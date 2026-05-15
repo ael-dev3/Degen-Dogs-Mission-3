@@ -4,13 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "tsc && vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "check": "tsc --noEmit"
+    "dev": "vite --host 0.0.0.0 --base=/Degen-Dogs-Mission-3/",
+    "build": "vite build --base=/Degen-Dogs-Mission-3/",
+    "preview": "vite preview --host 0.0.0.0"
   },
   "devDependencies": {
-    "typescript": "^6.0.3",
     "vite": "^8.0.13"
   }
 }

@@ -3,142 +3,106 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Degen Dogs Mission 3 dashboard and DuneSQL repository for Base analytics."
-    />
     <meta name="theme-color" content="#0b0d10" />
     <title>Degen Dogs Mission 3</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0d10;
+        --panel: #111419;
+        --line: #252a32;
+        --text: #e7e9e5;
+        --muted: #8d958d;
+        --green: #b9ff66;
+        --amber: #f4bb62;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      main {
+        width: min(1280px, calc(100% - 24px));
+        margin: 0 auto;
+        padding: 12px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        font-size: 13px;
+      }
+
+      th,
+      td {
+        height: 38px;
+        border-bottom: 1px solid var(--line);
+        padding: 0 12px;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      td:first-child {
+        width: 280px;
+        color: var(--muted);
+      }
+
+      td:nth-child(2) {
+        color: var(--text);
+      }
+
+      tr:last-child td { border-bottom: 0; }
+      .ok { color: var(--green); }
+      .pending { color: var(--amber); }
+
+      @media (max-width: 720px) {
+        main { width: 100%; padding: 0; }
+        table { border-left: 0; border-right: 0; }
+        th, td { white-space: normal; overflow-wrap: anywhere; }
+        td:first-child { width: 42%; }
+      }
+    </style>
   </head>
   <body>
-    <div id="app">
-      <header class="topbar">
-        <a class="brand" href="https://github.com/ael-dev3/Degen-Dogs-Mission-3" rel="noreferrer" aria-label="Repository">
-          <span class="brand-mark">DD</span>
-          <span>Degen Dogs</span>
-        </a>
-        <nav class="topnav" aria-label="External links">
-          <a href="https://dune.com/ael_dev/degen-dogs-mission-3" rel="noreferrer">Dune</a>
-          <a href="https://github.com/ael-dev3/Degen-Dogs-Mission-3/tree/main/sql" rel="noreferrer">SQL</a>
-          <a href="https://github.com/ael-dev3/Degen-Dogs-Mission-3" rel="noreferrer">GitHub</a>
-        </nav>
-      </header>
-
-      <main class="dashboard-shell">
-        <section class="dashboard-title" aria-labelledby="page-title">
-          <div>
-            <p class="chain-label">Base / WOOF / Mission 3</p>
-            <h1 id="page-title">Degen Dogs Mission 3</h1>
-          </div>
-          <div class="title-actions" aria-label="Dashboard links">
-            <a href="https://dune.com/ael_dev/degen-dogs-mission-3" rel="noreferrer">Open Dune</a>
-            <a href="https://github.com/ael-dev3/Degen-Dogs-Mission-3/tree/main/sql" rel="noreferrer">SQL</a>
-          </div>
-        </section>
-
-        <section class="kpi-grid" id="kpi-grid" aria-label="Mission 3 key metrics"></section>
-
-        <section class="panel-grid" aria-label="Dashboard panels">
-          <article class="panel panel-wide">
-            <div class="panel-head">
-              <span>WOOF market activity</span>
-              <code>dex.trades</code>
-            </div>
-            <div class="chart-line" aria-label="WOOF activity chart">
-              <svg viewBox="0 0 640 220" role="img" aria-labelledby="chart-title">
-                <title id="chart-title">Market activity preview</title>
-                <g class="grid-lines">
-                  <path d="M0 40H640" />
-                  <path d="M0 95H640" />
-                  <path d="M0 150H640" />
-                  <path d="M0 205H640" />
-                </g>
-                <path class="area" d="M0 182L86 150L176 164L268 98L356 118L458 62L552 88L640 48V220H0Z" />
-                <path class="line" d="M0 182L86 150L176 164L268 98L356 118L458 62L552 88L640 48" />
-              </svg>
-            </div>
-            <div class="micro-row">
-              <span>Volume</span><strong>daily</strong>
-              <span>Traders</span><strong>unique</strong>
-              <span>Price</span><strong>median</strong>
-            </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-head">
-              <span>Auction cadence</span>
-              <code>24h</code>
-            </div>
-            <div class="bar-stack" aria-label="Auction cadence bars">
-              <span style="--height: 42%"></span>
-              <span style="--height: 72%"></span>
-              <span style="--height: 56%"></span>
-              <span style="--height: 84%"></span>
-              <span style="--height: 61%"></span>
-              <span style="--height: 78%"></span>
-            </div>
-            <div class="panel-foot">
-              <span>Reserve</span>
-              <strong>0.0005 ETH</strong>
-            </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-head">
-              <span>Streaming</span>
-              <code>Superfluid</code>
-            </div>
-            <div class="stream-map" aria-label="Streaming map">
-              <span>Treasury</span>
-              <i></i>
-              <span>WOOF / SUP</span>
-              <i></i>
-              <span>Dog holders</span>
-            </div>
-            <div class="panel-foot">
-              <span>Window</span>
-              <strong>90 days</strong>
-            </div>
-          </article>
-
-          <article class="panel panel-wide">
-            <div class="panel-head">
-              <span>Dune panels</span>
-              <code>repo/sql</code>
-            </div>
-            <div class="table" id="panel-table"></div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-head">
-              <span>Contracts</span>
-              <code>Base</code>
-            </div>
-            <div class="contract-list" id="contract-list"></div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-head">
-              <span>Holder buckets</span>
-              <code>distribution</code>
-            </div>
-            <div class="bucket-list" aria-label="Holder distribution buckets">
-              <div><span>1B+</span><i style="--width: 82%"></i></div>
-              <div><span>100M-1B</span><i style="--width: 68%"></i></div>
-              <div><span>10M-100M</span><i style="--width: 54%"></i></div>
-              <div><span>1M-10M</span><i style="--width: 39%"></i></div>
-              <div><span>&lt;1M</span><i style="--width: 26%"></i></div>
-            </div>
-          </article>
-        </section>
-      </main>
-    </div>
-    <script type="module" src="/src/main.ts"></script>
+    <main>
+      <table>
+        <thead>
+          <tr>
+            <th>field</th>
+            <th>value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>network</td><td>base</td></tr>
+          <tr><td>token_name</td><td>Degen Dogs WOOF</td></tr>
+          <tr><td>symbol</td><td>WOOF</td></tr>
+          <tr><td>contract</td><td>0x3e5c4FA0cAA794516eD0DF77f31daA534918d492</td></tr>
+          <tr><td>decimals</td><td>18</td></tr>
+          <tr><td>total_supply</td><td>100000000000</td></tr>
+          <tr><td>auction_cadence</td><td>24h</td></tr>
+          <tr><td>reserve_price</td><td>0.0005 ETH</td></tr>
+          <tr><td>holder_stream_window</td><td>90d</td></tr>
+          <tr><td>staking_rewards_stream</td><td>365d</td></tr>
+          <tr><td>vault_airdrop_stream</td><td>365d</td></tr>
+          <tr><td>woof_status</td><td class="ok">verified</td></tr>
+          <tr><td>dog_nft_address</td><td class="pending">not published</td></tr>
+          <tr><td>auction_house_address</td><td class="pending">not published</td></tr>
+          <tr><td>dune_dashboard</td><td>https://dune.com/ael_dev/degen-dogs-mission-3</td></tr>
+        </tbody>
+      </table>
+    </main>
   </body>
 </html>

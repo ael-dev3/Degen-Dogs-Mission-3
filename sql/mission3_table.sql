@@ -1,0 +1,19 @@
+SELECT *
+FROM (
+    VALUES
+        ('network', 'base'),
+        ('token_name', 'Degen Dogs WOOF'),
+        ('symbol', 'WOOF'),
+        ('contract', '0x3e5c4FA0cAA794516eD0DF77f31daA534918d492'),
+        ('decimals', '18'),
+        ('total_supply', '100000000000'),
+        ('auction_cadence', '24h'),
+        ('reserve_price', '0.0005 ETH'),
+        ('holder_stream_window', '90d'),
+        ('staking_rewards_stream', '365d'),
+        ('vault_airdrop_stream', '365d'),
+        ('woof_status', 'verified'),
+        ('dog_nft_address', 'not published'),
+        ('auction_house_address', 'not published'),
+        ('dune_dashboard', 'https://dune.com/ael_dev/degen-dogs-mission-3')
+) AS t(field, value);
