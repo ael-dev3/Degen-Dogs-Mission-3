@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A professional dark dashboard and DuneSQL repository for Degen Dogs Mission 3 on Base."
+    />
+    <meta name="theme-color" content="#050506" />
+    <title>Degen Dogs Mission 3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="site-header" data-reveal>
+        <a class="brand" href="#top" aria-label="Degen Dogs Mission 3 home">
+          <span class="brand-mark" aria-hidden="true">DD</span>
+          <span>Degen Dogs</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#dashboard">Dashboard</a>
+          <a href="#sql">SQL</a>
+          <a href="#sources">Sources</a>
+          <a href="https://dune.com/ael_dev/degen-dogs-mission-3" rel="noreferrer">Dune</a>
+        </nav>
+      </header>
+
+      <main id="top">
+        <section class="hero section" aria-labelledby="hero-title">
+          <div class="hero-copy" data-reveal>
+            <p class="eyebrow"><span class="status-dot"></span> Mission 3 analytics rebuild</p>
+            <h1 id="hero-title">Base-native WOOF, auctions, and streaming telemetry.</h1>
+            <p class="hero-lede">
+              A clean public front-end for the Degen Dogs Mission 3 dashboard, with the DuneSQL layer kept in-repo for review, reuse, and iteration.
+            </p>
+            <div class="hero-actions" aria-label="Project links">
+              <a class="button primary" href="https://github.com/ael-dev3/Degen-Dogs-Mission-3" rel="noreferrer">View repo</a>
+              <a class="button secondary" href="https://dune.com/ael_dev/degen-dogs-mission-3" rel="noreferrer">Open Dune</a>
+            </div>
+          </div>
+
+          <aside class="terminal-card" aria-label="Dashboard build status" data-reveal>
+            <div class="terminal-head">
+              <span>mission3.preview</span>
+              <span>ready</span>
+            </div>
+            <div class="preview-kpis" aria-label="Mission 3 key metrics">
+              <div><strong>100B</strong><span>WOOF supply</span></div>
+              <div><strong>90d</strong><span>holder stream</span></div>
+              <div><strong>24h</strong><span>auction cycle</span></div>
+            </div>
+            <div class="preview-chart" aria-label="Dashboard preview chart">
+              <span style="--point: 58%"></span>
+              <span style="--point: 72%"></span>
+              <span style="--point: 46%"></span>
+              <span style="--point: 81%"></span>
+              <span style="--point: 64%"></span>
+              <span style="--point: 92%"></span>
+            </div>
+            <div class="terminal-body" id="terminal-lines"></div>
+          </aside>
+        </section>
+
+        <section class="section facts" aria-labelledby="facts-title" data-reveal>
+          <div class="section-heading compact">
+            <p class="eyebrow">verified constants</p>
+            <h2 id="facts-title">Mission 3 facts, not filler metrics.</h2>
+          </div>
+          <div class="fact-grid" id="fact-grid"></div>
+        </section>
+
+        <section class="section dashboard-shell" id="dashboard" aria-labelledby="dashboard-title">
+          <div class="section-heading" data-reveal>
+            <p class="eyebrow">dashboard architecture</p>
+            <h2 id="dashboard-title">Four panels that explain the mission loop.</h2>
+            <p>
+              The SQL is structured around the real flow: WOOF market activity, holders, Superfluid streams, and auctions feeding future streams.
+            </p>
+          </div>
+
+          <div class="analytics-layout">
+            <div class="signal-panel" data-reveal>
+              <div class="panel-head">
+                <span>Mission loop</span>
+                <span>Base</span>
+              </div>
+              <div class="loop-map" aria-label="Mission loop diagram">
+                <div class="loop-node">Auction</div>
+                <div class="loop-node">Treasury</div>
+                <div class="loop-node">Buy WOOF / SUP</div>
+                <div class="loop-node">Stream to Dogs</div>
+              </div>
+              <div class="chart-frame" aria-label="Sample activity bars">
+                <div class="scanline" aria-hidden="true"></div>
+                <div class="bar" style="--bar-size: 64%"></div>
+                <div class="bar" style="--bar-size: 88%"></div>
+                <div class="bar" style="--bar-size: 48%"></div>
+                <div class="bar" style="--bar-size: 72%"></div>
+                <div class="bar" style="--bar-size: 57%"></div>
+              </div>
+            </div>
+
+            <div class="module-grid" id="module-grid"></div>
+          </div>
+        </section>
+
+        <section class="section sql-section" id="sql" aria-labelledby="sql-title">
+          <div class="section-heading" data-reveal>
+            <p class="eyebrow">dune-ready sql</p>
+            <h2 id="sql-title">Queries live next to the site.</h2>
+            <p>
+              Each file is designed as a Dune panel or helper query. Confirm the Base auction and NFT contract addresses, then wire the parameterized panels into Dune.
+            </p>
+          </div>
+          <div class="query-grid" id="query-grid"></div>
+        </section>
+
+        <section class="section source-section" id="sources" aria-labelledby="sources-title">
+          <div class="source-copy" data-reveal>
+            <p class="eyebrow">source discipline</p>
+            <h2 id="sources-title">Documented where the data comes from.</h2>
+            <p>
+              The repository keeps public docs, chain assumptions, and query parameters explicit so the dashboard can be audited without guessing.
+            </p>
+          </div>
+          <div class="source-list" id="source-list" data-reveal></div>
+        </section>
+      </main>
+
+      <footer class="site-footer" data-reveal>
+        <span>Degen Dogs Mission 3</span>
+        <span>Base analytics, DuneSQL, and GitHub Pages.</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
