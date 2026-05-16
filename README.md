@@ -1,17 +1,36 @@
-| field | value |
+| table | file | rows |
+| --- | --- | --- |
+| mission3_metrics | generated/mission3_metrics.csv | 24 |
+| current_auction | generated/current_auction.csv | 1 |
+| season5_sup_by_winner | generated/season5_sup_by_winner.csv | 30 |
+| season5_sup_rewards_by_auction | generated/season5_sup_rewards_by_auction.csv | 52 |
+| auction_winners | generated/auction_winners.csv | 126 |
+| recent_bids | generated/recent_bids.csv | 100 |
+| top_woof_holders | generated/top_woof_holders.csv | 50 |
+
+| metric | value |
 | --- | --- |
 | network | base |
-| token_name | Degen Dogs WOOF |
-| symbol | WOOF |
-| contract | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
-| decimals | 18 |
-| total_supply | 100000000000 |
-| auction_cadence | 24h |
-| reserve_price | 0.0005 ETH |
-| holder_stream_window | 90d |
-| staking_rewards_stream | 365d |
-| vault_airdrop_stream | 365d |
-| woof_status | verified |
-| dog_nft_address | not published |
-| auction_house_address | not published |
-| dune_dashboard | https://dune.com/ael_dev/degen-dogs-mission-3 |
+| latest_block | 46057378 |
+| latest_block_time_utc | 2026-05-16 04:01:43 |
+| auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
+| dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
+| woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
+| woof_symbol | WOOF |
+| woof_total_supply | 100000000000 |
+| woof_holders | 391 |
+| top_woof_holder | 0x1c453d1909a0aae2011822de50b40780a0c26637 |
+| top_woof_holder_balance | 49413343002.3376 |
+| current_auction_token_id | 716 |
+| current_bid_eth | 0.0005 |
+| current_bidder | 0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d |
+| current_auction_end_utc | 2026-05-17 03:52:29 |
+| created_auctions | 127 |
+| settled_auctions | 126 |
+| total_bids | 1229 |
+| unique_bidders | 122 |
+| total_bid_eth | 34.336203 |
+| total_settled_eth | 6.58393 |
+| highest_bid_eth | 0.3021 |
+| season5_reward_total_sup | 1017000 |
+| season5_rewards_allocated_sup | 766434.78262 |
