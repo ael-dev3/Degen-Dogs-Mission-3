@@ -40,6 +40,111 @@ FROM auction_settled s
 LEFT JOIN bid_counts b USING (token_id)
 ORDER BY s.token_id DESC;
 
+DROP TABLE IF EXISTS auction_daily_activity;
+CREATE TABLE auction_daily_activity AS
+WITH days AS (
+  SELECT DATE(block_time_utc) AS activity_day FROM auction_bids WHERE block_time_utc != ''
+  UNION
+  SELECT DATE(block_time_utc) AS activity_day FROM auction_settled WHERE block_time_utc != ''
+  UNION
+  SELECT DATE(start_time_utc) AS activity_day FROM auction_created WHERE start_time_utc != ''
+),
+bids AS (
+  SELECT
+    DATE(block_time_utc) AS activity_day,
+    COUNT(*) AS bids,
+    COUNT(DISTINCT bidder) AS unique_bidders,
+    COALESCE(SUM(bid_eth), 0) AS bid_eth,
+    COALESCE(MAX(bid_eth), 0) AS high_bid_eth
+  FROM auction_bids
+  WHERE block_time_utc != ''
+  GROUP BY DATE(block_time_utc)
+),
+settled AS (
+  SELECT
+    DATE(block_time_utc) AS activity_day,
+    COUNT(*) AS settled_auctions,
+    COALESCE(SUM(amount_eth), 0) AS settled_eth
+  FROM auction_settled
+  WHERE block_time_utc != ''
+  GROUP BY DATE(block_time_utc)
+),
+created AS (
+  SELECT
+    DATE(start_time_utc) AS activity_day,
+    COUNT(*) AS created_auctions
+  FROM auction_created
+  WHERE start_time_utc != ''
+  GROUP BY DATE(start_time_utc)
+)
+SELECT
+  d.activity_day,
+  COALESCE(c.created_auctions, 0) AS created_auctions,
+  COALESCE(s.settled_auctions, 0) AS settled_auctions,
+  COALESCE(b.bids, 0) AS bids,
+  COALESCE(b.unique_bidders, 0) AS unique_bidders,
+  ROUND(COALESCE(b.bid_eth, 0), 8) AS bid_eth,
+  ROUND(COALESCE(b.high_bid_eth, 0), 8) AS high_bid_eth,
+  ROUND(COALESCE(s.settled_eth, 0), 8) AS settled_eth
+FROM days d
+LEFT JOIN created c USING (activity_day)
+LEFT JOIN settled s USING (activity_day)
+LEFT JOIN bids b USING (activity_day)
+WHERE d.activity_day IS NOT NULL
+ORDER BY d.activity_day DESC;
+
+DROP TABLE IF EXISTS auction_bidder_leaderboard;
+CREATE TABLE auction_bidder_leaderboard AS
+WITH bid_ranked AS (
+  SELECT
+    bidder,
+    token_id,
+    bid_eth,
+    block_time_utc,
+    block_number,
+    log_index,
+    ROW_NUMBER() OVER (PARTITION BY bidder ORDER BY block_number DESC, log_index DESC) AS latest_rank
+  FROM auction_bids
+),
+bidder_stats AS (
+  SELECT
+    bidder,
+    COUNT(*) AS bids,
+    COUNT(DISTINCT token_id) AS auctions_bid,
+    COALESCE(SUM(bid_eth), 0) AS bid_eth,
+    COALESCE(MAX(bid_eth), 0) AS high_bid_eth
+  FROM auction_bids
+  GROUP BY bidder
+),
+latest_bid AS (
+  SELECT bidder, token_id AS latest_bid_token_id, block_time_utc AS latest_bid_utc
+  FROM bid_ranked
+  WHERE latest_rank = 1
+),
+winner_stats AS (
+  SELECT
+    winner AS bidder,
+    COUNT(*) AS auction_wins,
+    COALESCE(SUM(amount_eth), 0) AS winning_eth
+  FROM auction_settled
+  GROUP BY winner
+)
+SELECT
+  b.bidder,
+  b.bids,
+  b.auctions_bid,
+  ROUND(b.bid_eth, 8) AS bid_eth,
+  ROUND(b.high_bid_eth, 8) AS high_bid_eth,
+  COALESCE(w.auction_wins, 0) AS auction_wins,
+  ROUND(COALESCE(w.winning_eth, 0), 8) AS winning_eth,
+  l.latest_bid_token_id,
+  l.latest_bid_utc
+FROM bidder_stats b
+LEFT JOIN latest_bid l USING (bidder)
+LEFT JOIN winner_stats w USING (bidder)
+ORDER BY b.bid_eth DESC, b.bids DESC, b.bidder
+LIMIT 100;
+
 DROP TABLE IF EXISTS season5_sup_rewards_by_auction;
 CREATE TABLE season5_sup_rewards_by_auction AS
 WITH season_wins AS (

@@ -2,6 +2,8 @@
 | --- | --- | --- |
 | mission3_metrics | generated/mission3_metrics.csv | 24 |
 | current_auction | generated/current_auction.csv | 1 |
+| auction_daily_activity | generated/auction_daily_activity.csv | 128 |
+| auction_bidder_leaderboard | generated/auction_bidder_leaderboard.csv | 100 |
 | season5_sup_by_winner | generated/season5_sup_by_winner.csv | 30 |
 | season5_sup_rewards_by_auction | generated/season5_sup_rewards_by_auction.csv | 52 |
 | auction_winners | generated/auction_winners.csv | 126 |
@@ -11,8 +13,8 @@
 | metric | value |
 | --- | --- |
 | network | base |
-| latest_block | 46060202 |
-| latest_block_time_utc | 2026-05-16 05:35:51 |
+| latest_block | 46062838 |
+| latest_block_time_utc | 2026-05-16 07:03:43 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
