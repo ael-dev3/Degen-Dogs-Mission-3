@@ -2,6 +2,7 @@
 | --- | --- | --- |
 | mission3_metrics | generated/mission3_metrics.csv | 24 |
 | current_auction | generated/current_auction.csv | 1 |
+| auction_timeline | generated/auction_timeline.csv | 127 |
 | auction_daily_activity | generated/auction_daily_activity.csv | 128 |
 | auction_bidder_leaderboard | generated/auction_bidder_leaderboard.csv | 100 |
 | season5_sup_by_winner | generated/season5_sup_by_winner.csv | 30 |
@@ -13,14 +14,14 @@
 | metric | value |
 | --- | --- |
 | network | base |
-| latest_block | 46062838 |
-| latest_block_time_utc | 2026-05-16 07:03:43 |
+| latest_block | 46065414 |
+| latest_block_time_utc | 2026-05-16 08:29:35 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
 | woof_symbol | WOOF |
 | woof_total_supply | 100000000000 |
-| woof_holders | 390 |
+| woof_holders | 389 |
 | top_woof_holder | 0x1c453d1909a0aae2011822de50b40780a0c26637 |
 | top_woof_holder_balance | 49416381734.6796 |
 | current_auction_token_id | 716 |

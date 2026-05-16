@@ -40,6 +40,72 @@ FROM auction_settled s
 LEFT JOIN bid_counts b USING (token_id)
 ORDER BY s.token_id DESC;
 
+DROP TABLE IF EXISTS auction_timeline;
+CREATE TABLE auction_timeline AS
+WITH bid_ranked AS (
+  SELECT
+    token_id,
+    bidder,
+    bid_eth,
+    block_time_utc,
+    block_number,
+    log_index,
+    ROW_NUMBER() OVER (PARTITION BY token_id ORDER BY block_number DESC, log_index DESC) AS latest_rank
+  FROM auction_bids
+),
+bid_stats AS (
+  SELECT
+    token_id,
+    COUNT(*) AS bids,
+    COUNT(DISTINCT bidder) AS unique_bidders,
+    MAX(bid_eth) AS high_bid_eth,
+    SUM(bid_eth) AS total_bid_eth
+  FROM auction_bids
+  GROUP BY token_id
+),
+latest_bid AS (
+  SELECT
+    token_id,
+    bidder AS latest_bidder,
+    bid_eth AS latest_bid_eth,
+    block_time_utc AS latest_bid_utc
+  FROM bid_ranked
+  WHERE latest_rank = 1
+),
+snapshot AS (
+  SELECT token_id AS current_token_id, settled AS current_settled, latest_block_time_utc
+  FROM current_auction_source
+  LIMIT 1
+)
+SELECT
+  c.token_id,
+  c.start_time_utc,
+  c.end_time_utc,
+  CASE
+    WHEN s.token_id IS NOT NULL THEN 'settled'
+    WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', snapshot.latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
+    WHEN c.token_id = snapshot.current_token_id AND snapshot.current_settled = 0 THEN 'live'
+    ELSE 'scheduled'
+  END AS auction_state,
+  COALESCE(b.bids, 0) AS bids,
+  COALESCE(b.unique_bidders, 0) AS unique_bidders,
+  ROUND(COALESCE(b.high_bid_eth, 0), 8) AS high_bid_eth,
+  ROUND(COALESCE(b.total_bid_eth, 0), 8) AS total_bid_eth,
+  l.latest_bidder,
+  ROUND(COALESCE(l.latest_bid_eth, 0), 8) AS latest_bid_eth,
+  l.latest_bid_utc,
+  s.winner,
+  ROUND(COALESCE(s.amount_eth, 0), 8) AS settled_eth,
+  s.block_time_utc AS settled_time_utc,
+  c.tx_hash AS created_tx_hash,
+  s.tx_hash AS settled_tx_hash
+FROM auction_created c
+CROSS JOIN snapshot
+LEFT JOIN bid_stats b USING (token_id)
+LEFT JOIN latest_bid l USING (token_id)
+LEFT JOIN auction_settled s USING (token_id)
+ORDER BY c.token_id DESC;
+
 DROP TABLE IF EXISTS auction_daily_activity;
 CREATE TABLE auction_daily_activity AS
 WITH days AS (
@@ -218,6 +284,16 @@ SELECT
   bidder,
   start_time_utc,
   end_time_utc,
+  CASE
+    WHEN settled != 0 THEN 'settled'
+    WHEN CAST(strftime('%s', end_time_utc) AS INTEGER) <= CAST(strftime('%s', latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
+    ELSE 'live'
+  END AS auction_state,
+  CASE
+    WHEN end_time_utc = '' OR latest_block_time_utc = '' THEN NULL
+    WHEN CAST(strftime('%s', end_time_utc) AS INTEGER) <= CAST(strftime('%s', latest_block_time_utc) AS INTEGER) THEN 0
+    ELSE CAST(strftime('%s', end_time_utc) AS INTEGER) - CAST(strftime('%s', latest_block_time_utc) AS INTEGER)
+  END AS seconds_remaining,
   settled,
   latest_block,
   latest_block_time_utc

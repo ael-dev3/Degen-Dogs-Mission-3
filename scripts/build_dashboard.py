@@ -51,6 +51,7 @@ ZERO = "0x0000000000000000000000000000000000000000"
 OUTPUT_TABLES = [
     "mission3_metrics",
     "current_auction",
+    "auction_timeline",
     "auction_daily_activity",
     "auction_bidder_leaderboard",
     "season5_sup_by_winner",
