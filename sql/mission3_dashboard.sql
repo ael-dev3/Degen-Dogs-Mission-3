@@ -329,6 +329,7 @@ top_holder AS (
   SELECT address, balance_woof FROM woof_holders WHERE balance_raw != '0' ORDER BY balance_woof DESC LIMIT 1
 )
 SELECT 'network' AS metric, 'base' AS value
+UNION ALL SELECT 'site_url', 'https://ael-dev3.github.io/Degen-Dogs-Mission-3/'
 UNION ALL SELECT 'latest_block', CAST((SELECT latest_block FROM current_auction_source LIMIT 1) AS TEXT)
 UNION ALL SELECT 'latest_block_time_utc', (SELECT latest_block_time_utc FROM current_auction_source LIMIT 1)
 UNION ALL SELECT 'auction_house', (SELECT value FROM token_stats WHERE metric = 'auction_house')

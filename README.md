@@ -1,6 +1,6 @@
 | table | file | rows |
 | --- | --- | --- |
-| mission3_metrics | generated/mission3_metrics.csv | 24 |
+| mission3_metrics | generated/mission3_metrics.csv | 25 |
 | current_auction | generated/current_auction.csv | 1 |
 | auction_timeline | generated/auction_timeline.csv | 127 |
 | auction_daily_activity | generated/auction_daily_activity.csv | 128 |
@@ -14,6 +14,7 @@
 | metric | value |
 | --- | --- |
 | network | base |
+| site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | latest_block | 46065414 |
 | latest_block_time_utc | 2026-05-16 08:29:35 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
