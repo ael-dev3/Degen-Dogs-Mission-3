@@ -2,18 +2,30 @@
   "name": "degen-dogs-mission3-sql-bundle-2026-05-22",
   "source": "Discord upload: degen_dogs_mission3_sql_bundle.zip",
   "archived_at_utc": "2026-05-22T21:49:36Z",
+  "patched_at_utc": "2026-05-22T22:19:34Z",
   "original_zip_sha256": "1b7a8c0758a345df12e1e631c28bd088539827be38f2062cc7b86057d8123538",
   "classification": "partial reconstruction bundle, not a full official Dune export",
-  "critical_finding": "Reconstructed auction SQL uses 0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd, which had no Base code during review; current known Mission 3 auction house is 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA.",
-  "file_inventory_scope": "Original upload zip, extracted source files from the upload, and ANALYSIS.md. Generated README.md and MANIFEST.json document the archive itself.",
+  "fix_summary": "Extracted reconstructed auction SQL patched to current Mission 3 auction house; original zip preserved unchanged.",
+  "root_cause": "Reconstructed auction SQL used 0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd, which had no Base code and no recent AuctionBid logs during review.",
+  "current_auction_house": "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA",
+  "base_rpc_verification": {
+    "block": 46349443,
+    "stale_address": "0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd",
+    "stale_code_bytes": 0,
+    "stale_auction_bid_logs_last_10000": 0,
+    "current_address": "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA",
+    "current_code_bytes": 7389,
+    "current_auction_bid_logs_last_10000": 1
+  },
+  "file_inventory_scope": "Original upload zip, extracted source files, and ANALYSIS.md. Generated README.md and MANIFEST.json document the archive itself. The extracted reconstructed SQL has been patched; the original zip remains unchanged for provenance.",
   "files": [
     {
       "path": "ANALYSIS.md",
-      "bytes": 4557,
-      "sha256": "0f0bacf5f983729dcbbc240d1e5db8771c1c23844038491c861576dee9a42188",
-      "line_count": 96,
+      "bytes": 3986,
+      "sha256": "896963f5875363741d4f79c726623861ad683869b3d65fa10e5dc39772db757e",
+      "line_count": 80,
       "status": "analysis",
-      "purpose": "Local review report covering archive metadata, SQL status, Base RPC checks, and recommended fixes.",
+      "purpose": "Local review report covering archive metadata, root-cause verification, applied SQL fixes, and remaining caveats.",
       "notes": []
     },
     {
@@ -22,38 +34,42 @@
       "sha256": "1b7a8c0758a345df12e1e631c28bd088539827be38f2062cc7b86057d8123538",
       "line_count": null,
       "status": "original-upload",
-      "purpose": "Original uploaded SQL bundle, preserved for provenance.",
+      "purpose": "Original uploaded SQL bundle, preserved unchanged for provenance.",
       "notes": []
     },
     {
       "path": "source/degen_dogs_mission3_sql/README.md",
-      "bytes": 2202,
-      "sha256": "f95630cb744c438c4c5418896c992e0cdcdbdf27b15d5b89f6973d79408cdcc2",
+      "bytes": 2246,
+      "sha256": "feb07f3004c94a1f6d125c1c5aed88bb7cc5827549187a1a1a59782b4a99349b",
       "line_count": 35,
-      "status": "bundle-doc",
-      "purpose": "README shipped inside the uploaded SQL bundle.",
-      "notes": []
+      "status": "bundle-doc-patched",
+      "purpose": "README shipped inside the uploaded SQL bundle, updated to document the current patched auction-address state.",
+      "notes": [
+        "Original zip preserves the pre-patch copy."
+      ]
     },
     {
       "path": "source/degen_dogs_mission3_sql/queries/6236765_degen_dogs_auction_winners.reconstructed.sql",
-      "bytes": 2996,
-      "sha256": "e4d4a193a3c0dbf058b65b7748524d7b1181569859056ba8e9698929eecb01c3",
-      "line_count": 101,
-      "status": "reconstructed-sql",
-      "purpose": "Reconstructed auction SQL from public snippets, not verified official Dune SQL.",
+      "bytes": 2796,
+      "sha256": "118ff0687d1ff159d7121e862014c7fa7e7f1a58c640c7287bcc0002670d86f3",
+      "line_count": 81,
+      "status": "reconstructed-sql-patched",
+      "purpose": "Reconstructed auction-winners SQL patched to current auction house, AuctionSettled-based winners, and exact wei/fractional ETH amounts.",
       "notes": [
-        "Uses stale/unverified auction address 0x3620..., documented in ANALYSIS.md."
+        "Original snippet address 0x3620... retained only in comments/provenance.",
+        "Not official Dune SQL."
       ]
     },
     {
       "path": "source/degen_dogs_mission3_sql/queries/degen_dogs_most_recent_bids.reconstructed.sql",
-      "bytes": 2077,
-      "sha256": "e838104576e2ccf23ab054ff87388d07442a0056a950925bd2416d0c1214650f",
-      "line_count": 67,
-      "status": "reconstructed-sql",
-      "purpose": "Reconstructed auction SQL from public snippets, not verified official Dune SQL.",
+      "bytes": 2618,
+      "sha256": "8cc15152b7bd00022649183ec9e8eed8bc926d0f733786ba16b68de57778edd5",
+      "line_count": 73,
+      "status": "reconstructed-sql-patched",
+      "purpose": "Reconstructed latest-bids SQL patched to current auction house with exact wei/fractional ETH amounts.",
       "notes": [
-        "Uses stale/unverified auction address 0x3620..., documented in ANALYSIS.md."
+        "Original snippet address 0x3620... retained only in comments/provenance.",
+        "Not official Dune SQL."
       ]
     },
     {

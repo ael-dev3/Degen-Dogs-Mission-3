@@ -2,12 +2,15 @@
 -- Dune query id: 6236765
 -- Owner: @ael_dev
 -- Status: reconstructed from publicly indexed Dune snippets, not fetched from Dune's authenticated query_sql API.
+-- Fixed: patched for current Mission 3 Base auction house after Base RPC verification.
 -- Notes:
---   * Public search snippets identify this query as "Degen Dogs - Auction Winners".
---   * Snippets confirm base.logs, contract_address 0x3620CA..., AuctionBid topic0 0x115916..., and dune.neynar Farcaster profile join.
---   * Degen Dogs/Superfluid docs list the Base Auction House as 0x8F34fe..., so verify the contract address in Dune before production use.
+--   * Original public snippets used contract_address 0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd.
+--   * That original snippet address has no code on Base and no recent AuctionBid logs.
+--   * Current Mission 3 auction house verified on Base: 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA.
+--   * Winners are decoded from AuctionSettled events instead of inferred from latest bids.
+--   * ETH amounts keep exact wei as amount_wei and fractional ETH as amount_eth.
 
-WITH all_bids AS (
+WITH settled_auctions AS (
     SELECT
         block_time,
         tx_hash,
@@ -15,41 +18,21 @@ WITH all_bids AS (
         -- Extract Token ID from indexed topic1.
         bytearray_to_uint256(topic1) AS token_id,
 
-        -- Extract bid amount from AuctionBid data payload:
-        -- data[1..32]   = sender address, right-aligned
-        -- data[33..64]  = value uint256
-        -- data[65..96]  = extended bool
+        -- Extract settlement amount from AuctionSettled data payload:
+        -- data[1..32]   = winner address, right-aligned
+        -- data[33..64]  = amount uint256
+        bytearray_to_uint256(bytearray_substring(data, 33, 32)) AS amount_wei,
         CAST(
-            ROUND(
-                bytearray_to_uint256(bytearray_substring(data, 33, 32)) / 1e18,
-                0
-            ) AS BIGINT
-        ) AS amount,
+            bytearray_to_uint256(bytearray_substring(data, 33, 32))
+            AS DOUBLE
+        ) / 1e18 AS amount_eth,
 
-        -- Extract bidder address from the first 32-byte ABI slot.
-        lower(concat('0x', to_hex(bytearray_substring(data, 13, 20)))) AS bidder_address
+        -- Extract winner address from the first 32-byte ABI slot.
+        lower(concat('0x', to_hex(bytearray_substring(data, 13, 20)))) AS winner_address
 
     FROM base.logs
-    WHERE contract_address = 0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd
-      AND topic0 = 0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3
-),
-
-winning_bids AS (
-    SELECT
-        *,
-
-        -- Rank 1 = latest bid per Dog.
-        ROW_NUMBER() OVER (
-            PARTITION BY token_id
-            ORDER BY block_time DESC
-        ) AS rank
-    FROM all_bids
-),
-
-current_dog AS (
-    SELECT
-        MAX(token_id) AS current_dog_id
-    FROM all_bids
+    WHERE contract_address = 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
+      AND topic0 = 0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99
 ),
 
 farcaster_identities AS (
@@ -81,21 +64,18 @@ farcaster_identities AS (
 )
 
 SELECT
-    wb.token_id,
-    wb.amount,
-    COALESCE(fc.fname, wb.bidder_address) AS winner_identity,
+    sa.token_id,
+    sa.amount_wei,
+    sa.amount_eth,
+    COALESCE(fc.fname, sa.winner_address) AS winner_identity,
     CASE
         WHEN fc.fname IS NOT NULL THEN concat('https://warpcast.com/', fc.fname)
         ELSE NULL
     END AS farcaster_link,
-    wb.bidder_address,
-    wb.block_time,
-    wb.tx_hash
-FROM winning_bids wb
-CROSS JOIN current_dog cd
+    sa.winner_address,
+    sa.block_time,
+    sa.tx_hash
+FROM settled_auctions sa
 LEFT JOIN farcaster_identities fc
-    ON wb.bidder_address = fc.wallet_address
-WHERE wb.rank = 1
-  -- Filter for completed auctions only.
-  AND wb.token_id < cd.current_dog_id
-ORDER BY wb.token_id DESC;
+    ON sa.winner_address = fc.wallet_address
+ORDER BY sa.token_id DESC;

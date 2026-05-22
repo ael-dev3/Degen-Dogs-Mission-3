@@ -17,7 +17,7 @@ Source dashboard: `https://dune.com/ael_dev/degen-dogs-mission-3`
 
 Dune's public dashboard page is rendered by JavaScript and did not expose all query SQL through static HTML. Dune's official Read Query API returns the `query_sql` field, but it requires a Dune API key. Dune's own query-management docs say that, for dashboards, the owner can click the dashboard's GitHub button to see the query ids, then run `pull_from_dune.py` to generate `/query_{id}.sql` files.
 
-The auction-winners SQL keeps the contract address found in indexed Dune snippets (`0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd`). Separately, Degen Dogs/Superfluid public docs list the Base Auction House as `0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA`, so verify the official query before production use.
+The reconstructed auction SQL has been patched to use the current Mission 3 Base Auction House (`0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA`). The original indexed snippets used `0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd`, which later Base RPC verification showed has no code; fetch official Dune SQL if exact upstream source fidelity is required.
 
 ## Pulling official SQL
 
