@@ -1,0 +1,12 @@
+-- Superfluid Season 4 $SUP rewards
+-- Dashboard card title found publicly on the ael_dev/Degen Dogs Mission 3 dashboard.
+-- Status: official SQL not recovered from public snippets.
+-- Reason: Dune's public dashboard page is JS-rendered, and Dune's official Read Query endpoint requires a Dune API key to return query_sql.
+--
+-- Public business-rule context to verify when pulling the official query:
+--   * Degen Dogs was allocated 1.9M SUP in Season 4.
+--   * Existing Dog owners received 1 XP for teleporting a Dog from Degen Chain to Base.
+--   * Auction winners on Base received 100 XP per auction win.
+--
+-- Use scripts/fetch_official_dune_sql.py after obtaining the query id from the dashboard GitHub button or chart URL.
+-- This file is intentionally a stub so it does not masquerade as the creator's official SQL.

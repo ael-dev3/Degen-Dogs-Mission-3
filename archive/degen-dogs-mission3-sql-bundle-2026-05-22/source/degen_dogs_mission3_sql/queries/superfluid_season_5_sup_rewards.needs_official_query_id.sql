@@ -1,0 +1,7 @@
+-- Superfluid season 5 $SUP rewards
+-- Dashboard card title found publicly on the ael_dev/Degen Dogs Mission 3 dashboard.
+-- Status: official SQL not recovered from public snippets.
+-- Reason: Dune's public dashboard page is JS-rendered, and Dune's official Read Query endpoint requires a Dune API key to return query_sql.
+--
+-- Use scripts/fetch_official_dune_sql.py after obtaining the query id from the dashboard GitHub button or chart URL.
+-- This file is intentionally a stub so it does not masquerade as the creator's official SQL.

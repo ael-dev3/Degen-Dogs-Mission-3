@@ -1,0 +1,15 @@
+# Add missing query ids here once you get them from the dashboard's GitHub button
+# or from each chart/query URL: https://dune.com/queries/<query_id>/<visualization_id>
+queries:
+  - id: 6236765
+    name: Degen Dogs - Auction Winners
+    status: reconstructed_from_public_snippets
+  - id:
+    name: Degen Dogs - Most Recent Bids / DegenDogs Latest Auctions
+    status: needs_official_query_id
+  - id:
+    name: Superfluid Season 4 $SUP rewards
+    status: needs_official_query_id
+  - id:
+    name: Superfluid season 5 $SUP rewards
+    status: needs_official_query_id

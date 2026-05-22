@@ -1,0 +1,105 @@
+{
+  "name": "degen-dogs-mission3-sql-bundle-2026-05-22",
+  "source": "Discord upload: degen_dogs_mission3_sql_bundle.zip",
+  "archived_at_utc": "2026-05-22T21:49:36Z",
+  "original_zip_sha256": "1b7a8c0758a345df12e1e631c28bd088539827be38f2062cc7b86057d8123538",
+  "classification": "partial reconstruction bundle, not a full official Dune export",
+  "critical_finding": "Reconstructed auction SQL uses 0x3620CA030a023BCE87EC59a8b0E979bD7607Fdbd, which had no Base code during review; current known Mission 3 auction house is 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA.",
+  "file_inventory_scope": "Original upload zip, extracted source files from the upload, and ANALYSIS.md. Generated README.md and MANIFEST.json document the archive itself.",
+  "files": [
+    {
+      "path": "ANALYSIS.md",
+      "bytes": 4557,
+      "sha256": "0f0bacf5f983729dcbbc240d1e5db8771c1c23844038491c861576dee9a42188",
+      "line_count": 96,
+      "status": "analysis",
+      "purpose": "Local review report covering archive metadata, SQL status, Base RPC checks, and recommended fixes.",
+      "notes": []
+    },
+    {
+      "path": "degen_dogs_mission3_sql_bundle.zip",
+      "bytes": 8325,
+      "sha256": "1b7a8c0758a345df12e1e631c28bd088539827be38f2062cc7b86057d8123538",
+      "line_count": null,
+      "status": "original-upload",
+      "purpose": "Original uploaded SQL bundle, preserved for provenance.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/README.md",
+      "bytes": 2202,
+      "sha256": "f95630cb744c438c4c5418896c992e0cdcdbdf27b15d5b89f6973d79408cdcc2",
+      "line_count": 35,
+      "status": "bundle-doc",
+      "purpose": "README shipped inside the uploaded SQL bundle.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/queries/6236765_degen_dogs_auction_winners.reconstructed.sql",
+      "bytes": 2996,
+      "sha256": "e4d4a193a3c0dbf058b65b7748524d7b1181569859056ba8e9698929eecb01c3",
+      "line_count": 101,
+      "status": "reconstructed-sql",
+      "purpose": "Reconstructed auction SQL from public snippets, not verified official Dune SQL.",
+      "notes": [
+        "Uses stale/unverified auction address 0x3620..., documented in ANALYSIS.md."
+      ]
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/queries/degen_dogs_most_recent_bids.reconstructed.sql",
+      "bytes": 2077,
+      "sha256": "e838104576e2ccf23ab054ff87388d07442a0056a950925bd2416d0c1214650f",
+      "line_count": 67,
+      "status": "reconstructed-sql",
+      "purpose": "Reconstructed auction SQL from public snippets, not verified official Dune SQL.",
+      "notes": [
+        "Uses stale/unverified auction address 0x3620..., documented in ANALYSIS.md."
+      ]
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/queries/superfluid_season_4_sup_rewards.needs_official_query_id.sql",
+      "bytes": 823,
+      "sha256": "5050433df6da3deb3a36c67ba5919b011dda0bf7cb1180ea6c8ee403e7a88122",
+      "line_count": 12,
+      "status": "stub",
+      "purpose": "Comment-only placeholder; requires official Dune query id/SQL before use.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/queries/superfluid_season_5_sup_rewards.needs_official_query_id.sql",
+      "bytes": 538,
+      "sha256": "5f19b27d5e912e24af1029b110c6b1f35373bae2cdd38f620290425cb8e2bb9a",
+      "line_count": 7,
+      "status": "stub",
+      "purpose": "Comment-only placeholder; requires official Dune query id/SQL before use.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/queries.yml",
+      "bytes": 566,
+      "sha256": "ee34546aa459fe57db51524d55776a008c6f7aadd015f6b5f3e611c5f647d018",
+      "line_count": 15,
+      "status": "config",
+      "purpose": "YAML copy of query-id inventory and missing-query TODOs.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/query_ids.json",
+      "bytes": 670,
+      "sha256": "8340dbffbc39c4a6598170ae2cd93e1937edda9ff836d9d5c1d84ff502c30643",
+      "line_count": 22,
+      "status": "config",
+      "purpose": "Dune query id inventory: one known query id and missing ids for three dashboard cards.",
+      "notes": []
+    },
+    {
+      "path": "source/degen_dogs_mission3_sql/scripts/fetch_official_dune_sql.py",
+      "bytes": 2682,
+      "sha256": "854d5b4ce6640ece9d4a0a077822c8c9c9401a7d0d2aaa4e2ff6502823dd4719",
+      "line_count": 85,
+      "status": "helper-script",
+      "purpose": "Fetches official Dune SQL through the Dune Read Query API when DUNE_API_KEY and query ids are available.",
+      "notes": []
+    }
+  ]
+}
