@@ -1,11 +1,19 @@
 [
   {
-    "dog": "Dog #722",
-    "latest_bid_eth": 0.0121,
-    "bidder": "@skunkape",
-    "bid_time_utc": "2026-05-22 18:38:39",
+    "dog": "Dog #723",
+    "dog_image_url": "https://api.degendogs.club/images/723.png",
+    "dog_external_url": "https://degendogs.club/#dog723",
+    "latest_bid": "0.00000 ETH ($0)",
+    "latest_bid_eth": 0.0,
+    "latest_bid_usd": 0.0,
+    "bidder": "0x0000…0000",
+    "bidder_url": "",
+    "bid_time_utc": "2026-05-23 15:08:01",
     "auction_state": "live",
-    "time_remaining": "03:27:56",
-    "auction_end_utc": "2026-05-23 14:58:51"
+    "time_remaining": "24:02:40",
+    "auction_end_utc": "2026-05-24 15:10:41",
+    "traits": "Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: Teeth; Ears: LoopEarring; Head: BaseballCap; Eyes: Glasses",
+    "trait_rarity": "Background: None (90.5%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.8%); Mouth: Teeth (5.1%); Ears: LoopEarring (27.5%); Head: BaseballCap (10.5%); Eyes: Glasses (12.4%)",
+    "rarity": "#226/724"
   }
 ]

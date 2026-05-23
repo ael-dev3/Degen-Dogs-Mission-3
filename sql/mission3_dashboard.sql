@@ -6,6 +6,10 @@ SELECT
     WHEN COALESCE(username, '') != '' THEN '@' || username
     ELSE substr(LOWER(address), 1, 6) || '…' || substr(LOWER(address), -4)
   END AS label,
+  CASE
+    WHEN COALESCE(username, '') != '' THEN 'https://farcaster.xyz/' || username
+    ELSE ''
+  END AS url,
   fid,
   username,
   display_name
@@ -13,16 +17,23 @@ FROM farcaster_profiles;
 
 DROP TABLE IF EXISTS recent_bids;
 CREATE TABLE recent_bids AS
+WITH eth_price AS (
+  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
+)
 SELECT
   b.block_time_utc AS bid_time_utc,
   b.token_id,
   COALESCE(l.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
+  COALESCE(l.url, '') AS bidder_url,
   b.bidder AS bidder_wallet,
+  printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * eth_price.eth_usd) AS bid,
   ROUND(b.bid_eth, 8) AS bid_eth,
+  ROUND(b.bid_eth * eth_price.eth_usd, 2) AS bid_usd,
   b.extended,
   b.block_number,
   b.tx_hash
 FROM auction_bids b
+CROSS JOIN eth_price
 LEFT JOIN address_labels l ON l.address_lc = LOWER(b.bidder)
 ORDER BY b.block_number DESC, b.log_index DESC
 LIMIT 100;
@@ -39,13 +50,26 @@ WITH bid_counts AS (
     MAX(bid_eth) AS max_seen_bid_eth
   FROM auction_bids
   GROUP BY token_id
+),
+eth_price AS (
+  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
 )
 SELECT
   s.block_time_utc AS settled_time_utc,
   s.token_id,
+  d.dog_name,
+  COALESCE(d.dog_image_url, '') AS dog_image_url,
+  COALESCE(d.dog_external_url, '') AS dog_external_url,
+  COALESCE(d.traits, '') AS traits,
+  COALESCE(d.trait_rarity, '') AS trait_rarity,
+  COALESCE(d.rarity, '') AS rarity,
+  COALESCE(d.rarity_score, 0) AS rarity_score,
   s.winner AS winner_wallet,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
+  COALESCE(l.url, '') AS winner_url,
+  printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * eth_price.eth_usd) AS winning_bid,
   ROUND(s.amount_eth, 8) AS winning_bid_eth,
+  ROUND(s.amount_eth * eth_price.eth_usd, 2) AS winning_bid_usd,
   COALESCE(b.bid_count, 0) AS bid_count,
   COALESCE(b.unique_bidders, 0) AS unique_bidders,
   b.first_bid_utc,
@@ -53,18 +77,24 @@ SELECT
   s.block_number,
   s.tx_hash
 FROM auction_settled s
+CROSS JOIN eth_price
 LEFT JOIN bid_counts b USING (token_id)
 LEFT JOIN address_labels l ON l.address_lc = LOWER(s.winner)
+LEFT JOIN dog_metadata d USING (token_id)
 ORDER BY s.token_id DESC;
 
 DROP TABLE IF EXISTS recent_auction_winners;
 CREATE TABLE recent_auction_winners AS
 SELECT
   'Dog #' || token_id AS dog,
+  dog_image_url,
+  dog_external_url,
   winner,
+  winner_url,
+  winning_bid,
   winning_bid_eth,
-  bid_count,
-  unique_bidders,
+  winning_bid_usd,
+  rarity,
   last_bid_utc,
   settled_time_utc
 FROM auction_winners_base
@@ -105,6 +135,7 @@ latest_bid AS (
     token_id,
     bidder AS latest_bidder_wallet,
     COALESCE(l.label, substr(LOWER(bid_ranked.bidder), 1, 6) || '…' || substr(LOWER(bid_ranked.bidder), -4)) AS latest_bidder,
+    COALESCE(l.url, '') AS latest_bidder_url,
     bid_eth AS latest_bid_eth,
     block_time_utc AS latest_bid_utc
   FROM bid_ranked
@@ -118,6 +149,7 @@ snapshot AS (
 )
 SELECT
   c.token_id,
+  COALESCE(d.dog_image_url, '') AS dog_image_url,
   c.start_time_utc,
   c.end_time_utc,
   CASE
@@ -131,11 +163,14 @@ SELECT
   ROUND(COALESCE(b.high_bid_eth, 0), 8) AS high_bid_eth,
   ROUND(COALESCE(b.total_bid_eth, 0), 8) AS total_bid_eth,
   l.latest_bidder,
+  l.latest_bidder_url,
   ROUND(COALESCE(l.latest_bid_eth, 0), 8) AS latest_bid_eth,
   l.latest_bid_utc,
   wb.winner,
+  wb.winner_url,
   ROUND(COALESCE(s.amount_eth, 0), 8) AS settled_eth,
   s.block_time_utc AS settled_time_utc,
+  COALESCE(d.rarity, '') AS rarity,
   c.tx_hash AS created_tx_hash,
   s.tx_hash AS settled_tx_hash
 FROM auction_created c
@@ -144,6 +179,7 @@ LEFT JOIN bid_stats b USING (token_id)
 LEFT JOIN latest_bid l USING (token_id)
 LEFT JOIN auction_settled s USING (token_id)
 LEFT JOIN auction_winners_base wb USING (token_id)
+LEFT JOIN dog_metadata d USING (token_id)
 ORDER BY c.token_id DESC;
 
 DROP TABLE IF EXISTS auction_daily_activity;
@@ -237,6 +273,7 @@ winner_stats AS (
 )
 SELECT
   COALESCE(lab.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
+  COALESCE(lab.url, '') AS bidder_url,
   b.bidder AS bidder_wallet,
   b.bids,
   b.auctions_bid,
@@ -275,6 +312,7 @@ SELECT
   s.settled_time_utc,
   s.token_id,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
+  COALESCE(l.url, '') AS winner_url,
   s.winner AS winner_wallet,
   CAST(s.auction_xp AS INTEGER) AS auction_xp,
   ROUND((1017000.0 / 69.0) * s.auction_xp / d.day_xp, 6) AS sup_reward
@@ -287,13 +325,14 @@ DROP TABLE IF EXISTS season5_sup_by_winner;
 CREATE TABLE season5_sup_by_winner AS
 SELECT
   winner,
+  winner_url,
   winner_wallet,
   COUNT(*) AS auction_wins,
   SUM(auction_xp) AS auction_xp,
   ROUND(SUM(sup_reward), 6) AS sup_reward,
   GROUP_CONCAT(token_id, ',') AS token_ids
 FROM season5_sup_rewards_by_auction
-GROUP BY winner, winner_wallet
+GROUP BY winner, winner_url, winner_wallet
 ORDER BY sup_reward DESC, auction_wins DESC, winner;
 
 DROP TABLE IF EXISTS top_woof_holders;
@@ -303,6 +342,7 @@ WITH ranked AS (
     ROW_NUMBER() OVER (ORDER BY balance_woof DESC, address) AS rank,
     address,
     COALESCE(l.label, substr(LOWER(address), 1, 6) || '…' || substr(LOWER(address), -4)) AS holder,
+    COALESCE(l.url, '') AS holder_url,
     balance_woof,
     balance_raw,
     CASE
@@ -317,6 +357,7 @@ WITH ranked AS (
 SELECT
   rank,
   holder,
+  holder_url,
   address AS holder_wallet,
   ROUND(balance_woof, 6) AS balance_woof,
   ROUND(supply_pct, 6) AS supply_pct
@@ -326,28 +367,54 @@ ORDER BY rank;
 
 DROP TABLE IF EXISTS current_auction;
 CREATE TABLE current_auction AS
+WITH eth_price AS (
+  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
+),
+base AS (
+  SELECT
+    c.*,
+    CASE
+      WHEN c.end_time_utc = '' OR c.latest_block_time_utc = '' THEN NULL
+      WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER) THEN 0
+      ELSE CAST(strftime('%s', c.end_time_utc) AS INTEGER) - CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER)
+    END AS seconds_left
+  FROM current_auction_source c
+)
 SELECT
   c.token_id,
+  COALESCE(d.dog_name, 'Degen Dog #' || c.token_id) AS dog_name,
+  COALESCE(d.dog_image_url, '') AS dog_image_url,
+  COALESCE(d.dog_external_url, '') AS dog_external_url,
+  COALESCE(d.traits, '') AS traits,
+  COALESCE(d.trait_rarity, '') AS trait_rarity,
+  COALESCE(d.rarity, '') AS rarity,
+  COALESCE(d.rarity_score, 0) AS rarity_score,
+  printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
+  ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd,
   COALESCE(l.label, substr(LOWER(c.bidder), 1, 6) || '…' || substr(LOWER(c.bidder), -4)) AS bidder,
+  COALESCE(l.url, '') AS bidder_url,
   c.bidder AS bidder_wallet,
   c.start_time_utc,
   c.end_time_utc,
   CASE
     WHEN c.settled != 0 THEN 'settled'
-    WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
+    WHEN c.seconds_left = 0 THEN 'ended_unsettled'
     ELSE 'live'
   END AS auction_state,
+  c.seconds_left AS seconds_remaining,
   CASE
-    WHEN c.end_time_utc = '' OR c.latest_block_time_utc = '' THEN NULL
-    WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER) THEN 0
-    ELSE CAST(strftime('%s', c.end_time_utc) AS INTEGER) - CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER)
-  END AS seconds_remaining,
+    WHEN c.seconds_left IS NULL THEN ''
+    WHEN c.seconds_left <= 0 THEN 'ended'
+    ELSE printf('%02d:%02d:%02d', c.seconds_left / 3600, (c.seconds_left / 60) % 60, c.seconds_left % 60)
+  END AS time_remaining,
   c.settled,
   c.latest_block,
   c.latest_block_time_utc
-FROM current_auction_source c
-LEFT JOIN address_labels l ON l.address_lc = LOWER(c.bidder);
+FROM base c
+CROSS JOIN eth_price
+LEFT JOIN address_labels l ON l.address_lc = LOWER(c.bidder)
+LEFT JOIN dog_metadata d USING (token_id);
 
 DROP TABLE IF EXISTS current_latest_bid;
 CREATE TABLE current_latest_bid AS
@@ -365,17 +432,103 @@ latest_bid AS (
 )
 SELECT
   'Dog #' || c.token_id AS dog,
+  c.dog_image_url,
+  c.dog_external_url,
+  c.current_bid AS latest_bid,
   c.current_bid_eth AS latest_bid_eth,
+  c.current_bid_usd AS latest_bid_usd,
   c.bidder,
+  c.bidder_url,
   COALESCE((SELECT bid_time_utc FROM latest_bid WHERE bid_rank = 1), c.latest_block_time_utc) AS bid_time_utc,
   c.auction_state,
-  CASE
-    WHEN c.seconds_remaining IS NULL THEN ''
-    WHEN c.seconds_remaining <= 0 THEN 'ended'
-    ELSE printf('%02d:%02d:%02d', c.seconds_remaining / 3600, (c.seconds_remaining / 60) % 60, c.seconds_remaining % 60)
-  END AS time_remaining,
-  c.end_time_utc AS auction_end_utc
+  c.time_remaining,
+  c.end_time_utc AS auction_end_utc,
+  c.traits,
+  c.trait_rarity,
+  c.rarity
 FROM current_row c;
+
+DROP TABLE IF EXISTS auction_feed;
+CREATE TABLE auction_feed AS
+WITH current_row AS (
+  SELECT * FROM current_auction LIMIT 1
+),
+latest_bid AS (
+  SELECT
+    b.token_id,
+    b.block_time_utc AS bid_time_utc,
+    ROW_NUMBER() OVER (PARTITION BY b.token_id ORDER BY b.block_number DESC, b.log_index DESC) AS bid_rank
+  FROM auction_bids b
+  JOIN current_row c ON c.token_id = b.token_id
+),
+recent_settled AS (
+  SELECT * FROM auction_winners_base ORDER BY token_id DESC LIMIT 10
+),
+combined AS (
+  SELECT
+    0 AS sort_order,
+    c.token_id,
+    CASE
+      WHEN c.auction_state = 'live' THEN 'ongoing'
+      WHEN c.auction_state = 'ended_unsettled' THEN 'ended pending settlement'
+      ELSE c.auction_state
+    END AS status,
+    'Dog #' || c.token_id AS dog,
+    c.dog_image_url,
+    c.dog_external_url,
+    c.bidder AS bidder_winner,
+    c.bidder_url AS bidder_winner_url,
+    c.current_bid AS bid,
+    c.current_bid_eth AS amount_eth,
+    c.current_bid_usd AS amount_usd,
+    COALESCE((SELECT bid_time_utc FROM latest_bid WHERE bid_rank = 1), c.latest_block_time_utc) AS last_bid_utc,
+    '' AS settled_time_utc,
+    c.time_remaining,
+    c.traits,
+    c.trait_rarity,
+    c.rarity,
+    c.rarity_score
+  FROM current_row c
+  UNION ALL
+  SELECT
+    1 AS sort_order,
+    token_id,
+    'settled' AS status,
+    'Dog #' || token_id AS dog,
+    dog_image_url,
+    dog_external_url,
+    winner AS bidder_winner,
+    winner_url AS bidder_winner_url,
+    winning_bid AS bid,
+    winning_bid_eth AS amount_eth,
+    winning_bid_usd AS amount_usd,
+    last_bid_utc,
+    settled_time_utc,
+    '' AS time_remaining,
+    traits,
+    trait_rarity,
+    rarity,
+    rarity_score
+  FROM recent_settled
+)
+SELECT
+  status,
+  dog,
+  dog_image_url,
+  dog_external_url,
+  bidder_winner,
+  bidder_winner_url,
+  bid,
+  amount_eth,
+  amount_usd,
+  time_remaining,
+  last_bid_utc,
+  settled_time_utc,
+  rarity,
+  traits,
+  trait_rarity
+FROM combined
+ORDER BY sort_order ASC, token_id DESC;
 
 DROP TABLE IF EXISTS mission3_metrics;
 CREATE TABLE mission3_metrics AS
@@ -415,21 +568,23 @@ UNION ALL SELECT 'latest_block', CAST((SELECT latest_block FROM current_auction_
 UNION ALL SELECT 'latest_block_time_utc', (SELECT latest_block_time_utc FROM current_auction_source LIMIT 1)
 UNION ALL SELECT 'auction_house', (SELECT value FROM token_stats WHERE metric = 'auction_house')
 UNION ALL SELECT 'dog_nft', (SELECT value FROM token_stats WHERE metric = 'dog_nft')
+UNION ALL SELECT 'dog_total_supply', (SELECT value FROM token_stats WHERE metric = 'dog_total_supply')
 UNION ALL SELECT 'woof_token', (SELECT value FROM token_stats WHERE metric = 'woof_token')
 UNION ALL SELECT 'woof_symbol', (SELECT value FROM token_stats WHERE metric = 'woof_symbol')
 UNION ALL SELECT 'woof_total_supply', (SELECT value FROM token_stats WHERE metric = 'woof_total_supply')
+UNION ALL SELECT 'eth_usd_price', (SELECT value FROM token_stats WHERE metric = 'eth_usd_price')
+UNION ALL SELECT 'eth_usd_source', (SELECT value FROM token_stats WHERE metric = 'eth_usd_source')
 UNION ALL SELECT 'woof_holders', CAST((SELECT woof_holders FROM holder_stats) AS TEXT)
 UNION ALL SELECT 'top_woof_holder', COALESCE((SELECT holder FROM top_holder), '')
 UNION ALL SELECT 'top_woof_holder_balance', CAST(ROUND(COALESCE((SELECT balance_woof FROM top_holder), 0), 6) AS TEXT)
 UNION ALL SELECT 'farcaster_profiles_resolved', CAST((SELECT farcaster_profiles FROM profile_stats) AS TEXT)
 UNION ALL SELECT 'current_auction_token_id', CAST((SELECT token_id FROM current_auction_source LIMIT 1) AS TEXT)
 UNION ALL SELECT 'current_bid_eth', CAST(ROUND((SELECT amount_eth FROM current_auction_source LIMIT 1), 8) AS TEXT)
+UNION ALL SELECT 'current_bid_usd', CAST(ROUND((SELECT current_bid_usd FROM current_auction LIMIT 1), 2) AS TEXT)
 UNION ALL SELECT 'current_bidder', (SELECT bidder FROM current_auction LIMIT 1)
 UNION ALL SELECT 'current_auction_end_utc', (SELECT end_time_utc FROM current_auction_source LIMIT 1)
 UNION ALL SELECT 'created_auctions', CAST((SELECT created_auctions FROM created_stats) AS TEXT)
 UNION ALL SELECT 'settled_auctions', CAST((SELECT settled_auctions FROM settle_stats) AS TEXT)
-UNION ALL SELECT 'total_bids', CAST((SELECT total_bids FROM bid_stats) AS TEXT)
-UNION ALL SELECT 'unique_bidders', CAST((SELECT unique_bidders FROM bid_stats) AS TEXT)
 UNION ALL SELECT 'total_bid_eth', CAST(ROUND((SELECT total_bid_eth FROM bid_stats), 8) AS TEXT)
 UNION ALL SELECT 'total_settled_eth', CAST(ROUND((SELECT total_settled_eth FROM settle_stats), 8) AS TEXT)
 UNION ALL SELECT 'highest_bid_eth', CAST(ROUND((SELECT highest_bid_eth FROM bid_stats), 8) AS TEXT)

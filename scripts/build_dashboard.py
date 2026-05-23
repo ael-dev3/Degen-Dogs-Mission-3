@@ -12,7 +12,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal, getcontext
 from pathlib import Path
@@ -24,6 +24,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SQL_PATH = ROOT / "sql" / "mission3_dashboard.sql"
 GENERATED = ROOT / "generated"
 PUBLIC_GENERATED = ROOT / "public" / "generated"
+CACHE_DIR = ROOT / ".cache"
+DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
 
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
@@ -53,6 +55,7 @@ ZERO = "0x0000000000000000000000000000000000000000"
 
 OUTPUT_TABLES = [
     "mission3_metrics",
+    "auction_feed",
     "current_latest_bid",
     "recent_auction_winners",
     "current_auction",
@@ -65,7 +68,7 @@ OUTPUT_TABLES = [
     "recent_bids",
     "top_woof_holders",
 ]
-PRIMARY_TABLES = ["current_latest_bid", "recent_auction_winners"]
+PRIMARY_TABLES = ["auction_feed"]
 
 
 TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
@@ -79,6 +82,7 @@ SELECTOR_DECIMALS = "0x313ce567"
 SELECTOR_TOTAL_SUPPLY = "0x18160ddd"
 SELECTOR_AUCTION = "0x7d9f6db5"
 SELECTOR_BALANCE_OF = "0x70a08231"
+SELECTOR_TOKEN_URI = "0xc87b56dd"
 
 
 def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url: str) -> Any:
@@ -245,11 +249,30 @@ def decode_uint_call(raw: str) -> int:
     return int(raw, 16) if raw and raw != "0x" else 0
 
 
+def fetch_eth_usd_price() -> tuple[Decimal, str]:
+    endpoints = [
+        ("coinbase", "https://api.coinbase.com/v2/prices/ETH-USD/spot", lambda data: data["data"]["amount"]),
+        ("coingecko", "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd", lambda data: data["ethereum"]["usd"]),
+    ]
+    for source, url, picker in endpoints:
+        try:
+            req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"})
+            with urllib.request.urlopen(req, timeout=30) as response:
+                data = json.loads(response.read().decode("utf-8"))
+            price = Decimal(str(picker(data)))
+            if price > 0:
+                return price, source
+        except Exception as exc:  # noqa: BLE001
+            print(f"warning: ETH/USD lookup failed via {source}: {exc}", file=sys.stderr)
+    return Decimal(0), "unavailable"
+
+
 def fetch_token_stats(block_tag: str) -> dict[str, str]:
     name = decode_abi_string(eth_call(WOOF, SELECTOR_NAME, block_tag))
     symbol = decode_abi_string(eth_call(WOOF, SELECTOR_SYMBOL, block_tag))
     decimals = decode_uint_call(eth_call(WOOF, SELECTOR_DECIMALS, block_tag))
     supply_raw = decode_uint_call(eth_call(WOOF, SELECTOR_TOTAL_SUPPLY, block_tag))
+    eth_usd, eth_usd_source = fetch_eth_usd_price()
     return {
         "auction_house": AUCTION_HOUSE,
         "dog_nft": DEGEN_DOGS,
@@ -259,7 +282,152 @@ def fetch_token_stats(block_tag: str) -> dict[str, str]:
         "woof_decimals": str(decimals),
         "woof_total_supply": decimal_str(supply_raw, decimals, 6),
         "woof_total_supply_raw": str(supply_raw),
+        "eth_usd_price": decimal_str(int(eth_usd * 100), 2, 2) if eth_usd else "0",
+        "eth_usd_source": eth_usd_source,
     }
+
+
+def token_uri_data(token_id: int) -> str:
+    return SELECTOR_TOKEN_URI + f"{token_id:x}".rjust(64, "0")
+
+
+def fetch_dog_total_supply(block_tag: str) -> int:
+    return decode_uint_call(eth_call(DEGEN_DOGS, SELECTOR_TOTAL_SUPPLY, block_tag))
+
+
+def fetch_token_uri(token_id: int, block_tag: str) -> str:
+    return decode_abi_string(eth_call(DEGEN_DOGS, token_uri_data(token_id), block_tag))
+
+
+def normalize_metadata_url(url: str) -> str:
+    if url.startswith("ipfs://"):
+        return "https://ipfs.io/ipfs/" + url.removeprefix("ipfs://")
+    return url
+
+
+def fetch_url_json(url: str, timeout: int = 45) -> dict[str, Any]:
+    req = urllib.request.Request(
+        normalize_metadata_url(url),
+        headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def simplified_dog_metadata(token_id: int, data: dict[str, Any]) -> dict[str, Any]:
+    attrs = []
+    for item in data.get("attributes") or []:
+        if not isinstance(item, dict):
+            continue
+        trait_type = str(item.get("trait_type") or "").strip()
+        value = str(item.get("value") or "").strip()
+        if trait_type and value:
+            attrs.append({"trait_type": trait_type, "value": value})
+    image = str(data.get("image") or "")
+    if image.startswith("ipfs://"):
+        image = normalize_metadata_url(image)
+    return {
+        "token_id": token_id,
+        "name": str(data.get("name") or f"Degen Dog #{token_id}"),
+        "image_url": image,
+        "external_url": str(data.get("external_url") or f"https://degendogs.club/#dog{token_id}"),
+        "attributes": attrs,
+    }
+
+
+def load_dog_cache() -> dict[str, Any]:
+    if not DOG_METADATA_CACHE.exists():
+        return {}
+    try:
+        data = json.loads(DOG_METADATA_CACHE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def write_dog_cache(cache: dict[str, Any]) -> None:
+    CACHE_DIR.mkdir(exist_ok=True)
+    DOG_METADATA_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def fetch_one_dog_metadata(token_id: int, block_tag: str) -> dict[str, Any]:
+    url = f"https://degendogs.club/meta/{token_id}"
+    try:
+        return simplified_dog_metadata(token_id, fetch_url_json(url))
+    except Exception:
+        uri = fetch_token_uri(token_id, block_tag)
+        return simplified_dog_metadata(token_id, fetch_url_json(uri))
+
+
+def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str, Any]]:
+    cache = load_dog_cache()
+    token_ids = list(range(total_supply))
+    missing = [token_id for token_id in token_ids if str(token_id) not in cache]
+    if missing:
+        workers = max(1, min(int(os.environ.get("DOG_METADATA_WORKERS", "16")), 24))
+        print(f"fetching dog metadata: {len(missing)} missing of {total_supply}", file=sys.stderr)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(fetch_one_dog_metadata, token_id, block_tag): token_id for token_id in missing}
+            for future in concurrent.futures.as_completed(futures):
+                token_id = futures[future]
+                try:
+                    cache[str(token_id)] = future.result()
+                except Exception as exc:  # noqa: BLE001
+                    print(f"warning: metadata failed for dog {token_id}: {exc}", file=sys.stderr)
+                    cache[str(token_id)] = simplified_dog_metadata(token_id, {})
+        write_dog_cache(cache)
+
+    metadata = []
+    for token_id in token_ids:
+        row = cache.get(str(token_id)) or simplified_dog_metadata(token_id, {})
+        row["token_id"] = int(row.get("token_id") or token_id)
+        metadata.append(row)
+
+    trait_counts: Counter[tuple[str, str]] = Counter()
+    for row in metadata:
+        for attr in row.get("attributes") or []:
+            trait_counts[(str(attr.get("trait_type") or ""), str(attr.get("value") or ""))] += 1
+
+    score_by_token: dict[int, float] = {}
+    for row in metadata:
+        token_id = int(row["token_id"])
+        score = 0.0
+        for attr in row.get("attributes") or []:
+            key = (str(attr.get("trait_type") or ""), str(attr.get("value") or ""))
+            count = max(1, trait_counts.get(key, 1))
+            score += total_supply / count
+        score_by_token[token_id] = score
+    ranks = {token_id: rank for rank, token_id in enumerate(sorted(score_by_token, key=lambda tid: (-score_by_token[tid], tid)), start=1)}
+
+    rows: list[dict[str, Any]] = []
+    for row in metadata:
+        token_id = int(row["token_id"])
+        attrs = row.get("attributes") or []
+        traits = []
+        rarity_items = []
+        for attr in attrs:
+            trait_type = str(attr.get("trait_type") or "")
+            value = str(attr.get("value") or "")
+            if not trait_type or not value:
+                continue
+            count = trait_counts[(trait_type, value)]
+            pct = (Decimal(count) * Decimal(100)) / Decimal(total_supply) if total_supply else Decimal(0)
+            traits.append(f"{trait_type}: {value}")
+            rarity_items.append(f"{trait_type}: {value} ({pct:.1f}%)")
+        rows.append(
+            {
+                "token_id": token_id,
+                "dog_name": row.get("name") or f"Degen Dog #{token_id}",
+                "dog_image_url": row.get("image_url") or "",
+                "dog_external_url": row.get("external_url") or f"https://degendogs.club/#dog{token_id}",
+                "traits": "; ".join(traits),
+                "trait_rarity": "; ".join(rarity_items),
+                "rarity": f"#{ranks.get(token_id, 0)}/{total_supply}",
+                "rarity_score": round(score_by_token.get(token_id, 0.0), 6),
+            }
+        )
+    rows.sort(key=lambda item: item["token_id"])
+    return rows
 
 
 def fetch_current_auction(latest_block: int, latest_time: str, block_tag: str) -> dict[str, Any]:
@@ -541,31 +709,114 @@ def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+
+HIDDEN_UI_COLUMNS = {
+    "dog_image_url",
+    "dog_external_url",
+    "bidder_url",
+    "winner_url",
+    "holder_url",
+    "latest_bidder_url",
+    "bidder_winner_url",
+    "bidder_wallet",
+    "winner_wallet",
+    "holder_wallet",
+    "bid_count",
+    "unique_bidders",
+    "amount_eth",
+    "amount_usd",
+    "latest_bid_eth",
+    "latest_bid_usd",
+    "winning_bid_eth",
+    "winning_bid_usd",
+    "current_bid_eth",
+    "current_bid_usd",
+    "traits",
+    "trait_rarity",
+    "rarity_score",
+    "tx_hash",
+    "created_tx_hash",
+    "settled_tx_hash",
+    "block_number",
+    "log_index",
+    "bid_wei",
+    "amount_wei",
+}
+
+
 def css_class_for_col(col: str) -> str:
     lowered = col.lower()
+    if lowered in {"status", "auction_state", "state"}:
+        return "state"
+    if lowered in {"dog", "dog_name"}:
+        return "dog-col"
     if "winner" in lowered or "bidder" in lowered or "farcaster" in lowered or "wallet" in lowered or "holder" in lowered:
         return "identity"
     if "time" in lowered or lowered.endswith("utc") or "date" in lowered:
         return "time"
-    if "state" in lowered:
-        return "state"
-    numeric_markers = ("_eth", "_wei", "_pct", "_reward", "_balance", "count", "bids", "rank", "remaining")
-    if any(marker in lowered for marker in numeric_markers) or lowered in {"eth", "bid", "reward", "balance", "supply_pct"}:
+    numeric_markers = ("_eth", "_wei", "_pct", "_reward", "_balance", "count", "bids", "rank", "remaining", "usd")
+    if any(marker in lowered for marker in numeric_markers) or lowered in {"eth", "bid", "reward", "balance", "supply_pct", "rarity"}:
         return "num"
     return ""
 
 
+def display_col_name(col: str) -> str:
+    overrides = {
+        "bidder_winner": "bidder / winner",
+        "last_bid_utc": "last bid",
+        "settled_time_utc": "settled",
+        "time_remaining": "time left",
+    }
+    return overrides.get(col, col.replace("_", " "))
+
+
+def cell_url(col: str, row_data: dict[str, Any]) -> str:
+    if col == "bidder_winner":
+        return str(row_data.get("bidder_winner_url") or "")
+    if col in {"bidder", "winner", "holder", "latest_bidder"}:
+        return str(row_data.get(f"{col}_url") or "")
+    if col == "dog":
+        return str(row_data.get("dog_external_url") or "")
+    return ""
+
+
+def render_cell(col: str, value: Any, row_data: dict[str, Any]) -> str:
+    text = "" if value is None else str(value)
+    escaped = html.escape(text)
+    lowered = col.lower()
+    if col == "dog":
+        image = str(row_data.get("dog_image_url") or "")
+        url = cell_url(col, row_data)
+        image_html = ""
+        if image:
+            image_html = f'<img class="dog-thumb" src="{html.escape(image, quote=True)}" alt="{html.escape(text, quote=True)} image" loading="lazy">'
+        label_html = f'<span>{escaped}</span>'
+        inner = f'<span class="dog-cell">{image_html}{label_html}</span>'
+        if url:
+            inner = f'<a class="dog-link" href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{inner}</a>'
+        return inner
+    if lowered in {"status", "auction_state"}:
+        tone = "ongoing" if "ongoing" in text or text == "live" else "settled" if "settled" in text else "neutral"
+        return f'<span class="status-pill {tone}">{escaped}</span>'
+    url = cell_url(col, row_data)
+    if url and text:
+        return f'<a href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{escaped}</a>'
+    return escaped
+
+
 def table_html(name: str, cols: list[str], rows: list[tuple[Any, ...]], *, featured: bool = False) -> str:
+    visible = [(idx, col) for idx, col in enumerate(cols) if col not in HIDDEN_UI_COLUMNS]
     head = "".join(
-        f'<th scope="col" aria-sort="none" class="{css_class_for_col(col)}"><button type="button" data-col="{i}">{html.escape(col.replace("_", " "))}</button></th>'
-        for i, col in enumerate(cols)
+        f'<th scope="col" aria-sort="none" class="{css_class_for_col(col)}"><button type="button" data-col="{visible_idx}">{html.escape(display_col_name(col))}</button></th>'
+        for visible_idx, (_, col) in enumerate(visible)
     )
     body = []
     for row in rows:
+        row_data = {col: row[i] for i, col in enumerate(cols)}
         cells = []
-        for col, value in zip(cols, row):
-            text = "" if value is None else str(value)
-            cells.append(f'<td class="{css_class_for_col(col)}">{html.escape(text)}</td>')
+        for _, col in visible:
+            value = row_data.get(col)
+            cells.append(f'<td class="{css_class_for_col(col)}">{render_cell(col, value, row_data)}</td>')
         body.append("<tr>" + "".join(cells) + "</tr>")
     row_count = len(rows)
     caption = (
@@ -587,7 +838,9 @@ def metric_lookup(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) ->
 
 
 def current_lookup(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> dict[str, str]:
-    cols, rows = tables.get("current_latest_bid", ([], []))
+    cols, rows = tables.get("auction_feed", ([], []))
+    if not rows:
+        cols, rows = tables.get("current_latest_bid", ([], []))
     if not rows:
         return {}
     row = rows[0]
@@ -599,16 +852,18 @@ def export_links(name: str) -> str:
     return f'<a href="generated/{safe}.csv" download>CSV</a><a href="generated/{safe}.json" download>JSON</a>'
 
 
-def render_metric_card(label: str, value: str, tone: str = "") -> str:
-    return f'<article class="metric {tone}"><span>{html.escape(label)}</span><strong>{html.escape(value)}</strong></article>'
-
-
 def markdown_table(cols: list[str], rows: list[tuple[Any, ...]], limit: int | None = None) -> str:
     selected = rows if limit is None else rows[:limit]
     out = ["| " + " | ".join(cols) + " |", "| " + " | ".join(["---"] * len(cols)) + " |"]
     for row in selected:
         out.append("| " + " | ".join(str("" if v is None else v).replace("|", "\\|") for v in row) + " |")
     return "\n".join(out) + "\n"
+
+
+def trait_chips(current: dict[str, str]) -> str:
+    source = current.get("trait_rarity") or current.get("traits") or ""
+    items = [item.strip() for item in source.split(";") if item.strip()]
+    return "".join(f'<span>{html.escape(item)}</span>' for item in items)
 
 
 def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> None:
@@ -618,7 +873,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     raw_parts = [
         table_html(name, cols, rows)
         for name, (cols, rows) in tables.items()
-        if name not in PRIMARY_TABLES and name != "mission3_metrics"
+        if name not in PRIMARY_TABLES
     ]
     export_rows = []
     for name, (cols, rows) in tables.items():
@@ -626,36 +881,39 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             f'<tr><td>{html.escape(name.replace("_", " "))}</td><td>{len(rows)}</td><td>{export_links(name)}</td></tr>'
         )
 
-    cards = "".join(
+    dog = current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}").strip() or "Current dog"
+    bid = current.get("bid") or current.get("latest_bid") or f"{metrics.get('current_bid_eth', '0')} ETH"
+    participant = current.get("bidder_winner") or current.get("bidder") or metrics.get("current_bidder", "")
+    participant_url = current.get("bidder_winner_url") or current.get("bidder_url", "")
+    participant_html = html.escape(participant)
+    if participant_url and participant:
+        participant_html = f'<a href="{html.escape(participant_url, quote=True)}" target="_blank" rel="noopener noreferrer">{participant_html}</a>'
+    status = current.get("status") or current.get("auction_state", "")
+    time_left = current.get("time_remaining", "")
+    image = current.get("dog_image_url", "")
+    image_html = ""
+    if image:
+        image_html = f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image">'
+    rarity = current.get("rarity", "")
+    subtitle = html.escape(
+        f"Cached block {metrics.get('latest_block', '')} · ETH ${metrics.get('eth_usd_price', '0')} · private Mac mini runner"
+    )
+    current_detail = "".join(
         [
-            render_metric_card("Current auction", current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}"), "hot"),
-            render_metric_card("Latest bid", f"{current.get('latest_bid_eth', metrics.get('current_bid_eth', '0'))} ETH", "money"),
-            render_metric_card("Bidder", current.get("bidder", metrics.get("current_bidder", "")), "identity-card"),
-            render_metric_card("Recent winners shown", "10", "cool"),
-            render_metric_card("Settled auctions", metrics.get("settled_auctions", ""), ""),
-            render_metric_card("Unique bidders", metrics.get("unique_bidders", ""), ""),
+            f'<span><b>Status</b>{html.escape(status)}</span>' if status else "",
+            f'<span><b>Bid</b>{html.escape(bid)}</span>' if bid else "",
+            f'<span><b>Time left</b>{html.escape(time_left)}</span>' if time_left else "",
+            f'<span><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
+            f'<span><b>Bidder</b>{participant_html}</span>' if participant else "",
         ]
     )
-    subtitle = html.escape(
-        f"Cached at block {metrics.get('latest_block', '')} · {metrics.get('latest_block_time_utc', '')} UTC · generated by the private Mac mini runner"
-    )
-    detail_items = [
-        ("Status", current.get("auction_state", "")),
-        ("Ends", f"{current.get('auction_end_utc', '')} UTC"),
-        ("Last bid", f"{current.get('bid_time_utc', '')} UTC"),
-        ("Remaining", current.get("time_remaining", "")),
-    ]
-    current_detail = "".join(
-        f'<span><b>{html.escape(label)}</b>{html.escape(value)}</span>'
-        for label, value in detail_items
-        if value and value != " UTC"
-    )
+    chips = trait_chips(current)
     css = """
-:root{color-scheme:dark;--bg:#050712;--bg2:#080d1b;--panel:#0d1424;--panel2:#101a2d;--panel3:#14213a;--line:#243455;--line2:#38527d;--text:#f3f7ff;--muted:#9fb0cf;--cyan:#58f5ff;--lime:#b6ff5d;--pink:#ff5de4;--orange:#ffb85d;--purple:#a78bfa;--red:#ff6b8a;--shadow:0 28px 90px rgba(0,0,0,.48);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-width:320px;background:radial-gradient(circle at 12% -10%,rgba(88,245,255,.24),transparent 30rem),radial-gradient(circle at 82% 2%,rgba(255,93,228,.16),transparent 28rem),linear-gradient(180deg,var(--bg2),var(--bg));color:var(--text)}a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}.shell{width:min(1480px,calc(100% - 32px));margin:0 auto;padding:28px 0 40px}.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:18px;align-items:stretch;margin-bottom:18px}.headline,.panel,.table-card,.exports,details{border:1px solid rgba(88,245,255,.18);background:linear-gradient(180deg,rgba(16,26,45,.86),rgba(8,13,27,.94));box-shadow:var(--shadow);border-radius:24px}.headline{padding:24px;position:relative;overflow:hidden}.headline:before{content:"";position:absolute;inset:auto -8rem -10rem auto;width:23rem;height:23rem;border-radius:50%;background:radial-gradient(circle,rgba(182,255,93,.22),transparent 70%)}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--lime);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 18px var(--lime)}h1{margin:12px 0 10px;font-size:clamp(32px,5.2vw,64px);line-height:.94;letter-spacing:-.065em}.subtitle{margin:0;color:var(--muted);font-size:15px;line-height:1.6;max-width:760px}.current-detail{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px;color:#dbe8ff;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.current-detail span{display:inline-flex;gap:7px;align-items:center;border:1px solid rgba(88,245,255,.18);border-radius:999px;background:rgba(88,245,255,.07);padding:6px 9px}.current-detail b{color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{min-height:104px;padding:17px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(20,33,58,.82),rgba(10,16,31,.92));display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.metric span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:750}.metric strong{font-size:clamp(20px,3.2vw,34px);letter-spacing:-.04em;overflow-wrap:anywhere}.metric.hot strong{color:var(--orange)}.metric.money strong{color:var(--lime)}.metric.identity-card strong{color:var(--cyan)}.metric.cool strong{color:var(--pink)}.toolbar{position:sticky;top:0;z-index:20;margin:0 0 14px;padding:10px;border:1px solid rgba(88,245,255,.16);border-radius:18px;background:rgba(5,7,18,.82);backdrop-filter:blur(18px)}#filter{width:100%;height:42px;border:1px solid var(--line2);border-radius:12px;background:#071022;color:var(--text);font:600 14px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;padding:0 14px;outline:none}#filter:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(88,245,255,.13)}.primary-grid{display:grid;gap:16px}.table-card{overflow:hidden}.table-card.featured-table{border-color:rgba(182,255,93,.22)}.table-scroll{overflow:auto;max-height:min(72vh,760px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;line-height:1.45}caption{caption-side:top;text-align:left;padding:16px 18px;border-bottom:1px solid var(--line);color:var(--text);font-weight:850;display:flex;justify-content:space-between;gap:16px;background:rgba(20,33,58,.92);position:relative;z-index:1;text-transform:capitalize}caption span:last-child{color:var(--muted);font-weight:700;text-transform:none}th,td{border-bottom:1px solid rgba(36,52,85,.72);padding:12px 14px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}thead th{position:sticky;top:0;z-index:5;background:#111d33;color:var(--muted);box-shadow:inset 0 -1px 0 var(--line2);font-size:11px;text-transform:uppercase;letter-spacing:.1em}tbody tr:hover td{background:rgba(88,245,255,.045)}td.num{color:var(--lime);font-weight:850}td.identity{color:var(--cyan);font-weight:850}td.state{color:var(--orange);font-weight:800}td.time{color:#c8d5ee}th button{all:unset;display:block;width:100%;cursor:pointer}th button[data-dir="asc"]::after{content:" ↑";color:var(--cyan)}th button[data-dir="desc"]::after{content:" ↓";color:var(--cyan)}.exports{margin-top:18px;padding:18px}.exports h2,details summary{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}.exports table{font-size:13px}.exports td:last-child{display:flex;gap:10px}.exports a{display:inline-flex;border:1px solid rgba(88,245,255,.24);border-radius:999px;padding:5px 10px;background:rgba(88,245,255,.07);font-weight:800}details{margin-top:18px;padding:16px}details summary{cursor:pointer;color:var(--cyan);font-weight:850}.raw-grid{display:grid;gap:12px;margin-top:12px}.raw-grid .table-scroll{max-height:420px}@media (max-width:980px){.shell{width:min(100% - 18px,1480px);padding-top:14px}.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}h1{font-size:44px}th,td{white-space:normal;overflow-wrap:anywhere}}@media (max-width:620px){.metrics{grid-template-columns:1fr}.headline{padding:20px}.metric{min-height:92px}table{font-size:12px}th,td{padding:10px}}
+:root{color-scheme:light;--paper:#e8ded5;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--accent:#e51b2f;--accent2:#b91325;--shadow:0 18px 45px rgba(10,10,10,.12);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}html{background:var(--paper)}body{margin:0;min-width:320px;background:var(--paper);color:var(--ink)}a{color:var(--ink);text-decoration-thickness:2px;text-decoration-color:var(--accent);text-underline-offset:3px}a:hover{color:var(--accent2)}.shell{width:min(1440px,calc(100% - 32px));margin:0 auto;padding:28px 0 42px}.current-card,.table-card,.exports,details{background:var(--panel);border:3px solid var(--ink);box-shadow:var(--shadow)}.current-card{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(300px,.7fr);gap:0;margin-bottom:18px;min-height:420px}.current-copy{padding:28px;display:flex;flex-direction:column;gap:16px;border-right:3px solid var(--ink)}.eyebrow{display:flex;gap:10px;align-items:center;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.dot{width:12px;height:12px;background:var(--accent);border:2px solid var(--ink);display:inline-block}.current-copy h1{font-size:clamp(44px,8vw,96px);line-height:.88;margin:0;letter-spacing:-.075em;max-width:9ch}.subtitle{margin:0;color:var(--muted);font-weight:700}.current-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:auto}.current-detail span{display:flex;min-height:64px;flex-direction:column;justify-content:center;border:2px solid var(--ink);background:var(--panel2);padding:10px 12px;font-weight:900}.current-detail b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.traits{display:flex;flex-wrap:wrap;gap:8px}.traits span{border:2px solid var(--ink);background:var(--panel);padding:6px 8px;font-size:12px;font-weight:800}.dog-stage{display:flex;align-items:center;justify-content:center;background:#ddd2ca;min-height:360px;padding:26px}.dog-stage img{width:min(100%,430px);max-height:430px;object-fit:contain;image-rendering:pixelated}.toolbar{display:flex;justify-content:flex-end;margin:12px 0}.toolbar input{width:min(420px,100%);border:3px solid var(--ink);background:var(--panel);color:var(--ink);padding:13px 14px;font:inherit;font-weight:800;outline:none}.toolbar input:focus{box-shadow:0 0 0 4px rgba(229,27,47,.2)}.primary-grid{display:grid;gap:16px}.table-card{overflow:hidden;margin-bottom:18px}.table-scroll{overflow:auto;max-height:650px}table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}caption{position:sticky;left:0;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;background:var(--ink);color:var(--panel);font-weight:950;text-transform:uppercase;letter-spacing:.05em}caption [data-total]{font-size:12px;color:var(--paper)}thead th{position:sticky;top:50px;z-index:1;background:var(--panel2);border-bottom:3px solid var(--ink);white-space:nowrap}th,td{border-bottom:1px solid var(--line);padding:11px 12px;text-align:left;vertical-align:middle}th button{all:unset;display:block;width:100%;cursor:pointer;font-weight:950;text-transform:uppercase;font-size:12px;letter-spacing:.04em}tbody tr:first-child td{background:#fff3ee}tbody tr:hover td{background:#f7eee6}.num{text-align:right;font-variant-numeric:tabular-nums}.time{white-space:nowrap;color:var(--muted);font-variant-numeric:tabular-nums}.identity{font-weight:900}.dog-cell{display:flex;align-items:center;gap:10px;font-weight:950;white-space:nowrap}.dog-thumb{width:52px;height:52px;object-fit:contain;background:#ddd2ca;border:2px solid var(--ink);image-rendering:pixelated}.dog-link{text-decoration:none}.status-pill{display:inline-flex;align-items:center;border:2px solid var(--ink);padding:4px 8px;font-size:12px;font-weight:950;text-transform:uppercase;white-space:nowrap}.status-pill.ongoing{background:var(--accent);color:#fff}.status-pill.settled{background:var(--ink);color:var(--panel)}.status-pill.neutral{background:var(--panel2);color:var(--ink)}.exports,details{padding:16px;margin-top:18px}h2,summary{font-size:18px;font-weight:950;margin:0 0 12px;letter-spacing:-.03em}summary{cursor:pointer;margin:0}.exports table{font-size:13px}.exports a{display:inline-block;margin-right:10px;font-weight:950}.raw-grid{display:grid;gap:16px;margin-top:14px}.raw-grid .table-scroll{max-height:430px}@media (max-width:900px){.current-card{grid-template-columns:1fr}.current-copy{border-right:0;border-bottom:3px solid var(--ink)}.current-detail{grid-template-columns:1fr}.dog-stage{min-height:280px}.shell{width:min(100% - 18px,1440px);padding-top:12px}th,td{padding:9px 10px;font-size:13px}}
 """.strip()
     script = """
 const filter=document.getElementById('filter');
-const key=v=>{const s=v.trim().replaceAll(',','');const n=Number(s);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
+const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
 filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid,details');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
@@ -666,22 +924,23 @@ updateCounts();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#050712">
+<meta name="theme-color" content="#e8ded5">
 <title>Degen Dogs Mission 3 Auctions</title>
 <style>{css}</style>
 </head>
 <body>
 <div class="shell">
-  <section class="hero" aria-label="Auction overview">
-    <div class="headline">
+  <section class="current-card" aria-label="Current auction">
+    <div class="current-copy">
       <div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>
-      <h1>Latest bid + recent winners</h1>
+      <h1>{html.escape(dog)}</h1>
       <p class="subtitle">{subtitle}</p>
-      <p class="current-detail">{current_detail}</p>
+      <div class="current-detail">{current_detail}</div>
+      <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
     </div>
-    <div class="metrics" aria-label="Key metrics">{cards}</div>
+    <a class="dog-stage" href="{html.escape(current.get('dog_external_url', '#'), quote=True)}" target="_blank" rel="noopener noreferrer">{image_html}</a>
   </section>
-  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search current bid or recent winners" autocomplete="off"></div>
+  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
   <section class="exports"><h2>Cached data exports</h2><table><thead><tr><th>table</th><th>rows</th><th>download</th></tr></thead><tbody>{''.join(export_rows)}</tbody></table></section>
   <details><summary>Advanced cached tables</summary><div class="raw-grid">{''.join(raw_parts)}</div></details>
@@ -691,7 +950,6 @@ updateCounts();
 </html>
 """
     (ROOT / "index.html").write_text(html_doc, encoding="utf-8")
-
 
 def main() -> None:
     GENERATED.mkdir(exist_ok=True)
@@ -714,6 +972,9 @@ def main() -> None:
 
     token_stats = fetch_token_stats(snapshot_tag)
     decimals = int(token_stats["woof_decimals"])
+    dog_total_supply = fetch_dog_total_supply(snapshot_tag)
+    token_stats["dog_total_supply"] = str(dog_total_supply)
+    dog_metadata = fetch_dog_metadata_rows(dog_total_supply, snapshot_tag)
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
@@ -725,6 +986,7 @@ def main() -> None:
     insert_rows(conn, "auction_settled", settled, [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     insert_rows(conn, "woof_holders", holders, [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
     insert_rows(conn, "farcaster_profiles", farcaster_profiles, [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
+    insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
     insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 

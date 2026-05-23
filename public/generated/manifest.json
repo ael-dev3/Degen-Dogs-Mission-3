@@ -2,7 +2,12 @@
   {
     "table": "mission3_metrics",
     "file": "generated/mission3_metrics.csv",
-    "rows": 26
+    "rows": 28
+  },
+  {
+    "table": "auction_feed",
+    "file": "generated/auction_feed.csv",
+    "rows": 11
   },
   {
     "table": "current_latest_bid",
@@ -27,7 +32,7 @@
   {
     "table": "auction_daily_activity",
     "file": "generated/auction_daily_activity.csv",
-    "rows": 134
+    "rows": 135
   },
   {
     "table": "auction_bidder_leaderboard",

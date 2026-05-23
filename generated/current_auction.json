@@ -1,15 +1,26 @@
 [
   {
-    "token_id": 722,
-    "current_bid_eth": 0.0121,
-    "bidder": "@skunkape",
-    "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-    "start_time_utc": "2026-05-22 14:58:51",
-    "end_time_utc": "2026-05-23 14:58:51",
+    "token_id": 723,
+    "dog_name": "Degen Dog #723",
+    "dog_image_url": "https://api.degendogs.club/images/723.png",
+    "dog_external_url": "https://degendogs.club/#dog723",
+    "traits": "Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: Teeth; Ears: LoopEarring; Head: BaseballCap; Eyes: Glasses",
+    "trait_rarity": "Background: None (90.5%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.8%); Mouth: Teeth (5.1%); Ears: LoopEarring (27.5%); Head: BaseballCap (10.5%); Eyes: Glasses (12.4%)",
+    "rarity": "#226/724",
+    "rarity_score": 53.526618,
+    "current_bid": "0.00000 ETH ($0)",
+    "current_bid_eth": 0.0,
+    "current_bid_usd": 0.0,
+    "bidder": "0x0000…0000",
+    "bidder_url": "",
+    "bidder_wallet": "0x0000000000000000000000000000000000000000",
+    "start_time_utc": "2026-05-23 15:10:41",
+    "end_time_utc": "2026-05-24 15:10:41",
     "auction_state": "live",
-    "seconds_remaining": 12476,
+    "seconds_remaining": 86560,
+    "time_remaining": "24:02:40",
     "settled": 0,
-    "latest_block": 46373254,
-    "latest_block_time_utc": "2026-05-23 11:30:55"
+    "latest_block": 46379767,
+    "latest_block_time_utc": "2026-05-23 15:08:01"
   }
 ]

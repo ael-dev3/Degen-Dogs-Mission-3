@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "46373254"
+    "value": "46379767"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-05-23 11:30:55"
+    "value": "2026-05-23 15:08:01"
   },
   {
     "metric": "auction_house",
@@ -22,6 +22,10 @@
   {
     "metric": "dog_nft",
     "value": "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
+  },
+  {
+    "metric": "dog_total_supply",
+    "value": "724"
   },
   {
     "metric": "woof_token",
@@ -36,8 +40,16 @@
     "value": "100000000000"
   },
   {
+    "metric": "eth_usd_price",
+    "value": "2065.68"
+  },
+  {
+    "metric": "eth_usd_source",
+    "value": "coinbase"
+  },
+  {
     "metric": "woof_holders",
-    "value": "388"
+    "value": "389"
   },
   {
     "metric": "top_woof_holder",
@@ -53,19 +65,23 @@
   },
   {
     "metric": "current_auction_token_id",
-    "value": "722"
+    "value": "723"
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.0121"
+    "value": "0.0"
+  },
+  {
+    "metric": "current_bid_usd",
+    "value": "0.0"
   },
   {
     "metric": "current_bidder",
-    "value": "@skunkape"
+    "value": "0x0000…0000"
   },
   {
     "metric": "current_auction_end_utc",
-    "value": "2026-05-23 14:58:51"
+    "value": "2026-05-24 15:10:41"
   },
   {
     "metric": "created_auctions",
@@ -76,16 +92,8 @@
     "value": "132"
   },
   {
-    "metric": "total_bids",
-    "value": "1265"
-  },
-  {
-    "metric": "unique_bidders",
-    "value": "127"
-  },
-  {
     "metric": "total_bid_eth",
-    "value": "34.726303"
+    "value": "34.754263"
   },
   {
     "metric": "total_settled_eth",
