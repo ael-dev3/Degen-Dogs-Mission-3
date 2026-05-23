@@ -1,6 +1,8 @@
 | table | file | rows |
 | --- | --- | --- |
-| mission3_metrics | generated/mission3_metrics.csv | 25 |
+| mission3_metrics | generated/mission3_metrics.csv | 26 |
+| current_latest_bid | generated/current_latest_bid.csv | 1 |
+| recent_auction_winners | generated/recent_auction_winners.csv | 10 |
 | current_auction | generated/current_auction.csv | 1 |
 | auction_timeline | generated/auction_timeline.csv | 133 |
 | auction_daily_activity | generated/auction_daily_activity.csv | 134 |
@@ -15,19 +17,20 @@
 | --- | --- |
 | network | base |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
-| latest_block | 46352276 |
-| latest_block_time_utc | 2026-05-22 23:51:39 |
+| latest_block | 46373254 |
+| latest_block_time_utc | 2026-05-23 11:30:55 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
 | woof_symbol | WOOF |
 | woof_total_supply | 100000000000 |
-| woof_holders | 387 |
-| top_woof_holder | 0x1c453d1909a0aae2011822de50b40780a0c26637 |
-| top_woof_holder_balance | 50280247000.3651 |
+| woof_holders | 388 |
+| top_woof_holder | 0x1c45…6637 |
+| top_woof_holder_balance | 50297280188.9364 |
+| farcaster_profiles_resolved | 153 |
 | current_auction_token_id | 722 |
 | current_bid_eth | 0.0121 |
-| current_bidder | 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 |
+| current_bidder | @skunkape |
 | current_auction_end_utc | 2026-05-23 14:58:51 |
 | created_auctions | 133 |
 | settled_auctions | 132 |

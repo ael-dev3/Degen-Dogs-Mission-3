@@ -1,19 +1,34 @@
+DROP TABLE IF EXISTS address_labels;
+CREATE TEMP TABLE address_labels AS
+SELECT
+  LOWER(address) AS address_lc,
+  CASE
+    WHEN COALESCE(username, '') != '' THEN '@' || username
+    ELSE substr(LOWER(address), 1, 6) || '…' || substr(LOWER(address), -4)
+  END AS label,
+  fid,
+  username,
+  display_name
+FROM farcaster_profiles;
+
 DROP TABLE IF EXISTS recent_bids;
 CREATE TABLE recent_bids AS
 SELECT
-  block_time_utc AS bid_time_utc,
-  token_id,
-  bidder,
-  ROUND(bid_eth, 8) AS bid_eth,
-  extended,
-  block_number,
-  tx_hash
-FROM auction_bids
-ORDER BY block_number DESC, log_index DESC
+  b.block_time_utc AS bid_time_utc,
+  b.token_id,
+  COALESCE(l.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
+  b.bidder AS bidder_wallet,
+  ROUND(b.bid_eth, 8) AS bid_eth,
+  b.extended,
+  b.block_number,
+  b.tx_hash
+FROM auction_bids b
+LEFT JOIN address_labels l ON l.address_lc = LOWER(b.bidder)
+ORDER BY b.block_number DESC, b.log_index DESC
 LIMIT 100;
 
-DROP TABLE IF EXISTS auction_winners;
-CREATE TABLE auction_winners AS
+DROP TABLE IF EXISTS auction_winners_base;
+CREATE TEMP TABLE auction_winners_base AS
 WITH bid_counts AS (
   SELECT
     token_id,
@@ -28,7 +43,8 @@ WITH bid_counts AS (
 SELECT
   s.block_time_utc AS settled_time_utc,
   s.token_id,
-  s.winner,
+  s.winner AS winner_wallet,
+  COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
   ROUND(s.amount_eth, 8) AS winning_bid_eth,
   COALESCE(b.bid_count, 0) AS bid_count,
   COALESCE(b.unique_bidders, 0) AS unique_bidders,
@@ -38,7 +54,28 @@ SELECT
   s.tx_hash
 FROM auction_settled s
 LEFT JOIN bid_counts b USING (token_id)
+LEFT JOIN address_labels l ON l.address_lc = LOWER(s.winner)
 ORDER BY s.token_id DESC;
+
+DROP TABLE IF EXISTS recent_auction_winners;
+CREATE TABLE recent_auction_winners AS
+SELECT
+  'Dog #' || token_id AS dog,
+  winner,
+  winning_bid_eth,
+  bid_count,
+  unique_bidders,
+  last_bid_utc,
+  settled_time_utc
+FROM auction_winners_base
+ORDER BY token_id DESC
+LIMIT 10;
+
+DROP TABLE IF EXISTS auction_winners;
+CREATE TABLE auction_winners AS
+SELECT *
+FROM auction_winners_base
+ORDER BY token_id DESC;
 
 DROP TABLE IF EXISTS auction_timeline;
 CREATE TABLE auction_timeline AS
@@ -66,10 +103,12 @@ bid_stats AS (
 latest_bid AS (
   SELECT
     token_id,
-    bidder AS latest_bidder,
+    bidder AS latest_bidder_wallet,
+    COALESCE(l.label, substr(LOWER(bid_ranked.bidder), 1, 6) || '…' || substr(LOWER(bid_ranked.bidder), -4)) AS latest_bidder,
     bid_eth AS latest_bid_eth,
     block_time_utc AS latest_bid_utc
   FROM bid_ranked
+  LEFT JOIN address_labels l ON l.address_lc = LOWER(bid_ranked.bidder)
   WHERE latest_rank = 1
 ),
 snapshot AS (
@@ -94,7 +133,7 @@ SELECT
   l.latest_bidder,
   ROUND(COALESCE(l.latest_bid_eth, 0), 8) AS latest_bid_eth,
   l.latest_bid_utc,
-  s.winner,
+  wb.winner,
   ROUND(COALESCE(s.amount_eth, 0), 8) AS settled_eth,
   s.block_time_utc AS settled_time_utc,
   c.tx_hash AS created_tx_hash,
@@ -104,6 +143,7 @@ CROSS JOIN snapshot
 LEFT JOIN bid_stats b USING (token_id)
 LEFT JOIN latest_bid l USING (token_id)
 LEFT JOIN auction_settled s USING (token_id)
+LEFT JOIN auction_winners_base wb USING (token_id)
 ORDER BY c.token_id DESC;
 
 DROP TABLE IF EXISTS auction_daily_activity;
@@ -196,7 +236,8 @@ winner_stats AS (
   GROUP BY winner
 )
 SELECT
-  b.bidder,
+  COALESCE(lab.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
+  b.bidder AS bidder_wallet,
   b.bids,
   b.auctions_bid,
   ROUND(b.bid_eth, 8) AS bid_eth,
@@ -208,6 +249,7 @@ SELECT
 FROM bidder_stats b
 LEFT JOIN latest_bid l USING (bidder)
 LEFT JOIN winner_stats w USING (bidder)
+LEFT JOIN address_labels lab ON lab.address_lc = LOWER(b.bidder)
 ORDER BY b.bid_eth DESC, b.bids DESC, b.bidder
 LIMIT 100;
 
@@ -232,23 +274,26 @@ SELECT
   s.reward_day,
   s.settled_time_utc,
   s.token_id,
-  s.winner,
+  COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
+  s.winner AS winner_wallet,
   CAST(s.auction_xp AS INTEGER) AS auction_xp,
   ROUND((1017000.0 / 69.0) * s.auction_xp / d.day_xp, 6) AS sup_reward
 FROM season_wins s
 JOIN daily_xp d USING (reward_day)
+LEFT JOIN address_labels l ON l.address_lc = LOWER(s.winner)
 ORDER BY s.reward_day DESC, s.token_id DESC;
 
 DROP TABLE IF EXISTS season5_sup_by_winner;
 CREATE TABLE season5_sup_by_winner AS
 SELECT
   winner,
+  winner_wallet,
   COUNT(*) AS auction_wins,
   SUM(auction_xp) AS auction_xp,
   ROUND(SUM(sup_reward), 6) AS sup_reward,
   GROUP_CONCAT(token_id, ',') AS token_ids
 FROM season5_sup_rewards_by_auction
-GROUP BY winner
+GROUP BY winner, winner_wallet
 ORDER BY sup_reward DESC, auction_wins DESC, winner;
 
 DROP TABLE IF EXISTS top_woof_holders;
@@ -257,6 +302,7 @@ WITH ranked AS (
   SELECT
     ROW_NUMBER() OVER (ORDER BY balance_woof DESC, address) AS rank,
     address,
+    COALESCE(l.label, substr(LOWER(address), 1, 6) || '…' || substr(LOWER(address), -4)) AS holder,
     balance_woof,
     balance_raw,
     CASE
@@ -265,11 +311,13 @@ WITH ranked AS (
       ELSE NULL
     END AS supply_pct
   FROM woof_holders
+  LEFT JOIN address_labels l ON l.address_lc = LOWER(address)
   WHERE balance_raw != '0'
 )
 SELECT
   rank,
-  address,
+  holder,
+  address AS holder_wallet,
   ROUND(balance_woof, 6) AS balance_woof,
   ROUND(supply_pct, 6) AS supply_pct
 FROM ranked
@@ -279,25 +327,55 @@ ORDER BY rank;
 DROP TABLE IF EXISTS current_auction;
 CREATE TABLE current_auction AS
 SELECT
-  token_id,
-  ROUND(amount_eth, 8) AS current_bid_eth,
-  bidder,
-  start_time_utc,
-  end_time_utc,
+  c.token_id,
+  ROUND(c.amount_eth, 8) AS current_bid_eth,
+  COALESCE(l.label, substr(LOWER(c.bidder), 1, 6) || '…' || substr(LOWER(c.bidder), -4)) AS bidder,
+  c.bidder AS bidder_wallet,
+  c.start_time_utc,
+  c.end_time_utc,
   CASE
-    WHEN settled != 0 THEN 'settled'
-    WHEN CAST(strftime('%s', end_time_utc) AS INTEGER) <= CAST(strftime('%s', latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
+    WHEN c.settled != 0 THEN 'settled'
+    WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
     ELSE 'live'
   END AS auction_state,
   CASE
-    WHEN end_time_utc = '' OR latest_block_time_utc = '' THEN NULL
-    WHEN CAST(strftime('%s', end_time_utc) AS INTEGER) <= CAST(strftime('%s', latest_block_time_utc) AS INTEGER) THEN 0
-    ELSE CAST(strftime('%s', end_time_utc) AS INTEGER) - CAST(strftime('%s', latest_block_time_utc) AS INTEGER)
+    WHEN c.end_time_utc = '' OR c.latest_block_time_utc = '' THEN NULL
+    WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER) THEN 0
+    ELSE CAST(strftime('%s', c.end_time_utc) AS INTEGER) - CAST(strftime('%s', c.latest_block_time_utc) AS INTEGER)
   END AS seconds_remaining,
-  settled,
-  latest_block,
-  latest_block_time_utc
-FROM current_auction_source;
+  c.settled,
+  c.latest_block,
+  c.latest_block_time_utc
+FROM current_auction_source c
+LEFT JOIN address_labels l ON l.address_lc = LOWER(c.bidder);
+
+DROP TABLE IF EXISTS current_latest_bid;
+CREATE TABLE current_latest_bid AS
+WITH current_row AS (
+  SELECT * FROM current_auction LIMIT 1
+),
+latest_bid AS (
+  SELECT
+    b.token_id,
+    b.block_time_utc AS bid_time_utc,
+    b.tx_hash,
+    ROW_NUMBER() OVER (PARTITION BY b.token_id ORDER BY b.block_number DESC, b.log_index DESC) AS bid_rank
+  FROM auction_bids b
+  JOIN current_row c ON c.token_id = b.token_id
+)
+SELECT
+  'Dog #' || c.token_id AS dog,
+  c.current_bid_eth AS latest_bid_eth,
+  c.bidder,
+  COALESCE((SELECT bid_time_utc FROM latest_bid WHERE bid_rank = 1), c.latest_block_time_utc) AS bid_time_utc,
+  c.auction_state,
+  CASE
+    WHEN c.seconds_remaining IS NULL THEN ''
+    WHEN c.seconds_remaining <= 0 THEN 'ended'
+    ELSE printf('%02d:%02d:%02d', c.seconds_remaining / 3600, (c.seconds_remaining / 60) % 60, c.seconds_remaining % 60)
+  END AS time_remaining,
+  c.end_time_utc AS auction_end_utc
+FROM current_row c;
 
 DROP TABLE IF EXISTS mission3_metrics;
 CREATE TABLE mission3_metrics AS
@@ -326,7 +404,10 @@ holder_stats AS (
   SELECT COUNT(*) AS woof_holders FROM woof_holders WHERE balance_raw != '0'
 ),
 top_holder AS (
-  SELECT address, balance_woof FROM woof_holders WHERE balance_raw != '0' ORDER BY balance_woof DESC LIMIT 1
+  SELECT holder, balance_woof FROM top_woof_holders ORDER BY rank LIMIT 1
+),
+profile_stats AS (
+  SELECT COUNT(*) AS farcaster_profiles FROM farcaster_profiles
 )
 SELECT 'network' AS metric, 'base' AS value
 UNION ALL SELECT 'site_url', 'https://ael-dev3.github.io/Degen-Dogs-Mission-3/'
@@ -338,11 +419,12 @@ UNION ALL SELECT 'woof_token', (SELECT value FROM token_stats WHERE metric = 'wo
 UNION ALL SELECT 'woof_symbol', (SELECT value FROM token_stats WHERE metric = 'woof_symbol')
 UNION ALL SELECT 'woof_total_supply', (SELECT value FROM token_stats WHERE metric = 'woof_total_supply')
 UNION ALL SELECT 'woof_holders', CAST((SELECT woof_holders FROM holder_stats) AS TEXT)
-UNION ALL SELECT 'top_woof_holder', COALESCE((SELECT address FROM top_holder), '')
+UNION ALL SELECT 'top_woof_holder', COALESCE((SELECT holder FROM top_holder), '')
 UNION ALL SELECT 'top_woof_holder_balance', CAST(ROUND(COALESCE((SELECT balance_woof FROM top_holder), 0), 6) AS TEXT)
+UNION ALL SELECT 'farcaster_profiles_resolved', CAST((SELECT farcaster_profiles FROM profile_stats) AS TEXT)
 UNION ALL SELECT 'current_auction_token_id', CAST((SELECT token_id FROM current_auction_source LIMIT 1) AS TEXT)
 UNION ALL SELECT 'current_bid_eth', CAST(ROUND((SELECT amount_eth FROM current_auction_source LIMIT 1), 8) AS TEXT)
-UNION ALL SELECT 'current_bidder', (SELECT bidder FROM current_auction_source LIMIT 1)
+UNION ALL SELECT 'current_bidder', (SELECT bidder FROM current_auction LIMIT 1)
 UNION ALL SELECT 'current_auction_end_utc', (SELECT end_time_utc FROM current_auction_source LIMIT 1)
 UNION ALL SELECT 'created_auctions', CAST((SELECT created_auctions FROM created_stats) AS TEXT)
 UNION ALL SELECT 'settled_auctions', CAST((SELECT settled_auctions FROM settle_stats) AS TEXT)

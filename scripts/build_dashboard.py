@@ -7,8 +7,10 @@ import html
 import json
 import os
 import sqlite3
+import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -21,6 +23,7 @@ getcontext().prec = 80
 ROOT = Path(__file__).resolve().parents[1]
 SQL_PATH = ROOT / "sql" / "mission3_dashboard.sql"
 GENERATED = ROOT / "generated"
+PUBLIC_GENERATED = ROOT / "public" / "generated"
 
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
@@ -50,6 +53,8 @@ ZERO = "0x0000000000000000000000000000000000000000"
 
 OUTPUT_TABLES = [
     "mission3_metrics",
+    "current_latest_bid",
+    "recent_auction_winners",
     "current_auction",
     "auction_timeline",
     "auction_daily_activity",
@@ -60,6 +65,7 @@ OUTPUT_TABLES = [
     "recent_bids",
     "top_woof_holders",
 ]
+PRIMARY_TABLES = ["current_latest_bid", "recent_auction_winners"]
 
 
 TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
@@ -276,6 +282,128 @@ def fetch_current_auction(latest_block: int, latest_time: str, block_tag: str) -
         "latest_block_time_utc": latest_time,
     }
 
+def load_neynar_api_key() -> str | None:
+    if os.environ.get("NEYNAR_API_KEY"):
+        return os.environ["NEYNAR_API_KEY"]
+    candidates = [
+        Path.home() / ".hermes" / "skills" / "openclaw-imports" / "neynar" / "config.json",
+        Path.home() / ".clawdbot" / "skills" / "neynar" / "config.json",
+    ]
+    for config_path in candidates:
+        if not config_path.exists():
+            continue
+        try:
+            data = json.loads(config_path.read_text(encoding="utf-8"))
+            key = data.get("apiKey") or data.get("api_key")
+            if key:
+                return str(key)
+        except Exception:
+            continue
+    return None
+
+
+def normalize_address(address: str | None) -> str:
+    if not address:
+        return ""
+    text = str(address).strip().lower()
+    return text if text.startswith("0x") and len(text) == 42 else ""
+
+
+def short_address(address: str) -> str:
+    normalized = normalize_address(address)
+    if not normalized:
+        return ""
+    return f"{normalized[:6]}…{normalized[-4:]}"
+
+
+def collect_identity_addresses(
+    current: dict[str, Any],
+    bids: list[dict[str, Any]],
+    settled: list[dict[str, Any]],
+    holders: list[dict[str, Any]],
+) -> list[str]:
+    addresses: set[str] = set()
+    for value in [current.get("bidder")]:
+        normalized = normalize_address(value)
+        if normalized and normalized != ZERO:
+            addresses.add(normalized)
+    for row in bids:
+        normalized = normalize_address(row.get("bidder"))
+        if normalized and normalized != ZERO:
+            addresses.add(normalized)
+    for row in settled:
+        normalized = normalize_address(row.get("winner"))
+        if normalized and normalized != ZERO:
+            addresses.add(normalized)
+    for row in holders[:100]:
+        normalized = normalize_address(row.get("address"))
+        if normalized and normalized != ZERO:
+            addresses.add(normalized)
+    return sorted(addresses)
+
+
+def pick_farcaster_user(address: str, users: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not users:
+        return None
+    address_lc = normalize_address(address)
+
+    def score(user: dict[str, Any]) -> tuple[int, int, int]:
+        verified = [normalize_address(a) for a in user.get("verifications", [])]
+        primary = normalize_address((user.get("verified_addresses") or {}).get("primary", {}).get("eth_address"))
+        eth_addresses = [normalize_address(a) for a in (user.get("verified_addresses") or {}).get("eth_addresses", [])]
+        is_primary = int(primary == address_lc)
+        is_verified = int(address_lc in verified or address_lc in eth_addresses)
+        followers = int(user.get("follower_count") or 0)
+        return (is_primary, is_verified, followers)
+
+    return max(users, key=score)
+
+
+def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
+    api_key = load_neynar_api_key()
+    rows: list[dict[str, Any]] = []
+    if not api_key or not addresses:
+        return rows
+    chunk_size = 100
+    for i in range(0, len(addresses), chunk_size):
+        chunk = addresses[i : i + chunk_size]
+        query = ",".join(chunk)
+        url = "https://api.neynar.com/v2/farcaster/user/bulk-by-address?" + urllib.parse.urlencode({"addresses": query})
+        last: Exception | None = None
+        data: dict[str, Any] | None = None
+        for attempt in range(4):
+            try:
+                req = urllib.request.Request(url, headers={"accept": "application/json", "x-api-key": api_key})
+                with urllib.request.urlopen(req, timeout=45) as response:
+                    data = json.loads(response.read().decode("utf-8"))
+                break
+            except Exception as exc:  # noqa: BLE001
+                last = exc
+                if attempt == 3:
+                    print(f"warning: Neynar wallet lookup failed for {len(chunk)} addresses: {last}", file=sys.stderr)
+                    data = {}
+                    break
+                time.sleep(1.5 * (attempt + 1))
+        if not data:
+            continue
+        for address in chunk:
+            users = data.get(address) or data.get(address.lower()) or data.get(address.upper()) or []
+            user = pick_farcaster_user(address, users)
+            if not user:
+                continue
+            rows.append(
+                {
+                    "address": address.lower(),
+                    "fid": int(user.get("fid") or 0),
+                    "username": str(user.get("username") or ""),
+                    "display_name": str(user.get("display_name") or ""),
+                    "pfp_url": str(user.get("pfp_url") or ""),
+                }
+            )
+    rows.sort(key=lambda row: row["address"])
+    return rows
+
+
 
 def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[str, Any]], settled_logs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     blocks = {int(log["blockNumber"], 16) for log in bid_logs + settled_logs}
@@ -400,26 +528,79 @@ def fetch_table(conn: sqlite3.Connection, table: str) -> tuple[list[str], list[t
 
 
 def write_csv(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, lineterminator="\n")
         writer.writerow(cols)
         writer.writerows(rows)
 
 
-def table_html(name: str, cols: list[str], rows: list[tuple[Any, ...]]) -> str:
+def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = [dict(zip(cols, row)) for row in rows]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def css_class_for_col(col: str) -> str:
+    lowered = col.lower()
+    if "winner" in lowered or "bidder" in lowered or "farcaster" in lowered or "wallet" in lowered or "holder" in lowered:
+        return "identity"
+    if "time" in lowered or lowered.endswith("utc") or "date" in lowered:
+        return "time"
+    if "state" in lowered:
+        return "state"
+    numeric_markers = ("_eth", "_wei", "_pct", "_reward", "_balance", "count", "bids", "rank", "remaining")
+    if any(marker in lowered for marker in numeric_markers) or lowered in {"eth", "bid", "reward", "balance", "supply_pct"}:
+        return "num"
+    return ""
+
+
+def table_html(name: str, cols: list[str], rows: list[tuple[Any, ...]], *, featured: bool = False) -> str:
     head = "".join(
-        f'<th scope="col" aria-sort="none"><button type="button" data-col="{i}">{html.escape(col)}</button></th>'
+        f'<th scope="col" aria-sort="none" class="{css_class_for_col(col)}"><button type="button" data-col="{i}">{html.escape(col.replace("_", " "))}</button></th>'
         for i, col in enumerate(cols)
     )
     body = []
     for row in rows:
-        body.append("<tr>" + "".join(f"<td>{html.escape('' if v is None else str(v))}</td>" for v in row) + "</tr>")
+        cells = []
+        for col, value in zip(cols, row):
+            text = "" if value is None else str(value)
+            cells.append(f'<td class="{css_class_for_col(col)}">{html.escape(text)}</td>')
+        body.append("<tr>" + "".join(cells) + "</tr>")
     row_count = len(rows)
     caption = (
-        f"<caption><span>{html.escape(name)}</span>"
+        f"<caption><span>{html.escape(name.replace('_', ' '))}</span>"
         f'<span data-total="{row_count}">{row_count} rows</span></caption>'
     )
-    return f'<section class="table-wrap"><table data-table="{html.escape(name)}">{caption}<thead><tr>{head}</tr></thead><tbody>{"".join(body)}</tbody></table></section>'
+    featured_class = " featured-table" if featured else ""
+    return f'<section class="table-card{featured_class}" data-name="{html.escape(name)}"><div class="table-scroll"><table data-table="{html.escape(name)}">{caption}<thead><tr>{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div></section>'
+
+
+def metric_lookup(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> dict[str, str]:
+    cols, rows = tables.get("mission3_metrics", (["metric", "value"], []))
+    try:
+        metric_idx = cols.index("metric")
+        value_idx = cols.index("value")
+    except ValueError:
+        return {}
+    return {str(row[metric_idx]): str(row[value_idx]) for row in rows}
+
+
+def current_lookup(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> dict[str, str]:
+    cols, rows = tables.get("current_latest_bid", ([], []))
+    if not rows:
+        return {}
+    row = rows[0]
+    return {col: "" if row[i] is None else str(row[i]) for i, col in enumerate(cols)}
+
+
+def export_links(name: str) -> str:
+    safe = html.escape(name)
+    return f'<a href="generated/{safe}.csv" download>CSV</a><a href="generated/{safe}.json" download>JSON</a>'
+
+
+def render_metric_card(label: str, value: str, tone: str = "") -> str:
+    return f'<article class="metric {tone}"><span>{html.escape(label)}</span><strong>{html.escape(value)}</strong></article>'
 
 
 def markdown_table(cols: list[str], rows: list[tuple[Any, ...]], limit: int | None = None) -> str:
@@ -431,15 +612,52 @@ def markdown_table(cols: list[str], rows: list[tuple[Any, ...]], limit: int | No
 
 
 def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> None:
-    parts = [table_html(name, cols, rows) for name, (cols, rows) in tables.items()]
+    metrics = metric_lookup(tables)
+    current = current_lookup(tables)
+    primary_parts = [table_html(name, *tables[name], featured=True) for name in PRIMARY_TABLES if name in tables]
+    raw_parts = [
+        table_html(name, cols, rows)
+        for name, (cols, rows) in tables.items()
+        if name not in PRIMARY_TABLES and name != "mission3_metrics"
+    ]
+    export_rows = []
+    for name, (cols, rows) in tables.items():
+        export_rows.append(
+            f'<tr><td>{html.escape(name.replace("_", " "))}</td><td>{len(rows)}</td><td>{export_links(name)}</td></tr>'
+        )
+
+    cards = "".join(
+        [
+            render_metric_card("Current auction", current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}"), "hot"),
+            render_metric_card("Latest bid", f"{current.get('latest_bid_eth', metrics.get('current_bid_eth', '0'))} ETH", "money"),
+            render_metric_card("Bidder", current.get("bidder", metrics.get("current_bidder", "")), "identity-card"),
+            render_metric_card("Recent winners shown", "10", "cool"),
+            render_metric_card("Settled auctions", metrics.get("settled_auctions", ""), ""),
+            render_metric_card("Unique bidders", metrics.get("unique_bidders", ""), ""),
+        ]
+    )
+    subtitle = html.escape(
+        f"Cached at block {metrics.get('latest_block', '')} · {metrics.get('latest_block_time_utc', '')} UTC · generated by the private Mac mini runner"
+    )
+    detail_items = [
+        ("Status", current.get("auction_state", "")),
+        ("Ends", f"{current.get('auction_end_utc', '')} UTC"),
+        ("Last bid", f"{current.get('bid_time_utc', '')} UTC"),
+        ("Remaining", current.get("time_remaining", "")),
+    ]
+    current_detail = "".join(
+        f'<span><b>{html.escape(label)}</b>{html.escape(value)}</span>'
+        for label, value in detail_items
+        if value and value != " UTC"
+    )
     css = """
-:root{color-scheme:dark;--bg:#06080d;--panel:#0d1118;--panel2:#111722;--line:#242b36;--line2:#303949;--text:#e8ebf0;--muted:#8e99aa;--accent:#8bffcb;--shadow:0 18px 60px rgba(0,0,0,.35)}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top left,#132017 0,#06080d 38rem);color:var(--text);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}.controls{position:sticky;top:0;z-index:20;padding:8px;background:linear-gradient(180deg,rgba(6,8,13,.98),rgba(6,8,13,.86));backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}#filter{width:100%;height:34px;border:1px solid var(--line2);border-radius:8px;background:#0b0f16;color:var(--text);font:12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;padding:0 10px;outline:none}#filter:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(139,255,203,.15)}main{width:min(1760px,100%);margin:0 auto;padding:8px;display:grid;gap:10px}.table-wrap{overflow:auto;max-height:min(78vh,720px);border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,var(--panel2),var(--panel));box-shadow:var(--shadow)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;line-height:1.35}caption{caption-side:top;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);color:var(--text);font-weight:650;display:flex;justify-content:space-between;gap:16px;background:rgba(17,23,34,.92);position:sticky;left:0;top:0;z-index:8}caption span:last-child{color:var(--muted);font-weight:500}th,td{border-bottom:1px solid var(--line);padding:7px 10px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}thead th{position:sticky;top:38px;z-index:5;background:#121925;color:var(--muted);box-shadow:inset 0 -1px 0 var(--line2)}td:first-child,th:first-child{position:sticky;left:0;z-index:4;background:#101621;box-shadow:1px 0 0 var(--line)}thead th:first-child{z-index:6}th button{all:unset;display:block;width:100%;cursor:pointer}th button[data-dir]::after{float:right;margin-left:8px;color:var(--accent);font-size:10px;letter-spacing:.04em}th button[data-dir="asc"]::after{content:"↑"}th button[data-dir="desc"]::after{content:"↓"}th button:hover{color:var(--accent)}tbody tr:nth-child(2n){background:rgba(255,255,255,.018)}tbody tr:hover{background:rgba(139,255,203,.055)}tbody tr[hidden]{display:none}tr:last-child td{border-bottom:0}td:first-child,th:first-child{padding-left:12px}@media(max-width:900px){.controls{padding:6px}main{padding:6px;gap:8px}.table-wrap{border-radius:0;border-left:0;border-right:0}thead th{top:36px}}
+:root{color-scheme:dark;--bg:#050712;--bg2:#080d1b;--panel:#0d1424;--panel2:#101a2d;--panel3:#14213a;--line:#243455;--line2:#38527d;--text:#f3f7ff;--muted:#9fb0cf;--cyan:#58f5ff;--lime:#b6ff5d;--pink:#ff5de4;--orange:#ffb85d;--purple:#a78bfa;--red:#ff6b8a;--shadow:0 28px 90px rgba(0,0,0,.48);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-width:320px;background:radial-gradient(circle at 12% -10%,rgba(88,245,255,.24),transparent 30rem),radial-gradient(circle at 82% 2%,rgba(255,93,228,.16),transparent 28rem),linear-gradient(180deg,var(--bg2),var(--bg));color:var(--text)}a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}.shell{width:min(1480px,calc(100% - 32px));margin:0 auto;padding:28px 0 40px}.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr);gap:18px;align-items:stretch;margin-bottom:18px}.headline,.panel,.table-card,.exports,details{border:1px solid rgba(88,245,255,.18);background:linear-gradient(180deg,rgba(16,26,45,.86),rgba(8,13,27,.94));box-shadow:var(--shadow);border-radius:24px}.headline{padding:24px;position:relative;overflow:hidden}.headline:before{content:"";position:absolute;inset:auto -8rem -10rem auto;width:23rem;height:23rem;border-radius:50%;background:radial-gradient(circle,rgba(182,255,93,.22),transparent 70%)}.eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--lime);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 18px var(--lime)}h1{margin:12px 0 10px;font-size:clamp(32px,5.2vw,64px);line-height:.94;letter-spacing:-.065em}.subtitle{margin:0;color:var(--muted);font-size:15px;line-height:1.6;max-width:760px}.current-detail{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px;color:#dbe8ff;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.current-detail span{display:inline-flex;gap:7px;align-items:center;border:1px solid rgba(88,245,255,.18);border-radius:999px;background:rgba(88,245,255,.07);padding:6px 9px}.current-detail b{color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{min-height:104px;padding:17px;border-radius:20px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(20,33,58,.82),rgba(10,16,31,.92));display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}.metric span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:750}.metric strong{font-size:clamp(20px,3.2vw,34px);letter-spacing:-.04em;overflow-wrap:anywhere}.metric.hot strong{color:var(--orange)}.metric.money strong{color:var(--lime)}.metric.identity-card strong{color:var(--cyan)}.metric.cool strong{color:var(--pink)}.toolbar{position:sticky;top:0;z-index:20;margin:0 0 14px;padding:10px;border:1px solid rgba(88,245,255,.16);border-radius:18px;background:rgba(5,7,18,.82);backdrop-filter:blur(18px)}#filter{width:100%;height:42px;border:1px solid var(--line2);border-radius:12px;background:#071022;color:var(--text);font:600 14px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;padding:0 14px;outline:none}#filter:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(88,245,255,.13)}.primary-grid{display:grid;gap:16px}.table-card{overflow:hidden}.table-card.featured-table{border-color:rgba(182,255,93,.22)}.table-scroll{overflow:auto;max-height:min(72vh,760px)}table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;line-height:1.45}caption{caption-side:top;text-align:left;padding:16px 18px;border-bottom:1px solid var(--line);color:var(--text);font-weight:850;display:flex;justify-content:space-between;gap:16px;background:rgba(20,33,58,.92);position:relative;z-index:1;text-transform:capitalize}caption span:last-child{color:var(--muted);font-weight:700;text-transform:none}th,td{border-bottom:1px solid rgba(36,52,85,.72);padding:12px 14px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}thead th{position:sticky;top:0;z-index:5;background:#111d33;color:var(--muted);box-shadow:inset 0 -1px 0 var(--line2);font-size:11px;text-transform:uppercase;letter-spacing:.1em}tbody tr:hover td{background:rgba(88,245,255,.045)}td.num{color:var(--lime);font-weight:850}td.identity{color:var(--cyan);font-weight:850}td.state{color:var(--orange);font-weight:800}td.time{color:#c8d5ee}th button{all:unset;display:block;width:100%;cursor:pointer}th button[data-dir="asc"]::after{content:" ↑";color:var(--cyan)}th button[data-dir="desc"]::after{content:" ↓";color:var(--cyan)}.exports{margin-top:18px;padding:18px}.exports h2,details summary{margin:0 0 12px;font-size:16px;letter-spacing:-.02em}.exports table{font-size:13px}.exports td:last-child{display:flex;gap:10px}.exports a{display:inline-flex;border:1px solid rgba(88,245,255,.24);border-radius:999px;padding:5px 10px;background:rgba(88,245,255,.07);font-weight:800}details{margin-top:18px;padding:16px}details summary{cursor:pointer;color:var(--cyan);font-weight:850}.raw-grid{display:grid;gap:12px;margin-top:12px}.raw-grid .table-scroll{max-height:420px}@media (max-width:980px){.shell{width:min(100% - 18px,1480px);padding-top:14px}.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}h1{font-size:44px}th,td{white-space:normal;overflow-wrap:anywhere}}@media (max-width:620px){.metrics{grid-template-columns:1fr}.headline{padding:20px}.metric{min-height:92px}table{font-size:12px}th,td{padding:10px}}
 """.strip()
     script = """
 const filter=document.getElementById('filter');
 const key=v=>{const s=v.trim().replaceAll(',','');const n=Number(s);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
-const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{tr.hidden=q!==''&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
+const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
+filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid,details');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
 """.strip()
@@ -448,13 +666,26 @@ updateCounts();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#06080d">
-<title>Degen Dogs Mission 3</title>
+<meta name="theme-color" content="#050712">
+<title>Degen Dogs Mission 3 Auctions</title>
 <style>{css}</style>
 </head>
 <body>
-<div class="controls"><input id="filter" type="search" aria-label="filter rows" placeholder="filter" autocomplete="off"></div>
-<main>{''.join(parts)}</main>
+<div class="shell">
+  <section class="hero" aria-label="Auction overview">
+    <div class="headline">
+      <div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>
+      <h1>Latest bid + recent winners</h1>
+      <p class="subtitle">{subtitle}</p>
+      <p class="current-detail">{current_detail}</p>
+    </div>
+    <div class="metrics" aria-label="Key metrics">{cards}</div>
+  </section>
+  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search current bid or recent winners" autocomplete="off"></div>
+  <main class="primary-grid">{''.join(primary_parts)}</main>
+  <section class="exports"><h2>Cached data exports</h2><table><thead><tr><th>table</th><th>rows</th><th>download</th></tr></thead><tbody>{''.join(export_rows)}</tbody></table></section>
+  <details><summary>Advanced cached tables</summary><div class="raw-grid">{''.join(raw_parts)}</div></details>
+</div>
 <script>{script}</script>
 </body>
 </html>
@@ -464,6 +695,7 @@ updateCounts();
 
 def main() -> None:
     GENERATED.mkdir(exist_ok=True)
+    PUBLIC_GENERATED.mkdir(parents=True, exist_ok=True)
     latest_block = int(rpc("eth_blockNumber", []), 16)
     snapshot_tag = hex(latest_block)
     latest_block_data = rpc("eth_getBlockByNumber", [snapshot_tag, False])
@@ -485,12 +717,14 @@ def main() -> None:
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
+    farcaster_profiles = fetch_farcaster_profiles(collect_identity_addresses(current, bids, settled, holders))
 
     conn = sqlite3.connect(":memory:")
     insert_rows(conn, "auction_created", created, [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
     insert_rows(conn, "auction_bids", bids, [("token_id", "INTEGER"), ("bidder", "TEXT"), ("bid_eth", "REAL"), ("bid_wei", "TEXT"), ("extended", "INTEGER"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     insert_rows(conn, "auction_settled", settled, [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     insert_rows(conn, "woof_holders", holders, [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
+    insert_rows(conn, "farcaster_profiles", farcaster_profiles, [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
     insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
@@ -503,9 +737,22 @@ def main() -> None:
         tables[table] = (cols, rows)
         out_path = GENERATED / f"{table}.csv"
         write_csv(out_path, cols, rows)
+        write_json(GENERATED / f"{table}.json", cols, rows)
+        write_csv(PUBLIC_GENERATED / f"{table}.csv", cols, rows)
+        write_json(PUBLIC_GENERATED / f"{table}.json", cols, rows)
         manifest_rows.append((table, f"generated/{table}.csv", len(rows)))
 
     write_csv(GENERATED / "manifest.csv", ["table", "file", "rows"], manifest_rows)
+    write_json(GENERATED / "manifest.json", ["table", "file", "rows"], manifest_rows)
+    write_csv(PUBLIC_GENERATED / "manifest.csv", ["table", "file", "rows"], manifest_rows)
+    write_json(PUBLIC_GENERATED / "manifest.json", ["table", "file", "rows"], manifest_rows)
+    expected_public_files = {"manifest.csv", "manifest.json"}
+    for table in OUTPUT_TABLES:
+        expected_public_files.add(f"{table}.csv")
+        expected_public_files.add(f"{table}.json")
+    for stale in PUBLIC_GENERATED.glob("*"):
+        if stale.is_file() and stale.name not in expected_public_files:
+            stale.unlink()
     write_html(tables)
 
     metrics_cols, metrics_rows = tables["mission3_metrics"]

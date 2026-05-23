@@ -1,0 +1,62 @@
+[
+  {
+    "table": "mission3_metrics",
+    "file": "generated/mission3_metrics.csv",
+    "rows": 26
+  },
+  {
+    "table": "current_latest_bid",
+    "file": "generated/current_latest_bid.csv",
+    "rows": 1
+  },
+  {
+    "table": "recent_auction_winners",
+    "file": "generated/recent_auction_winners.csv",
+    "rows": 10
+  },
+  {
+    "table": "current_auction",
+    "file": "generated/current_auction.csv",
+    "rows": 1
+  },
+  {
+    "table": "auction_timeline",
+    "file": "generated/auction_timeline.csv",
+    "rows": 133
+  },
+  {
+    "table": "auction_daily_activity",
+    "file": "generated/auction_daily_activity.csv",
+    "rows": 134
+  },
+  {
+    "table": "auction_bidder_leaderboard",
+    "file": "generated/auction_bidder_leaderboard.csv",
+    "rows": 100
+  },
+  {
+    "table": "season5_sup_by_winner",
+    "file": "generated/season5_sup_by_winner.csv",
+    "rows": 32
+  },
+  {
+    "table": "season5_sup_rewards_by_auction",
+    "file": "generated/season5_sup_rewards_by_auction.csv",
+    "rows": 58
+  },
+  {
+    "table": "auction_winners",
+    "file": "generated/auction_winners.csv",
+    "rows": 132
+  },
+  {
+    "table": "recent_bids",
+    "file": "generated/recent_bids.csv",
+    "rows": 100
+  },
+  {
+    "table": "top_woof_holders",
+    "file": "generated/top_woof_holders.csv",
+    "rows": 50
+  }
+]
