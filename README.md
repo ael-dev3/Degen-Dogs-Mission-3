@@ -18,28 +18,28 @@
 | --- | --- |
 | network | base |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
-| latest_block | 46384989 |
-| latest_block_time_utc | 2026-05-23 18:02:05 |
+| latest_block | 46393760 |
+| latest_block_time_utc | 2026-05-23 22:54:27 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | dog_total_supply | 724 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
 | woof_symbol | WOOF |
 | woof_total_supply | 100000000000 |
-| eth_usd_price | 2063.79 |
+| eth_usd_price | 2113.97 |
 | eth_usd_source | coinbase |
 | woof_holders | 387 |
 | top_woof_holder | 0x1c45…6637 |
-| top_woof_holder_balance | 50303780134.2534 |
-| farcaster_profiles_resolved | 153 |
+| top_woof_holder_balance | 50304224698.274925 |
+| farcaster_profiles_resolved | 154 |
 | current_auction_token_id | 723 |
-| current_bid_eth | 0.0012 |
-| current_bid_usd | 2.48 |
-| current_bidder | @i-am-rael.eth |
+| current_bid_eth | 0.011 |
+| current_bid_usd | 23.25 |
+| current_bidder | @floam |
 | current_auction_end_utc | 2026-05-24 15:10:41 |
 | created_auctions | 134 |
 | settled_auctions | 133 |
-| total_bid_eth | 34.757353 |
+| total_bid_eth | 34.779673 |
 | total_settled_eth | 6.69006 |
 | highest_bid_eth | 0.3021 |
 | season5_reward_total_sup | 1017000 |

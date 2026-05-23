@@ -3,14 +3,14 @@
     "bidder": "@0xael.eth",
     "bidder_url": "https://farcaster.xyz/0xael.eth",
     "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bids": 141,
-    "auctions_bid": 72,
-    "bid_eth": 3.97653,
+    "bids": 142,
+    "auctions_bid": 73,
+    "bid_eth": 3.98653,
     "high_bid_eth": 0.16455,
     "auction_wins": 10,
     "winning_eth": 0.55213,
-    "latest_bid_token_id": 715,
-    "latest_bid_utc": "2026-05-15 08:01:49"
+    "latest_bid_token_id": 723,
+    "latest_bid_utc": "2026-05-23 19:50:23"
   },
   {
     "bidder": "@stemo.eth",
@@ -871,8 +871,8 @@
     "latest_bid_utc": "2026-05-03 22:16:57"
   },
   {
-    "bidder": "@i-am-rael.eth",
-    "bidder_url": "https://farcaster.xyz/i-am-rael.eth",
+    "bidder": "0x4119…72cb",
+    "bidder_url": "",
     "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "bids": 5,
     "auctions_bid": 4,
@@ -986,6 +986,19 @@
     "winning_eth": 0.01331,
     "latest_bid_token_id": 712,
     "latest_bid_utc": "2026-05-13 03:10:39"
+  },
+  {
+    "bidder": "@floam",
+    "bidder_url": "https://farcaster.xyz/floam",
+    "bidder_wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
+    "bids": 2,
+    "auctions_bid": 1,
+    "bid_eth": 0.01232,
+    "high_bid_eth": 0.011,
+    "auction_wins": 0,
+    "winning_eth": 0.0,
+    "latest_bid_token_id": 723,
+    "latest_bid_utc": "2026-05-23 19:58:53"
   },
   {
     "bidder": "@nomadicframe",
@@ -1285,18 +1298,5 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 605,
     "latest_bid_utc": "2026-01-24 13:01:51"
-  },
-  {
-    "bidder": "@artstudio48",
-    "bidder_url": "https://farcaster.xyz/artstudio48",
-    "bidder_wallet": "0xf09bc31983976740a3fb6415c349a2ed27400a09",
-    "bids": 2,
-    "auctions_bid": 1,
-    "bid_eth": 0.00364,
-    "high_bid_eth": 0.002,
-    "auction_wins": 0,
-    "winning_eth": 0.0,
-    "latest_bid_token_id": 596,
-    "latest_bid_utc": "2026-01-15 01:57:17"
   }
 ]
