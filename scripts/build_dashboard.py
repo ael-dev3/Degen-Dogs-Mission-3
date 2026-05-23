@@ -819,6 +819,7 @@ HIDDEN_UI_COLUMNS = {
     "winning_bid_usd",
     "current_bid_eth",
     "current_bid_usd",
+    "time_remaining",
     "auction_end_utc",
     "end_time_utc",
     "traits",
