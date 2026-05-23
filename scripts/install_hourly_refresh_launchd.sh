@@ -6,11 +6,19 @@ set -Eeuo pipefail
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PATH
 
+USER_HOME="${HOME:-$(python3 - <<'PY'
+import os
+import pwd
+print(pwd.getpwuid(os.getuid()).pw_dir)
+PY
+)}"
+export HOME="$USER_HOME"
+
 REPO_DIR="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 LABEL="${DEGEN_DOGS_LAUNCHD_LABEL:-com.ael.degendogs.mission3.refresh}"
 INTERVAL_SECONDS="${DEGEN_DOGS_REFRESH_INTERVAL_SECONDS:-3600}"
-PLIST_DIR="${HOME}/Library/LaunchAgents"
-LOG_DIR="${HOME}/Library/Logs/degen-dogs-mission3"
+PLIST_DIR="${USER_HOME}/Library/LaunchAgents"
+LOG_DIR="${USER_HOME}/Library/Logs/degen-dogs-mission3"
 PLIST_PATH="${PLIST_DIR}/${LABEL}.plist"
 SCRIPT_PATH="${REPO_DIR}/scripts/refresh_and_publish.sh"
 
@@ -49,7 +57,9 @@ plist = {
     "StandardOutPath": f"{os.environ['LOG_DIR']}/launchd.out.log",
     "StandardErrorPath": f"{os.environ['LOG_DIR']}/launchd.err.log",
     "EnvironmentVariables": {
+        "HOME": os.environ["HOME"],
         "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "GIT_TERMINAL_PROMPT": "0",
         "DEGEN_DOGS_REPO_DIR": os.environ["REPO_DIR"],
     },
 }

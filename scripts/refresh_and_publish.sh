@@ -7,9 +7,17 @@ set -Eeuo pipefail
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PATH
 
+USER_HOME="${HOME:-$(python3 - <<'PY'
+import os
+import pwd
+print(pwd.getpwuid(os.getuid()).pw_dir)
+PY
+)}"
+export HOME="$USER_HOME"
+
 REPO_DIR="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-LOG_DIR="${DEGEN_DOGS_LOG_DIR:-${HOME}/Library/Logs/degen-dogs-mission3}"
-LOCK_DIR="${DEGEN_DOGS_LOCK_DIR:-${HOME}/Library/Caches/degen-dogs-mission3}"
+LOG_DIR="${DEGEN_DOGS_LOG_DIR:-${USER_HOME}/Library/Logs/degen-dogs-mission3}"
+LOCK_DIR="${DEGEN_DOGS_LOCK_DIR:-${USER_HOME}/Library/Caches/degen-dogs-mission3}"
 REMOTE="${DEGEN_DOGS_REMOTE:-origin}"
 BRANCH="${DEGEN_DOGS_BRANCH:-main}"
 COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
