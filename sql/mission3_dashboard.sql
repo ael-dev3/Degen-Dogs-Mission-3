@@ -392,8 +392,14 @@ SELECT
   printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
   ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd,
-  COALESCE(l.label, substr(LOWER(c.bidder), 1, 6) || '…' || substr(LOWER(c.bidder), -4)) AS bidder,
-  COALESCE(l.url, '') AS bidder_url,
+  CASE
+    WHEN LOWER(c.bidder) = '0x0000000000000000000000000000000000000000' THEN 'no bids yet'
+    ELSE COALESCE(l.label, substr(LOWER(c.bidder), 1, 6) || '…' || substr(LOWER(c.bidder), -4))
+  END AS bidder,
+  CASE
+    WHEN LOWER(c.bidder) = '0x0000000000000000000000000000000000000000' THEN ''
+    ELSE COALESCE(l.url, '')
+  END AS bidder_url,
   c.bidder AS bidder_wallet,
   c.start_time_utc,
   c.end_time_utc,
@@ -439,6 +445,7 @@ SELECT
   c.current_bid_usd AS latest_bid_usd,
   c.bidder,
   c.bidder_url,
+  c.bidder_wallet,
   COALESCE((SELECT bid_time_utc FROM latest_bid WHERE bid_rank = 1), c.latest_block_time_utc) AS bid_time_utc,
   c.auction_state,
   c.time_remaining,
@@ -478,6 +485,7 @@ combined AS (
     c.dog_external_url,
     c.bidder AS bidder_winner,
     c.bidder_url AS bidder_winner_url,
+    c.bidder_wallet AS bidder_winner_wallet,
     c.current_bid AS bid,
     c.current_bid_eth AS amount_eth,
     c.current_bid_usd AS amount_usd,
@@ -499,6 +507,7 @@ combined AS (
     dog_external_url,
     winner AS bidder_winner,
     winner_url AS bidder_winner_url,
+    winner_wallet AS bidder_winner_wallet,
     winning_bid AS bid,
     winning_bid_eth AS amount_eth,
     winning_bid_usd AS amount_usd,
@@ -518,6 +527,7 @@ SELECT
   dog_external_url,
   bidder_winner,
   bidder_winner_url,
+  bidder_winner_wallet,
   bid,
   amount_eth,
   amount_usd,

@@ -5,12 +5,12 @@
 | current_latest_bid | generated/current_latest_bid.csv | 1 |
 | recent_auction_winners | generated/recent_auction_winners.csv | 10 |
 | current_auction | generated/current_auction.csv | 1 |
-| auction_timeline | generated/auction_timeline.csv | 133 |
+| auction_timeline | generated/auction_timeline.csv | 134 |
 | auction_daily_activity | generated/auction_daily_activity.csv | 135 |
 | auction_bidder_leaderboard | generated/auction_bidder_leaderboard.csv | 100 |
 | season5_sup_by_winner | generated/season5_sup_by_winner.csv | 32 |
-| season5_sup_rewards_by_auction | generated/season5_sup_rewards_by_auction.csv | 58 |
-| auction_winners | generated/auction_winners.csv | 132 |
+| season5_sup_rewards_by_auction | generated/season5_sup_rewards_by_auction.csv | 59 |
+| auction_winners | generated/auction_winners.csv | 133 |
 | recent_bids | generated/recent_bids.csv | 100 |
 | top_woof_holders | generated/top_woof_holders.csv | 50 |
 
@@ -18,29 +18,29 @@
 | --- | --- |
 | network | base |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
-| latest_block | 46379767 |
-| latest_block_time_utc | 2026-05-23 15:08:01 |
+| latest_block | 46384989 |
+| latest_block_time_utc | 2026-05-23 18:02:05 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | dog_total_supply | 724 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
 | woof_symbol | WOOF |
 | woof_total_supply | 100000000000 |
-| eth_usd_price | 2065.68 |
+| eth_usd_price | 2063.79 |
 | eth_usd_source | coinbase |
-| woof_holders | 389 |
+| woof_holders | 387 |
 | top_woof_holder | 0x1c45…6637 |
-| top_woof_holder_balance | 50297280188.9364 |
+| top_woof_holder_balance | 50303780134.2534 |
 | farcaster_profiles_resolved | 153 |
 | current_auction_token_id | 723 |
-| current_bid_eth | 0.0 |
-| current_bid_usd | 0.0 |
-| current_bidder | 0x0000…0000 |
+| current_bid_eth | 0.0012 |
+| current_bid_usd | 2.48 |
+| current_bidder | @i-am-rael.eth |
 | current_auction_end_utc | 2026-05-24 15:10:41 |
-| created_auctions | 133 |
-| settled_auctions | 132 |
-| total_bid_eth | 34.754263 |
-| total_settled_eth | 6.67541 |
+| created_auctions | 134 |
+| settled_auctions | 133 |
+| total_bid_eth | 34.757353 |
+| total_settled_eth | 6.69006 |
 | highest_bid_eth | 0.3021 |
 | season5_reward_total_sup | 1017000 |
-| season5_rewards_allocated_sup | 854869.56523 |
+| season5_rewards_allocated_sup | 869608.695665 |

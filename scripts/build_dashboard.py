@@ -563,7 +563,7 @@ def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
                 {
                     "address": address.lower(),
                     "fid": int(user.get("fid") or 0),
-                    "username": str(user.get("username") or ""),
+                    "username": str(user.get("username") or "").lstrip("@"),
                     "display_name": str(user.get("display_name") or ""),
                     "pfp_url": str(user.get("pfp_url") or ""),
                 }
@@ -571,6 +571,93 @@ def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
     rows.sort(key=lambda row: row["address"])
     return rows
 
+
+def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, Any]]:
+    """Fallback identity source used by the live Degen Dogs miniapp.
+
+    Neynar only resolves addresses that are currently indexed as Farcaster custody
+    or verified addresses. The official auction API also returns the username used
+    by the miniapp for the current bidder, so use it to link the current high-bid
+    wallet when Neynar has no match.
+    """
+    current_token_id = int(current.get("token_id") or 0)
+    current_bidder = normalize_address(current.get("bidder"))
+    if not current_token_id or not current_bidder or current_bidder == ZERO:
+        return []
+    url = "https://degendogs.club/api/auctionData"
+    try:
+        req = urllib.request.Request(url, headers={"accept": "application/json", "user-agent": "degen-dogs-mission3-builder/1.0"})
+        with urllib.request.urlopen(req, timeout=45) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: Degen Dogs auction identity lookup failed: {exc}", file=sys.stderr)
+        return []
+
+    try:
+        api_token_id = int(data.get("nounId") or 0)
+    except (TypeError, ValueError):
+        return []
+    if api_token_id != current_token_id:
+        return []
+    api_bidder = normalize_address(data.get("bidder"))
+    if api_bidder != current_bidder:
+        return []
+    api_amount = data.get("amount")
+    if api_amount is not None:
+        try:
+            if abs(Decimal(str(api_amount)) - Decimal(str(current.get("amount_eth") or 0))) > Decimal("0.000000000001"):
+                return []
+        except Exception:
+            return []
+
+    rows: list[dict[str, Any]] = []
+    for bid in data.get("bids") or []:
+        try:
+            bid_token_id = int(bid.get("nounId") or api_token_id)
+        except (TypeError, ValueError):
+            continue
+        if bid_token_id != current_token_id:
+            continue
+        bidder = normalize_address(bid.get("bidder"))
+        username = str(bid.get("username") or "").strip().lstrip("@")
+        if bidder != current_bidder or not username:
+            continue
+        rows.append(
+            {
+                "address": bidder.lower(),
+                "fid": 0,
+                "username": username,
+                "display_name": username,
+                "pfp_url": str(bid.get("pfp_url") or ""),
+            }
+        )
+    rows.sort(key=lambda row: row["address"])
+    return rows
+
+
+def merge_farcaster_profiles(*sources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    merged: dict[str, dict[str, Any]] = {}
+    for rows in sources:
+        for row in rows:
+            address = normalize_address(row.get("address"))
+            if not address:
+                continue
+            key = address.lower()
+            normalized = {
+                "address": key,
+                "fid": int(row.get("fid") or 0),
+                "username": str(row.get("username") or "").strip().lstrip("@"),
+                "display_name": str(row.get("display_name") or ""),
+                "pfp_url": str(row.get("pfp_url") or ""),
+            }
+            existing = merged.get(key)
+            if not existing:
+                merged[key] = normalized
+                continue
+            for field in ["fid", "username", "display_name", "pfp_url"]:
+                if not existing.get(field) and normalized.get(field):
+                    existing[field] = normalized[field]
+    return [merged[key] for key in sorted(merged)]
 
 
 def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[str, Any]], settled_logs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
@@ -719,6 +806,7 @@ HIDDEN_UI_COLUMNS = {
     "latest_bidder_url",
     "bidder_winner_url",
     "bidder_wallet",
+    "bidder_winner_wallet",
     "winner_wallet",
     "holder_wallet",
     "bid_count",
@@ -762,7 +850,7 @@ def css_class_for_col(col: str) -> str:
 
 def display_col_name(col: str) -> str:
     overrides = {
-        "bidder_winner": "bidder / winner",
+        "bidder_winner": "high bidder / winner",
         "last_bid_utc": "last bid",
         "settled_time_utc": "settled",
         "time_remaining": "time left",
@@ -904,7 +992,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             f'<span><b>Bid</b>{html.escape(bid)}</span>' if bid else "",
             f'<span><b>Time left</b>{html.escape(time_left)}</span>' if time_left else "",
             f'<span><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
-            f'<span><b>Bidder</b>{participant_html}</span>' if participant else "",
+            f'<span><b>High bidder</b>{participant_html}</span>' if participant else "",
         ]
     )
     chips = trait_chips(current)
@@ -978,7 +1066,15 @@ def main() -> None:
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
-    farcaster_profiles = fetch_farcaster_profiles(collect_identity_addresses(current, bids, settled, holders))
+    identity_addresses = collect_identity_addresses(current, bids, settled, holders)
+    neynar_profiles = fetch_farcaster_profiles(identity_addresses)
+    current_bidder = normalize_address(current.get("bidder"))
+    current_has_neynar_profile = any(
+        normalize_address(profile.get("address")) == current_bidder and profile.get("username")
+        for profile in neynar_profiles
+    )
+    auction_profiles = [] if current_has_neynar_profile else fetch_degendogs_auction_profiles(current)
+    farcaster_profiles = merge_farcaster_profiles(neynar_profiles, auction_profiles)
 
     conn = sqlite3.connect(":memory:")
     insert_rows(conn, "auction_created", created, [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
