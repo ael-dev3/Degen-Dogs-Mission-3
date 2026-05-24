@@ -13,14 +13,14 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | Field | Value |
 | --- | --- |
 | Network | base |
-| Snapshot block | 46422993 |
-| Snapshot time UTC | 2026-05-24 15:08:53 |
-| Current auction | Dog #723 |
-| Current bid | 0.01541 ETH ($32.3) |
-| Current high bidder | @sharas.eth |
-| Auction ends UTC | 2026-05-24 15:14:15 |
-| Created / settled auctions | 134 / 133 |
-| WOOF holders | 387 |
+| Snapshot block | 46424945 |
+| Snapshot time UTC | 2026-05-24 16:13:57 |
+| Current auction | Dog #724 |
+| Current bid | 0.0005 ETH ($1.05) |
+| Current high bidder | @i-am-rael.eth |
+| Auction ends UTC | 2026-05-25 15:30:29 |
+| Created / settled auctions | 135 / 134 |
+| WOOF holders | 388 |
 | Farcaster profiles resolved | 154 |
 
 ## Published datasets
@@ -32,12 +32,12 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | current_latest_bid | `generated/current_latest_bid.csv` | 1 | [CSV](generated/current_latest_bid.csv) / [JSON](generated/current_latest_bid.json) |
 | recent_auction_winners | `generated/recent_auction_winners.csv` | 10 | [CSV](generated/recent_auction_winners.csv) / [JSON](generated/recent_auction_winners.json) |
 | current_auction | `generated/current_auction.csv` | 1 | [CSV](generated/current_auction.csv) / [JSON](generated/current_auction.json) |
-| auction_timeline | `generated/auction_timeline.csv` | 134 | [CSV](generated/auction_timeline.csv) / [JSON](generated/auction_timeline.json) |
+| auction_timeline | `generated/auction_timeline.csv` | 135 | [CSV](generated/auction_timeline.csv) / [JSON](generated/auction_timeline.json) |
 | auction_daily_activity | `generated/auction_daily_activity.csv` | 136 | [CSV](generated/auction_daily_activity.csv) / [JSON](generated/auction_daily_activity.json) |
 | auction_bidder_leaderboard | `generated/auction_bidder_leaderboard.csv` | 100 | [CSV](generated/auction_bidder_leaderboard.csv) / [JSON](generated/auction_bidder_leaderboard.json) |
 | season5_sup_by_winner | `generated/season5_sup_by_winner.csv` | 32 | [CSV](generated/season5_sup_by_winner.csv) / [JSON](generated/season5_sup_by_winner.json) |
-| season5_sup_rewards_by_auction | `generated/season5_sup_rewards_by_auction.csv` | 59 | [CSV](generated/season5_sup_rewards_by_auction.csv) / [JSON](generated/season5_sup_rewards_by_auction.json) |
-| auction_winners | `generated/auction_winners.csv` | 133 | [CSV](generated/auction_winners.csv) / [JSON](generated/auction_winners.json) |
+| season5_sup_rewards_by_auction | `generated/season5_sup_rewards_by_auction.csv` | 60 | [CSV](generated/season5_sup_rewards_by_auction.csv) / [JSON](generated/season5_sup_rewards_by_auction.json) |
+| auction_winners | `generated/auction_winners.csv` | 134 | [CSV](generated/auction_winners.csv) / [JSON](generated/auction_winners.json) |
 | recent_bids | `generated/recent_bids.csv` | 100 | [CSV](generated/recent_bids.csv) / [JSON](generated/recent_bids.json) |
 | top_woof_holders | `generated/top_woof_holders.csv` | 50 | [CSV](generated/top_woof_holders.csv) / [JSON](generated/top_woof_holders.json) |
 
