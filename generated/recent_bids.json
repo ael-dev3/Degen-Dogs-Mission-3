@@ -1,5 +1,18 @@
 [
   {
+    "bid_time_utc": "2026-05-24 18:10:59",
+    "token_id": 724,
+    "bidder": "0x4119…72cb",
+    "bidder_url": "",
+    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
+    "bid": "0.00061 ETH ($1)",
+    "bid_eth": 0.00061,
+    "bid_usd": 1.28,
+    "extended": 0,
+    "block_number": 46428456,
+    "tx_hash": "0xe2f0b844cafd460b23a4a2223cac8c4756855900395ce863ab70a2c27bb41a3b"
+  },
+  {
     "bid_time_utc": "2026-05-24 17:00:25",
     "token_id": 724,
     "bidder": "@rubyredriver",
@@ -33,7 +46,7 @@
     "bidder_wallet": "0xd722d7cef1870733a85e779ab3d306ba286c0af0",
     "bid": "0.01541 ETH ($32)",
     "bid_eth": 0.01541,
-    "bid_usd": 32.35,
+    "bid_usd": 32.34,
     "extended": 1,
     "block_number": 46423004,
     "tx_hash": "0x5a637fc1e9876427dd1119e550bd398438c0054c3d28a3b09a4b22468a471b49"
@@ -46,7 +59,7 @@
     "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
     "bid": "0.01400 ETH ($29)",
     "bid_eth": 0.014,
-    "bid_usd": 29.39,
+    "bid_usd": 29.38,
     "extended": 0,
     "block_number": 46420383,
     "tx_hash": "0x65704640773f601e60b8b9e0625e7e7c1a5f5449925297a14e154e7adf9ff4ef"
@@ -137,7 +150,7 @@
     "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "bid": "0.01465 ETH ($31)",
     "bid_eth": 0.01465,
-    "bid_usd": 30.76,
+    "bid_usd": 30.75,
     "extended": 1,
     "block_number": 46379499,
     "tx_hash": "0x17ad37f297a890a03ca5ab377322e2d1f6d04fd8a109d6b9e6ade6638537dd75"
@@ -202,7 +215,7 @@
     "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
     "bid": "0.01580 ETH ($33)",
     "bid_eth": 0.0158,
-    "bid_usd": 33.17,
+    "bid_usd": 33.16,
     "extended": 0,
     "block_number": 46309341,
     "tx_hash": "0xe6925a324b0f7a18c3ae09975fba5a89afe56e550e7a79e3681327f7feffea32"
@@ -254,7 +267,7 @@
     "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
     "bid": "0.01650 ETH ($35)",
     "bid_eth": 0.0165,
-    "bid_usd": 34.64,
+    "bid_usd": 34.63,
     "extended": 0,
     "block_number": 46292793,
     "tx_hash": "0xad4b25003203dfb10e08e519d65714ac476085766da5d80a5bda298b09e5a3bb"
@@ -267,7 +280,7 @@
     "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
     "bid": "0.01500 ETH ($31)",
     "bid_eth": 0.015,
-    "bid_usd": 31.49,
+    "bid_usd": 31.48,
     "extended": 0,
     "block_number": 46292197,
     "tx_hash": "0xc1bfa7e619f194fe8783d98cec4a6783fe14db30aa8c0fd9ed55cc2d7e717291"
@@ -306,7 +319,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.00630 ETH ($13)",
     "bid_eth": 0.0063,
-    "bid_usd": 13.23,
+    "bid_usd": 13.22,
     "extended": 0,
     "block_number": 46252882,
     "tx_hash": "0x2fc92dcfb019ae8cecb4d29d01f0ea32c4e6184f089d2bea464c643fd56b0714"
@@ -319,7 +332,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01952 ETH ($41)",
     "bid_eth": 0.01952,
-    "bid_usd": 40.98,
+    "bid_usd": 40.97,
     "extended": 0,
     "block_number": 46238295,
     "tx_hash": "0x7b3bf5a7f180cc5305de90edababb164d05263cc70cef7644cbbff32c359026c"
@@ -332,7 +345,7 @@
     "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
     "bid": "0.01774 ETH ($37)",
     "bid_eth": 0.01774,
-    "bid_usd": 37.24,
+    "bid_usd": 37.23,
     "extended": 0,
     "block_number": 46238249,
     "tx_hash": "0x313d7380b758e609a4a4e21698c4caff42c741a5cdf3e51570f8af39eb0cb9f3"
@@ -345,7 +358,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01612 ETH ($34)",
     "bid_eth": 0.01612,
-    "bid_usd": 33.84,
+    "bid_usd": 33.83,
     "extended": 0,
     "block_number": 46237533,
     "tx_hash": "0xe04dde1ea439afb737fcf69ddc1bb627020d5e60fdae89bd1ade2acd28fc2f20"
@@ -358,7 +371,7 @@
     "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
     "bid": "0.01465 ETH ($31)",
     "bid_eth": 0.01465,
-    "bid_usd": 30.76,
+    "bid_usd": 30.75,
     "extended": 0,
     "block_number": 46230817,
     "tx_hash": "0x423bd57ff7a42ddd96c20fe8cee509ebcfa6d041d4d92e5d60dda370f9f0ec01"
@@ -436,7 +449,7 @@
     "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "bid": "0.00500 ETH ($10)",
     "bid_eth": 0.005,
-    "bid_usd": 10.5,
+    "bid_usd": 10.49,
     "extended": 0,
     "block_number": 46145691,
     "tx_hash": "0xfefe1d9ee8d14ca419003b128b21a6ae51df0da9b3a020c1275870e3ac5fb3bc"
@@ -449,7 +462,7 @@
     "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
     "bid": "0.01600 ETH ($34)",
     "bid_eth": 0.016,
-    "bid_usd": 33.59,
+    "bid_usd": 33.58,
     "extended": 0,
     "block_number": 46127011,
     "tx_hash": "0xde65ea8a05f4cab7082abbd218f30a474bf2f93cfff9a184eed60edc31378923"
@@ -462,7 +475,7 @@
     "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
     "bid": "0.01430 ETH ($30)",
     "bid_eth": 0.0143,
-    "bid_usd": 30.02,
+    "bid_usd": 30.01,
     "extended": 0,
     "block_number": 46126246,
     "tx_hash": "0x258adeda00e0443161690a9deb7d07d42b09f8c35f61bc12302721515182e1bb"
@@ -514,7 +527,7 @@
     "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
     "bid": "0.01866 ETH ($39)",
     "bid_eth": 0.01866,
-    "bid_usd": 39.17,
+    "bid_usd": 39.16,
     "extended": 1,
     "block_number": 46100235,
     "tx_hash": "0x6022f24cab161657743e2d2780935f48aee015a77ad65c8a94c5079f67c6cad6"
@@ -540,7 +553,7 @@
     "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
     "bid": "0.01541 ETH ($32)",
     "bid_eth": 0.01541,
-    "bid_usd": 32.35,
+    "bid_usd": 32.34,
     "extended": 0,
     "block_number": 46097127,
     "tx_hash": "0xd7321869bb97140952b78d9be614fe4e9f6e41cbcd1e28aa75e67149485daa50"
@@ -553,7 +566,7 @@
     "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
     "bid": "0.01400 ETH ($29)",
     "bid_eth": 0.014,
-    "bid_usd": 29.39,
+    "bid_usd": 29.38,
     "extended": 0,
     "block_number": 46096397,
     "tx_hash": "0x8980a49907061d31d7b1d706ccb4af882c5e176c0f4b733f6615c5c376f16d40"
@@ -735,7 +748,7 @@
     "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
     "bid": "0.01073 ETH ($23)",
     "bid_eth": 0.01073,
-    "bid_usd": 22.53,
+    "bid_usd": 22.52,
     "extended": 1,
     "block_number": 46013211,
     "tx_hash": "0xd403fe51277ca74f3c2bd7135448fdb4af808c2a589b3bfa178729a33c5255e0"
@@ -748,7 +761,7 @@
     "bidder_wallet": "0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d",
     "bid": "0.00975 ETH ($20)",
     "bid_eth": 0.00975,
-    "bid_usd": 20.47,
+    "bid_usd": 20.46,
     "extended": 1,
     "block_number": 46013126,
     "tx_hash": "0xa1f33cf88b7613a4c999eddf07bdd444307b9220578eb5f82c7ca72ab99af84a"
@@ -787,7 +800,7 @@
     "bidder_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
     "bid": "0.00731 ETH ($15)",
     "bid_eth": 0.00731,
-    "bid_usd": 15.35,
+    "bid_usd": 15.34,
     "extended": 0,
     "block_number": 45995446,
     "tx_hash": "0x891e5149ba134862d389b1fc603a0d052793812e35bfb2bb4ecba4d8ddede734"
@@ -826,7 +839,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01612 ETH ($34)",
     "bid_eth": 0.01612,
-    "bid_usd": 33.84,
+    "bid_usd": 33.83,
     "extended": 1,
     "block_number": 45969700,
     "tx_hash": "0x1106f15e33284586d4bd91009547098ad20b5cb1dc3016a793b84e332a42b24d"
@@ -839,7 +852,7 @@
     "bidder_wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
     "bid": "0.01465 ETH ($31)",
     "bid_eth": 0.01465,
-    "bid_usd": 30.76,
+    "bid_usd": 30.75,
     "extended": 1,
     "block_number": 45969562,
     "tx_hash": "0xb50da047de39b707d26369aec8147e205ac53140d85256491135246f331f2d63"
@@ -1086,7 +1099,7 @@
     "bidder_wallet": "0x1fb17e93ca83a21c517841f8a6fda27fa8eb11f0",
     "bid": "0.00237 ETH ($5)",
     "bid_eth": 0.00237,
-    "bid_usd": 4.98,
+    "bid_usd": 4.97,
     "extended": 0,
     "block_number": 45830127,
     "tx_hash": "0x3dbe7f7ba9cf91b6b37af4e0455533adece3c4b80ceb1eeb0a3240cd8f4b7d89"
@@ -1112,7 +1125,7 @@
     "bidder_wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
     "bid": "0.02430 ETH ($51)",
     "bid_eth": 0.0243,
-    "bid_usd": 51.01,
+    "bid_usd": 51.0,
     "extended": 1,
     "block_number": 45796490,
     "tx_hash": "0x905c63c7ff85b5943f343ad12acdca237ed15af3a175a5c88c716fd3a7ba4ddf"
@@ -1125,7 +1138,7 @@
     "bidder_wallet": "0xea89fa73f8e6283c37a72267290bc7829464893f",
     "bid": "0.02209 ETH ($46)",
     "bid_eth": 0.02209,
-    "bid_usd": 46.37,
+    "bid_usd": 46.36,
     "extended": 1,
     "block_number": 45796477,
     "tx_hash": "0x56b73938ea3e94969ce031114513a50a8c9892bb931e0eb36db39574d7440a70"
@@ -1151,7 +1164,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01825 ETH ($38)",
     "bid_eth": 0.01825,
-    "bid_usd": 38.31,
+    "bid_usd": 38.3,
     "extended": 1,
     "block_number": 45796256,
     "tx_hash": "0xb45fea1fad89c24a04bd6fad6573cf0333419c103074d1645bddd0ce5215995f"
@@ -1164,7 +1177,7 @@
     "bidder_wallet": "0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d",
     "bid": "0.01659 ETH ($35)",
     "bid_eth": 0.01659,
-    "bid_usd": 34.83,
+    "bid_usd": 34.82,
     "extended": 1,
     "block_number": 45796234,
     "tx_hash": "0x88b0988ec1a7171a59c64b59a083fa36af41ee6aa01538fe5e19a4e11dc7f82d"
@@ -1177,7 +1190,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01508 ETH ($32)",
     "bid_eth": 0.01508,
-    "bid_usd": 31.66,
+    "bid_usd": 31.65,
     "extended": 1,
     "block_number": 45796213,
     "tx_hash": "0x40de24827e35639daa10af6274820ad9570010ab428d1c1b33a4e865b9695959"
@@ -1190,7 +1203,7 @@
     "bidder_wallet": "0x412b7153504217b405af821bdcdc5f21c71e3cbc",
     "bid": "0.01370 ETH ($29)",
     "bid_eth": 0.0137,
-    "bid_usd": 28.76,
+    "bid_usd": 28.75,
     "extended": 0,
     "block_number": 45796195,
     "tx_hash": "0x717a2c50b440c26f1cedc437807b93e4d5acca795dcbf7de0f1d53afedc96e91"
@@ -1203,7 +1216,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.01245 ETH ($26)",
     "bid_eth": 0.01245,
-    "bid_usd": 26.14,
+    "bid_usd": 26.13,
     "extended": 0,
     "block_number": 45796185,
     "tx_hash": "0x9efcdb421154ead12881792f458487262f46b29fec8309aae54f6eeb5be945fb"
@@ -1242,7 +1255,7 @@
     "bidder_wallet": "0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d",
     "bid": "0.00934 ETH ($20)",
     "bid_eth": 0.00934,
-    "bid_usd": 19.61,
+    "bid_usd": 19.6,
     "extended": 0,
     "block_number": 45796047,
     "tx_hash": "0x42dcbb0b024bffa0290c401fb4071f4e51fdbcd0f268d4a4c9bb3852cc9f1dbe"
@@ -1268,7 +1281,7 @@
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
     "bid": "0.00771 ETH ($16)",
     "bid_eth": 0.00771,
-    "bid_usd": 16.19,
+    "bid_usd": 16.18,
     "extended": 0,
     "block_number": 45795250,
     "tx_hash": "0x484ab1e19973a64b1db6c692440d3714cfa8ee30e15d96fad50768dfd5aa3f96"
@@ -1281,22 +1294,9 @@
     "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
     "bid": "0.00700 ETH ($15)",
     "bid_eth": 0.007,
-    "bid_usd": 14.7,
+    "bid_usd": 14.69,
     "extended": 0,
     "block_number": 45795240,
     "tx_hash": "0x89e4020990fb32d69d6ecd4de2d37d28e1b5c1353678e8569f81d03eb23afc64"
-  },
-  {
-    "bid_time_utc": "2026-05-10 02:23:31",
-    "token_id": 709,
-    "bidder": "@badadan",
-    "bidder_url": "https://farcaster.xyz/badadan",
-    "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
-    "bid": "0.00636 ETH ($13)",
-    "bid_eth": 0.00636,
-    "bid_usd": 13.35,
-    "extended": 0,
-    "block_number": 45795232,
-    "tx_hash": "0xe2a9519e199b3bf3645fdb03be6123c37fdf2769712c76010d6ff5347901d3c5"
   }
 ]
