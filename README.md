@@ -18,17 +18,17 @@
 | --- | --- |
 | network | base |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
-| latest_block | 46399721 |
-| latest_block_time_utc | 2026-05-24 02:13:09 |
+| latest_block | 46401675 |
+| latest_block_time_utc | 2026-05-24 03:18:17 |
 | auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
 | dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
 | dog_total_supply | 724 |
 | woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
 | woof_symbol | WOOF |
 | woof_total_supply | 100000000000 |
-| eth_usd_price | 2120.69 |
+| eth_usd_price | 2120.73 |
 | eth_usd_source | coinbase |
-| woof_holders | 387 |
+| woof_holders | 386 |
 | top_woof_holder | 0x1c45…6637 |
 | top_woof_holder_balance | 50304224698.274925 |
 | farcaster_profiles_resolved | 154 |
