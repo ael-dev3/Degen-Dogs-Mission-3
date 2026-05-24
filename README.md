@@ -13,8 +13,8 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | Field | Value |
 | --- | --- |
 | Network | base |
-| Snapshot block | 46436685 |
-| Snapshot time UTC | 2026-05-24 22:45:17 |
+| Snapshot block | 46438637 |
+| Snapshot time UTC | 2026-05-24 23:50:21 |
 | Current auction | Dog #724 |
 | Current bid | 0.00061 ETH ($1.28) |
 | Current high bidder | 0x4119…72cb |
