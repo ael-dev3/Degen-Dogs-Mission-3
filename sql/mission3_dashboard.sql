@@ -533,6 +533,10 @@ SELECT
   bid,
   amount_eth,
   amount_usd,
+  CASE
+    WHEN status = 'settled' THEN settled_time_utc
+    ELSE last_bid_utc
+  END AS auction_time_utc,
   time_remaining,
   auction_end_utc,
   last_bid_utc,
