@@ -948,12 +948,70 @@ def export_links(name: str) -> str:
     return f'<a href="generated/{safe}.csv" download>CSV</a><a href="generated/{safe}.json" download>JSON</a>'
 
 
+def markdown_cell(value: Any) -> str:
+    return str("" if value is None else value).replace("\n", " ").replace("|", "\\|")
+
+
 def markdown_table(cols: list[str], rows: list[tuple[Any, ...]], limit: int | None = None) -> str:
     selected = rows if limit is None else rows[:limit]
-    out = ["| " + " | ".join(cols) + " |", "| " + " | ".join(["---"] * len(cols)) + " |"]
+    out = ["| " + " | ".join(markdown_cell(col) for col in cols) + " |", "| " + " | ".join(["---"] * len(cols)) + " |"]
     for row in selected:
-        out.append("| " + " | ".join(str("" if v is None else v).replace("|", "\\|") for v in row) + " |")
+        out.append("| " + " | ".join(markdown_cell(v) for v in row) + " |")
     return "\n".join(out) + "\n"
+
+
+def metric_value(metrics: dict[str, str], key: str, fallback: str = "") -> str:
+    value = metrics.get(key, fallback)
+    return str(value) if value is not None else fallback
+
+
+def readme_table_links(csv_path: str) -> str:
+    json_path = str(Path(csv_path).with_suffix(".json"))
+    return f"[CSV]({csv_path}) / [JSON]({json_path})"
+
+
+def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], manifest_rows: list[tuple[Any, ...]]) -> str:
+    metrics = metric_lookup(tables)
+    site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
+
+    snapshot_rows = [
+        ("Network", metric_value(metrics, "network", "base")),
+        ("Snapshot block", metric_value(metrics, "latest_block")),
+        ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
+        ("Current auction", f"Dog #{metric_value(metrics, 'current_auction_token_id')}"),
+        ("Current bid", f"{metric_value(metrics, 'current_bid_eth')} ETH (${metric_value(metrics, 'current_bid_usd')})"),
+        ("Current high bidder", metric_value(metrics, "current_bidder")),
+        ("Auction ends UTC", metric_value(metrics, "current_auction_end_utc")),
+        ("Created / settled auctions", f"{metric_value(metrics, 'created_auctions')} / {metric_value(metrics, 'settled_auctions')}"),
+        ("WOOF holders", metric_value(metrics, "woof_holders")),
+        ("Farcaster profiles resolved", metric_value(metrics, "farcaster_profiles_resolved")),
+    ]
+    snapshot_rows = [(label, value) for label, value in snapshot_rows if value and not value.endswith("#")]
+
+    dataset_rows = [
+        (str(table), f"`{csv_path}`", rows, readme_table_links(str(csv_path)))
+        for table, csv_path, rows in manifest_rows
+    ]
+
+    contract_rows = [
+        ("Auction house", metric_value(metrics, "auction_house")),
+        ("Degen Dogs NFT", metric_value(metrics, "dog_nft")),
+        ("WOOF token", metric_value(metrics, "woof_token")),
+    ]
+    contract_rows = [(label, address) for label, address in contract_rows if address]
+
+    parts = [
+        "# Degen Dogs Mission 3 Analytics",
+        "Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serves approved, precomputed result tables and downloadable CSV/JSON exports; it does not expose arbitrary visitor-run SQL.",
+        "## Links\n\n- Live dashboard: [{0}]({0})\n- Query layer: [`sql/mission3_dashboard.sql`](sql/mission3_dashboard.sql)\n- Generated exports: [`generated/`](generated/)".format(site_url),
+        "## Current snapshot\n\n" + markdown_table(["Field", "Value"], snapshot_rows).rstrip(),
+        "## Published datasets\n\n" + markdown_table(["Table", "CSV path", "Rows", "Downloads"], dataset_rows).rstrip(),
+        "## Data pipeline\n\n1. Fetch Base RPC logs and contract calls from the private Mac mini runner.\n2. Load decoded auction, WOOF, NFT metadata, and Farcaster identity rows into SQLite.\n3. Execute the approved SQL query layer and publish cached CSV/JSON/table artifacts to GitHub Pages.\n4. Refresh automatically from the private runner; the Mac mini is not the public host.",
+        "## Verified contracts\n\n" + markdown_table(["Contract", "Address"], contract_rows).rstrip(),
+        "## Caveats\n\n- The public site is a cached snapshot, not a live SQL database.\n- Current-auction state and high bidder are taken from the on-chain `auction()` snapshot.\n- Historical auction rows are reconstructed from verified Base auction-house events.\n- Archived SQL bundles may contain reconstructed auction SQL, SUP reward stubs, and patched contract references; the active dashboard is generated from this repository's query layer and Base RPC data.",
+        "## Local development\n\n```bash\nnpm ci\nnpm run data\nnpm run build\n```\n\nInstall or refresh the hourly private-runner LaunchAgent:\n\n```bash\nnpm run refresh:install\n```",
+    ]
+    return "\n\n".join(parts).rstrip() + "\n"
 
 
 def trait_chips(current: dict[str, str]) -> str:
@@ -1126,9 +1184,7 @@ def main() -> None:
             stale.unlink()
     write_html(tables)
 
-    metrics_cols, metrics_rows = tables["mission3_metrics"]
-    readme = markdown_table(["table", "file", "rows"], manifest_rows) + "\n" + markdown_table(metrics_cols, metrics_rows)
-    (ROOT / "README.md").write_text(readme, encoding="utf-8")
+    (ROOT / "README.md").write_text(render_readme(tables, manifest_rows), encoding="utf-8")
 
     print(json.dumps({"latest_block": latest_block, "tables": {k: len(v[1]) for k, v in tables.items()}}, indent=2))
 

@@ -1,46 +1,78 @@
-| table | file | rows |
-| --- | --- | --- |
-| mission3_metrics | generated/mission3_metrics.csv | 28 |
-| auction_feed | generated/auction_feed.csv | 11 |
-| current_latest_bid | generated/current_latest_bid.csv | 1 |
-| recent_auction_winners | generated/recent_auction_winners.csv | 10 |
-| current_auction | generated/current_auction.csv | 1 |
-| auction_timeline | generated/auction_timeline.csv | 134 |
-| auction_daily_activity | generated/auction_daily_activity.csv | 135 |
-| auction_bidder_leaderboard | generated/auction_bidder_leaderboard.csv | 100 |
-| season5_sup_by_winner | generated/season5_sup_by_winner.csv | 32 |
-| season5_sup_rewards_by_auction | generated/season5_sup_rewards_by_auction.csv | 59 |
-| auction_winners | generated/auction_winners.csv | 133 |
-| recent_bids | generated/recent_bids.csv | 100 |
-| top_woof_holders | generated/top_woof_holders.csv | 50 |
+# Degen Dogs Mission 3 Analytics
 
-| metric | value |
+Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serves approved, precomputed result tables and downloadable CSV/JSON exports; it does not expose arbitrary visitor-run SQL.
+
+## Links
+
+- Live dashboard: [https://ael-dev3.github.io/Degen-Dogs-Mission-3/](https://ael-dev3.github.io/Degen-Dogs-Mission-3/)
+- Query layer: [`sql/mission3_dashboard.sql`](sql/mission3_dashboard.sql)
+- Generated exports: [`generated/`](generated/)
+
+## Current snapshot
+
+| Field | Value |
 | --- | --- |
-| network | base |
-| site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
-| latest_block | 46411435 |
-| latest_block_time_utc | 2026-05-24 08:43:37 |
-| auction_house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
-| dog_nft | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
-| dog_total_supply | 724 |
-| woof_token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
-| woof_symbol | WOOF |
-| woof_total_supply | 100000000000 |
-| eth_usd_price | 2118.68 |
-| eth_usd_source | coinbase |
-| woof_holders | 388 |
-| top_woof_holder | 0x1c45…6637 |
-| top_woof_holder_balance | 50366416722.898407 |
-| farcaster_profiles_resolved | 154 |
-| current_auction_token_id | 723 |
-| current_bid_eth | 0.011 |
-| current_bid_usd | 23.31 |
-| current_bidder | @floam |
-| current_auction_end_utc | 2026-05-24 15:10:41 |
-| created_auctions | 134 |
-| settled_auctions | 133 |
-| total_bid_eth | 34.779673 |
-| total_settled_eth | 6.69006 |
-| highest_bid_eth | 0.3021 |
-| season5_reward_total_sup | 1017000 |
-| season5_rewards_allocated_sup | 869608.695665 |
+| Network | base |
+| Snapshot block | 46411435 |
+| Snapshot time UTC | 2026-05-24 08:43:37 |
+| Current auction | Dog #723 |
+| Current bid | 0.011 ETH ($23.31) |
+| Current high bidder | @floam |
+| Auction ends UTC | 2026-05-24 15:10:41 |
+| Created / settled auctions | 134 / 133 |
+| WOOF holders | 388 |
+| Farcaster profiles resolved | 154 |
+
+## Published datasets
+
+| Table | CSV path | Rows | Downloads |
+| --- | --- | --- | --- |
+| mission3_metrics | `generated/mission3_metrics.csv` | 28 | [CSV](generated/mission3_metrics.csv) / [JSON](generated/mission3_metrics.json) |
+| auction_feed | `generated/auction_feed.csv` | 11 | [CSV](generated/auction_feed.csv) / [JSON](generated/auction_feed.json) |
+| current_latest_bid | `generated/current_latest_bid.csv` | 1 | [CSV](generated/current_latest_bid.csv) / [JSON](generated/current_latest_bid.json) |
+| recent_auction_winners | `generated/recent_auction_winners.csv` | 10 | [CSV](generated/recent_auction_winners.csv) / [JSON](generated/recent_auction_winners.json) |
+| current_auction | `generated/current_auction.csv` | 1 | [CSV](generated/current_auction.csv) / [JSON](generated/current_auction.json) |
+| auction_timeline | `generated/auction_timeline.csv` | 134 | [CSV](generated/auction_timeline.csv) / [JSON](generated/auction_timeline.json) |
+| auction_daily_activity | `generated/auction_daily_activity.csv` | 135 | [CSV](generated/auction_daily_activity.csv) / [JSON](generated/auction_daily_activity.json) |
+| auction_bidder_leaderboard | `generated/auction_bidder_leaderboard.csv` | 100 | [CSV](generated/auction_bidder_leaderboard.csv) / [JSON](generated/auction_bidder_leaderboard.json) |
+| season5_sup_by_winner | `generated/season5_sup_by_winner.csv` | 32 | [CSV](generated/season5_sup_by_winner.csv) / [JSON](generated/season5_sup_by_winner.json) |
+| season5_sup_rewards_by_auction | `generated/season5_sup_rewards_by_auction.csv` | 59 | [CSV](generated/season5_sup_rewards_by_auction.csv) / [JSON](generated/season5_sup_rewards_by_auction.json) |
+| auction_winners | `generated/auction_winners.csv` | 133 | [CSV](generated/auction_winners.csv) / [JSON](generated/auction_winners.json) |
+| recent_bids | `generated/recent_bids.csv` | 100 | [CSV](generated/recent_bids.csv) / [JSON](generated/recent_bids.json) |
+| top_woof_holders | `generated/top_woof_holders.csv` | 50 | [CSV](generated/top_woof_holders.csv) / [JSON](generated/top_woof_holders.json) |
+
+## Data pipeline
+
+1. Fetch Base RPC logs and contract calls from the private Mac mini runner.
+2. Load decoded auction, WOOF, NFT metadata, and Farcaster identity rows into SQLite.
+3. Execute the approved SQL query layer and publish cached CSV/JSON/table artifacts to GitHub Pages.
+4. Refresh automatically from the private runner; the Mac mini is not the public host.
+
+## Verified contracts
+
+| Contract | Address |
+| --- | --- |
+| Auction house | 0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA |
+| Degen Dogs NFT | 0x09154248fFDbaF8aA877aE8A4bf8cE1503596428 |
+| WOOF token | 0x3e5c4FA0cAA794516eD0DF77f31daA534918d492 |
+
+## Caveats
+
+- The public site is a cached snapshot, not a live SQL database.
+- Current-auction state and high bidder are taken from the on-chain `auction()` snapshot.
+- Historical auction rows are reconstructed from verified Base auction-house events.
+- Archived SQL bundles may contain reconstructed auction SQL, SUP reward stubs, and patched contract references; the active dashboard is generated from this repository's query layer and Base RPC data.
+
+## Local development
+
+```bash
+npm ci
+npm run data
+npm run build
+```
+
+Install or refresh the hourly private-runner LaunchAgent:
+
+```bash
+npm run refresh:install
+```
