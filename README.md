@@ -13,14 +13,14 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | Field | Value |
 | --- | --- |
 | Network | base |
-| Snapshot block | 46415339 |
-| Snapshot time UTC | 2026-05-24 10:53:45 |
+| Snapshot block | 46417290 |
+| Snapshot time UTC | 2026-05-24 11:58:47 |
 | Current auction | Dog #723 |
-| Current bid | 0.011 ETH ($23.32) |
+| Current bid | 0.011 ETH ($23.35) |
 | Current high bidder | @floam |
 | Auction ends UTC | 2026-05-24 15:10:41 |
 | Created / settled auctions | 134 / 133 |
-| WOOF holders | 387 |
+| WOOF holders | 386 |
 | Farcaster profiles resolved | 154 |
 
 ## Published datasets
