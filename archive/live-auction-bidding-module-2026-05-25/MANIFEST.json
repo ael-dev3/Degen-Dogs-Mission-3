@@ -1,0 +1,51 @@
+{
+  "archive": "live-auction-bidding-module-2026-05-25",
+  "archived_commit": "82bdf57008e03561bb1f3813bbf1a0d387d3b36d",
+  "parent_commit": "9870e760c06920277a57079b0a516139a757c043",
+  "subject": "[verified] Add live auction bidding module",
+  "status": "archived-reverted-from-active-site",
+  "files": [
+    {
+      "path": "COMMIT.md",
+      "bytes": 2458,
+      "sha256": "6e96673f03a1b6de4b2e1f3cff425e830a6c8e4b4e1f0894510b0055bf202cda",
+      "lines": 44
+    },
+    {
+      "path": "README.md",
+      "bytes": 1551,
+      "sha256": "ad37ea345cd6d32beb51a5a80e69219eb5528bfd3324cbf91c4ad0c342e4c6ba",
+      "lines": 26
+    },
+    {
+      "path": "attempt.patch.gz",
+      "bytes": 207455,
+      "sha256": "de73ca85be354ccd1dad4dde44bb99a10203aa91afc251b2405402c1bde57079",
+      "lines": 776
+    },
+    {
+      "path": "changed-files.txt",
+      "bytes": 1226,
+      "sha256": "5a46abd707da63dd04d34429d7cd1c9cc7bf09cfd81ae9180455f77bc91849e1",
+      "lines": 35
+    },
+    {
+      "path": "source-snapshot/README.md",
+      "bytes": 4263,
+      "sha256": "3b15265b101f29ef79e84d2d347d8b4bbe51bdeb4c217b220625e79438c85069",
+      "lines": 79
+    },
+    {
+      "path": "source-snapshot/index.html",
+      "bytes": 439889,
+      "sha256": "b3f5a1bebf9a4aaaa5223c4ea498b3c56c677b8de104a6fb36fb4faeca8f7da1",
+      "lines": 195
+    },
+    {
+      "path": "source-snapshot/scripts/build_dashboard.py",
+      "bytes": 84622,
+      "sha256": "0ae07773ec77048bb4027d61d1122786142b7b26830e28fd1dc3ffb230aa28e6",
+      "lines": 1442
+    }
+  ]
+}
