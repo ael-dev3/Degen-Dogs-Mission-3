@@ -14,14 +14,14 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46460172 |
-| Snapshot time UTC | 2026-05-25 11:48:11 |
+| Snapshot block | 46462123 |
+| Snapshot time UTC | 2026-05-25 12:53:13 |
 | Current auction | Dog #724 |
-| Current bid | 0.00061 ETH ($1.29) |
-| Current high bidder | 0x4119…72cb |
+| Current bid | 0.01 ETH ($21.17) |
+| Current high bidder | @0xael.eth |
 | Auction ends UTC | 2026-05-25 15:30:29 |
 | Created / settled auctions | 135 / 134 |
-| WOOF holders | 387 |
+| WOOF holders | 386 |
 | Farcaster profiles resolved | 155 |
 
 ## Published datasets
@@ -34,7 +34,7 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | recent_auction_winners | `generated/recent_auction_winners.csv` | 10 | [CSV](generated/recent_auction_winners.csv) / [JSON](generated/recent_auction_winners.json) |
 | current_auction | `generated/current_auction.csv` | 1 | [CSV](generated/current_auction.csv) / [JSON](generated/current_auction.json) |
 | auction_timeline | `generated/auction_timeline.csv` | 135 | [CSV](generated/auction_timeline.csv) / [JSON](generated/auction_timeline.json) |
-| auction_daily_activity | `generated/auction_daily_activity.csv` | 136 | [CSV](generated/auction_daily_activity.csv) / [JSON](generated/auction_daily_activity.json) |
+| auction_daily_activity | `generated/auction_daily_activity.csv` | 137 | [CSV](generated/auction_daily_activity.csv) / [JSON](generated/auction_daily_activity.json) |
 | auction_bidder_leaderboard | `generated/auction_bidder_leaderboard.csv` | 100 | [CSV](generated/auction_bidder_leaderboard.csv) / [JSON](generated/auction_bidder_leaderboard.json) |
 | season5_sup_by_winner | `generated/season5_sup_by_winner.csv` | 32 | [CSV](generated/season5_sup_by_winner.csv) / [JSON](generated/season5_sup_by_winner.json) |
 | season5_sup_rewards_by_auction | `generated/season5_sup_rewards_by_auction.csv` | 60 | [CSV](generated/season5_sup_rewards_by_auction.csv) / [JSON](generated/season5_sup_rewards_by_auction.json) |
