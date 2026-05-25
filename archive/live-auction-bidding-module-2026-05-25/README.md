@@ -15,6 +15,15 @@ Status: archived/reverted from the active GitHub Pages site at Ael's request.
 
 This attempt added a browser-side live auction card and wallet bidding flow to the static dashboard. It read Base auction state from the browser and submitted user-signed bids directly to the auction house. The active site is being reverted to the cached/static dashboard flow; this folder keeps the attempt for provenance and possible future reference.
 
+## Observed failure
+
+- Wallet connection succeeded.
+- The connected wallet had funds available to bid.
+- The bidding button stayed greyed out.
+- The bidding functionality did not work in practice.
+
+Because of that failure mode, this attempt was archived and removed from the active site instead of being treated as production-ready bidding UX.
+
 ## Restore/reference
 
 To inspect the exact attempt later, review `attempt.patch.gz` or the original commit `82bdf57008e03561bb1f3813bbf1a0d387d3b36d`. To re-apply in a scratch branch, start from the parent commit `9870e760c06920277a57079b0a516139a757c043` or a compatible tree and apply/cherry-pick intentionally after review.
