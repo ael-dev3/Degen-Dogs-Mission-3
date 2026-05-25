@@ -985,6 +985,7 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
     site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
 
     snapshot_rows = [
+        ("site_url", site_url),
         ("Network", metric_value(metrics, "network", "base")),
         ("Snapshot block", metric_value(metrics, "latest_block")),
         ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
