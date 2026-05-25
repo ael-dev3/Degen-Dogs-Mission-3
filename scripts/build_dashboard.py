@@ -1031,6 +1031,107 @@ def trait_chips(current: dict[str, str]) -> str:
     return "".join(f'<span>{html.escape(item)}</span>' for item in items)
 
 
+def decimal_or_zero(value: Any) -> Decimal:
+    try:
+        return Decimal(str(value or "0").replace(",", "").strip())
+    except Exception:  # noqa: BLE001
+        return Decimal("0")
+
+
+def eth_decimal_to_wei(value: Any) -> int:
+    amount = max(decimal_or_zero(value), Decimal("0"))
+    return int(amount * (Decimal(10) ** 18))
+
+
+def eth_input_value(wei: int) -> str:
+    amount = Decimal(wei) / (Decimal(10) ** 18)
+    return f"{amount:.18f}".rstrip("0").rstrip(".") or "0"
+
+
+def cached_min_next_bid_wei(current_bid_eth: Any) -> int:
+    current_wei = eth_decimal_to_wei(current_bid_eth)
+    reserve_wei = eth_decimal_to_wei("0.0005")
+    incremented = current_wei + ((current_wei * 10) // 100)
+    return max(reserve_wei, incremented)
+
+
+def live_auction_html(metrics: dict[str, str], current: dict[str, str]) -> str:
+    auction_house = metric_value(metrics, "auction_house", AUCTION_HOUSE)
+    dog_id = metric_value(metrics, "current_auction_token_id")
+    bid_eth = metric_value(metrics, "current_bid_eth") or current.get("amount_eth") or "0"
+    current_bid_wei = eth_decimal_to_wei(bid_eth)
+    min_next_wei = cached_min_next_bid_wei(bid_eth)
+    end_time = current.get("auction_end_utc") or current.get("end_time_utc") or metric_value(metrics, "current_auction_end_utc")
+    participant = current.get("bidder_winner") or current.get("bidder") or metric_value(metrics, "current_bidder", "")
+    participant_wallet = current.get("bidder_winner_wallet") or current.get("bidder_wallet") or ""
+    participant_url = current.get("bidder_winner_url") or current.get("bidder_url", "")
+    participant_html = html.escape(participant or "no bids yet")
+    if participant and participant_url:
+        participant_html = f'<a href="{html.escape(participant_url, quote=True)}" target="_blank" rel="noopener noreferrer">{participant_html}</a>'
+    contract_url = f"https://basescan.org/address/{auction_house}"
+    return f"""
+  <section class="live-auction-card" id="live-auction" aria-label="Live auction bidding" data-auction-house="{html.escape(auction_house, quote=True)}" data-current-dog-id="{html.escape(dog_id, quote=True)}" data-current-bid-wei="{current_bid_wei}" data-reserve-wei="{eth_decimal_to_wei('0.0005')}" data-increment="10" data-auction-end="{html.escape(end_time, quote=True)}" data-current-bidder-wallet="{html.escape(participant_wallet, quote=True)}" data-current-bidder-label="{html.escape(participant, quote=True)}" data-current-bidder-url="{html.escape(participant_url, quote=True)}">
+    <div class="live-auction-head">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Live auction</div>
+        <p>Direct Base read/write. No custody contract.</p>
+      </div>
+      <a class="address-chip" href="{html.escape(contract_url, quote=True)}" target="_blank" rel="noopener noreferrer">{html.escape(auction_house[:6] + '…' + auction_house[-4:])}</a>
+    </div>
+    <div class="live-auction-grid">
+      <span><b>Live dog</b><strong data-live-field="nounId">Dog #{html.escape(dog_id)}</strong></span>
+      <span><b>High bid</b><strong data-live-field="amountEth">{html.escape(bid_eth)} ETH</strong></span>
+      <span><b>Min next bid</b><strong data-live-field="minNextBid">{html.escape(eth_input_value(min_next_wei))} ETH</strong></span>
+      <span><b>Ends</b><strong data-live-field="endTime">{html.escape(end_time or 'loading')}</strong></span>
+      <span><b>High bidder</b><strong data-live-field="bidder">{participant_html}</strong></span>
+    </div>
+    <div class="live-auction-actions">
+      <label class="sr-only" for="live-bid-amount">Bid amount in ETH</label>
+      <input id="live-bid-amount" type="number" min="{html.escape(eth_input_value(min_next_wei), quote=True)}" step="0.00001" inputmode="decimal" autocomplete="off" value="{html.escape(eth_input_value(min_next_wei), quote=True)}" aria-label="Bid amount in ETH">
+      <button type="button" id="live-refresh">Refresh live</button>
+      <button type="button" id="live-connect">Connect wallet</button>
+      <button type="button" id="live-bid-button">Bid on Base</button>
+    </div>
+    <p class="live-auction-status" id="live-auction-status">Reads <code>auction()</code> in-browser and sends bids directly to <code>createBid(uint256)</code>.</p>
+  </section>""".strip()
+
+
+def known_bidder_profiles_json(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> str:
+    profiles: dict[str, dict[str, str]] = {}
+
+    def row_value(row: tuple[Any, ...], idx: dict[str, int], column: str) -> str:
+        if column not in idx:
+            return ""
+        value = row[idx[column]]
+        return "" if value is None else str(value).strip()
+
+    def add(wallet_value: str, label_value: str, url_value: str) -> None:
+        wallet = normalize_address(wallet_value)
+        if not wallet or wallet == ZERO:
+            return
+        label = label_value.strip() or short_address(wallet)
+        url = url_value.strip()
+        if url and not url.startswith("https://farcaster.xyz/"):
+            url = ""
+        existing = profiles.get(wallet)
+        if existing and existing.get("url"):
+            return
+        profiles[wallet] = {"label": label, "url": url}
+
+    patterns = [
+        ("bidder_winner_wallet", "bidder_winner", "bidder_winner_url"),
+        ("bidder_wallet", "bidder", "bidder_url"),
+        ("winner_wallet", "winner", "winner_url"),
+    ]
+    for cols, rows in tables.values():
+        idx = {col: i for i, col in enumerate(cols)}
+        for row in rows:
+            for wallet_col, label_col, url_col in patterns:
+                if wallet_col in idx:
+                    add(row_value(row, idx, wallet_col), row_value(row, idx, label_col), row_value(row, idx, url_col))
+    return json.dumps(profiles, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+
 def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> None:
     metrics = metric_lookup(tables)
     current = current_lookup(tables)
@@ -1074,6 +1175,8 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         ]
     )
     chips = trait_chips(current)
+    live_section = live_auction_html(metrics, current)
+    known_profiles_json = known_bidder_profiles_json(tables)
     css = """
 :root{color-scheme:light;--paper:#e8ded5;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
@@ -1082,7 +1185,7 @@ body{margin:0;min-width:320px;background:var(--paper);color:var(--ink);font-size
 a{color:var(--ink);text-decoration:none;transition:color .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
 a:hover{color:var(--accent2)}
 .shell{width:min(1520px,calc(100% - 16px));margin:0 auto;padding:12px 0 24px}
-.current-card,.table-card,.exports,details{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
+.current-card,.live-auction-card,.table-card,.exports,details{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
 .current-card{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(260px,.42fr);gap:0;margin-bottom:10px;min-height:300px;overflow:hidden}
 .current-copy{padding:18px;display:flex;flex-direction:column;gap:10px;border-right:2px solid var(--ink)}
 .eyebrow{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
@@ -1099,6 +1202,24 @@ a:hover{color:var(--accent2)}
 .traits span{border:1.5px solid var(--ink);background:var(--panel);padding:4px 6px;font-size:11px;font-weight:800;line-height:1.15}
 .dog-stage{display:flex;align-items:center;justify-content:center;background:var(--panel2);min-height:280px;padding:10px;overflow:hidden}
 .dog-stage img{width:min(100%,330px);height:min(100%,330px);object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.16))}
+.live-auction-card{display:grid;gap:11px;margin:0 0 10px;padding:14px}
+.live-auction-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.live-auction-head p{margin:5px 0 0;color:var(--muted);font-weight:800}
+.address-chip{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--ink);border-radius:999px;background:var(--panel2);padding:5px 9px;font-weight:950;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
+.address-chip::after{content:'↗';font-size:.78em;color:var(--accent2)}
+.live-auction-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:7px}
+.live-auction-grid span{display:flex;min-height:50px;flex-direction:column;justify-content:center;border:1.5px solid var(--ink);background:var(--panel2);padding:7px 9px;font-weight:900;line-height:1.18;min-width:0}
+.live-auction-grid b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.live-auction-grid strong{font-size:13px;overflow-wrap:anywhere}
+.live-auction-actions{display:grid;grid-template-columns:minmax(150px,1fr) auto auto auto;gap:8px;align-items:center}
+.live-auction-actions input{width:100%;border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:9px 11px;font:inherit;font-weight:900;outline:none;box-shadow:3px 3px 0 var(--ink)}
+.live-auction-actions input:focus{border-color:var(--accent2);box-shadow:3px 3px 0 var(--accent2)}
+.live-auction-actions button{border:2px solid var(--ink);background:var(--panel2);color:var(--ink);padding:9px 11px;font:inherit;font-weight:950;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-transform:uppercase;letter-spacing:.04em}
+.live-auction-actions button:hover:not(:disabled){background:#fff;border-color:var(--accent2);box-shadow:3px 3px 0 var(--accent2)}
+.live-auction-actions button:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.live-auction-status{margin:0;color:var(--muted);font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.live-auction-status.success{color:#12692a}.live-auction-status.error{color:var(--accent2)}
+.live-auction-status a{font-weight:950;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px}
 .toolbar{display:flex;justify-content:flex-end;margin:0 0 10px}
 .toolbar input{width:min(100%,390px);border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:9px 11px;font:inherit;font-weight:800;outline:none;box-shadow:4px 4px 0 var(--ink)}
 .toolbar input:focus{border-color:var(--accent2);box-shadow:4px 4px 0 var(--accent2)}
@@ -1145,7 +1266,8 @@ summary{cursor:pointer;padding:10px 12px;font-weight:950;text-transform:uppercas
 .countdown.ending{color:var(--accent2)}
 .countdown.ended{color:var(--muted)}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
-@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card,.exports,details{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.current-detail span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail span:nth-child(2),.current-detail span:nth-child(5){grid-column:1/-1}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}.exports{padding:9px;margin-top:8px;overflow:hidden}.exports h2{font-size:14px}.exports table{font-size:11.5px}.exports th,.exports td{padding:6px 5px}.exports a{margin-right:3px;padding:2px 6px;box-shadow:1px 1px 0 var(--ink)}summary{padding:8px 10px;font-size:12px}.raw-grid{padding:8px;gap:8px}}
+@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.live-auction-card,.table-card,.exports,details{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.current-detail span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail span:nth-child(2),.current-detail span:nth-child(5){grid-column:1/-1}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}.exports{padding:9px;margin-top:8px;overflow:hidden}.exports h2{font-size:14px}.exports table{font-size:11.5px}.exports th,.exports td{padding:6px 5px}.exports a{margin-right:3px;padding:2px 6px;box-shadow:1px 1px 0 var(--ink)}summary{padding:8px 10px;font-size:12px}.raw-grid{padding:8px;gap:8px}}
+@media (max-width:640px){.live-auction-card{padding:10px;gap:9px}.live-auction-head{display:grid;gap:8px}.live-auction-head p{font-size:12px}.address-chip{width:max-content;max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.live-auction-grid{grid-template-columns:1fr 1fr;gap:6px}.live-auction-grid span{min-height:42px;padding:6px 7px}.live-auction-grid span:nth-child(5){grid-column:1/-1}.live-auction-grid b{font-size:9px}.live-auction-grid strong{font-size:12px}.live-auction-actions{grid-template-columns:1fr 1fr;gap:6px}.live-auction-actions input{grid-column:1/-1;padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}.live-auction-actions button{padding:8px 7px;font-size:11px;box-shadow:2px 2px 0 var(--ink)}.live-auction-status{font-size:12px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
 @media (max-width:380px){.current-detail{grid-template-columns:1fr}.current-detail span:nth-child(2),.current-detail span:nth-child(5){grid-column:1}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 
@@ -1157,11 +1279,52 @@ const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const seconds=Math.max(0,Math.floor((end-now)/1000));el.textContent=seconds===0?'ended':formatDuration(seconds);el.classList.toggle('ending',seconds>0&&seconds<3600);el.classList.toggle('ended',seconds===0);});};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid,details');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
+filter?.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid,details');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
+const liveCard=document.getElementById('live-auction');
+const LIVE_ZERO='0x0000000000000000000000000000000000000000';
+const LIVE_CHAIN_ID='0x2105';
+const LIVE_RPC_URLS=['https://base-rpc.publicnode.com','https://mainnet.base.org','https://developer-access-mainnet.base.org'];
+const LIVE_SELECTORS={auction:'0x7d9f6db5',reservePrice:'0xdb2e1eed',minBidIncrementPercentage:'0xb296024d',createBid:'0x659dd2b4'};
+const LIVE_PROFILE_MAP=JSON.parse(document.getElementById('live-auction-profiles')?.textContent||'{}');
+const WEI=1000000000000000000n;
+const liveState={account:null,nounId:liveCard?.dataset.currentDogId?Number(liveCard.dataset.currentDogId):null,amountWei:BigInt(liveCard?.dataset.currentBidWei||0),reserveWei:BigInt(liveCard?.dataset.reserveWei||500000000000000),increment:BigInt(liveCard?.dataset.increment||10),minNextWei:0n,endTime:liveCard?.dataset.auctionEnd?Math.floor(parseUtc(liveCard.dataset.auctionEnd)/1000):0,settled:false,bidder:(liveCard?.dataset.currentBidderWallet||LIVE_ZERO).toLowerCase(),autoBidValue:'',inputDirty:false,lastLiveRefresh:0};
+const liveEls={status:document.getElementById('live-auction-status'),input:document.getElementById('live-bid-amount'),refresh:document.getElementById('live-refresh'),connect:document.getElementById('live-connect'),bid:document.getElementById('live-bid-button')};
+liveState.autoBidValue=liveEls.input?.value||'';
+const isAddress=address=>/^0x[a-fA-F0-9]{40}$/.test(address||'');
+const auctionHouseAddress=()=>{const address=liveCard?.dataset.auctionHouse||'';if(!isAddress(address))throw new Error('Invalid auction house address.');return address;};
+const shortAddress=address=>isAddress(address)?`${address.slice(0,6)}…${address.slice(-4)}`:String(address||'');
+const toHex=value=>`0x${BigInt(value).toString(16)}`;
+const encodeUint256=value=>BigInt(value).toString(16).padStart(64,'0');
+const formatEthValue=(wei,maxDecimals=6)=>{const value=BigInt(wei);const whole=value/WEI;const frac=(value%WEI).toString().padStart(18,'0').slice(0,maxDecimals).replace(/0+$/,'');return frac?`${whole}.${frac}`:`${whole}`;};
+const formatEthDisplay=wei=>`${formatEthValue(wei,5).includes('.')?formatEthValue(wei,5).padEnd(formatEthValue(wei,5).split('.')[0].length+6,'0'):formatEthValue(wei,5)+'.00000'} ETH`;
+const parseEthToWei=value=>{const raw=String(value||'').trim();if(!/^\d+(\.\d{0,18})?$/.test(raw))throw new Error('Enter a valid ETH amount with up to 18 decimals.');const [whole,frac='']=raw.split('.');return BigInt(whole)*WEI+BigInt((frac+'0'.repeat(18)).slice(0,18));};
+const setLiveStatus=(message,tone='',txHash='')=>{if(!liveEls.status)return;liveEls.status.className=`live-auction-status ${tone}`.trim();liveEls.status.textContent=message;if(txHash){liveEls.status.append(' ');const link=document.createElement('a');link.href=`https://basescan.org/tx/${encodeURIComponent(txHash)}`;link.target='_blank';link.rel='noopener noreferrer';link.textContent='view tx';liveEls.status.appendChild(link);}};
+const setLiveField=(name,value,url='')=>{const el=liveCard?.querySelector(`[data-live-field="${name}"]`);if(!el)return;el.textContent='';if(url){const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=value;el.appendChild(link);}else{el.textContent=value;}};
+const rpcRequest=async(method,params)=>{let last;for(const url of LIVE_RPC_URLS){try{const response=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});if(!response.ok)throw new Error(`${url} HTTP ${response.status}`);const data=await response.json();if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));return data.result;}catch(error){last=error;}}throw last||new Error('Base RPC unavailable');};
+const readUintWord=(hex,index)=>BigInt(`0x${String(hex||'0x').slice(2+index*64,2+(index+1)*64)||'0'}`);
+const readAddressWord=(hex,index)=>`0x${String(hex||'0x').slice(2+index*64+24,2+(index+1)*64)}`.toLowerCase();
+const decodeAuction=hex=>({nounId:Number(readUintWord(hex,0)),amountWei:readUintWord(hex,1),startTime:Number(readUintWord(hex,2)),endTime:Number(readUintWord(hex,3)),bidder:readAddressWord(hex,4),settled:readUintWord(hex,5)!==0n});
+const callLive=selector=>rpcRequest('eth_call',[{to:auctionHouseAddress(),data:selector},'latest']);
+const minNextBidWei=()=>{const incremented=liveState.amountWei+((liveState.amountWei*liveState.increment)/100n);return liveState.reserveWei>incremented?liveState.reserveWei:incremented;};
+const cachedBidderLink=wallet=>{const normalized=(wallet||'').toLowerCase();const known=LIVE_PROFILE_MAP[normalized];if(known)return {label:known.label||shortAddress(wallet),url:known.url||''};if(normalized===(liveCard?.dataset.currentBidderWallet||'').toLowerCase()){return {label:liveCard.dataset.currentBidderLabel||shortAddress(wallet),url:liveCard.dataset.currentBidderUrl||''};}return {label:shortAddress(wallet),url:''};};
+const syncLiveUi=()=>{liveState.minNextWei=minNextBidWei();const endMs=Number.isFinite(liveState.endTime)&&liveState.endTime>0?liveState.endTime*1000:0;const ended=endMs>0&&Date.now()>=endMs;const nextBidValue=formatEthValue(liveState.minNextWei,6);setLiveField('nounId',`Dog #${liveState.nounId??liveCard.dataset.currentDogId}`);setLiveField('amountEth',formatEthDisplay(liveState.amountWei));setLiveField('minNextBid',`${nextBidValue} ETH`);setLiveField('endTime',endMs?(ended?'ended':formatDuration((endMs-Date.now())/1000)):'loading');const bidder=liveState.bidder&&liveState.bidder!==LIVE_ZERO?cachedBidderLink(liveState.bidder):{label:'no bids yet',url:''};setLiveField('bidder',bidder.label,bidder.url);if(liveEls.input){const previousAuto=liveState.autoBidValue;const pristine=!liveState.inputDirty||liveEls.input.value===previousAuto;liveEls.input.min=formatEthValue(liveState.minNextWei,18);liveEls.input.placeholder=nextBidValue;if(pristine){liveEls.input.value=nextBidValue;liveState.inputDirty=false;}liveState.autoBidValue=nextBidValue;}if(liveEls.bid)liveEls.bid.disabled=liveState.settled||ended;};
+const refreshLiveAuction=async({quiet=false,requireFresh=false}={})=>{if(!liveCard)throw new Error('Live auction card missing.');if(!quiet)setLiveStatus('Refreshing live Base auction state…');try{const [auctionHex,reserveHex,incrementHex]=await Promise.all([callLive(LIVE_SELECTORS.auction),callLive(LIVE_SELECTORS.reservePrice),callLive(LIVE_SELECTORS.minBidIncrementPercentage)]);const auction=decodeAuction(auctionHex);liveState.nounId=auction.nounId;liveState.amountWei=auction.amountWei;liveState.endTime=auction.endTime;liveState.bidder=auction.bidder;liveState.settled=auction.settled;liveState.reserveWei=BigInt(reserveHex);liveState.increment=BigInt(incrementHex);liveState.lastLiveRefresh=Date.now();syncLiveUi();if(!quiet)setLiveStatus('Live auction state loaded from Base.', 'success');return auction;}catch(error){setLiveStatus(`Live refresh failed: ${error.message||error}`, 'error');if(requireFresh)throw error;return null;}};
+const ensureBaseChain=async()=>{if(!window.ethereum)throw new Error('No injected wallet found. Open with MetaMask, Rabby, Coinbase Wallet, or another Base-capable wallet.');const chainId=await window.ethereum.request({method:'eth_chainId'}).catch(()=>null);if(chainId!==LIVE_CHAIN_ID){try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:LIVE_CHAIN_ID}]});}catch(error){if(error?.code!==4902)throw error;await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:LIVE_CHAIN_ID,chainName:'Base',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:['https://mainnet.base.org'],blockExplorerUrls:['https://basescan.org']} ]});}}const activeChainId=await window.ethereum.request({method:'eth_chainId'});if(activeChainId!==LIVE_CHAIN_ID)throw new Error('Wallet is not on Base.');};
+const connectWallet=async()=>{await ensureBaseChain();const accounts=await window.ethereum.request({method:'eth_requestAccounts'});liveState.account=accounts?.[0]||null;if(!liveState.account)throw new Error('Wallet did not return an account.');if(liveEls.connect)liveEls.connect.textContent=shortAddress(liveState.account);return liveState.account;};
+const submitLiveBid=async()=>{try{const account=liveState.account||await connectWallet();await ensureBaseChain();await refreshLiveAuction({quiet:true,requireFresh:true});syncLiveUi();const endMs=Number.isFinite(liveState.endTime)&&liveState.endTime>0?liveState.endTime*1000:0;if(!Number.isFinite(liveState.nounId))throw new Error('Live dog is unavailable.');if(liveState.settled||(endMs>0&&Date.now()>=endMs))throw new Error('Auction is ended or settled. Refresh for the next dog.');const valueWei=parseEthToWei(liveEls.input?.value);if(valueWei<liveState.minNextWei)throw new Error(`Bid must be at least ${formatEthValue(liveState.minNextWei,6)} ETH.`);if(liveEls.bid)liveEls.bid.disabled=true;setLiveStatus('Submitting bid in wallet…');const txHash=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:account,to:auctionHouseAddress(),value:toHex(valueWei),data:`${LIVE_SELECTORS.createBid}${encodeUint256(liveState.nounId)}`} ]});setLiveStatus('Bid transaction submitted.', 'success', txHash);setTimeout(()=>refreshLiveAuction({quiet:true}),6000);setTimeout(()=>refreshLiveAuction({quiet:true}),20000);}catch(error){setLiveStatus(`Bid failed: ${error.message||error}`, 'error');syncLiveUi();}};
+liveEls.input?.addEventListener('input',()=>{liveState.inputDirty=liveEls.input.value!==liveState.autoBidValue;});
+liveEls.refresh?.addEventListener('click',()=>refreshLiveAuction());
+liveEls.connect?.addEventListener('click',()=>connectWallet().then(()=>setLiveStatus('Wallet connected on Base.', 'success')).catch(error=>setLiveStatus(`Wallet connect failed: ${error.message||error}`, 'error')));
+liveEls.bid?.addEventListener('click',submitLiveBid);
+window.ethereum?.on?.('accountsChanged',accounts=>{liveState.account=accounts?.[0]||null;if(liveEls.connect)liveEls.connect.textContent=liveState.account?shortAddress(liveState.account):'Connect wallet';});
+window.ethereum?.on?.('chainChanged',()=>refreshLiveAuction({quiet:true}));
 updateCounts();
 updateCountdowns();
-setInterval(updateCountdowns,1000);
+syncLiveUi();
+refreshLiveAuction({quiet:true});
+setInterval(()=>{updateCountdowns();syncLiveUi();},1000);
+setInterval(()=>refreshLiveAuction({quiet:true}),30000);
 """.strip()
     html_doc = f"""<!doctype html>
 <html lang="en">
@@ -1183,11 +1346,13 @@ setInterval(updateCountdowns,1000);
     </div>
     <a class="dog-stage" href="{html.escape(current.get('dog_external_url', '#'), quote=True)}" target="_blank" rel="noopener noreferrer">{image_html}</a>
   </section>
+  {live_section}
   <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
   <section class="exports"><h2>Cached data exports</h2><table><thead><tr><th>table</th><th>rows</th><th>download</th></tr></thead><tbody>{''.join(export_rows)}</tbody></table></section>
   <details><summary>Advanced cached tables</summary><div class="raw-grid">{''.join(raw_parts)}</div></details>
 </div>
+<script type="application/json" id="live-auction-profiles">{known_profiles_json}</script>
 <script>{script}</script>
 </body>
 </html>
