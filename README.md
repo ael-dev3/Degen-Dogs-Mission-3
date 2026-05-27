@@ -14,14 +14,14 @@ Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serve
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46545015 |
-| Snapshot time UTC | 2026-05-27 10:56:17 |
+| Snapshot block | 46547021 |
+| Snapshot time UTC | 2026-05-27 12:03:09 |
 | Current auction | Dog #725 |
-| Current bid | 0.011 ETH ($22.84) |
+| Current bid | 0.011 ETH ($22.82) |
 | Current high bidder | @skunkape |
 | Auction ends UTC | 2026-05-27 16:03:59 |
 | Created / settled auctions | 136 / 135 |
-| WOOF holders | 386 |
+| WOOF holders | 385 |
 | Farcaster profiles resolved | 156 |
 
 ## Published datasets
