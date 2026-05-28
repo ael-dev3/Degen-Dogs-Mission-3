@@ -1031,11 +1031,17 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     current = current_lookup(tables)
     primary_parts = [table_html(name, *tables[name], featured=True) for name in PRIMARY_TABLES if name in tables]
     site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
+    metric_cols, metric_rows = tables.get("mission3_metrics", (["metric", "value"], [("site_url", site_url)]))
+    metric_head = "".join(f'<th scope="col">{html.escape(str(col))}</th>' for col in metric_cols)
+    metric_body = "".join(
+        "<tr>" + "".join(f"<td>{html.escape(str(cell))}</td>" for cell in row) + "</tr>"
+        for row in metric_rows
+    )
     site_metric_html = (
         '<table data-table="mission3_metrics" hidden aria-hidden="true">'
         '<caption class="sr-only">mission3 metrics</caption>'
-        '<thead><tr><th scope="col">metric</th><th scope="col">value</th></tr></thead>'
-        f'<tbody><tr><td>site_url</td><td>{html.escape(site_url)}</td></tr></tbody>'
+        f'<thead><tr>{metric_head}</tr></thead>'
+        f'<tbody>{metric_body}</tbody>'
         '</table>'
     )
 
