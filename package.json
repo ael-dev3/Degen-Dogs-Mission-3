@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "data": "python3 scripts/build_dashboard.py",
+    "archive:mission2": "python3 scripts/archive_mission2_index.py",
+    "archive:mission2:check": "python3 scripts/archive_mission2_index.py --check-config",
     "refresh:publish": "bash scripts/refresh_and_publish.sh",
     "refresh:install": "bash scripts/install_hourly_refresh_launchd.sh",
     "dev": "vite --host 0.0.0.0 --base=/Degen-Dogs-Mission-3/",

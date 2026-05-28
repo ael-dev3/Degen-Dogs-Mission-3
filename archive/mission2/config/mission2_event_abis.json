@@ -1,0 +1,282 @@
+{
+  "source_file_url": "https://raw.githubusercontent.com/markcarey/degendogs/main/contracts/interfaces/IDogsAuctionHouse.sol",
+  "source_confidence": "verified source file",
+  "notes": [
+    "Event topic hashes should be computed by the indexer from signature strings.",
+    "Only dogId is indexed for auction lifecycle events in the source interface."
+  ],
+  "events": [
+    {
+      "name": "AuctionCreated",
+      "signature": "AuctionCreated(uint256,uint256,uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "dogId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "startTime",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "endTime",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionCreated",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "dogId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "name": "startTime",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "name": "endTime",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionBid",
+      "signature": "AuctionBid(uint256,address,uint256,bool)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "dogId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "sender",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "value",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "extended",
+          "type": "bool",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionBid",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "dogId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "name": "sender",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "name": "value",
+            "type": "uint256",
+            "indexed": false
+          },
+          {
+            "name": "extended",
+            "type": "bool",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionExtended",
+      "signature": "AuctionExtended(uint256,uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "dogId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "endTime",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionExtended",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "dogId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "name": "endTime",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionSettled",
+      "signature": "AuctionSettled(uint256,address,uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "dogId",
+          "type": "uint256",
+          "indexed": true
+        },
+        {
+          "name": "winner",
+          "type": "address",
+          "indexed": false
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionSettled",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "dogId",
+            "type": "uint256",
+            "indexed": true
+          },
+          {
+            "name": "winner",
+            "type": "address",
+            "indexed": false
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionTimeBufferUpdated",
+      "signature": "AuctionTimeBufferUpdated(uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "timeBuffer",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionTimeBufferUpdated",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "timeBuffer",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionDurationUpdated",
+      "signature": "AuctionDurationUpdated(uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "duration",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionDurationUpdated",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "duration",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionReservePriceUpdated",
+      "signature": "AuctionReservePriceUpdated(uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "reservePrice",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionReservePriceUpdated",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "reservePrice",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "AuctionMinBidIncrementPercentageUpdated",
+      "signature": "AuctionMinBidIncrementPercentageUpdated(uint256)",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "minBidIncrementPercentage",
+          "type": "uint256",
+          "indexed": false
+        }
+      ],
+      "abi_fragment": {
+        "type": "event",
+        "name": "AuctionMinBidIncrementPercentageUpdated",
+        "anonymous": false,
+        "inputs": [
+          {
+            "name": "minBidIncrementPercentage",
+            "type": "uint256",
+            "indexed": false
+          }
+        ]
+      }
+    }
+  ]
+}

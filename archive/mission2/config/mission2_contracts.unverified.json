@@ -1,0 +1,32 @@
+{
+  "dogs_nft": {
+    "address": null,
+    "confidence": "unverified",
+    "how_to_verify": "Recover from Dune Mission 2 SQL, Mark repo deploy scripts, docs, or Degen Chain explorer."
+  },
+  "auction_house": {
+    "address": null,
+    "confidence": "unverified",
+    "how_to_verify": "Recover from Dune Mission 2 SQL or Degen Chain explorer, then verify emitted AuctionCreated/AuctionBid/AuctionSettled logs."
+  },
+  "woof": {
+    "address": null,
+    "confidence": "unverified"
+  },
+  "woofx": {
+    "address": null,
+    "confidence": "unverified"
+  },
+  "superfluid_pool": {
+    "address": null,
+    "confidence": "unverified"
+  },
+  "pool_manager": {
+    "address": null,
+    "confidence": "unverified"
+  },
+  "mintclub_bonding_curve_token": {
+    "address": null,
+    "confidence": "unverified"
+  }
+}

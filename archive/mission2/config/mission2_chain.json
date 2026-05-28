@@ -1,0 +1,19 @@
+{
+  "network": "Degen Chain",
+  "chain_id": 666666666,
+  "currency_symbol": "DEGEN",
+  "native_decimals_assumed": 18,
+  "native_decimals_confidence": "inferred",
+  "rpc_candidates": [
+    "https://rpc.degen.tips"
+  ],
+  "explorer": "https://explorer.degen.tips",
+  "dune_chain_slug_candidates": [
+    "degen"
+  ],
+  "notes": [
+    "Mission 2 auctions occurred on Degen Chain.",
+    "Docs say bids were submitted in native DEGEN.",
+    "Do not assume deployed auction currency path until contract configuration is verified."
+  ]
+}

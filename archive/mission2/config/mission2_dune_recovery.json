@@ -1,0 +1,15 @@
+{
+  "dashboard_title": "Degen Dogs Mission 2",
+  "owner": "ael_dev",
+  "dashboard_url": null,
+  "dashboard_id": null,
+  "discover_source": "https://dune.com/discover/content/popular?q=blockchain%3A%27Degen%27&resource-type=dashboards&timeframe=30d",
+  "read_query_endpoint_template": "https://api.dune.com/api/v1/query/{queryId}",
+  "latest_results_endpoint_template": "https://api.dune.com/api/v1/query/{queryId}/results",
+  "status": "dashboard seen in Dune Discover, query IDs not yet recovered",
+  "instructions": [
+    "Use Dune UI to recover dashboard URL and query IDs.",
+    "Use DUNE_API_KEY and archive/mission2/scripts/recover_dune_queries.py after query IDs are recorded.",
+    "Do not fabricate query IDs or SQL."
+  ]
+}
