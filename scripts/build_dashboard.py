@@ -52,7 +52,17 @@ RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 
 AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
 DEGEN_DOGS = "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
 WOOF = "0x3e5c4FA0cAA794516eD0DF77f31daA534918d492"
+SUP = "0xa69f80524381275A7fFdb3AE01c54150644c8792"
 ZERO = "0x0000000000000000000000000000000000000000"
+
+# Rewards snapshot supplied by Ael for a 141-Dog wallet. WOOF Vault Bonus is
+# intentionally excluded so the per-Dog reward estimate reflects only the base
+# WOOF stream and SUP stream a new bidder should reason about.
+REWARD_DOG_COUNT = Decimal("141")
+REWARD_WOOF_RECEIVED = Decimal("2750407020.46")
+REWARD_WOOF_FLOW_PER_DAY = Decimal("22327617.40")
+REWARD_SUP_RECEIVED = Decimal("36935.51")
+REWARD_SUP_FLOW_PER_DAY = Decimal("379.01")
 
 OUTPUT_TABLES = [
     "mission3_metrics",
@@ -97,6 +107,8 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
     ("NEYNAR_API_KEY", "Optional Neynar API key for Farcaster identity resolution."),
+    ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
+    ("SUP_USD_PRICE", "Optional manual SUP/USD override; otherwise fetched from Dexscreener Base pools."),
 ]
 
 
@@ -296,12 +308,101 @@ def fetch_eth_usd_price() -> tuple[Decimal, str]:
     return Decimal(0), "unavailable"
 
 
+def decimal_value_str(value: Decimal, max_places: int = 6) -> str:
+    s = f"{value:.{max_places}f}".rstrip("0").rstrip(".")
+    return s if s else "0"
+
+
+def configured_price(symbol: str) -> tuple[Decimal, str] | None:
+    env_name = f"{symbol.upper()}_USD_PRICE"
+    raw = os.environ.get(env_name, "").strip()
+    if not raw:
+        return None
+    try:
+        price = Decimal(raw)
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: invalid {env_name}: {exc}", file=sys.stderr)
+        return None
+    if price > 0:
+        return price, f"env:{env_name}"
+    return None
+
+
+def fetch_token_usd_price(symbol: str, token_address: str) -> tuple[Decimal, str]:
+    configured = configured_price(symbol)
+    if configured:
+        return configured
+
+    url = f"https://api.dexscreener.com/latest/dex/tokens/{token_address}"
+    try:
+        req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            data = json.loads(response.read().decode("utf-8"))
+        candidates = []
+        token_lower = token_address.lower()
+        for pair in data.get("pairs") or []:
+            if str(pair.get("chainId", "")).lower() != "base":
+                continue
+            base_token = pair.get("baseToken") or {}
+            if str(base_token.get("address") or "").lower() != token_lower:
+                continue
+            try:
+                price = Decimal(str(pair.get("priceUsd") or "0"))
+                liquidity = Decimal(str((pair.get("liquidity") or {}).get("usd") or "0"))
+            except Exception:
+                continue
+            if price <= 0:
+                continue
+            candidates.append((liquidity, price, pair))
+        if candidates:
+            _liquidity, price, pair = max(candidates, key=lambda item: item[0])
+            source = f"dexscreener:{pair.get('dexId', 'unknown')}:{pair.get('pairAddress', '')}"
+            return price, source
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: {symbol}/USD lookup failed via Dexscreener: {exc}", file=sys.stderr)
+    return Decimal(0), "unavailable"
+
+
+def reward_token_stats(woof_usd: Decimal, sup_usd: Decimal) -> dict[str, str]:
+    woof_per_dog = REWARD_WOOF_FLOW_PER_DAY / REWARD_DOG_COUNT
+    sup_per_dog = REWARD_SUP_FLOW_PER_DAY / REWARD_DOG_COUNT
+    woof_flow_usd = REWARD_WOOF_FLOW_PER_DAY * woof_usd
+    sup_flow_usd = REWARD_SUP_FLOW_PER_DAY * sup_usd
+    woof_per_dog_usd = woof_per_dog * woof_usd
+    sup_per_dog_usd = sup_per_dog * sup_usd
+    total_flow_usd = woof_flow_usd + sup_flow_usd
+    total_per_dog_usd = woof_per_dog_usd + sup_per_dog_usd
+    return {
+        "reward_basis_dogs": decimal_value_str(REWARD_DOG_COUNT, 0),
+        "reward_excludes": "woof_vault_bonus",
+        "reward_woof_received": decimal_value_str(REWARD_WOOF_RECEIVED, 2),
+        "reward_woof_received_usd": decimal_value_str(REWARD_WOOF_RECEIVED * woof_usd, 2),
+        "reward_woof_flow_per_day": decimal_value_str(REWARD_WOOF_FLOW_PER_DAY, 2),
+        "reward_woof_flow_usd_per_day": decimal_value_str(woof_flow_usd, 2),
+        "reward_woof_per_dog_per_day": decimal_value_str(woof_per_dog, 6),
+        "reward_woof_per_dog_usd_per_day": decimal_value_str(woof_per_dog_usd, 6),
+        "reward_sup_received": decimal_value_str(REWARD_SUP_RECEIVED, 2),
+        "reward_sup_received_usd": decimal_value_str(REWARD_SUP_RECEIVED * sup_usd, 2),
+        "reward_sup_flow_per_day": decimal_value_str(REWARD_SUP_FLOW_PER_DAY, 2),
+        "reward_sup_flow_usd_per_day": decimal_value_str(sup_flow_usd, 2),
+        "reward_sup_per_dog_per_day": decimal_value_str(sup_per_dog, 6),
+        "reward_sup_per_dog_usd_per_day": decimal_value_str(sup_per_dog_usd, 6),
+        "reward_total_flow_usd_per_day": decimal_value_str(total_flow_usd, 2),
+        "reward_total_per_dog_usd_per_day": decimal_value_str(total_per_dog_usd, 6),
+    }
+
+
 def fetch_token_stats(block_tag: str) -> dict[str, str]:
     name = decode_abi_string(eth_call(WOOF, SELECTOR_NAME, block_tag))
     symbol = decode_abi_string(eth_call(WOOF, SELECTOR_SYMBOL, block_tag))
     decimals = decode_uint_call(eth_call(WOOF, SELECTOR_DECIMALS, block_tag))
     supply_raw = decode_uint_call(eth_call(WOOF, SELECTOR_TOTAL_SUPPLY, block_tag))
     eth_usd, eth_usd_source = fetch_eth_usd_price()
+    sup_name = decode_abi_string(eth_call(SUP, SELECTOR_NAME, block_tag))
+    sup_symbol = decode_abi_string(eth_call(SUP, SELECTOR_SYMBOL, block_tag))
+    sup_decimals = decode_uint_call(eth_call(SUP, SELECTOR_DECIMALS, block_tag))
+    woof_usd, woof_usd_source = fetch_token_usd_price("WOOF", WOOF)
+    sup_usd, sup_usd_source = fetch_token_usd_price("SUP", SUP)
     return {
         "auction_house": AUCTION_HOUSE,
         "dog_nft": DEGEN_DOGS,
@@ -311,8 +412,17 @@ def fetch_token_stats(block_tag: str) -> dict[str, str]:
         "woof_decimals": str(decimals),
         "woof_total_supply": decimal_str(supply_raw, decimals, 6),
         "woof_total_supply_raw": str(supply_raw),
+        "woof_usd_price": decimal_value_str(woof_usd, 12),
+        "woof_usd_source": woof_usd_source,
+        "sup_token": SUP,
+        "sup_name": sup_name,
+        "sup_symbol": sup_symbol,
+        "sup_decimals": str(sup_decimals),
+        "sup_usd_price": decimal_value_str(sup_usd, 8),
+        "sup_usd_source": sup_usd_source,
         "eth_usd_price": decimal_str(int(eth_usd * 100), 2, 2) if eth_usd else "0",
         "eth_usd_source": eth_usd_source,
+        **reward_token_stats(woof_usd, sup_usd),
     }
 
 
@@ -1013,6 +1123,71 @@ def format_current_bid(metrics: dict[str, str]) -> str:
     return ""
 
 
+def metric_decimal(metrics: dict[str, str], key: str) -> Decimal | None:
+    raw = metric_value(metrics, key).replace(",", "").strip()
+    if not raw:
+        return None
+    try:
+        return Decimal(raw)
+    except Exception:
+        return None
+
+
+def format_decimal_display(value: Decimal, places: int = 2) -> str:
+    return f"{value:,.{places}f}"
+
+
+def reward_token_display(metrics: dict[str, str], token_key: str, usd_key: str, token: str, places: int = 2) -> str:
+    amount = metric_decimal(metrics, token_key)
+    usd = metric_decimal(metrics, usd_key)
+    if amount is None:
+        return ""
+    amount_text = f"{format_decimal_display(amount, places)} {token}/day"
+    if usd is not None:
+        amount_text += f" (${format_decimal_display(usd, 2)}/day)"
+    return amount_text
+
+
+def reward_usd_display(metrics: dict[str, str], key: str) -> str:
+    value = metric_decimal(metrics, key)
+    if value is None:
+        return ""
+    return f"${format_decimal_display(value, 2)}/day"
+
+
+def reward_payback_display(metrics: dict[str, str]) -> str:
+    days = metric_decimal(metrics, "reward_current_bid_payback_days")
+    if days is None or days <= 0:
+        return ""
+    if days < 1:
+        return "<1 day"
+    places = 1 if days < 10 else 0
+    return f"≈{format_decimal_display(days, places)} days"
+
+
+def render_reward_strip(metrics: dict[str, str]) -> str:
+    basis = metric_value(metrics, "reward_basis_dogs", "141")
+    woof = reward_token_display(metrics, "reward_woof_per_dog_per_day", "reward_woof_per_dog_usd_per_day", "WOOF", 2)
+    sup = reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)
+    total = reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")
+    payback = reward_payback_display(metrics)
+    tiles = [
+        ("WOOF / Dog", woof, "Base WOOF flow"),
+        ("SUP / Dog", sup, "SUP flow"),
+        ("Total / Dog", total, "WOOF + SUP"),
+        ("Bid payback", payback, "Current bid / per-Dog flow"),
+    ]
+    body = "".join(
+        f'<span class="reward-tile"><b>{html.escape(label)}</b><strong>{html.escape(value)}</strong><em>{html.escape(note)}</em></span>'
+        for label, value, note in tiles
+        if value
+    )
+    if not body:
+        return ""
+    note = f"Based on Ael wallet flow across {basis} Dogs. WOOF Vault Bonus excluded."
+    return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}<p>{html.escape(note)}</p></section>'
+
+
 def format_current_auction(metrics: dict[str, str]) -> str:
     token_id = metric_value(metrics, "current_auction_token_id")
     return f"Dog #{token_id}" if token_id else ""
@@ -1049,6 +1224,11 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Current bid", format_current_bid(metrics)),
         ("Current high bidder", metric_value(metrics, "current_bidder")),
         ("Auction ends UTC", metric_value(metrics, "current_auction_end_utc")),
+        ("WOOF per Dog / day", reward_token_display(metrics, "reward_woof_per_dog_per_day", "reward_woof_per_dog_usd_per_day", "WOOF", 2)),
+        ("SUP per Dog / day", reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)),
+        ("Reward total per Dog / day", reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")),
+        ("Current bid reward payback", reward_payback_display(metrics)),
+        ("Rewards basis", f"{metric_value(metrics, 'reward_basis_dogs', '141')} Dogs; WOOF Vault Bonus excluded"),
         ("Created / settled auctions", format_created_settled(metrics)),
         ("WOOF holders", metric_value(metrics, "woof_holders")),
         ("Farcaster profiles resolved", metric_value(metrics, "farcaster_profiles_resolved")),
@@ -1073,6 +1253,7 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Auction house", metric_value(metrics, "auction_house")),
         ("Degen Dogs NFT", metric_value(metrics, "dog_nft")),
         ("WOOF token", metric_value(metrics, "woof_token")),
+        ("SUP token", metric_value(metrics, "sup_token")),
     ]
     contract_rows = [(label, address) for label, address in contract_rows if address]
 
@@ -1191,6 +1372,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             f'<span class="detail-bidder"><b>High bidder</b>{participant_html}</span>' if participant else "",
         ]
     )
+    reward_strip = render_reward_strip(metrics)
     chips = trait_chips(current)
     css = """
 :root{color-scheme:light;--paper:#e8ded5;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -1208,6 +1390,12 @@ a:hover{color:var(--accent2)}
 .current-copy h1{font-size:clamp(34px,6vw,72px);line-height:.9;margin:0;letter-spacing:-.075em;max-width:10ch}
 .subtitle{margin:0;color:var(--muted);font-weight:700}
 .current-detail{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;margin-top:auto}
+.reward-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:2px}
+.reward-tile{display:flex;min-width:0;flex-direction:column;gap:2px;border:1.5px solid var(--ink);background:#eff8df;padding:7px 8px;font-weight:900;line-height:1.12;box-shadow:2px 2px 0 rgba(36,84,23,.18)}
+.reward-tile b{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#31551f}
+.reward-tile strong{font-size:clamp(13px,1.35vw,18px);font-weight:950;letter-spacing:-.025em;overflow-wrap:anywhere}
+.reward-tile em{font-style:normal;color:#5d6b48;font-size:10.5px;font-weight:800}
+.reward-strip p{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px;font-weight:800}
 .current-detail > span{display:flex;min-height:48px;flex:0 1 auto;width:max-content;max-width:100%;flex-direction:column;justify-content:center;align-items:flex-start;border:1.5px solid var(--ink);background:var(--panel2);padding:7px 9px;font-weight:900;line-height:1.18}
 .current-detail .detail-status{min-width:96px}
 .current-detail .detail-bid{min-width:142px}
@@ -1277,6 +1465,8 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 .identity{max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .identity a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:reduce){.timer-card,.timer-card *{animation:none!important;transition:none!important}}
+@media (max-width:1100px){.reward-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.reward-strip{grid-template-columns:1fr;gap:5px}.reward-tile{padding:6px 7px}.reward-tile strong{font-size:13px}.reward-strip p{font-size:10px}}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
 @media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .timer-card{flex:1 1 100%;width:100%;max-width:100%;min-width:0}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
@@ -1315,6 +1505,7 @@ setInterval(updateCountdowns,1000);
       <div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>
       <h1>{html.escape(dog)}</h1>
       <div class="current-detail">{current_detail}</div>
+      {reward_strip}
       <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
     </div>
     <a class="dog-stage" href="{html.escape(current.get('dog_external_url', '#'), quote=True)}" target="_blank" rel="noopener noreferrer">{image_html}</a>

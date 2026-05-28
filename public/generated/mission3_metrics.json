@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "46598109"
+    "value": "46600847"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-05-28 16:26:05"
+    "value": "2026-05-28 17:57:21"
   },
   {
     "metric": "auction_house",
@@ -40,16 +40,112 @@
     "value": "100000000000"
   },
   {
+    "metric": "woof_usd_price",
+    "value": "0.0000004751"
+  },
+  {
+    "metric": "woof_usd_source",
+    "value": "dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637"
+  },
+  {
+    "metric": "sup_token",
+    "value": "0xa69f80524381275A7fFdb3AE01c54150644c8792"
+  },
+  {
+    "metric": "sup_symbol",
+    "value": "SUP"
+  },
+  {
+    "metric": "sup_usd_price",
+    "value": "0.01148"
+  },
+  {
+    "metric": "sup_usd_source",
+    "value": "dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20"
+  },
+  {
     "metric": "eth_usd_price",
-    "value": "1995.68"
+    "value": "2017.08"
   },
   {
     "metric": "eth_usd_source",
     "value": "coinbase"
   },
   {
+    "metric": "reward_basis_dogs",
+    "value": "141"
+  },
+  {
+    "metric": "reward_excludes",
+    "value": "woof_vault_bonus"
+  },
+  {
+    "metric": "reward_woof_received",
+    "value": "2750407020.46"
+  },
+  {
+    "metric": "reward_woof_received_usd",
+    "value": "1306.72"
+  },
+  {
+    "metric": "reward_woof_flow_per_day",
+    "value": "22327617.4"
+  },
+  {
+    "metric": "reward_woof_flow_usd_per_day",
+    "value": "10.61"
+  },
+  {
+    "metric": "reward_woof_per_dog_per_day",
+    "value": "158351.896454"
+  },
+  {
+    "metric": "reward_woof_per_dog_usd_per_day",
+    "value": "0.075233"
+  },
+  {
+    "metric": "reward_sup_received",
+    "value": "36935.51"
+  },
+  {
+    "metric": "reward_sup_received_usd",
+    "value": "424.02"
+  },
+  {
+    "metric": "reward_sup_flow_per_day",
+    "value": "379.01"
+  },
+  {
+    "metric": "reward_sup_flow_usd_per_day",
+    "value": "4.35"
+  },
+  {
+    "metric": "reward_sup_per_dog_per_day",
+    "value": "2.688014"
+  },
+  {
+    "metric": "reward_sup_per_dog_usd_per_day",
+    "value": "0.030858"
+  },
+  {
+    "metric": "reward_total_flow_usd_per_day",
+    "value": "14.96"
+  },
+  {
+    "metric": "reward_total_per_dog_usd_per_day",
+    "value": "0.106091"
+  },
+  {
+    "metric": "reward_current_bid_payback_days",
+    "value": "209.16"
+  },
+  {
+    "metric": "reward_current_bid_daily_roi_pct",
+    "value": "0.4781"
+  },
+  {
     "metric": "woof_holders",
-    "value": "398"
+    "value": "399"
   },
   {
     "metric": "top_woof_holder",
@@ -73,7 +169,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "21.95"
+    "value": "22.19"
   },
   {
     "metric": "current_bidder",
