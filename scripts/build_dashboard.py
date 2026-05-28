@@ -26,6 +26,7 @@ GENERATED = ROOT / "generated"
 PUBLIC_GENERATED = ROOT / "public" / "generated"
 CACHE_DIR = ROOT / ".cache"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
+README_TEMPLATE_PATH = ROOT / "README.template.md"
 
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
@@ -69,6 +70,34 @@ OUTPUT_TABLES = [
     "top_woof_holders",
 ]
 PRIMARY_TABLES = ["auction_feed"]
+
+DATASET_DESCRIPTIONS = {
+    "mission3_metrics": "Key dashboard metrics, refresh metadata, and verified contract snapshot values.",
+    "auction_feed": "Homepage-ready current auction plus recent settled auctions.",
+    "current_latest_bid": "Current auction latest bid and high-bidder snapshot.",
+    "recent_auction_winners": "Recent settled winners formatted for the homepage.",
+    "current_auction": "Full current auction state, dog metadata, rarity, and countdown fields.",
+    "auction_timeline": "One row per auction with bid, winner, and settlement summary.",
+    "auction_daily_activity": "Daily auction counts, settlement counts, and bid/settlement volume.",
+    "auction_bidder_leaderboard": "Ranked bidder activity across decoded auction events.",
+    "season5_sup_by_winner": "Estimated Season 5 SUP rewards grouped by winning wallet/profile.",
+    "season5_sup_rewards_by_auction": "Estimated Season 5 SUP rewards per auction.",
+    "auction_winners": "Settled auction winners with bid values and identity fields.",
+    "recent_bids": "Latest bid events decoded from the auction house.",
+    "top_woof_holders": "WOOF holder snapshot from transfer participants and balance checks.",
+}
+
+CONFIGURATION_ENV_VARS = [
+    ("BASE_RPC_URL", "Single Base RPC endpoint for contract calls; also overrides log RPC lists when set."),
+    ("BASE_RPC_URLS", "Comma-separated fallback Base RPC endpoints for contract calls."),
+    ("BASE_LOG_RPC_URLS", "Comma-separated Base RPC endpoints used for `eth_getLogs` history scans."),
+    ("BASE_FROM_BLOCK", "First Base block scanned for Mission 3 logs; defaults to the known Mission 3 start range."),
+    ("BASE_LOG_CHUNK", "Maximum block range per log request, capped at 10,000 for public Base RPC compatibility."),
+    ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
+    ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
+    ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
+    ("NEYNAR_API_KEY", "Optional Neynar API key for Farcaster identity resolution."),
+]
 
 
 TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
@@ -970,9 +999,41 @@ def metric_value(metrics: dict[str, str], key: str, fallback: str = "") -> str:
     return str(value) if value is not None else fallback
 
 
-def readme_table_links(csv_path: str) -> str:
-    json_path = str(Path(csv_path).with_suffix(".json"))
-    return f"[CSV]({csv_path}) / [JSON]({json_path})"
+def markdown_link(label: str, href: str) -> str:
+    return f"[{markdown_cell(label)}]({href})"
+
+
+def format_current_bid(metrics: dict[str, str]) -> str:
+    bid_eth = metric_value(metrics, "current_bid_eth")
+    bid_usd = metric_value(metrics, "current_bid_usd")
+    if bid_eth and bid_usd:
+        return f"{bid_eth} ETH (${bid_usd})"
+    if bid_eth:
+        return f"{bid_eth} ETH"
+    return ""
+
+
+def format_current_auction(metrics: dict[str, str]) -> str:
+    token_id = metric_value(metrics, "current_auction_token_id")
+    return f"Dog #{token_id}" if token_id else ""
+
+
+def format_created_settled(metrics: dict[str, str]) -> str:
+    created = metric_value(metrics, "created_auctions")
+    settled = metric_value(metrics, "settled_auctions")
+    return f"{created} / {settled}" if created and settled else ""
+
+
+def render_readme_from_template(replacements: dict[str, str]) -> str:
+    # README.md is generated because `npm run data` rewrites live snapshot and catalog sections.
+    # Keep stable human-written copy in README.template.md and replace only explicit placeholders here.
+    template = README_TEMPLATE_PATH.read_text(encoding="utf-8")
+    missing = [token for token in replacements if token not in template]
+    if missing:
+        raise RuntimeError(f"README template missing placeholders: {', '.join(missing)}")
+    for token, value in replacements.items():
+        template = template.replace(token, value.rstrip())
+    return template.rstrip() + "\n"
 
 
 def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], manifest_rows: list[tuple[Any, ...]]) -> str:
@@ -984,20 +1045,29 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Network", metric_value(metrics, "network", "base")),
         ("Snapshot block", metric_value(metrics, "latest_block")),
         ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
-        ("Current auction", f"Dog #{metric_value(metrics, 'current_auction_token_id')}"),
-        ("Current bid", f"{metric_value(metrics, 'current_bid_eth')} ETH (${metric_value(metrics, 'current_bid_usd')})"),
+        ("Current auction", format_current_auction(metrics)),
+        ("Current bid", format_current_bid(metrics)),
         ("Current high bidder", metric_value(metrics, "current_bidder")),
         ("Auction ends UTC", metric_value(metrics, "current_auction_end_utc")),
-        ("Created / settled auctions", f"{metric_value(metrics, 'created_auctions')} / {metric_value(metrics, 'settled_auctions')}"),
+        ("Created / settled auctions", format_created_settled(metrics)),
         ("WOOF holders", metric_value(metrics, "woof_holders")),
         ("Farcaster profiles resolved", metric_value(metrics, "farcaster_profiles_resolved")),
     ]
-    snapshot_rows = [(label, value) for label, value in snapshot_rows if value and not value.endswith("#")]
+    snapshot_rows = [(label, value) for label, value in snapshot_rows if value]
 
-    dataset_rows = [
-        (str(table), f"`{csv_path}`", rows, readme_table_links(str(csv_path)))
-        for table, csv_path, rows in manifest_rows
-    ]
+    dataset_rows = []
+    for table, csv_path, rows in manifest_rows:
+        table_name = str(table)
+        csv_link = str(csv_path)
+        json_link = str(Path(csv_link).with_suffix(".json"))
+        dataset_rows.append((
+            f"`{table_name}`",
+            f"`{csv_link}`",
+            rows,
+            markdown_link("CSV", csv_link),
+            markdown_link("JSON", json_link),
+            DATASET_DESCRIPTIONS.get(table_name, "Generated table exported by the approved query layer."),
+        ))
 
     contract_rows = [
         ("Auction house", metric_value(metrics, "auction_house")),
@@ -1006,18 +1076,15 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
     ]
     contract_rows = [(label, address) for label, address in contract_rows if address]
 
-    parts = [
-        "# Degen Dogs Mission 3 Analytics",
-        "Static, cached analytics for Degen Dogs Mission 3 on Base. The public site serves approved, precomputed result tables and downloadable CSV/JSON exports; it does not expose arbitrary visitor-run SQL.",
-        "## Links\n\n- Live dashboard: [{0}]({0})\n- Query layer: [`sql/mission3_dashboard.sql`](sql/mission3_dashboard.sql)\n- Generated exports: [`generated/`](generated/)".format(site_url),
-        "## Current snapshot\n\n" + markdown_table(["Field", "Value"], snapshot_rows).rstrip(),
-        "## Published datasets\n\n" + markdown_table(["Table", "CSV path", "Rows", "Downloads"], dataset_rows).rstrip(),
-        "## Data pipeline\n\n1. Fetch Base RPC logs and contract calls from the private Mac mini runner.\n2. Load decoded auction, WOOF, NFT metadata, and Farcaster identity rows into SQLite.\n3. Execute the approved SQL query layer and publish cached CSV/JSON/table artifacts to GitHub Pages.\n4. Refresh automatically from the private runner; the Mac mini is not the public host.",
-        "## Verified contracts\n\n" + markdown_table(["Contract", "Address"], contract_rows).rstrip(),
-        "## Caveats\n\n- The public site is a cached snapshot, not a live SQL database.\n- Current-auction state and high bidder are taken from the on-chain `auction()` snapshot.\n- Historical auction rows are reconstructed from verified Base auction-house events.\n- Archived SQL bundles may contain reconstructed auction SQL, SUP reward stubs, and patched contract references; the active dashboard is generated from this repository's query layer and Base RPC data.",
-        "## Local development\n\n```bash\nnpm ci\nnpm run data\nnpm run build\n```\n\nInstall or refresh the hourly private-runner LaunchAgent:\n\n```bash\nnpm run refresh:install\n```",
-    ]
-    return "\n\n".join(parts).rstrip() + "\n"
+    configuration_rows = [(f"`{name}`", description) for name, description in CONFIGURATION_ENV_VARS]
+
+    return render_readme_from_template({
+        "{{LIVE_DASHBOARD_LINK}}": markdown_link(site_url, site_url),
+        "{{CURRENT_SNAPSHOT_TABLE}}": markdown_table(["Field", "Value"], snapshot_rows).rstrip(),
+        "{{PUBLISHED_DATASETS_TABLE}}": markdown_table(["Table", "Path", "Rows", "CSV", "JSON", "Description"], dataset_rows).rstrip(),
+        "{{CONFIGURATION_TABLE}}": markdown_table(["Variable", "Purpose"], configuration_rows).rstrip(),
+        "{{VERIFIED_CONTRACTS_TABLE}}": markdown_table(["Contract", "Address"], contract_rows).rstrip(),
+    })
 
 
 def trait_chips(current: dict[str, str]) -> str:
