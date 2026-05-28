@@ -1066,11 +1066,11 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     rarity = current.get("rarity", "")
     current_detail = "".join(
         [
-            f'<span><b>Status</b>{html.escape(status)}</span>' if status else "",
-            f'<span><b>Bid</b>{html.escape(bid)}</span>' if bid else "",
-            f'<span><b>Time left</b>{time_left_html}</span>' if time_left else "",
-            f'<span><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
-            f'<span><b>High bidder</b>{participant_html}</span>' if participant else "",
+            f'<span class="detail-status"><b>Status</b>{html.escape(status)}</span>' if status else "",
+            f'<span class="detail-bid"><b>Bid</b>{html.escape(bid)}</span>' if bid else "",
+            f'<span class="detail-time"><b>Time left</b>{time_left_html}</span>' if time_left else "",
+            f'<span class="detail-rarity"><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
+            f'<span class="detail-bidder"><b>High bidder</b>{participant_html}</span>' if participant else "",
         ]
     )
     chips = trait_chips(current)
@@ -1091,9 +1091,10 @@ a:hover{color:var(--accent2)}
 .subtitle{margin:0;color:var(--muted);font-weight:700}
 .current-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:7px;margin-top:auto}
 .current-detail span{display:flex;min-height:50px;flex-direction:column;justify-content:center;border:1.5px solid var(--ink);background:var(--panel2);padding:7px 9px;font-weight:900;line-height:1.18}
+.current-detail .detail-bidder{grid-column:span 2}
 .current-detail b,.time-cell b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.current-detail a,.identity a,td.time a{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;border:1.5px solid var(--ink);border-radius:999px;background:var(--panel2);padding:3px 8px;font-weight:900;line-height:1.1;box-shadow:2px 2px 0 var(--ink)}
-.current-detail a::after,.identity a::after,td.time a::after{content:'↗';font-size:.78em;color:var(--accent2)}
+.current-detail a,.identity a,td.time a{display:inline-flex;align-items:center;position:relative;width:max-content;max-width:100%;border:1.5px solid var(--ink);border-radius:999px;background:var(--panel2);padding:3px calc(8px + 1.05em) 3px 8px;font-weight:900;line-height:1.1;box-shadow:2px 2px 0 var(--ink)}
+.current-detail a::after,.identity a::after,td.time a::after{content:'↗';position:absolute;inset-inline-end:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:.95em;height:.95em;font-size:.74em;line-height:1;color:var(--accent2);pointer-events:none}
 .current-detail a:hover,.identity a:hover,td.time a:hover{background:#fff;border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--accent2)}
 .traits{display:flex;flex-wrap:wrap;gap:5px;max-height:78px;overflow:auto;padding-right:2px}
 .traits span{border:1.5px solid var(--ink);background:var(--panel);padding:4px 6px;font-size:11px;font-weight:800;line-height:1.15}
@@ -1147,7 +1148,7 @@ summary{cursor:pointer;padding:10px 12px;font-weight:950;text-transform:uppercas
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
 @media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card,.exports,details{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.current-detail span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail span:nth-child(2),.current-detail span:nth-child(5){grid-column:1/-1}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}.exports{padding:9px;margin-top:8px;overflow:hidden}.exports h2{font-size:14px}.exports table{font-size:11.5px}.exports th,.exports td{padding:6px 5px}.exports a{margin-right:3px;padding:2px 6px;box-shadow:1px 1px 0 var(--ink)}summary{padding:8px 10px;font-size:12px}.raw-grid{padding:8px;gap:8px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
-@media (max-width:380px){.current-detail{grid-template-columns:1fr}.current-detail span:nth-child(2),.current-detail span:nth-child(5){grid-column:1}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
+@media (max-width:380px){.current-detail{grid-template-columns:1fr}.current-detail span:nth-child(2),.current-detail span:nth-child(5),.current-detail .detail-bidder{grid-column:1}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 
 """.strip()
     script = """
