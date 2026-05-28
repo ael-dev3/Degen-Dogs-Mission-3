@@ -1348,11 +1348,11 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     mark_avatar_src = html.escape(public_png_data_uri("mark-profile.png"), quote=True)
     mark_credit_html = (
         '<div class="credit-menu">'
-        f'<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark created Degen Dogs and is the main dev"><img class="credit-avatar" src="{mark_avatar_src}" alt="" aria-hidden="true">Degen Dogs by Mark</button>'
+        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark created Degen Dogs">Degen Dogs by Mark</button>'
         '<div class="credit-popover" aria-label="Mark profile links">'
         '<div class="credit-head">'
         f'<img src="{mark_avatar_src}" alt="Pixel Degen Dog avatar for Mark">'
-        '<div><b>Creator / main dev</b><span>Mark created Degen Dogs and leads the project.</span></div>'
+        '<div><b>Creator</b><span>Mark created Degen Dogs.</span></div>'
         '</div>'
         '<a href="https://farcaster.xyz/markcarey" target="_blank" rel="noopener noreferrer">Farcaster</a>'
         '<a href="https://x.com/mthacks" target="_blank" rel="noopener noreferrer">X</a>'
@@ -1448,7 +1448,6 @@ a:hover{color:var(--accent2)}
 .credit-trigger{cursor:default;background:#fff;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
 .credit-trigger:focus{outline:2px solid var(--accent2);outline-offset:2px}
 .credit-popover{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:6px;min-width:252px;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);padding:10px;opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease}
-.credit-avatar{width:24px;height:24px;object-fit:cover;image-rendering:pixelated;border:1.5px solid var(--ink);background:#fff;box-shadow:1.5px 1.5px 0 var(--ink);margin:-5px 0 -5px -5px;flex:none}
 .credit-head{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:7px;margin-bottom:2px}
 .credit-head img{width:44px;height:44px;object-fit:cover;image-rendering:pixelated;border:2px solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink)}
 .credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover{opacity:1;pointer-events:auto;transform:translateY(0)}
