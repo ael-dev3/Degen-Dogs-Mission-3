@@ -1035,7 +1035,7 @@ def cell_url(col: str, row_data: dict[str, Any]) -> str:
     if col in {"bidder", "winner", "holder", "latest_bidder"}:
         return str(row_data.get(f"{col}_url") or basescan_address_url(row_data.get(f"{col}_wallet")) or "")
     if col == "dog":
-        return str(row_data.get("dog_external_url") or "")
+        return str(row_data.get("dog_opensea_url") or row_data.get("dog_external_url") or "")
     return ""
 
 
@@ -1435,6 +1435,15 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     )
 
     dog = current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}").strip() or "Current dog"
+    current_dog_url = current.get("dog_opensea_url") or current.get("dog_external_url") or "#"
+    current_dog_label = f"Open {dog} on OpenSea" if current.get("dog_opensea_url") else f"Open {dog}"
+    current_dog_html = html.escape(dog)
+    if current_dog_url and current_dog_url != "#":
+        current_dog_html = (
+            f'<a class="current-dog-link" href="{html.escape(current_dog_url, quote=True)}" target="_blank" '
+            f'rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}" '
+            f'title="{html.escape(current_dog_label, quote=True)}">{current_dog_html}</a>'
+        )
     bid = current.get("bid") or current.get("latest_bid") or f"{metrics.get('current_bid_eth', '0')} ETH"
     participant = current.get("bidder_winner") or current.get("bidder") or metrics.get("current_bidder", "")
     participant_url = current.get("bidder_winner_url") or current.get("bidder_url", "")
@@ -1516,6 +1525,10 @@ a:hover{color:var(--accent2)}
 .credit-popover a::after{content:'↗';color:var(--accent2);font-size:.78em}
 .credit-popover a:hover{background:#fff;border-color:var(--accent2);box-shadow:3px 3px 0 var(--accent2)}
 .current-copy h1{font-size:clamp(34px,6vw,72px);line-height:.9;margin:0;letter-spacing:-.075em;max-width:10ch}
+.current-dog-link{display:inline-flex;align-items:flex-start;gap:.04em;color:inherit;max-width:100%}
+.current-dog-link::after{content:'↗';font-size:.28em;line-height:1;color:var(--accent2);letter-spacing:0;margin-left:.04em;transform:translateY(.14em);transition:transform .16s ease,color .16s ease}
+.current-dog-link:hover{color:var(--accent2)}
+.current-dog-link:hover::after{transform:translate(.05em,.06em)}
 .subtitle{margin:0;color:var(--muted);font-weight:700}
 .current-detail{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;margin-top:auto}
 .reward-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:2px}
@@ -1642,12 +1655,12 @@ setInterval(updateCountdowns,1000);
   <section class="current-card" aria-label="Current auction">
     <div class="current-copy">
       <div class="topline"><div class="eyebrow">{live_dot_html}Mission 3 auction feed</div>{top_actions_html}</div>
-      <h1>{html.escape(dog)}</h1>
+      <h1>{current_dog_html}</h1>
       <div class="current-detail">{current_detail}</div>
       {reward_strip}
       <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
     </div>
-    <a class="dog-stage" href="{html.escape(current.get('dog_external_url', '#'), quote=True)}" target="_blank" rel="noopener noreferrer">{image_html}</a>
+    <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
   </section>
   <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
