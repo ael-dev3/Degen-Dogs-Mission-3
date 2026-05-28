@@ -1030,6 +1030,14 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     metrics = metric_lookup(tables)
     current = current_lookup(tables)
     primary_parts = [table_html(name, *tables[name], featured=True) for name in PRIMARY_TABLES if name in tables]
+    site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
+    site_metric_html = (
+        '<table data-table="mission3_metrics" hidden aria-hidden="true">'
+        '<caption class="sr-only">mission3 metrics</caption>'
+        '<thead><tr><th scope="col">metric</th><th scope="col">value</th></tr></thead>'
+        f'<tbody><tr><td>site_url</td><td>{html.escape(site_url)}</td></tr></tbody>'
+        '</table>'
+    )
 
     dog = current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}").strip() or "Current dog"
     bid = current.get("bid") or current.get("latest_bid") or f"{metrics.get('current_bid_eth', '0')} ETH"
@@ -1168,6 +1176,7 @@ setInterval(updateCountdowns,1000);
   </section>
   <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
+  {site_metric_html}
 </div>
 <script>{script}</script>
 </body>

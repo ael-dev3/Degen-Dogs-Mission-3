@@ -754,6 +754,19 @@
     "latest_bid_utc": "2026-01-22 02:02:41"
   },
   {
+    "bidder": "0x4119…72cb",
+    "bidder_url": "",
+    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
+    "bids": 9,
+    "auctions_bid": 6,
+    "bid_eth": 0.03558,
+    "high_bid_eth": 0.01465,
+    "auction_wins": 2,
+    "winning_eth": 0.01965,
+    "latest_bid_token_id": 726,
+    "latest_bid_utc": "2026-05-28 00:38:23"
+  },
+  {
     "bidder": "@mudge",
     "bidder_url": "https://farcaster.xyz/mudge",
     "bidder_wallet": "0xfcd8f38392866fcebab167e68748ae4b637a6a24",
@@ -869,19 +882,6 @@
     "winning_eth": 0.02486,
     "latest_bid_token_id": 703,
     "latest_bid_utc": "2026-05-03 22:16:57"
-  },
-  {
-    "bidder": "0x4119…72cb",
-    "bidder_url": "",
-    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
-    "bids": 8,
-    "auctions_bid": 6,
-    "bid_eth": 0.02458,
-    "high_bid_eth": 0.01465,
-    "auction_wins": 2,
-    "winning_eth": 0.01965,
-    "latest_bid_token_id": 726,
-    "latest_bid_utc": "2026-05-27 21:39:23"
   },
   {
     "bidder": "@riff-raff",
