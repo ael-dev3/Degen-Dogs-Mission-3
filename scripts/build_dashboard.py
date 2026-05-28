@@ -1026,6 +1026,46 @@ def trait_chips(current: dict[str, str]) -> str:
     return "".join(f'<span>{html.escape(item)}</span>' for item in items)
 
 
+def parse_timer_seconds(value: str) -> int | None:
+    value = (value or "").strip().lower()
+    if not value or value == "ended":
+        return 0 if value == "ended" else None
+    if value.isdigit():
+        return int(value)
+    day_count = 0
+    if "d " in value:
+        days, value = value.split("d ", 1)
+        try:
+            day_count = int(days.strip())
+        except ValueError:
+            return None
+    parts = value.split(":")
+    if len(parts) != 3:
+        return None
+    try:
+        hours, minutes, seconds = (int(part) for part in parts)
+    except ValueError:
+        return None
+    return day_count * 86400 + hours * 3600 + minutes * 60 + seconds
+
+
+def timer_urgency_state(remaining_seconds: int | None, auction_status: str = "") -> str:
+    status = (auction_status or "").lower()
+    if "settled" in status or "ended" in status:
+        return "ended"
+    if remaining_seconds is None:
+        return "normal"
+    if remaining_seconds <= 0:
+        return "ended"
+    if remaining_seconds <= 600:
+        return "critical"
+    if remaining_seconds <= 3600:
+        return "urgent"
+    if remaining_seconds <= 21600:
+        return "warning"
+    return "normal"
+
+
 def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> None:
     metrics = metric_lookup(tables)
     current = current_lookup(tables)
@@ -1055,9 +1095,18 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     status = current.get("status") or current.get("auction_state", "")
     time_left = current.get("time_remaining", "")
     time_left_end = current.get("auction_end_utc") or current.get("end_time_utc", "")
+    time_left_seconds = parse_timer_seconds(current.get("seconds_remaining", ""))
+    if time_left_seconds is None:
+        time_left_seconds = parse_timer_seconds(time_left)
+    timer_state = timer_urgency_state(time_left_seconds, status)
+    auction_status_attr = html.escape(status.lower(), quote=True)
     time_left_html = html.escape(time_left)
     if time_left and time_left_end:
-        time_left_html = f'<span class="countdown" data-countdown-end="{html.escape(time_left_end, quote=True)}">{time_left_html}</span>'
+        time_left_html = (
+            f'<span class="countdown timer-value countdown--{timer_state}" '
+            f'data-countdown-end="{html.escape(time_left_end, quote=True)}" '
+            f'data-auction-status="{auction_status_attr}">{time_left_html}</span>'
+        )
     image = current.get("dog_image_url", "")
     image_html = ""
     if image:
@@ -1067,14 +1116,17 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         [
             f'<span class="detail-status"><b>Status</b>{html.escape(status)}</span>' if status else "",
             f'<span class="detail-bid"><b>Bid</b>{html.escape(bid)}</span>' if bid else "",
-            f'<span class="detail-time"><b>Time left</b>{time_left_html}</span>' if time_left else "",
+            (
+                f'<span class="detail-time timer-card timer-card--{timer_state}" '
+                f'data-auction-status="{auction_status_attr}"><b class="timer-label">Time left</b>{time_left_html}</span>'
+            ) if time_left else "",
             f'<span class="detail-rarity"><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
             f'<span class="detail-bidder"><b>High bidder</b>{participant_html}</span>' if participant else "",
         ]
     )
     chips = trait_chips(current)
     css = """
-:root{color-scheme:light;--paper:#e8ded5;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root{color-scheme:light;--paper:#e8ded5;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 html{background:var(--paper)}
 body{margin:0;min-width:320px;background:var(--paper);color:var(--ink);font-size:14px}
@@ -1094,14 +1146,28 @@ a:hover{color:var(--accent2)}
 .current-detail .detail-bid{min-width:142px}
 .current-detail .detail-rarity{min-width:104px}
 .current-detail .detail-bidder{min-width:0}
-.current-detail .detail-time{min-width:180px;background:#ecfff1;color:#0e2a16;border-color:#78d88d;box-shadow:3px 3px 0 #78d88d;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.current-detail .detail-time.timer-ending{background:var(--ink);color:var(--panel);border-color:var(--accent2);box-shadow:3px 3px 0 var(--accent2)}
-.current-detail .detail-time.timer-ended{background:var(--panel2);color:var(--muted);border-color:var(--line);box-shadow:3px 3px 0 var(--line)}
+.current-detail .timer-card{min-width:180px;position:relative;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
+.current-detail .timer-card--normal{background:var(--panel2);color:var(--ink);border-color:var(--ink);box-shadow:none}
+.current-detail .timer-card--warning{background:var(--paper-warm);color:var(--ink);border-color:var(--warning);box-shadow:3px 3px 0 rgba(217,119,6,.22)}
+.current-detail .timer-card--urgent{background:var(--paper-urgent);color:var(--ink);border-color:var(--urgent);box-shadow:3px 3px 0 rgba(229,27,50,.18)}
+.current-detail .timer-card--critical{background:var(--critical-bg);color:white;border-color:var(--critical-red);box-shadow:3px 3px 0 var(--critical-red)}
+.current-detail .timer-card--ended{background:#eee7dd;color:#4a403a;border-color:#8a8178;box-shadow:none}
 .current-detail b,.time-cell b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.current-detail .detail-time b{color:#26733a}
-.current-detail .detail-time.timer-ending b{color:#f0aeb5}
-.current-detail .detail-time.timer-ended b{color:var(--muted)}
-.current-detail .countdown{display:block;margin-top:4px;border:0;background:transparent;padding:0;min-height:0;font-family:"Arial Black",Impact,ui-sans-serif,system-ui,sans-serif;font-size:clamp(21px,2.3vw,30px);font-weight:950;line-height:.96;letter-spacing:-.015em;font-variant-numeric:tabular-nums;transform:skewX(-4deg);transform-origin:left center;text-shadow:1px 0 0 #a8f3b8,0 0 8px rgba(103,216,133,.22)}
+.current-detail .timer-label{display:flex;align-items:center;gap:5px}
+.current-detail .timer-card--normal .timer-label{color:var(--muted)}
+.current-detail .timer-card--warning .timer-label{color:var(--warning-dark)}
+.current-detail .timer-card--urgent .timer-label{color:var(--urgent-dark)}
+.current-detail .timer-card--critical .timer-label{color:#ffb3bd}
+.current-detail .timer-card--ended .timer-label{color:#4a403a}
+.current-detail .timer-card--warning .timer-label::before,.current-detail .timer-card--urgent .timer-label::before,.current-detail .timer-card--critical .timer-label::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;box-shadow:0 0 0 1px rgba(10,10,10,.12)}
+.current-detail .timer-card--critical .timer-label::before{animation:timerPulse 1.8s ease-in-out infinite}
+.current-detail .timer-value{display:block;margin-top:4px;border:0;background:transparent;padding:0;min-height:0;font-family:"Arial Black",Impact,ui-sans-serif,system-ui,sans-serif;font-size:clamp(21px,2.3vw,30px);font-weight:950;line-height:.96;letter-spacing:-.015em;font-variant-numeric:tabular-nums;transform:skewX(-4deg);transform-origin:left center;text-shadow:none;color:inherit}
+.current-detail .timer-card--normal .timer-value{color:var(--ink);text-shadow:none}
+.current-detail .timer-card--warning .timer-value{color:var(--warning-dark);text-shadow:none}
+.current-detail .timer-card--urgent .timer-value{color:var(--urgent);text-shadow:none}
+.current-detail .timer-card--critical .timer-value{color:white;text-shadow:2px 2px 0 var(--critical-red),0 0 12px rgba(239,35,60,.45)}
+.current-detail .timer-card--ended .timer-value{color:#4a403a;text-shadow:none}
+@keyframes timerPulse{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
 .current-detail a,.identity a,td.time a{display:inline-flex;align-items:center;position:relative;width:max-content;max-width:100%;border:1.5px solid var(--ink);border-radius:999px;background:var(--panel2);padding:3px calc(8px + 1.05em) 3px 8px;font-weight:900;line-height:1.1;box-shadow:2px 2px 0 var(--ink)}
 .current-detail a::after,.identity a::after,td.time a::after{content:'↗';position:absolute;inset-inline-end:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:.95em;height:.95em;font-size:.74em;line-height:1;color:var(--accent2);pointer-events:none}
 .current-detail a:hover,.identity a:hover,td.time a:hover{background:#fff;border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--accent2)}
@@ -1143,10 +1209,9 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 .dog-col{min-width:132px}
 .identity{max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .identity a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.countdown.ending{color:#ff3347;text-shadow:2px 0 0 #fff0f0,0 0 14px rgba(255,51,71,.34)}
-.countdown.ended{color:var(--muted);text-shadow:none}
+@media (prefers-reduced-motion:reduce){.timer-card,.timer-card *{animation:none!important;transition:none!important}}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
-@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .detail-time{min-width:156px}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
+@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .timer-card{flex:1 1 100%;width:100%;max-width:100%;min-width:0}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
 @media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span{width:100%;max-width:100%}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 
@@ -1156,7 +1221,10 @@ const filter=document.getElementById('filter');
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
-const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const seconds=Math.max(0,Math.floor((end-now)/1000));const ending=seconds>0&&seconds<3600;const ended=seconds===0;const safe=seconds>=3600;el.textContent=ended?'ended':formatDuration(seconds);el.classList.toggle('safe',safe);el.classList.toggle('ending',ending);el.classList.toggle('ended',ended);const box=el.closest('.detail-time');if(box){box.classList.toggle('timer-safe',safe);box.classList.toggle('timer-ending',ending);box.classList.toggle('timer-ended',ended);}});};
+const TIMER_STATES=['normal','warning','urgent','critical','ended'];
+const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':seconds<=21600?'warning':'normal';
+const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggle(`countdown--${name}`,name===state));const box=el.closest('.timer-card');if(box){TIMER_STATES.forEach(name=>box.classList.toggle(`timer-card--${name}`,name===state));}};
+const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
 filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
