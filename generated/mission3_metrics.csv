@@ -1,11 +1,11 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46600847
-latest_block_time_utc,2026-05-28 17:57:21
+latest_block,46602860
+latest_block_time_utc,2026-05-28 19:04:27
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
-dog_total_supply,727
+dog_total_supply,728
 woof_token,0x3e5c4FA0cAA794516eD0DF77f31daA534918d492
 woof_symbol,WOOF
 woof_total_supply,100000000000
@@ -13,9 +13,9 @@ woof_usd_price,0.0000004751
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
-sup_usd_price,0.01148
+sup_usd_price,0.01161
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,2017.08
+eth_usd_price,2019.04
 eth_usd_source,coinbase
 reward_basis_dogs,141
 reward_excludes,woof_vault_bonus
@@ -26,28 +26,28 @@ reward_woof_flow_usd_per_day,10.61
 reward_woof_per_dog_per_day,158351.896454
 reward_woof_per_dog_usd_per_day,0.075233
 reward_sup_received,36935.51
-reward_sup_received_usd,424.02
+reward_sup_received_usd,428.82
 reward_sup_flow_per_day,379.01
-reward_sup_flow_usd_per_day,4.35
+reward_sup_flow_usd_per_day,4.4
 reward_sup_per_dog_per_day,2.688014
-reward_sup_per_dog_usd_per_day,0.030858
-reward_total_flow_usd_per_day,14.96
-reward_total_per_dog_usd_per_day,0.106091
-reward_current_bid_payback_days,209.16
-reward_current_bid_daily_roi_pct,0.4781
-woof_holders,399
+reward_sup_per_dog_usd_per_day,0.031208
+reward_total_flow_usd_per_day,15.01
+reward_total_per_dog_usd_per_day,0.106441
+reward_current_bid_payback_days,18.98
+reward_current_bid_daily_roi_pct,5.2694
+woof_holders,387
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,51143086883.3105
-farcaster_profiles_resolved,157
-current_auction_token_id,726
-current_bid_eth,0.011
-current_bid_usd,22.19
-current_bidder,0x4119…72cb
-current_auction_end_utc,2026-05-28 16:10:25
-created_auctions,137
-settled_auctions,136
-total_bid_eth,34.867413
-total_settled_eth,6.72647
+farcaster_profiles_resolved,158
+current_auction_token_id,727
+current_bid_eth,0.001
+current_bid_usd,2.02
+current_bidder,@cryptomill
+current_auction_end_utc,2026-05-29 18:36:55
+created_auctions,138
+settled_auctions,137
+total_bid_eth,34.868413
+total_settled_eth,6.73747
 highest_bid_eth,0.3021
 season5_reward_total_sup,1017000
-season5_rewards_allocated_sup,913826.08697
+season5_rewards_allocated_sup,928565.217405

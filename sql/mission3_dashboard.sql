@@ -8,7 +8,7 @@ SELECT
   END AS label,
   CASE
     WHEN COALESCE(username, '') != '' THEN 'https://farcaster.xyz/' || username
-    ELSE ''
+    ELSE 'https://basescan.org/address/' || LOWER(address)
   END AS url,
   fid,
   username,
@@ -24,7 +24,7 @@ SELECT
   b.block_time_utc AS bid_time_utc,
   b.token_id,
   COALESCE(l.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
-  COALESCE(l.url, '') AS bidder_url,
+  COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(b.bidder)) AS bidder_url,
   b.bidder AS bidder_wallet,
   printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * eth_price.eth_usd) AS bid,
   ROUND(b.bid_eth, 8) AS bid_eth,
@@ -66,7 +66,7 @@ SELECT
   COALESCE(d.rarity_score, 0) AS rarity_score,
   s.winner AS winner_wallet,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
-  COALESCE(l.url, '') AS winner_url,
+  COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(s.winner)) AS winner_url,
   printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * eth_price.eth_usd) AS winning_bid,
   ROUND(s.amount_eth, 8) AS winning_bid_eth,
   ROUND(s.amount_eth * eth_price.eth_usd, 2) AS winning_bid_usd,
@@ -135,7 +135,7 @@ latest_bid AS (
     token_id,
     bidder AS latest_bidder_wallet,
     COALESCE(l.label, substr(LOWER(bid_ranked.bidder), 1, 6) || '…' || substr(LOWER(bid_ranked.bidder), -4)) AS latest_bidder,
-    COALESCE(l.url, '') AS latest_bidder_url,
+    COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(bid_ranked.bidder)) AS latest_bidder_url,
     bid_eth AS latest_bid_eth,
     block_time_utc AS latest_bid_utc
   FROM bid_ranked
@@ -273,7 +273,7 @@ winner_stats AS (
 )
 SELECT
   COALESCE(lab.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
-  COALESCE(lab.url, '') AS bidder_url,
+  COALESCE(NULLIF(lab.url, ''), 'https://basescan.org/address/' || LOWER(b.bidder)) AS bidder_url,
   b.bidder AS bidder_wallet,
   b.bids,
   b.auctions_bid,
@@ -312,7 +312,7 @@ SELECT
   s.settled_time_utc,
   s.token_id,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
-  COALESCE(l.url, '') AS winner_url,
+  COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(s.winner)) AS winner_url,
   s.winner AS winner_wallet,
   CAST(s.auction_xp AS INTEGER) AS auction_xp,
   ROUND((1017000.0 / 69.0) * s.auction_xp / d.day_xp, 6) AS sup_reward
@@ -342,7 +342,7 @@ WITH ranked AS (
     ROW_NUMBER() OVER (ORDER BY balance_woof DESC, address) AS rank,
     address,
     COALESCE(l.label, substr(LOWER(address), 1, 6) || '…' || substr(LOWER(address), -4)) AS holder,
-    COALESCE(l.url, '') AS holder_url,
+    COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(address)) AS holder_url,
     balance_woof,
     balance_raw,
     CASE
@@ -398,7 +398,7 @@ SELECT
   END AS bidder,
   CASE
     WHEN LOWER(c.bidder) = '0x0000000000000000000000000000000000000000' THEN ''
-    ELSE COALESCE(l.url, '')
+    ELSE COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(c.bidder))
   END AS bidder_url,
   c.bidder AS bidder_wallet,
   c.start_time_utc,

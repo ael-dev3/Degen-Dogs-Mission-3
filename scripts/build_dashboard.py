@@ -623,6 +623,13 @@ def short_address(address: str) -> str:
     return f"{normalized[:6]}…{normalized[-4:]}"
 
 
+def basescan_address_url(address: str | None) -> str:
+    normalized = normalize_address(address)
+    if not normalized or normalized == ZERO:
+        return ""
+    return f"https://basescan.org/address/{normalized}"
+
+
 def collect_identity_addresses(
     current: dict[str, Any],
     bids: list[dict[str, Any]],
@@ -1005,9 +1012,9 @@ def display_col_name(col: str) -> str:
 
 def cell_url(col: str, row_data: dict[str, Any]) -> str:
     if col == "bidder_winner":
-        return str(row_data.get("bidder_winner_url") or "")
+        return str(row_data.get("bidder_winner_url") or basescan_address_url(row_data.get("bidder_winner_wallet")) or "")
     if col in {"bidder", "winner", "holder", "latest_bidder"}:
-        return str(row_data.get(f"{col}_url") or "")
+        return str(row_data.get(f"{col}_url") or basescan_address_url(row_data.get(f"{col}_wallet")) or "")
     if col == "dog":
         return str(row_data.get("dog_external_url") or "")
     return ""
@@ -1309,8 +1316,6 @@ def timer_urgency_state(remaining_seconds: int | None, auction_status: str = "")
         return "critical"
     if remaining_seconds <= 3600:
         return "urgent"
-    if remaining_seconds <= 21600:
-        return "warning"
     return "normal"
 
 
@@ -1350,6 +1355,12 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         time_left_seconds = parse_timer_seconds(time_left)
     timer_state = timer_urgency_state(time_left_seconds, status)
     auction_status_attr = html.escape(status.lower(), quote=True)
+    is_live_auction = ("ongoing" in status.lower() or status.lower() == "live") and timer_state != "ended"
+    live_dot_class = "dot dot--live" if is_live_auction else "dot dot--idle"
+    live_dot_html = (
+        f'<span class="{live_dot_class}" data-live-dot data-auction-status="{auction_status_attr}" '
+        f'data-live-end="{html.escape(time_left_end, quote=True)}" aria-hidden="true"></span>'
+    )
     time_left_html = html.escape(time_left)
     if time_left and time_left_end:
         time_left_html = (
@@ -1377,7 +1388,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     reward_strip = render_reward_strip(metrics)
     chips = trait_chips(current)
     css = """
-:root{color-scheme:light;--paper:#e8ded5;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root{color-scheme:light;--paper:#e8ded5;--paper-calm:#eff8df;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--calm:#55a653;--calm-dark:#245a32;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 html{background:var(--paper)}
 body{margin:0;min-width:320px;background:var(--paper);color:var(--ink);font-size:14px}
@@ -1389,7 +1400,9 @@ a:hover{color:var(--accent2)}
 .current-copy{padding:18px;display:flex;flex-direction:column;gap:10px;border-right:2px solid var(--ink)}
 .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .eyebrow{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
-.dot{width:10px;height:10px;background:var(--accent);border:2px solid var(--ink);display:inline-block}
+.dot{width:10px;height:10px;background:#8a8178;border:2px solid var(--ink);display:inline-block;box-shadow:none}
+.dot--live{background:var(--calm);animation:liveDotPulse 1.7s ease-in-out infinite;box-shadow:0 0 0 0 rgba(85,166,83,.42)}
+.dot--idle{background:#8a8178}
 .repo-chip{display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;border:2px solid var(--ink);background:var(--ink);color:white;padding:6px 10px;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;line-height:1;box-shadow:3px 3px 0 var(--accent2)}
 .repo-chip::after{content:'↗';color:#ffccd2;font-size:.85em;line-height:1}
 .repo-chip:hover{background:white;color:var(--accent2);border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--accent2)}
@@ -1409,14 +1422,14 @@ a:hover{color:var(--accent2)}
 .current-detail .detail-rarity{min-width:104px}
 .current-detail .detail-bidder{min-width:0}
 .current-detail .timer-card{min-width:180px;position:relative;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.current-detail .timer-card--normal{background:var(--panel2);color:var(--ink);border-color:var(--ink);box-shadow:none}
+.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:var(--calm);box-shadow:3px 3px 0 rgba(85,166,83,.18)}
 .current-detail .timer-card--warning{background:var(--paper-warm);color:var(--ink);border-color:var(--warning);box-shadow:3px 3px 0 rgba(217,119,6,.22)}
 .current-detail .timer-card--urgent{background:var(--paper-urgent);color:var(--ink);border-color:var(--urgent);box-shadow:3px 3px 0 rgba(229,27,50,.18)}
 .current-detail .timer-card--critical{background:var(--critical-bg);color:white;border-color:var(--critical-red);box-shadow:3px 3px 0 var(--critical-red)}
 .current-detail .timer-card--ended{background:#eee7dd;color:#4a403a;border-color:#8a8178;box-shadow:none}
 .current-detail b,.time-cell b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
 .current-detail .timer-label{display:flex;align-items:center;gap:5px}
-.current-detail .timer-card--normal .timer-label{color:var(--muted)}
+.current-detail .timer-card--normal .timer-label{color:var(--calm-dark)}
 .current-detail .timer-card--warning .timer-label{color:var(--warning-dark)}
 .current-detail .timer-card--urgent .timer-label{color:var(--urgent-dark)}
 .current-detail .timer-card--critical .timer-label{color:#ffb3bd}
@@ -1424,12 +1437,13 @@ a:hover{color:var(--accent2)}
 .current-detail .timer-card--warning .timer-label::before,.current-detail .timer-card--urgent .timer-label::before,.current-detail .timer-card--critical .timer-label::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;box-shadow:0 0 0 1px rgba(10,10,10,.12)}
 .current-detail .timer-card--critical .timer-label::before{animation:timerPulse 1.8s ease-in-out infinite}
 .current-detail .timer-value{display:block;margin-top:4px;border:0;background:transparent;padding:0;min-height:0;font-family:"Arial Black",Impact,ui-sans-serif,system-ui,sans-serif;font-size:clamp(21px,2.3vw,30px);font-weight:950;line-height:.96;letter-spacing:-.015em;font-variant-numeric:tabular-nums;transform:skewX(-4deg);transform-origin:left center;text-shadow:none;color:inherit}
-.current-detail .timer-card--normal .timer-value{color:var(--ink);text-shadow:none}
+.current-detail .timer-card--normal .timer-value{color:var(--calm-dark);text-shadow:none}
 .current-detail .timer-card--warning .timer-value{color:var(--warning-dark);text-shadow:none}
 .current-detail .timer-card--urgent .timer-value{color:var(--urgent);text-shadow:none}
 .current-detail .timer-card--critical .timer-value{color:white;text-shadow:2px 2px 0 var(--critical-red),0 0 12px rgba(239,35,60,.45)}
 .current-detail .timer-card--ended .timer-value{color:#4a403a;text-shadow:none}
 @keyframes timerPulse{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.08)}}
+@keyframes liveDotPulse{0%,100%{transform:scale(.94);box-shadow:0 0 0 0 rgba(85,166,83,.4)}50%{transform:scale(1.08);box-shadow:0 0 0 5px rgba(85,166,83,0)}}
 .current-detail a,.identity a,td.time a{display:inline-flex;align-items:center;position:relative;width:max-content;max-width:100%;border:1.5px solid var(--ink);border-radius:999px;background:var(--panel2);padding:3px calc(8px + 1.05em) 3px 8px;font-weight:900;line-height:1.1;box-shadow:2px 2px 0 var(--ink)}
 .current-detail a::after,.identity a::after,td.time a::after{content:'↗';position:absolute;inset-inline-end:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:.95em;height:.95em;font-size:.74em;line-height:1;color:var(--accent2);pointer-events:none}
 .current-detail a:hover,.identity a:hover,td.time a:hover{background:#fff;border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--accent2)}
@@ -1471,7 +1485,7 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 .dog-col{min-width:132px}
 .identity{max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .identity a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (prefers-reduced-motion:reduce){.timer-card,.timer-card *{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){.timer-card,.timer-card *,.dot--live{animation:none!important;transition:none!important}}
 @media (max-width:1100px){.reward-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.reward-strip{grid-template-columns:1fr;gap:5px}.reward-tile{padding:6px 7px}.reward-tile strong{font-size:13px}.reward-strip p{font-size:10px}}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
@@ -1486,9 +1500,10 @@ const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=N
 const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
 const TIMER_STATES=['normal','warning','urgent','critical','ended'];
-const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':seconds<=21600?'warning':'normal';
+const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':'normal';
 const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggle(`countdown--${name}`,name===state));const box=el.closest('.timer-card');if(box){TIMER_STATES.forEach(name=>box.classList.toggle(`timer-card--${name}`,name===state));}};
-const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});};
+const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
+const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
 filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
@@ -1509,7 +1524,7 @@ setInterval(updateCountdowns,1000);
 <div class="shell">
   <section class="current-card" aria-label="Current auction">
     <div class="current-copy">
-      <div class="topline"><div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>{repo_link}</div>
+      <div class="topline"><div class="eyebrow">{live_dot_html}Mission 3 auction feed</div>{repo_link}</div>
       <h1>{html.escape(dog)}</h1>
       <div class="current-detail">{current_detail}</div>
       {reward_strip}
