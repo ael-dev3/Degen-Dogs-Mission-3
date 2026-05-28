@@ -1319,6 +1319,8 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     current = current_lookup(tables)
     primary_parts = [table_html(name, *tables[name], featured=True) for name in PRIMARY_TABLES if name in tables]
     site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
+    repo_url = "https://github.com/ael-dev3/Degen-Dogs-Mission-3"
+    repo_link = f'<a class="repo-chip" href="{html.escape(repo_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="Open the Degen Dogs Mission 3 GitHub repository">GitHub repo</a>'
     metric_cols, metric_rows = tables.get("mission3_metrics", (["metric", "value"], [("site_url", site_url)]))
     metric_head = "".join(f'<th scope="col">{html.escape(str(col))}</th>' for col in metric_cols)
     metric_body = "".join(
@@ -1385,8 +1387,13 @@ a:hover{color:var(--accent2)}
 .current-card,.table-card{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
 .current-card{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(260px,.42fr);gap:0;margin-bottom:10px;min-height:300px;overflow:hidden}
 .current-copy{padding:18px;display:flex;flex-direction:column;gap:10px;border-right:2px solid var(--ink)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .eyebrow{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .dot{width:10px;height:10px;background:var(--accent);border:2px solid var(--ink);display:inline-block}
+.repo-chip{display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;border:2px solid var(--ink);background:var(--ink);color:white;padding:6px 10px;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;line-height:1;box-shadow:3px 3px 0 var(--accent2)}
+.repo-chip::after{content:'↗';color:#ffccd2;font-size:.85em;line-height:1}
+.repo-chip:hover{background:white;color:var(--accent2);border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--accent2)}
+.repo-chip:hover::after{color:var(--accent2)}
 .current-copy h1{font-size:clamp(34px,6vw,72px);line-height:.9;margin:0;letter-spacing:-.075em;max-width:10ch}
 .subtitle{margin:0;color:var(--muted);font-weight:700}
 .current-detail{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;margin-top:auto}
@@ -1502,7 +1509,7 @@ setInterval(updateCountdowns,1000);
 <div class="shell">
   <section class="current-card" aria-label="Current auction">
     <div class="current-copy">
-      <div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>
+      <div class="topline"><div class="eyebrow"><span class="dot"></span>Mission 3 auction feed</div>{repo_link}</div>
       <h1>{html.escape(dog)}</h1>
       <div class="current-detail">{current_detail}</div>
       {reward_strip}
