@@ -15,7 +15,7 @@ Status: dashboard title `Degen Dogs Mission 2` by `ael_dev` has been seen in Dun
 - <https://docs.degendogs.club/degen-dogs/basics/auctions>
 - <https://docs.degendogs.club/basics/streamonomics>
 
-## Superfluid forum / Mark summary
+## Superfluid forum / Mark Carey summary
 
 - <https://forum.superfluid.org/t/season-5-ideas-established-project-degen-dogs/1556>
 

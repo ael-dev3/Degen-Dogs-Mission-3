@@ -25,12 +25,12 @@ The current goal is data recovery and reproducibility, not a public visual dashb
 - Network: Degen Chain, chain ID `666666666`.
 - Native gas currency: DEGEN.
 - Mission 2 docs describe native DEGEN bids, 24 hour auctions, 1000 DEGEN reserve price, 10% minimum bid increment, and 5 minute time buffer.
-- Mark's source repo exposes the auction event shapes used by the local indexer.
+- Mark Carey's source repo exposes the auction event shapes used by the local indexer.
 - Mission 3 started on Base at Dog #590 according to current docs, so Dog #590 is a transition marker. The last Mission 2 auction and exact Mission 2 Dog ID range are still unverified.
 
 ## What is not recovered yet
 
-Do not treat any of these as production facts until verified from Dune SQL, explorer verified contracts, official docs, or Mark's source/deployment records:
+Do not treat any of these as production facts until verified from Dune SQL, explorer verified contracts, official docs, or Mark Carey's source/deployment records:
 
 - Mission 2 Dune dashboard URL/slug/dashboard ID.
 - Mission 2 Dune query IDs and official SQL.

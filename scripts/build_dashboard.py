@@ -1408,11 +1408,11 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     mark_avatar_src = html.escape(public_png_data_uri("mark-profile.png"), quote=True)
     mark_credit_html = (
         '<div class="credit-menu">'
-        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark, the creator of Degen Dogs">Degen Dogs by Mark</button>'
-        '<div class="credit-popover" aria-label="Mark profile links">'
+        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark Carey, the creator of Degen Dogs">Degen Dogs by Mark Carey</button>'
+        '<div class="credit-popover" aria-label="Mark Carey profile links">'
         '<div class="credit-head">'
-        f'<img src="{mark_avatar_src}" alt="Pixel Degen Dog avatar for Mark">'
-        '<div><span>Mark, the creator of Degen Dogs</span></div>'
+        f'<img src="{mark_avatar_src}" alt="Pixel Degen Dog avatar for Mark Carey">'
+        '<div><span>Mark Carey, the creator of Degen Dogs</span></div>'
         '</div>'
         '<a href="https://farcaster.xyz/markcarey" target="_blank" rel="noopener noreferrer">Farcaster</a>'
         '<a href="https://x.com/mthacks" target="_blank" rel="noopener noreferrer">X</a>'

@@ -12,7 +12,7 @@
 - [ ] Recover MintClub bonding curve token address.
 - [ ] Recover deployment block / first relevant auction block.
 - [ ] Recover final Degen Chain auction before Base migration.
-- [ ] Find official Mark/Farcaster casts announcing Mission 2 contract deployments.
+- [ ] Find official Mark Carey/Farcaster casts announcing Mission 2 contract deployments.
 
 ## Index/reconciliation checklist
 

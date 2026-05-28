@@ -10,7 +10,7 @@ Do not fabricate query IDs or SQL. Use the official Dune Read Query endpoint onl
 
 ## Mission 2 mechanics summary
 
-Mission 2 moved Degen Dogs onto Degen Chain and Farcaster. Public docs and Mark's Superfluid forum summary describe:
+Mission 2 moved Degen Dogs onto Degen Chain and Farcaster. Public docs and Mark Carey's Superfluid forum summary describe:
 
 - Native DEGEN bids on Degen Chain.
 - One Dog auctioned at a time.
