@@ -1348,11 +1348,11 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     mark_avatar_src = html.escape(public_png_data_uri("mark-profile.png"), quote=True)
     mark_credit_html = (
         '<div class="credit-menu">'
-        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark created Degen Dogs">Degen Dogs by Mark</button>'
+        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark, the creator of Degen Dogs">Degen Dogs by Mark</button>'
         '<div class="credit-popover" aria-label="Mark profile links">'
         '<div class="credit-head">'
         f'<img src="{mark_avatar_src}" alt="Pixel Degen Dog avatar for Mark">'
-        '<div><b>Creator</b><span>Mark created Degen Dogs.</span></div>'
+        '<div><span>Mark, the creator of Degen Dogs</span></div>'
         '</div>'
         '<a href="https://farcaster.xyz/markcarey" target="_blank" rel="noopener noreferrer">Farcaster</a>'
         '<a href="https://x.com/mthacks" target="_blank" rel="noopener noreferrer">X</a>'
@@ -1451,7 +1451,6 @@ a:hover{color:var(--accent2)}
 .credit-head{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:7px;margin-bottom:2px}
 .credit-head img{width:44px;height:44px;object-fit:cover;image-rendering:pixelated;border:2px solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink)}
 .credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover{opacity:1;pointer-events:auto;transform:translateY(0)}
-.credit-popover b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2)}
 .credit-popover span{font-size:12px;font-weight:850;line-height:1.2;color:var(--ink)}
 .credit-popover a{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--ink);background:var(--panel2);padding:5px 7px;font-size:12px;font-weight:950;line-height:1;text-transform:uppercase;letter-spacing:.06em;box-shadow:2px 2px 0 var(--ink)}
 .credit-popover a::after{content:'↗';color:var(--accent2);font-size:.78em}
