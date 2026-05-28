@@ -55,6 +55,8 @@ GitHub Pages dashboard
 
 - Check the top card for the current dog, current high bid, and countdown.
 - Use the auction feed to see the current auction and recent winners.
+- Click Dog images in the auction feed to open their OpenSea item pages.
+- Click current-Dog traits to filter the Degen Dogs OpenSea collection.
 - Use traits and rarity to understand the dog's profile.
 - Use the advanced tables or downloads only if you want raw data.
 - The dashboard updates when the private runner publishes a new snapshot.

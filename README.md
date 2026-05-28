@@ -55,6 +55,8 @@ GitHub Pages dashboard
 
 - Check the top card for the current dog, current high bid, and countdown.
 - Use the auction feed to see the current auction and recent winners.
+- Click Dog images in the auction feed to open their OpenSea item pages.
+- Click current-Dog traits to filter the Degen Dogs OpenSea collection.
 - Use traits and rarity to understand the dog's profile.
 - Use the advanced tables or downloads only if you want raw data.
 - The dashboard updates when the private runner publishes a new snapshot.
@@ -67,8 +69,8 @@ This block is generated from the latest data refresh, so it changes when `npm ru
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46602860 |
-| Snapshot time UTC | 2026-05-28 19:04:27 |
+| Snapshot block | 46605338 |
+| Snapshot time UTC | 2026-05-28 20:27:03 |
 | Current auction | Dog #727 |
 | Current bid | 0.001 ETH ($2.02) |
 | Current high bidder | @cryptomill |
@@ -79,7 +81,7 @@ This block is generated from the latest data refresh, so it changes when `npm ru
 | Current bid reward payback | ≈19 days |
 | Rewards basis | 141 Dogs; WOOF Vault Bonus excluded |
 | Created / settled auctions | 138 / 137 |
-| WOOF holders | 387 |
+| WOOF holders | 390 |
 | Farcaster profiles resolved | 158 |
 
 ## How the data pipeline works

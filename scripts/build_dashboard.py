@@ -55,6 +55,22 @@ DEGEN_DOGS = "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
 WOOF = "0x3e5c4FA0cAA794516eD0DF77f31daA534918d492"
 SUP = "0xa69f80524381275A7fFdb3AE01c54150644c8792"
 ZERO = "0x0000000000000000000000000000000000000000"
+OPENSEA_ITEM_BASE = "https://opensea.io/item/base"
+OPENSEA_COLLECTION_URL = "https://opensea.io/collection/degen-dogs-club"
+
+
+def dog_opensea_url(token_id: int | str) -> str:
+    return f"{OPENSEA_ITEM_BASE}/{DEGEN_DOGS.lower()}/{int(token_id)}"
+
+
+def opensea_trait_url(trait_type: str, trait_value: str) -> str:
+    payload = json.dumps(
+        [{"traitType": str(trait_type), "values": [str(trait_value)]}],
+        separators=(",", ":"),
+    )
+    quote_encoded_payload = payload.replace('"', "%22")
+    encoded = urllib.parse.quote(quote_encoded_payload, safe=":,")
+    return f"{OPENSEA_COLLECTION_URL}?traits={encoded}"
 
 # Rewards snapshot supplied by Ael for a 141-Dog wallet. WOOF Vault Bonus is
 # intentionally excluded so the per-Dog reward estimate reflects only the base
@@ -560,6 +576,7 @@ def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str,
                 "dog_name": row.get("name") or f"Degen Dog #{token_id}",
                 "dog_image_url": row.get("image_url") or "",
                 "dog_external_url": row.get("external_url") or f"https://degendogs.club/#dog{token_id}",
+                "dog_opensea_url": dog_opensea_url(token_id),
                 "traits": "; ".join(traits),
                 "trait_rarity": "; ".join(rarity_items),
                 "rarity": f"#{ranks.get(token_id, 0)}/{total_supply}",
@@ -947,6 +964,7 @@ def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None
 HIDDEN_UI_COLUMNS = {
     "dog_image_url",
     "dog_external_url",
+    "dog_opensea_url",
     "bidder_url",
     "winner_url",
     "holder_url",
@@ -1027,14 +1045,23 @@ def render_cell(col: str, value: Any, row_data: dict[str, Any]) -> str:
     lowered = col.lower()
     if col == "dog":
         image = str(row_data.get("dog_image_url") or "")
-        url = cell_url(col, row_data)
+        text_url = cell_url(col, row_data)
+        image_url = str(row_data.get("dog_opensea_url") or "")
         image_html = ""
         if image:
             image_html = f'<img class="dog-thumb" src="{html.escape(image, quote=True)}" alt="{html.escape(text, quote=True)} image" loading="lazy">'
+            if image_url:
+                dog_label = text or "Dog"
+                image_label = f"Open {dog_label} on OpenSea"
+                image_html = (
+                    f'<a class="dog-image-link" href="{html.escape(image_url, quote=True)}" target="_blank" '
+                    f'rel="noopener noreferrer" aria-label="{html.escape(image_label, quote=True)}" '
+                    f'title="{html.escape(image_label, quote=True)}">{image_html}</a>'
+                )
         label_html = f'<span>{escaped}</span>'
+        if text_url and text:
+            label_html = f'<a class="dog-link" href="{html.escape(text_url, quote=True)}" target="_blank" rel="noopener noreferrer">{escaped}</a>'
         inner = f'<span class="dog-cell">{image_html}{label_html}</span>'
-        if url:
-            inner = f'<a class="dog-link" href="{html.escape(url, quote=True)}" target="_blank" rel="noopener noreferrer">{inner}</a>'
         return inner
     if lowered in {"status", "auction_state"}:
         tone = "ongoing" if "ongoing" in text or text == "live" else "settled" if "settled" in text else "neutral"
@@ -1276,10 +1303,43 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
     })
 
 
+def parse_trait_item(item: str) -> tuple[str, str, str]:
+    if ":" not in item:
+        return "", item.strip(), ""
+    trait_type, raw_value = item.split(":", 1)
+    trait_type = trait_type.strip()
+    trait_value = raw_value.strip()
+    rarity = ""
+    if trait_value.endswith(")") and " (" in trait_value:
+        value_part, rarity_part = trait_value.rsplit(" (", 1)
+        if rarity_part.endswith(")") and rarity_part[:-1].strip().endswith("%"):
+            trait_value = value_part.strip()
+            rarity = f"({rarity_part}"
+    return trait_type, trait_value, rarity
+
+
 def trait_chips(current: dict[str, str]) -> str:
     source = current.get("trait_rarity") or current.get("traits") or ""
     items = [item.strip() for item in source.split(";") if item.strip()]
-    return "".join(f'<span>{html.escape(item)}</span>' for item in items)
+    chips = []
+    for item in items:
+        trait_type, trait_value, rarity = parse_trait_item(item)
+        if not trait_type or not trait_value:
+            chips.append(f'<span class="trait-pill">{html.escape(item)}</span>')
+            continue
+        url = opensea_trait_url(trait_type, trait_value)
+        label = f"View Degen Dogs with {trait_type}: {trait_value} on OpenSea"
+        rarity_html = f'<span class="trait-rarity">{html.escape(rarity)}</span>' if rarity else ""
+        chips.append(
+            f'<a class="trait-pill trait-pill-link" href="{html.escape(url, quote=True)}" target="_blank" '
+            f'rel="noopener noreferrer" aria-label="{html.escape(label, quote=True)}" '
+            f'title="{html.escape(label, quote=True)}">'
+            f'<span class="trait-type">{html.escape(trait_type)}</span>'
+            f'<span class="trait-value">{html.escape(trait_value)}</span>'
+            f'{rarity_html}'
+            '</a>'
+        )
+    return "".join(chips)
 
 
 def public_png_data_uri(filename: str) -> str:
@@ -1496,7 +1556,11 @@ a:hover{color:var(--accent2)}
 .current-detail a::after,.identity a::after,td.time a::after{content:'↗';position:absolute;inset-inline-end:7px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:.95em;height:.95em;font-size:.74em;line-height:1;color:var(--accent2);pointer-events:none}
 .current-detail a:hover,.identity a:hover,td.time a:hover{background:#fff;border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--accent2)}
 .traits{display:flex;flex-wrap:wrap;gap:5px;max-height:78px;overflow:auto;padding-right:2px}
-.traits span{border:1.5px solid var(--ink);background:var(--panel);padding:4px 6px;font-size:11px;font-weight:800;line-height:1.15}
+.traits .trait-pill{display:inline-flex;align-items:baseline;gap:3px;border:1.5px solid var(--ink);background:var(--panel);color:inherit;padding:4px 6px;font-size:11px;font-weight:800;line-height:1.15}
+.trait-pill-link{cursor:pointer;text-decoration:none;transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease}
+.trait-pill-link:hover{background:#fff;border-color:var(--accent2);transform:translateY(-1px);box-shadow:2px 2px 0 rgba(185,19,37,.18)}
+.trait-pill-link:focus-visible,.dog-image-link:focus-visible{outline:3px solid currentColor;outline-offset:3px}
+.trait-type{font-weight:950;color:var(--muted);text-transform:uppercase;font-size:.84em;letter-spacing:.04em}.trait-type::after{content:':'}.trait-value{color:var(--ink)}.trait-rarity{color:var(--muted);font-weight:850}
 .dog-stage{display:flex;align-items:center;justify-content:center;background:var(--panel2);min-height:280px;padding:10px;overflow:hidden}
 .dog-stage img{width:min(100%,330px);height:min(100%,330px);object-fit:contain;filter:drop-shadow(0 10px 18px rgba(0,0,0,.16))}
 .toolbar{display:flex;justify-content:flex-end;margin:0 0 10px}
@@ -1528,8 +1592,11 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 .status-pill.ongoing{background:var(--accent);color:white}
 .status-pill.settled{background:#efe3d7;color:var(--ink)}
 .dog-link{display:inline-flex;color:var(--ink)}
+.dog-link:hover{color:var(--accent2)}
 .dog-cell{display:flex;align-items:center;gap:7px;font-weight:950}
-.dog-thumb{width:38px;height:38px;border:1.5px solid var(--ink);background:var(--panel2);object-fit:cover;flex:none}
+.dog-image-link{display:inline-flex;flex:none;border-radius:3px;color:inherit}
+.dog-image-link:hover .dog-thumb{transform:translateY(-1px);box-shadow:0 3px 0 rgba(10,10,10,.16)}
+.dog-thumb{width:38px;height:38px;border:1.5px solid var(--ink);background:var(--panel2);object-fit:cover;flex:none;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 .dog-col{min-width:132px}
 .identity{max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .identity a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1537,7 +1604,7 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 @media (max-width:1100px){.reward-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.reward-strip{grid-template-columns:1fr;gap:5px}.reward-tile{padding:6px 7px}.reward-tile strong{font-size:13px}.reward-strip p{font-size:10px}}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{justify-content:stretch}.toolbar input{width:100%}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
-@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .timer-card{flex:1 1 100%;width:100%;max-width:100%;min-width:0}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits span{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
+@media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .timer-card{flex:1 1 100%;width:100%;max-width:100%;min-width:0}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits .trait-pill{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0}.toolbar input{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
 @media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span{width:100%;max-width:100%}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 @media (max-width:900px){.topline{align-items:flex-start}.top-actions{justify-content:flex-start;max-width:100%}}
@@ -1635,7 +1702,7 @@ def main() -> None:
     insert_rows(conn, "auction_settled", settled, [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     insert_rows(conn, "woof_holders", holders, [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
     insert_rows(conn, "farcaster_profiles", farcaster_profiles, [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
-    insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
+    insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
     insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
