@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import base64
 import csv
 import concurrent.futures
 import html
@@ -1281,6 +1282,15 @@ def trait_chips(current: dict[str, str]) -> str:
     return "".join(f'<span>{html.escape(item)}</span>' for item in items)
 
 
+def public_png_data_uri(filename: str) -> str:
+    path = ROOT / "public" / filename
+    try:
+        payload = base64.b64encode(path.read_bytes()).decode("ascii")
+    except FileNotFoundError:
+        return filename
+    return f"data:image/png;base64,{payload}"
+
+
 def parse_timer_seconds(value: str) -> int | None:
     value = (value or "").strip().lower()
     if not value or value == "ended":
@@ -1335,11 +1345,15 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         f'rel="noopener noreferrer" aria-label="{html.escape(label, quote=True)}">{html.escape(text)}</a>'
         for text, url, label, extra in top_links
     )
+    mark_avatar_src = html.escape(public_png_data_uri("mark-profile.png"), quote=True)
     mark_credit_html = (
         '<div class="credit-menu">'
-        '<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark is the main dev who created this dashboard">Built by Mark</button>'
+        f'<button type="button" class="credit-trigger" aria-haspopup="true" aria-label="Project credit: Mark created Degen Dogs and is the main dev"><img class="credit-avatar" src="{mark_avatar_src}" alt="" aria-hidden="true">Degen Dogs by Mark</button>'
         '<div class="credit-popover" aria-label="Mark profile links">'
-        '<b>Main dev</b><span>Mark created this dashboard end-to-end.</span>'
+        '<div class="credit-head">'
+        f'<img src="{mark_avatar_src}" alt="Pixel Degen Dog avatar for Mark">'
+        '<div><b>Creator / main dev</b><span>Mark created Degen Dogs and leads the project.</span></div>'
+        '</div>'
         '<a href="https://farcaster.xyz/markcarey" target="_blank" rel="noopener noreferrer">Farcaster</a>'
         '<a href="https://x.com/mthacks" target="_blank" rel="noopener noreferrer">X</a>'
         '<a href="https://github.com/markcarey" target="_blank" rel="noopener noreferrer">GitHub</a>'
@@ -1433,7 +1447,10 @@ a:hover{color:var(--accent2)}
 .credit-menu{position:relative;display:inline-flex}
 .credit-trigger{cursor:default;background:#fff;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
 .credit-trigger:focus{outline:2px solid var(--accent2);outline-offset:2px}
-.credit-popover{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:6px;min-width:220px;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);padding:10px;opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease}
+.credit-popover{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:6px;min-width:252px;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);padding:10px;opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease}
+.credit-avatar{width:24px;height:24px;object-fit:cover;image-rendering:pixelated;border:1.5px solid var(--ink);background:#fff;box-shadow:1.5px 1.5px 0 var(--ink);margin:-5px 0 -5px -5px;flex:none}
+.credit-head{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:7px;margin-bottom:2px}
+.credit-head img{width:44px;height:44px;object-fit:cover;image-rendering:pixelated;border:2px solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink)}
 .credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover{opacity:1;pointer-events:auto;transform:translateY(0)}
 .credit-popover b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent2)}
 .credit-popover span{font-size:12px;font-weight:850;line-height:1.2;color:var(--ink)}
