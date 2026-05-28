@@ -1,0 +1,86 @@
+{
+  "chain_id": 8453,
+  "confidence": "verified",
+  "contracts": {
+    "auction_house": {
+      "address": "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA",
+      "sources": [
+        {
+          "path": "scripts/build_dashboard.py",
+          "type": "repo"
+        },
+        {
+          "method": "eth_getCode",
+          "result": "non_empty_code_7389_bytes",
+          "type": "base_rpc"
+        }
+      ],
+      "verified_by": [
+        "repo_code",
+        "contract_code_exists",
+        "dog_590_auction_created_receipt"
+      ]
+    },
+    "dogs_nft": {
+      "address": "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428",
+      "sources": [
+        {
+          "path": "scripts/build_dashboard.py",
+          "type": "repo"
+        },
+        {
+          "method": "eth_getCode",
+          "result": "non_empty_code_13330_bytes",
+          "type": "base_rpc"
+        }
+      ],
+      "verified_by": [
+        "repo_code",
+        "contract_code_exists",
+        "dashboard_metadata_calls"
+      ]
+    },
+    "sup": {
+      "address": "0xa69f80524381275A7fFdb3AE01c54150644c8792",
+      "sources": [
+        {
+          "path": "scripts/build_dashboard.py",
+          "type": "repo"
+        },
+        {
+          "method": "eth_getCode",
+          "result": "non_empty_code_4239_bytes",
+          "type": "base_rpc"
+        }
+      ],
+      "verified_by": [
+        "repo_code",
+        "contract_code_exists",
+        "dashboard_symbol_decimals_calls"
+      ]
+    },
+    "woof": {
+      "address": "0x3e5c4FA0cAA794516eD0DF77f31daA534918d492",
+      "sources": [
+        {
+          "path": "scripts/build_dashboard.py",
+          "type": "repo"
+        },
+        {
+          "method": "eth_getCode",
+          "result": "non_empty_code_1325_bytes",
+          "type": "base_rpc"
+        }
+      ],
+      "verified_by": [
+        "repo_code",
+        "contract_code_exists",
+        "dashboard_balance_calls"
+      ]
+    }
+  },
+  "mission": 3,
+  "notes": "Verified against current repo code and public Base eth_getCode checks during archive Phase 0.",
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T22:04:11Z"
+}

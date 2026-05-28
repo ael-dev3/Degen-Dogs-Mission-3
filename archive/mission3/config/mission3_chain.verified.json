@@ -1,0 +1,33 @@
+{
+  "chain": {
+    "chain_id": 8453,
+    "explorers": [
+      "https://basescan.org"
+    ],
+    "name": "Base Mainnet",
+    "native_currency": {
+      "decimals": 18,
+      "symbol": "ETH"
+    },
+    "rpc_env_vars": [
+      "BASE_RPC_URL",
+      "BASE_RPC_URLS",
+      "BASE_LOG_RPC_URLS"
+    ]
+  },
+  "confidence": "verified",
+  "mission": 3,
+  "schema_version": 1,
+  "sources": [
+    {
+      "description": "eth_chainId returned 8453 via public Base RPC during Phase 0 inspection",
+      "type": "rpc"
+    },
+    {
+      "description": "Current Mission 3 dashboard uses Base RPC and ETH amounts",
+      "path": "scripts/build_dashboard.py",
+      "type": "repo"
+    }
+  ],
+  "updated_at_utc": "2026-05-28T22:04:11Z"
+}

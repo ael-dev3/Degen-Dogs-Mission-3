@@ -7,3 +7,6 @@ __pycache__
 .env.*
 *.local
 .cache
+archive/mission3/data/mission3_archive.sqlite
+archive/mission3/data/mission3_archive.sqlite-*
+archive/mission3/data/raw/*.ndjson

@@ -23,6 +23,7 @@ BRANCH="${DEGEN_DOGS_BRANCH:-main}"
 COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
 SKIP_PUSH="${DEGEN_DOGS_SKIP_PUSH:-0}"
 SKIP_PULL="${DEGEN_DOGS_SKIP_PULL:-0}"
+RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-0}"
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_FILE:-${LOG_DIR}/refresh.log}"
@@ -127,7 +128,7 @@ from __future__ import annotations
 import subprocess
 import sys
 
-paths = ["README.md", "index.html", "generated", "public"]
+paths = ["README.md", "index.html", "generated", "public", "archive/mission3/data/generated"]
 status = subprocess.check_output(
     ["git", "status", "--porcelain", "--untracked-files=all", "--", *paths],
     text=True,
@@ -148,6 +149,13 @@ fi
 if [[ ! -d node_modules || package-lock.json -nt node_modules/.package-lock.json ]]; then
   log "installing npm dependencies"
   npm ci
+fi
+
+if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
+  log "running Mission 3 archive incremental index"
+  npm run archive:mission3:index
+  log "checking Mission 3 archive health"
+  npm run archive:mission3:health
 fi
 
 log "running blockchain data generator"
@@ -226,8 +234,8 @@ PY
 git diff --check
 npm run build
 
-if git diff --quiet -- README.md index.html generated public; then
-  log "no generated website data changes to publish"
+if git diff --quiet -- README.md index.html generated public archive/mission3/data/generated; then
+  log "no generated website/archive data changes to publish"
   exit 0
 fi
 
@@ -246,6 +254,13 @@ with open("generated/manifest.csv", newline="", encoding="utf-8") as handle:
         json_path = csv_path.with_suffix(".json")
         paths.extend([str(csv_path), str(json_path), str(Path("public") / csv_path), str(Path("public") / json_path)])
 paths.extend(["generated/manifest.csv", "generated/manifest.json", "public/generated/manifest.csv", "public/generated/manifest.json"])
+archive_public = Path("public/generated/mission3")
+archive_generated = Path("archive/mission3/data/generated")
+if archive_public.exists():
+    paths.extend(str(path) for path in sorted(archive_public.glob("*.json")))
+if archive_generated.exists():
+    paths.extend(str(path) for path in sorted(archive_generated.glob("*.csv")))
+    paths.extend(str(path) for path in sorted(archive_generated.glob("*.json")))
 for path in dict.fromkeys(paths):
     print(path)
 PY
@@ -268,7 +283,15 @@ from pathlib import Path
 staged = subprocess.check_output(["git", "diff", "--cached", "--name-only"], text=True).splitlines()
 allowed_exact = {"README.md", "index.html"}
 allowed_artifact = re.compile(r"^(generated|public/generated)/[A-Za-z0-9_]+\.(csv|json)$")
-unexpected = [path for path in staged if path not in allowed_exact and not allowed_artifact.fullmatch(path)]
+allowed_archive_artifact = re.compile(r"^archive/mission3/data/generated/[A-Za-z0-9_]+\.(csv|json)$")
+allowed_public_archive = re.compile(r"^public/generated/mission3/[A-Za-z0-9_]+\.json$")
+unexpected = [
+    path for path in staged
+    if path not in allowed_exact
+    and not allowed_artifact.fullmatch(path)
+    and not allowed_archive_artifact.fullmatch(path)
+    and not allowed_public_archive.fullmatch(path)
+]
 if unexpected:
     print("refusing to publish unexpected staged paths:", file=sys.stderr)
     for path in unexpected:

@@ -1,0 +1,45 @@
+{
+  "chain_id": 8453,
+  "confidence": "verified",
+  "earliest_verified_auction_created": {
+    "block_number": 40564762,
+    "end_time_utc": "2026-01-10T00:34:31Z",
+    "log_index": 2108,
+    "start_time_utc": "2026-01-09T00:34:31Z",
+    "token_id": 590,
+    "transaction_hash": "0x875be581184c855641547daf148a091a709a3001740ee0ac26ea85a55a5a4400"
+  },
+  "indexing": {
+    "dashboard_from_block": 40500000,
+    "mode": "open_ended_live",
+    "recommended_chunk_size": 10000,
+    "verified_from_block": 40500000
+  },
+  "latest_dashboard_generated_block_at_inspection": 46605338,
+  "latest_verified_public_rpc_block_at_config_time": 46608390,
+  "mission": 3,
+  "mission_transition": {
+    "confidence": "verified_from_base_logs",
+    "first_mission3_dog_token_id": 590,
+    "note": "Dog #590 AuctionCreated was verified from Base transaction receipt during archive Phase 0."
+  },
+  "schema_version": 1,
+  "sources": [
+    {
+      "field": "FROM_BLOCK",
+      "path": "scripts/build_dashboard.py",
+      "type": "repo"
+    },
+    {
+      "field": "latest_block",
+      "path": "generated/mission3_metrics.csv",
+      "type": "generated"
+    },
+    {
+      "method": "eth_getTransactionReceipt",
+      "transaction_hash": "0x875be581184c855641547daf148a091a709a3001740ee0ac26ea85a55a5a4400",
+      "type": "base_rpc"
+    }
+  ],
+  "updated_at_utc": "2026-05-28T22:04:11Z"
+}

@@ -1219,7 +1219,7 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     )
     if not body:
         return ""
-    note = f"Based on Ael wallet flow across {basis} Dogs. WOOF Vault Bonus excluded."
+    note = f"Per-Dog stream estimate across {basis} Dogs. WOOF Vault Bonus excluded."
     return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}<p>{html.escape(note)}</p></section>'
 
 
@@ -1379,14 +1379,14 @@ def timer_urgency_state(remaining_seconds: int | None, auction_status: str = "")
     if "settled" in status or "ended" in status:
         return "ended"
     if remaining_seconds is None:
-        return "normal"
+        return "calm"
     if remaining_seconds <= 0:
         return "ended"
     if remaining_seconds <= 600:
         return "critical"
     if remaining_seconds <= 3600:
         return "urgent"
-    return "normal"
+    return "calm"
 
 
 def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> None:
@@ -1543,23 +1543,20 @@ a:hover{color:var(--accent2)}
 .current-detail .detail-rarity{min-width:104px}
 .current-detail .detail-bidder{min-width:0}
 .current-detail .timer-card{min-width:180px;position:relative;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:var(--calm);box-shadow:3px 3px 0 rgba(85,166,83,.18)}
-.current-detail .timer-card--warning{background:var(--paper-warm);color:var(--ink);border-color:var(--warning);box-shadow:3px 3px 0 rgba(217,119,6,.22)}
+.current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:#9bd78d;box-shadow:3px 3px 0 rgba(85,166,83,.14)}
 .current-detail .timer-card--urgent{background:var(--paper-urgent);color:var(--ink);border-color:var(--urgent);box-shadow:3px 3px 0 rgba(229,27,50,.18)}
 .current-detail .timer-card--critical{background:var(--critical-bg);color:white;border-color:var(--critical-red);box-shadow:3px 3px 0 var(--critical-red)}
 .current-detail .timer-card--ended{background:#eee7dd;color:#4a403a;border-color:#8a8178;box-shadow:none}
 .current-detail b,.time-cell b{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
 .current-detail .timer-label{display:flex;align-items:center;gap:5px}
-.current-detail .timer-card--normal .timer-label{color:var(--calm-dark)}
-.current-detail .timer-card--warning .timer-label{color:var(--warning-dark)}
+.current-detail .timer-card--calm .timer-label,.current-detail .timer-card--normal .timer-label{color:var(--calm-dark)}
 .current-detail .timer-card--urgent .timer-label{color:var(--urgent-dark)}
 .current-detail .timer-card--critical .timer-label{color:#ffb3bd}
 .current-detail .timer-card--ended .timer-label{color:#4a403a}
-.current-detail .timer-card--warning .timer-label::before,.current-detail .timer-card--urgent .timer-label::before,.current-detail .timer-card--critical .timer-label::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;box-shadow:0 0 0 1px rgba(10,10,10,.12)}
+.current-detail .timer-card--urgent .timer-label::before,.current-detail .timer-card--critical .timer-label::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;box-shadow:0 0 0 1px rgba(10,10,10,.12)}
 .current-detail .timer-card--critical .timer-label::before{animation:timerPulse 1.8s ease-in-out infinite}
 .current-detail .timer-value{display:block;margin-top:4px;border:0;background:transparent;padding:0;min-height:0;font-family:"Arial Black",Impact,ui-sans-serif,system-ui,sans-serif;font-size:clamp(21px,2.3vw,30px);font-weight:950;line-height:.96;letter-spacing:-.015em;font-variant-numeric:tabular-nums;transform:skewX(-4deg);transform-origin:left center;text-shadow:none;color:inherit}
-.current-detail .timer-card--normal .timer-value{color:var(--calm-dark);text-shadow:none}
-.current-detail .timer-card--warning .timer-value{color:var(--warning-dark);text-shadow:none}
+.current-detail .timer-card--calm .timer-value,.current-detail .timer-card--normal .timer-value{color:var(--calm-dark);text-shadow:none}
 .current-detail .timer-card--urgent .timer-value{color:var(--urgent);text-shadow:none}
 .current-detail .timer-card--critical .timer-value{color:white;text-shadow:2px 2px 0 var(--critical-red),0 0 12px rgba(239,35,60,.45)}
 .current-detail .timer-card--ended .timer-value{color:#4a403a;text-shadow:none}
@@ -1629,8 +1626,8 @@ const filter=document.getElementById('filter');
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
-const TIMER_STATES=['normal','warning','urgent','critical','ended'];
-const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':'normal';
+const TIMER_STATES=['calm','normal','urgent','critical','ended'];
+const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':'calm';
 const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggle(`countdown--${name}`,name===state));const box=el.closest('.timer-card');if(box){TIMER_STATES.forEach(name=>box.classList.toggle(`timer-card--${name}`,name===state));}};
 const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
