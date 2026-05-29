@@ -3,7 +3,7 @@
 Fetch official SQL text for Dune queries using Dune's Read Query API.
 
 Usage:
-  export DUNE_API_KEY='...'
+  Export your Dune API key in the local shell, then run:
   python scripts/fetch_official_dune_sql.py query_ids.json
 
 The script reads query_ids.json, skips entries with null query_id, and writes

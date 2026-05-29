@@ -1519,7 +1519,6 @@ def reward_payback_display(metrics: dict[str, str]) -> str:
 
 
 def render_reward_strip(metrics: dict[str, str]) -> str:
-    basis = metric_value(metrics, "reward_basis_dogs", "141")
     woof = reward_token_display(metrics, "reward_woof_per_dog_per_day", "reward_woof_per_dog_usd_per_day", "WOOF", 2)
     sup = reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)
     total = reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")
@@ -1537,8 +1536,7 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     )
     if not body:
         return ""
-    note = f"Per-Dog stream estimate across {basis} Dogs. WOOF Vault Bonus excluded."
-    return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}<p>{html.escape(note)}</p></section>'
+    return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}</section>'
 
 
 def format_current_auction(metrics: dict[str, str]) -> str:
@@ -1553,14 +1551,13 @@ def format_created_settled(metrics: dict[str, str]) -> str:
 
 
 def render_readme_from_template(replacements: dict[str, str]) -> str:
-    # README.md is generated because `npm run data` rewrites live snapshot and catalog sections.
+    # README.md is generated because `npm run data` rewrites live snapshot sections.
     # Keep stable human-written copy in README.template.md and replace only explicit placeholders here.
     template = README_TEMPLATE_PATH.read_text(encoding="utf-8")
-    missing = [token for token in replacements if token not in template]
-    if missing:
-        raise RuntimeError(f"README template missing placeholders: {', '.join(missing)}")
     for token, value in replacements.items():
         template = template.replace(token, value.rstrip())
+    if "{{" in template and "}}" in template:
+        raise RuntimeError("README template has unresolved placeholders")
     return template.rstrip() + "\n"
 
 
@@ -1569,22 +1566,14 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
     site_url = metric_value(metrics, "site_url", "https://ael-dev3.github.io/Degen-Dogs-Mission-3/")
 
     snapshot_rows = [
-        ("site_url", site_url),
         ("Network", metric_value(metrics, "network", "base")),
         ("Snapshot block", metric_value(metrics, "latest_block")),
         ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
-        ("Current auction", format_current_auction(metrics)),
+        ("Current Dog", format_current_auction(metrics)),
         ("Current bid", format_current_bid(metrics)),
         ("Current high bidder", metric_value(metrics, "current_bidder")),
-        ("Auction ends UTC", metric_value(metrics, "current_auction_end_utc")),
-        ("WOOF per Dog / day", reward_token_display(metrics, "reward_woof_per_dog_per_day", "reward_woof_per_dog_usd_per_day", "WOOF", 2)),
-        ("SUP per Dog / day", reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)),
-        ("Reward total per Dog / day", reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")),
-        ("Current bid reward payback", reward_payback_display(metrics)),
-        ("Rewards basis", f"{metric_value(metrics, 'reward_basis_dogs', '141')} Dogs; WOOF Vault Bonus excluded"),
         ("Created / settled auctions", format_created_settled(metrics)),
         ("WOOF holders", metric_value(metrics, "woof_holders")),
-        ("Farcaster profiles resolved", metric_value(metrics, "farcaster_profiles_resolved")),
     ]
     snapshot_rows = [(label, value) for label, value in snapshot_rows if value]
 

@@ -24,10 +24,9 @@ npm run archive:mission1:reconcile
 ## Optional environment variables
 
 ```bash
-POLYGON_RPC_URL=https://your-polygon-rpc
-POLYGON_RPC_URLS=https://rpc1,https://rpc2
-POLYGONSCAN_API_KEY=...
-DUNE_API_KEY=...
+# Polygon RPC endpoint(s)
+# PolygonScan API key
+# Dune API key
 ```
 
 The default indexer keeps Mission 1 verified contracts and block boundaries in committed config files, not ad-hoc environment variables. If an alternate contract or block range is needed later, add it to candidate config with evidence first, then promote it to verified config before indexing.

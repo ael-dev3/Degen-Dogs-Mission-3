@@ -60,10 +60,9 @@ npm run archive:mission1:reconcile
 Optional env vars:
 
 ```bash
-POLYGON_RPC_URL=https://your-archive-polygon-rpc
-POLYGON_RPC_URLS=https://rpc1,https://rpc2
-POLYGONSCAN_API_KEY=...
-DUNE_API_KEY=...
+# Polygon RPC endpoint(s)
+# PolygonScan API key
+# Dune API key
 ```
 
 No secrets are required for the default receipt-based recovery path. If secrets are used locally, keep them in environment variables and never commit `.env` files.

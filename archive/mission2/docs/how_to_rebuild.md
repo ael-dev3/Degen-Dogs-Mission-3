@@ -21,8 +21,10 @@ npm run archive:mission2:check
 4. Run:
 
 ```bash
-DUNE_API_KEY=... npm run archive:mission2:discover
+npm run archive:mission2:discover
 ```
+
+Run it from a shell where your Dune API key is already exported locally.
 
 If no query IDs are recorded, the helper exits cleanly and does not fabricate anything.
 

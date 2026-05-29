@@ -28,7 +28,7 @@ The reconstructed auction SQL has been patched to use the current Mission 3 Base
 3. Run:
 
 ```bash
-export DUNE_API_KEY='your_api_key_here'
+# Set Dune API credentials in your local shell, then run:
 python scripts/fetch_official_dune_sql.py query_ids.json
 ```
 
