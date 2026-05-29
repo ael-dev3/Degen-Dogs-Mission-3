@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46652879
-latest_block_time_utc,2026-05-29 22:51:45
+latest_block,46653150
+latest_block_time_utc,2026-05-29 23:00:47
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,729
@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.01174
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,2010.34
+eth_usd_price,2011.05
 eth_usd_source,coinbase
 reward_basis_dogs,141
 reward_excludes,woof_vault_bonus
@@ -33,15 +33,15 @@ reward_sup_per_dog_per_day,2.688014
 reward_sup_per_dog_usd_per_day,0.031557
 reward_total_flow_usd_per_day,16.05
 reward_total_per_dog_usd_per_day,0.113821
-reward_current_bid_payback_days,176.59
-reward_current_bid_daily_roi_pct,0.5663
-woof_holders,387
+reward_current_bid_payback_days,176.68
+reward_current_bid_daily_roi_pct,0.566
+woof_holders,385
 top_woof_holder,0x1c45…6637
-top_woof_holder_balance,49159700153.551247
-farcaster_profiles_resolved,158
+top_woof_holder_balance,49159700153.5512
+farcaster_profiles_resolved,159
 current_auction_token_id,728
 current_bid_eth,0.01
-current_bid_usd,20.1
+current_bid_usd,20.11
 current_bidder,@0xael.eth
 current_auction_end_utc,2026-05-30 18:38:33
 created_auctions,139

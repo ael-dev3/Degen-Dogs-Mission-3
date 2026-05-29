@@ -136,15 +136,7 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
-    ("FARCASTER_FEED_ENABLED", "Set to 0 to write a disabled /degendogs channel snapshot."),
-    ("FARCASTER_CHANNEL_ID", "Farcaster channel id for the cached panel; defaults to degendogs."),
-    ("FARCASTER_CHANNEL_LIMIT", "Recent channel casts to keep in the static snapshot, capped at 50."),
-    ("HYPERSNAP_BASE_URL", "Hypersnap/Snapchain public node base for direct Farcaster reads."),
-    ("HYPERSNAP_READ_API_URL", "Optional Hypersnap read API endpoint/base override."),
-    ("SNAPCHAIN_RPC_URL", "Optional Snapchain-compatible HTTP base for castsByParent fallback."),
-    ("FARCASTER_DIRECT_TIMEOUT_SECONDS", "Timeout for direct Farcaster channel-feed reads."),
-    ("NEYNAR_FALLBACK_ENABLED", "Must be 1 before Neynar channel-feed fallback is attempted."),
-    ("NEYNAR_API_KEY", "Optional Neynar API key for identity resolution and last-resort feed fallback."),
+    ("NEYNAR_API_KEY", "Optional Neynar API key for identity resolution."),
     ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
     ("SUP_USD_PRICE", "Optional manual SUP/USD override; otherwise fetched from Dexscreener Base pools."),
 ]
@@ -1819,31 +1811,8 @@ body{margin:0;min-width:320px;background:var(--paper);color:var(--ink);font-size
 a{color:var(--ink);text-decoration:none;transition:color .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}
 a:hover{color:var(--accent2)}
 .shell{width:min(1520px,calc(100% - 16px));margin:0 auto;padding:12px 0 24px}
-.current-card,.table-card,.farcaster-channel-panel{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
+.current-card,.table-card{background:var(--panel);border:2px solid var(--ink);box-shadow:var(--shadow)}
 .current-card{display:grid;grid-template-columns:minmax(360px,.9fr) minmax(260px,.42fr);gap:0;margin-bottom:10px;min-height:300px;overflow:hidden}
-.farcaster-channel-panel{margin:0 0 10px;padding:12px 14px;background:#f4faee;display:grid;gap:8px}
-.farcaster-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.section-kicker{font-size:10px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:var(--calm-dark)}
-.farcaster-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.farcaster-title-row h2{margin:0;font-size:clamp(20px,2.3vw,30px);line-height:.95;letter-spacing:-.045em}
-.farcaster-channel-panel p{margin:2px 0 0;color:#4d6140;font-weight:800;line-height:1.25}
-.farcaster-open{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--ink);background:var(--ink);color:white;padding:7px 10px;font-size:11px;font-weight:950;text-transform:uppercase;letter-spacing:.07em;box-shadow:3px 3px 0 var(--calm)}
-.farcaster-open::after{content:'↗';color:#d8f2c9;font-size:.85em}
-.farcaster-open:hover{background:#fff;color:var(--calm-dark);border-color:var(--calm-dark);box-shadow:4px 4px 0 var(--calm)}
-.farcaster-feed-meta{font-size:11px;font-weight:850;color:#526445;line-height:1.2}
-.farcaster-feed-scroll{max-height:320px;overflow:auto;display:grid;gap:7px;padding:2px 3px 2px 0;scrollbar-color:#9bd78d transparent}
-.farcaster-cast{display:grid;grid-template-columns:34px minmax(0,1fr);gap:8px;border:1.5px solid var(--ink);background:var(--panel);padding:8px;box-shadow:2px 2px 0 rgba(85,166,83,.16)}
-.farcaster-avatar{width:34px;height:34px;border:1.5px solid var(--ink);background:#dfeecf;object-fit:cover;overflow:hidden;display:grid;place-items:center;font-size:12px;font-weight:950;color:var(--calm-dark)}
-.farcaster-cast-main{min-width:0;display:grid;gap:4px}
-.farcaster-cast-head{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;min-width:0}
-.farcaster-cast-author{font-weight:950;line-height:1.1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.farcaster-cast-user,.farcaster-cast-time{color:var(--muted);font-size:11px;font-weight:850;line-height:1.1}
-.farcaster-cast-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.28;font-weight:700;color:#1f241d}
-.farcaster-cast-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;font-weight:900;color:#53624a}
-.farcaster-cast-link{margin-left:auto;color:var(--calm-dark);font-weight:950;text-transform:uppercase;letter-spacing:.05em}
-.farcaster-cast-link:hover{color:var(--accent2)}
-.farcaster-empty{border:1.5px dashed #8aaa7b;background:#f9fff2;padding:12px;font-weight:850;color:#526445;line-height:1.35}
-.farcaster-empty a{font-weight:950;text-decoration:underline;text-underline-offset:2px}
 .current-copy{padding:18px;display:flex;flex-direction:column;gap:10px;border-right:2px solid var(--ink)}
 .topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .eyebrow{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
@@ -1996,9 +1965,6 @@ const auctionBody=auctionTable?.tBodies?.[0];
 const auctionTotal=auctionTable?.caption?.querySelector('[data-total]');
 const defaultRows=auctionBody?[...auctionBody.rows].map(row=>row.cloneNode(true)):[];
 const archiveState={query:'',mission:'all',sortMode:'newest',pageSize:10,currentPage:1};
-const farcasterFeed=document.getElementById('farcaster-feed');
-const farcasterMeta=document.getElementById('farcaster-feed-meta');
-const FARCASTER_CHANNEL_URL='https://farcaster.xyz/~/channel/degendogs';
 let unifiedPromise=null;
 let unifiedRecords=[];
 let unifiedReady=false;
@@ -2023,14 +1989,6 @@ const dogCell=record=>{const dog=`Dog #${record.dog_id}`;const img=record.dog_im
 const identityCell=record=>{const who=record.winner_or_high_bidder||{};const label=who.display||shortAddress(who.wallet)||'';if(!label)return '';const url=who.profile_url||who.wallet_explorer_url||record.links?.explorer||'';return url?`<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`:escapeHtml(label);};
 const bidCell=record=>{const amount=record.amount||{};if(!amount.native)return archiveState.sortMode==='highest_usd'?'USD estimate unavailable':'';const native=`${amount.native} ${amount.native_symbol||''}`.trim();const usd=amount.usd_estimate_display?` (${amount.usd_estimate_display} est.)`:(archiveState.sortMode==='highest_usd'?' (USD estimate unavailable)':'');return escapeHtml(`${native}${usd}`);};
 const timeCell=record=>{const status=String(record.status||'').toLowerCase();const label=status.includes('settled')?'Settled':(record.activity_time_basis==='last_bid_block_time'?'Last bid':'Activity');const value=record.activity_time_utc||'';return value?`<span class="time-cell"><b>${label}</b>${escapeHtml(value.replace('T',' ').replace('Z',''))}</span>`:'';};
-const formatSyncedAt=value=>{const d=new Date(value);return Number.isFinite(d.getTime())?d.toLocaleString(undefined,{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):String(value||'unknown');};
-const farcasterSourceLabel=source=>({hypersnap:'Hypersnap',snapchain:'Snapchain',open_farcaster:'Open Farcaster',neynar:'Neynar fallback',none:'No source'}[String(source||'').toLowerCase()]||String(source||'Unknown'));
-const farcasterEmpty=message=>`<div class="farcaster-empty">${escapeHtml(message)} <a href="${FARCASTER_CHANNEL_URL}" target="_blank" rel="noopener noreferrer">Open /degendogs on Farcaster.</a></div>`;
-const farcasterAuthorLabel=cast=>cast.author_display_name||cast.author_username||(`FID ${cast.author_fid||''}`.trim())||'Unknown';
-const farcasterAvatar=cast=>{const label=farcasterAuthorLabel(cast);const src=String(cast.author_pfp_url||'');if(src.startsWith('http://')||src.startsWith('https://'))return `<img class="farcaster-avatar" src="${attr(src)}" alt="${attr(label)} avatar" loading="lazy">`;return `<span class="farcaster-avatar" aria-hidden="true">${escapeHtml(label.slice(0,1)||'?')}</span>`;};
-const farcasterCastCard=cast=>{const label=farcasterAuthorLabel(cast);const username=cast.author_username?`@${String(cast.author_username).replace(/^@/,'')}`:'';const time=formatSyncedAt(cast.timestamp);const url=String(cast.url||FARCASTER_CHANNEL_URL);const safeUrl=url.startsWith('https://')||url.startsWith('http://')?url:FARCASTER_CHANNEL_URL;const stats=[cast.replies_count?`${cast.replies_count} replies`:'',cast.recasts_count?`${cast.recasts_count} recasts`:'',cast.likes_count?`${cast.likes_count} likes`:''].filter(Boolean).join(' · ');return `<article class="farcaster-cast"><a href="${attr(safeUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open cast by ${attr(label)} on Farcaster">${farcasterAvatar(cast)}</a><div class="farcaster-cast-main"><div class="farcaster-cast-head"><strong class="farcaster-cast-author">${escapeHtml(label)}</strong>${username?`<span class="farcaster-cast-user">${escapeHtml(username)}</span>`:''}<time class="farcaster-cast-time">${escapeHtml(time)}</time></div><div class="farcaster-cast-text">${escapeHtml(cast.text||'')}</div><div class="farcaster-cast-foot"><span>${escapeHtml(stats||'Farcaster channel cast')}</span><a class="farcaster-cast-link" href="${attr(safeUrl)}" target="_blank" rel="noopener noreferrer">Open cast</a></div></div></article>`;};
-const renderFarcasterPanel=snapshot=>{if(!farcasterFeed)return;const casts=Array.isArray(snapshot?.casts)?snapshot.casts:[];const source=farcasterSourceLabel(snapshot?.source);const synced=snapshot?.updated_at_utc?formatSyncedAt(snapshot.updated_at_utc):'unknown';if(farcasterMeta)farcasterMeta.textContent=`Source: ${source} · Last synced: ${synced} · Cached read-only snapshot`;if(snapshot?.status==='ok'&&casts.length){farcasterFeed.innerHTML=casts.slice(0,30).map(farcasterCastCard).join('');return;}const message=snapshot?.status==='error'?'Farcaster channel snapshot unavailable. Open /degendogs on Farcaster.':'No channel snapshot available right now.';farcasterFeed.innerHTML=farcasterEmpty(message);};
-const loadFarcasterSnapshot=async()=>{if(!farcasterFeed)return;for(const url of ['generated/farcaster_degendogs_channel.json','/Degen-Dogs-Mission-3/generated/farcaster_degendogs_channel.json','/generated/farcaster_degendogs_channel.json']){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;const type=r.headers.get('content-type')||'';if(type&&!type.includes('json'))continue;renderFarcasterPanel(await r.json());return;}catch(_){}}if(farcasterMeta)farcasterMeta.textContent='Source: unavailable · Cached read-only snapshot';farcasterFeed.innerHTML=farcasterEmpty('Farcaster channel snapshot unavailable. Open /degendogs on Farcaster.');};
 const rarityCell=record=>escapeHtml(record.rarity?.display||'');
 const unifiedRowHtml=record=>{const statusLabel=`${record.era_label||`Mission ${record.mission}`} · ${record.status||''}`;return `<tr data-search="${attr(rowSearchText(record))}"><td class="state" data-label="status">${statusCell(statusLabel)}</td><td class="dog-col" data-label="dog">${dogCell(record)}</td><td class="identity" data-label="high bidder / winner">${identityCell(record)}</td><td class="" data-label="bid">${bidCell(record)}</td><td class="time" data-label="last bid / settled">${timeCell(record)}</td><td class="num" data-label="rarity">${rarityCell(record)}</td></tr>`;};
 const isDefaultArchiveState=()=>archiveState.query===''&&archiveState.mission==='all'&&archiveState.sortMode==='newest'&&archiveState.pageSize===10&&archiveState.currentPage===1;
@@ -2054,7 +2012,6 @@ pageNext?.addEventListener('click',()=>{archiveState.currentPage+=1;renderArchiv
 const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{if(!table.tBodies.length)return;const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total&&!table.matches('[data-table="auction_feed"]')){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-loadFarcasterSnapshot();
 loadUnified().then(records=>{unifiedRecords=Array.isArray(records)?records.filter(record=>record&&typeof record==='object'):[];unifiedReady=true;renderArchive();}).catch(()=>{fallbackAuctionRows();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
@@ -2082,20 +2039,6 @@ setInterval(updateCountdowns,1000);
       <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
     </div>
     <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
-  </section>
-  <section class="farcaster-channel-panel" aria-label="Degen Dogs Farcaster channel discussion">
-    <div class="farcaster-head">
-      <div>
-        <div class="section-kicker">LIVE SOCIAL FEED</div>
-        <div class="farcaster-title-row"><h2>Degen Dogs Channel</h2></div>
-        <p>Latest discussion from the /degendogs Farcaster channel.</p>
-      </div>
-      <a class="farcaster-open" href="https://farcaster.xyz/~/channel/degendogs" target="_blank" rel="noopener noreferrer">Open on Farcaster</a>
-    </div>
-    <div id="farcaster-feed-meta" class="farcaster-feed-meta">Source: loading · Cached read-only snapshot</div>
-    <div id="farcaster-feed" class="farcaster-feed-scroll" aria-live="polite">
-      <div class="farcaster-empty">No channel snapshot available right now. <a href="https://farcaster.xyz/~/channel/degendogs" target="_blank" rel="noopener noreferrer">Open /degendogs on Farcaster.</a></div>
-    </div>
   </section>
   <div class="toolbar" aria-label="Auction archive controls">
     <div class="toolbar-field search-field"><label for="filter">Search auctions</label><input id="filter" type="search" aria-label="search unified Mission 1, 2, and 3 archive" placeholder="Search all missions: Dog #, wallet, handle, tx, chain, status" autocomplete="off"></div>
