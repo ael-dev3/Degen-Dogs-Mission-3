@@ -70,16 +70,16 @@ This block is generated from the latest data refresh, so it changes when `npm ru
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46634362 |
-| Snapshot time UTC | 2026-05-29 12:34:31 |
+| Snapshot block | 46634614 |
+| Snapshot time UTC | 2026-05-29 12:42:55 |
 | Current auction | Dog #727 |
-| Current bid | 0.01 ETH ($19.98) |
+| Current bid | 0.01 ETH ($19.93) |
 | Current high bidder | @0xael.eth |
 | Auction ends UTC | 2026-05-29 18:36:55 |
 | WOOF per Dog / day | 158,351.90 WOOF/day ($0.08/day) |
 | SUP per Dog / day | 2.69 SUP/day ($0.03/day) |
 | Reward total per Dog / day | $0.11/day |
-| Current bid reward payback | ≈175 days |
+| Current bid reward payback | ≈174 days |
 | Rewards basis | 141 Dogs; WOOF Vault Bonus excluded |
 | Created / settled auctions | 138 / 137 |
 | WOOF holders | 400 |

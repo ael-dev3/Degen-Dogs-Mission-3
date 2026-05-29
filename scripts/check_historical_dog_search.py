@@ -161,6 +161,7 @@ def main() -> int:
         "fetch(url,{cache:'no-store'})",
         'missionMatch=remaining.match',
         'dogMatch=remaining.match',
+        'restoreAuctionRows=()=>{if(!auctionBody)return;loadUnified()',
         'Search all missions: Dog #, wallet, handle, tx, chain, status',
         'Latest 10 archive records',
     ]:
