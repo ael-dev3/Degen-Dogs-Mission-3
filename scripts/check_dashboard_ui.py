@@ -43,6 +43,27 @@ def assert_trait_links() -> None:
         raise AssertionError("generated index.html missing expected single-encoded Background/Halo OpenSea trait URL")
 
 
+def assert_timer_urgency_colors() -> None:
+    builder = load_builder()
+    if builder.timer_urgency_state(7201, "ongoing") != "calm":
+        raise AssertionError("timer should be calm/light green when more than 1 hour remains")
+    if builder.timer_urgency_state(3599, "ongoing") != "urgent":
+        raise AssertionError("timer should become urgent when less than 1 hour remains")
+    if builder.timer_urgency_state(600, "ongoing") != "critical":
+        raise AssertionError("timer should become critical in the final 10 minutes")
+
+    html = INDEX_PATH.read_text(encoding="utf-8")
+    required_markers = [
+        "--paper-calm:#eff8df",
+        ".current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm)",
+        ".current-detail .timer-card--urgent{background:var(--paper-urgent)",
+        "seconds<=600?'critical':seconds<=3600?'urgent':'calm'",
+    ]
+    for marker in required_markers:
+        if marker not in html:
+            raise AssertionError(f"generated index.html missing timer urgency marker: {marker}")
+
+
 def assert_creator_popover() -> None:
     html = INDEX_PATH.read_text(encoding="utf-8")
     required_markers = [
@@ -65,6 +86,7 @@ def assert_creator_popover() -> None:
 
 def main() -> int:
     assert_trait_links()
+    assert_timer_urgency_colors()
     assert_creator_popover()
     print("dashboard_ui_checks=pass")
     return 0

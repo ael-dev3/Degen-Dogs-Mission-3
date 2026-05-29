@@ -1,0 +1,125 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-04T22:32:33Z",
+    "amount": {
+      "native": "0.0286",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "28600000000000000",
+      "usd_estimate": "66.41200318",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$66.41",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-05-04",
+      "usd_estimate_price_usd": "2322.098013189142",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 45529090,
+      "block_time_utc": "2026-05-03T22:32:07Z",
+      "tx_hash": "0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46",
+      "tx_url": "https://basescan.org/tx/0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 5,
+      "last_bid_time_utc": "2026-05-04T21:42:11Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0x39a20c476128548a49703b349b4bf8d36a6397eca0030c83db2708828d538ce6",
+      "0x88206b14352040dbfc0b799a03bfd178137ad0be162a0f98dcd839d30179dba8",
+      "0xd82a76cca8e89873599e08a28d279d26fe1fb039cf57a13e6afb8fada25d2459",
+      "0x95156f596fcefe3a03e23d5b8873f2fdc35dc5452672261d5382d1f606cc5163",
+      "0xb242d34901336d82e52e6160c60223009421501884e563980d967a5fd64dbfbe"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 704,
+    "dog_image_url": "https://api.degendogs.club/images/704.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/704",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46",
+      "dog_page": "https://degendogs.club/#dog704",
+      "explorer": "https://basescan.org/address/0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/704",
+      "repo_archive": "archive/dogs/by-id/704.json",
+      "settlement_tx": "https://basescan.org/tx/0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#383/728",
+      "rank": 383,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 704 dog #704 704 mission 3 mission 3 base settled 0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae @britomartis britomartis 0.0286 eth 0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46 0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe #383/728 background: none; body: dalmation; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: monocle 0x39a20c476128548a49703b349b4bf8d36a6397eca0030c83db2708828d538ce6 0x88206b14352040dbfc0b799a03bfd178137ad0be162a0f98dcd839d30179dba8 0xd82a76cca8e89873599e08a28d279d26fe1fb039cf57a13e6afb8fada25d2459 0x95156f596fcefe3a03e23d5b8873f2fdc35dc5452672261d5382d1f606cc5163 0xb242d34901336d82e52e6160c60223009421501884e563980d967a5fd64dbfbe base_logs archive_indexer",
+    "settlement": {
+      "block_number": 45572303,
+      "block_time_utc": "2026-05-04T22:32:33Z",
+      "settled": true,
+      "tx_hash": "0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe",
+      "tx_url": "https://basescan.org/tx/0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Dalmation (9.8%)",
+        "trait_type": "Body",
+        "value": "Dalmation"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: None (25.1%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: StripedBeanie (8.5%)",
+        "trait_type": "Head",
+        "value": "StripedBeanie"
+      },
+      {
+        "display": "Eyes: Monocle (6.6%)",
+        "trait_type": "Eyes",
+        "value": "Monocle"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@britomartis",
+      "farcaster_fid": null,
+      "farcaster_handle": "britomartis",
+      "profile_url": "https://farcaster.xyz/britomartis",
+      "wallet": "0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae",
+      "wallet_explorer_url": "https://basescan.org/address/0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae"
+    }
+  },
+  "schema_version": 1
+}

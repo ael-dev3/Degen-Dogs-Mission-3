@@ -1,0 +1,146 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-01-11T01:06:41Z",
+    "amount": {
+      "native": "0.3021",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "302100000000000000",
+      "usd_estimate": "931.24365225",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$931.24",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-01-11",
+      "usd_estimate_price_usd": "3082.567534760909",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 40608232,
+      "block_time_utc": "2026-01-10T00:43:31Z",
+      "tx_hash": "0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b",
+      "tx_url": "https://basescan.org/tx/0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 26,
+      "last_bid_time_utc": "2026-01-11T01:01:25Z",
+      "unique_bidder_count": 10
+    },
+    "bid_tx_hashes": [
+      "0x45d43e322f59beb1f0aa1ec957626862767b37e1f2665a39906bc3b8ed2b900e",
+      "0x3f9b5167bac32e0015b57c6cb164334123cb6735731964c87e6a59615cf729ad",
+      "0x2947ab579f04d0a61677d5226c86ca9a2a7e38cfbbbc6c3a7bed0493450165ac",
+      "0x47806e723990142212861dc1fad0951b622d7954a53610ae4ae6f45a0c2ef7b3",
+      "0x4f5142eff0cdd11ad3fbc9d3cd993d924d78c6cf9daa50c658d85af05a9a1392",
+      "0xda878a633830fb8c81dacbba81e57be60c53ed5e62dd305f38055c046881cf61",
+      "0x8541fac33865a13c1f969b0863dc96452a5290e8e6bddc01e0ec26b07a112317",
+      "0x42c332655c8cf7c936e827b80c90cdc5c54972a17e8280347678bfb6bf722e9e",
+      "0xb154a1ecf0db718c13f08e65e85decb0452744fdc055ff3adbbaf78c9572b052",
+      "0x4eddca19b34ee220b85f9548fb5524bb5d0f7801ad830e009687cad75f6b44c2",
+      "0xfea59da73461d64c81b450728f4df722d26447bb2b2fb1dac3cf18e89d816147",
+      "0x395e88760d91313e33a8fbba76bd4b99ff75d2eda6567a4bf505214837b96f02",
+      "0x880f6c21de27ef1b1f648e06a2c929c820c9221ade855a746bf223eadf61130f",
+      "0x95119fcdc82081c6639c431d91d674488deb68558c79920da106697483216066",
+      "0x97ac076a03d68a7e153f7231df5910610a1185bc1a01662a2d9a7ce663bff005",
+      "0xe84bb14b992c9d16ff325d5ac02e6affc14ce1075e83a9edd2c7f5c4dc360365",
+      "0x9c6e163f9ef450e63c6bcf2174bbd3c10f54231f18784114f732c7eaa88842e4",
+      "0x8d1df354a0d6c0d060f26b43edd92fe6111a5ec7e26b66a73b59af286b2f35f6",
+      "0xa5a0b4001fcf72987f8676f97b6cd87ef72a08457859a4deece86dc694b2c210",
+      "0x9826ab5e682478537c6e877c5b221806a59d80b12e7d29950d60fcc8266465fe",
+      "0x74d9c143d37aa7c479d383df7b55cc918c8c8064a54c8e3eede41932790bc231",
+      "0x268489677a60f522a1f1ca2557a834fb0ef8738cab489232b8367dbf2e8f0942",
+      "0x51950fd9caf0ef083ef6d8cd7daed4442414286505111e89e183d612efb3e518",
+      "0xf10869619c1b6a4d834b6fe312d94ca603c74c083619c814ea00e45946345120",
+      "0x52d92350082d1fcc79bb706ebb48eacd552c6f843311cdd87434ede4953cceb0",
+      "0x420d35d685fb60c04c1d5557f4576e2da55909be81691cd553a6f4282d2fde21"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 591,
+    "dog_image_url": "https://api.degendogs.club/images/591.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/591",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b",
+      "dog_page": "https://degendogs.club/#dog591",
+      "explorer": "https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/591",
+      "repo_archive": "archive/dogs/by-id/591.json",
+      "settlement_tx": "https://basescan.org/tx/0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#419/728",
+      "rank": 419,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 591 dog #591 591 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.3021 eth 0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b 0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f #419/728 background: none; body: white; neck: none; mouth: pizza; ears: loopearring; head: baseballcap; eyes: masksnorkel 0x45d43e322f59beb1f0aa1ec957626862767b37e1f2665a39906bc3b8ed2b900e 0x3f9b5167bac32e0015b57c6cb164334123cb6735731964c87e6a59615cf729ad 0x2947ab579f04d0a61677d5226c86ca9a2a7e38cfbbbc6c3a7bed0493450165ac 0x47806e723990142212861dc1fad0951b622d7954a53610ae4ae6f45a0c2ef7b3 0x4f5142eff0cdd11ad3fbc9d3cd993d924d78c6cf9daa50c658d85af05a9a1392 0xda878a633830fb8c81dacbba81e57be60c53ed5e62dd305f38055c046881cf61 0x8541fac33865a13c1f969b0863dc96452a5290e8e6bddc01e0ec26b07a112317 0x42c332655c8cf7c936e827b80c90cdc5c54972a17e8280347678bfb6bf722e9e 0xb154a1ecf0db718c13f08e65e85decb0452744fdc055ff3adbbaf78c9572b052 0x4eddca19b34ee220b85f9548fb5524bb5d0f7801ad830e009687cad75f6b44c2 0xfea59da73461d64c81b450728f4df722d26447bb2b2fb1dac3cf18e89d816147 0x395e88760d91313e33a8fbba76bd4b99ff75d2eda6567a4bf505214837b96f02 0x880f6c21de27ef1b1f648e06a2c929c820c9221ade855a746bf223eadf61130f 0x95119fcdc82081c6639c431d91d674488deb68558c79920da106697483216066 0x97ac076a03d68a7e153f7231df5910610a1185bc1a01662a2d9a7ce663bff005 0xe84bb14b992c9d16ff325d5ac02e6affc14ce1075e83a9edd2c7f5c4dc360365 0x9c6e163f9ef450e63c6bcf2174bbd3c10f54231f18784114f732c7eaa88842e4 0x8d1df354a0d6c0d060f26b43edd92fe6111a5ec7e26b66a73b59af286b2f35f6 0xa5a0b4001fcf72987f8676f97b6cd87ef72a08457859a4deece86dc694b2c210 0x9826ab5e682478537c6e877c5b221806a59d80b12e7d29950d60fcc8266465fe 0x74d9c143d37aa7c479d383df7b55cc918c8c8064a54c8e3eede41932790bc231 0x268489677a60f522a1f1ca2557a834fb0ef8738cab489232b8367dbf2e8f0942 0x51950fd9caf0ef083ef6d8cd7daed4442414286505111e89e183d612efb3e518 0xf10869619c1b6a4d834b6fe312d94ca603c74c083619c814ea00e45946345120 0x52d92350082d1fcc79bb706ebb48eacd552c6f843311cdd87434ede4953cceb0 0x420d35d685fb60c04c1d5557f4576e2da55909be81691cd553a6f4282d2fde21 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 40652127,
+      "block_time_utc": "2026-01-11T01:06:41Z",
+      "settled": true,
+      "tx_hash": "0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f",
+      "tx_url": "https://basescan.org/tx/0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: White (11.3%)",
+        "trait_type": "Body",
+        "value": "White"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: BaseballCap (10.4%)",
+        "trait_type": "Head",
+        "value": "BaseballCap"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (9.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@vaibhavmule",
+      "farcaster_fid": null,
+      "farcaster_handle": "vaibhavmule",
+      "profile_url": "https://farcaster.xyz/vaibhavmule",
+      "wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
+      "wallet_explorer_url": "https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad"
+    }
+  },
+  "schema_version": 1
+}

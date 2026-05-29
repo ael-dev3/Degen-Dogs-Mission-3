@@ -1,0 +1,124 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2025-01-16T04:52:22Z",
+    "amount": {
+      "native": "9790",
+      "native_symbol": "DEGEN",
+      "price_asset_key": "DEGEN",
+      "raw": "9790000000000000000000",
+      "usd_estimate": "93.62539230",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$93.63",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2025-01-16",
+      "usd_estimate_price_usd": "0.00956337",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 25240952,
+      "block_time_utc": "2025-01-15T04:46:16Z",
+      "tx_hash": "0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e",
+      "tx_url": "https://explorer.degen.tips/tx/0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 4,
+      "last_bid_time_utc": "2025-01-16T04:45:30Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0x3985afc24540f81e044cd08c47e97cbfdf6421cb3f1a7541ba004f2eeeea5d31",
+      "0xe5fe580065b2abc5092d6ac3bf335b93f505e9103ad3b7ec7165f1d04bf902a8",
+      "0x71cbbf9a23b5e67cafbe74088676a144b1825d9bfe4d44da86378d348912659f",
+      "0x96c5362e6334af50d4b98c6577a0b49ed3dfcc71529a3709c8f2f78f945d8643"
+    ],
+    "chain": "Degen Chain",
+    "chain_id": 666666666,
+    "dog_id": 255,
+    "dog_image_url": "https://api.degendogs.club/images/255.png",
+    "dog_item_url": null,
+    "era_label": "Mission 2",
+    "links": {
+      "auction_tx": "https://explorer.degen.tips/tx/0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e",
+      "dog_page": "https://degendogs.club/#dog255",
+      "explorer": "https://explorer.degen.tips/address/0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/255.json",
+      "settlement_tx": "https://explorer.degen.tips/tx/0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2"
+    },
+    "mission": 2,
+    "rarity": {
+      "display": "#110/728",
+      "rank": 110,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 255 dog #255 255 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 9790 degen 0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e 0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2 #110/728 background: none; body: sugarskull; neck: none; mouth: none; ears: none; head: headphones; eyes: 3dglasses 0x3985afc24540f81e044cd08c47e97cbfdf6421cb3f1a7541ba004f2eeeea5d31 0xe5fe580065b2abc5092d6ac3bf335b93f505e9103ad3b7ec7165f1d04bf902a8 0x71cbbf9a23b5e67cafbe74088676a144b1825d9bfe4d44da86378d348912659f 0x96c5362e6334af50d4b98c6577a0b49ed3dfcc71529a3709c8f2f78f945d8643 chain_logs contract_getters",
+    "settlement": {
+      "block_number": 25252729,
+      "block_time_utc": "2025-01-16T04:52:22Z",
+      "settled": true,
+      "tx_hash": "0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2",
+      "tx_url": "https://explorer.degen.tips/tx/0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 2 contract uses verified 18-decimal WDEGEN/DEGEN auction amounts.",
+      "raw_confidence": "verified_onchain",
+      "sources": [
+        "chain_logs",
+        "contract_getters"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: SugarSkull (6.6%)",
+        "trait_type": "Body",
+        "value": "SugarSkull"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: None (25.1%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: Headphones (6.3%)",
+        "trait_type": "Head",
+        "value": "Headphones"
+      },
+      {
+        "display": "Eyes: 3DGlasses (4.9%)",
+        "trait_type": "Eyes",
+        "value": "3DGlasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "0x2e62…f2c0",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0",
+      "wallet_explorer_url": "https://explorer.degen.tips/address/0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0"
+    }
+  },
+  "schema_version": 1
+}

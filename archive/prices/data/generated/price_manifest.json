@@ -1,0 +1,29 @@
+{
+  "asset_windows": {
+    "DEGEN": {
+      "end_date": "2026-01-06",
+      "start_date": "2024-11-26"
+    },
+    "ETH": {
+      "end_date": "2026-05-28",
+      "start_date": "2022-03-17"
+    }
+  },
+  "errors": [
+    "DEGEN: CoinGecko failed: CoinGecko fetch failed for degen-base: HTTP Error 429: Too Many Requests",
+    "ETH: CoinGecko failed: CoinGecko fetch failed for ethereum: HTTP Error 401: Unauthorized"
+  ],
+  "notes": [
+    "Missing source/API coverage leaves downstream USD estimates null; no zero fills are used."
+  ],
+  "rows": 1611,
+  "schema_version": 1,
+  "source_files": [
+    "archive/prices/data/raw/defillama_degen_2024-11-26_2026-01-06.json",
+    "archive/prices/data/raw/defillama_eth_2022-03-17_2026-05-28.json"
+  ],
+  "sources": [
+    "defillama_coin_prices"
+  ],
+  "updated_at_utc": "2026-05-29T11:30:02Z"
+}

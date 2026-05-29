@@ -1,0 +1,130 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-04-09T18:20:29Z",
+    "amount": {
+      "native": "0.03276",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "32760000000000000",
+      "usd_estimate": "71.76088323",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$71.76",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-04-09",
+      "usd_estimate_price_usd": "2190.503150986104",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 44441491,
+      "block_time_utc": "2026-04-08T18:18:49Z",
+      "tx_hash": "0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9",
+      "tx_url": "https://basescan.org/tx/0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 10,
+      "last_bid_time_utc": "2026-04-09T18:12:17Z",
+      "unique_bidder_count": 4
+    },
+    "bid_tx_hashes": [
+      "0xa55702ed922927501427b7a1f91a41b43cefbcdbf1ca6c318f42c0d38ee5173d",
+      "0xbb01e04221d4ec12d21193d2cb8da27c384978c59b7ae746c91897457711a906",
+      "0xed56ae109fd7b32b04b233175612c68dda63bd2c7a0941265d886063571643cb",
+      "0x66c20ba18f0ef565700b401b69e7626b292439a2d990d616e9759b9c8a817760",
+      "0x22158b574eff201c273ad0f92232d2de46cbfa35821081006f225d58b4ee5065",
+      "0xd9a8768b648ba987ae8fbabe7df996f45b77d0c6d9b5dbc252a68c8e00ba4ec6",
+      "0x609d4c00aaaddee2411b6829c3f23f6d0fe45bc677341313e6c1cf2d8b842cfa",
+      "0x76fc910a52f1b0bbd10bf6daba5f0ee65dbd3daa3793c772363428a0439ed2e8",
+      "0xa814ce246ffd02a960d9b839154b030dc4c0312f86f580f3c289aaa854a411b9",
+      "0xfb1a49a8f7d57489a21783c0914f5c8267bf0122c7f5ef5d3ef0c36ac8b7b16e"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 679,
+    "dog_image_url": "https://api.degendogs.club/images/679.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/679",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9",
+      "dog_page": "https://degendogs.club/#dog679",
+      "explorer": "https://basescan.org/address/0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/679",
+      "repo_archive": "archive/dogs/by-id/679.json",
+      "settlement_tx": "https://basescan.org/tx/0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#585/728",
+      "rank": 585,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 679 dog #679 679 mission 3 mission 3 base settled 0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae @britomartis britomartis 0.03276 eth 0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9 0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab #585/728 background: none; body: black; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: glasses 0xa55702ed922927501427b7a1f91a41b43cefbcdbf1ca6c318f42c0d38ee5173d 0xbb01e04221d4ec12d21193d2cb8da27c384978c59b7ae746c91897457711a906 0xed56ae109fd7b32b04b233175612c68dda63bd2c7a0941265d886063571643cb 0x66c20ba18f0ef565700b401b69e7626b292439a2d990d616e9759b9c8a817760 0x22158b574eff201c273ad0f92232d2de46cbfa35821081006f225d58b4ee5065 0xd9a8768b648ba987ae8fbabe7df996f45b77d0c6d9b5dbc252a68c8e00ba4ec6 0x609d4c00aaaddee2411b6829c3f23f6d0fe45bc677341313e6c1cf2d8b842cfa 0x76fc910a52f1b0bbd10bf6daba5f0ee65dbd3daa3793c772363428a0439ed2e8 0xa814ce246ffd02a960d9b839154b030dc4c0312f86f580f3c289aaa854a411b9 0xfb1a49a8f7d57489a21783c0914f5c8267bf0122c7f5ef5d3ef0c36ac8b7b16e base_logs archive_indexer",
+    "settlement": {
+      "block_number": 44484741,
+      "block_time_utc": "2026-04-09T18:20:29Z",
+      "settled": true,
+      "tx_hash": "0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab",
+      "tx_url": "https://basescan.org/tx/0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Black (11.7%)",
+        "trait_type": "Body",
+        "value": "Black"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: Tongue (9.3%)",
+        "trait_type": "Mouth",
+        "value": "Tongue"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: None (20.2%)",
+        "trait_type": "Head",
+        "value": "None"
+      },
+      {
+        "display": "Eyes: Glasses (12.5%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@britomartis",
+      "farcaster_fid": null,
+      "farcaster_handle": "britomartis",
+      "profile_url": "https://farcaster.xyz/britomartis",
+      "wallet": "0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae",
+      "wallet_explorer_url": "https://basescan.org/address/0xfe1180d8515c8700b933ee9a4ba6a98bc1a9b5ae"
+    }
+  },
+  "schema_version": 1
+}

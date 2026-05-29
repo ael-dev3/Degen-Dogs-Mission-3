@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-29T11:19:52Z",
+  "sources": [
+    {
+      "name": "dune_prices_day",
+      "priority": 1,
+      "status": "available_if_dune_api",
+      "notes": "Use daily token prices where available; SQL template is committed but schema must be verified before use."
+    },
+    {
+      "name": "coingecko_market_chart_range",
+      "priority": 2,
+      "status": "implemented",
+      "notes": "Offline builder fetches historical range endpoints by verified CoinGecko IDs ethereum and degen-base."
+    },
+    {
+      "name": "defillama_coin_prices",
+      "priority": 3,
+      "status": "configured_fallback",
+      "notes": "Configured for future fallback/cross-check; not silently mixed with CoinGecko output."
+    },
+    {
+      "name": "dex_twap",
+      "priority": 4,
+      "status": "last_resort",
+      "notes": "Use only with liquidity/confidence caveats and explicit documentation."
+    }
+  ]
+}

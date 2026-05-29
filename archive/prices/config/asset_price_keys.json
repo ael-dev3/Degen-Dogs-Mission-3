@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-29T11:19:52Z",
+  "assets": {
+    "ETH": {
+      "symbol": "ETH",
+      "decimals": 18,
+      "coingecko_id": "ethereum",
+      "defillama_coin": "coingecko:ethereum",
+      "dune_symbol_candidates": [
+        "ETH",
+        "WETH"
+      ],
+      "notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD."
+    },
+    "WETH_POLYGON": {
+      "symbol": "WETH",
+      "chain": "polygon",
+      "chain_id": 137,
+      "decimals": 18,
+      "contract_address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "coingecko_platform": "polygon-pos",
+      "coingecko_contract_address": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "defillama_coin": "polygon:0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "fallback_price_asset": "ETH",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH in archive/mission1/config/mission1_contracts.verified.json."
+    },
+    "DEGEN": {
+      "symbol": "DEGEN",
+      "decimals": 18,
+      "coingecko_id": "degen-base",
+      "defillama_coin": "coingecko:degen-base",
+      "dune_symbol_candidates": [
+        "DEGEN",
+        "WDEGEN"
+      ],
+      "notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN."
+    }
+  }
+}

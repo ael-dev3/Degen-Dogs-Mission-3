@@ -1,0 +1,118 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "auction_created_block_time",
+    "activity_time_utc": "2022-04-08T14:27:59Z",
+    "amount": {
+      "native": null,
+      "native_symbol": "WETH",
+      "price_asset_key": "ETH",
+      "raw": "",
+      "usd_estimate": null,
+      "usd_estimate_confidence": "missing",
+      "usd_estimate_display": null,
+      "usd_estimate_source": null,
+      "usd_estimate_time_basis": null
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": null,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bid_stats": {
+      "bid_count": 0,
+      "last_bid_time_utc": null,
+      "unique_bidder_count": 0
+    },
+    "bid_tx_hashes": [],
+    "chain": "Polygon",
+    "chain_id": 137,
+    "dog_id": 66,
+    "dog_image_url": "https://api.degendogs.club/images/66.png",
+    "dog_item_url": null,
+    "era_label": "Mission 1",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog66",
+      "explorer": null,
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/066.json",
+      "settlement_tx": null
+    },
+    "mission": 1,
+    "rarity": {
+      "display": "#523/728",
+      "rank": 523,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 66 dog #66 66 mission 1 mission 1 polygon no_auction_dogmaster_reward weth #523/728 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing. This is a verified non-auction/special-case record, not a fake auction row.",
+      "raw_confidence": "verified_mint_and_receipt_logs",
+      "sources": [
+        "polygon_receipts",
+        "polygonscan_tx_pages",
+        "degen_dogs_docs",
+        "markcarey_github"
+      ]
+    },
+    "status": "no_auction_dogmaster_reward",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Brown (10.9%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: Beanie (6.5%)",
+        "trait_type": "Head",
+        "value": "Beanie"
+      },
+      {
+        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "trait_type": "Eyes",
+        "value": "BlueLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": null,
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": null,
+      "wallet_explorer_url": null
+    }
+  },
+  "schema_version": 1
+}

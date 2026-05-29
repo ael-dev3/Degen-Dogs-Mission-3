@@ -1,0 +1,124 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-03-11T08:27:57Z",
+    "amount": {
+      "native": "0.011",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "11000000000000000",
+      "usd_estimate": "22.40092985",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$22.40",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-03-11",
+      "usd_estimate_price_usd": "2036.4481677486033",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 43170888,
+      "block_time_utc": "2026-03-10T08:25:23Z",
+      "tx_hash": "0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823",
+      "tx_url": "https://basescan.org/tx/0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 4,
+      "last_bid_time_utc": "2026-03-10T20:53:01Z",
+      "unique_bidder_count": 4
+    },
+    "bid_tx_hashes": [
+      "0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e",
+      "0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e",
+      "0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e",
+      "0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 650,
+    "dog_image_url": "https://api.degendogs.club/images/650.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/650",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823",
+      "dog_page": "https://degendogs.club/#dog650",
+      "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/650",
+      "repo_archive": "archive/dogs/by-id/650.json",
+      "settlement_tx": "https://basescan.org/tx/0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#646/728",
+      "rank": 646,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 650 dog #650 650 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823 0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f #646/728 background: none; body: dalmation; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e 0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e 0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e 0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 43214165,
+      "block_time_utc": "2026-03-11T08:27:57Z",
+      "settled": true,
+      "tx_hash": "0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f",
+      "tx_url": "https://basescan.org/tx/0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Dalmation (9.8%)",
+        "trait_type": "Body",
+        "value": "Dalmation"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: StripedBeanie (8.5%)",
+        "trait_type": "Head",
+        "value": "StripedBeanie"
+      },
+      {
+        "display": "Eyes: None (17.9%)",
+        "trait_type": "Eyes",
+        "value": "None"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@thec1",
+      "farcaster_fid": null,
+      "farcaster_handle": "thec1",
+      "profile_url": "https://farcaster.xyz/thec1",
+      "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+      "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
+    }
+  },
+  "schema_version": 1
+}

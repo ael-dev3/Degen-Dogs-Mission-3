@@ -1,0 +1,122 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-05-28T22:09:17Z",
+    "amount": {
+      "native": "0.01",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "10000000000000000",
+      "usd_estimate": "20.22506249",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$20.23",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-05-27",
+      "usd_estimate_price_usd": "2022.5062490754037",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 46602034,
+      "block_time_utc": "2026-05-28T18:36:55Z",
+      "tx_hash": "0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7",
+      "tx_url": "https://basescan.org/tx/0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-05-28T22:09:17Z",
+      "unique_bidder_count": 2
+    },
+    "bid_tx_hashes": [
+      "0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d",
+      "0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 727,
+    "dog_image_url": "https://api.degendogs.club/images/727.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/727",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7",
+      "dog_page": "https://degendogs.club/#dog727",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/727",
+      "repo_archive": "archive/dogs/by-id/727.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#317/728",
+      "rank": 317,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #317/728 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: sunglasses 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 base_logs archive_indexer",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: Halo (9.8%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: RedBrown (15.4%)",
+        "trait_type": "Body",
+        "value": "RedBrown"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: GoldEarring (15.7%)",
+        "trait_type": "Ears",
+        "value": "GoldEarring"
+      },
+      {
+        "display": "Head: WhiteMohawk (6.7%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: Sunglasses (14.8%)",
+        "trait_type": "Eyes",
+        "value": "Sunglasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}

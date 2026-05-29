@@ -1,0 +1,121 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2025-11-08T00:05:34Z",
+    "amount": {
+      "native": "1234",
+      "native_symbol": "DEGEN",
+      "price_asset_key": "DEGEN",
+      "raw": "1234000000000000000000",
+      "usd_estimate": "2.11791065",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$2.12",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2025-11-07",
+      "usd_estimate_price_usd": "0.0017162971227883594",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 26435449,
+      "block_time_utc": "2025-11-07T00:02:33Z",
+      "tx_hash": "0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3",
+      "tx_url": "https://explorer.degen.tips/tx/0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2025-11-07T00:02:57Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x45e426c8ea7ea9e1f3e15878a2746120a96fd7053aa81cd68294e983f36802e3"
+    ],
+    "chain": "Degen Chain",
+    "chain_id": 666666666,
+    "dog_id": 530,
+    "dog_image_url": "https://api.degendogs.club/images/530.png",
+    "dog_item_url": null,
+    "era_label": "Mission 2",
+    "links": {
+      "auction_tx": "https://explorer.degen.tips/tx/0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3",
+      "dog_page": "https://degendogs.club/#dog530",
+      "explorer": "https://explorer.degen.tips/address/0xc421401af43d217d8bf16f18ffd076f3c84219d9",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/530.json",
+      "settlement_tx": "https://explorer.degen.tips/tx/0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d"
+    },
+    "mission": 2,
+    "rarity": {
+      "display": "#310/728",
+      "rank": 310,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 530 dog #530 530 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 1234 degen 0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3 0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d #310/728 background: none; body: black; neck: redcollar; mouth: pizza; ears: loopearring; head: headphones; eyes: glasses 0x45e426c8ea7ea9e1f3e15878a2746120a96fd7053aa81cd68294e983f36802e3 chain_logs contract_getters",
+    "settlement": {
+      "block_number": 26440108,
+      "block_time_utc": "2025-11-08T00:05:34Z",
+      "settled": true,
+      "tx_hash": "0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d",
+      "tx_url": "https://explorer.degen.tips/tx/0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 2 contract uses verified 18-decimal WDEGEN/DEGEN auction amounts.",
+      "raw_confidence": "verified_onchain",
+      "sources": [
+        "chain_logs",
+        "contract_getters"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Black (11.7%)",
+        "trait_type": "Body",
+        "value": "Black"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: Headphones (6.3%)",
+        "trait_type": "Head",
+        "value": "Headphones"
+      },
+      {
+        "display": "Eyes: Glasses (12.5%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@vorcha",
+      "farcaster_fid": null,
+      "farcaster_handle": "vorcha",
+      "profile_url": "https://farcaster.xyz/vorcha",
+      "wallet": "0xc421401af43d217d8bf16f18ffd076f3c84219d9",
+      "wallet_explorer_url": "https://explorer.degen.tips/address/0xc421401af43d217d8bf16f18ffd076f3c84219d9"
+    }
+  },
+  "schema_version": 1
+}

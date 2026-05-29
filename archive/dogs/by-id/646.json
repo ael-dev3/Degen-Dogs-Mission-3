@@ -1,0 +1,131 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-03-07T08:05:31Z",
+    "amount": {
+      "native": "0.0121",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "12100000000000000",
+      "usd_estimate": "23.93953582",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$23.94",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-03-07",
+      "usd_estimate_price_usd": "1978.4740343528076",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 42997340,
+      "block_time_utc": "2026-03-06T08:00:27Z",
+      "tx_hash": "0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117",
+      "tx_url": "https://basescan.org/tx/0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 11,
+      "last_bid_time_utc": "2026-03-07T08:00:19Z",
+      "unique_bidder_count": 8
+    },
+    "bid_tx_hashes": [
+      "0x7ba0096334e74f8bf852d997ba09f2cdc59d40c00a0cad07a5fdf2305d9729cc",
+      "0x437abdea21fe9a738844d5e73ad9f60dde85bbdee4be5bf81bd30de7ac3731a6",
+      "0xcec110cf3373c46f15c32bd4ad6c5c940338686ec429bbd74bc6a8e6e4534bc8",
+      "0xf1f3d3d1b7117a2befc722c8782587f9212d782d7988ea345af9d33810723446",
+      "0xb6a536f9c251b1a8196e09e36b1b6040482a1af139507db058ea05f7e545da96",
+      "0xb508d51bdc7a5146126222694ab77b1558f76ae34ebc9100fe3f947b24fe542d",
+      "0xa976ac8461314ed937c24ced9094ab2ac13d41cab7a3ac0dab563edb9fb3fcfa",
+      "0x49b76c0d8e5dd81a9b45bd4f89f7185a9c2a040fdbf1b3e978a438a0a00da653",
+      "0x44c81fc34b036100e4418c8cf6a24c9af7e6754b7fbc3ed9e1eafba9e69f82b0",
+      "0x403f3922104f837972c80a3da4a8ef1a8071e97980e4d242af63ecefef38fe60",
+      "0x338d8c236754450e73633901e215ee3b7270e051a9d1b99225a414bfb070517e"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 646,
+    "dog_image_url": "https://api.degendogs.club/images/646.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/646",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117",
+      "dog_page": "https://degendogs.club/#dog646",
+      "explorer": "https://basescan.org/address/0xc421401af43d217d8bf16f18ffd076f3c84219d9",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/646",
+      "repo_archive": "archive/dogs/by-id/646.json",
+      "settlement_tx": "https://basescan.org/tx/0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#124/728",
+      "rank": 124,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 646 dog #646 646 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0121 eth 0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117 0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04 #124/728 background: halo; body: blue; neck: goldnecklace; mouth: none; ears: loopearring; head: crazyhair; eyes: eyepatch 0x7ba0096334e74f8bf852d997ba09f2cdc59d40c00a0cad07a5fdf2305d9729cc 0x437abdea21fe9a738844d5e73ad9f60dde85bbdee4be5bf81bd30de7ac3731a6 0xcec110cf3373c46f15c32bd4ad6c5c940338686ec429bbd74bc6a8e6e4534bc8 0xf1f3d3d1b7117a2befc722c8782587f9212d782d7988ea345af9d33810723446 0xb6a536f9c251b1a8196e09e36b1b6040482a1af139507db058ea05f7e545da96 0xb508d51bdc7a5146126222694ab77b1558f76ae34ebc9100fe3f947b24fe542d 0xa976ac8461314ed937c24ced9094ab2ac13d41cab7a3ac0dab563edb9fb3fcfa 0x49b76c0d8e5dd81a9b45bd4f89f7185a9c2a040fdbf1b3e978a438a0a00da653 0x44c81fc34b036100e4418c8cf6a24c9af7e6754b7fbc3ed9e1eafba9e69f82b0 0x403f3922104f837972c80a3da4a8ef1a8071e97980e4d242af63ecefef38fe60 0x338d8c236754450e73633901e215ee3b7270e051a9d1b99225a414bfb070517e base_logs archive_indexer",
+    "settlement": {
+      "block_number": 43040692,
+      "block_time_utc": "2026-03-07T08:05:31Z",
+      "settled": true,
+      "tx_hash": "0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04",
+      "tx_url": "https://basescan.org/tx/0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: Halo (9.8%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: Blue (9.1%)",
+        "trait_type": "Body",
+        "value": "Blue"
+      },
+      {
+        "display": "Neck: GoldNecklace (19.6%)",
+        "trait_type": "Neck",
+        "value": "GoldNecklace"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: CrazyHair (6.7%)",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: EyePatch (8.0%)",
+        "trait_type": "Eyes",
+        "value": "EyePatch"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@vorcha",
+      "farcaster_fid": null,
+      "farcaster_handle": "vorcha",
+      "profile_url": "https://farcaster.xyz/vorcha",
+      "wallet": "0xc421401af43d217d8bf16f18ffd076f3c84219d9",
+      "wallet_explorer_url": "https://basescan.org/address/0xc421401af43d217d8bf16f18ffd076f3c84219d9"
+    }
+  },
+  "schema_version": 1
+}

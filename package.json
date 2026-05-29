@@ -4,7 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "data": "python3 scripts/build_dashboard.py",
+    "data": "python3 scripts/build_dashboard.py && python3 scripts/build_unified_dog_index.py && python3 scripts/archive_apply_usd_estimates.py",
+    "archive:unified:index": "python3 scripts/build_unified_dog_index.py",
+    "archive:prices:fetch": "python3 scripts/archive_fetch_historical_prices.py",
+    "archive:prices:apply": "python3 scripts/archive_apply_usd_estimates.py",
+    "archive:prices:validate": "python3 scripts/archive_validate_usd_estimates.py",
     "check:historical-dogs": "python3 scripts/check_historical_dog_search.py",
     "check:dashboard-ui": "python3 scripts/check_dashboard_ui.py",
     "archive:mission2": "python3 scripts/archive_mission2_index.py",

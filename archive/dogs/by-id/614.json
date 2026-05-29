@@ -1,0 +1,132 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-02-03T03:21:59Z",
+    "amount": {
+      "native": "0.05851",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "58510000000000000",
+      "usd_estimate": "137.14431931",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$137.14",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-02-03",
+      "usd_estimate_price_usd": "2343.946663932276",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 41606116,
+      "block_time_utc": "2026-02-02T03:06:19Z",
+      "tx_hash": "0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a",
+      "tx_url": "https://basescan.org/tx/0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 12,
+      "last_bid_time_utc": "2026-02-03T03:16:47Z",
+      "unique_bidder_count": 7
+    },
+    "bid_tx_hashes": [
+      "0x4392f8379c8c06433d9db354f25f2d81fef26bf25a80bfe00a6d9e2fbd088e50",
+      "0x234379e70cbbe0ee0540e1ded6c8de7b892e13486ef1c4169242ac16dec8f0fb",
+      "0xaf03bc59ecfa10e0a1656e2306776f5067e80fb923fea66419da56f4f51d59f1",
+      "0xdf6b17f34b1b4437c7040ded0fa52c4eb802600f763fc66920208a3849f3bb27",
+      "0xbcf30b974b79b7c617e95184d411d9df7db7932a011064956e4f8aa1f99edfd7",
+      "0x8c70d55da36936ad406a5b9df4d83552d764742852e4ff5b590b2066b9d5f4eb",
+      "0x590cad0f3046672b8f50c734ebdfca120709cffd750b80b0700a5fd56044fe20",
+      "0xa0b99ebd6dca3d8b03393a4227b33e8d84cfb8268ebbd44b9d68db58bdd899d2",
+      "0x2c6ae98948d12ec58dbfdcdcc7fdfb8bb2c1d38f5972f6a0f2b6ea28e39a6e15",
+      "0x14edd48ff966c9ebc9e0ab7aa71aac1f48b8b80ec13865571f7a3892b2df1972",
+      "0x2a3603a3fa7790d88177a96e64c76007b69e4d30b73440c5f2c5e43793e01ce5",
+      "0x75d7f924b1f697c91ee0215d646177b9a89617d12530e73babd7d0480e90a3a4"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 614,
+    "dog_image_url": "https://api.degendogs.club/images/614.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/614",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a",
+      "dog_page": "https://degendogs.club/#dog614",
+      "explorer": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/614",
+      "repo_archive": "archive/dogs/by-id/614.json",
+      "settlement_tx": "https://basescan.org/tx/0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#644/728",
+      "rank": 644,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 614 dog #614 614 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.05851 eth 0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a 0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d #644/728 background: none; body: blue; neck: redcollar; mouth: none; ears: none; head: none; eyes: masksnorkel 0x4392f8379c8c06433d9db354f25f2d81fef26bf25a80bfe00a6d9e2fbd088e50 0x234379e70cbbe0ee0540e1ded6c8de7b892e13486ef1c4169242ac16dec8f0fb 0xaf03bc59ecfa10e0a1656e2306776f5067e80fb923fea66419da56f4f51d59f1 0xdf6b17f34b1b4437c7040ded0fa52c4eb802600f763fc66920208a3849f3bb27 0xbcf30b974b79b7c617e95184d411d9df7db7932a011064956e4f8aa1f99edfd7 0x8c70d55da36936ad406a5b9df4d83552d764742852e4ff5b590b2066b9d5f4eb 0x590cad0f3046672b8f50c734ebdfca120709cffd750b80b0700a5fd56044fe20 0xa0b99ebd6dca3d8b03393a4227b33e8d84cfb8268ebbd44b9d68db58bdd899d2 0x2c6ae98948d12ec58dbfdcdcc7fdfb8bb2c1d38f5972f6a0f2b6ea28e39a6e15 0x14edd48ff966c9ebc9e0ab7aa71aac1f48b8b80ec13865571f7a3892b2df1972 0x2a3603a3fa7790d88177a96e64c76007b69e4d30b73440c5f2c5e43793e01ce5 0x75d7f924b1f697c91ee0215d646177b9a89617d12530e73babd7d0480e90a3a4 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 41649786,
+      "block_time_utc": "2026-02-03T03:21:59Z",
+      "settled": true,
+      "tx_hash": "0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d",
+      "tx_url": "https://basescan.org/tx/0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Blue (9.1%)",
+        "trait_type": "Body",
+        "value": "Blue"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: None (25.1%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: None (20.2%)",
+        "trait_type": "Head",
+        "value": "None"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (9.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@dl39",
+      "farcaster_fid": null,
+      "farcaster_handle": "dl39",
+      "profile_url": "https://farcaster.xyz/dl39",
+      "wallet": "0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "wallet_explorer_url": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af"
+    }
+  },
+  "schema_version": 1
+}

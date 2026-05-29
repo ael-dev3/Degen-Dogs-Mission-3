@@ -1,0 +1,145 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-05T22:35:57Z",
+    "amount": {
+      "native": "0.02148",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "21480000000000000",
+      "usd_estimate": "50.39930288",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$50.40",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-05-05",
+      "usd_estimate_price_usd": "2346.3362606872515",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 45572303,
+      "block_time_utc": "2026-05-04T22:32:33Z",
+      "tx_hash": "0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe",
+      "tx_url": "https://basescan.org/tx/0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 25,
+      "last_bid_time_utc": "2026-05-05T22:30:31Z",
+      "unique_bidder_count": 10
+    },
+    "bid_tx_hashes": [
+      "0xce2e8a6e0c9fd1dc915a13795b94793e04eabf1356af1fef39aca7ca3aa150f3",
+      "0x4e2764e7e317ad6a4a9ada6b6e759efc3f3f47b46934bcba3261ecdf737bc272",
+      "0xabc2c7b680e4b387392f96373e2f306b572fabef544e487b00218a563d7c28aa",
+      "0xa0cec3a2c021b1c87874620ef8ab5de5217a8ee7e1bd1aea06adc0aaa6f1bdad",
+      "0x301ab9c504e1b2c808e143329148847d117fe56ca5676b93bce7314c9afce491",
+      "0xb0e74e3a313078f8b1a75bdd304b818e70fc8e301104133a5dbf8d86386256d9",
+      "0xf2d62519dc1dcea9ecc2a9bf16ade3921e63009061df532c3e3d59cb507087af",
+      "0xe827b18ac52a131192ff16b27b844969e144b4fcbe1cd0cae166654f80f59548",
+      "0xb3681be3a45e38f086b3c52db4fe40de76f763c0c68e95239807e51f5ea368bc",
+      "0xb4daf6bdbabd11c5f72d932aab4a01a503cac45cc5c119c7ff3dd33fa6865b8e",
+      "0x9ebfd9594cfe89c9437b0bb5b3f4befeb79113e0916605124b923da4312ad3df",
+      "0x88a4f1f6dae58f0b30492f20064682f0506099f7b9f6b9f771afdf23ccf59ed8",
+      "0xd26bc96c97dd451b9a6df8a0ef3266807f7d24d3df7e9af83b0a27801f4df8e0",
+      "0xe9923ab6b2f0a2700426b8b041b5c3b54cc9729698ed25d3ba6ace38268ee203",
+      "0xc8b4877430aae9cd05070b095da4209b48cfb25a7ab30cd58f5a26db53284bd0",
+      "0xfac87cee82c5d87bfbf1661b8ea8fd9a98ef3a0390a709b4bb18309b3e9ba2ef",
+      "0x1b6deea7a9a66923d89ad07d336bae7c7e6e117c5fccfed4b87ec8d51281d33a",
+      "0x92ec7a09f677a9673edbf13ee5abdf6302fae2c6fc0c395a2172e1ffb448d146",
+      "0x8f9029924a50d3661fd2d13bf0e952103a1a1f8e210467bab4b62a7da5770d21",
+      "0x99c1ef0ed04f7a5bf1c3f3d9ad89be08e8a189fee67fdf6c8517898078f17857",
+      "0x3750b3cd12627f2211dcc80900e15df8e594edc8c144d7055ac2d8c9836d8e2b",
+      "0x5c21fe117bca04e5f6c938853a088e4fc8d2bf8ed1529d46bf781094cb41bffe",
+      "0x7004d7b20eb35b0f19a0457e94ef7017914b92c57a70cb1a4bcff8a0e3788157",
+      "0xd03dd7d0124e597cde64cfd4f2a0cefc27e6b9ab8780ceec7bc3e2ad4b453484",
+      "0x3e1a49533027ccbddc0efda77b5ba0f7aeb81649a530e07749b4d1ba0cf6180f"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 705,
+    "dog_image_url": "https://api.degendogs.club/images/705.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/705",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe",
+      "dog_page": "https://degendogs.club/#dog705",
+      "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/705",
+      "repo_archive": "archive/dogs/by-id/705.json",
+      "settlement_tx": "https://basescan.org/tx/0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#558/728",
+      "rank": 558,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 705 dog #705 705 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.02148 eth 0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe 0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971 #558/728 background: none; body: brown; neck: none; mouth: none; ears: goldearring; head: redmohawk; eyes: none 0xce2e8a6e0c9fd1dc915a13795b94793e04eabf1356af1fef39aca7ca3aa150f3 0x4e2764e7e317ad6a4a9ada6b6e759efc3f3f47b46934bcba3261ecdf737bc272 0xabc2c7b680e4b387392f96373e2f306b572fabef544e487b00218a563d7c28aa 0xa0cec3a2c021b1c87874620ef8ab5de5217a8ee7e1bd1aea06adc0aaa6f1bdad 0x301ab9c504e1b2c808e143329148847d117fe56ca5676b93bce7314c9afce491 0xb0e74e3a313078f8b1a75bdd304b818e70fc8e301104133a5dbf8d86386256d9 0xf2d62519dc1dcea9ecc2a9bf16ade3921e63009061df532c3e3d59cb507087af 0xe827b18ac52a131192ff16b27b844969e144b4fcbe1cd0cae166654f80f59548 0xb3681be3a45e38f086b3c52db4fe40de76f763c0c68e95239807e51f5ea368bc 0xb4daf6bdbabd11c5f72d932aab4a01a503cac45cc5c119c7ff3dd33fa6865b8e 0x9ebfd9594cfe89c9437b0bb5b3f4befeb79113e0916605124b923da4312ad3df 0x88a4f1f6dae58f0b30492f20064682f0506099f7b9f6b9f771afdf23ccf59ed8 0xd26bc96c97dd451b9a6df8a0ef3266807f7d24d3df7e9af83b0a27801f4df8e0 0xe9923ab6b2f0a2700426b8b041b5c3b54cc9729698ed25d3ba6ace38268ee203 0xc8b4877430aae9cd05070b095da4209b48cfb25a7ab30cd58f5a26db53284bd0 0xfac87cee82c5d87bfbf1661b8ea8fd9a98ef3a0390a709b4bb18309b3e9ba2ef 0x1b6deea7a9a66923d89ad07d336bae7c7e6e117c5fccfed4b87ec8d51281d33a 0x92ec7a09f677a9673edbf13ee5abdf6302fae2c6fc0c395a2172e1ffb448d146 0x8f9029924a50d3661fd2d13bf0e952103a1a1f8e210467bab4b62a7da5770d21 0x99c1ef0ed04f7a5bf1c3f3d9ad89be08e8a189fee67fdf6c8517898078f17857 0x3750b3cd12627f2211dcc80900e15df8e594edc8c144d7055ac2d8c9836d8e2b 0x5c21fe117bca04e5f6c938853a088e4fc8d2bf8ed1529d46bf781094cb41bffe 0x7004d7b20eb35b0f19a0457e94ef7017914b92c57a70cb1a4bcff8a0e3788157 0xd03dd7d0124e597cde64cfd4f2a0cefc27e6b9ab8780ceec7bc3e2ad4b453484 0x3e1a49533027ccbddc0efda77b5ba0f7aeb81649a530e07749b4d1ba0cf6180f base_logs archive_indexer",
+    "settlement": {
+      "block_number": 45615605,
+      "block_time_utc": "2026-05-05T22:35:57Z",
+      "settled": true,
+      "tx_hash": "0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971",
+      "tx_url": "https://basescan.org/tx/0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Brown (10.9%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: GoldEarring (15.7%)",
+        "trait_type": "Ears",
+        "value": "GoldEarring"
+      },
+      {
+        "display": "Head: RedMohawk (6.9%)",
+        "trait_type": "Head",
+        "value": "RedMohawk"
+      },
+      {
+        "display": "Eyes: None (17.9%)",
+        "trait_type": "Eyes",
+        "value": "None"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@skunkape",
+      "farcaster_fid": null,
+      "farcaster_handle": "skunkape",
+      "profile_url": "https://farcaster.xyz/skunkape",
+      "wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "wallet_explorer_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202"
+    }
+  },
+  "schema_version": 1
+}

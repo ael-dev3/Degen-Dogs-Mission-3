@@ -1,0 +1,133 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2022-03-22T21:57:15Z",
+    "amount": {
+      "native": "0.21",
+      "native_symbol": "WETH",
+      "price_asset_key": "ETH",
+      "raw": "210000000000000000",
+      "usd_estimate": "623.65484657",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$623.65",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2022-03-22",
+      "usd_estimate_price_usd": "2969.78498365825",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 26229273,
+      "block_time_utc": "2022-03-22T13:56:55Z",
+      "tx_hash": "0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163",
+      "tx_url": "https://polygonscan.com/tx/0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163"
+    },
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bid_stats": {
+      "bid_count": 11,
+      "last_bid_time_utc": "2022-03-22T14:51:53Z",
+      "unique_bidder_count": 7
+    },
+    "bid_tx_hashes": [
+      "0x30a7cc6f30d23bbbf7662482be156f3a877efc13c6f99d44d4860c2f186868c5",
+      "0xca5ced7c9c5fbbaf726408b5911a4a00171c48f2caf41025c17d1e44eaee885d",
+      "0xd13555f3e53f8ae99d063ec4f4df76970332b57b668c2cc763f6e9c07a0c6328",
+      "0xfaa3a354eb369d6eb8be57cdeb7e5bd414f82dad9784a34e99de73e32ffd3d4e",
+      "0x98d5f6bca2ff659ed8d7bbbfa3c6e3ff22a4bcd2e7b70cf10fc64e253d16b8d1",
+      "0x5c02cfb242cf1f85638662361d82912c7b13222bb00e621daca177e9332814f9",
+      "0x844c68032b80da08629079e6944263e187b87c9e7d9d6851705706a8938a9f6b",
+      "0xf124af7f551e2d6debb7f007a6604e2c6e11464492b205147b94edd899e470a0",
+      "0xbf219c7916074edc38dd7c7c7099bc632e3f0f5cb262f0f57d29ee1abe7a2607",
+      "0x92c7c7d4907cd1aac1f736acc19eebab81ddf4f5ba6288543ee0b546950f5be0",
+      "0x9631916d978c50a8c6e85bdaff1afa40bb58b3d84abaf47302f518037e9fc6fc"
+    ],
+    "chain": "Polygon",
+    "chain_id": 137,
+    "dog_id": 43,
+    "dog_image_url": "https://api.degendogs.club/images/43.png",
+    "dog_item_url": null,
+    "era_label": "Mission 1",
+    "links": {
+      "auction_tx": "https://polygonscan.com/tx/0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163",
+      "dog_page": "https://degendogs.club/#dog43",
+      "explorer": "https://polygonscan.com/address/0xf8a025b42b07db05638fe596cce339707ec3cc71",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/043.json",
+      "settlement_tx": "https://polygonscan.com/tx/0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8"
+    },
+    "mission": 1,
+    "rarity": {
+      "display": "#469/728",
+      "rank": 469,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 43 dog #43 43 mission 1 mission 1 polygon settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 0.21 weth 0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163 0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8 #469/728 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: whitemohawk; eyes: vrgoggles 0x30a7cc6f30d23bbbf7662482be156f3a877efc13c6f99d44d4860c2f186868c5 0xca5ced7c9c5fbbaf726408b5911a4a00171c48f2caf41025c17d1e44eaee885d 0xd13555f3e53f8ae99d063ec4f4df76970332b57b668c2cc763f6e9c07a0c6328 0xfaa3a354eb369d6eb8be57cdeb7e5bd414f82dad9784a34e99de73e32ffd3d4e 0x98d5f6bca2ff659ed8d7bbbfa3c6e3ff22a4bcd2e7b70cf10fc64e253d16b8d1 0x5c02cfb242cf1f85638662361d82912c7b13222bb00e621daca177e9332814f9 0x844c68032b80da08629079e6944263e187b87c9e7d9d6851705706a8938a9f6b 0xf124af7f551e2d6debb7f007a6604e2c6e11464492b205147b94edd899e470a0 0xbf219c7916074edc38dd7c7c7099bc632e3f0f5cb262f0f57d29ee1abe7a2607 0x92c7c7d4907cd1aac1f736acc19eebab81ddf4f5ba6288543ee0b546950f5be0 0x9631916d978c50a8c6e85bdaff1afa40bb58b3d84abaf47302f518037e9fc6fc polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "settlement": {
+      "block_number": 26242672,
+      "block_time_utc": "2022-03-22T21:57:15Z",
+      "settled": true,
+      "tx_hash": "0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8",
+      "tx_url": "https://polygonscan.com/tx/0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing.",
+      "raw_confidence": "verified_mint_and_receipt_logs",
+      "sources": [
+        "polygon_receipts",
+        "polygonscan_tx_pages",
+        "degen_dogs_docs",
+        "markcarey_github"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Dalmation (9.8%)",
+        "trait_type": "Body",
+        "value": "Dalmation"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: None (25.1%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: WhiteMohawk (6.7%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: VRGoggles (10.0%)",
+        "trait_type": "Eyes",
+        "value": "VRGoggles"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "0xf8a0…cc71",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0xf8a025b42b07db05638fe596cce339707ec3cc71",
+      "wallet_explorer_url": "https://polygonscan.com/address/0xf8a025b42b07db05638fe596cce339707ec3cc71"
+    }
+  },
+  "schema_version": 1
+}

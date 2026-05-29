@@ -107,7 +107,7 @@ OUTPUT_TABLES = [
     "recent_bids",
     "top_woof_holders",
 ]
-PRIMARY_TABLES = ["auction_feed", "historical_dog_search", "historical_dog_report"]
+PRIMARY_TABLES = ["auction_feed"]
 
 DATASET_DESCRIPTIONS = {
     "mission3_metrics": "Key dashboard metrics, refresh metadata, and verified contract snapshot values.",
@@ -1941,16 +1941,37 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 """.strip()
     script = """
 const filter=document.getElementById('filter');
+const auctionTable=document.querySelector('table[data-table="auction_feed"]');
+const auctionBody=auctionTable?.tBodies?.[0];
+const auctionTotal=auctionTable?.caption?.querySelector('[data-total]');
+const defaultRows=auctionBody?[...auctionBody.rows].map(row=>row.cloneNode(true)):[];
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
 const TIMER_STATES=['calm','normal','urgent','critical','ended'];
 const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':'calm';
 const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggle(`countdown--${name}`,name===state));const box=el.closest('.timer-card');if(box){TIMER_STATES.forEach(name=>box.classList.toggle(`timer-card--${name}`,name===state));}};
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const attr=value=>escapeHtml(value);
+const shortAddress=value=>{const s=String(value||'');return s.startsWith('0x')&&s.length>=12?`${s.slice(0,6)}…${s.slice(-4)}`:s;};
+const statusCell=status=>{const text=String(status||'unknown');const lower=text.toLowerCase();const tone=lower.includes('ongoing')||lower==='live'?'ongoing':(lower.includes('settled')?'settled':'neutral');return `<span class="status-pill ${tone}">${escapeHtml(text)}</span>`;};
+const dogCell=record=>{const dog=`Dog #${record.dog_id}`;const img=record.dog_image_url?`<img class="dog-thumb" src="${attr(record.dog_image_url)}" alt="${attr(dog)} image" loading="lazy">`:'';const links=record.links||{};const item=record.dog_item_url||links.item||links.dog_page||'#';const imgHtml=img&&item!=='#'?`<a class="dog-image-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${img}</a>`:img;const label=item&&item!=='#'?`<a class="dog-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer">${escapeHtml(dog)}</a>`:`<span>${escapeHtml(dog)}</span>`;return `<span class="dog-cell">${imgHtml}${label}</span>`;};
+const identityCell=record=>{const who=record.winner_or_high_bidder||{};const label=who.display||shortAddress(who.wallet)||'';if(!label)return '';const url=who.profile_url||who.wallet_explorer_url||record.links?.explorer||'';return url?`<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`:escapeHtml(label);};
+const bidCell=record=>{const amount=record.amount||{};if(!amount.native)return '';const native=`${amount.native} ${amount.native_symbol||''}`.trim();const usd=amount.usd_estimate_display?` (${amount.usd_estimate_display} est.)`:'';return escapeHtml(`${native}${usd}`);};
+const timeCell=record=>{const status=String(record.status||'').toLowerCase();const label=status.includes('settled')?'Settled':(record.activity_time_basis==='last_bid_block_time'?'Last bid':'Activity');const value=record.activity_time_utc||'';return value?`<span class="time-cell"><b>${label}</b>${escapeHtml(value.replace('T',' ').replace('Z',''))}</span>`:'';};
+const rarityCell=record=>escapeHtml(record.rarity?.display||'');
+const unifiedRowHtml=record=>{const statusLabel=`${record.era_label||`Mission ${record.mission}`} · ${record.status||''}`;return `<tr data-search="${attr(record.search_text||'')}"><td class="state" data-label="status">${statusCell(statusLabel)}</td><td class="dog-col" data-label="dog">${dogCell(record)}</td><td class="identity" data-label="high bidder / winner">${identityCell(record)}</td><td class="" data-label="bid">${bidCell(record)}</td><td class="time" data-label="last bid / settled">${timeCell(record)}</td><td class="num" data-label="rarity">${rarityCell(record)}</td></tr>`;};
+let unifiedPromise=null;
+const loadUnified=()=>unifiedPromise||(unifiedPromise=(async()=>{for(const url of ['generated/unified_dog_search_index.json','/generated/unified_dog_search_index.json']){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;const type=r.headers.get('content-type')||'';if(!type.includes('json'))continue;return await r.json();}catch(_){}}throw new Error('unified archive index unavailable');})());
+const setAuctionRows=(records,label)=>{if(!auctionBody)return;auctionBody.innerHTML=records.length?records.map(unifiedRowHtml).join(''):`<tr><td colspan="6">No archive matches found.</td></tr>`;if(auctionTotal){auctionTotal.dataset.total=String(records.length);auctionTotal.textContent=label||`${records.length} rows`;}};
+const restoreAuctionRows=()=>{if(!auctionBody)return;auctionBody.replaceChildren(...defaultRows.map(row=>row.cloneNode(true)));if(auctionTotal){auctionTotal.dataset.total=String(defaultRows.length);auctionTotal.textContent=`${defaultRows.length} rows`;}};
+const matchesQuery=(record,q)=>{let remaining=q;const missionMatch=remaining.match(/(?:^|\s)mission\s*:?\s*([123])(?=\s|$)/);if(missionMatch&&Number(record.mission)!==Number(missionMatch[1]))return false;remaining=remaining.replace(/(?:^|\s)mission\s*:?\s*[123](?=\s|$)/g,' ');const dogMatch=remaining.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/);if(dogMatch&&Number(record.dog_id)!==Number(dogMatch[1]))return false;remaining=remaining.replace(/(?:^|\s)dog\s*#?\s*\d{1,4}(?=\s|$)/g,' ');const terms=remaining.split(/\s+/).filter(Boolean);const haystack=String(record.search_text||'').toLowerCase();return terms.every(term=>haystack.includes(term));};
 const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
-const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');const haystack=(tr.dataset.search||tr.textContent).toLowerCase();tr.hidden=q!==''&&searchable&&!haystack.includes(q);});updateCounts();});
+const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{if(!table.tBodies.length)return;const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total&&!table.matches('[data-table="auction_feed"]')){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
+const runFilter=()=>{const q=filter.value.trim().toLowerCase();if(!q){restoreAuctionRows();updateCounts();return;}loadUnified().then(records=>{const matches=records.filter(record=>matchesQuery(record,q)).slice(0,100);setAuctionRows(matches,`${matches.length} archive matches`);updateCounts();}).catch(()=>{document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');const haystack=(tr.dataset.search||tr.textContent).toLowerCase();tr.hidden=q!==''&&searchable&&!haystack.includes(q);});updateCounts();});};
+filter.addEventListener('input',runFilter);
+loadUnified().then(records=>{if(!filter.value.trim())setAuctionRows(records.slice(0,10),'Latest 10 archive records');}).catch(()=>{});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
 updateCountdowns();
@@ -1977,7 +1998,7 @@ setInterval(updateCountdowns,1000);
     </div>
     <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
   </section>
-  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs, traits, wallets" autocomplete="off"></div>
+  <div class="toolbar"><input id="filter" type="search" aria-label="search unified Mission 1, 2, and 3 archive" placeholder="Search all missions: Dog #, wallet, handle, tx, chain, status" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
   {site_metric_html}
 </div>

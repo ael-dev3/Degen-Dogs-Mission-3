@@ -1,0 +1,121 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-02-21T06:26:53Z",
+    "amount": {
+      "native": "0.01234",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "12340000000000000",
+      "usd_estimate": "24.29150789",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$24.29",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-02-21",
+      "usd_estimate_price_usd": "1968.517657102729",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 42389571,
+      "block_time_utc": "2026-02-20T06:21:29Z",
+      "tx_hash": "0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832",
+      "tx_url": "https://basescan.org/tx/0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-02-20T06:21:57Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 632,
+    "dog_image_url": "https://api.degendogs.club/images/632.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/632",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832",
+      "dog_page": "https://degendogs.club/#dog632",
+      "explorer": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/632",
+      "repo_archive": "archive/dogs/by-id/632.json",
+      "settlement_tx": "https://basescan.org/tx/0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#89/728",
+      "rank": 89,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #89/728 background: none; body: sugarskull; neck: redcollar; mouth: tongue; ears: loopearring; head: hoodie; eyes: bluelasereyes 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 42432933,
+      "block_time_utc": "2026-02-21T06:26:53Z",
+      "settled": true,
+      "tx_hash": "0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b",
+      "tx_url": "https://basescan.org/tx/0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: SugarSkull (6.6%)",
+        "trait_type": "Body",
+        "value": "SugarSkull"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: Tongue (9.3%)",
+        "trait_type": "Mouth",
+        "value": "Tongue"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: Hoodie (4.7%)",
+        "trait_type": "Head",
+        "value": "Hoodie"
+      },
+      {
+        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "trait_type": "Eyes",
+        "value": "BlueLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@dl39",
+      "farcaster_fid": null,
+      "farcaster_handle": "dl39",
+      "profile_url": "https://farcaster.xyz/dl39",
+      "wallet": "0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "wallet_explorer_url": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af"
+    }
+  },
+  "schema_version": 1
+}

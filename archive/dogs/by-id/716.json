@@ -1,0 +1,130 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-17T03:55:49Z",
+    "amount": {
+      "native": "0.01866",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "18660000000000000",
+      "usd_estimate": "41.49237522",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$41.49",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-05-16",
+      "usd_estimate_price_usd": "2223.5999584060537",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 46057101,
+      "block_time_utc": "2026-05-16T03:52:29Z",
+      "tx_hash": "0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad",
+      "tx_url": "https://basescan.org/tx/0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 10,
+      "last_bid_time_utc": "2026-05-17T03:50:17Z",
+      "unique_bidder_count": 7
+    },
+    "bid_tx_hashes": [
+      "0x09576c981f57699a8123b0f029aa4c297fa7d6f5fa4985a6a4ee5f696aa0edb0",
+      "0x10988da6328519174b858e7fb5dc0da9d71c29ddc46c9140dc1f6e269a0cd697",
+      "0x962c3d4343e0c7391385b6b807d01b1fca10331cb17e58f117b8c21727ba5caa",
+      "0xfdcbf3837a5e48624626b9fc7782fb813741c52e59ab28154b9d5000a45e4b99",
+      "0x619e628919c4ddeaa21dda27e713b0df3e204355f637fc09d4bee3b231b37bc1",
+      "0x2320e2890e4f2713e56f7a5e190c5ec2d95387e62a66c3bfd4c27eac8c03201e",
+      "0x8980a49907061d31d7b1d706ccb4af882c5e176c0f4b733f6615c5c376f16d40",
+      "0xd7321869bb97140952b78d9be614fe4e9f6e41cbcd1e28aa75e67149485daa50",
+      "0x4add46af53b0620dde6dddfd081012c3bf687632213f8d309486b86be26dfb6d",
+      "0x6022f24cab161657743e2d2780935f48aee015a77ad65c8a94c5079f67c6cad6"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 716,
+    "dog_image_url": "https://api.degendogs.club/images/716.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/716",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad",
+      "dog_page": "https://degendogs.club/#dog716",
+      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/716",
+      "repo_archive": "archive/dogs/by-id/716.json",
+      "settlement_tx": "https://basescan.org/tx/0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#161/728",
+      "rank": 161,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 716 dog #716 716 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.01866 eth 0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad 0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad #161/728 background: none; body: white; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: bluelasereyes 0x09576c981f57699a8123b0f029aa4c297fa7d6f5fa4985a6a4ee5f696aa0edb0 0x10988da6328519174b858e7fb5dc0da9d71c29ddc46c9140dc1f6e269a0cd697 0x962c3d4343e0c7391385b6b807d01b1fca10331cb17e58f117b8c21727ba5caa 0xfdcbf3837a5e48624626b9fc7782fb813741c52e59ab28154b9d5000a45e4b99 0x619e628919c4ddeaa21dda27e713b0df3e204355f637fc09d4bee3b231b37bc1 0x2320e2890e4f2713e56f7a5e190c5ec2d95387e62a66c3bfd4c27eac8c03201e 0x8980a49907061d31d7b1d706ccb4af882c5e176c0f4b733f6615c5c376f16d40 0xd7321869bb97140952b78d9be614fe4e9f6e41cbcd1e28aa75e67149485daa50 0x4add46af53b0620dde6dddfd081012c3bf687632213f8d309486b86be26dfb6d 0x6022f24cab161657743e2d2780935f48aee015a77ad65c8a94c5079f67c6cad6 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 46100401,
+      "block_time_utc": "2026-05-17T03:55:49Z",
+      "settled": true,
+      "tx_hash": "0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad",
+      "tx_url": "https://basescan.org/tx/0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: White (11.3%)",
+        "trait_type": "Body",
+        "value": "White"
+      },
+      {
+        "display": "Neck: StuddedCollar (10.0%)",
+        "trait_type": "Neck",
+        "value": "StuddedCollar"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: RedMohawk (6.9%)",
+        "trait_type": "Head",
+        "value": "RedMohawk"
+      },
+      {
+        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "trait_type": "Eyes",
+        "value": "BlueLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@cryptomill",
+      "farcaster_fid": null,
+      "farcaster_handle": "cryptomill",
+      "profile_url": "https://farcaster.xyz/cryptomill",
+      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
+    }
+  },
+  "schema_version": 1
+}

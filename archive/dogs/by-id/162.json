@@ -1,0 +1,123 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2022-08-29T12:39:13Z",
+    "amount": {
+      "native": "0.05",
+      "native_symbol": "WETH",
+      "price_asset_key": "ETH",
+      "raw": "50000000000000000",
+      "usd_estimate": "71.78767802",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$71.79",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2022-08-29",
+      "usd_estimate_price_usd": "1435.7535603062865",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 32268023,
+      "block_time_utc": "2022-08-24T12:57:20Z",
+      "tx_hash": "0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6",
+      "tx_url": "https://polygonscan.com/tx/0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6"
+    },
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2022-08-24T13:00:36Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0xdc0342fd104ee82c810682bec7ebb2692be0ec72af39578cdec0cee4fbcb9dd9"
+    ],
+    "chain": "Polygon",
+    "chain_id": 137,
+    "dog_id": 162,
+    "dog_image_url": "https://api.degendogs.club/images/162.png",
+    "dog_item_url": null,
+    "era_label": "Mission 1",
+    "links": {
+      "auction_tx": "https://polygonscan.com/tx/0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6",
+      "dog_page": "https://degendogs.club/#dog162",
+      "explorer": "https://polygonscan.com/address/0x96584f1c9f9a69a65ab5264a8384c28c94a3539a",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/162.json",
+      "settlement_tx": "https://polygonscan.com/tx/0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9"
+    },
+    "mission": 1,
+    "rarity": {
+      "display": "#377/728",
+      "rank": 377,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 162 dog #162 162 mission 1 mission 1 polygon settled 0x96584f1c9f9a69a65ab5264a8384c28c94a3539a 0x9658…539a 0.05 weth 0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6 0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9 #377/728 background: halo; body: orange; neck: none; mouth: none; ears: loopearring; head: baseballcap; eyes: glasses 0xdc0342fd104ee82c810682bec7ebb2692be0ec72af39578cdec0cee4fbcb9dd9 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "settlement": {
+      "block_number": 32448668,
+      "block_time_utc": "2022-08-29T12:39:13Z",
+      "settled": true,
+      "tx_hash": "0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9",
+      "tx_url": "https://polygonscan.com/tx/0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing.",
+      "raw_confidence": "verified_mint_and_receipt_logs",
+      "sources": [
+        "polygon_receipts",
+        "polygonscan_tx_pages",
+        "degen_dogs_docs",
+        "markcarey_github"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: Halo (9.8%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: Orange (8.7%)",
+        "trait_type": "Body",
+        "value": "Orange"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: BaseballCap (10.4%)",
+        "trait_type": "Head",
+        "value": "BaseballCap"
+      },
+      {
+        "display": "Eyes: Glasses (12.5%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "0x9658…539a",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0x96584f1c9f9a69a65ab5264a8384c28c94a3539a",
+      "wallet_explorer_url": "https://polygonscan.com/address/0x96584f1c9f9a69a65ab5264a8384c28c94a3539a"
+    }
+  },
+  "schema_version": 1
+}

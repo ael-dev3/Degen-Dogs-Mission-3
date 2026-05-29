@@ -1,0 +1,126 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-01-20T01:32:05Z",
+    "amount": {
+      "native": "0.2046",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "204600000000000000",
+      "usd_estimate": "652.01525290",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$652.02",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-01-20",
+      "usd_estimate_price_usd": "3186.7803172019467",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 40998385,
+      "block_time_utc": "2026-01-19T01:28:37Z",
+      "tx_hash": "0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d",
+      "tx_url": "https://basescan.org/tx/0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 6,
+      "last_bid_time_utc": "2026-01-20T01:26:51Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0xeec78279f232e896efe0d2cd89273fc4eabb3c70a9fc6004714bee3cb3ae6fdb",
+      "0xd66d0ad433d96395e99c7449685c5a3ced3971952f63e47976611cea98269bba",
+      "0x0f72bad9dad86285a45fa1ecc913f95a403f013311dfaf039dfc59958dcb8df4",
+      "0x0ab9580a2333f7dbe1cb4ae94696e8934aca6ac4daf2281c5b236c39f898b9d8",
+      "0xca4aafcc2e28ec4373ee33a9ba696eab794d189a36f3c2e83b410e13631dd04e",
+      "0xa1225bb58bf79e3d84d259f98c90e7625cc82bf583495b0da99f02eb3e8dbfb3"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 600,
+    "dog_image_url": "https://api.degendogs.club/images/600.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/600",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d",
+      "dog_page": "https://degendogs.club/#dog600",
+      "explorer": "https://basescan.org/address/0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/600",
+      "repo_archive": "archive/dogs/by-id/600.json",
+      "settlement_tx": "https://basescan.org/tx/0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#527/728",
+      "rank": 527,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 600 dog #600 600 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.2046 eth 0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d 0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5 #527/728 background: none; body: grey; neck: none; mouth: tongue; ears: loopearring; head: none; eyes: vrgoggles 0xeec78279f232e896efe0d2cd89273fc4eabb3c70a9fc6004714bee3cb3ae6fdb 0xd66d0ad433d96395e99c7449685c5a3ced3971952f63e47976611cea98269bba 0x0f72bad9dad86285a45fa1ecc913f95a403f013311dfaf039dfc59958dcb8df4 0x0ab9580a2333f7dbe1cb4ae94696e8934aca6ac4daf2281c5b236c39f898b9d8 0xca4aafcc2e28ec4373ee33a9ba696eab794d189a36f3c2e83b410e13631dd04e 0xa1225bb58bf79e3d84d259f98c90e7625cc82bf583495b0da99f02eb3e8dbfb3 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 41041689,
+      "block_time_utc": "2026-01-20T01:32:05Z",
+      "settled": true,
+      "tx_hash": "0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5",
+      "tx_url": "https://basescan.org/tx/0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Grey (11.1%)",
+        "trait_type": "Body",
+        "value": "Grey"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Tongue (9.3%)",
+        "trait_type": "Mouth",
+        "value": "Tongue"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: None (20.2%)",
+        "trait_type": "Head",
+        "value": "None"
+      },
+      {
+        "display": "Eyes: VRGoggles (10.0%)",
+        "trait_type": "Eyes",
+        "value": "VRGoggles"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@mr-r0b0t",
+      "farcaster_fid": null,
+      "farcaster_handle": "mr-r0b0t",
+      "profile_url": "https://farcaster.xyz/mr-r0b0t",
+      "wallet": "0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd",
+      "wallet_explorer_url": "https://basescan.org/address/0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd"
+    }
+  },
+  "schema_version": 1
+}

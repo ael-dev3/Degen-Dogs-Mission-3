@@ -1,0 +1,121 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2022-11-24T13:58:27Z",
+    "amount": {
+      "native": "0",
+      "native_symbol": "WETH",
+      "price_asset_key": "ETH",
+      "raw": "0",
+      "usd_estimate": "0E-8",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$0.00",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2022-11-24",
+      "usd_estimate_price_usd": "1185.9159377338015",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 35911681,
+      "block_time_utc": "2022-11-22T04:23:40Z",
+      "tx_hash": "0x7b6a53275588a4023c5e9eddc8fb2624f982cad08cfb6e3fe359b4860fd3fb69",
+      "tx_url": "https://polygonscan.com/tx/0x7b6a53275588a4023c5e9eddc8fb2624f982cad08cfb6e3fe359b4860fd3fb69"
+    },
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bid_stats": {
+      "bid_count": 0,
+      "last_bid_time_utc": null,
+      "unique_bidder_count": 0
+    },
+    "bid_tx_hashes": [],
+    "chain": "Polygon",
+    "chain_id": 137,
+    "dog_id": 180,
+    "dog_image_url": "https://api.degendogs.club/images/180.png",
+    "dog_item_url": null,
+    "era_label": "Mission 1",
+    "links": {
+      "auction_tx": "https://polygonscan.com/tx/0x7b6a53275588a4023c5e9eddc8fb2624f982cad08cfb6e3fe359b4860fd3fb69",
+      "dog_page": "https://degendogs.club/#dog180",
+      "explorer": null,
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/180.json",
+      "settlement_tx": "https://polygonscan.com/tx/0x04fcc5f4d66985180ddc6caebf226e3d3fa54c0eb94f9644de51bba3458888de"
+    },
+    "mission": 1,
+    "rarity": {
+      "display": "#139/728",
+      "rank": 139,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 180 dog #180 180 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x7b6a53275588a4023c5e9eddc8fb2624f982cad08cfb6e3fe359b4860fd3fb69 0x04fcc5f4d66985180ddc6caebf226e3d3fa54c0eb94f9644de51bba3458888de #139/728 background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: goldearring; head: headphones; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "settlement": {
+      "block_number": 36010299,
+      "block_time_utc": "2022-11-24T13:58:27Z",
+      "settled": true,
+      "tx_hash": "0x04fcc5f4d66985180ddc6caebf226e3d3fa54c0eb94f9644de51bba3458888de",
+      "tx_url": "https://polygonscan.com/tx/0x04fcc5f4d66985180ddc6caebf226e3d3fa54c0eb94f9644de51bba3458888de"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing.",
+      "raw_confidence": "verified_mint_and_receipt_logs",
+      "sources": [
+        "polygon_receipts",
+        "polygonscan_tx_pages",
+        "degen_dogs_docs",
+        "markcarey_github"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: RedBrown (15.4%)",
+        "trait_type": "Body",
+        "value": "RedBrown"
+      },
+      {
+        "display": "Neck: StuddedCollar (10.0%)",
+        "trait_type": "Neck",
+        "value": "StuddedCollar"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: GoldEarring (15.7%)",
+        "trait_type": "Ears",
+        "value": "GoldEarring"
+      },
+      {
+        "display": "Head: Headphones (6.3%)",
+        "trait_type": "Head",
+        "value": "Headphones"
+      },
+      {
+        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "trait_type": "Eyes",
+        "value": "BlueLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "0x0000…0000",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0x0000000000000000000000000000000000000000",
+      "wallet_explorer_url": null
+    }
+  },
+  "schema_version": 1
+}

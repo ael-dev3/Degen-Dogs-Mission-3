@@ -1,0 +1,125 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-18T03:56:55Z",
+    "amount": {
+      "native": "0.016",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "16000000000000000",
+      "usd_estimate": "34.04800364",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$34.05",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-05-18",
+      "usd_estimate_price_usd": "2128.0002275811294",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 46100401,
+      "block_time_utc": "2026-05-17T03:55:49Z",
+      "tx_hash": "0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad",
+      "tx_url": "https://basescan.org/tx/0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 5,
+      "last_bid_time_utc": "2026-05-17T18:42:49Z",
+      "unique_bidder_count": 4
+    },
+    "bid_tx_hashes": [
+      "0x12db753ee98f938ea70a9954f44a2dfea9d32622a7d883f17efbcba72824140e",
+      "0xe1a1c479459a37dbe480bf4820c2131603e294180aa6502e75b4af3c97509ca1",
+      "0x05cd9688e855e9746518e1ee0741fae2161f66cf0b379e6838d3fa3f0accf003",
+      "0x258adeda00e0443161690a9deb7d07d42b09f8c35f61bc12302721515182e1bb",
+      "0xde65ea8a05f4cab7082abbd218f30a474bf2f93cfff9a184eed60edc31378923"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 717,
+    "dog_image_url": "https://api.degendogs.club/images/717.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/717",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad",
+      "dog_page": "https://degendogs.club/#dog717",
+      "explorer": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/717",
+      "repo_archive": "archive/dogs/by-id/717.json",
+      "settlement_tx": "https://basescan.org/tx/0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#441/728",
+      "rank": 441,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 717 dog #717 717 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.016 eth 0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad 0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e #441/728 background: none; body: brown; neck: studdedcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: glasses 0x12db753ee98f938ea70a9954f44a2dfea9d32622a7d883f17efbcba72824140e 0xe1a1c479459a37dbe480bf4820c2131603e294180aa6502e75b4af3c97509ca1 0x05cd9688e855e9746518e1ee0741fae2161f66cf0b379e6838d3fa3f0accf003 0x258adeda00e0443161690a9deb7d07d42b09f8c35f61bc12302721515182e1bb 0xde65ea8a05f4cab7082abbd218f30a474bf2f93cfff9a184eed60edc31378923 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 46143634,
+      "block_time_utc": "2026-05-18T03:56:55Z",
+      "settled": true,
+      "tx_hash": "0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e",
+      "tx_url": "https://basescan.org/tx/0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Brown (10.9%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: StuddedCollar (10.0%)",
+        "trait_type": "Neck",
+        "value": "StuddedCollar"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: StripedBeanie (8.5%)",
+        "trait_type": "Head",
+        "value": "StripedBeanie"
+      },
+      {
+        "display": "Eyes: Glasses (12.5%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@staraptor.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "staraptor.eth",
+      "profile_url": "https://farcaster.xyz/staraptor.eth",
+      "wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
+      "wallet_explorer_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347"
+    }
+  },
+  "schema_version": 1
+}

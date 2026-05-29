@@ -1,0 +1,133 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-08T03:00:45Z",
+    "amount": {
+      "native": "0.033",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "33000000000000000",
+      "usd_estimate": "77.57092701",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$77.57",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-05-07",
+      "usd_estimate_price_usd": "2350.634151936807",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 45666541,
+      "block_time_utc": "2026-05-07T02:53:49Z",
+      "tx_hash": "0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504",
+      "tx_url": "https://basescan.org/tx/0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 13,
+      "last_bid_time_utc": "2026-05-08T02:53:37Z",
+      "unique_bidder_count": 8
+    },
+    "bid_tx_hashes": [
+      "0xee365cd98770b23e8cf5f3d55e5c4c0cb76de5e6410003c793312323b433ecf0",
+      "0x184142d492ced0e509c8a0cc76821e79aaef67e9414c10fdc120dbad1cc327b9",
+      "0xca1931fdc26355f4625d0c87716c658970cab52aac09fb90bc1b1950e0e3f0fd",
+      "0xf91b319ec57da4d69a41da23ff804bf4b3930bdc7a023a4a95e0bcfa1442fb7c",
+      "0x315d3f880119dceec2a6fe95ca6ce1f0ce4a866e58f6a03b09c9197cf06ddd12",
+      "0x47ab397d295231c5d061bcb82cb852f0baf3494f59b95032f0f187f42d5b2193",
+      "0x2ffcbcdcf7a4d8f292aa9374d583700fee0bc50f7dba777f47ee7a13c02291b7",
+      "0x591ad1057c0884df0292682cbc804cb91f6cbb02359b0380fcf4ad7eb45743ce",
+      "0x0f539ad2796b14f730dc5cead97e7b4536d351c0defb2e271ddbcefef6163e0a",
+      "0x8a420e1b4379131b1f10846fb46593ae1bfb3542990364ff7b1e4add3d31cdb2",
+      "0xac6dd69a6f7b1c8061f981bec4bffb1596746d3614609fe389567dfd786b9876",
+      "0x04d6a885bedd797df15a22b5808158ad628614d4925e3f4786a6a05266b488f9",
+      "0x53f88c393f9a1c935fbdc67faf079ffd3661f2ede768c6fe15c4fd8ddfd34da2"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 707,
+    "dog_image_url": "https://api.degendogs.club/images/707.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/707",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504",
+      "dog_page": "https://degendogs.club/#dog707",
+      "explorer": "https://basescan.org/address/0xee2bb96a633e50de9cbc8b4229b07cef9a008852",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/707",
+      "repo_archive": "archive/dogs/by-id/707.json",
+      "settlement_tx": "https://basescan.org/tx/0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#180/728",
+      "rank": 180,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 707 dog #707 707 mission 3 mission 3 base settled 0xee2bb96a633e50de9cbc8b4229b07cef9a008852 @kidmyr.eth kidmyr.eth 0.033 eth 0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504 0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206 #180/728 background: none; body: rainbow; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: none 0xee365cd98770b23e8cf5f3d55e5c4c0cb76de5e6410003c793312323b433ecf0 0x184142d492ced0e509c8a0cc76821e79aaef67e9414c10fdc120dbad1cc327b9 0xca1931fdc26355f4625d0c87716c658970cab52aac09fb90bc1b1950e0e3f0fd 0xf91b319ec57da4d69a41da23ff804bf4b3930bdc7a023a4a95e0bcfa1442fb7c 0x315d3f880119dceec2a6fe95ca6ce1f0ce4a866e58f6a03b09c9197cf06ddd12 0x47ab397d295231c5d061bcb82cb852f0baf3494f59b95032f0f187f42d5b2193 0x2ffcbcdcf7a4d8f292aa9374d583700fee0bc50f7dba777f47ee7a13c02291b7 0x591ad1057c0884df0292682cbc804cb91f6cbb02359b0380fcf4ad7eb45743ce 0x0f539ad2796b14f730dc5cead97e7b4536d351c0defb2e271ddbcefef6163e0a 0x8a420e1b4379131b1f10846fb46593ae1bfb3542990364ff7b1e4add3d31cdb2 0xac6dd69a6f7b1c8061f981bec4bffb1596746d3614609fe389567dfd786b9876 0x04d6a885bedd797df15a22b5808158ad628614d4925e3f4786a6a05266b488f9 0x53f88c393f9a1c935fbdc67faf079ffd3661f2ede768c6fe15c4fd8ddfd34da2 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 45709949,
+      "block_time_utc": "2026-05-08T03:00:45Z",
+      "settled": true,
+      "tx_hash": "0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206",
+      "tx_url": "https://basescan.org/tx/0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Rainbow (4.4%)",
+        "trait_type": "Body",
+        "value": "Rainbow"
+      },
+      {
+        "display": "Neck: RedCollar (30.9%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: GoldEarring (15.7%)",
+        "trait_type": "Ears",
+        "value": "GoldEarring"
+      },
+      {
+        "display": "Head: WhiteMohawk (6.7%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: None (17.9%)",
+        "trait_type": "Eyes",
+        "value": "None"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@kidmyr.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "kidmyr.eth",
+      "profile_url": "https://farcaster.xyz/kidmyr.eth",
+      "wallet": "0xee2bb96a633e50de9cbc8b4229b07cef9a008852",
+      "wallet_explorer_url": "https://basescan.org/address/0xee2bb96a633e50de9cbc8b4229b07cef9a008852"
+    }
+  },
+  "schema_version": 1
+}

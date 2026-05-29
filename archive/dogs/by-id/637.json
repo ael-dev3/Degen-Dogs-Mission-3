@@ -1,0 +1,121 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-02-26T06:46:45Z",
+    "amount": {
+      "native": "0.01",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "10000000000000000",
+      "usd_estimate": "20.55095439",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$20.55",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-02-26",
+      "usd_estimate_price_usd": "2055.0954389406515",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 42606169,
+      "block_time_utc": "2026-02-25T06:41:25Z",
+      "tx_hash": "0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33",
+      "tx_url": "https://basescan.org/tx/0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-02-25T06:48:07Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 637,
+    "dog_image_url": "https://api.degendogs.club/images/637.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/637",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33",
+      "dog_page": "https://degendogs.club/#dog637",
+      "explorer": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/637",
+      "repo_archive": "archive/dogs/by-id/637.json",
+      "settlement_tx": "https://basescan.org/tx/0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#282/728",
+      "rank": 282,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #282/728 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d base_logs archive_indexer",
+    "settlement": {
+      "block_number": 42649529,
+      "block_time_utc": "2026-02-26T06:46:45Z",
+      "settled": true,
+      "tx_hash": "0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25",
+      "tx_url": "https://basescan.org/tx/0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Grey (11.1%)",
+        "trait_type": "Body",
+        "value": "Grey"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Teeth (5.2%)",
+        "trait_type": "Mouth",
+        "value": "Teeth"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: None (20.2%)",
+        "trait_type": "Head",
+        "value": "None"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (9.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@dl39",
+      "farcaster_fid": null,
+      "farcaster_handle": "dl39",
+      "profile_url": "https://farcaster.xyz/dl39",
+      "wallet": "0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "wallet_explorer_url": "https://basescan.org/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af"
+    }
+  },
+  "schema_version": 1
+}

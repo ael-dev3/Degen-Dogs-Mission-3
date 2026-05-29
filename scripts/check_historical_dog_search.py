@@ -135,17 +135,42 @@ def main() -> int:
         assert_artifact_pair_matches(ROOT / "generated" / f"{table_name}.csv", ROOT / "public" / "generated" / f"{table_name}.csv")
         assert_artifact_pair_matches(ROOT / "generated" / f"{table_name}.json", ROOT / "public" / "generated" / f"{table_name}.json")
 
+    unified_archive_path = ROOT / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+    unified_public_path = ROOT / "public" / "generated" / "unified_dog_search_index.json"
+    if not unified_archive_path.exists() or not unified_public_path.exists():
+        raise AssertionError("missing unified dog search index artifacts")
+    unified_archive = json.loads(unified_archive_path.read_text(encoding="utf-8"))
+    unified_public = json.loads(unified_public_path.read_text(encoding="utf-8"))
+    if unified_archive != unified_public:
+        raise AssertionError("public unified dog search index differs from archive copy")
+    if len(unified_archive) < 700:
+        raise AssertionError(f"unified dog search index unexpectedly small: {len(unified_archive)}")
+    unified_missions = {str(row.get("mission")) for row in unified_archive if isinstance(row, dict)}
+    if not {"1", "2", "3"}.issubset(unified_missions):
+        raise AssertionError(f"unified dog search mission coverage incomplete: {sorted(unified_missions)}")
+    for row in unified_archive[:10]:
+        search_text = str(row.get("search_text") or "").lower()
+        if f"dog #{row.get('dog_id')}" not in search_text or f"mission {row.get('mission')}" not in search_text:
+            raise AssertionError("unified search row missing dog/mission terms")
+
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     for marker in [
-        'data-table="historical_dog_search"',
-        'data-table="historical_dog_report"',
-        'data-search=',
-        'Search auctions, usernames, dogs, traits, wallets',
+        'data-table="auction_feed"',
+        'generated/unified_dog_search_index.json',
+        "'/generated/unified_dog_search_index.json'",
+        "fetch(url,{cache:'no-store'})",
+        'missionMatch=remaining.match',
+        'dogMatch=remaining.match',
+        'Search all missions: Dog #, wallet, handle, tx, chain, status',
+        'Latest 10 archive records',
     ]:
         if marker not in html:
             raise AssertionError(f"index.html missing {marker}")
+    for retired_marker in ['data-table="historical_dog_search"', 'data-table="historical_dog_report"']:
+        if retired_marker in html:
+            raise AssertionError(f"index.html still renders separate archive table {retired_marker}")
 
-    print(json.dumps({"historical_dog_search_rows": len(generated_rows), "report_rows": len(report_rows)}, indent=2))
+    print(json.dumps({"historical_dog_search_rows": len(generated_rows), "report_rows": len(report_rows), "unified_search_rows": len(unified_archive)}, indent=2))
     return 0
 
 

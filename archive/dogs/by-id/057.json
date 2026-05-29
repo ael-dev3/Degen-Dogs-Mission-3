@@ -1,0 +1,126 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2022-03-31T14:19:11Z",
+    "amount": {
+      "native": "0.26",
+      "native_symbol": "WETH",
+      "price_asset_key": "ETH",
+      "raw": "260000000000000000",
+      "usd_estimate": "853.65873907",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$853.66",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2022-03-31",
+      "usd_estimate_price_usd": "3283.3028425717257",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 26541639,
+      "block_time_utc": "2022-03-30T14:18:13Z",
+      "tx_hash": "0xca09a74e3004f7cf535a12468a91213e79b74dd00dfcc4752e27e19359ee6d85",
+      "tx_url": "https://polygonscan.com/tx/0xca09a74e3004f7cf535a12468a91213e79b74dd00dfcc4752e27e19359ee6d85"
+    },
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bid_stats": {
+      "bid_count": 4,
+      "last_bid_time_utc": "2022-03-30T14:23:07Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0xf19c9d0aeb81e4b0fac27057aa8cc125465f1ff39d324af3423cdf4047e295e0",
+      "0xfc6bd3a7677311d0f5301f35d44278f3c27abe8953e0a04ac9e0b5d379fd7610",
+      "0x96be076dbea7debe4f5744164f9011112bf29300f5d135c4f3d49eeef6a40f45",
+      "0xd1a4944d52e57ae37547f438fd0885c91956ebad3c77b802e523a160ef51f08a"
+    ],
+    "chain": "Polygon",
+    "chain_id": 137,
+    "dog_id": 57,
+    "dog_image_url": "https://api.degendogs.club/images/57.png",
+    "dog_item_url": null,
+    "era_label": "Mission 1",
+    "links": {
+      "auction_tx": "https://polygonscan.com/tx/0xca09a74e3004f7cf535a12468a91213e79b74dd00dfcc4752e27e19359ee6d85",
+      "dog_page": "https://degendogs.club/#dog57",
+      "explorer": "https://polygonscan.com/address/0xc9d7858797acf8f67515828401423a6b02a646b5",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/057.json",
+      "settlement_tx": "https://polygonscan.com/tx/0x145e11201cbd1041e1cc0b55efc8b959b538531543513381e7a97bd6ed8aa932"
+    },
+    "mission": 1,
+    "rarity": {
+      "display": "#411/728",
+      "rank": 411,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 57 dog #57 57 mission 1 mission 1 polygon settled 0xc9d7858797acf8f67515828401423a6b02a646b5 0xc9d7…46b5 0.26 weth 0xca09a74e3004f7cf535a12468a91213e79b74dd00dfcc4752e27e19359ee6d85 0x145e11201cbd1041e1cc0b55efc8b959b538531543513381e7a97bd6ed8aa932 #411/728 background: none; body: black; neck: none; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: sunglasses 0xf19c9d0aeb81e4b0fac27057aa8cc125465f1ff39d324af3423cdf4047e295e0 0xfc6bd3a7677311d0f5301f35d44278f3c27abe8953e0a04ac9e0b5d379fd7610 0x96be076dbea7debe4f5744164f9011112bf29300f5d135c4f3d49eeef6a40f45 0xd1a4944d52e57ae37547f438fd0885c91956ebad3c77b802e523a160ef51f08a polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "settlement": {
+      "block_number": 26580254,
+      "block_time_utc": "2022-03-31T14:19:11Z",
+      "settled": true,
+      "tx_hash": "0x145e11201cbd1041e1cc0b55efc8b959b538531543513381e7a97bd6ed8aa932",
+      "tx_url": "https://polygonscan.com/tx/0x145e11201cbd1041e1cc0b55efc8b959b538531543513381e7a97bd6ed8aa932"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing.",
+      "raw_confidence": "verified_mint_and_receipt_logs",
+      "sources": [
+        "polygon_receipts",
+        "polygonscan_tx_pages",
+        "degen_dogs_docs",
+        "markcarey_github"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Black (11.7%)",
+        "trait_type": "Body",
+        "value": "Black"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: WhiteMohawk (6.7%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: Sunglasses (14.8%)",
+        "trait_type": "Eyes",
+        "value": "Sunglasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "0xc9d7…46b5",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0xc9d7858797acf8f67515828401423a6b02a646b5",
+      "wallet_explorer_url": "https://polygonscan.com/address/0xc9d7858797acf8f67515828401423a6b02a646b5"
+    }
+  },
+  "schema_version": 1
+}

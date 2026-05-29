@@ -1,0 +1,131 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-02-11T04:40:17Z",
+    "amount": {
+      "native": "0.03123",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "31230000000000000",
+      "usd_estimate": "63.07124279",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$63.07",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-02-11",
+      "usd_estimate_price_usd": "2019.5722956412158",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 41954107,
+      "block_time_utc": "2026-02-10T04:26:01Z",
+      "tx_hash": "0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea",
+      "tx_url": "https://basescan.org/tx/0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 11,
+      "last_bid_time_utc": "2026-02-11T04:33:33Z",
+      "unique_bidder_count": 7
+    },
+    "bid_tx_hashes": [
+      "0x4667ab5c8e603b0301073513b2cf8de47a6276d93aff68ef4e7e6ac38674517e",
+      "0xf45e283285d062fb745deae076f7b9920f53eb112e59ea11e20e4d4900982142",
+      "0x70e61249e777c7d8a247a507c0f5caf33a965ca02a80e65e3b1f0f1ab01259bf",
+      "0x566585f3014a217394821e647c5ed143756debad3412e09621761dae636f7ef5",
+      "0x799d7fbd114d7507c4748fddb50068f3c5bf0cd1316561797005c078e0c52997",
+      "0xa65d6b9d915d0ff3739b898b0717720399ca99f7ef7df9f0972ca35ae2272060",
+      "0x440faa015e49e69636975966374082c4beaee4d7ae8c8c55ef3face333004702",
+      "0xa2d59a22ac299b1fa18a57360db108ccc4e09b05ab3beeb9dacca58bf401660f",
+      "0xf722d2da1a35275154608b353bc9a1dda96a9854d6f39bcb8d54c6f6165e79de",
+      "0xd82c4b0a7dc389046fc6e05f50fa2994bf748dd0a39b893b766016e02299185b",
+      "0xfdb94bef3ea472cb47a45de0e84f4b777d99e00a00d5dbb2f2f536968c67c00d"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 622,
+    "dog_image_url": "https://api.degendogs.club/images/622.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/622",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea",
+      "dog_page": "https://degendogs.club/#dog622",
+      "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/622",
+      "repo_archive": "archive/dogs/by-id/622.json",
+      "settlement_tx": "https://basescan.org/tx/0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#463/728",
+      "rank": 463,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 622 dog #622 622 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.03123 eth 0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea 0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce #463/728 background: none; body: blue; neck: none; mouth: none; ears: earbuds; head: toque; eyes: masksnorkel 0x4667ab5c8e603b0301073513b2cf8de47a6276d93aff68ef4e7e6ac38674517e 0xf45e283285d062fb745deae076f7b9920f53eb112e59ea11e20e4d4900982142 0x70e61249e777c7d8a247a507c0f5caf33a965ca02a80e65e3b1f0f1ab01259bf 0x566585f3014a217394821e647c5ed143756debad3412e09621761dae636f7ef5 0x799d7fbd114d7507c4748fddb50068f3c5bf0cd1316561797005c078e0c52997 0xa65d6b9d915d0ff3739b898b0717720399ca99f7ef7df9f0972ca35ae2272060 0x440faa015e49e69636975966374082c4beaee4d7ae8c8c55ef3face333004702 0xa2d59a22ac299b1fa18a57360db108ccc4e09b05ab3beeb9dacca58bf401660f 0xf722d2da1a35275154608b353bc9a1dda96a9854d6f39bcb8d54c6f6165e79de 0xd82c4b0a7dc389046fc6e05f50fa2994bf748dd0a39b893b766016e02299185b 0xfdb94bef3ea472cb47a45de0e84f4b777d99e00a00d5dbb2f2f536968c67c00d base_logs archive_indexer",
+    "settlement": {
+      "block_number": 41997735,
+      "block_time_utc": "2026-02-11T04:40:17Z",
+      "settled": true,
+      "tx_hash": "0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce",
+      "tx_url": "https://basescan.org/tx/0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Blue (9.1%)",
+        "trait_type": "Body",
+        "value": "Blue"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: Toque (7.0%)",
+        "trait_type": "Head",
+        "value": "Toque"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (9.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@skunkape",
+      "farcaster_fid": null,
+      "farcaster_handle": "skunkape",
+      "profile_url": "https://farcaster.xyz/skunkape",
+      "wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "wallet_explorer_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202"
+    }
+  },
+  "schema_version": 1
+}

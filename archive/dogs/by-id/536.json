@@ -1,0 +1,125 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2025-11-14T02:22:38Z",
+    "amount": {
+      "native": "3081",
+      "native_symbol": "DEGEN",
+      "price_asset_key": "DEGEN",
+      "raw": "3081000000000000000000",
+      "usd_estimate": "4.31948539",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$4.32",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2025-11-14",
+      "usd_estimate_price_usd": "0.0014019751332539788",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 26464828,
+      "block_time_utc": "2025-11-13T02:15:11Z",
+      "tx_hash": "0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d",
+      "tx_url": "https://explorer.degen.tips/tx/0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 5,
+      "last_bid_time_utc": "2025-11-14T02:15:56Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0x9562c7e64e563afb590c8d75917df823953c1a85fece5c634226d559082eb60c",
+      "0x6a8b98d09df2c8891e307b27a62d0f493c28a1bf779231c3493a0e3079aa8d54",
+      "0x3dbcf6f0bd6c5fbc20bdb0965491e6a2d129c538dba30831f2e3452be75b298d",
+      "0xef2ab2b1e0320332ef5d0923f63f24f44643066c4e828c5db6e304c2a7a0750c",
+      "0xbd86c27912f54f0e16fdb37d4800082e5ba5ad1425054342c5a7c3ea0944710d"
+    ],
+    "chain": "Degen Chain",
+    "chain_id": 666666666,
+    "dog_id": 536,
+    "dog_image_url": "https://api.degendogs.club/images/536.png",
+    "dog_item_url": null,
+    "era_label": "Mission 2",
+    "links": {
+      "auction_tx": "https://explorer.degen.tips/tx/0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d",
+      "dog_page": "https://degendogs.club/#dog536",
+      "explorer": "https://explorer.degen.tips/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "item": null,
+      "repo_archive": "archive/dogs/by-id/536.json",
+      "settlement_tx": "https://explorer.degen.tips/tx/0x70de749d0c3f3207ec942d458c442f2d50d39f810400119f40e238dec9de7501"
+    },
+    "mission": 2,
+    "rarity": {
+      "display": "#56/728",
+      "rank": 56,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 536 dog #536 536 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 3081 degen 0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d 0x70de749d0c3f3207ec942d458c442f2d50d39f810400119f40e238dec9de7501 #56/728 background: none; body: blue; neck: studdedcollar; mouth: teeth; ears: none; head: crazyhair; eyes: masksnorkel 0x9562c7e64e563afb590c8d75917df823953c1a85fece5c634226d559082eb60c 0x6a8b98d09df2c8891e307b27a62d0f493c28a1bf779231c3493a0e3079aa8d54 0x3dbcf6f0bd6c5fbc20bdb0965491e6a2d129c538dba30831f2e3452be75b298d 0xef2ab2b1e0320332ef5d0923f63f24f44643066c4e828c5db6e304c2a7a0750c 0xbd86c27912f54f0e16fdb37d4800082e5ba5ad1425054342c5a7c3ea0944710d chain_logs contract_getters",
+    "settlement": {
+      "block_number": 26469664,
+      "block_time_utc": "2025-11-14T02:22:38Z",
+      "settled": true,
+      "tx_hash": "0x70de749d0c3f3207ec942d458c442f2d50d39f810400119f40e238dec9de7501",
+      "tx_url": "https://explorer.degen.tips/tx/0x70de749d0c3f3207ec942d458c442f2d50d39f810400119f40e238dec9de7501"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 2 contract uses verified 18-decimal WDEGEN/DEGEN auction amounts.",
+      "raw_confidence": "verified_onchain",
+      "sources": [
+        "chain_logs",
+        "contract_getters"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Blue (9.1%)",
+        "trait_type": "Body",
+        "value": "Blue"
+      },
+      {
+        "display": "Neck: StuddedCollar (10.0%)",
+        "trait_type": "Neck",
+        "value": "StuddedCollar"
+      },
+      {
+        "display": "Mouth: Teeth (5.2%)",
+        "trait_type": "Mouth",
+        "value": "Teeth"
+      },
+      {
+        "display": "Ears: None (25.1%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: CrazyHair (6.7%)",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (9.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@dl39",
+      "farcaster_fid": null,
+      "farcaster_handle": "dl39",
+      "profile_url": "https://farcaster.xyz/dl39",
+      "wallet": "0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+      "wallet_explorer_url": "https://explorer.degen.tips/address/0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af"
+    }
+  },
+  "schema_version": 1
+}

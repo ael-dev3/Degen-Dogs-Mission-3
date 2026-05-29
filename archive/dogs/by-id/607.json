@@ -1,0 +1,166 @@
+{
+  "generated_at_utc": "2026-05-29T12:39:45Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-01-27T02:26:13Z",
+    "amount": {
+      "native": "0.085",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "85000000000000000",
+      "usd_estimate": "248.78851597",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$248.79",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-01-26",
+      "usd_estimate_price_usd": "2926.923717263726",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 41302072,
+      "block_time_utc": "2026-01-26T02:11:31Z",
+      "tx_hash": "0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4",
+      "tx_url": "https://basescan.org/tx/0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 46,
+      "last_bid_time_utc": "2026-01-27T02:20:53Z",
+      "unique_bidder_count": 18
+    },
+    "bid_tx_hashes": [
+      "0x2990055e1745c4f38e0ff932732eada19400afae6dfa0cfbd3b5a9ff7e366a0d",
+      "0x9cea148a4a884eb09d6310f1678a907b0983cb7db552fcf3af738653c33c2f03",
+      "0x3dd0b9681b7da6f48d32d90ed276e36842bc7a10b0b65272bcd0469228cebc44",
+      "0xc9fee4b650addc046908668f5284b44fb54fff448c2cbe950a023e48e3caa7e2",
+      "0xf3cdbb7dabf2e53c829685c76e42957532ac8aebbffccaa5f21c963eae7ebbad",
+      "0x6ac66620a9f542a5e03105cb6bdcd23b5413114b80226302ca91f8067d0a3b76",
+      "0x8cb676447336cbd4bb5e5364e6ffb4fc82be78830f72d939b84075cb43fa7740",
+      "0xf0fe3edc064b73f284008ebda5d275570a40a1f8d2184d6f78a9248914131b48",
+      "0x5145feb9295510a3c36836ac2d2e45327f9e5a1e8e7925e6e5254c30e7a777b5",
+      "0x02d1f12426c4cb138da7ad011776f66ac5b78c9478670342ae4d1f7b1226375a",
+      "0x5f6942a66e8cae8bf8407d3dd4411713f1d205779e2303e8be55ea674466495b",
+      "0x0465b39122a885d6bb86d67cf286179e8cd6ea37bb06d8aa76c91cbfdb169914",
+      "0x4b8fd7eecb6ee90f75074b9fd60fe9fde3bbfd2cf8d9b4cf99a4479d2ba946d2",
+      "0x5f525b2d615d92392f1cc5909f3488a69209b10b1755ba17b3020825450741b6",
+      "0x5e65549bd240e88bc0e366c4ca36499d5f0854d7e91e00850b059a22cb7944a5",
+      "0xcf0f796a987e2a73d9755b8aa9758054b6431fd3783f40ad25f85c38877e818e",
+      "0x0c08eeace2dbe697ecdf371067eac6da0f272e93d0be047e831e349bd95ddc96",
+      "0x9c923011e07caee640c47b34729ec6d97a8fc2ff62221ec7218692c70f8755b4",
+      "0x4eb78e8e89e63834a93e4f57c9abfedc78930010c99ee11f0817d62441fde386",
+      "0xd0a9e647d23fc96d49251abfd6b719f023e77950333ca2ad56cee8578b2adc83",
+      "0x2124d99a8b7ec463274e9378e9e8122d73ad1ffa30c10b22db43e2401afe8240",
+      "0xd80dd4b603f8dbb58fec152f9efc01c886036919e26d386cde493a88684367df",
+      "0xd4a4d97b1ce6a0231545a9b825d39c02aaa0780a6adb4e11fd12e388ddd3a076",
+      "0xa8bc0b77690e030cc98830c5f800d64c9a6371fb576646b947a40a95251c81c1",
+      "0x3bd51e24dd07c7780e072117e773563eaec047e498cfb49c65d07a18be8f953b",
+      "0x5845541e37589c7ffdc47c6b1f471ec4ed03cba24178490fd60bebee6335b358",
+      "0x454be49925ab4da27676e5e7bc69b6a500f9d9fd70a59a6c4c7478c86aa96035",
+      "0x3f4a900c42fc05af223b709ff8a5827cfaa0212b12c272d2f5f2a890167311a3",
+      "0xfa9c14d25a1241927055628a2555d4630d3d0fade0cc45610efaf447d7306bd7",
+      "0x5b33f14ee036f3a79efc46591f6fc7eeee24d99e7e71916d5b721115fe71e00c",
+      "0xa43af033ebbc09a007407cd0811cfb338e2664db102f188a2020ba468c0c0ac5",
+      "0xbf614cc2e754a0d562c5ab45c1961c2de733d95d19623a7c723271aac3cbe118",
+      "0x26e0295f5fa19823667399b6be28bdaa8840d3cc07b43458174276a2aea38e3e",
+      "0xa8c1d0e3d683720f8ee13ee17f920c72af00fddb817ced12ebeb96bc4452d1e9",
+      "0x31a89329df5bb9de30b2193c36094fa4eacd82495c634ff69b9364633971e17c",
+      "0xf60785521ff8c6811d01fe82b322da671c82bfabb2d7b1c870a1c53a0474e84a",
+      "0xbd761ffcd8f77802d4ef952b77f729b2caf844c3e67faf666e90a3df3d03df84",
+      "0x3b409797881a2d88ee5cf1083016e57db844b96648d46e0260e67cf5744480d4",
+      "0x924cea12262750d466fa7fd4dcaf0c87a5384afc738ec270cc7b4ae3acc565ae",
+      "0x48ec61361086efd2c723bb5d2a952f1aa712cb4adf98f6cc15e7d479926a73aa",
+      "0x2a26e3d8310f6a36650cb8a355b330829ed63161cd8ba9a3c0188989d5f7beff",
+      "0x25bfadc9fb3ad985d560c1663559d415b99745920fe910eb6e6e1c06ff99e453",
+      "0x306c9ee6658307517d192f6c80a33d079f5012d79a6d6ed5b01bb0608fea040b",
+      "0x79519dc81c4c867663b8fa439b92d6152d81e74f162f41b81dc7c16ad2fc0825",
+      "0x78613f2d5a5236358f96e3f2ce842fbe5991aa906b74c8a75a54ebd531efc7de",
+      "0xd3d056ea6b8c04589356456de99ec3035b930aa0a9ca663df6fdf8ed7949f0b8"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 607,
+    "dog_image_url": "https://api.degendogs.club/images/607.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/607",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4",
+      "dog_page": "https://degendogs.club/#dog607",
+      "explorer": "https://basescan.org/address/0xe16f9db0e6ca8f2f9151ac581a78d9dd5a4bb1ef",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/607",
+      "repo_archive": "archive/dogs/by-id/607.json",
+      "settlement_tx": "https://basescan.org/tx/0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#373/728",
+      "rank": 373,
+      "total": 728
+    },
+    "schema_version": 1,
+    "search_text": "dog 607 dog #607 607 mission 3 mission 3 base settled 0xe16f9db0e6ca8f2f9151ac581a78d9dd5a4bb1ef @hydropho.eth hydropho.eth 0.085 eth 0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4 0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4 #373/728 background: none; body: blue; neck: none; mouth: none; ears: loopearring; head: crazyhair; eyes: eyepatch 0x2990055e1745c4f38e0ff932732eada19400afae6dfa0cfbd3b5a9ff7e366a0d 0x9cea148a4a884eb09d6310f1678a907b0983cb7db552fcf3af738653c33c2f03 0x3dd0b9681b7da6f48d32d90ed276e36842bc7a10b0b65272bcd0469228cebc44 0xc9fee4b650addc046908668f5284b44fb54fff448c2cbe950a023e48e3caa7e2 0xf3cdbb7dabf2e53c829685c76e42957532ac8aebbffccaa5f21c963eae7ebbad 0x6ac66620a9f542a5e03105cb6bdcd23b5413114b80226302ca91f8067d0a3b76 0x8cb676447336cbd4bb5e5364e6ffb4fc82be78830f72d939b84075cb43fa7740 0xf0fe3edc064b73f284008ebda5d275570a40a1f8d2184d6f78a9248914131b48 0x5145feb9295510a3c36836ac2d2e45327f9e5a1e8e7925e6e5254c30e7a777b5 0x02d1f12426c4cb138da7ad011776f66ac5b78c9478670342ae4d1f7b1226375a 0x5f6942a66e8cae8bf8407d3dd4411713f1d205779e2303e8be55ea674466495b 0x0465b39122a885d6bb86d67cf286179e8cd6ea37bb06d8aa76c91cbfdb169914 0x4b8fd7eecb6ee90f75074b9fd60fe9fde3bbfd2cf8d9b4cf99a4479d2ba946d2 0x5f525b2d615d92392f1cc5909f3488a69209b10b1755ba17b3020825450741b6 0x5e65549bd240e88bc0e366c4ca36499d5f0854d7e91e00850b059a22cb7944a5 0xcf0f796a987e2a73d9755b8aa9758054b6431fd3783f40ad25f85c38877e818e 0x0c08eeace2dbe697ecdf371067eac6da0f272e93d0be047e831e349bd95ddc96 0x9c923011e07caee640c47b34729ec6d97a8fc2ff62221ec7218692c70f8755b4 0x4eb78e8e89e63834a93e4f57c9abfedc78930010c99ee11f0817d62441fde386 0xd0a9e647d23fc96d49251abfd6b719f023e77950333ca2ad56cee8578b2adc83 0x2124d99a8b7ec463274e9378e9e8122d73ad1ffa30c10b22db43e2401afe8240 0xd80dd4b603f8dbb58fec152f9efc01c886036919e26d386cde493a88684367df 0xd4a4d97b1ce6a0231545a9b825d39c02aaa0780a6adb4e11fd12e388ddd3a076 0xa8bc0b77690e030cc98830c5f800d64c9a6371fb576646b947a40a95251c81c1 0x3bd51e24dd07c7780e072117e773563eaec047e498cfb49c65d07a18be8f953b 0x5845541e37589c7ffdc47c6b1f471ec4ed03cba24178490fd60bebee6335b358 0x454be49925ab4da27676e5e7bc69b6a500f9d9fd70a59a6c4c7478c86aa96035 0x3f4a900c42fc05af223b709ff8a5827cfaa0212b12c272d2f5f2a890167311a3 0xfa9c14d25a1241927055628a2555d4630d3d0fade0cc45610efaf447d7306bd7 0x5b33f14ee036f3a79efc46591f6fc7eeee24d99e7e71916d5b721115fe71e00c 0xa43af033ebbc09a007407cd0811cfb338e2664db102f188a2020ba468c0c0ac5 0xbf614cc2e754a0d562c5ab45c1961c2de733d95d19623a7c723271aac3cbe118 0x26e0295f5fa19823667399b6be28bdaa8840d3cc07b43458174276a2aea38e3e 0xa8c1d0e3d683720f8ee13ee17f920c72af00fddb817ced12ebeb96bc4452d1e9 0x31a89329df5bb9de30b2193c36094fa4eacd82495c634ff69b9364633971e17c 0xf60785521ff8c6811d01fe82b322da671c82bfabb2d7b1c870a1c53a0474e84a 0xbd761ffcd8f77802d4ef952b77f729b2caf844c3e67faf666e90a3df3d03df84 0x3b409797881a2d88ee5cf1083016e57db844b96648d46e0260e67cf5744480d4 0x924cea12262750d466fa7fd4dcaf0c87a5384afc738ec270cc7b4ae3acc565ae 0x48ec61361086efd2c723bb5d2a952f1aa712cb4adf98f6cc15e7d479926a73aa 0x2a26e3d8310f6a36650cb8a355b330829ed63161cd8ba9a3c0188989d5f7beff 0x25bfadc9fb3ad985d560c1663559d415b99745920fe910eb6e6e1c06ff99e453 0x306c9ee6658307517d192f6c80a33d079f5012d79a6d6ed5b01bb0608fea040b 0x79519dc81c4c867663b8fa439b92d6152d81e74f162f41b81dc7c16ad2fc0825 0x78613f2d5a5236358f96e3f2ce842fbe5991aa906b74c8a75a54ebd531efc7de 0xd3d056ea6b8c04589356456de99ec3035b930aa0a9ca663df6fdf8ed7949f0b8 base_logs archive_indexer",
+    "settlement": {
+      "block_number": 41345713,
+      "block_time_utc": "2026-01-27T02:26:13Z",
+      "settled": true,
+      "tx_hash": "0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4",
+      "tx_url": "https://basescan.org/tx/0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified",
+      "sources": [
+        "base_logs",
+        "archive_indexer"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Blue (9.1%)",
+        "trait_type": "Body",
+        "value": "Blue"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.5%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: CrazyHair (6.7%)",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: EyePatch (8.0%)",
+        "trait_type": "Eyes",
+        "value": "EyePatch"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@hydropho.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "hydropho.eth",
+      "profile_url": "https://farcaster.xyz/hydropho.eth",
+      "wallet": "0xe16f9db0e6ca8f2f9151ac581a78d9dd5a4bb1ef",
+      "wallet_explorer_url": "https://basescan.org/address/0xe16f9db0e6ca8f2f9151ac581a78d9dd5a4bb1ef"
+    }
+  },
+  "schema_version": 1
+}
