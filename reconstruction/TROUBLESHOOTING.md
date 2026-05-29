@@ -77,6 +77,29 @@ Symptom: current Dog/bid fields are blank or stale.
 
 Fix: verify Base RPC, auction-house address, and current contract call responses.
 
+## Onchain watcher not refreshing
+
+Symptom: `npm run watch:onchain` runs, but the dashboard remains stale after a real bid.
+
+Fix:
+
+- Inspect `.local/mission3_onchain_tracker_state.json`.
+- Check `last_checked_block` and `last_seen_bid_tx` advanced.
+- Check `pending_refresh` and `next_allowed_refresh_after_utc`; cooldown/backoff may be active.
+- Run `npm run watch:onchain:dry` to see detected reasons without writing state.
+- Run `npm run validate:dashboard` after a local refresh to catch top-card/feed mismatches.
+- If RPC failed, set a reliable `BASE_RPC_URL` or lower `MISSION3_WATCHER_LOG_CHUNK`.
+
+## Onchain watcher refresh refused
+
+Symptom: watcher logs mention auto-push or dirty worktree refusal.
+
+Fix:
+
+- Default `MISSION3_REFRESH_COMMAND` should be `npm run data && npm run build`.
+- Publish commands require `MISSION3_WATCHER_AUTO_PUSH=1`.
+- In publish mode, clear tracked worktree changes or set `MISSION3_WATCHER_REQUIRE_CLEAN_TREE=0` only for intentional local operation.
+
 ## Archive data incomplete
 
 Symptom: unified search misses a mission or row counts are lower than expected.

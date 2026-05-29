@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 ROOT = Path(__file__).resolve().parents[1]
+CHAIN_ID = 8453
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
     "https://mainnet.base.org",
@@ -31,20 +32,61 @@ DEFAULT_RPC_URLS = [
 ]
 DEFAULT_LOG_RPC_URLS = ["https://mainnet.base.org"]
 
-AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
+MISSION3_CONTRACTS_CONFIG = ROOT / "archive" / "mission3" / "config" / "mission3_contracts.verified.json"
+MISSION3_EVENTS_CONFIG = ROOT / "archive" / "mission3" / "config" / "mission3_events.verified.json"
+FALLBACK_AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
+FALLBACK_TOPIC_BY_EVENT = {
+    "AuctionCreated": "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca",
+    "AuctionBid": "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3",
+    "AuctionExtended": "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e",
+    "AuctionSettled": "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99",
+}
 SELECTOR_AUCTION = "0x7d9f6db5"
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
-
-TOPIC_AUCTION_CREATED = "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca"
-TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
-TOPIC_AUCTION_SETTLED = "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99"
-WATCHED_TOPICS = [TOPIC_AUCTION_CREATED, TOPIC_AUCTION_BID, TOPIC_AUCTION_SETTLED]
-
-DEFAULT_STATE_PATH = ROOT / ".local" / "mission3_watcher_state.json"
-DEFAULT_LOG_PATH = ROOT / "logs" / "watch-auction.log"
-DEFAULT_LOCAL_REFRESH_COMMAND = "npm run refresh:local"
-DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
 SCHEMA_VERSION = 1
+
+
+def _load_verified_auction_house() -> str:
+    try:
+        data = json.loads(MISSION3_CONTRACTS_CONFIG.read_text(encoding="utf-8"))
+        if int(data.get("chain_id")) != CHAIN_ID or data.get("confidence") != "verified":
+            raise ValueError("contract config is not verified for Base mainnet")
+        address = str(data["contracts"]["auction_house"]["address"])
+        if not re.fullmatch(r"0x[a-fA-F0-9]{40}", address):
+            raise ValueError("auction_house address is invalid")
+        return address
+    except Exception:
+        return FALLBACK_AUCTION_HOUSE
+
+
+def _load_verified_event_topics() -> dict[str, str]:
+    try:
+        data = json.loads(MISSION3_EVENTS_CONFIG.read_text(encoding="utf-8"))
+        if int(data.get("chain_id")) != CHAIN_ID or data.get("confidence") != "verified":
+            raise ValueError("event config is not verified for Base mainnet")
+        topics = {event["name"]: str(event["topic0"]).lower() for event in data.get("events", [])}
+        missing = set(FALLBACK_TOPIC_BY_EVENT) - set(topics)
+        if missing:
+            raise ValueError(f"missing event topics: {sorted(missing)}")
+        return {name: topics[name] for name in FALLBACK_TOPIC_BY_EVENT}
+    except Exception:
+        return dict(FALLBACK_TOPIC_BY_EVENT)
+
+
+AUCTION_HOUSE = _load_verified_auction_house()
+TOPIC_BY_EVENT = _load_verified_event_topics()
+TOPIC_AUCTION_CREATED = TOPIC_BY_EVENT["AuctionCreated"]
+TOPIC_AUCTION_BID = TOPIC_BY_EVENT["AuctionBid"]
+TOPIC_AUCTION_EXTENDED = TOPIC_BY_EVENT["AuctionExtended"]
+TOPIC_AUCTION_SETTLED = TOPIC_BY_EVENT["AuctionSettled"]
+TOPIC_EVENT_NAMES = {topic.lower(): name for name, topic in TOPIC_BY_EVENT.items()}
+WATCHED_EVENT_NAMES = ["AuctionCreated", "AuctionBid", "AuctionExtended", "AuctionSettled"]
+WATCHED_TOPICS = [TOPIC_BY_EVENT[name] for name in WATCHED_EVENT_NAMES]
+
+DEFAULT_STATE_PATH = ROOT / ".local" / "mission3_onchain_tracker_state.json"
+DEFAULT_LOG_PATH = ROOT / "logs" / "watch-onchain.log"
+DEFAULT_LOCAL_REFRESH_COMMAND = "npm run data && npm run build"
+DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
 
 
 class Config(NamedTuple):
@@ -56,7 +98,8 @@ class Config(NamedTuple):
     interval_seconds: int
     cooldown_seconds: int
     force_after_seconds: int
-    log_window_blocks: int
+    lookback_blocks: int
+    safety_overlap_blocks: int
     log_chunk: int
     refresh_command: str
     auto_push: bool
@@ -123,6 +166,23 @@ def env_int(env: dict[str, str], name: str, default: int, *, minimum: int = 0, m
     return value
 
 
+def env_int_any(
+    env: dict[str, str],
+    names: list[str],
+    default: int,
+    *,
+    minimum: int = 0,
+    maximum: int | None = None,
+) -> int:
+    for name in names:
+        if str(env.get(name, "")).strip():
+            return env_int(env, name, default, minimum=minimum, maximum=maximum)
+    value = max(minimum, default)
+    if maximum is not None:
+        value = min(value, maximum)
+    return value
+
+
 def parse_url_list(env: dict[str, str], name: str, default_urls: list[str]) -> list[str]:
     raw = env.get(name, "")
     if not raw:
@@ -149,7 +209,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
     if not state_path.is_absolute():
         state_path = ROOT / state_path
 
-    lock_path_raw = env.get("MISSION3_WATCHER_LOCK_PATH", str(ROOT / ".local" / "mission3_watcher.lock")).strip()
+    lock_path_raw = env.get("MISSION3_WATCHER_LOCK_PATH", str(ROOT / ".local" / "mission3_onchain_tracker.lock")).strip()
     lock_path: Path | None
     if lock_path_raw in {"", "-"}:
         lock_path = None
@@ -173,10 +233,11 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         state_path=state_path,
         lock_path=lock_path,
         log_path=log_path,
-        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 300, minimum=30),
-        cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 300, minimum=0),
-        force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 0, minimum=0),
-        log_window_blocks=env_int(env, "MISSION3_WATCHER_LOG_WINDOW_BLOCKS", 2000, minimum=1, maximum=10000),
+        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 120, minimum=30),
+        cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 180, minimum=0),
+        force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 3600, minimum=0),
+        lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 2000, minimum=1, maximum=10000),
+        safety_overlap_blocks=env_int_any(env, ["MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS", "MISSION3_WATCHER_LOG_SAFETY_OVERLAP_BLOCKS"], 50, minimum=0, maximum=500),
         log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 2000, minimum=1, maximum=10000),
         refresh_command=refresh_command,
         auto_push=auto_push,
@@ -278,15 +339,23 @@ def decode_auction_result(raw: str, *, latest_block: int) -> dict[str, Any]:
     }
 
 
-def choose_log_from_block(state: dict[str, Any], *, latest_block: int, default_from_block: int, window_blocks: int) -> int:
-    safety_start = max(default_from_block, latest_block - window_blocks + 1)
+def choose_log_from_block(
+    state: dict[str, Any],
+    *,
+    latest_block: int,
+    default_from_block: int,
+    lookback_blocks: int,
+    safety_overlap_blocks: int,
+) -> int:
+    if not state:
+        return max(default_from_block, latest_block - lookback_blocks + 1)
     try:
-        last_seen = int(state.get("last_seen_block") or 0)
+        last_checked = int(state.get("last_checked_block") or state.get("last_seen_block") or 0)
     except (TypeError, ValueError):
-        last_seen = 0
-    if last_seen > 0 and last_seen >= safety_start:
-        return min(latest_block, last_seen + 1)
-    return safety_start
+        last_checked = 0
+    if last_checked > 0:
+        return max(default_from_block, min(latest_block, last_checked + 1 - safety_overlap_blocks))
+    return max(default_from_block, latest_block - lookback_blocks + 1)
 
 
 def log_filter(address: str, topics: list[str], from_block: int, to_block: int) -> dict[str, Any]:
@@ -328,16 +397,75 @@ def log_identity(item: dict[str, Any] | None) -> str:
     return f"{block}:{tx_hash}:{log_index}"
 
 
+def topic_uint(item: dict[str, Any], idx: int) -> int | None:
+    topics = item.get("topics") or []
+    if len(topics) <= idx:
+        return None
+    try:
+        return int(str(topics[idx]), 16)
+    except (TypeError, ValueError):
+        return None
+
+
+def safe_data_word(item: dict[str, Any], idx: int) -> int | None:
+    try:
+        return word(str(item.get("data") or "0x"), idx)
+    except (TypeError, ValueError):
+        return None
+
+
+def safe_data_address(item: dict[str, Any], idx: int) -> str:
+    try:
+        return normalize_address(word_address(str(item.get("data") or "0x"), idx))
+    except (TypeError, ValueError):
+        return ""
+
+
 def compact_event_log(item: dict[str, Any] | None) -> dict[str, Any] | None:
     if not item:
         return None
-    return {
+    topic0 = str((item.get("topics") or [""])[0]).lower()
+    event_name = TOPIC_EVENT_NAMES.get(topic0, "unknown")
+    result: dict[str, Any] = {
         "id": log_identity(item),
         "block_number": int(str(item.get("blockNumber", "0x0")), 16),
         "tx_hash": str(item.get("transactionHash") or ""),
         "log_index": int(str(item.get("logIndex", "0x0")), 16),
-        "topic0": str((item.get("topics") or [""])[0]).lower(),
+        "topic0": topic0,
+        "event_name": event_name,
     }
+    token_id = topic_uint(item, 1)
+    if token_id is not None:
+        result["token_id"] = token_id
+    if event_name == "AuctionCreated":
+        start_time = safe_data_word(item, 0)
+        end_time = safe_data_word(item, 1)
+        if start_time is not None:
+            result["start_time_unix"] = start_time
+        if end_time is not None:
+            result["end_time_unix"] = end_time
+    elif event_name == "AuctionBid":
+        bidder = safe_data_address(item, 0)
+        amount = safe_data_word(item, 1)
+        extended = safe_data_word(item, 2)
+        if bidder:
+            result["bidder"] = bidder
+        if amount is not None:
+            result["amount_wei"] = str(amount)
+        if extended is not None:
+            result["extended"] = bool(extended)
+    elif event_name == "AuctionExtended":
+        end_time = safe_data_word(item, 0)
+        if end_time is not None:
+            result["end_time_unix"] = end_time
+    elif event_name == "AuctionSettled":
+        winner = safe_data_address(item, 0)
+        amount = safe_data_word(item, 1)
+        if winner:
+            result["winner"] = winner
+        if amount is not None:
+            result["amount_wei"] = str(amount)
+    return result
 
 
 def latest_log_for_topic(logs: list[dict[str, Any]], topic: str) -> dict[str, Any] | None:
@@ -361,7 +489,8 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         state,
         latest_block=latest_block,
         default_from_block=default_from_block,
-        window_blocks=config.log_window_blocks,
+        lookback_blocks=config.lookback_blocks,
+        safety_overlap_blocks=config.safety_overlap_blocks,
     )
     logs = fetch_logs(config, from_block, latest_block)
     snapshot = {
@@ -371,6 +500,7 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         "checked_log_count": len(logs),
         "created_log": latest_log_for_topic(logs, TOPIC_AUCTION_CREATED),
         "bid_log": latest_log_for_topic(logs, TOPIC_AUCTION_BID),
+        "extended_log": latest_log_for_topic(logs, TOPIC_AUCTION_EXTENDED),
         "settled_log": latest_log_for_topic(logs, TOPIC_AUCTION_SETTLED),
         "rpc_url": redact_url(call_url),
         "block_rpc_url": redact_url(block_url),
@@ -449,6 +579,10 @@ def decide_refresh(
     reasons: list[str] = []
     if not _same_log_id(snapshot, state, "created_log", "last_seen_auction_created_log_id"):
         reasons.append("auction_created")
+    if not _same_log_id(snapshot, state, "bid_log", "last_seen_bid_log_id"):
+        reasons.append("auction_bid")
+    if not _same_log_id(snapshot, state, "extended_log", "last_seen_auction_extended_log_id"):
+        reasons.append("auction_extended")
     if not _same_log_id(snapshot, state, "settled_log", "last_seen_auction_settled_log_id"):
         reasons.append("auction_settled")
 
@@ -489,6 +623,25 @@ def decide_refresh(
     return RefreshDecision(True, reasons, bypassed_cooldown=bypassed and last_refresh_age is not None and last_refresh_age < cooldown_seconds)
 
 
+def get_snapshot_log(snapshot: dict[str, Any], key: str) -> dict[str, Any]:
+    value = snapshot.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def latest_activity_block(snapshot: dict[str, Any]) -> int:
+    blocks = []
+    for key in ("created_log", "bid_log", "extended_log", "settled_log"):
+        item = get_snapshot_log(snapshot, key)
+        if item.get("block_number") is not None:
+            try:
+                blocks.append(int(item["block_number"]))
+            except (TypeError, ValueError):
+                pass
+    if blocks:
+        return max(blocks)
+    return int(snapshot.get("latest_block") or snapshot.get("checked_to_block") or 0)
+
+
 def state_from_snapshot(
     snapshot: dict[str, Any],
     *,
@@ -497,27 +650,44 @@ def state_from_snapshot(
     decision: RefreshDecision | None = None,
 ) -> dict[str, Any]:
     state = dict(previous_state)
+    created_log = get_snapshot_log(snapshot, "created_log")
+    bid_log = get_snapshot_log(snapshot, "bid_log")
+    extended_log = get_snapshot_log(snapshot, "extended_log")
+    settled_log = get_snapshot_log(snapshot, "settled_log")
+    checked_to_block = int(snapshot.get("checked_to_block") or snapshot.get("latest_block") or 0)
     state.update(
         {
             "schema_version": SCHEMA_VERSION,
             "updated_at_utc": now_utc,
+            "chain_id": CHAIN_ID,
+            "auction_house": AUCTION_HOUSE,
             "last_checked_at_utc": now_utc,
-            "last_seen_block": int(snapshot.get("latest_block") or 0),
+            "last_checked_block": checked_to_block,
+            "last_seen_block": latest_activity_block(snapshot),
             "last_checked_from_block": int(snapshot.get("checked_from_block") or 0),
             "last_seen_token_id": int(snapshot.get("token_id") or 0),
             "last_seen_high_bidder": normalize_address(snapshot.get("high_bidder")),
-            "last_seen_amount_wei": str(snapshot.get("amount_wei") or "0"),
+            "last_seen_bidder": normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder")),
+            "last_seen_amount_wei": str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0"),
             "last_seen_settled": bool(snapshot.get("settled")),
             "last_seen_start_time_unix": int(snapshot.get("start_time_unix") or 0),
-            "last_seen_end_time_unix": int(snapshot.get("end_time_unix") or 0),
-            "last_seen_auction_created_log_id": ((snapshot.get("created_log") or {}).get("id") if isinstance(snapshot.get("created_log"), dict) else "") or state.get("last_seen_auction_created_log_id", ""),
-            "last_seen_auction_created_tx": ((snapshot.get("created_log") or {}).get("tx_hash") if isinstance(snapshot.get("created_log"), dict) else "") or state.get("last_seen_auction_created_tx", ""),
-            "last_seen_auction_settled_log_id": ((snapshot.get("settled_log") or {}).get("id") if isinstance(snapshot.get("settled_log"), dict) else "") or state.get("last_seen_auction_settled_log_id", ""),
-            "last_seen_auction_settled_tx": ((snapshot.get("settled_log") or {}).get("tx_hash") if isinstance(snapshot.get("settled_log"), dict) else "") or state.get("last_seen_auction_settled_tx", ""),
-            "last_seen_bid_log_id": ((snapshot.get("bid_log") or {}).get("id") if isinstance(snapshot.get("bid_log"), dict) else "") or state.get("last_seen_bid_log_id", ""),
-            "last_seen_bid_tx": ((snapshot.get("bid_log") or {}).get("tx_hash") if isinstance(snapshot.get("bid_log"), dict) else "") or state.get("last_seen_bid_tx", ""),
+            "last_seen_end_time_unix": int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0),
+            "last_seen_auction_created_log_id": created_log.get("id", "") or state.get("last_seen_auction_created_log_id", ""),
+            "last_seen_auction_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_auction_created_tx", ""),
+            "last_seen_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_created_tx", ""),
+            "last_seen_auction_settled_log_id": settled_log.get("id", "") or state.get("last_seen_auction_settled_log_id", ""),
+            "last_seen_auction_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_auction_settled_tx", ""),
+            "last_seen_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_settled_tx", ""),
+            "last_seen_auction_extended_log_id": extended_log.get("id", "") or state.get("last_seen_auction_extended_log_id", ""),
+            "last_seen_auction_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_auction_extended_tx", ""),
+            "last_seen_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_extended_tx", ""),
+            "last_seen_bid_log_id": bid_log.get("id", "") or state.get("last_seen_bid_log_id", ""),
+            "last_seen_bid_tx": bid_log.get("tx_hash", "") or state.get("last_seen_bid_tx", ""),
+            "last_seen_bid_log_index": int(bid_log.get("log_index") or state.get("last_seen_bid_log_index") or 0),
+            "last_seen_bid_token_id": int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("last_seen_bid_token_id") or 0),
             "last_rpc_url": snapshot.get("rpc_url", ""),
             "last_log_count": int(snapshot.get("checked_log_count") or 0),
+            "last_error": None,
         }
     )
     if decision and decision.pending_refresh:
@@ -556,26 +726,45 @@ def state_from_generated_dashboard(snapshot: dict[str, Any], *, now_utc: str, ro
     row = rows[0]
     created_log = snapshot.get("created_log") if isinstance(snapshot.get("created_log"), dict) else {}
     settled_log = snapshot.get("settled_log") if isinstance(snapshot.get("settled_log"), dict) else {}
+    extended_log = snapshot.get("extended_log") if isinstance(snapshot.get("extended_log"), dict) else {}
     bid_log = snapshot.get("bid_log") if isinstance(snapshot.get("bid_log"), dict) else {}
     block_time = parse_utc(row.get("latest_block_time_utc") or now_utc)
+    checked_block = int(row.get("latest_block") or snapshot.get("checked_to_block") or snapshot.get("latest_block") or 0)
+    bid_tx = bid_log.get("tx_hash", "") if isinstance(bid_log, dict) else ""
+    settled_tx = settled_log.get("tx_hash", "") if isinstance(settled_log, dict) else ""
+    created_tx = created_log.get("tx_hash", "") if isinstance(created_log, dict) else ""
+    extended_tx = extended_log.get("tx_hash", "") if isinstance(extended_log, dict) else ""
     return {
         "schema_version": SCHEMA_VERSION,
         "updated_at_utc": now_utc,
+        "chain_id": CHAIN_ID,
+        "auction_house": AUCTION_HOUSE,
         "last_checked_at_utc": now_utc,
-        "last_seen_block": int(row.get("latest_block") or 0),
+        "last_checked_block": checked_block,
+        "last_seen_block": checked_block,
+        "last_checked_from_block": int(snapshot.get("checked_from_block") or 0),
         "last_seen_token_id": int(row.get("token_id") or 0),
         "last_seen_high_bidder": normalize_address(row.get("bidder_wallet")),
+        "last_seen_bidder": normalize_address((bid_log.get("bidder") if isinstance(bid_log, dict) else "") or row.get("bidder_wallet")),
         "last_seen_amount_wei": wei_from_eth_text(row.get("current_bid_eth") or 0),
         "last_seen_settled": str(row.get("settled") or "").strip().lower() in {"1", "true", "yes"},
         "last_refresh_at_utc": (block_time or parse_utc(now_utc) or datetime.now(timezone.utc)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "last_refresh_reason": "generated_dashboard_baseline",
         "last_refresh_status": "success",
         "last_seen_auction_created_log_id": created_log.get("id", "") if isinstance(created_log, dict) else "",
-        "last_seen_auction_created_tx": created_log.get("tx_hash", "") if isinstance(created_log, dict) else "",
+        "last_seen_auction_created_tx": created_tx,
+        "last_seen_created_tx": created_tx,
         "last_seen_auction_settled_log_id": settled_log.get("id", "") if isinstance(settled_log, dict) else "",
-        "last_seen_auction_settled_tx": settled_log.get("tx_hash", "") if isinstance(settled_log, dict) else "",
+        "last_seen_auction_settled_tx": settled_tx,
+        "last_seen_settled_tx": settled_tx,
+        "last_seen_auction_extended_log_id": extended_log.get("id", "") if isinstance(extended_log, dict) else "",
+        "last_seen_auction_extended_tx": extended_tx,
+        "last_seen_extended_tx": extended_tx,
         "last_seen_bid_log_id": bid_log.get("id", "") if isinstance(bid_log, dict) else "",
-        "last_seen_bid_tx": bid_log.get("tx_hash", "") if isinstance(bid_log, dict) else "",
+        "last_seen_bid_tx": bid_tx,
+        "last_seen_bid_log_index": int(bid_log.get("log_index") or 0) if isinstance(bid_log, dict) else 0,
+        "last_seen_bid_token_id": int(bid_log.get("token_id") or row.get("token_id") or 0) if isinstance(bid_log, dict) else int(row.get("token_id") or 0),
+        "last_error": None,
     }
 
 
@@ -663,13 +852,21 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[s
         text=True,
         timeout=config.timeout_seconds,
         env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
+    stdout_tail = "\n".join((result.stdout or "").splitlines()[-20:])
+    stderr_tail = "\n".join((result.stderr or "").splitlines()[-20:])
+    if stdout_tail:
+        log(config, "refresh_stdout_tail: " + redact_command(stdout_tail))
+    if stderr_tail:
+        log(config, "refresh_stderr_tail: " + redact_command(stderr_tail))
     if result.returncode != 0:
         return "failure", result.returncode
     return "success", 0
 
 
-def run_once_locked(config: Config, *, dry_run: bool = False) -> int:
+def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: bool = False) -> int:
     now = utc_now()
     state = load_state(config.state_path)
     try:
@@ -690,6 +887,8 @@ def run_once_locked(config: Config, *, dry_run: bool = False) -> int:
         cooldown_seconds=config.cooldown_seconds,
         force_after_seconds=config.force_after_seconds,
     )
+    if force_refresh and not decision.should_refresh:
+        decision = RefreshDecision(True, ["force_refresh"])
     new_state = state_from_snapshot(snapshot, now_utc=now, previous_state=state, decision=decision)
     new_state["consecutive_rpc_failures"] = 0
     summary = (
@@ -726,13 +925,13 @@ def run_once_locked(config: Config, *, dry_run: bool = False) -> int:
     return 0
 
 
-def run_once(config: Config, *, dry_run: bool = False) -> int:
+def run_once(config: Config, *, dry_run: bool = False, force_refresh: bool = False) -> int:
     lock_handle = acquire_run_lock(config)
     if config.lock_path and lock_handle is None:
         log(config, f"lock_skip: another watcher run is active at {config.lock_path}")
         return 0
     try:
-        return run_once_locked(config, dry_run=dry_run)
+        return run_once_locked(config, dry_run=dry_run, force_refresh=force_refresh)
     finally:
         release_run_lock(lock_handle)
 
@@ -743,6 +942,7 @@ def build_parser() -> argparse.ArgumentParser:
     mode.add_argument("--once", action="store_true", help="Run one check then exit (default).")
     mode.add_argument("--loop", action="store_true", help="Run continuously, sleeping between checks.")
     parser.add_argument("--dry-run", action="store_true", help="Detect changes and log the intended refresh without running it or writing watcher state.")
+    parser.add_argument("--force-refresh", action="store_true", help="Run the configured refresh command even if this check only initializes or sees no new signal.")
     parser.add_argument("--state-path", help="Override MISSION3_WATCHER_STATE_PATH for this run.")
     parser.add_argument("--refresh-command", help="Override MISSION3_REFRESH_COMMAND for this run.")
     return parser
@@ -759,10 +959,10 @@ def main(argv: list[str] | None = None) -> int:
     validate_refresh_command(config)
 
     if not args.loop:
-        return run_once(config, dry_run=args.dry_run)
+        return run_once(config, dry_run=args.dry_run, force_refresh=args.force_refresh)
 
     while True:
-        run_once(config, dry_run=args.dry_run)
+        run_once(config, dry_run=args.dry_run, force_refresh=args.force_refresh)
         time.sleep(config.interval_seconds)
 
 

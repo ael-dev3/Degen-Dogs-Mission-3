@@ -44,6 +44,26 @@ Fill only the values you need in `.env.local`.
 | `COINGECKO_API_KEY` | Optional historical price fetching. | yes |
 | `DUNE_API_KEY` | Optional Dune discovery/recovery work where query IDs are available. | yes |
 
+## Onchain watcher variables
+
+These keep Mission 3 current-auction data fresher than the hourly baseline without browser-side polling.
+
+| Variable | Purpose | Sensitive? |
+| --- | --- | --- |
+| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 120 seconds. | no |
+| `MISSION3_WATCHER_COOLDOWN_SECONDS` | Minimum delay between non-major refreshes. | no |
+| `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; hourly refresh remains the baseline. | no |
+| `MISSION3_WATCHER_LOOKBACK_BLOCKS` | Recent block lookback for missing state. | no |
+| `MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS` | Overlap subtracted from `last_checked_block + 1` to avoid missed logs. | no |
+| `MISSION3_WATCHER_LOG_CHUNK` | Max blocks per `eth_getLogs` request. | no |
+| `MISSION3_WATCHER_STATE_PATH` | Local state path, normally `.local/mission3_onchain_tracker_state.json`. | can reveal local paths |
+| `MISSION3_WATCHER_LOCK_PATH` | Local non-overlap lock path. | can reveal local paths |
+| `MISSION3_WATCHER_LOG_PATH` | Local concise watcher log path. | can reveal local paths |
+| `MISSION3_REFRESH_COMMAND` | Command to run after a real onchain signal; default is `npm run data && npm run build`. | no, unless embedding secrets |
+| `MISSION3_WATCHER_AUTO_PUSH` | Must be `1` before publish-like commands are allowed. | no |
+| `MISSION3_WATCHER_REQUIRE_CLEAN_TREE` | Refuse refresh with tracked changes; defaults on in auto-push mode. | no |
+| `MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS` | Refresh command timeout. | no |
+
 ## What works without secrets
 
 - Static build from checked-in generated files.

@@ -38,8 +38,47 @@ def auction_raw(token_id: int, amount_wei: int, start_ts: int, end_ts: int, bidd
     ])
 
 
+def event_log(
+    watcher,
+    event_name: str,
+    *,
+    block: int,
+    tx: str,
+    index: int,
+    token_id: int,
+    bidder: str | None = None,
+    amount: int | None = None,
+    end_time: int | None = None,
+    extended: bool = False,
+):
+    topics = [watcher.TOPIC_BY_EVENT[event_name], "0x" + word(token_id)]
+    if event_name == "AuctionCreated":
+        data_words = [word(1), word(end_time or 2)]
+    elif event_name == "AuctionBid":
+        data_words = [
+            address_word(bidder or "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+            word(amount or 0),
+            word(1 if extended else 0),
+        ]
+    elif event_name == "AuctionExtended":
+        data_words = [word(end_time or 2)]
+    elif event_name == "AuctionSettled":
+        data_words = [address_word(bidder or "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), word(amount or 0)]
+    else:
+        raise AssertionError(event_name)
+    return {
+        "blockNumber": hex(block),
+        "transactionHash": tx,
+        "logIndex": hex(index),
+        "topics": topics,
+        "data": "0x" + "".join(data_words),
+    }
+
+
 def iso(seconds_offset: int = 0) -> str:
-    return (datetime(2026, 5, 29, tzinfo=timezone.utc) + timedelta(seconds=seconds_offset)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    return (
+        datetime(2026, 5, 29, tzinfo=timezone.utc) + timedelta(seconds=seconds_offset)
+    ).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def test_decode_auction_result_matches_auction_house_struct():
@@ -53,6 +92,44 @@ def test_decode_auction_result_matches_auction_house_struct():
     assert decoded["latest_block"] == 123
 
 
+def test_verified_mission3_metadata_is_loaded_and_includes_extended_event():
+    watcher = load_module()
+    assert watcher.CHAIN_ID == 8453
+    assert watcher.AUCTION_HOUSE.lower() == "0x8f34fe11ce28893dea6a802c8d0b3d0ffc7f5cea"
+    assert watcher.TOPIC_BY_EVENT["AuctionBid"] == "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
+    assert watcher.TOPIC_BY_EVENT["AuctionExtended"] == "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e"
+    assert "AuctionExtended" in watcher.WATCHED_EVENT_NAMES
+
+
+def test_compact_event_log_decodes_bid_and_extended_payloads():
+    watcher = load_module()
+    bid = watcher.compact_event_log(
+        event_log(
+            watcher,
+            "AuctionBid",
+            block=100,
+            tx="0xbid",
+            index=3,
+            token_id=728,
+            bidder="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            amount=200,
+            extended=True,
+        )
+    )
+    assert bid["event_name"] == "AuctionBid"
+    assert bid["token_id"] == 728
+    assert bid["bidder"] == "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    assert bid["amount_wei"] == "200"
+    assert bid["extended"] is True
+
+    extended = watcher.compact_event_log(
+        event_log(watcher, "AuctionExtended", block=101, tx="0xext", index=4, token_id=728, end_time=999)
+    )
+    assert extended["event_name"] == "AuctionExtended"
+    assert extended["token_id"] == 728
+    assert extended["end_time_unix"] == 999
+
+
 def test_change_detection_initializes_without_refresh_then_detects_bidder_amount_and_token_changes():
     watcher = load_module()
     snapshot = {
@@ -60,7 +137,10 @@ def test_change_detection_initializes_without_refresh_then_detects_bidder_amount
         "token_id": 727,
         "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "amount_wei": "100",
+        "settled": False,
         "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "91:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
         "settled_log": None,
     }
     state = {}
@@ -75,14 +155,80 @@ def test_change_detection_initializes_without_refresh_then_detects_bidder_amount
         "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "amount_wei": "200",
         "created_log": {"id": "109:0xcreated2:2", "tx_hash": "0xcreated2"},
+        "bid_log": {"id": "110:0xbid2:3", "tx_hash": "0xbid2"},
     })
     previous = watcher.state_from_snapshot(snapshot, now_utc=iso(), previous_state={})
     decision = watcher.decide_refresh(previous, changed, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
     assert decision.should_refresh is True
     assert "auction_created" in decision.reasons
+    assert "auction_bid" in decision.reasons
     assert "current_auction_token_changed" in decision.reasons
     assert "highest_bidder_changed" in decision.reasons
     assert "highest_bid_amount_changed" in decision.reasons
+
+
+def test_new_bid_log_event_triggers_refresh_even_when_contract_snapshot_is_unchanged():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "last_seen_amount_wei": "200",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xoldbid:2",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+    }
+    snapshot = {
+        "latest_block": 110,
+        "token_id": 728,
+        "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "amount_wei": "200",
+        "settled": False,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "110:0xnewbid:4", "tx_hash": "0xnewbid", "log_index": 4, "token_id": 728},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
+    assert decision.should_refresh is True
+    assert decision.reasons == ["auction_bid"]
+
+
+def test_new_extended_log_triggers_after_cooldown_and_is_deferred_inside_cooldown():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "last_seen_amount_wei": "200",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:2",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+    }
+    snapshot = {
+        "latest_block": 120,
+        "token_id": 728,
+        "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "amount_wei": "200",
+        "settled": False,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:2", "tx_hash": "0xbid"},
+        "extended_log": {"id": "119:0xextended:5", "tx_hash": "0xextended", "log_index": 5, "token_id": 728},
+        "settled_log": None,
+    }
+    early = watcher.decide_refresh(previous, snapshot, now_utc=iso(120), cooldown_seconds=300, force_after_seconds=0)
+    assert early.should_refresh is False
+    assert early.cooldown_skip is True
+    assert early.pending_refresh is True
+    assert early.reasons == ["auction_extended"]
+
+    later = watcher.decide_refresh(previous, snapshot, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
+    assert later.should_refresh is True
+    assert later.reasons == ["auction_extended"]
 
 
 def test_bid_change_inside_cooldown_is_deferred_not_lost():
@@ -92,8 +238,10 @@ def test_bid_change_inside_cooldown_is_deferred_not_lost():
         "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "last_seen_amount_wei": "100",
         "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
         "last_seen_auction_created_log_id": "90:0xcreated:1",
         "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
     }
     snapshot = {
         "latest_block": 101,
@@ -101,6 +249,8 @@ def test_bid_change_inside_cooldown_is_deferred_not_lost():
         "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "amount_wei": "200",
         "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "101:0xbid2:2", "tx_hash": "0xbid2"},
+        "extended_log": None,
         "settled_log": None,
     }
     decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(120), cooldown_seconds=300, force_after_seconds=0)
@@ -121,8 +271,10 @@ def test_new_settlement_bypasses_cooldown():
         "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "last_seen_amount_wei": "100",
         "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
         "last_seen_auction_created_log_id": "90:0xcreated:1",
         "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
     }
     snapshot = {
         "latest_block": 120,
@@ -130,6 +282,8 @@ def test_new_settlement_bypasses_cooldown():
         "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "amount_wei": "100",
         "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
         "settled_log": {"id": "119:0xsettled:3", "tx_hash": "0xsettled"},
     }
     decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(120), cooldown_seconds=300, force_after_seconds=0)
@@ -147,8 +301,10 @@ def test_settlement_state_change_bypasses_cooldown_even_without_log_scan_hit():
         "last_seen_amount_wei": "100",
         "last_seen_settled": False,
         "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
         "last_seen_auction_created_log_id": "90:0xcreated:1",
         "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
     }
     snapshot = {
         "latest_block": 120,
@@ -157,6 +313,8 @@ def test_settlement_state_change_bypasses_cooldown_even_without_log_scan_hit():
         "amount_wei": "100",
         "settled": True,
         "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
         "settled_log": None,
     }
     decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(120), cooldown_seconds=300, force_after_seconds=0)
@@ -171,7 +329,10 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     env = {}
     config = watcher.config_from_env(env)
     assert config.auto_push is False
-    assert config.refresh_command == "npm run refresh:local"
+    assert config.refresh_command == "npm run data && npm run build"
+    assert config.state_path.name == "mission3_onchain_tracker_state.json"
+    assert config.interval_seconds == 120
+    assert config.cooldown_seconds == 180
 
     env = {"MISSION3_WATCHER_AUTO_PUSH": "1"}
     config = watcher.config_from_env(env)
@@ -211,11 +372,12 @@ def test_run_lock_prevents_overlapping_one_shot_runs():
         watcher.release_run_lock(third)
 
 
-def test_log_scan_start_uses_recent_window_when_state_missing_or_stale():
+def test_log_scan_start_uses_last_checked_block_safety_overlap_or_recent_lookback():
     watcher = load_module()
-    assert watcher.choose_log_from_block({}, latest_block=10_000, default_from_block=4_000, window_blocks=500) == 9_501
-    assert watcher.choose_log_from_block({"last_seen_block": 9_900}, latest_block=10_000, default_from_block=4_000, window_blocks=500) == 9_901
-    assert watcher.choose_log_from_block({"last_seen_block": 1}, latest_block=10_000, default_from_block=4_000, window_blocks=500) == 9_501
+    assert watcher.choose_log_from_block({}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_501
+    assert watcher.choose_log_from_block({"last_checked_block": 9_900}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_851
+    assert watcher.choose_log_from_block({"last_checked_block": 1}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 4_000
+    assert watcher.choose_log_from_block({"last_seen_block": 9_900}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_851
 
 
 def test_generated_dashboard_baseline_prevents_false_initial_refresh_but_detects_stale_bid():
@@ -236,9 +398,14 @@ def test_generated_dashboard_baseline_prevents_false_initial_refresh_but_detects
             "amount_wei": "11000000000000000",
             "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
             "settled_log": None,
+            "extended_log": None,
             "bid_log": {"id": "105:0xbid:2", "tx_hash": "0xbid"},
         }
         baseline = watcher.state_from_generated_dashboard(snapshot, now_utc=iso(), root=root)
+        assert baseline["chain_id"] == 8453
+        assert baseline["auction_house"].lower() == watcher.AUCTION_HOUSE.lower()
+        assert baseline["last_checked_block"] == 100
+        assert baseline["last_seen_bid_tx"] == "0xbid"
         decision = watcher.decide_refresh(baseline, snapshot, now_utc=iso(60), cooldown_seconds=300, force_after_seconds=0)
         assert decision.should_refresh is False
         assert decision.reasons == []
@@ -280,6 +447,7 @@ def test_dry_run_does_not_write_state_and_reports_refresh_intent():
             "checked_log_count": 1,
             "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
             "bid_log": {"id": "101:0xbid:4", "tx_hash": "0xbid"},
+            "extended_log": None,
             "settled_log": None,
             "rpc_url": "https://mainnet.base.org",
         }
