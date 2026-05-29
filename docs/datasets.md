@@ -46,6 +46,8 @@ Additional unified search files:
 - `archive/data/generated/unified_dog_search_index.json` - archive copy.
 - `archive/dogs/by-id/<dog_id>.json` - per-Dog archive records.
 
+The hosted feed/search UI reads `public/generated/unified_dog_search_index.json` client-side, renders only the current page of results, and keeps the latest-10 default state. Mission filters and highest-USD sorting use the generated record fields already present in that static index; missing Mission rows or missing USD estimates remain visible/degrade gracefully instead of being fabricated.
+
 ## Full manifest
 
 | Table | CSV path | Rows | CSV | JSON |

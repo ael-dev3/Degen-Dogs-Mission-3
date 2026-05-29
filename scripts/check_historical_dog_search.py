@@ -161,9 +161,14 @@ def main() -> int:
         "fetch(url,{cache:'no-store'})",
         'missionMatch=remaining.match',
         'dogMatch=remaining.match',
-        'restoreAuctionRows=()=>{if(!auctionBody)return;loadUnified()',
+        'restoreAuctionRows=()=>{archiveState.query=',
         'Search all missions: Dog #, wallet, handle, tx, chain, status',
         'Latest 10 archive records',
+        'data-mission-filter="1"',
+        'id="auction-page-size"',
+        '<option value="highest_usd">Highest USD bid</option>',
+        'getUsdSortValue=record=>',
+        'Missing estimates sort last.',
     ]:
         if marker not in html:
             raise AssertionError(f"index.html missing {marker}")

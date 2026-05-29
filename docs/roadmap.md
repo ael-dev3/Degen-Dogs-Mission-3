@@ -4,7 +4,7 @@
 
 - Mission 3 cached analytics dashboard on Base.
 - Current auction, recent winners, bidder activity, WOOF/SUP context, generated exports.
-- Unified Dog/archive search across available Mission 1, 2, and 3 records.
+- Unified Dog/archive search across available Mission 1, 2, and 3 records, with compact pagination, rows-per-page, mission filters, and highest historical estimated USD sorting in the main feed.
 - Static GitHub Pages deployment backed by committed generated files.
 
 ## Next

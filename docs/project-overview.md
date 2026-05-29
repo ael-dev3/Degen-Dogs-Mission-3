@@ -20,6 +20,8 @@ The repo is broader than the live Mission 3 page:
 - Mission 3: Base live dashboard and rolling archive.
 - Unified Dog search: cross-mission records where verified outputs exist.
 
+The hosted auction feed still defaults to the latest 10 archive records for casual visitors. Power users can use the compact controls above the feed to search, paginate, change rows per page, filter by Mission 1/2/3, and sort by highest historical estimated USD bid where that estimate exists.
+
 ## Independence
 
 Degen Dogs was created by Mark Carey / dogmaster. This repo is a community analytics/archive contribution and should not be presented as official unless the project explicitly approves that wording.

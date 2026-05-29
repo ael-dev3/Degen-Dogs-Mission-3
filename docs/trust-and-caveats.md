@@ -28,6 +28,10 @@ WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses
 
 Do not fabricate missing history. Keep verified, candidate, and unknown data separated.
 
+## Historical USD estimates
+
+Highest-USD sorting in the hosted feed uses generated historical estimate fields from the static archive, not browser live price calls. Estimates are for browsing/context, not official accounting. Rows without historical USD estimates are kept in the archive and sorted below priced rows when the USD sort is active.
+
 ## Public SQL
 
 The dashboard does not expose visitor-run SQL. Queries are approved in `sql/mission3_dashboard.sql` and executed by the local runner.
