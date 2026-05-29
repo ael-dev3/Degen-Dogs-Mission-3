@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:54:27Z",
+  "status": "onchain_verified_dune_unavailable",
+  "local_counts": {
+    "mission2_auction_created": 369,
+    "mission2_auction_bids": 1630,
+    "mission2_auction_extended": 273,
+    "mission2_auction_settled": 369,
+    "mission2_raw_logs": 2641
+  },
+  "dog_range": {
+    "first_token_id": 201,
+    "last_token_id": 589
+  },
+  "comparisons": [
+    {
+      "target": "AuctionCreated count",
+      "local_value": 369,
+      "dune_value": null,
+      "classification": "missing_in_dune_recovery"
+    },
+    {
+      "target": "AuctionBid count",
+      "local_value": 1630,
+      "dune_value": null,
+      "classification": "missing_in_dune_recovery"
+    },
+    {
+      "target": "AuctionExtended count",
+      "local_value": 273,
+      "dune_value": null,
+      "classification": "missing_in_dune_recovery"
+    },
+    {
+      "target": "AuctionSettled count",
+      "local_value": 369,
+      "dune_value": null,
+      "classification": "missing_in_dune_recovery"
+    }
+  ],
+  "notes": "Official Dune query IDs, SQL, and result exports are not recovered; no match/mismatch claim is made."
+}

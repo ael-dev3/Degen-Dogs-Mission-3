@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:44:40Z",
+  "queries": [],
+  "missing": [
+    {
+      "item": "Mission 2 dashboard query IDs and official SQL",
+      "status": "not_recovered",
+      "reason": "No DUNE_API_KEY in environment and public Dune browser/API attempts were blocked by Cloudflare/403/auth gates.",
+      "next_action": "Open Dune as an authenticated user, record dashboard/query IDs in archive/mission2/dune/query_ids.json, then run python3 archive/mission2/scripts/recover_dune_queries.py."
+    }
+  ],
+  "notes": "No query IDs, SQL, or results are fabricated.",
+  "search_attempts": [
+    {
+      "query": "https://dune.com/ael_dev/degen-dogs-mission-2",
+      "result": "Cloudflare in browser; r.jina view returned 404 Page Not Found"
+    },
+    {
+      "query": "https://dune.com/search?q=Degen Dogs Mission 2",
+      "result": "r.jina public search returned unrelated Degen airdrop/chain queries; no Degen Dogs Mission 2 dashboard/query IDs"
+    },
+    {
+      "query": "https://dune.com/search?q=ael_dev",
+      "result": "r.jina public search did not show ael_dev Degen Dogs dashboard/query records"
+    },
+    {
+      "query": "https://dune.com/search?q=WOOF WOOFx Degen Dogs",
+      "result": "no useful public search results"
+    }
+  ]
+}

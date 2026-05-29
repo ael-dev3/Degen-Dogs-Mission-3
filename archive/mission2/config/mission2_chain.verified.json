@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:22:48Z",
+  "confidence": "verified",
+  "chain": {
+    "name": "Degen Chain",
+    "chain_id": 666666666,
+    "native_currency": {
+      "symbol": "DEGEN",
+      "decimals": 18
+    },
+    "rpc_urls": [
+      {
+        "url": "https://rpc.degen.tips",
+        "status": "working",
+        "checked_at_utc": "2026-05-28T23:22:48Z",
+        "verified_by": [
+          "eth_chainId returned 0x27bc86aa / 666666666",
+          "eth_getLogs accepted <=10000 block chunks"
+        ]
+      }
+    ],
+    "explorers": [
+      {
+        "url": "https://explorer.degen.tips",
+        "status": "candidate",
+        "notes": "Public explorer candidate; archive verification used RPC rather than explorer scrape."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "type": "onchain_rpc",
+      "url": "https://rpc.degen.tips",
+      "notes": "Degen Chain JSON-RPC used for eth_chainId, eth_getCode, eth_call getters, and eth_getLogs scans."
+    },
+    {
+      "type": "source_repo",
+      "url": "https://github.com/markcarey/degendogs",
+      "notes": "Auction house event ABI and WOOF vault allocation source files."
+    }
+  ],
+  "notes": [
+    "Mission 2 auction data was recovered from Degen Chain logs.",
+    "Auction amounts are 18-decimal WDEGEN/DEGEN-denominated raw integers. Display values are generated from exact integer strings."
+  ]
+}

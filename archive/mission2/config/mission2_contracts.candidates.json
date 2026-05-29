@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:22:48Z",
+  "confidence": "candidate",
+  "candidates": {
+    "superfluid_pool": [],
+    "pool_manager": [],
+    "mintclub_bonding_curve_token": [],
+    "dune_dashboard_id": [],
+    "dune_query_ids": []
+  },
+  "notes": [
+    "No candidate values are promoted without a source URL/query/file and verification notes.",
+    "Dune query IDs remain empty because automated Dune access was blocked and DUNE_API_KEY was not available."
+  ]
+}

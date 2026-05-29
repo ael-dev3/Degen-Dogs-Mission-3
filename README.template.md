@@ -12,6 +12,7 @@ A custom cached analytics dashboard for Degen Dogs Mission 3 on Base.
 - Generated data exports: [`generated/`](generated/)
 - SQL query layer: [`sql/mission3_dashboard.sql`](sql/mission3_dashboard.sql)
 - Data pipeline script: [`scripts/build_dashboard.py`](scripts/build_dashboard.py)
+- Mission 2 archival module: [`archive/mission2/`](archive/mission2/)
 - Degen Dogs: [degendogs.club](https://degendogs.club/)
 - Degen Dogs docs: [docs.degendogs.club](https://docs.degendogs.club/)
 
