@@ -11,7 +11,9 @@ Base RPC + contract calls
 
 ## Static public site
 
-The public dashboard is static. Visitors download HTML, CSS, JavaScript, images, and generated JSON/CSV files. They do not run SQL and do not call the auction contracts directly from the browser.
+The public dashboard is static. Visitors download HTML, CSS, JavaScript, images, and
+generated JSON/CSV files. They do not run SQL and do not call the auction contracts
+directly from the browser.
 
 ## Local runner
 
@@ -28,8 +30,12 @@ The runner is a trusted local machine that performs the expensive/reliable work:
 
 ## GitHub Pages
 
-`.github/workflows/deploy-pages.yml` installs dependencies and runs `npm run build`. It does not run `npm run data`. Fresh data must already be committed before a Pages deploy if the dashboard needs an updated snapshot.
+`.github/workflows/deploy-pages.yml` installs dependencies and runs `npm run build`. It
+does not run `npm run data`. Fresh data must already be committed before a Pages deploy
+if the dashboard needs an updated snapshot.
 
 ## Why no public SQL editor
 
-The current design favors reproducibility and low hosting risk over interactive queries. Public SQL would require a hosted database, rate-limit controls, abuse prevention, cost management, and a separate security model.
+The current design favors reproducibility and low hosting risk over interactive queries.
+Public SQL would require a hosted database, rate-limit controls, abuse prevention, cost
+management, and a separate security model.

@@ -2,11 +2,14 @@
 
 ## Independent community contribution
 
-This repo is an independent community-built dashboard/archive contribution. Degen Dogs was created by Mark Carey / dogmaster. Do not describe this repo as official unless the Degen Dogs project explicitly approves that wording.
+This repo is an independent community-built dashboard/archive contribution. Degen Dogs
+was created by Mark Carey / dogmaster. Do not describe this repo as official unless the
+Degen Dogs project explicitly approves that wording.
 
 ## Cached snapshot
 
-The public site is a cached static snapshot. It updates when the local runner refreshes data, commits generated files, and GitHub Pages deploys.
+The public site is a cached static snapshot. It updates when the local runner refreshes
+data, commits generated files, and GitHub Pages deploys.
 
 ## Data sources
 
@@ -14,11 +17,14 @@ The public site is a cached static snapshot. It updates when the local runner re
 - Historical Mission 3 auction rows: Base event logs.
 - Dog metadata and traits: token metadata fetched by the pipeline and cached locally.
 - Farcaster identities: optional best-effort resolution.
-- Mission 1 and Mission 2 archive rows: era-specific recovery scripts and checked-in archive outputs.
+- Mission 1 and Mission 2 archive rows: era-specific recovery scripts and checked-in
+  archive outputs.
 
 ## Reward and token context
 
-WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses 141 Dogs and the vault bonus is not included in that estimate basis. Treat the values as estimates unless confirmed against official reward/accounting logic.
+WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses 141
+Dogs and the vault bonus is not included in that estimate basis. Treat the values as
+estimates unless confirmed against official reward/accounting logic.
 
 ## Archive completeness
 
@@ -30,12 +36,20 @@ Do not fabricate missing history. Keep verified, candidate, and unknown data sep
 
 ## Historical USD estimates
 
-Highest-USD sorting in the hosted feed uses generated historical estimate fields from the static archive, not browser live price calls. Estimates are for browsing/context, not official accounting. Rows without historical USD estimates are kept in the archive and sorted below priced rows when the USD sort is active.
+Highest-USD sorting in the hosted feed uses generated historical estimate fields from
+the static archive, not browser live price calls. Estimates are for browsing/context,
+not official accounting. Rows without historical USD estimates are kept in the archive
+and sorted below priced rows when the USD sort is active.
 
 ## License and attribution
 
-Original code in this repository is licensed under MIT unless otherwise noted. Third-party materials, including Degen Dogs upstream code/assets/docs referenced here, retain their original licenses and attribution requirements. See [`../NOTICE.md`](../NOTICE.md) and [`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
+Original code in this repository is licensed under MIT unless otherwise noted.
+Third-party materials, including Degen Dogs upstream code/assets/docs referenced here,
+retain their original licenses and attribution requirements. See
+[`../NOTICE.md`](../NOTICE.md) and
+[`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
 
 ## Public SQL
 
-The dashboard does not expose visitor-run SQL. Queries are approved in `sql/mission3_dashboard.sql` and executed by the local runner.
+The dashboard does not expose visitor-run SQL. Queries are approved in
+`sql/mission3_dashboard.sql` and executed by the local runner.

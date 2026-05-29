@@ -25,9 +25,11 @@ A blank `BASE_RPC_URL` means the script uses public defaults.
 
 ## Secrets policy
 
-Never commit `.env`, `.env.local`, API keys, RPC secrets, private keys, or local machine paths.
+Never commit `.env`, `.env.local`, API keys, RPC secrets, private keys, or local machine
+paths.
 
-The dashboard does not need wallet private keys. It reads public/onchain data and writes static files.
+The dashboard does not need wallet private keys. It reads public/onchain data and writes
+static files.
 
 ## Variables
 

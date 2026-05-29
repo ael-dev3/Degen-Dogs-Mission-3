@@ -1,15 +1,20 @@
 # Degen Dogs Mission 2 Archive
 
-This folder preserves a reproducible local archive of Degen Dogs Mission 2 historical auction data from Degen Chain.
+This folder preserves a reproducible local archive of Degen Dogs Mission 2 historical
+auction data from Degen Chain.
 
-It is archival infrastructure, not a live dashboard integration. The current public Mission 3 dashboard remains Mission 3-focused and does not surface Mission 2 unless explicitly enabled later.
+It is archival infrastructure, not a live dashboard integration. The current public
+Mission 3 dashboard remains Mission 3-focused and does not surface Mission 2 unless
+explicitly enabled later.
 
 ## Current status
 
 - Onchain auction archive: recovered and verified from Degen Chain logs.
-- Dune dashboard/query metadata: not recovered beyond the likely title/owner; no query IDs or SQL are fabricated.
+- Dune dashboard/query metadata: not recovered beyond the likely title/owner; no query
+  IDs or SQL are fabricated.
 - Reward/stream accounting: partial context only; not reconciled.
-- Future dashboard integration: prepared through local CSV/JSON/SQLite outputs, not enabled.
+- Future dashboard integration: prepared through local CSV/JSON/SQLite outputs, not
+  enabled.
 
 ## Verified onchain constants
 
@@ -50,7 +55,8 @@ Current onchain counts:
 
 ## Dune recovery status
 
-The likely Dune target is `Degen Dogs Mission 2` by `ael_dev`, but the dashboard URL, dashboard ID, query IDs, official SQL, and official result exports are not recovered.
+The likely Dune target is `Degen Dogs Mission 2` by `ael_dev`, but the dashboard URL,
+dashboard ID, query IDs, official SQL, and official result exports are not recovered.
 
 Files intentionally preserve this missing state:
 
@@ -59,7 +65,8 @@ Files intentionally preserve this missing state:
 - `dune/query_ids.json`
 - `dune/hardcoded_constants.json`
 
-To continue Dune recovery, authenticate in Dune, record query IDs in `dune/query_ids.json`, set `DUNE_API_KEY`, then run:
+To continue Dune recovery, authenticate in Dune, record query IDs in
+`dune/query_ids.json`, set `DUNE_API_KEY`, then run:
 
 ```bash
 npm run archive:mission2:discover
@@ -94,7 +101,9 @@ MISSION2_LOG_CHUNK=10000
 
 ## Caveats
 
-- This archive is independent community infrastructure, not official Degen Dogs accounting.
+- This archive is independent community infrastructure, not official Degen Dogs
+  accounting.
 - Dune reconciliation is pending.
 - Superfluid/WOOFx stream allocation and MintClub reward accounting are not complete.
-- Amounts are stored as exact raw integer strings; display values use verified 18-decimal WDEGEN metadata.
+- Amounts are stored as exact raw integer strings; display values use verified
+  18-decimal WDEGEN metadata.

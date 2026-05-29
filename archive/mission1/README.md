@@ -2,17 +2,27 @@
 
 Mission 1 is the Polygon production era of Degen Dogs.
 
-Degen Dogs began as an ETHOnline 2021/testnet project by Mark Carey, then launched in production on Polygon around March 14, 2022. The project used one-Dog-at-a-time auctions, WETH bidding, Dog Biscuits/BSCT for bidders, Idle Finance WETH yield strategies, and Superfluid-powered streaming mechanics.
+Degen Dogs began as an ETHOnline 2021/testnet project by Mark Carey, then launched in
+production on Polygon around March 14, 2022. The project used one-Dog-at-a-time
+auctions, WETH bidding, Dog Biscuits/BSCT for bidders, Idle Finance WETH yield
+strategies, and Superfluid-powered streaming mechanics.
 
-This folder is an independent/community-built historical archive. It is not official unless later approved by the creator/community. Treat data as verified only when backed by source docs, Polygon logs/receipts, Dune exports, PolygonScan, or explicit reconciliation notes.
+This folder is an independent/community-built historical archive. It is not official
+unless later approved by the creator/community. Treat data as verified only when backed
+by source docs, Polygon logs/receipts, Dune exports, PolygonScan, or explicit
+reconciliation notes.
 
 ## Archive status
 
 - Chain: Polygon PoS, chain ID `137`.
-- Bid currency: WETH, verified from the auction contract `weth()` and historical source scripts.
+- Bid currency: WETH, verified from the auction contract `weth()` and historical source
+  scripts.
 - Core contracts: stored in `config/mission1_contracts.verified.json`.
-- Candidate/unknown constants: stored separately in `config/mission1_contracts.candidates.json` and `config/mission1_blocks.candidates.json`.
-- Recovery method in this pass: PolygonScan auction-house transaction pages plus public Polygon RPC transaction receipts.
+- Candidate/unknown constants: stored separately in
+  `config/mission1_contracts.candidates.json` and
+  `config/mission1_blocks.candidates.json`.
+- Recovery method in this pass: PolygonScan auction-house transaction pages plus public
+  Polygon RPC transaction receipts.
 - Live Mission 3 dashboard UI: not modified by this archive module.
 
 ## Layout
@@ -65,4 +75,5 @@ Optional env vars:
 # Dune API key
 ```
 
-No secrets are required for the default receipt-based recovery path. If secrets are used locally, keep them in environment variables and never commit `.env` files.
+No secrets are required for the default receipt-based recovery path. If secrets are used
+locally, keep them in environment variables and never commit `.env` files.

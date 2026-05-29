@@ -26,11 +26,14 @@ The command runs three steps:
 - loads input rows into in-memory SQLite,
 - executes `sql/mission3_dashboard.sql`,
 - exports approved tables from `OUTPUT_TABLES`,
-- writes `generated/*.csv`, `generated/*.json`, mirrored public files, `index.html`, and `README.md`.
+- writes `generated/*.csv`, `generated/*.json`, mirrored public files, `index.html`, and
+  `README.md`.
 
 ## Unified archive/search generation
 
-`scripts/build_unified_dog_index.py` combines available Mission 1, Mission 2, and Mission 3 archive search indexes into a public search index used by the dashboard search box.
+`scripts/build_unified_dog_index.py` combines available Mission 1, Mission 2, and
+Mission 3 archive search indexes into a public search index used by the dashboard search
+box.
 
 The browser reads:
 
@@ -44,7 +47,8 @@ Archive copies live under:
 
 ## Historical USD estimates
 
-`scripts/archive_apply_usd_estimates.py` enriches unified archive records with historical USD estimates where price provenance exists under `archive/prices/`.
+`scripts/archive_apply_usd_estimates.py` enriches unified archive records with
+historical USD estimates where price provenance exists under `archive/prices/`.
 
 ## Source vs generated
 

@@ -32,8 +32,10 @@
 
 - Commit small generated dashboard snapshots whenever the refresh pipeline publishes.
 - Preserve archive manifests with every archive rebuild.
-- Keep raw logs if they are needed for reproducibility, but store large files outside the normal repo unless intentionally approved.
+- Keep raw logs if they are needed for reproducibility, but store large files outside
+  the normal repo unless intentionally approved.
 
 ## Recovery rule
 
-A maintainer should be able to rebuild the dashboard from source files, checked-in generated snapshots, public/onchain sources, and documented optional API keys.
+A maintainer should be able to rebuild the dashboard from source files, checked-in
+generated snapshots, public/onchain sources, and documented optional API keys.

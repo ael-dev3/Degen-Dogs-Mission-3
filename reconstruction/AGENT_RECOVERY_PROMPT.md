@@ -1,6 +1,7 @@
 # Agent recovery prompt
 
-Paste this into a future agent if the dashboard must be recovered from a fork or fresh clone.
+Paste this into a future agent if the dashboard must be recovered from a fork or fresh
+clone.
 
 ```text
 You are recovering the Degen Dogs Mission 3 dashboard from a fork or fresh clone.
@@ -11,7 +12,9 @@ Do not commit secrets.
 Do not hand-edit generated files as the durable fix.
 Do not push unless explicitly told.
 
-First inspect README.md, README.template.md, package.json, scripts/build_dashboard.py, scripts/build_unified_dog_index.py, sql/mission3_dashboard.sql, generated/, public/generated/, archive/, reconstruction/, docs/, and .github/workflows/.
+First inspect README.md, README.template.md, package.json, scripts/build_dashboard.py,
+scripts/build_unified_dog_index.py, sql/mission3_dashboard.sql, generated/,
+public/generated/, archive/, reconstruction/, docs/, and .github/workflows/.
 
 Your goals:
 1. Confirm how the dashboard is generated.

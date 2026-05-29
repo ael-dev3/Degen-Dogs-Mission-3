@@ -2,6 +2,7 @@
   "name": "degen-dogs-mission-3",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "data": "python3 scripts/build_dashboard.py && python3 scripts/build_unified_dog_index.py && python3 scripts/archive_apply_usd_estimates.py",

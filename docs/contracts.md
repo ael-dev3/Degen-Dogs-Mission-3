@@ -21,4 +21,5 @@ Verified Mission 3 contract addresses used by the live dashboard pipeline.
 - Verified Mission 3 archive config in `archive/mission3/config/`.
 - Analytics logic in `sql/mission3_dashboard.sql`.
 
-Update contract constants only after verifying the source of truth and running the full data/build validation suite.
+Update contract constants only after verifying the source of truth and running the full
+data/build validation suite.

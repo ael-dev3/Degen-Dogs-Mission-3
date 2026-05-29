@@ -25,7 +25,8 @@ Fix: lower `BASE_LOG_CHUNK`, for example `5000` or `2000`.
 
 Symptom: Python import error.
 
-Fix: use the repo's documented Python/runtime environment. Current scripts are mostly standard-library Python; if a new dependency is added, document and pin it.
+Fix: use the repo's documented Python/runtime environment. Current scripts are mostly
+standard-library Python; if a new dependency is added, document and pin it.
 
 ## Node/Vite build failure
 
@@ -42,7 +43,8 @@ Fix:
 
 Symptom: README edits disappear after `npm run data`.
 
-Fix: edit `README.template.md` and any placeholder logic in `scripts/build_dashboard.py`.
+Fix: edit `README.template.md` and any placeholder logic in
+`scripts/build_dashboard.py`.
 
 ## Generated files stale
 
@@ -90,4 +92,5 @@ Fix:
 
 Symptom: Dune discovery/export work cannot continue.
 
-Fix: preserve the missing state in docs and do not fabricate query IDs or SQL. Use onchain recovery paths where available.
+Fix: preserve the missing state in docs and do not fabricate query IDs or SQL. Use
+onchain recovery paths where available.

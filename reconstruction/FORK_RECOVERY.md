@@ -1,6 +1,7 @@
 # Fork recovery
 
-Use this when the original local runner is offline and another maintainer needs to republish from a fork.
+Use this when the original local runner is offline and another maintainer needs to
+republish from a fork.
 
 ## Steps
 
@@ -20,15 +21,19 @@ Use this when the original local runner is offline and another maintainer needs 
 
 ## Important: generated data
 
-The Pages deploy workflow builds the static site. It does not fetch fresh chain data. Run `npm run data` locally before pushing if the fork needs a fresh snapshot.
+The Pages deploy workflow builds the static site. It does not fetch fresh chain data.
+Run `npm run data` locally before pushing if the fork needs a fresh snapshot.
 
 ## GitHub Pages notes
 
 - Workflow file: `.github/workflows/deploy-pages.yml`.
 - Build command: `npm run build`.
 - Build output: `dist/`.
-- The workflow uses checked-in `index.html` and `public/generated/*` after the local data run.
+- The workflow uses checked-in `index.html` and `public/generated/*` after the local
+  data run.
 
 ## Fork URL expectation
 
-The original site uses `/Degen-Dogs-Mission-3/` as the Vite base path. If the fork keeps the same repo name, the path remains valid. If the fork changes repo name, update build base config/scripts before publishing.
+The original site uses `/Degen-Dogs-Mission-3/` as the Vite base path. If the fork keeps
+the same repo name, the path remains valid. If the fork changes repo name, update build
+base config/scripts before publishing.

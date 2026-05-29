@@ -56,4 +56,5 @@ npm run check:historical-dogs
 npm run check:dashboard-ui
 ```
 
-Do not commit if data generation failed, row counts look partial, or secrets appear in the diff.
+Do not commit if data generation failed, row counts look partial, or secrets appear in
+the diff.

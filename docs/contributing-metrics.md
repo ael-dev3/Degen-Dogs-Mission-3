@@ -8,7 +8,8 @@ Use this workflow when adding or changing dashboard metrics.
 2. Identify whether the needed input already exists in the decoded tables.
 3. If needed, add decoding or enrichment in `scripts/build_dashboard.py`.
 4. Add or modify a `CREATE TABLE` output in `sql/mission3_dashboard.sql`.
-5. If the table should be exported, add it to `OUTPUT_TABLES` in `scripts/build_dashboard.py`.
+5. If the table should be exported, add it to `OUTPUT_TABLES` in
+   `scripts/build_dashboard.py`.
 6. Add a clear description to `DATASET_DESCRIPTIONS`.
 7. Regenerate data with `npm run data`.
 8. Run `npm run build` and the relevant checks.

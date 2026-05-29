@@ -8,7 +8,8 @@ npm run build
 git status --short
 ```
 
-Expected generated paths include `README.md`, `index.html`, `generated/`, `public/generated/`, and unified archive search outputs.
+Expected generated paths include `README.md`, `index.html`, `generated/`,
+`public/generated/`, and unified archive search outputs.
 
 ## Rebuild from scratch
 
@@ -21,7 +22,8 @@ npm run data
 npm run build
 ```
 
-Only do this when you are ready to regenerate everything. If unsure, create a fresh clone instead.
+Only do this when you are ready to regenerate everything. If unsure, create a fresh
+clone instead.
 
 ## Restore generated outputs from Git
 
@@ -82,7 +84,8 @@ Linux cron example:
 
 ## Event-aware refresh watcher
 
-The hourly runner remains the reliability baseline. The watcher is an additional cheap check that can publish faster when Mission 3 auction activity changes.
+The hourly runner remains the reliability baseline. The watcher is an additional cheap
+check that can publish faster when Mission 3 auction activity changes.
 
 One-shot check:
 
@@ -102,9 +105,12 @@ Schedule it every five minutes, separately from the hourly full refresh:
 */5 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:auction >> logs/watch-auction.log 2>&1
 ```
 
-For macOS launchd, use `StartInterval=300` and run `cd /path/to/Degen-Dogs-Mission-3 && npm run watch:auction` through `/bin/bash -lc`.
+For macOS launchd, use `StartInterval=300` and run `cd /path/to/Degen-Dogs-Mission-3 &&
+npm run watch:auction` through `/bin/bash -lc`.
 
-Operational state lives at `.local/mission3_watcher_state.json`, the one-shot overlap lock lives at `.local/mission3_watcher.lock`, and logs go to `logs/watch-auction.log`; all are local-only and gitignored.
+Operational state lives at `.local/mission3_watcher_state.json`, the one-shot overlap
+lock lives at `.local/mission3_watcher.lock`, and logs go to `logs/watch-auction.log`;
+all are local-only and gitignored.
 
 Triggers:
 
@@ -114,9 +120,12 @@ Triggers:
 4. Highest bidder changed.
 5. Highest bid amount changed.
 
-Cooldown defaults to 300 seconds. New auctions, settlements, and token changes bypass cooldown; bid-only churn inside cooldown becomes a pending refresh and is retried after cooldown.
+Cooldown defaults to 300 seconds. New auctions, settlements, and token changes bypass
+cooldown; bid-only churn inside cooldown becomes a pending refresh and is retried after
+cooldown.
 
-Default mode is local-only (`npm run refresh:local`). To publish from watcher-triggered refreshes, set both:
+Default mode is local-only (`npm run refresh:local`). To publish from watcher-triggered
+refreshes, set both:
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1
@@ -129,6 +138,8 @@ If the watcher looks stuck, inspect:
 python3 -m json.tool .local/mission3_watcher_state.json
 ```
 
-Look for stale `last_checked_at_utc`, repeated `consecutive_rpc_failures`, repeated `consecutive_refresh_failures`, or a future `next_allowed_refresh_after_utc` from backoff.
+Look for stale `last_checked_at_utc`, repeated `consecutive_rpc_failures`, repeated
+`consecutive_refresh_failures`, or a future `next_allowed_refresh_after_utc` from
+backoff.
 
 Keep recovery simple. Use the existing scripts before adding new infrastructure.

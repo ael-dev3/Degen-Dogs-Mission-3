@@ -1,8 +1,10 @@
 # Configuration
 
-The default pipeline can run against public RPC defaults, but a reliable Base RPC endpoint is recommended for recovery or scheduled refreshes.
+The default pipeline can run against public RPC defaults, but a reliable Base RPC
+endpoint is recommended for recovery or scheduled refreshes.
 
-Never commit `.env`, `.env.local`, API keys, RPC secrets, private keys, local cache paths, or machine-specific paths.
+Never commit `.env`, `.env.local`, API keys, RPC secrets, private keys, local cache
+paths, or machine-specific paths.
 
 ## Safe local env file
 
@@ -37,7 +39,7 @@ Fill only the values you need in `.env.local`.
 | `DEGEN_RPC_URL` | Mission 2 Degen Chain RPC. | yes if provider-specific |
 | `MISSION2_FROM_BLOCK`, `MISSION2_TO_BLOCK`, `MISSION2_LOG_CHUNK` | Mission 2 indexing bounds/tuning. | no |
 | `MISSION2_AUCTION_HOUSE` | Mission 2 override, normally not needed when verified config exists. | no |
-| `MISSION3_FROM_BLOCK`, `MISSION3_TO_BLOCK`, `MISSION3_LOG_CHUNK`, `MISSION3_LOG_WORKERS` | Mission 3 archive indexing bounds/tuning. | no |
+| `MISSION3_FROM_BLOCK`, `MISSION3_TO_BLOCK`, `MISSION3_LOG_CHUNK`, `MISSION3_LOG_WORKERS` | Mission 3 archive bounds/tuning. | no |
 | `MISSION3_ARCHIVE_DB`, `MISSION3_OUTPUT_DIR` | Mission 3 archive local paths. | can reveal local paths |
 | `COINGECKO_API_KEY` | Optional historical price fetching. | yes |
 | `DUNE_API_KEY` | Optional Dune discovery/recovery work where query IDs are available. | yes |

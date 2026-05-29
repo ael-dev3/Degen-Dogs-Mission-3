@@ -51,7 +51,10 @@ npm run archive:prices:validate
 
 ## Common local failures
 
-- RPC timeouts: set a reliable `BASE_RPC_URL`, lower `BASE_LOG_CHUNK`, or reduce `BASE_LOG_WORKERS`.
-- Stale README after editing: edit `README.template.md`, not only `README.md`, then rerun `npm run data`.
+- RPC timeouts: set a reliable `BASE_RPC_URL`, lower `BASE_LOG_CHUNK`, or reduce
+  `BASE_LOG_WORKERS`.
+- Stale README after editing: edit `README.template.md`, not only `README.md`, then
+  rerun `npm run data`.
 - Vite path confusion: use the configured base path `/Degen-Dogs-Mission-3/`.
-- Generated data looks partial: do not commit it until `npm run data` and validation checks pass.
+- Generated data looks partial: do not commit it until `npm run data` and validation
+  checks pass.

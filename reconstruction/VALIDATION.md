@@ -28,7 +28,8 @@ grep -R "Per-Dog stream estimate across 141"" Dogs" -n index.html generated publ
 grep -R "WOOF Vault Bonus"" excluded" -n index.html generated public README.md docs || true
 ```
 
-The dashboard-visible sentence should not appear in `index.html` or public generated output.
+The dashboard-visible sentence should not appear in `index.html` or public generated
+output.
 
 ## Link and integrity checks
 
@@ -63,4 +64,5 @@ for path in pathlib.Path('.').rglob('*'):
 PY
 ```
 
-Blank placeholders such as `.env.example` are okay. Investigate any non-empty value match before committing.
+Blank placeholders such as `.env.example` are okay. Investigate any non-empty value
+match before committing.
