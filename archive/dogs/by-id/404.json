@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#245/728",
-      "rank": 245,
-      "total": 728
+      "display": "#246/729",
+      "rank": 246,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 404 dog #404 404 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x5366a0f1e097fd7d28d90cbb5e4b6f0652baead5b77b81794bb300d39bb0a641 0x92add0fcb30dfbda1c2c04892e8642a0330db69688e2a0a27d4ecb6ca5195b5c #245/728 background: none; body: brown; neck: none; mouth: tongue; ears: none; head: whitemohawk; eyes: vrgoggles 0x8dca7ea2acd6012da693fe56f0369b633407e46d2652abab37691cb49120a336 0x0948896105e5099b6cb6d82576eb7018879f38e5093e025e50f9d3c04a0cb698 chain_logs contract_getters",
+    "search_text": "dog 404 dog #404 404 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x5366a0f1e097fd7d28d90cbb5e4b6f0652baead5b77b81794bb300d39bb0a641 0x92add0fcb30dfbda1c2c04892e8642a0330db69688e2a0a27d4ecb6ca5195b5c #246/729 background: none; body: brown; neck: none; mouth: tongue; ears: none; head: whitemohawk; eyes: vrgoggles 0x8dca7ea2acd6012da693fe56f0369b633407e46d2652abab37691cb49120a336 0x0948896105e5099b6cb6d82576eb7018879f38e5093e025e50f9d3c04a0cb698 chain_logs contract_getters",
     "settlement": {
       "block_number": 25955200,
       "block_time_utc": "2025-06-07T13:55:05Z",
@@ -74,12 +74,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -104,7 +104,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

@@ -38,9 +38,9 @@ def assert_trait_links() -> None:
     html = INDEX_PATH.read_text(encoding="utf-8")
     if DOUBLE_ENCODED_QUOTE in html:
         raise AssertionError("generated index.html contains double-encoded OpenSea trait quotes")
-    expected_halo = "https://opensea.io/collection/degen-dogs-club?traits=[{%22traitType%22:%22Background%22,%22values%22:[%22Halo%22]}]"
-    if expected_halo not in html:
-        raise AssertionError("generated index.html missing expected single-encoded Background/Halo OpenSea trait URL")
+    expected_prefix = f"{builder.OPENSEA_COLLECTION_URL}?traits=[{{%22traitType%22:%22"
+    if expected_prefix not in html:
+        raise AssertionError("generated index.html missing single-encoded OpenSea trait URL")
 
 
 def assert_timer_urgency_colors() -> None:

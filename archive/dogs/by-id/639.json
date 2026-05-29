@@ -63,12 +63,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#324/728",
-      "rank": 324,
-      "total": 728
+      "display": "#326/729",
+      "rank": 326,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 639 dog #639 639 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.00733 eth 0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7 0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4 #324/728 background: none; body: sugarskull; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: vrgoggles 0xa1469bdb12852359f6156607a9f108ea1e9f778070318d1b528b53189c0e6398 0x8ee5b35c403369cdae2ee069473ebc712db50b524db8f475e223250d580ffaa0 0x56ce83457b2ac922e97343180bc08cf9de54f36f848140a3bdf082deaa17ce62 0x2785fe75c846c80384cf9a714d7c3a19ba9b4f9b492a499c1cca1dc7e2d97335 0xdf50eb80424dd7d778afa557a4aedab03c5f57dae9e6d66a8c9066520e0628e2 0xdd9fce585189f16ba2f5ed37b43ccfb56778a4907aaa1afc1677c4cf1334b21d 0x65fa95ab0af733afa5736e6f6eeb0ace7629c95c57331dae2e41eed3fa0304e4 0xeab54449520c3f1b59412e7ac7a701ef7ccbffa5bdb5f39943b27528fbb5e583 0xaeb8102c0bdc9bef5299e1f23ce4ba3428e2c9994adecf30e60bde7064648b7e 0x26d31ef1cc8165ae798adbad7e7548b2f6f15e3f9cd28a7aa20e6f8d8a525cb0 0xac837768a46a772dcdbadcd25fb1e0bbda237596a0100578f2edec2174762f18 0x839f374770ae190c32d9fa2a2c41470fe5db6684d745fcdfc9c20490c11669f3 0x71abfbcdb78d395a7d83ede26b9dcaf65986d68f38ae84a203145771cf7729e9 0xa0a2e69a290d6622651082a045da07ec8ad2a6a926d224fd50d9a843d7321e24 0xd8091bc79fb2551aebdfaa8a727abb16742b25d9a020fd03887b821609202a72 0xda9ce5ee99eca0c4fe49bfeb7b2199856b5cf22e09f5c24fe26ba6b708ebcef1 base_logs archive_indexer",
+    "search_text": "dog 639 dog #639 639 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.00733 eth 0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7 0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4 #326/729 background: none; body: sugarskull; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: vrgoggles 0xa1469bdb12852359f6156607a9f108ea1e9f778070318d1b528b53189c0e6398 0x8ee5b35c403369cdae2ee069473ebc712db50b524db8f475e223250d580ffaa0 0x56ce83457b2ac922e97343180bc08cf9de54f36f848140a3bdf082deaa17ce62 0x2785fe75c846c80384cf9a714d7c3a19ba9b4f9b492a499c1cca1dc7e2d97335 0xdf50eb80424dd7d778afa557a4aedab03c5f57dae9e6d66a8c9066520e0628e2 0xdd9fce585189f16ba2f5ed37b43ccfb56778a4907aaa1afc1677c4cf1334b21d 0x65fa95ab0af733afa5736e6f6eeb0ace7629c95c57331dae2e41eed3fa0304e4 0xeab54449520c3f1b59412e7ac7a701ef7ccbffa5bdb5f39943b27528fbb5e583 0xaeb8102c0bdc9bef5299e1f23ce4ba3428e2c9994adecf30e60bde7064648b7e 0x26d31ef1cc8165ae798adbad7e7548b2f6f15e3f9cd28a7aa20e6f8d8a525cb0 0xac837768a46a772dcdbadcd25fb1e0bbda237596a0100578f2edec2174762f18 0x839f374770ae190c32d9fa2a2c41470fe5db6684d745fcdfc9c20490c11669f3 0x71abfbcdb78d395a7d83ede26b9dcaf65986d68f38ae84a203145771cf7729e9 0xa0a2e69a290d6622651082a045da07ec8ad2a6a926d224fd50d9a843d7321e24 0xd8091bc79fb2551aebdfaa8a727abb16742b25d9a020fd03887b821609202a72 0xda9ce5ee99eca0c4fe49bfeb7b2199856b5cf22e09f5c24fe26ba6b708ebcef1 base_logs archive_indexer",
     "settlement": {
       "block_number": 42736204,
       "block_time_utc": "2026-02-28T06:55:55Z",
@@ -88,7 +88,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -103,22 +103,22 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

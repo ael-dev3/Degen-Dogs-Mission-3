@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#702/728",
-      "rank": 702,
-      "total": 728
+      "display": "#703/729",
+      "rank": 703,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 425 dog #425 425 mission 2 mission 2 degen chain settled 0x8f4359d1c2166452b5e7a02742d6fe9ca5448fde 0x8f43…8fde 4050 degen 0x7289c1d6eaea5e8cd643f74bbc371a418da742b478074b4df29ead1ba3767b36 0xbf97e8d9b8b6dbfea1029e05a6bee51487303a264c8d8876119fc4f260e269e9 #702/728 background: none; body: grey; neck: goldnecklace; mouth: none; ears: none; head: none; eyes: sunglasses 0xb49ff3b2dc646091cb7b6380a8da897802a2478117156374fd786b27372fd24f 0x220a61728bebe4f7f785dff8b4ee356bfaee4119076ff933991c3a60d35234c0 0xc5d04ce62fd0009786d96f82be08efcf1a6165844b3e9c3d29a0e462551cc048 0x7937761f7bc971e38824d1fe6dc5a0ae6a23974ac70fd51a0d3bf05f94acb630 0x3c419779671b8dd8bfc8d63bd8e88c37bdc80d1a25f854054e0e5ae011c59622 0x26cc33c22e27bdba1c90adc98e76525db36f630ab456766490960b313a92463f chain_logs contract_getters",
+    "search_text": "dog 425 dog #425 425 mission 2 mission 2 degen chain settled 0x8f4359d1c2166452b5e7a02742d6fe9ca5448fde 0x8f43…8fde 4050 degen 0x7289c1d6eaea5e8cd643f74bbc371a418da742b478074b4df29ead1ba3767b36 0xbf97e8d9b8b6dbfea1029e05a6bee51487303a264c8d8876119fc4f260e269e9 #703/729 background: none; body: grey; neck: goldnecklace; mouth: none; ears: none; head: none; eyes: sunglasses 0xb49ff3b2dc646091cb7b6380a8da897802a2478117156374fd786b27372fd24f 0x220a61728bebe4f7f785dff8b4ee356bfaee4119076ff933991c3a60d35234c0 0xc5d04ce62fd0009786d96f82be08efcf1a6165844b3e9c3d29a0e462551cc048 0x7937761f7bc971e38824d1fe6dc5a0ae6a23974ac70fd51a0d3bf05f94acb630 0x3c419779671b8dd8bfc8d63bd8e88c37bdc80d1a25f854054e0e5ae011c59622 0x26cc33c22e27bdba1c90adc98e76525db36f630ab456766490960b313a92463f chain_logs contract_getters",
     "settlement": {
       "block_number": 26059338,
       "block_time_utc": "2025-07-09T14:34:18Z",
@@ -78,12 +78,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -93,7 +93,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

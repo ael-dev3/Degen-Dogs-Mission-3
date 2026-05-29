@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#260/728",
-      "rank": 260,
-      "total": 728
+      "display": "#266/729",
+      "rank": 266,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 250 dog #250 250 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 9277 degen 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 0x20b347e93fde4a5b7cba1ac803e9d69a26eae2623ec9137d93a989fc6ec87df6 #260/728 background: none; body: grey; neck: none; mouth: none; ears: goldearring; head: hoodie; eyes: vrgoggles 0x2e934c71378ab94fc6505b46f3135638cfee5d5b3c7bacf25c95d1dba19ecde9 0x4d63b5b4265986b0abf2f2becd3d3346c737807827715f708c2593531daa3d15 0xf50d96ab4882e77e9639b918e87798c93668161155cb030801304ea334ea08f9 0x6eddddaf785ab221654a24422ec5f5356646d044a8c48f369b15c7ab2d2f452c 0x890df58c3f181ba5ff0645f17c7da063265b9eb562c4aec98ff36f795922a6d7 0xd88aa7f07b7b3e5c21c617eb3a2f06e83ff995979c2f755c2808f747628898e9 0xfb130f1f0a5322a455bb039371f56e7bfab1b8ee929c08e9f9e3feb30a546691 chain_logs contract_getters",
+    "search_text": "dog 250 dog #250 250 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 9277 degen 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 0x20b347e93fde4a5b7cba1ac803e9d69a26eae2623ec9137d93a989fc6ec87df6 #266/729 background: none; body: grey; neck: none; mouth: none; ears: goldearring; head: hoodie; eyes: vrgoggles 0x2e934c71378ab94fc6505b46f3135638cfee5d5b3c7bacf25c95d1dba19ecde9 0x4d63b5b4265986b0abf2f2becd3d3346c737807827715f708c2593531daa3d15 0xf50d96ab4882e77e9639b918e87798c93668161155cb030801304ea334ea08f9 0x6eddddaf785ab221654a24422ec5f5356646d044a8c48f369b15c7ab2d2f452c 0x890df58c3f181ba5ff0645f17c7da063265b9eb562c4aec98ff36f795922a6d7 0xd88aa7f07b7b3e5c21c617eb3a2f06e83ff995979c2f755c2808f747628898e9 0xfb130f1f0a5322a455bb039371f56e7bfab1b8ee929c08e9f9e3feb30a546691 chain_logs contract_getters",
     "settlement": {
       "block_number": 25223555,
       "block_time_utc": "2025-01-12T01:59:44Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -94,12 +94,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -109,7 +109,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

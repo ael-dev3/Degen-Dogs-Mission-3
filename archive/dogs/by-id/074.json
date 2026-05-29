@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#333/728",
+      "display": "#333/729",
       "rank": 333,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 74 dog #74 74 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.09 weth 0x7264a81a02685a6acc26a00989e625cff4f6754a8aa3d6eb860db9ec4387e32b 0x31c7e8a781655d69de01e0fc7925430142c4551198820c657e2db57d47c29c73 #333/728 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: goldearring; head: whitemohawk; eyes: none 0x8627f1bb5282bc47b2f785a985ebf5b38aae6b77d846ef88fe8818eee15c0e67 0x83717d1d50ad31b5ab3e472918f4e8f5c9b448c436ecc9dff50e805cd0ec2fd5 0x2222772553ae4113da424f71f69bf2cd13a594be9867760ab861237e5c7fce78 0x3fa2344fb15ce26cf45387fbcca61b14ce94b1a804fc0780d70f49a64bb04514 0x4bd85ebe6e2c03f113227a075c896af419cbe3ccc750d9f523604a925818d743 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 74 dog #74 74 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.09 weth 0x7264a81a02685a6acc26a00989e625cff4f6754a8aa3d6eb860db9ec4387e32b 0x31c7e8a781655d69de01e0fc7925430142c4551198820c657e2db57d47c29c73 #333/729 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: goldearring; head: whitemohawk; eyes: none 0x8627f1bb5282bc47b2f785a985ebf5b38aae6b77d846ef88fe8818eee15c0e67 0x83717d1d50ad31b5ab3e472918f4e8f5c9b448c436ecc9dff50e805cd0ec2fd5 0x2222772553ae4113da424f71f69bf2cd13a594be9867760ab861237e5c7fce78 0x3fa2344fb15ce26cf45387fbcca61b14ce94b1a804fc0780d70f49a64bb04514 0x4bd85ebe6e2c03f113227a075c896af419cbe3ccc750d9f523604a925818d743 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27209707,
       "block_time_utc": "2022-04-16T15:22:32Z",
@@ -79,7 +79,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -89,7 +89,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -99,7 +99,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -109,7 +109,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

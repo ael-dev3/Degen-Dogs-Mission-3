@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#11/728",
+      "display": "#11/729",
       "rank": 11,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 127 dog #127 127 mission 1 mission 1 polygon settled 0x2a0660e203c9fd5ba5a9e77e9b7517741f54e2aa 0x2a06…e2aa 0.06 weth 0x95e95e11c7af34f80cbd1b358f5dac6fa3ff475f26659bc5a28715307908c1d1 0x11003fbd4c953d2452b1f3f88b4382b79403ac264a90575eb37252537d6d2c16 #11/728 background: halo; body: brown; neck: redcollar; mouth: coin; ears: goldearring; head: partyhat; eyes: redlasereyes 0x5104c1e1aef6c1ad36321e26ea9b87fd45e3eea17b685720b2e43630bc8cf969 0xdff8c049c83fb8f92ae0a02e16b2297a06d4d5a6eed29b391703a7263c8d80ab polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 127 dog #127 127 mission 1 mission 1 polygon settled 0x2a0660e203c9fd5ba5a9e77e9b7517741f54e2aa 0x2a06…e2aa 0.06 weth 0x95e95e11c7af34f80cbd1b358f5dac6fa3ff475f26659bc5a28715307908c1d1 0x11003fbd4c953d2452b1f3f88b4382b79403ac264a90575eb37252537d6d2c16 #11/729 background: halo; body: brown; neck: redcollar; mouth: coin; ears: goldearring; head: partyhat; eyes: redlasereyes 0x5104c1e1aef6c1ad36321e26ea9b87fd45e3eea17b685720b2e43630bc8cf969 0xdff8c049c83fb8f92ae0a02e16b2297a06d4d5a6eed29b391703a7263c8d80ab polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29365648,
       "block_time_utc": "2022-06-09T18:32:19Z",
@@ -76,17 +76,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -96,7 +96,7 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },

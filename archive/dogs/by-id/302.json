@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#358/728",
-      "rank": 358,
-      "total": 728
+      "display": "#357/729",
+      "rank": 357,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 302 dog #302 302 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555.000000000000262144 degen 0x9420ea6e08996b4e5c46925ed15ee661a38c8bf03b96a9f3daf1ee29a369ac1b 0x87d48c4a6b0b7d52059f0bab9a1904355f6a847e1f5fb46b54c344951922cc70 #358/728 background: none; body: sugarskull; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: masksnorkel 0xf8c19d20f1c8fccb6d46edbe887fe27475b51020850d50e8b65aad8fafbf25ae 0xdc3eb8816195ad359bad6d2352005edd8d3c912d5808f2da1ab2c20897fc8934 0x18fdfd258bd2c61670b93e3cf121045f09d0193c3924357d764b31201ff0ba57 0xea64aeaf56976afe38f947a46a7743aaabee6b0dd9a3d76d1b2b0692f609da61 0xd6baf23400488fdf927faf373cf00786366464c09f15d9a2b3784ca3f87792ab chain_logs contract_getters",
+    "search_text": "dog 302 dog #302 302 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555.000000000000262144 degen 0x9420ea6e08996b4e5c46925ed15ee661a38c8bf03b96a9f3daf1ee29a369ac1b 0x87d48c4a6b0b7d52059f0bab9a1904355f6a847e1f5fb46b54c344951922cc70 #357/729 background: none; body: sugarskull; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: masksnorkel 0xf8c19d20f1c8fccb6d46edbe887fe27475b51020850d50e8b65aad8fafbf25ae 0xdc3eb8816195ad359bad6d2352005edd8d3c912d5808f2da1ab2c20897fc8934 0x18fdfd258bd2c61670b93e3cf121045f09d0193c3924357d764b31201ff0ba57 0xea64aeaf56976afe38f947a46a7743aaabee6b0dd9a3d76d1b2b0692f609da61 0xd6baf23400488fdf927faf373cf00786366464c09f15d9a2b3784ca3f87792ab chain_logs contract_getters",
     "settlement": {
       "block_number": 25534586,
       "block_time_utc": "2025-03-02T23:27:38Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -92,7 +92,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

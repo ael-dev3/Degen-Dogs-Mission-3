@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#450/728",
-      "rank": 450,
-      "total": 728
+      "display": "#451/729",
+      "rank": 451,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 678 dog #678 678 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.02976 eth 0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644 0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9 #450/728 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: redmohawk; eyes: none 0xdb918d55c1b23d313239027d9b876beeb58d9641e71e949d5cf7a9a67d5eabfc 0x37ef9e36363ec47be5f97915c568fa517b738e3a3a68b863bf1571fee1d7b518 0x0a71eafd84e4390410846251dfa2925dd381df6971ec7408eca7f6da51722b79 0x0ec23d5446ddb500c5a976cee32a4dd454516e1d1fc9d19a6da2303037ec0bdb 0xb3203ffaf7f142757c135b1860065e6c22e44fe7eb20d7a5c204b3d79f618004 0x582f30ceb4596778e63677a2181d6233d073d549b803e42339b7f47f77499900 0xf46023d4e0f3fd87da12d66b062aa40e8223a52a6ee5f625a9886e18b1bab6c1 base_logs archive_indexer",
+    "search_text": "dog 678 dog #678 678 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.02976 eth 0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644 0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9 #451/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: redmohawk; eyes: none 0xdb918d55c1b23d313239027d9b876beeb58d9641e71e949d5cf7a9a67d5eabfc 0x37ef9e36363ec47be5f97915c568fa517b738e3a3a68b863bf1571fee1d7b518 0x0a71eafd84e4390410846251dfa2925dd381df6971ec7408eca7f6da51722b79 0x0ec23d5446ddb500c5a976cee32a4dd454516e1d1fc9d19a6da2303037ec0bdb 0xb3203ffaf7f142757c135b1860065e6c22e44fe7eb20d7a5c204b3d79f618004 0x582f30ceb4596778e63677a2181d6233d073d549b803e42339b7f47f77499900 0xf46023d4e0f3fd87da12d66b062aa40e8223a52a6ee5f625a9886e18b1bab6c1 base_logs archive_indexer",
     "settlement": {
       "block_number": 44441491,
       "block_time_utc": "2026-04-08T18:18:49Z",
@@ -79,7 +79,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -89,12 +89,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

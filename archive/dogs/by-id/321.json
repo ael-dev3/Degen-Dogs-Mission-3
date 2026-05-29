@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#346/728",
+      "display": "#346/729",
       "rank": 346,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 321 dog #321 321 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4889 degen 0x0281c203ef75d998d2773b0f2b0e9cb82aba291b05d8256569e67f314e3a5e54 0xf484c0fb37d04d5a03be285127a2440b3ad12b40142acba53af0dd12bc8e554f #346/728 background: none; body: brown; neck: goldnecklace; mouth: none; ears: loopearring; head: blackcap; eyes: eyepatch 0x53ca8e910d8271f5db4cae0efe8066d2c06064f92b8421cb18765437dda01447 0x369c63b337da8856eedaadec2690c37450ed378ff0ef86391a5be60d80b45e57 chain_logs contract_getters",
+    "search_text": "dog 321 dog #321 321 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4889 degen 0x0281c203ef75d998d2773b0f2b0e9cb82aba291b05d8256569e67f314e3a5e54 0xf484c0fb37d04d5a03be285127a2440b3ad12b40142acba53af0dd12bc8e554f #346/729 background: none; body: brown; neck: goldnecklace; mouth: none; ears: loopearring; head: blackcap; eyes: eyepatch 0x53ca8e910d8271f5db4cae0efe8066d2c06064f92b8421cb18765437dda01447 0x369c63b337da8856eedaadec2690c37450ed378ff0ef86391a5be60d80b45e57 chain_logs contract_getters",
     "settlement": {
       "block_number": 25624173,
       "block_time_utc": "2025-03-20T16:14:52Z",
@@ -74,12 +74,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -89,7 +89,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

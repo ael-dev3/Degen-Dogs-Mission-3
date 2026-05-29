@@ -593,6 +593,99 @@ def current_overlay_search_text(record: dict[str, Any], dog_id: int) -> str:
     return " ".join(str(part) for part in parts if text_value(part)).lower()
 
 
+def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identity: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    dog_id = dog_id_from_row(feed)
+    status_text = text_value(feed.get("status")).lower()
+    status = "settled" if "settled" in status_text else "ongoing"
+    wallet = normalize_address(feed.get("bidder_winner_wallet") or current.get("bidder_wallet"))
+    profile = identity.get(wallet, {}) if wallet else {}
+    display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet))
+    profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"))
+    native = first_text(feed.get("amount_eth"), current.get("current_bid_eth"))
+    usd_value = first_text(feed.get("amount_usd"), current.get("current_bid_usd"))
+    amount = {
+        "raw": eth_to_wei(native) or None,
+        "native": native or None,
+        "native_symbol": "ETH",
+        "price_asset_key": "ETH",
+        "usd_estimate": str(decimal_value(usd_value) or usd_value) if usd_value else None,
+        "usd_estimate_display": usd_display(usd_value) or None,
+        "usd_estimate_source": "generated_auction_feed" if usd_value else None,
+        "usd_estimate_confidence": "medium" if usd_value else "missing",
+        "usd_estimate_time_basis": ("settlement_block_time" if status == "settled" else "last_bid_block_time") if native else None,
+    }
+    activity = iso_utc(first_text(
+        feed.get("settled_time_utc") if status == "settled" else "",
+        feed.get("last_bid_utc"),
+        feed.get("auction_time_utc"),
+        current.get("latest_block_time_utc"),
+        current.get("start_time_utc"),
+    ))
+    auction_created_time = iso_utc(first_text(current.get("start_time_utc"), feed.get("auction_time_utc")))
+    settlement_time = iso_utc(first_text(feed.get("settled_time_utc"), feed.get("auction_time_utc") if status == "settled" else ""))
+    last_bid_time = iso_utc(first_text(feed.get("last_bid_utc"), current.get("latest_block_time_utc") if status != "settled" else ""))
+    record = {
+        "schema_version": 1,
+        "dog_id": dog_id,
+        "mission": 3,
+        "era_label": "Mission 3",
+        "chain": "Base",
+        "chain_id": 8453,
+        "status": status,
+        "dog_image_url": first_text(feed.get("dog_image_url"), current.get("dog_image_url"), f"https://api.degendogs.club/images/{dog_id}.png"),
+        "dog_item_url": first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
+        "auction_house": None,
+        "auction_created": {
+            "block_number": None,
+            "block_time_utc": auction_created_time or None,
+            "tx_hash": None,
+            "tx_url": None,
+        },
+        "settlement": {
+            "settled": status == "settled",
+            "block_number": None,
+            "block_time_utc": settlement_time or None,
+            "tx_hash": None,
+            "tx_url": None,
+        },
+        "winner_or_high_bidder": {
+            "wallet": wallet or None,
+            "display": display or None,
+            "farcaster_fid": profile.get("farcaster_fid"),
+            "farcaster_handle": first_text(profile.get("farcaster_handle"), display.lstrip("@") if display.startswith("@") else "") or None,
+            "profile_url": profile_url or None,
+            "wallet_explorer_url": address_url(3, wallet) or None,
+        },
+        "amount": amount,
+        "bid_stats": {
+            "bid_count": 0,
+            "unique_bidder_count": 0,
+            "last_bid_time_utc": last_bid_time or None,
+        },
+        "bid_tx_hashes": [],
+        "rarity": parse_rarity(first_text(feed.get("rarity"), current.get("rarity"))),
+        "traits": parse_traits(first_text(current.get("trait_rarity"), feed.get("trait_rarity"), current.get("traits"), feed.get("traits"))),
+        "links": {
+            "item": first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
+            "dog_page": first_text(feed.get("dog_external_url"), current.get("dog_external_url"), f"https://degendogs.club/#dog{dog_id}"),
+            "auction_tx": None,
+            "settlement_tx": None,
+            "explorer": address_url(3, wallet) or None,
+            "repo_archive": f"archive/dogs/by-id/{dog_id:03d}.json",
+        },
+        "source": {
+            "confidence": "verified",
+            "raw_confidence": "generated_auction_feed",
+            "sources": ["generated_auction_feed"],
+            "notes": MISSION_CONFIG[3]["source_note"],
+        },
+        "activity_time_utc": activity or None,
+        "activity_time_basis": "settlement_block_time" if status == "settled" else "last_bid_block_time",
+    }
+    record["search_text"] = current_overlay_search_text(record, dog_id)
+    return record
+
+
 def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dict[str, dict[str, Any]]) -> int:
     """Keep the live/current Mission 3 row aligned with the rendered auction feed.
 
@@ -616,13 +709,15 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         if not isinstance(feed, dict):
             continue
         status_text = text_value(feed.get("status")).lower()
-        if status_text not in {"ongoing", "live"}:
+        if status_text not in {"ongoing", "live", "settled"}:
             continue
         dog_id = dog_id_from_row(feed)
         record = by_key.get((3, dog_id))
-        if not record:
-            continue
         current = current_by_id.get(dog_id, {})
+        if not record:
+            record = generated_feed_record(feed, current, identity)
+            records.append(record)
+            by_key[(3, dog_id)] = record
         wallet = normalize_address(feed.get("bidder_winner_wallet") or current.get("bidder_wallet"))
         prior_who = record.get("winner_or_high_bidder") if isinstance(record.get("winner_or_high_bidder"), dict) else {}
         if not wallet:
@@ -630,7 +725,7 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         profile = identity.get(wallet, {}) if wallet else {}
         display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet), prior_who.get("display"))
         profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"), prior_who.get("profile_url"))
-        record["status"] = "ongoing"
+        record["status"] = "settled" if "settled" in status_text else "ongoing"
         record["dog_image_url"] = first_text(feed.get("dog_image_url"), current.get("dog_image_url"), record.get("dog_image_url")) or None
         record["dog_item_url"] = first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), record.get("dog_item_url"), mission3_item_url(dog_id)) or None
         record["winner_or_high_bidder"] = {
@@ -655,16 +750,31 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
             amount["usd_estimate_confidence"] = first_text(amount.get("usd_estimate_confidence"), "medium")
             amount["usd_estimate_time_basis"] = "last_bid_block_time"
         record["amount"] = amount
-        activity = iso_utc(first_text(feed.get("last_bid_utc"), feed.get("auction_time_utc"), current.get("latest_block_time_utc"), record.get("activity_time_utc")))
+        activity = iso_utc(first_text(
+            feed.get("settled_time_utc") if record["status"] == "settled" else "",
+            feed.get("last_bid_utc"),
+            feed.get("auction_time_utc"),
+            current.get("latest_block_time_utc"),
+            record.get("activity_time_utc"),
+        ))
         if activity:
             record["activity_time_utc"] = activity
-            record["activity_time_basis"] = "last_bid_block_time"
+            record["activity_time_basis"] = "settlement_block_time" if record["status"] == "settled" else "last_bid_block_time"
+        raw_settlement = record.get("settlement")
+        settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
+        if record["status"] == "settled":
+            settlement["settled"] = True
+            settlement["block_time_utc"] = first_text(settlement.get("block_time_utc"), iso_utc(feed.get("settled_time_utc")), iso_utc(feed.get("auction_time_utc"))) or None
+        else:
+            settlement["settled"] = False
+        record["settlement"] = settlement
         raw_bid_stats = record.get("bid_stats")
         bid_stats: dict[str, Any] = raw_bid_stats if isinstance(raw_bid_stats, dict) else {}
         historical = historical_by_id.get(dog_id, {})
         recent_bids = recent_bids_by_id.get(dog_id, [])
-        if activity:
-            bid_stats["last_bid_time_utc"] = activity
+        last_bid_time = iso_utc(first_text(feed.get("last_bid_utc"), historical.get("last_bid_time_utc"), bid_stats.get("last_bid_time_utc")))
+        if last_bid_time:
+            bid_stats["last_bid_time_utc"] = last_bid_time
         bid_count = int_value(historical.get("bid_count"), int_value(bid_stats.get("bid_count"), 0))
         unique_bidder_count = int_value(historical.get("unique_bidder_count"), int_value(bid_stats.get("unique_bidder_count"), 0))
         if recent_bids:

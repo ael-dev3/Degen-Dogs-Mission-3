@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#136/728",
-      "rank": 136,
-      "total": 728
+      "display": "#140/729",
+      "rank": 140,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 249 dog #249 249 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 10755 degen 0xa2aff1f4e1e8eed4cafa1facb3742d5d9c255ce7bdedf9f76889c316e6764dae 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 #136/728 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: hoodie; eyes: vrgoggles 0x58b3c714ceb611bf2e1e4fadb19909afce4c42c126a009b34b30be77c5a1993a 0x67149cf9dd3f5f0307abd8267645961b3c1bd541525347420ba3e75741ca206a 0xa346068b0bce728db1e7f37e390ebeb8ea034b8ba2fe43a5b1f2a55c43c786b2 0x38f7a9b6dbf17737555972445a440917f719530db0b692663158cc532c6386a9 chain_logs contract_getters",
+    "search_text": "dog 249 dog #249 249 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 10755 degen 0xa2aff1f4e1e8eed4cafa1facb3742d5d9c255ce7bdedf9f76889c316e6764dae 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 #140/729 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: hoodie; eyes: vrgoggles 0x58b3c714ceb611bf2e1e4fadb19909afce4c42c126a009b34b30be77c5a1993a 0x67149cf9dd3f5f0307abd8267645961b3c1bd541525347420ba3e75741ca206a 0xa346068b0bce728db1e7f37e390ebeb8ea034b8ba2fe43a5b1f2a55c43c786b2 0x38f7a9b6dbf17737555972445a440917f719530db0b692663158cc532c6386a9 chain_logs contract_getters",
     "settlement": {
       "block_number": 25215957,
       "block_time_utc": "2025-01-11T01:59:30Z",
@@ -76,12 +76,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -91,7 +91,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

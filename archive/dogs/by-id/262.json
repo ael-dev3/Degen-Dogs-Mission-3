@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#447/728",
-      "rank": 447,
-      "total": 728
+      "display": "#446/729",
+      "rank": 446,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 262 dog #262 262 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6100 degen 0x51f512d75b280888fbcf6a735a59ad4c49d2ca3e617ceebae1f298e0edc06074 0x1474acca7987e449b4de152562d517f7290801d31c0c5784f60bf58d546ef4a7 #447/728 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: toque; eyes: sunglasses 0x551dc7e6e30935ce1347891760117bae1d50b1e0f60d7adc46e6b1da8137a5ba 0x4c9903d2f5f06b70d437fef5c85a16782b81f6471922f1387f69e11c932135ce 0x846da7eb91d95cb8f1c2015eb5b92e9a9022c9d7201ebbc1c59541c923572dc4 chain_logs contract_getters",
+    "search_text": "dog 262 dog #262 262 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6100 degen 0x51f512d75b280888fbcf6a735a59ad4c49d2ca3e617ceebae1f298e0edc06074 0x1474acca7987e449b4de152562d517f7290801d31c0c5784f60bf58d546ef4a7 #446/729 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: toque; eyes: sunglasses 0x551dc7e6e30935ce1347891760117bae1d50b1e0f60d7adc46e6b1da8137a5ba 0x4c9903d2f5f06b70d437fef5c85a16782b81f6471922f1387f69e11c932135ce 0x846da7eb91d95cb8f1c2015eb5b92e9a9022c9d7201ebbc1c59541c923572dc4 chain_logs contract_getters",
     "settlement": {
       "block_number": 25306749,
       "block_time_utc": "2025-01-23T06:04:46Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -95,7 +95,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

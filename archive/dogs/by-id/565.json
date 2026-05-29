@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#627/728",
-      "rank": 627,
-      "total": 728
+      "display": "#628/729",
+      "rank": 628,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 565 dog #565 565 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 14141 degen 0x8ddc4e13352bc06aaa40f18a4370d4a3164ec402e5bfabd75dc1d8dc880fc3d9 0xdc03980597e8d0fdf319daf317e006d591e1263aab9bf0e132afa97a265677c8 #627/728 background: none; body: orange; neck: goldnecklace; mouth: none; ears: earbuds; head: baseballcap; eyes: none 0x8e1936e5ceb44ed4398023ffdbe46debf6db1b78526c50f9f3ca027e24f061d4 0x5f1a8d8fb4e8160166e9b8faeb8b926b52e0d323be39c7edd68ad900426b8d0c 0xeb1d9bc9a91d9d8506bc5e00be98f715a0385b8cb3d104b53fcb1b1dfd8f7e1a 0xa8469a0711775acdca0e3aa9890c57ddac2dc00574e8ed338b2925a2e67fe414 chain_logs contract_getters",
+    "search_text": "dog 565 dog #565 565 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 14141 degen 0x8ddc4e13352bc06aaa40f18a4370d4a3164ec402e5bfabd75dc1d8dc880fc3d9 0xdc03980597e8d0fdf319daf317e006d591e1263aab9bf0e132afa97a265677c8 #628/729 background: none; body: orange; neck: goldnecklace; mouth: none; ears: earbuds; head: baseballcap; eyes: none 0x8e1936e5ceb44ed4398023ffdbe46debf6db1b78526c50f9f3ca027e24f061d4 0x5f1a8d8fb4e8160166e9b8faeb8b926b52e0d323be39c7edd68ad900426b8d0c 0xeb1d9bc9a91d9d8506bc5e00be98f715a0385b8cb3d104b53fcb1b1dfd8f7e1a 0xa8469a0711775acdca0e3aa9890c57ddac2dc00574e8ed338b2925a2e67fe414 chain_logs contract_getters",
     "settlement": {
       "block_number": 26579829,
       "block_time_utc": "2025-12-13T05:54:23Z",
@@ -76,12 +76,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -91,12 +91,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -106,7 +106,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

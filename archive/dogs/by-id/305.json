@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#518/728",
-      "rank": 518,
-      "total": 728
+      "display": "#517/729",
+      "rank": 517,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 305 dog #305 305 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 #518/728 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: eyepatch 0xd109bff6701f39aa03dec70a7329e75065e4dd5f9b6661ba7b38ca83b42801e1 chain_logs contract_getters",
+    "search_text": "dog 305 dog #305 305 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 #517/729 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: eyepatch 0xd109bff6701f39aa03dec70a7329e75065e4dd5f9b6661ba7b38ca83b42801e1 chain_logs contract_getters",
     "settlement": {
       "block_number": 25555554,
       "block_time_utc": "2025-03-05T23:39:23Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,7 +83,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -93,12 +93,12 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

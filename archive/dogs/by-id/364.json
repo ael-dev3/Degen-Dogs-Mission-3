@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#534/728",
-      "rank": 534,
-      "total": 728
+      "display": "#531/729",
+      "rank": 531,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 364 dog #364 364 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 5500 degen 0x488669ec6499c5876caa1c66da39d270a6d28e83d36df919c5cbd79243ffa45b 0x521047255b77686334e7ea35f92b6c83db34d48e15824df81d8eed4b9b4efff7 #534/728 background: none; body: blue; neck: redcollar; mouth: tongue; ears: none; head: none; eyes: sunglasses 0x4fe85284ef7a82ac860d74c3f29ef970557d4263b953c6f1ea0f2535469c35f3 0xf5189640ff8e0c26a74bb027dcf826e7282c3110b811bc99c38ff65ad0a83871 0xa002b8b2a890f2dca95a84bab12e51a943629aa1d370ff708161b33282b99bd1 0xdd9449b9ad802a7d654b87a547f09bc614d40bd6475867a65347424df4040bc1 chain_logs contract_getters",
+    "search_text": "dog 364 dog #364 364 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 5500 degen 0x488669ec6499c5876caa1c66da39d270a6d28e83d36df919c5cbd79243ffa45b 0x521047255b77686334e7ea35f92b6c83db34d48e15824df81d8eed4b9b4efff7 #531/729 background: none; body: blue; neck: redcollar; mouth: tongue; ears: none; head: none; eyes: sunglasses 0x4fe85284ef7a82ac860d74c3f29ef970557d4263b953c6f1ea0f2535469c35f3 0xf5189640ff8e0c26a74bb027dcf826e7282c3110b811bc99c38ff65ad0a83871 0xa002b8b2a890f2dca95a84bab12e51a943629aa1d370ff708161b33282b99bd1 0xdd9449b9ad802a7d654b87a547f09bc614d40bd6475867a65347424df4040bc1 chain_logs contract_getters",
     "settlement": {
       "block_number": 25808652,
       "block_time_utc": "2025-04-30T03:59:03Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -86,7 +86,7 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

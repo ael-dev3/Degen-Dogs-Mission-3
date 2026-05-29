@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#508/728",
+      "display": "#508/729",
       "rank": 508,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 32 dog #32 32 mission 1 mission 1 polygon settled 0x06c9018ad287bd949e231bb5dbc196fe22d97675 0x06c9…7675 0.43 weth 0x4032908607ab62cb36e87f9a13d9477a7ba73bd9fb3569f819d8aa47fc5d7317 0xd186813d7e3ddc2d90f941e417bd5b4e6a1c69666d37ef5380700263cc4c7123 #508/728 background: none; body: redbrown; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: none 0xd2b099d56cdb4b921bd51a2ef12bf4b9932e6cb6b166b212aa7476c6633871af 0x0dbfa80bef45fbd253b317210b94028e6055c328fc5a32caa76a2be8cbad9ca6 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 32 dog #32 32 mission 1 mission 1 polygon settled 0x06c9018ad287bd949e231bb5dbc196fe22d97675 0x06c9…7675 0.43 weth 0x4032908607ab62cb36e87f9a13d9477a7ba73bd9fb3569f819d8aa47fc5d7317 0xd186813d7e3ddc2d90f941e417bd5b4e6a1c69666d37ef5380700263cc4c7123 #508/729 background: none; body: redbrown; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: none 0xd2b099d56cdb4b921bd51a2ef12bf4b9932e6cb6b166b212aa7476c6633871af 0x0dbfa80bef45fbd253b317210b94028e6055c328fc5a32caa76a2be8cbad9ca6 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26150656,
       "block_time_utc": "2022-03-20T13:42:20Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -86,12 +86,12 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

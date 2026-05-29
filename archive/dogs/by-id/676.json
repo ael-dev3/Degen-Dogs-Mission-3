@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#249/728",
-      "rank": 249,
-      "total": 728
+      "display": "#250/729",
+      "rank": 250,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 676 dog #676 676 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0333 eth 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 0xeea63316bc1f5653e33fcad5a41c2d3bc0501b2fd4ac3e00443e2fc05bfa5164 #249/728 background: none; body: blue; neck: none; mouth: pizza; ears: loopearring; head: none; eyes: redlasereyes 0xcf0b2ffd7a8e8497e3d49c3a20a8ca416f752e9937cbe697ff6c91f45b585f5e 0xefea60ba86db0c9a0a52addb6e6ca3609a56d71270366ca746f13903df2b3624 0x11838f54d50f9d0c52996d5c46a9ef32c1779704457d8aeb6cfc9a81f726bc62 0x15c2db9b512136e73ca721c21bcfe8b00de03f3f341b9fcef464b6a6c01de489 0x12863558bca6ca7b5b2f418c13e6f52d1685caa8715e8f3a904fb2a637959216 0x19bc7cb093295b9c722cb58222181c949df499436ec98f198008a2c1dcad451d 0xba82374a4a0b9e4aa86c9d17da054519637c168d8825d0801d9f8a1656c9d4b2 0xbf150d9b2833f26a89b7fb2a6f2e9e2ff8cfd95c260f9238b12461bbd71f9890 0x9053fbbbbe10b283c2cd30f135f2b2fff19056dd2df7f736ab72d047a456c71f 0x491e6efd5932a38e18b94107c8ae3684e3c925a4a92d6c8fb92f9ace8f190486 base_logs archive_indexer",
+    "search_text": "dog 676 dog #676 676 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0333 eth 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 0xeea63316bc1f5653e33fcad5a41c2d3bc0501b2fd4ac3e00443e2fc05bfa5164 #250/729 background: none; body: blue; neck: none; mouth: pizza; ears: loopearring; head: none; eyes: redlasereyes 0xcf0b2ffd7a8e8497e3d49c3a20a8ca416f752e9937cbe697ff6c91f45b585f5e 0xefea60ba86db0c9a0a52addb6e6ca3609a56d71270366ca746f13903df2b3624 0x11838f54d50f9d0c52996d5c46a9ef32c1779704457d8aeb6cfc9a81f726bc62 0x15c2db9b512136e73ca721c21bcfe8b00de03f3f341b9fcef464b6a6c01de489 0x12863558bca6ca7b5b2f418c13e6f52d1685caa8715e8f3a904fb2a637959216 0x19bc7cb093295b9c722cb58222181c949df499436ec98f198008a2c1dcad451d 0xba82374a4a0b9e4aa86c9d17da054519637c168d8825d0801d9f8a1656c9d4b2 0xbf150d9b2833f26a89b7fb2a6f2e9e2ff8cfd95c260f9238b12461bbd71f9890 0x9053fbbbbe10b283c2cd30f135f2b2fff19056dd2df7f736ab72d047a456c71f 0x491e6efd5932a38e18b94107c8ae3684e3c925a4a92d6c8fb92f9ace8f190486 base_logs archive_indexer",
     "settlement": {
       "block_number": 44354475,
       "block_time_utc": "2026-04-06T17:58:17Z",
@@ -82,7 +82,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -97,7 +97,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -107,7 +107,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

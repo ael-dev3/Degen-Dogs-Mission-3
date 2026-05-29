@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#493/728",
-      "rank": 493,
-      "total": 728
+      "display": "#497/729",
+      "rank": 497,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 126 dog #126 126 mission 1 mission 1 polygon settled 0x014c8f89fef419eec11dea3bdc6e3932e1b63364 0x014c…3364 0.05 weth 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 0x95e95e11c7af34f80cbd1b358f5dac6fa3ff475f26659bc5a28715307908c1d1 #493/728 background: none; body: orange; neck: redcollar; mouth: pizza; ears: earbuds; head: none; eyes: vrgoggles 0x2f03992174aa7e21e548da644218f1eb9e3c0a00fbf6730310732b28987c1633 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 126 dog #126 126 mission 1 mission 1 polygon settled 0x014c8f89fef419eec11dea3bdc6e3932e1b63364 0x014c…3364 0.05 weth 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 0x95e95e11c7af34f80cbd1b358f5dac6fa3ff475f26659bc5a28715307908c1d1 #497/729 background: none; body: orange; neck: redcollar; mouth: pizza; ears: earbuds; head: none; eyes: vrgoggles 0x2f03992174aa7e21e548da644218f1eb9e3c0a00fbf6730310732b28987c1633 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29324837,
       "block_time_utc": "2022-06-08T18:06:57Z",
@@ -75,37 +75,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

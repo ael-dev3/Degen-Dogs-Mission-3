@@ -56,12 +56,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#240/728",
-      "rank": 240,
-      "total": 728
+      "display": "#239/729",
+      "rank": 239,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 272 dog #272 272 mission 2 mission 2 degen chain settled 0x05f761aacd63e4e96bf98f0fe5614de5ba90856c 0x05f7…856c 12000 degen 0x964f0ddc59690e833cf68e25ec1fc0659a817d74b8b0a8215a52e94a8cc36f46 0xe837280bfd02c0ef016829093b8fc81e999f62f298c2df003ef9400bccb00949 #240/728 background: none; body: rainbow; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: sunglasses 0x9c8f707d7b11d43cd7ee65aa45fde34ef399bff1fc6cf515d12d13a173365d36 0xe8a30dc117014a3918411eaff2913dfb7a6660e58417e10326cda09739afee71 0xcffe25c00a54a31afe0dd4b69748169a57d47c7c06571478f1bf399b918dc4ab 0xfdca06369f70c0fcd0f8f3498005ead3b37778367c4b0514ee3d20aa8d8c7adf 0x1482aba35c583e207fbc709f827029e4d0de2f84971457c064569f3cb7961aed 0xc32b9b956a44deee60c7cdd28afa4151956c52944e4da31599150b4bcfdbd756 0xa15aa86db4017bedf76390c49942698a4c1f05ac93580e97063be74926a1c16b 0x35ecf4856e42a2dfa7d88fc6cea2dc8b644adfad65061e375168f4417c667dab 0x96836a3e479c0c6fd3a848bb6c1dce849786a11c7deac7dbed904663c80ae70a chain_logs contract_getters",
+    "search_text": "dog 272 dog #272 272 mission 2 mission 2 degen chain settled 0x05f761aacd63e4e96bf98f0fe5614de5ba90856c 0x05f7…856c 12000 degen 0x964f0ddc59690e833cf68e25ec1fc0659a817d74b8b0a8215a52e94a8cc36f46 0xe837280bfd02c0ef016829093b8fc81e999f62f298c2df003ef9400bccb00949 #239/729 background: none; body: rainbow; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: sunglasses 0x9c8f707d7b11d43cd7ee65aa45fde34ef399bff1fc6cf515d12d13a173365d36 0xe8a30dc117014a3918411eaff2913dfb7a6660e58417e10326cda09739afee71 0xcffe25c00a54a31afe0dd4b69748169a57d47c7c06571478f1bf399b918dc4ab 0xfdca06369f70c0fcd0f8f3498005ead3b37778367c4b0514ee3d20aa8d8c7adf 0x1482aba35c583e207fbc709f827029e4d0de2f84971457c064569f3cb7961aed 0xc32b9b956a44deee60c7cdd28afa4151956c52944e4da31599150b4bcfdbd756 0xa15aa86db4017bedf76390c49942698a4c1f05ac93580e97063be74926a1c16b 0x35ecf4856e42a2dfa7d88fc6cea2dc8b644adfad65061e375168f4417c667dab 0x96836a3e479c0c6fd3a848bb6c1dce849786a11c7deac7dbed904663c80ae70a chain_logs contract_getters",
     "settlement": {
       "block_number": 25402570,
       "block_time_utc": "2025-02-01T17:45:17Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -101,12 +101,12 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

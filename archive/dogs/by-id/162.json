@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#377/728",
+      "display": "#377/729",
       "rank": 377,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 162 dog #162 162 mission 1 mission 1 polygon settled 0x96584f1c9f9a69a65ab5264a8384c28c94a3539a 0x9658…539a 0.05 weth 0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6 0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9 #377/728 background: halo; body: orange; neck: none; mouth: none; ears: loopearring; head: baseballcap; eyes: glasses 0xdc0342fd104ee82c810682bec7ebb2692be0ec72af39578cdec0cee4fbcb9dd9 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 162 dog #162 162 mission 1 mission 1 polygon settled 0x96584f1c9f9a69a65ab5264a8384c28c94a3539a 0x9658…539a 0.05 weth 0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6 0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9 #377/729 background: halo; body: orange; neck: none; mouth: none; ears: loopearring; head: baseballcap; eyes: glasses 0xdc0342fd104ee82c810682bec7ebb2692be0ec72af39578cdec0cee4fbcb9dd9 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 32448668,
       "block_time_utc": "2022-08-29T12:39:13Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -90,7 +90,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

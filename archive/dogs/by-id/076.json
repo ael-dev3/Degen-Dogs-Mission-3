@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#192/728",
-      "rank": 192,
-      "total": 728
+      "display": "#191/729",
+      "rank": 191,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 76 dog #76 76 mission 1 mission 1 polygon settled 0x957ffbed31ca76544b677700811a52141dd77e23 0x957f…7e23 0.09009 weth 0x8659c8356fd48c3de6ad659f3df75d815803c8ef72e696151173eef53b1e2750 0x2839ae6e2fa2d86639a548138d1016e3ef17d177d73a0f51bdd498f74ecc6163 #192/728 background: none; body: black; neck: none; mouth: pizza; ears: none; head: toque; eyes: monocle 0x27575dacef5b339c0ed7fe8be018822d494e91101389a2047bb8fe9dd3711722 0xba1dbd1e3d4bdd47ddb3f3169ee9dff46c329c0b92ca47847fefb0aeffb6ba5e 0xf2903f64ba64cb9bc5e1dd3ce9e171da7f56a19d4d5e00aece4921cfb244a451 0xe59f06f9ffa64bdb72b69d29f1403b18b1b9342f7ce586dc31361b74b43e280e 0x9b31549a80a7d276051cb05b961ec44386859958bce1dddaa7a208d3ccf91bf4 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 76 dog #76 76 mission 1 mission 1 polygon settled 0x957ffbed31ca76544b677700811a52141dd77e23 0x957f…7e23 0.09009 weth 0x8659c8356fd48c3de6ad659f3df75d815803c8ef72e696151173eef53b1e2750 0x2839ae6e2fa2d86639a548138d1016e3ef17d177d73a0f51bdd498f74ecc6163 #191/729 background: none; body: black; neck: none; mouth: pizza; ears: none; head: toque; eyes: monocle 0x27575dacef5b339c0ed7fe8be018822d494e91101389a2047bb8fe9dd3711722 0xba1dbd1e3d4bdd47ddb3f3169ee9dff46c329c0b92ca47847fefb0aeffb6ba5e 0xf2903f64ba64cb9bc5e1dd3ce9e171da7f56a19d4d5e00aece4921cfb244a451 0xe59f06f9ffa64bdb72b69d29f1403b18b1b9342f7ce586dc31361b74b43e280e 0x9b31549a80a7d276051cb05b961ec44386859958bce1dddaa7a208d3ccf91bf4 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27289183,
       "block_time_utc": "2022-04-18T15:23:25Z",
@@ -79,7 +79,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },

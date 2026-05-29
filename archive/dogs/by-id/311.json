@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#256/728",
-      "rank": 256,
-      "total": 728
+      "display": "#257/729",
+      "rank": 257,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 #256/728 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters",
+    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 #257/729 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters",
     "settlement": {
       "block_number": 25585600,
       "block_time_utc": "2025-03-11T06:17:43Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,17 +83,17 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

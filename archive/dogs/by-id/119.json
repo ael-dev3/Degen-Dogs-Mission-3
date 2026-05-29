@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#583/728",
-      "rank": 583,
-      "total": 728
+      "display": "#582/729",
+      "rank": 582,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 119 dog #119 119 mission 1 mission 1 polygon settled 0xc4cd57b06c9f735abd6240a2683026e308f716c7 0xc4cd…16c7 0.05 weth 0x4c683928bd0b8ec83e1180b366c989e2b4d64d025ce7f377bb8cd7c90cce8f8b 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f #583/728 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: beanie; eyes: none 0x461e4cdaaabfb52afc9ed8e51a432f3b2769397dd9b4542d14f0f518ae9aa5c0 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 119 dog #119 119 mission 1 mission 1 polygon settled 0xc4cd57b06c9f735abd6240a2683026e308f716c7 0xc4cd…16c7 0.05 weth 0x4c683928bd0b8ec83e1180b366c989e2b4d64d025ce7f377bb8cd7c90cce8f8b 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f #582/729 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: beanie; eyes: none 0x461e4cdaaabfb52afc9ed8e51a432f3b2769397dd9b4542d14f0f518ae9aa5c0 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28956171,
       "block_time_utc": "2022-05-30T14:43:19Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -85,27 +85,27 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#96/728",
+      "display": "#96/729",
       "rank": 96,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 517 dog #517 517 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xef093c8d7dece99fbeb98c48622c4163b963435cdf8f61e1689b9c5a4cb304c8 0x5decad541a22affec4425bdfb46e41a94edb65cd49944094e8ba8eb66831b117 #96/728 background: halo; body: brown; neck: none; mouth: tongue; ears: goldearring; head: whitemohawk; eyes: bluelasereyes 0xa02b96de54888e806f930334b382afcc38f0916307ef844b9c7dc7f063ad0a08 chain_logs contract_getters",
+    "search_text": "dog 517 dog #517 517 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xef093c8d7dece99fbeb98c48622c4163b963435cdf8f61e1689b9c5a4cb304c8 0x5decad541a22affec4425bdfb46e41a94edb65cd49944094e8ba8eb66831b117 #96/729 background: halo; body: brown; neck: none; mouth: tongue; ears: goldearring; head: whitemohawk; eyes: bluelasereyes 0xa02b96de54888e806f930334b382afcc38f0916307ef844b9c7dc7f063ad0a08 chain_logs contract_getters",
     "settlement": {
       "block_number": 26371196,
       "block_time_utc": "2025-10-23T02:05:21Z",
@@ -73,12 +73,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -93,7 +93,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },

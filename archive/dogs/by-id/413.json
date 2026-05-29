@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#626/728",
-      "rank": 626,
-      "total": 728
+      "display": "#625/729",
+      "rank": 625,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 413 dog #413 413 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4400 degen 0xc2db10173c9245cf92c2166c142afa196829bf18eea468afa7d8f819af917a94 0x41b64c58f1161a237261c4c0eac3cad252e5c8f18ed4178d0ef5af66e998da6e #626/728 background: none; body: grey; neck: none; mouth: none; ears: earbuds; head: whitemohawk; eyes: none 0xced8acbd4b9eedf985e25659b56be905c34129f596dd1d6ab737a98d7405adce 0x433933a0e564dcc9c1a4901313c7ee136f7f5d3c5e554c6aec17a98e1539cd52 0xe908f71f79a71e3334cad480253919072a66ebf03cc9f77948ba10f17301a4f3 0x3ac307cb7acef8f3ef2b2ef4e200c2a51ec67138bf62efc3dd038717cfdcf556 0xa0b5b2553019d1aaa68e601c824028a04b65aab50251eafdb414ff3b7e9441ef 0xb588aaeeb8f84a19f46e401a2877d3f68df383e07d493b670e958784f32d808c chain_logs contract_getters",
+    "search_text": "dog 413 dog #413 413 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4400 degen 0xc2db10173c9245cf92c2166c142afa196829bf18eea468afa7d8f819af917a94 0x41b64c58f1161a237261c4c0eac3cad252e5c8f18ed4178d0ef5af66e998da6e #625/729 background: none; body: grey; neck: none; mouth: none; ears: earbuds; head: whitemohawk; eyes: none 0xced8acbd4b9eedf985e25659b56be905c34129f596dd1d6ab737a98d7405adce 0x433933a0e564dcc9c1a4901313c7ee136f7f5d3c5e554c6aec17a98e1539cd52 0xe908f71f79a71e3334cad480253919072a66ebf03cc9f77948ba10f17301a4f3 0x3ac307cb7acef8f3ef2b2ef4e200c2a51ec67138bf62efc3dd038717cfdcf556 0xa0b5b2553019d1aaa68e601c824028a04b65aab50251eafdb414ff3b7e9441ef 0xb588aaeeb8f84a19f46e401a2877d3f68df383e07d493b670e958784f32d808c chain_logs contract_getters",
     "settlement": {
       "block_number": 25989194,
       "block_time_utc": "2025-06-17T05:54:28Z",
@@ -78,12 +78,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -93,12 +93,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

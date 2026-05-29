@@ -55,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#320/728",
+      "display": "#320/729",
       "rank": 320,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 296 dog #296 296 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 7336 degen 0xa4662225aa2b8f325646bd1c28541814b55cf90aa06ad538b9ba5037cab7279e 0x84a0518fdc39ba52b94183b334b169f40b5d726283671591bfde24249ae55a51 #320/728 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: 3dglasses 0xf456be25c0bcb289110063d798d195b57ee4254f55f65c0a766d5c9e15d437ff 0x8de546dc2148e306b2d72267d30522cbbc629082977ef4aa775e3bbf6923f44c 0xe12a4a565834b03a71e1857f9d915e496e441141f0d0442caf84fdd601b84495 0xfe0d51841f6bc1c7a7b53139135b4f4f75952f38a2df768ed8e501ff83b382c3 0xc72cebf8053a4bc891892ee75ff3172d767738b698b9e63fc242645cee612499 0x3ed6a7d031fce9f8ca367fd48b1277fbd02d92ca616b62784a6b8671eb2d94ba 0x18d3d6793cdbd9a368529a0fd1018c758366bfb72f6964052855f48637d76edb 0x4f88712f3d1dd32fb113669b2a5ee428b2c55ae1b7cb759f8313c386a772fd8f chain_logs contract_getters",
+    "search_text": "dog 296 dog #296 296 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 7336 degen 0xa4662225aa2b8f325646bd1c28541814b55cf90aa06ad538b9ba5037cab7279e 0x84a0518fdc39ba52b94183b334b169f40b5d726283671591bfde24249ae55a51 #320/729 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: 3dglasses 0xf456be25c0bcb289110063d798d195b57ee4254f55f65c0a766d5c9e15d437ff 0x8de546dc2148e306b2d72267d30522cbbc629082977ef4aa775e3bbf6923f44c 0xe12a4a565834b03a71e1857f9d915e496e441141f0d0442caf84fdd601b84495 0xfe0d51841f6bc1c7a7b53139135b4f4f75952f38a2df768ed8e501ff83b382c3 0xc72cebf8053a4bc891892ee75ff3172d767738b698b9e63fc242645cee612499 0x3ed6a7d031fce9f8ca367fd48b1277fbd02d92ca616b62784a6b8671eb2d94ba 0x18d3d6793cdbd9a368529a0fd1018c758366bfb72f6964052855f48637d76edb 0x4f88712f3d1dd32fb113669b2a5ee428b2c55ae1b7cb759f8313c386a772fd8f chain_logs contract_getters",
     "settlement": {
       "block_number": 25509805,
       "block_time_utc": "2025-02-25T22:05:31Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,12 +90,12 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -105,7 +105,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

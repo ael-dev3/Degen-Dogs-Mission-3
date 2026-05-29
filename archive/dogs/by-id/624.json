@@ -56,12 +56,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#600/728",
-      "rank": 600,
-      "total": 728
+      "display": "#598/729",
+      "rank": 598,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 624 dog #624 624 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.01952 eth 0x579ff1dc2617f3a8344ab486c420aa6cb1aa65f877f48d59816565faee62eb76 0x08722c191337681fe017e9cccb055231a6656f0e473062bc95bea83270909e04 #600/728 background: none; body: dalmation; neck: none; mouth: tongue; ears: loopearring; head: none; eyes: none 0x300f2c296ca39fedd35722d1b1fd505a898f171fd9e6bb37489e418d19035e73 0x955ffd728eda7e33bdf0ce063446692f7ee585f006a507e92daae64196a1af3b 0x8e3f71021cb417cc40b4a9453bd9ae10609a6e9d6df035944add726b4b2fc7e1 0x881c8a1bc6a3acb12d62c717e3a167795a70fc446d3f74f0e04538f57afc6a15 0xa5079258aa47f8440685c634d699de91225a220ada60d806a45cc52c23bd6623 0xa6e32a1051b5878bddb5aa2dcfd73950dd3083af3470f11e6da3180e0b9c0bda 0x0c53127f1d5a63f12abd0cfccd3b30393eda710d377776dea356729b6b5516c3 0x745c8b35fa4522f3e22edc899eb78abeaed60d814661ab735c080fc272589630 0x69315b06fccf6f95d0888bb5ba3021e7f10c41beabb13059cd0111b55388f920 base_logs archive_indexer",
+    "search_text": "dog 624 dog #624 624 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.01952 eth 0x579ff1dc2617f3a8344ab486c420aa6cb1aa65f877f48d59816565faee62eb76 0x08722c191337681fe017e9cccb055231a6656f0e473062bc95bea83270909e04 #598/729 background: none; body: dalmation; neck: none; mouth: tongue; ears: loopearring; head: none; eyes: none 0x300f2c296ca39fedd35722d1b1fd505a898f171fd9e6bb37489e418d19035e73 0x955ffd728eda7e33bdf0ce063446692f7ee585f006a507e92daae64196a1af3b 0x8e3f71021cb417cc40b4a9453bd9ae10609a6e9d6df035944add726b4b2fc7e1 0x881c8a1bc6a3acb12d62c717e3a167795a70fc446d3f74f0e04538f57afc6a15 0xa5079258aa47f8440685c634d699de91225a220ada60d806a45cc52c23bd6623 0xa6e32a1051b5878bddb5aa2dcfd73950dd3083af3470f11e6da3180e0b9c0bda 0x0c53127f1d5a63f12abd0cfccd3b30393eda710d377776dea356729b6b5516c3 0x745c8b35fa4522f3e22edc899eb78abeaed60d814661ab735c080fc272589630 0x69315b06fccf6f95d0888bb5ba3021e7f10c41beabb13059cd0111b55388f920 base_logs archive_indexer",
     "settlement": {
       "block_number": 42084943,
       "block_time_utc": "2026-02-13T05:07:13Z",
@@ -81,12 +81,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -106,12 +106,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

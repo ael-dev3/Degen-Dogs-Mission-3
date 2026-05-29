@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#610/728",
+      "display": "#610/729",
       "rank": 610,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 282 dog #282 282 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 3669 degen 0x4e92f418fcec71fad22013065551c51d3f098213d761e532367013f10556fae6 0x1b0f18b850f75a0ddd7defd196043acee07c322b0f6c0cf3de183f9a493361b2 #610/728 background: none; body: black; neck: redcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: glasses 0x0cefd2e08ac3c6fc7713c3a254920b4018257a6a2594e85a6e581c55d1b1d527 0x91057530939349c1434dab8c2ad48586c563dd336c0291ff3ae9a258e423ac8f chain_logs contract_getters",
+    "search_text": "dog 282 dog #282 282 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 3669 degen 0x4e92f418fcec71fad22013065551c51d3f098213d761e532367013f10556fae6 0x1b0f18b850f75a0ddd7defd196043acee07c322b0f6c0cf3de183f9a493361b2 #610/729 background: none; body: black; neck: redcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: glasses 0x0cefd2e08ac3c6fc7713c3a254920b4018257a6a2594e85a6e581c55d1b1d527 0x91057530939349c1434dab8c2ad48586c563dd336c0291ff3ae9a258e423ac8f chain_logs contract_getters",
     "settlement": {
       "block_number": 25448325,
       "block_time_utc": "2025-02-12T03:01:20Z",
@@ -74,7 +74,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -84,17 +84,17 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },

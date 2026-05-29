@@ -58,12 +58,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#469/728",
-      "rank": 469,
-      "total": 728
+      "display": "#474/729",
+      "rank": 474,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 43 dog #43 43 mission 1 mission 1 polygon settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 0.21 weth 0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163 0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8 #469/728 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: whitemohawk; eyes: vrgoggles 0x30a7cc6f30d23bbbf7662482be156f3a877efc13c6f99d44d4860c2f186868c5 0xca5ced7c9c5fbbaf726408b5911a4a00171c48f2caf41025c17d1e44eaee885d 0xd13555f3e53f8ae99d063ec4f4df76970332b57b668c2cc763f6e9c07a0c6328 0xfaa3a354eb369d6eb8be57cdeb7e5bd414f82dad9784a34e99de73e32ffd3d4e 0x98d5f6bca2ff659ed8d7bbbfa3c6e3ff22a4bcd2e7b70cf10fc64e253d16b8d1 0x5c02cfb242cf1f85638662361d82912c7b13222bb00e621daca177e9332814f9 0x844c68032b80da08629079e6944263e187b87c9e7d9d6851705706a8938a9f6b 0xf124af7f551e2d6debb7f007a6604e2c6e11464492b205147b94edd899e470a0 0xbf219c7916074edc38dd7c7c7099bc632e3f0f5cb262f0f57d29ee1abe7a2607 0x92c7c7d4907cd1aac1f736acc19eebab81ddf4f5ba6288543ee0b546950f5be0 0x9631916d978c50a8c6e85bdaff1afa40bb58b3d84abaf47302f518037e9fc6fc polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 43 dog #43 43 mission 1 mission 1 polygon settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 0.21 weth 0x282c5c4cef0e79d1d06fc522d3ffb407c50282faf65749725adfad730d2fe163 0x612bcedb0e6ddc789a942f21df6a2c9dda74d66fc3bc62b34482db99871f1ca8 #474/729 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: whitemohawk; eyes: vrgoggles 0x30a7cc6f30d23bbbf7662482be156f3a877efc13c6f99d44d4860c2f186868c5 0xca5ced7c9c5fbbaf726408b5911a4a00171c48f2caf41025c17d1e44eaee885d 0xd13555f3e53f8ae99d063ec4f4df76970332b57b668c2cc763f6e9c07a0c6328 0xfaa3a354eb369d6eb8be57cdeb7e5bd414f82dad9784a34e99de73e32ffd3d4e 0x98d5f6bca2ff659ed8d7bbbfa3c6e3ff22a4bcd2e7b70cf10fc64e253d16b8d1 0x5c02cfb242cf1f85638662361d82912c7b13222bb00e621daca177e9332814f9 0x844c68032b80da08629079e6944263e187b87c9e7d9d6851705706a8938a9f6b 0xf124af7f551e2d6debb7f007a6604e2c6e11464492b205147b94edd899e470a0 0xbf219c7916074edc38dd7c7c7099bc632e3f0f5cb262f0f57d29ee1abe7a2607 0x92c7c7d4907cd1aac1f736acc19eebab81ddf4f5ba6288543ee0b546950f5be0 0x9631916d978c50a8c6e85bdaff1afa40bb58b3d84abaf47302f518037e9fc6fc polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26242672,
       "block_time_utc": "2022-03-22T21:57:15Z",
@@ -85,12 +85,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -115,7 +115,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

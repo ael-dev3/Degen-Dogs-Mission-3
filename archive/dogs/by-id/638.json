@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#92/728",
+      "display": "#92/729",
       "rank": 92,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 638 dog #638 638 mission 3 mission 3 base settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.00733 eth 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7 #92/728 background: halo; body: rainbow; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: none 0x26776cb5ca819fd870a6ab332f6cc6b7aacdd92986075795a322381de6f23454 0x28179c9c165fb038b8fe4388081ceaef349dcea83bdfd1b89d43e304d1b2c78d 0x2f57f7ed4af34ff719bb787add092032a6698fe1f6c3ea1e0c1e2cd400c05653 0x7aba520f4f6aee7f06ac19bfff88145100bbbc60a59f04e8e952268da2d283cb 0x4a4393f16c204e18b3848109e202cfed11e48c1ccda2b7ff1687d635ba3da217 0xea4d0d5a42b6879820f79381478fdebae310a06b8adfd39a42a8b1fcc49b668a base_logs archive_indexer",
+    "search_text": "dog 638 dog #638 638 mission 3 mission 3 base settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.00733 eth 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7 #92/729 background: halo; body: rainbow; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: none 0x26776cb5ca819fd870a6ab332f6cc6b7aacdd92986075795a322381de6f23454 0x28179c9c165fb038b8fe4388081ceaef349dcea83bdfd1b89d43e304d1b2c78d 0x2f57f7ed4af34ff719bb787add092032a6698fe1f6c3ea1e0c1e2cd400c05653 0x7aba520f4f6aee7f06ac19bfff88145100bbbc60a59f04e8e952268da2d283cb 0x4a4393f16c204e18b3848109e202cfed11e48c1ccda2b7ff1687d635ba3da217 0xea4d0d5a42b6879820f79381478fdebae310a06b8adfd39a42a8b1fcc49b668a base_logs archive_indexer",
     "settlement": {
       "block_number": 42692778,
       "block_time_utc": "2026-02-27T06:48:23Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -93,12 +93,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -108,7 +108,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

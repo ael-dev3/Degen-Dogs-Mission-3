@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#312/728",
+      "display": "#312/729",
       "rank": 312,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 123 dog #123 123 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x39897e5e1fc8af3428a3dc2d16d1eb08c0c1c0b16bde6772c2796318483ba33c 0xe68d763e82aaa9599088738176832ea96f6d810ddb939d8664caa7a7cae853d8 #312/728 background: none; body: white; neck: none; mouth: pizza; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 123 dog #123 123 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x39897e5e1fc8af3428a3dc2d16d1eb08c0c1c0b16bde6772c2796318483ba33c 0xe68d763e82aaa9599088738176832ea96f6d810ddb939d8664caa7a7cae853d8 #312/729 background: none; body: white; neck: none; mouth: pizza; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29094926,
       "block_time_utc": "2022-06-03T00:58:11Z",
@@ -73,12 +73,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -88,12 +88,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -103,7 +103,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

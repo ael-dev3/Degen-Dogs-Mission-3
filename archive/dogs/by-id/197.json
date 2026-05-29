@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#439/728",
-      "rank": 439,
-      "total": 728
+      "display": "#437/729",
+      "rank": 437,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 197 dog #197 197 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xfc36c9e22e7104573c776729f805f61d6ce0e6ad8b94a78aa801b9405968e1d1 0x044aeaa6a88945c8778897db9f36db09b381f9500bed020f8488a6d77765b6a8 #439/728 background: halo; body: redbrown; neck: none; mouth: none; ears: none; head: crazyhair; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 197 dog #197 197 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xfc36c9e22e7104573c776729f805f61d6ce0e6ad8b94a78aa801b9405968e1d1 0x044aeaa6a88945c8778897db9f36db09b381f9500bed020f8488a6d77765b6a8 #437/729 background: halo; body: redbrown; neck: none; mouth: none; ears: none; head: crazyhair; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 49708024,
       "block_time_utc": "2023-11-08T21:12:50Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -88,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

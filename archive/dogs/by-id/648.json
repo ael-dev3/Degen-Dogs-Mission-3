@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#12/728",
+      "display": "#12/729",
       "rank": 12,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 648 dog #648 648 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00988 eth 0xaf1c2aa8bc9b7eb7d917cf923790e1963c2b85dcddad6a720ebe3615b76533ee 0xfe9b367d7fd5f2109c95d126408af2c8135469f5e399215fa84a0da302c343c1 #12/728 background: none; body: rainbow; neck: redcollar; mouth: bone; ears: earbuds; head: whitemohawk; eyes: monocle 0x2ac042304861fb5cfe25d135195bf057283c5610e44f7278e9c9f943062da0ab 0x378ef37bde95dcadb1353887ecfab0e8142afd438ddf08cab3665023b149a248 0x5dd81b4ed90d5803ee533fa4867a9853c7f4a2a6e04ee237169c566f7aa640c7 0x2208a39fe46ab511ddb5233d4e421a73b7d152b75bd5ef2be5ee0d98ab493eae 0xe07aed456e8677efa36204b800a57f663681d86d1109141c0955dfc824a56b9e 0xfb8ef8d435df4d240f66aa566dca2f65ab85eeb7fadcf80f27706f5811f55d1c 0x9536b1638cb6aa99884b6a924bab0c6f06e2f772efb756b0e75d8cbcad29b6ca 0xa36c270a041bdf14e15655e133ba8f42ae210814280c8092bc8e709ca046c3a5 base_logs archive_indexer",
+    "search_text": "dog 648 dog #648 648 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00988 eth 0xaf1c2aa8bc9b7eb7d917cf923790e1963c2b85dcddad6a720ebe3615b76533ee 0xfe9b367d7fd5f2109c95d126408af2c8135469f5e399215fa84a0da302c343c1 #12/729 background: none; body: rainbow; neck: redcollar; mouth: bone; ears: earbuds; head: whitemohawk; eyes: monocle 0x2ac042304861fb5cfe25d135195bf057283c5610e44f7278e9c9f943062da0ab 0x378ef37bde95dcadb1353887ecfab0e8142afd438ddf08cab3665023b149a248 0x5dd81b4ed90d5803ee533fa4867a9853c7f4a2a6e04ee237169c566f7aa640c7 0x2208a39fe46ab511ddb5233d4e421a73b7d152b75bd5ef2be5ee0d98ab493eae 0xe07aed456e8677efa36204b800a57f663681d86d1109141c0955dfc824a56b9e 0xfb8ef8d435df4d240f66aa566dca2f65ab85eeb7fadcf80f27706f5811f55d1c 0x9536b1638cb6aa99884b6a924bab0c6f06e2f772efb756b0e75d8cbcad29b6ca 0xa36c270a041bdf14e15655e133ba8f42ae210814280c8092bc8e709ca046c3a5 base_logs archive_indexer",
     "settlement": {
       "block_number": 43127506,
       "block_time_utc": "2026-03-09T08:19:19Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,7 +90,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -100,7 +100,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

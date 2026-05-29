@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#400/728",
-      "rank": 400,
-      "total": 728
+      "display": "#398/729",
+      "rank": 398,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 369 dog #369 369 mission 2 mission 2 degen chain settled 0x2cd8cc289e927be809cc396c2075e32fabffd885 0x2cd8…d885 5000 degen 0x0a3f8848760883ae8e594d8339cc546afe999a909d9e7a9804c4a6d0bac3b5da 0x605f6adbce458bd582269bd1d7ce893feb3c0dcf4f18a80263f3ccafb76b9dbd #400/728 background: none; body: white; neck: goldnecklace; mouth: none; ears: loopearring; head: beanie; eyes: masksnorkel 0xd4b775ebde2651fca02389eadc81f9d36a6d5ed3a5ca4629711f9d4f1b364ced 0x4434251a90214ba75c18eb8047f633aed84b233045de15aa9eafb81bb178e604 0xa1a612622a4c4ab0fd2bbc3e980d0b9faf8a7ab745819af197e767e30c592ae3 chain_logs contract_getters",
+    "search_text": "dog 369 dog #369 369 mission 2 mission 2 degen chain settled 0x2cd8cc289e927be809cc396c2075e32fabffd885 0x2cd8…d885 5000 degen 0x0a3f8848760883ae8e594d8339cc546afe999a909d9e7a9804c4a6d0bac3b5da 0x605f6adbce458bd582269bd1d7ce893feb3c0dcf4f18a80263f3ccafb76b9dbd #398/729 background: none; body: white; neck: goldnecklace; mouth: none; ears: loopearring; head: beanie; eyes: masksnorkel 0xd4b775ebde2651fca02389eadc81f9d36a6d5ed3a5ca4629711f9d4f1b364ced 0x4434251a90214ba75c18eb8047f633aed84b233045de15aa9eafb81bb178e604 0xa1a612622a4c4ab0fd2bbc3e980d0b9faf8a7ab745819af197e767e30c592ae3 chain_logs contract_getters",
     "settlement": {
       "block_number": 25826668,
       "block_time_utc": "2025-05-05T18:19:57Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -90,7 +90,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -100,7 +100,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },

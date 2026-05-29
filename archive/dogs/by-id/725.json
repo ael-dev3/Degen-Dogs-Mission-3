@@ -15,7 +15,7 @@
       "usd_estimate_price_date_utc": "2026-05-27",
       "usd_estimate_price_usd": "2022.5062490754037",
       "usd_estimate_source": "defillama_coin_prices",
-      "usd_estimate_time_basis": "settlement_block_time"
+      "usd_estimate_time_basis": "last_bid_block_time"
     },
     "auction_created": {
       "block_number": 46511046,
@@ -49,12 +49,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#577/728",
+      "display": "#577/729",
       "rank": 577,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 725 dog #725 725 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f #577/728 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: masksnorkel 0x2c7cb603b1edc86159bf9b2b858a1a3f113fe34796a17f94caf439d7e0c2ee52 0x12e311c271d5847d6b71c2148b99992f2893c3d206f062160f188fd1cdb96f4a base_logs archive_indexer",
+    "search_text": "dog 725 dog #725 725 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 22.18 $22.18 2026-05-27t16:10:25z 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f #577/729 generated auction feed 0x2c7cb603b1edc86159bf9b2b858a1a3f113fe34796a17f94caf439d7e0c2ee52 0x12e311c271d5847d6b71c2148b99992f2893c3d206f062160f188fd1cdb96f4a background: none (90.3%) background none body: brown (10.8%) body brown neck: none (39.4%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: stripedbeanie (8.5%) head stripedbeanie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs archive_indexer generated_auction_feed",
     "settlement": {
       "block_number": 46554439,
       "block_time_utc": "2026-05-27T16:10:25Z",
@@ -68,18 +68,19 @@
       "raw_confidence": "verified",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -89,12 +90,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

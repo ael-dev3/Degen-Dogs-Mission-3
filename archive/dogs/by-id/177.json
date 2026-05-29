@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#655/728",
+      "display": "#655/729",
       "rank": 655,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 177 dog #177 177 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xabf87917b607f776213b08f2136ca01de68f23f5a9ab1236d1a86ef9603fa32c 0xa5b2a1e5fc26473533b55c1b861e2c390c036d8064eda8ac8da9e36e4ca5f897 #655/728 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 177 dog #177 177 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xabf87917b607f776213b08f2136ca01de68f23f5a9ab1236d1a86ef9603fa32c 0xa5b2a1e5fc26473533b55c1b861e2c390c036d8064eda8ac8da9e36e4ca5f897 #655/729 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 35465784,
       "block_time_utc": "2022-11-11T05:08:06Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,12 +83,12 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

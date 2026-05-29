@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#363/728",
-      "rank": 363,
-      "total": 728
+      "display": "#366/729",
+      "rank": 366,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 260 dog #260 260 mission 2 mission 2 degen chain settled 0x4932ae69f9da1ff74944680baad245cd3747d861 0x4932…d861 4129 degen 0x3e6d86abf8b27bd62adb4028f248f14f3d27c62e2da88c9aeb039fddfd1152a6 0xda62d47c5fdf96a260fe0e2d26f8a701776f1235eb1797a1b917a82776ecc689 #363/728 background: none; body: blue; neck: studdedcollar; mouth: none; ears: loopearring; head: none; eyes: monocle 0x29ad60c695096bbac75caa73cbc9899e0b1c58a3a4d1d2c6a1d10eebdd0d6d4b 0x7eaa8ee60800d62e86d63dd9d67a341f2a7e0bd116417866789267f4b60393a4 0xc595d0c4159c6c81f5bb170f935bceb145f446a223bb618fc4178e27c59b8546 0xa60859b3da9a1d92600b54da8d56856b163570fd6317d2a20646951d6241bafb 0x5d2893ba852996b6d6b6c090a6fa0d90e72e11c100fe1047e9774e4bdead8072 0xdcf888ce49d152f6823d55e201a968c8c0278089027628fe4dd59bfe61d8bc8e chain_logs contract_getters",
+    "search_text": "dog 260 dog #260 260 mission 2 mission 2 degen chain settled 0x4932ae69f9da1ff74944680baad245cd3747d861 0x4932…d861 4129 degen 0x3e6d86abf8b27bd62adb4028f248f14f3d27c62e2da88c9aeb039fddfd1152a6 0xda62d47c5fdf96a260fe0e2d26f8a701776f1235eb1797a1b917a82776ecc689 #366/729 background: none; body: blue; neck: studdedcollar; mouth: none; ears: loopearring; head: none; eyes: monocle 0x29ad60c695096bbac75caa73cbc9899e0b1c58a3a4d1d2c6a1d10eebdd0d6d4b 0x7eaa8ee60800d62e86d63dd9d67a341f2a7e0bd116417866789267f4b60393a4 0xc595d0c4159c6c81f5bb170f935bceb145f446a223bb618fc4178e27c59b8546 0xa60859b3da9a1d92600b54da8d56856b163570fd6317d2a20646951d6241bafb 0x5d2893ba852996b6d6b6c090a6fa0d90e72e11c100fe1047e9774e4bdead8072 0xdcf888ce49d152f6823d55e201a968c8c0278089027628fe4dd59bfe61d8bc8e chain_logs contract_getters",
     "settlement": {
       "block_number": 25292313,
       "block_time_utc": "2025-01-21T06:00:58Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,7 +93,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

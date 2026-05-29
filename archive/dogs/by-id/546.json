@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#179/728",
-      "rank": 179,
-      "total": 728
+      "display": "#178/729",
+      "rank": 178,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 546 dog #546 546 mission 2 mission 2 degen chain settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 8840 degen 0x8e6921f0629d55dd831a1562adaf49ef62d90e6d5bd55dd941092d996af12f44 0x807f8cf6d82aa2c66a0e0ac8a9a097f68c56a299c2624650817b41adc773edb9 #179/728 background: none; body: white; neck: none; mouth: pizza; ears: loopearring; head: blackcap; eyes: monocle 0x669f3b08a6e291b6e26a5d3e44993a162f754532616577228e03d344b70c0a02 0x492a395178200e9492207806b9e8ccfc343adf853f4250e6985c976a5b36da5d 0xf17965092b2815db663319c7af64aa3a1553b117a3580ea7b383093eed7552df chain_logs contract_getters",
+    "search_text": "dog 546 dog #546 546 mission 2 mission 2 degen chain settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 8840 degen 0x8e6921f0629d55dd831a1562adaf49ef62d90e6d5bd55dd941092d996af12f44 0x807f8cf6d82aa2c66a0e0ac8a9a097f68c56a299c2624650817b41adc773edb9 #178/729 background: none; body: white; neck: none; mouth: pizza; ears: loopearring; head: blackcap; eyes: monocle 0x669f3b08a6e291b6e26a5d3e44993a162f754532616577228e03d344b70c0a02 0x492a395178200e9492207806b9e8ccfc343adf853f4250e6985c976a5b36da5d 0xf17965092b2815db663319c7af64aa3a1553b117a3580ea7b383093eed7552df chain_logs contract_getters",
     "settlement": {
       "block_number": 26512417,
       "block_time_utc": "2025-11-24T04:02:18Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -90,7 +90,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },

@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#198/728",
-      "rank": 198,
-      "total": 728
+      "display": "#197/729",
+      "rank": 197,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 500 dog #500 500 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 5555 degen 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 0xae8a363e7f5131ea4a62d94e1fb2eb2020a6e1d1998d8bf25455f869f71eb684 #198/728 background: none; body: dalmation; neck: studdedcollar; mouth: pizza; ears: loopearring; head: blackcap; eyes: none 0x2c242038c3ef17b3bab04d4f13ba92f949bff363fe9ae22bf3998c536dd13156 0xbd447a83e73e77e6369f497517ced8e0a268264adf2f5bb74a6b2d7cfb598616 0x71f282b23189a8b84522b1a66a46a44cc20dc92b372c828c84f7c0c36d299fa2 chain_logs contract_getters",
+    "search_text": "dog 500 dog #500 500 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 5555 degen 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 0xae8a363e7f5131ea4a62d94e1fb2eb2020a6e1d1998d8bf25455f869f71eb684 #197/729 background: none; body: dalmation; neck: studdedcollar; mouth: pizza; ears: loopearring; head: blackcap; eyes: none 0x2c242038c3ef17b3bab04d4f13ba92f949bff363fe9ae22bf3998c536dd13156 0xbd447a83e73e77e6369f497517ced8e0a268264adf2f5bb74a6b2d7cfb598616 0x71f282b23189a8b84522b1a66a46a44cc20dc92b372c828c84f7c0c36d299fa2 chain_logs contract_getters",
     "settlement": {
       "block_number": 26278631,
       "block_time_utc": "2025-09-28T00:37:32Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -90,7 +90,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -105,7 +105,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

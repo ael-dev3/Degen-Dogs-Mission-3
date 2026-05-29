@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#191/728",
-      "rank": 191,
-      "total": 728
+      "display": "#190/729",
+      "rank": 190,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 254 dog #254 254 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9000 degen 0xa691142c58a1c888cf21a9812965a7fec1a7c0b1d6fbcfdbf1dbefa828c1c68e 0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e #191/728 background: none; body: blue; neck: none; mouth: none; ears: none; head: redmohawk; eyes: 3dglasses 0x4bbbd1d5fb327b91824803d3686018932094d229a8af366a87978743146761af chain_logs contract_getters",
+    "search_text": "dog 254 dog #254 254 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9000 degen 0xa691142c58a1c888cf21a9812965a7fec1a7c0b1d6fbcfdbf1dbefa828c1c68e 0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e #190/729 background: none; body: blue; neck: none; mouth: none; ears: none; head: redmohawk; eyes: 3dglasses 0x4bbbd1d5fb327b91824803d3686018932094d229a8af366a87978743146761af chain_logs contract_getters",
     "settlement": {
       "block_number": 25240952,
       "block_time_utc": "2025-01-15T04:46:16Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

@@ -60,12 +60,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#606/728",
-      "rank": 606,
-      "total": 728
+      "display": "#605/729",
+      "rank": 605,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 460 dog #460 460 mission 2 mission 2 degen chain settled 0x2a78be7b3b40671fa356798e7908654234bc0444 0x2a78…0444 7666 degen 0x32b05ef53b17cac547d5216547cf8103fd4cbc71c0434458bc8207ec7a429041 0x0ec9f3f90e519d6bf346552968bea0e4cf60287ada906d059f8167a25f43fd5e #606/728 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: redmohawk; eyes: none 0xcddef2a0b444ba7af3da8b79d9ad51b5260b211903a5e90d4b4a366d1bcdce7b 0x808042441dbcccfa1df0c146d5ed2429ab44f8c5bb16e10626548494b322d94f 0xdc480dd558829c4c85ac7fa76b66463239cf7cfd9c571bd0d390950259317076 0xed5bf72def93863e6dad0200ce44bf8f9fc30b03144a1c88e3b3f573ccbf9c4d 0x31b26497a022e99a662156e673c7742c0ac660389b8bab46f3373fc4261f445d 0x77b8eed0776638a2093e5be88a757fd85d2c2ae542d6f2486c7a1a7f6693a333 0x4f327a58af5838f7292d3ba1b35cc618bb7a6beefef913b0cab89aa976c6f10f 0xedaf58778b0be902c04268912ece694573c4faecf67b25057cbdcab0ca7f91f9 0xcb63879f550ecf6a9417c3e47ee4e15688dd7cbba1248cdce011a7b6b9d57ed7 0x88bcfd100aa3b1ac0272a41a9ba0f2dba5f53a003cc977260546b071d5605a8f 0xb850e408166a07c0eb7810249e79345c14eee1aa0b8fef8646bd608b033667cc 0x857ce86611e349087fd2675152e7f326767404a376a59677fc87783740bec374 0xbc9afd614aa58caf26302160124181136ba12b787b90a5be109fd6f3cac530ae chain_logs contract_getters",
+    "search_text": "dog 460 dog #460 460 mission 2 mission 2 degen chain settled 0x2a78be7b3b40671fa356798e7908654234bc0444 0x2a78…0444 7666 degen 0x32b05ef53b17cac547d5216547cf8103fd4cbc71c0434458bc8207ec7a429041 0x0ec9f3f90e519d6bf346552968bea0e4cf60287ada906d059f8167a25f43fd5e #605/729 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: redmohawk; eyes: none 0xcddef2a0b444ba7af3da8b79d9ad51b5260b211903a5e90d4b4a366d1bcdce7b 0x808042441dbcccfa1df0c146d5ed2429ab44f8c5bb16e10626548494b322d94f 0xdc480dd558829c4c85ac7fa76b66463239cf7cfd9c571bd0d390950259317076 0xed5bf72def93863e6dad0200ce44bf8f9fc30b03144a1c88e3b3f573ccbf9c4d 0x31b26497a022e99a662156e673c7742c0ac660389b8bab46f3373fc4261f445d 0x77b8eed0776638a2093e5be88a757fd85d2c2ae542d6f2486c7a1a7f6693a333 0x4f327a58af5838f7292d3ba1b35cc618bb7a6beefef913b0cab89aa976c6f10f 0xedaf58778b0be902c04268912ece694573c4faecf67b25057cbdcab0ca7f91f9 0xcb63879f550ecf6a9417c3e47ee4e15688dd7cbba1248cdce011a7b6b9d57ed7 0x88bcfd100aa3b1ac0272a41a9ba0f2dba5f53a003cc977260546b071d5605a8f 0xb850e408166a07c0eb7810249e79345c14eee1aa0b8fef8646bd608b033667cc 0x857ce86611e349087fd2675152e7f326767404a376a59677fc87783740bec374 0xbc9afd614aa58caf26302160124181136ba12b787b90a5be109fd6f3cac530ae chain_logs contract_getters",
     "settlement": {
       "block_number": 26183294,
       "block_time_utc": "2025-08-16T08:28:22Z",
@@ -85,7 +85,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -95,12 +95,12 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -115,7 +115,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

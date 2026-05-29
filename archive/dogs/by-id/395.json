@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#183/728",
-      "rank": 183,
-      "total": 728
+      "display": "#182/729",
+      "rank": 182,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 395 dog #395 395 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 2200 degen 0xfc9d69dd1a6f03abfdbbcb52ba9e0cd3f7a70469198a7f98eff7d550ff172731 0x9ded31dd2ebdacfe4451e56a3d6653c6d902c0258f19f23543f2b01191c968c3 #183/728 background: none; body: black; neck: studdedcollar; mouth: tongue; ears: loopearring; head: redmohawk; eyes: sunglasses 0x427906396a511c4f2dfc52f065243fe1fd01dbe36a50067b6fe8f06e4fa7d002 0x6681752f1504d3a8ccd3cd688d9df20f32469cbb3fe947f8759cdd3438b09794 0x9d90a8c3fca872e6d54aab0a073bcd3387bcb03ac7a6dfacf064a1a01b40e411 chain_logs contract_getters",
+    "search_text": "dog 395 dog #395 395 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 2200 degen 0xfc9d69dd1a6f03abfdbbcb52ba9e0cd3f7a70469198a7f98eff7d550ff172731 0x9ded31dd2ebdacfe4451e56a3d6653c6d902c0258f19f23543f2b01191c968c3 #182/729 background: none; body: black; neck: studdedcollar; mouth: tongue; ears: loopearring; head: redmohawk; eyes: sunglasses 0x427906396a511c4f2dfc52f065243fe1fd01dbe36a50067b6fe8f06e4fa7d002 0x6681752f1504d3a8ccd3cd688d9df20f32469cbb3fe947f8759cdd3438b09794 0x9d90a8c3fca872e6d54aab0a073bcd3387bcb03ac7a6dfacf064a1a01b40e411 chain_logs contract_getters",
     "settlement": {
       "block_number": 25924713,
       "block_time_utc": "2025-05-30T01:16:46Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },

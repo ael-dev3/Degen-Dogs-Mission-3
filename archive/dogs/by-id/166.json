@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#224/728",
-      "rank": 224,
-      "total": 728
+      "display": "#222/729",
+      "rank": 222,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 166 dog #166 166 mission 1 mission 1 polygon settled 0x3e32c70b82f79dd243dcd32ae9231c2c19f5ae23 0x3e32…ae23 0.05 weth 0xdebecc21623b257bd018937de3c35d079df5a72ea4896f5dffee95ec83058ade 0xd7213167cfe6d2698329b59f906c3fa5bc48d946ba9d07d242c53570538bb050 #224/728 background: halo; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: toque; eyes: none 0xd20ce90e7f2e9b513cb76aa7d96fe7f027f2ed261ab45a76a59dcb41959c9070 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 166 dog #166 166 mission 1 mission 1 polygon settled 0x3e32c70b82f79dd243dcd32ae9231c2c19f5ae23 0x3e32…ae23 0.05 weth 0xdebecc21623b257bd018937de3c35d079df5a72ea4896f5dffee95ec83058ade 0xd7213167cfe6d2698329b59f906c3fa5bc48d946ba9d07d242c53570538bb050 #222/729 background: halo; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: toque; eyes: none 0xd20ce90e7f2e9b513cb76aa7d96fe7f027f2ed261ab45a76a59dcb41959c9070 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 33008899,
       "block_time_utc": "2022-09-12T10:52:18Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -90,7 +90,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#535/728",
-      "rank": 535,
-      "total": 728
+      "display": "#536/729",
+      "rank": 536,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 251 dog #251 251 mission 2 mission 2 degen chain settled 0x4932ae69f9da1ff74944680baad245cd3747d861 0x4932…d861 8950 degen 0x20b347e93fde4a5b7cba1ac803e9d69a26eae2623ec9137d93a989fc6ec87df6 0x278213d18b67fd03b4e75fad8ff477cb552c69ba0262f11b7093d5dfd43feca7 #535/728 background: none; body: grey; neck: none; mouth: pizza; ears: none; head: none; eyes: masksnorkel 0x6a456deeef818d8381f7c4909b17b922aae4277a6d04290d5cdca0adadbc5f53 0x749aee67e79cebf56d9cf7d5cf6867e3df7076f683fe5a4d625c04b37ec6c115 0x76fe8e0f2db8bd0c93470760ef6d6909a1b1135de93cd29fdfba49304ace99d8 0x1441a614d99dd812ee813489289f2abe02f91cbb5acab9af6cfe32278cec2869 0xcdccdb35ab6d9525a7882a75481ea723de9d5dadf351b5190f24f9ad1c72e3cb 0xded459157dd11a6c926b1d18766d01de5e0115feda05f542885467cfddd60821 0x04108577570c8a546d5876293800f4e5d0c560eb5531b46078fbf09bccb067d1 chain_logs contract_getters",
+    "search_text": "dog 251 dog #251 251 mission 2 mission 2 degen chain settled 0x4932ae69f9da1ff74944680baad245cd3747d861 0x4932…d861 8950 degen 0x20b347e93fde4a5b7cba1ac803e9d69a26eae2623ec9137d93a989fc6ec87df6 0x278213d18b67fd03b4e75fad8ff477cb552c69ba0262f11b7093d5dfd43feca7 #536/729 background: none; body: grey; neck: none; mouth: pizza; ears: none; head: none; eyes: masksnorkel 0x6a456deeef818d8381f7c4909b17b922aae4277a6d04290d5cdca0adadbc5f53 0x749aee67e79cebf56d9cf7d5cf6867e3df7076f683fe5a4d625c04b37ec6c115 0x76fe8e0f2db8bd0c93470760ef6d6909a1b1135de93cd29fdfba49304ace99d8 0x1441a614d99dd812ee813489289f2abe02f91cbb5acab9af6cfe32278cec2869 0xcdccdb35ab6d9525a7882a75481ea723de9d5dadf351b5190f24f9ad1c72e3cb 0xded459157dd11a6c926b1d18766d01de5e0115feda05f542885467cfddd60821 0x04108577570c8a546d5876293800f4e5d0c560eb5531b46078fbf09bccb067d1 chain_logs contract_getters",
     "settlement": {
       "block_number": 25231600,
       "block_time_utc": "2025-01-13T02:23:29Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#705/728",
-      "rank": 705,
-      "total": 728
+      "display": "#706/729",
+      "rank": 706,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 349 dog #349 349 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8500 degen 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f 0xa61e0b0192baf088e9f5fa969be28c24af514cd41ba101e3f2ff39900d6306d2 #705/728 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xc89af47508bdfed3626418e7b79148e1c8c7d3f9bdea02b3f31a017475fbf345 0xfbe595273ca5c96fb485cd62ae9f391918f47449a6409b8890129b9e9a2bf7c1 0x80e1189850073dfb5e98362ee931eb4fa1f0c3bac53b0e86d29093870c5e480b 0x6e2d753b499dfb62b7400ac650b039a3cbddc6e8473f42b9530bc022deec899e chain_logs contract_getters",
+    "search_text": "dog 349 dog #349 349 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8500 degen 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f 0xa61e0b0192baf088e9f5fa969be28c24af514cd41ba101e3f2ff39900d6306d2 #706/729 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xc89af47508bdfed3626418e7b79148e1c8c7d3f9bdea02b3f31a017475fbf345 0xfbe595273ca5c96fb485cd62ae9f391918f47449a6409b8890129b9e9a2bf7c1 0x80e1189850073dfb5e98362ee931eb4fa1f0c3bac53b0e86d29093870c5e480b 0x6e2d753b499dfb62b7400ac650b039a3cbddc6e8473f42b9530bc022deec899e chain_logs contract_getters",
     "settlement": {
       "block_number": 25726693,
       "block_time_utc": "2025-04-16T12:05:53Z",
@@ -76,12 +76,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

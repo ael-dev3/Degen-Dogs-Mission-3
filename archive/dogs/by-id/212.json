@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#625/728",
-      "rank": 625,
-      "total": 728
+      "display": "#624/729",
+      "rank": 624,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 212 dog #212 212 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 11111 degen 0x1844f912c8d19b41605ab2872b511889001d4f38bf5d2f656ec1682a7b6322a7 0x958e2c5c9aac6d9c47e33a302e92e261592724e26a370e9f2ae765ddc3affb5d #625/728 background: none; body: grey; neck: none; mouth: none; ears: earbuds; head: blackcap; eyes: none 0x3d725af57a448d9f0902404570d26c98f419022f9584d79a48b85d887bc8d5aa 0x8968a72f351af1d4933432bc0a6667c907284be4405dfbe11b87e1d1668db3f9 chain_logs contract_getters",
+    "search_text": "dog 212 dog #212 212 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 11111 degen 0x1844f912c8d19b41605ab2872b511889001d4f38bf5d2f656ec1682a7b6322a7 0x958e2c5c9aac6d9c47e33a302e92e261592724e26a370e9f2ae765ddc3affb5d #624/729 background: none; body: grey; neck: none; mouth: none; ears: earbuds; head: blackcap; eyes: none 0x3d725af57a448d9f0902404570d26c98f419022f9584d79a48b85d887bc8d5aa 0x8968a72f351af1d4933432bc0a6667c907284be4405dfbe11b87e1d1668db3f9 chain_logs contract_getters",
     "settlement": {
       "block_number": 24827941,
       "block_time_utc": "2024-12-06T16:38:24Z",
@@ -74,12 +74,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -89,12 +89,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -104,7 +104,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#292/728",
-      "rank": 292,
-      "total": 728
+      "display": "#291/729",
+      "rank": 291,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 240 dog #240 240 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9999 degen 0x66b7ecfb3b9d53a096a7d073dc2113ddde5fa052422fe85996b4fed91c6c1432 0x6120b20847522ab1c729eb7ec075155f0ae239f1b923f73f472c754c5363b814 #292/728 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: unicorn; eyes: none 0xfd3c70b4e0527420fe0ca19be36d9a7ad3fb3607bb26ce996d15f4c1462e5b33 0x14eb26a0dcea4ebcea32b826af04e967bd6cb75d8bd635994a91184cb2f6d511 0xcbe43c434bf72c606fe701da7d083c78db92d91ccf39e840db75b753dd19ca50 0xb45c20929db4f9dea47390388d513c30ec3b1e789cc8fff95a7074f740af645f chain_logs contract_getters",
+    "search_text": "dog 240 dog #240 240 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9999 degen 0x66b7ecfb3b9d53a096a7d073dc2113ddde5fa052422fe85996b4fed91c6c1432 0x6120b20847522ab1c729eb7ec075155f0ae239f1b923f73f472c754c5363b814 #291/729 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: unicorn; eyes: none 0xfd3c70b4e0527420fe0ca19be36d9a7ad3fb3607bb26ce996d15f4c1462e5b33 0x14eb26a0dcea4ebcea32b826af04e967bd6cb75d8bd635994a91184cb2f6d511 0xcbe43c434bf72c606fe701da7d083c78db92d91ccf39e840db75b753dd19ca50 0xb45c20929db4f9dea47390388d513c30ec3b1e789cc8fff95a7074f740af645f chain_logs contract_getters",
     "settlement": {
       "block_number": 25128974,
       "block_time_utc": "2025-01-03T00:02:32Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -106,7 +106,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

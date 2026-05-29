@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#441/728",
-      "rank": 441,
-      "total": 728
+      "display": "#439/729",
+      "rank": 439,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 717 dog #717 717 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.016 eth 0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad 0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e #441/728 background: none; body: brown; neck: studdedcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: glasses 0x12db753ee98f938ea70a9954f44a2dfea9d32622a7d883f17efbcba72824140e 0xe1a1c479459a37dbe480bf4820c2131603e294180aa6502e75b4af3c97509ca1 0x05cd9688e855e9746518e1ee0741fae2161f66cf0b379e6838d3fa3f0accf003 0x258adeda00e0443161690a9deb7d07d42b09f8c35f61bc12302721515182e1bb 0xde65ea8a05f4cab7082abbd218f30a474bf2f93cfff9a184eed60edc31378923 base_logs archive_indexer",
+    "search_text": "dog 717 dog #717 717 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.016 eth 0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad 0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e #439/729 background: none; body: brown; neck: studdedcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: glasses 0x12db753ee98f938ea70a9954f44a2dfea9d32622a7d883f17efbcba72824140e 0xe1a1c479459a37dbe480bf4820c2131603e294180aa6502e75b4af3c97509ca1 0x05cd9688e855e9746518e1ee0741fae2161f66cf0b379e6838d3fa3f0accf003 0x258adeda00e0443161690a9deb7d07d42b09f8c35f61bc12302721515182e1bb 0xde65ea8a05f4cab7082abbd218f30a474bf2f93cfff9a184eed60edc31378923 base_logs archive_indexer",
     "settlement": {
       "block_number": 46143634,
       "block_time_utc": "2026-05-18T03:56:55Z",
@@ -77,12 +77,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -92,7 +92,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

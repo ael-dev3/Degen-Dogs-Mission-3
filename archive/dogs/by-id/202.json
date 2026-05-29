@@ -57,12 +57,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#471/728",
-      "rank": 471,
-      "total": 728
+      "display": "#469/729",
+      "rank": 469,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 202 dog #202 202 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 10420 degen 0x8f7a43cccddb964657cf1dce8ef074cdeed4d5bdd4ca3a29bc8fa1ce82aeb3ce 0x3adace01eb2cc4cd0e78f926618cb4a7210984813a08f6b6d2b273553990494a #471/728 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xb53b659d94b32ba1c1ac0c93dd65253af0fdcd693f074bdcf04285f0a2aa75f8 0x81939659b3a6388990171a05e07f984f5783341bded128d557fd6292018732ab 0x90d8ae46b80a88e22d68cc4e125bbff90cc8ce619a70be3d758c395e6a3f7bb1 0x19c2f80e0ec7690a6c5c1e1ba773081413f03756e7c4f664e3db02256121f6d4 0x39201e22ac02a80a56e8efcd2a1b1af8268c35fdca2f72cb5eb72c5bebbb93f8 0xfaf18f57c54892ab5d8576db7f5f3f2f85eb86ba5179f0a0f7ad15b87e3491dd 0x91d41776f6a145abaee9c2efc650ca53314a6100c70338c304e51ca4cf1eb170 0x614beb28e75a2af76425dce8b3706ef50ca922a7a75ea482b872131e8db24f2f 0x4cfa6d60114ca1354fb7c6cc7c8a04691a93cab46ef6e06b9c807c1646a4d9dc 0x445ba24dea2c7d718982a1fb2186380dddc8cbc2265e5cc0d77aa22d075d30cc chain_logs contract_getters",
+    "search_text": "dog 202 dog #202 202 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 10420 degen 0x8f7a43cccddb964657cf1dce8ef074cdeed4d5bdd4ca3a29bc8fa1ce82aeb3ce 0x3adace01eb2cc4cd0e78f926618cb4a7210984813a08f6b6d2b273553990494a #469/729 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xb53b659d94b32ba1c1ac0c93dd65253af0fdcd693f074bdcf04285f0a2aa75f8 0x81939659b3a6388990171a05e07f984f5783341bded128d557fd6292018732ab 0x90d8ae46b80a88e22d68cc4e125bbff90cc8ce619a70be3d758c395e6a3f7bb1 0x19c2f80e0ec7690a6c5c1e1ba773081413f03756e7c4f664e3db02256121f6d4 0x39201e22ac02a80a56e8efcd2a1b1af8268c35fdca2f72cb5eb72c5bebbb93f8 0xfaf18f57c54892ab5d8576db7f5f3f2f85eb86ba5179f0a0f7ad15b87e3491dd 0x91d41776f6a145abaee9c2efc650ca53314a6100c70338c304e51ca4cf1eb170 0x614beb28e75a2af76425dce8b3706ef50ca922a7a75ea482b872131e8db24f2f 0x4cfa6d60114ca1354fb7c6cc7c8a04691a93cab46ef6e06b9c807c1646a4d9dc 0x445ba24dea2c7d718982a1fb2186380dddc8cbc2265e5cc0d77aa22d075d30cc chain_logs contract_getters",
     "settlement": {
       "block_number": 24716053,
       "block_time_utc": "2024-11-27T16:01:12Z",
@@ -82,12 +82,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -97,7 +97,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "None"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },

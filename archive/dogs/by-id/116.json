@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#262/728",
-      "rank": 262,
-      "total": 728
+      "display": "#260/729",
+      "rank": 260,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 116 dog #116 116 mission 1 mission 1 polygon settled 0xeecce11af9d72ae9ff15d7c106f13349d336aeaf 0xeecc…aeaf 0.05 weth 0x84ebff366697d3a61d81bc77ae4d9d34f469510d37195aa0d9955df40763bc7b 0x21012cb6ceba6c8c6a93ed4003456ca0367f3efcc24b0820503e36be2c5aec55 #262/728 background: none; body: blue; neck: goldnecklace; mouth: none; ears: loopearring; head: partyhat; eyes: sunglasses 0x83c8dbc6575534b7c3daf849cda36020f4ffe2cebf399a4556eb5d487c72f055 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 116 dog #116 116 mission 1 mission 1 polygon settled 0xeecce11af9d72ae9ff15d7c106f13349d336aeaf 0xeecc…aeaf 0.05 weth 0x84ebff366697d3a61d81bc77ae4d9d34f469510d37195aa0d9955df40763bc7b 0x21012cb6ceba6c8c6a93ed4003456ca0367f3efcc24b0820503e36be2c5aec55 #260/729 background: none; body: blue; neck: goldnecklace; mouth: none; ears: loopearring; head: partyhat; eyes: sunglasses 0x83c8dbc6575534b7c3daf849cda36020f4ffe2cebf399a4556eb5d487c72f055 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28834127,
       "block_time_utc": "2022-05-27T13:41:16Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,7 +90,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

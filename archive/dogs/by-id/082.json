@@ -51,12 +51,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#237/728",
-      "rank": 237,
-      "total": 728
+      "display": "#241/729",
+      "rank": 241,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 82 dog #82 82 mission 1 mission 1 polygon settled 0x689e50e2bd5dd19f27be266e24b52c5041441ad6 0x689e…1ad6 0.09 weth 0x09a9cdae5769ee37f113e0f3e45d5473b1d251215dc3b06b78a479befd15914f 0x95eb21f471b8082f2ac0cbe6e7d32f973435f335e61fa633cb5b55675810fc1e #237/728 background: none; body: blue; neck: studdedcollar; mouth: none; ears: loopearring; head: beanie; eyes: vrgoggles 0xbfb32c3bac969c16a2fbfc2a2a8fc6ad61d652e961452b05c72a70176efe57ad 0xa2c1c742e16834603aa484461d6e0b5ae2bb661edf88c8336105bb95ee9c2a67 0xf48cca3c2bf986eeb909b6ce1ac052755fcf81a63e27fd30b0affb330bf177c5 0x6b57c17a199b2bdc6e041efd1037e1e0defda9a0fe4f26b73afb014ef5101313 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 82 dog #82 82 mission 1 mission 1 polygon settled 0x689e50e2bd5dd19f27be266e24b52c5041441ad6 0x689e…1ad6 0.09 weth 0x09a9cdae5769ee37f113e0f3e45d5473b1d251215dc3b06b78a479befd15914f 0x95eb21f471b8082f2ac0cbe6e7d32f973435f335e61fa633cb5b55675810fc1e #241/729 background: none; body: blue; neck: studdedcollar; mouth: none; ears: loopearring; head: beanie; eyes: vrgoggles 0xbfb32c3bac969c16a2fbfc2a2a8fc6ad61d652e961452b05c72a70176efe57ad 0xa2c1c742e16834603aa484461d6e0b5ae2bb661edf88c8336105bb95ee9c2a67 0xf48cca3c2bf986eeb909b6ce1ac052755fcf81a63e27fd30b0affb330bf177c5 0x6b57c17a199b2bdc6e041efd1037e1e0defda9a0fe4f26b73afb014ef5101313 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27488824,
       "block_time_utc": "2022-04-23T17:43:16Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,7 +93,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

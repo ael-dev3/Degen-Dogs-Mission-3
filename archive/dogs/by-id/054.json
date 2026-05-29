@@ -57,12 +57,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#660/728",
-      "rank": 660,
-      "total": 728
+      "display": "#659/729",
+      "rank": 659,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 54 dog #54 54 mission 1 mission 1 polygon settled 0xa31e99ab181d8db8fb3f84c8f18bbb6229893746 0xa31e…3746 0.45 weth 0x624ee7bddd9bec41c7e5cba33683ffab006c648c1cf4bc19b32535d04bdca874 0x498b8314febcc827ec1ff41674e28265c869dafdf71ae7d36506d63d015d2989 #660/728 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: none; eyes: none 0xc1ac4198e7497a4c9ca2a2601d22438d890dbc3d01b761bb760a5ea299b5dae8 0xabad9a996fd6250cb44afd300cb8698d48d08d73cce268fae0e6eb1c0d828063 0x7c2a1a8de7128c21e211d90c5b3f31189401fa03f43cfe0104e089a2025a331a 0x6e6699c55dff0480895efeb107b41e98bdd8d68502397d484bf2500100a3e0aa 0x77a4c9ff1c8069f5518516c985920021ecbf40824f9068b9b82bd35de6cffa09 0x7b5b5ddd85f2c7056f251a75d62d8018c2d1a8c96342f279eebfa8b7332ed395 0x2801a7d9f5dd168ec10235da46bf0fe51b90be810992716f7a8131f63afb6ec3 0xad01d6dd72f40cd9bc5f75c40eca786445b5ad7a29a7ae805e2b3b8c8813a9b5 0x68138f256498027069c1a36c63d6104b20c792b27fad896cb6226d9e246dddd4 0x65679d285743d6a6bf5c08c019845e2be4f23a43e12739fa22407ddf15fa79af polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 54 dog #54 54 mission 1 mission 1 polygon settled 0xa31e99ab181d8db8fb3f84c8f18bbb6229893746 0xa31e…3746 0.45 weth 0x624ee7bddd9bec41c7e5cba33683ffab006c648c1cf4bc19b32535d04bdca874 0x498b8314febcc827ec1ff41674e28265c869dafdf71ae7d36506d63d015d2989 #659/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: none; eyes: none 0xc1ac4198e7497a4c9ca2a2601d22438d890dbc3d01b761bb760a5ea299b5dae8 0xabad9a996fd6250cb44afd300cb8698d48d08d73cce268fae0e6eb1c0d828063 0x7c2a1a8de7128c21e211d90c5b3f31189401fa03f43cfe0104e089a2025a331a 0x6e6699c55dff0480895efeb107b41e98bdd8d68502397d484bf2500100a3e0aa 0x77a4c9ff1c8069f5518516c985920021ecbf40824f9068b9b82bd35de6cffa09 0x7b5b5ddd85f2c7056f251a75d62d8018c2d1a8c96342f279eebfa8b7332ed395 0x2801a7d9f5dd168ec10235da46bf0fe51b90be810992716f7a8131f63afb6ec3 0xad01d6dd72f40cd9bc5f75c40eca786445b5ad7a29a7ae805e2b3b8c8813a9b5 0x68138f256498027069c1a36c63d6104b20c792b27fad896cb6226d9e246dddd4 0x65679d285743d6a6bf5c08c019845e2be4f23a43e12739fa22407ddf15fa79af polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26503043,
       "block_time_utc": "2022-03-29T14:18:00Z",
@@ -84,7 +84,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -94,12 +94,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -109,12 +109,12 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

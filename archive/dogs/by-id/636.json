@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#215/728",
-      "rank": 215,
-      "total": 728
+      "display": "#214/729",
+      "rank": 214,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 636 dog #636 636 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 #215/728 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: crazyhair; eyes: monocle 0xad6d4f6becd0adc5d99be6309733a49935e55cccadd429292a4fda869619e1d9 0x6afc2d312c470c2e8fa16004d941d162005a61ca4e8d58579be19c37a1b907ac 0x61fac457156016fd62a191a7a2245d325f1694d28bae452e7ade69ad9264b08d 0x8926678356e7013bd0344daa1b7ed20179cb3cd585e378fc4e8568dd2f07423e 0x95094e11764b2184fec066b2024ae49b99da334fc7c48ee2595a0ee9c5985d30 0x697cf073c8e325d0667ecfdc2f668181f140d8528a0458a91d6b67a286991ea1 base_logs archive_indexer",
+    "search_text": "dog 636 dog #636 636 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 #214/729 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: crazyhair; eyes: monocle 0xad6d4f6becd0adc5d99be6309733a49935e55cccadd429292a4fda869619e1d9 0x6afc2d312c470c2e8fa16004d941d162005a61ca4e8d58579be19c37a1b907ac 0x61fac457156016fd62a191a7a2245d325f1694d28bae452e7ade69ad9264b08d 0x8926678356e7013bd0344daa1b7ed20179cb3cd585e378fc4e8568dd2f07423e 0x95094e11764b2184fec066b2024ae49b99da334fc7c48ee2595a0ee9c5985d30 0x697cf073c8e325d0667ecfdc2f668181f140d8528a0458a91d6b67a286991ea1 base_logs archive_indexer",
     "settlement": {
       "block_number": 42606169,
       "block_time_utc": "2026-02-25T06:41:25Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

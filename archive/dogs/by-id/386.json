@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#176/728",
-      "rank": 176,
-      "total": 728
+      "display": "#174/729",
+      "rank": 174,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 386 dog #386 386 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xc7f8b743180771216e7548fb2b1b5684325fd4293ba48a10c416e2ee82fa7669 0x4b53bd66ee0225846c62f0fc1a02d224688889b765ba44d006455addccd17aed #176/728 background: none; body: brown; neck: none; mouth: teeth; ears: earbuds; head: whitemohawk; eyes: none 0xee7191ca50311ed2256f76d223cb934d8e0840f0469cf971fe2c6f45114ed9b6 0xcef37d17f62a4f5fda882243bf5001f639b3629d05aa6a15ed4f53116d324c00 0xcdd380bb00a3567ac365cb403cefbd9c6f981ecf66d7024ccbcee18c1d452f41 0x0e44403d08eca37f0a1ec26bce720b5bde89d6d59c8b7d311832c08711102485 0xe2a91fff4cbf2b80b6a7639fff5d53150ef65b8ab5e213fd9f1cf3f47bcd22f8 chain_logs contract_getters",
+    "search_text": "dog 386 dog #386 386 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xc7f8b743180771216e7548fb2b1b5684325fd4293ba48a10c416e2ee82fa7669 0x4b53bd66ee0225846c62f0fc1a02d224688889b765ba44d006455addccd17aed #174/729 background: none; body: brown; neck: none; mouth: teeth; ears: earbuds; head: whitemohawk; eyes: none 0xee7191ca50311ed2256f76d223cb934d8e0840f0469cf971fe2c6f45114ed9b6 0xcef37d17f62a4f5fda882243bf5001f639b3629d05aa6a15ed4f53116d324c00 0xcdd380bb00a3567ac365cb403cefbd9c6f981ecf66d7024ccbcee18c1d452f41 0x0e44403d08eca37f0a1ec26bce720b5bde89d6d59c8b7d311832c08711102485 0xe2a91fff4cbf2b80b6a7639fff5d53150ef65b8ab5e213fd9f1cf3f47bcd22f8 chain_logs contract_getters",
     "settlement": {
       "block_number": 25889986,
       "block_time_utc": "2025-05-20T23:42:30Z",
@@ -77,12 +77,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -97,7 +97,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -107,7 +107,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

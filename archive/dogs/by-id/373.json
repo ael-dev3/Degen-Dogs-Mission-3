@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#48/728",
+      "display": "#48/729",
       "rank": 48,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 373 dog #373 373 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2800 degen 0xe3543da29b6a860a69c77b1f3f745cff9cba8f9fe6f0be0a1225bd6bb7d40eb8 0x442fbec1b7dc871f71b8803aab14d68f854fcdc1c753bae80264971f7d6b95d2 #48/728 background: none; body: black; neck: redcollar; mouth: coin; ears: earbuds; head: redmohawk; eyes: masksnorkel 0x4f96ade1ab74ee206a87fbfa2963c3708367310080e7b481976b534223f8bff5 0x91577c631830db87fccf536a3d06d11f4c67f495cd559509c0ac340d2fbc9051 0x4fc054995549ba9e9b50713e00adb969868fe4e2bf7f3e7502df1d0b04819987 chain_logs contract_getters",
+    "search_text": "dog 373 dog #373 373 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2800 degen 0xe3543da29b6a860a69c77b1f3f745cff9cba8f9fe6f0be0a1225bd6bb7d40eb8 0x442fbec1b7dc871f71b8803aab14d68f854fcdc1c753bae80264971f7d6b95d2 #48/729 background: none; body: black; neck: redcollar; mouth: coin; ears: earbuds; head: redmohawk; eyes: masksnorkel 0x4f96ade1ab74ee206a87fbfa2963c3708367310080e7b481976b534223f8bff5 0x91577c631830db87fccf536a3d06d11f4c67f495cd559509c0ac340d2fbc9051 0x4fc054995549ba9e9b50713e00adb969868fe4e2bf7f3e7502df1d0b04819987 chain_logs contract_getters",
     "settlement": {
       "block_number": 25841200,
       "block_time_utc": "2025-05-09T21:19:16Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -85,7 +85,7 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -95,7 +95,7 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

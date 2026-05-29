@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#510/728",
-      "rank": 510,
-      "total": 728
+      "display": "#511/729",
+      "rank": 511,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 328 dog #328 328 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 11000 degen 0x0981a37fde3e89c98b60566b81469b071f42c71491fe13245126a26d6521a50b 0xa610c89463e0df0a48df9a2334fa4854f12b959d47817da44aa0b2e68295f4e0 #510/728 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: loopearring; head: whitemohawk; eyes: vrgoggles 0xa666fa305b884c5e74c2e0d439ac0a42800bd33f4d4049d8693863d9452a65d9 0xe3ec68e1296ec3120147a08d38ba43c6e5bdf46d080eef0426d8e0a3ed1fad35 0xa615b25175f39f5d24ac4e5068e306f1e08979ed675df54f0abb7b597bd8d55b 0xac398f47f0e43aae3c2db35cb28aef7f7d9a4286a0fcc307e84826e65e8901c7 0x9eb7510a5f27f02d94b2123bd3ba7cb026136f8040c60d2cb6a6a3baa4c4ad90 0xd1319feb115c722e18726e89a572afe7eea9e4d7915152b7d1fed2c9b087f409 chain_logs contract_getters",
+    "search_text": "dog 328 dog #328 328 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 11000 degen 0x0981a37fde3e89c98b60566b81469b071f42c71491fe13245126a26d6521a50b 0xa610c89463e0df0a48df9a2334fa4854f12b959d47817da44aa0b2e68295f4e0 #511/729 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: loopearring; head: whitemohawk; eyes: vrgoggles 0xa666fa305b884c5e74c2e0d439ac0a42800bd33f4d4049d8693863d9452a65d9 0xe3ec68e1296ec3120147a08d38ba43c6e5bdf46d080eef0426d8e0a3ed1fad35 0xa615b25175f39f5d24ac4e5068e306f1e08979ed675df54f0abb7b597bd8d55b 0xac398f47f0e43aae3c2db35cb28aef7f7d9a4286a0fcc307e84826e65e8901c7 0x9eb7510a5f27f02d94b2123bd3ba7cb026136f8040c60d2cb6a6a3baa4c4ad90 0xd1319feb115c722e18726e89a572afe7eea9e4d7915152b7d1fed2c9b087f409 chain_logs contract_getters",
     "settlement": {
       "block_number": 25650396,
       "block_time_utc": "2025-03-27T17:47:23Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,7 +93,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

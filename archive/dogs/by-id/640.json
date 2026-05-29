@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#388/728",
-      "rank": 388,
-      "total": 728
+      "display": "#390/729",
+      "rank": 390,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 640 dog #640 640 mission 3 mission 3 base settled 0x0b2b3483a5cedb08839e098d3d9f02d1893a20dc @isodl isodl 0.00807 eth 0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4 0x744be070f74b589f7239ccc117baf6368209314ed546a47d00e18a8cd5c3d873 #388/728 background: none; body: grey; neck: none; mouth: tongue; ears: loopearring; head: toque; eyes: none 0x227a1d04510aa597454923103ad58c9da363c33a6d10869231c76b7ba3aa7bf5 0xada02882c0251cfb4ff60acc59a96fd63c928a668d0c42cd540f4c20ce5b268e 0x54944aa866cd213f24ba2dad041da2acc2b40a498813b86677a7051d32cf456b 0x331cf753f88f4cefa79c03f22c10340831271b1c7e9ce7e74a84e39809e554bc 0x9f2545944a10fd7f244d5339e8f76837924ac49bd71b2a964d456a20bd2ab1e6 0xbc36fc450132a36b3a9468baf2b06092894d1ec1835fc9cc4112853886d3e461 0x3eecc5608802494a64e70498012ce371f201bb944b909ca6ec84b24bccb080d4 base_logs archive_indexer",
+    "search_text": "dog 640 dog #640 640 mission 3 mission 3 base settled 0x0b2b3483a5cedb08839e098d3d9f02d1893a20dc @isodl isodl 0.00807 eth 0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4 0x744be070f74b589f7239ccc117baf6368209314ed546a47d00e18a8cd5c3d873 #390/729 background: none; body: grey; neck: none; mouth: tongue; ears: loopearring; head: toque; eyes: none 0x227a1d04510aa597454923103ad58c9da363c33a6d10869231c76b7ba3aa7bf5 0xada02882c0251cfb4ff60acc59a96fd63c928a668d0c42cd540f4c20ce5b268e 0x54944aa866cd213f24ba2dad041da2acc2b40a498813b86677a7051d32cf456b 0x331cf753f88f4cefa79c03f22c10340831271b1c7e9ce7e74a84e39809e554bc 0x9f2545944a10fd7f244d5339e8f76837924ac49bd71b2a964d456a20bd2ab1e6 0xbc36fc450132a36b3a9468baf2b06092894d1ec1835fc9cc4112853886d3e461 0x3eecc5608802494a64e70498012ce371f201bb944b909ca6ec84b24bccb080d4 base_logs archive_indexer",
     "settlement": {
       "block_number": 42779503,
       "block_time_utc": "2026-03-01T06:59:13Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -109,7 +109,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

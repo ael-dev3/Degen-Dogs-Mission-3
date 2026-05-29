@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#524/728",
-      "rank": 524,
-      "total": 728
+      "display": "#525/729",
+      "rank": 525,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 290 dog #290 290 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 10000 degen 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 0xe864d597917b387bb6de050fcc85fbbe66b7aa53ebb3a5dd2fc8f001bb052929 #524/728 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0x39ea45db1f58e01de9e74c54c48358752dd193812b852d53f383614f8a510b18 0x7897f30febab5329a898f11bff4475d36700b856bf14dd64c854ff8d228f0010 0xdf76f60840e30e54da6b7c0340883b8411e121f7d9e1dbf95b626f24ab832f6f chain_logs contract_getters",
+    "search_text": "dog 290 dog #290 290 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 10000 degen 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 0xe864d597917b387bb6de050fcc85fbbe66b7aa53ebb3a5dd2fc8f001bb052929 #525/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0x39ea45db1f58e01de9e74c54c48358752dd193812b852d53f383614f8a510b18 0x7897f30febab5329a898f11bff4475d36700b856bf14dd64c854ff8d228f0010 0xdf76f60840e30e54da6b7c0340883b8411e121f7d9e1dbf95b626f24ab832f6f chain_logs contract_getters",
     "settlement": {
       "block_number": 25478587,
       "block_time_utc": "2025-02-19T19:54:00Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -85,12 +85,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -51,12 +51,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#646/728",
+      "display": "#646/729",
       "rank": 646,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 650 dog #650 650 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823 0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f #646/728 background: none; body: dalmation; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e 0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e 0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e 0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74 base_logs archive_indexer",
+    "search_text": "dog 650 dog #650 650 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823 0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f #646/729 background: none; body: dalmation; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e 0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e 0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e 0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74 base_logs archive_indexer",
     "settlement": {
       "block_number": 43214165,
       "block_time_utc": "2026-03-11T08:27:57Z",
@@ -76,12 +76,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

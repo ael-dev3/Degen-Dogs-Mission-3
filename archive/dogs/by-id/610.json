@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#236/728",
-      "rank": 236,
-      "total": 728
+      "display": "#237/729",
+      "rank": 237,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 610 dog #610 610 mission 3 mission 3 base settled 0xe068579e46ca32a7ed3d51f217fcc5a0d829fca0 @yes2crypto.eth yes2crypto.eth 0.10253 eth 0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634 0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064 #236/728 background: none; body: orange; neck: none; mouth: pizza; ears: loopearring; head: none; eyes: redlasereyes 0xc37f1312e677e22357b810b0cf6c986ac1c12e7c6030ff3bc553ab603441ef8d 0xb22839971663da26489d244fbbe888b76d91f2ba0d6df059cf3820e865ad680f 0x3147ebb6f8c58352d398772a8edf2b4668540d837df20751f2b6c216e1c5a09f 0x4c87e4d85d6f749f40d54686d24400f53666f98538b43a7123180b4d18c9f43a 0x10a00fbe58a4bad4c7c4f55c96bef863cc98939e5892a42657221bab57edb0ba base_logs archive_indexer",
+    "search_text": "dog 610 dog #610 610 mission 3 mission 3 base settled 0xe068579e46ca32a7ed3d51f217fcc5a0d829fca0 @yes2crypto.eth yes2crypto.eth 0.10253 eth 0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634 0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064 #237/729 background: none; body: orange; neck: none; mouth: pizza; ears: loopearring; head: none; eyes: redlasereyes 0xc37f1312e677e22357b810b0cf6c986ac1c12e7c6030ff3bc553ab603441ef8d 0xb22839971663da26489d244fbbe888b76d91f2ba0d6df059cf3820e865ad680f 0x3147ebb6f8c58352d398772a8edf2b4668540d837df20751f2b6c216e1c5a09f 0x4c87e4d85d6f749f40d54686d24400f53666f98538b43a7123180b4d18c9f43a 0x10a00fbe58a4bad4c7c4f55c96bef863cc98939e5892a42657221bab57edb0ba base_logs archive_indexer",
     "settlement": {
       "block_number": 41476083,
       "block_time_utc": "2026-01-30T02:51:53Z",
@@ -77,12 +77,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -92,7 +92,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -102,7 +102,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

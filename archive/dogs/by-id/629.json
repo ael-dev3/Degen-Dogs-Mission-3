@@ -51,12 +51,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#428/728",
+      "display": "#428/729",
       "rank": 428,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 629 dog #629 629 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0269 eth 0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38 0xe606629719c886495dbb95b0f2993cfca09a4ae4db6954e05d9e12e6955ce9e4 #428/728 background: none; body: rainbow; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xf4354c90c9b53ef0f7813be77d9f1c371e5f22cc0cd3026a48f31efe1c1673f6 0xba10bf44746114261701f1434f5a591b0bf338a0d852919d933cf972df99c1e8 0x7ec21711dd6292a75cfcb65a8d8b8b95f52736441fe2e305f61ed93c7483a8a6 0xe04df69254e1f9fbb645b1f338c68fb233945ae20e31dd229e1a881265508a88 base_logs archive_indexer",
+    "search_text": "dog 629 dog #629 629 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0269 eth 0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38 0xe606629719c886495dbb95b0f2993cfca09a4ae4db6954e05d9e12e6955ce9e4 #428/729 background: none; body: rainbow; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xf4354c90c9b53ef0f7813be77d9f1c371e5f22cc0cd3026a48f31efe1c1673f6 0xba10bf44746114261701f1434f5a591b0bf338a0d852919d933cf972df99c1e8 0x7ec21711dd6292a75cfcb65a8d8b8b95f52736441fe2e305f61ed93c7483a8a6 0xe04df69254e1f9fbb645b1f338c68fb233945ae20e31dd229e1a881265508a88 base_logs archive_indexer",
     "settlement": {
       "block_number": 42302433,
       "block_time_utc": "2026-02-18T05:56:53Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

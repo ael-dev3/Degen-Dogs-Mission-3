@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#259/728",
-      "rank": 259,
-      "total": 728
+      "display": "#265/729",
+      "rank": 265,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 680 dog #680 680 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.02708 eth 0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab 0xe26300d6ddb9edcf9b88ecfef32f4528ff232e05e61ed9e5497cfb32ac520226 #259/728 background: halo; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: whitemohawk; eyes: vrgoggles 0x996acff531af56ec80381583179aad193e2a5c2b6d26120f05dc357813706ee5 0xf0a1623b19ec34e34d6458fa5ab926d0cb39c5515cdb7aee7fc95d9fde303171 0x45ef984d724fbca1258d9ae63ad7576806168046d6345ff3755fb51292b46b16 0x3cf2498ea7693db01914ff69eddc82529f9fc191f68b8d73e8d7d669c6979751 0x249528cebe45c0fabc4d93fbadbbae198a742775375369bf69bf7869dbf0ac4c 0xff8e205549aa50d56d6062781401d435058f92cc93b988ec23144986aca5dfd1 0xd8f834dfb790a612829db179c36dcf7dab5a337d1634ab04c61155005141552b 0xd29793f99c79555dea9905a874cc1f239bf1fc8e796d99d474dd05547c87d22a base_logs archive_indexer",
+    "search_text": "dog 680 dog #680 680 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.02708 eth 0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab 0xe26300d6ddb9edcf9b88ecfef32f4528ff232e05e61ed9e5497cfb32ac520226 #265/729 background: halo; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: whitemohawk; eyes: vrgoggles 0x996acff531af56ec80381583179aad193e2a5c2b6d26120f05dc357813706ee5 0xf0a1623b19ec34e34d6458fa5ab926d0cb39c5515cdb7aee7fc95d9fde303171 0x45ef984d724fbca1258d9ae63ad7576806168046d6345ff3755fb51292b46b16 0x3cf2498ea7693db01914ff69eddc82529f9fc191f68b8d73e8d7d669c6979751 0x249528cebe45c0fabc4d93fbadbbae198a742775375369bf69bf7869dbf0ac4c 0xff8e205549aa50d56d6062781401d435058f92cc93b988ec23144986aca5dfd1 0xd8f834dfb790a612829db179c36dcf7dab5a337d1634ab04c61155005141552b 0xd29793f99c79555dea9905a874cc1f239bf1fc8e796d99d474dd05547c87d22a base_logs archive_indexer",
     "settlement": {
       "block_number": 44528267,
       "block_time_utc": "2026-04-10T18:31:21Z",
@@ -80,27 +80,27 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -110,7 +110,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

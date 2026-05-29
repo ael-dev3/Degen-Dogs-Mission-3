@@ -50,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#570/728",
-      "rank": 570,
-      "total": 728
+      "display": "#574/729",
+      "rank": 574,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 80 dog #80 80 mission 1 mission 1 polygon settled 0x156bbe5c1cc60232df6e1f8ad5fa670fe38670c8 0x156b…70c8 0.08 weth 0x35de8d638b137dd43635144ad1c73828afbcb2a9f351fe055fb289a6b68fb51c 0xa3769d4e959d7441671aec3173299365c09f6adfcd8ca5eb950ce533e0791e31 #570/728 background: none; body: redbrown; neck: redcollar; mouth: none; ears: earbuds; head: blackcap; eyes: vrgoggles 0x1b42d83f6393b6bcb1d418a37c9fa7310aa9497b098b5a521ea5a15952e65877 0xff9b4a211c857ed68011ab4b5e6975d94e4836ae64b72f135545df59ed11fe20 0xe0ed18de3761fbe572b3e59bdcc00b856fbee00cceefb4f06551f3ae0c3920c4 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 80 dog #80 80 mission 1 mission 1 polygon settled 0x156bbe5c1cc60232df6e1f8ad5fa670fe38670c8 0x156b…70c8 0.08 weth 0x35de8d638b137dd43635144ad1c73828afbcb2a9f351fe055fb289a6b68fb51c 0xa3769d4e959d7441671aec3173299365c09f6adfcd8ca5eb950ce533e0791e31 #574/729 background: none; body: redbrown; neck: redcollar; mouth: none; ears: earbuds; head: blackcap; eyes: vrgoggles 0x1b42d83f6393b6bcb1d418a37c9fa7310aa9497b098b5a521ea5a15952e65877 0xff9b4a211c857ed68011ab4b5e6975d94e4836ae64b72f135545df59ed11fe20 0xe0ed18de3761fbe572b3e59bdcc00b856fbee00cceefb4f06551f3ae0c3920c4 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27408971,
       "block_time_utc": "2022-04-21T16:57:07Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,17 +87,17 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -107,7 +107,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

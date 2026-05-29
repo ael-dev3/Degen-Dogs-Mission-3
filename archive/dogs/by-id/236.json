@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#477/728",
-      "rank": 477,
-      "total": 728
+      "display": "#473/729",
+      "rank": 473,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 236 dog #236 236 mission 2 mission 2 degen chain settled 0x05f761aacd63e4e96bf98f0fe5614de5ba90856c 0x05f7…856c 8999 degen 0xf2749322174b9ff414919183f73b004197eff1121073f3769eddd462f8479719 0x1d9aae976fa0aeaaa9d226ec5fe07e17be9515df43e607ac20297033325e2f53 #477/728 background: none; body: black; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: none 0x530f4bc5acb4ea7b367bd8fa909ef198f6da4a323130e816d24af005eedc9170 0x00673d0a577f44375a99e3957a03418997c149eddd213dfb91df282c96a8248f 0x0dae6c7063bce923fc75a3f59e346e270693ae180ff5dd8b76d68cf6404a9288 chain_logs contract_getters",
+    "search_text": "dog 236 dog #236 236 mission 2 mission 2 degen chain settled 0x05f761aacd63e4e96bf98f0fe5614de5ba90856c 0x05f7…856c 8999 degen 0xf2749322174b9ff414919183f73b004197eff1121073f3769eddd462f8479719 0x1d9aae976fa0aeaaa9d226ec5fe07e17be9515df43e607ac20297033325e2f53 #473/729 background: none; body: black; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: none 0x530f4bc5acb4ea7b367bd8fa909ef198f6da4a323130e816d24af005eedc9170 0x00673d0a577f44375a99e3957a03418997c149eddd213dfb91df282c96a8248f 0x0dae6c7063bce923fc75a3f59e346e270693ae180ff5dd8b76d68cf6404a9288 chain_logs contract_getters",
     "settlement": {
       "block_number": 25067135,
       "block_time_utc": "2024-12-29T23:05:49Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,12 +90,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -105,7 +105,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

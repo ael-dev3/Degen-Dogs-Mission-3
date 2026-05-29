@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#242/728",
-      "rank": 242,
-      "total": 728
+      "display": "#244/729",
+      "rank": 244,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 117 dog #117 117 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21012cb6ceba6c8c6a93ed4003456ca0367f3efcc24b0820503e36be2c5aec55 0x69452b27d51af714aa88c2897671cf167440ed0cca325d3597a028809f335606 #242/728 background: none; body: brown; neck: redcollar; mouth: tongue; ears: none; head: toque; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 117 dog #117 117 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21012cb6ceba6c8c6a93ed4003456ca0367f3efcc24b0820503e36be2c5aec55 0x69452b27d51af714aa88c2897671cf167440ed0cca325d3597a028809f335606 #244/729 background: none; body: brown; neck: redcollar; mouth: tongue; ears: none; head: toque; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28875376,
       "block_time_utc": "2022-05-28T14:42:41Z",
@@ -73,17 +73,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -103,7 +103,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

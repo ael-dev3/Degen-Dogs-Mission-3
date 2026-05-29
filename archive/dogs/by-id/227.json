@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#316/728",
-      "rank": 316,
-      "total": 728
+      "display": "#317/729",
+      "rank": 317,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 227 dog #227 227 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555 degen 0x2ea05afeaf5968de071a5c21d9e53780540a9603d6211ba870a039c7544c3f25 0xb96445b3d04345b74914c752b0945ce164ef05914641775a1049972e81fb3943 #316/728 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: vrgoggles 0xcd1937bc26e356bf666dbfc13d521581f9f20f27c84401eadba574c81b360452 0x2cff16fb15569558592b71f2655d9d619156c6e4f6aad760ec64b86dd744b9c1 0x1d4d19f33b5f19db06dc29387b43b532823ee3dec381203b33b13563e01ea51b 0x0828accd9a9cfc18c325c12e8446d179ab94d329174ed916f2419b5a216e3147 0x151e6d6a47d17e2b7b52e62c531cd3d708eb4b93f2068d563919001b1b87da91 chain_logs contract_getters",
+    "search_text": "dog 227 dog #227 227 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555 degen 0x2ea05afeaf5968de071a5c21d9e53780540a9603d6211ba870a039c7544c3f25 0xb96445b3d04345b74914c752b0945ce164ef05914641775a1049972e81fb3943 #317/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: vrgoggles 0xcd1937bc26e356bf666dbfc13d521581f9f20f27c84401eadba574c81b360452 0x2cff16fb15569558592b71f2655d9d619156c6e4f6aad760ec64b86dd744b9c1 0x1d4d19f33b5f19db06dc29387b43b532823ee3dec381203b33b13563e01ea51b 0x0828accd9a9cfc18c325c12e8446d179ab94d329174ed916f2419b5a216e3147 0x151e6d6a47d17e2b7b52e62c531cd3d708eb4b93f2068d563919001b1b87da91 chain_logs contract_getters",
     "settlement": {
       "block_number": 24988668,
       "block_time_utc": "2024-12-21T01:24:13Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,12 +87,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

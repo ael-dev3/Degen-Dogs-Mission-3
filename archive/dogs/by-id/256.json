@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#499/728",
-      "rank": 499,
-      "total": 728
+      "display": "#498/729",
+      "rank": 498,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 256 dog #256 256 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9100 degen 0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2 0x4e5c747ad2e25a7dabdb1313e72c454e64ac59527749444445658e50cbb04346 #499/728 background: none; body: blue; neck: none; mouth: none; ears: goldearring; head: baseballcap; eyes: masksnorkel 0x7d74baef1378e021b1a21c53403e68d9d4e2353c8aa22d3b5bd75ed327a91139 chain_logs contract_getters",
+    "search_text": "dog 256 dog #256 256 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9100 degen 0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2 0x4e5c747ad2e25a7dabdb1313e72c454e64ac59527749444445658e50cbb04346 #498/729 background: none; body: blue; neck: none; mouth: none; ears: goldearring; head: baseballcap; eyes: masksnorkel 0x7d74baef1378e021b1a21c53403e68d9d4e2353c8aa22d3b5bd75ed327a91139 chain_logs contract_getters",
     "settlement": {
       "block_number": 25260490,
       "block_time_utc": "2025-01-17T04:52:37Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,12 +88,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },

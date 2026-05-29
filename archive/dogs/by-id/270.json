@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#295/728",
-      "rank": 295,
-      "total": 728
+      "display": "#296/729",
+      "rank": 296,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 270 dog #270 270 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8000 degen 0x76f09d590caccb4e60e390d6ebaeb10e4f391fa62f1adeba65508a6b03d203e1 0x1d608fe1333aed90077667b041cd8d14fff9d008aed21a624f8dfbb06be18dd5 #295/728 background: none; body: grey; neck: goldnecklace; mouth: tongue; ears: none; head: baseballcap; eyes: masksnorkel 0xa77c82cac37305d71cac6cd4024fd40bc876de9cf15baae04b5a1792003862c8 0x03669b46387011c96d4911bb912d42a6a1a3f832f344cc591ba86e705fec8ae8 0x8e0b7e3d7153a3184894e6495e4a5dcee44adfc9167e80a30ce5b2d64a1feeb9 0x5d18901c9bcfd2396682f2331223b5ae8d4add3c28df190cae8507c90850df7d 0x8216580f412bfaed728ff4b448dae2794c9799a5342f08dc57a184222995f3d5 0x1c910bf1405dfd18614b0da3751460789a2919dd5b3267d4b52c7a7ff68c123d 0x216b2f18b589b6ea339b5c38c5b5476ca39a826db4056aa561dd4e2ab1df6443 chain_logs contract_getters",
+    "search_text": "dog 270 dog #270 270 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8000 degen 0x76f09d590caccb4e60e390d6ebaeb10e4f391fa62f1adeba65508a6b03d203e1 0x1d608fe1333aed90077667b041cd8d14fff9d008aed21a624f8dfbb06be18dd5 #296/729 background: none; body: grey; neck: goldnecklace; mouth: tongue; ears: none; head: baseballcap; eyes: masksnorkel 0xa77c82cac37305d71cac6cd4024fd40bc876de9cf15baae04b5a1792003862c8 0x03669b46387011c96d4911bb912d42a6a1a3f832f344cc591ba86e705fec8ae8 0x8e0b7e3d7153a3184894e6495e4a5dcee44adfc9167e80a30ce5b2d64a1feeb9 0x5d18901c9bcfd2396682f2331223b5ae8d4add3c28df190cae8507c90850df7d 0x8216580f412bfaed728ff4b448dae2794c9799a5342f08dc57a184222995f3d5 0x1c910bf1405dfd18614b0da3751460789a2919dd5b3267d4b52c7a7ff68c123d 0x216b2f18b589b6ea339b5c38c5b5476ca39a826db4056aa561dd4e2ab1df6443 chain_logs contract_getters",
     "settlement": {
       "block_number": 25379233,
       "block_time_utc": "2025-01-30T13:41:16Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },

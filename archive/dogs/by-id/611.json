@@ -50,12 +50,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#106/728",
+      "display": "#106/729",
       "rank": 106,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 611 dog #611 611 mission 3 mission 3 base settled 0x14e8fddfa4a7c709c19a8c7da5205c3ae366355c @iiccii iiccii 0.07701 eth 0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace #106/728 background: halo; body: black; neck: none; mouth: teeth; ears: earbuds; head: baseballcap; eyes: glasses 0x8f8ce939a7fc465e22e4e317c8ccd088889b439ea1ac457b9c02fa89ba41002f 0x69001461288ee11aa380c11f8158c882aa127144d0cbbd122a4fcb1559135aa3 0xba83fe244a86d57836f0c00c726c56a837cea781a45b1712e60325b82e2961bc base_logs archive_indexer",
+    "search_text": "dog 611 dog #611 611 mission 3 mission 3 base settled 0x14e8fddfa4a7c709c19a8c7da5205c3ae366355c @iiccii iiccii 0.07701 eth 0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace #106/729 background: halo; body: black; neck: none; mouth: teeth; ears: earbuds; head: baseballcap; eyes: glasses 0x8f8ce939a7fc465e22e4e317c8ccd088889b439ea1ac457b9c02fa89ba41002f 0x69001461288ee11aa380c11f8158c882aa127144d0cbbd122a4fcb1559135aa3 0xba83fe244a86d57836f0c00c726c56a837cea781a45b1712e60325b82e2961bc base_logs archive_indexer",
     "settlement": {
       "block_number": 41519533,
       "block_time_utc": "2026-01-31T03:00:13Z",
@@ -75,7 +75,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -95,7 +95,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

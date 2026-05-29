@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#592/728",
-      "rank": 592,
-      "total": 728
+      "display": "#591/729",
+      "rank": 591,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 #592/728 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 #591/729 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29902006,
       "block_time_utc": "2022-06-23T09:49:25Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,12 +83,12 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -98,12 +98,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#531/728",
-      "rank": 531,
-      "total": 728
+      "display": "#528/729",
+      "rank": 528,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 697 dog #697 697 mission 3 mission 3 base settled 0x398acdc97722f3f0415861359e74bdcd10e41130 @acion acion 0.02785 eth 0x336a93c0317990ca9c234e81e86e5c98e3fc043c69838f8b6ead0df7107d0509 0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb #531/728 background: none; body: dalmation; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: bluelasereyes 0x9a3bdc9a127d94bb7bd9e085b294ba1402345e3219f6ae5bdbbc5f27a19b5934 0xb9db3c896dfdafb645f22a4683e0a1d28e16aa08599fd652da8c5b796f6616bc 0xc9ce246e731cb72fa2ccb169dd4160077e4e5ca2793662e2d6013df3281f2b72 0x41df2b353553656473d0badf9ed12c8edef2852a9b6c8b11577ed5c4a3819f52 0xf91d6c543c67b3c4a67117af1a8caab2527b862a867451c54cb63a80492955f7 0x8ec9f9c9349aa5877e20c25f632537180ff2d62866a6ba55cee03b9bd9a5f4a4 base_logs archive_indexer",
+    "search_text": "dog 697 dog #697 697 mission 3 mission 3 base settled 0x398acdc97722f3f0415861359e74bdcd10e41130 @acion acion 0.02785 eth 0x336a93c0317990ca9c234e81e86e5c98e3fc043c69838f8b6ead0df7107d0509 0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb #528/729 background: none; body: dalmation; neck: redcollar; mouth: pizza; ears: none; head: none; eyes: bluelasereyes 0x9a3bdc9a127d94bb7bd9e085b294ba1402345e3219f6ae5bdbbc5f27a19b5934 0xb9db3c896dfdafb645f22a4683e0a1d28e16aa08599fd652da8c5b796f6616bc 0xc9ce246e731cb72fa2ccb169dd4160077e4e5ca2793662e2d6013df3281f2b72 0x41df2b353553656473d0badf9ed12c8edef2852a9b6c8b11577ed5c4a3819f52 0xf91d6c543c67b3c4a67117af1a8caab2527b862a867451c54cb63a80492955f7 0x8ec9f9c9349aa5877e20c25f632537180ff2d62866a6ba55cee03b9bd9a5f4a4 base_logs archive_indexer",
     "settlement": {
       "block_number": 45268155,
       "block_time_utc": "2026-04-27T21:34:17Z",
@@ -78,22 +78,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

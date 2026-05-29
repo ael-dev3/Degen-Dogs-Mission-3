@@ -49,12 +49,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#279/728",
+      "display": "#279/729",
       "rank": 279,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 675 dog #675 675 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01843 eth 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 #279/728 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: partyhat; eyes: glasses 0x902ce2bf840f605b8301b6ccdbb01cd13f5a0764175e6f11437e1ae4eabd3ce9 0x4bce18fbe25dbb866e69933cb4c2442295154ac3ded9d74db84dcb17fbe36b2c base_logs archive_indexer",
+    "search_text": "dog 675 dog #675 675 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01843 eth 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 #279/729 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: partyhat; eyes: glasses 0x902ce2bf840f605b8301b6ccdbb01cd13f5a0764175e6f11437e1ae4eabd3ce9 0x4bce18fbe25dbb866e69933cb4c2442295154ac3ded9d74db84dcb17fbe36b2c base_logs archive_indexer",
     "settlement": {
       "block_number": 44310968,
       "block_time_utc": "2026-04-05T17:48:03Z",
@@ -74,12 +74,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -89,7 +89,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

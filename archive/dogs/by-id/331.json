@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#194/728",
-      "rank": 194,
-      "total": 728
+      "display": "#193/729",
+      "rank": 193,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 331 dog #331 331 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7000 degen 0x355b40dc5b6767dfcbbae68e7e156947323e3cd8dc3d0c1da986a877b85283fb 0x287e70382bbb5aa5a47a5d71f74e7952bb75928c899409ccd99a15a1bf2bb76e #194/728 background: none; body: orange; neck: studdedcollar; mouth: none; ears: loopearring; head: hoodie; eyes: none 0x8e20fe98a188fa25bf060e247a3fea517d0ea8622ba3a5d70718ba6161fe63cd 0xa46fc2db8a57ce36188e80c2a19565240d68ce0a14c38e5fd1651d47436a6114 0x08c1abbc56a956eedefe2009a8436ad456d9434d6c4f7f1b3dec3439b78e084e chain_logs contract_getters",
+    "search_text": "dog 331 dog #331 331 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7000 degen 0x355b40dc5b6767dfcbbae68e7e156947323e3cd8dc3d0c1da986a877b85283fb 0x287e70382bbb5aa5a47a5d71f74e7952bb75928c899409ccd99a15a1bf2bb76e #193/729 background: none; body: orange; neck: studdedcollar; mouth: none; ears: loopearring; head: hoodie; eyes: none 0x8e20fe98a188fa25bf060e247a3fea517d0ea8622ba3a5d70718ba6161fe63cd 0xa46fc2db8a57ce36188e80c2a19565240d68ce0a14c38e5fd1651d47436a6114 0x08c1abbc56a956eedefe2009a8436ad456d9434d6c4f7f1b3dec3439b78e084e chain_logs contract_getters",
     "settlement": {
       "block_number": 25658338,
       "block_time_utc": "2025-03-29T19:56:13Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -90,7 +90,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

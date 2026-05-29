@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#97/728",
+      "display": "#97/729",
       "rank": 97,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 583 dog #583 583 mission 2 mission 2 degen chain settled 0x409538216575caefe49af5af9b12ef4b4496041b 0x4095…041b 22184 degen 0xa468e1432ca06647f30621f3b4ed7136f40e63d29f936e404feb27da32d582d2 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 #97/728 background: none; body: black; neck: none; mouth: coin; ears: none; head: baseballcap; eyes: none 0xd80a36f3a14a5cf65bef1e5a4e07213500e75cb236fb0699751b92425a80ca68 0xd0bcb2728cc30e99d321281f7887312aa1c2c4b967e40bc2131350023efa99d4 0x7a5934ceb95a277d245687582547b5a6f7d6308bfc7b38532f6129cf622fb203 0x11b288dba0a7fa49ee9cc0565bfc6d41ff1851e100f94a58940ee72acf15626b chain_logs contract_getters",
+    "search_text": "dog 583 dog #583 583 mission 2 mission 2 degen chain settled 0x409538216575caefe49af5af9b12ef4b4496041b 0x4095…041b 22184 degen 0xa468e1432ca06647f30621f3b4ed7136f40e63d29f936e404feb27da32d582d2 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 #97/729 background: none; body: black; neck: none; mouth: coin; ears: none; head: baseballcap; eyes: none 0xd80a36f3a14a5cf65bef1e5a4e07213500e75cb236fb0699751b92425a80ca68 0xd0bcb2728cc30e99d321281f7887312aa1c2c4b967e40bc2131350023efa99d4 0x7a5934ceb95a277d245687582547b5a6f7d6308bfc7b38532f6129cf622fb203 0x11b288dba0a7fa49ee9cc0565bfc6d41ff1851e100f94a58940ee72acf15626b chain_logs contract_getters",
     "settlement": {
       "block_number": 26613786,
       "block_time_utc": "2025-12-31T07:54:40Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

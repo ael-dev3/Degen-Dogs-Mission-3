@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#286/728",
-      "rank": 286,
-      "total": 728
+      "display": "#285/729",
+      "rank": 285,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 695 dog #695 695 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0317 eth 0x5d8b790f91cb7549b75e110941f8c1ebffcf349b88a73bc8bad5857a0c7f55bf 0x6069b5518ed83b759e71a01ae282ee88004b87ba27020ba6ac68b367bbdf2d40 #286/728 background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: loopearring; head: beanie; eyes: glasses 0xaa91af8268527f2774141ec28325078b8d1a29dae5e862a684796e5b840c8f01 0xae6c1249be6f97a7c3583755dcf19fff1bd552c129989c5859d5a91f96990170 0x308579d6278b63ad1dd3b1332cfb0728e864a69ac4892bc90e55fffecd0b22b9 0x034788b3efd95c8dfb79032668c1f110de76cc0fb9b37544fcf5b842ef2fda36 0xd08eb6a37b04676e4c9f68a5924e0c98252d98b64e9f470202d0592d6914fd01 base_logs archive_indexer",
+    "search_text": "dog 695 dog #695 695 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0317 eth 0x5d8b790f91cb7549b75e110941f8c1ebffcf349b88a73bc8bad5857a0c7f55bf 0x6069b5518ed83b759e71a01ae282ee88004b87ba27020ba6ac68b367bbdf2d40 #285/729 background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: loopearring; head: beanie; eyes: glasses 0xaa91af8268527f2774141ec28325078b8d1a29dae5e862a684796e5b840c8f01 0xae6c1249be6f97a7c3583755dcf19fff1bd552c129989c5859d5a91f96990170 0x308579d6278b63ad1dd3b1332cfb0728e864a69ac4892bc90e55fffecd0b22b9 0x034788b3efd95c8dfb79032668c1f110de76cc0fb9b37544fcf5b842ef2fda36 0xd08eb6a37b04676e4c9f68a5924e0c98252d98b64e9f470202d0592d6914fd01 base_logs archive_indexer",
     "settlement": {
       "block_number": 45181597,
       "block_time_utc": "2026-04-25T21:29:01Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Beanie (6.5%)",
+        "display": "Head: Beanie (6.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },

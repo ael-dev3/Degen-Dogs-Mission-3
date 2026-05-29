@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#222/728",
-      "rank": 222,
-      "total": 728
+      "display": "#224/729",
+      "rank": 224,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 105 dog #105 105 mission 1 mission 1 polygon settled 0xb0504ffd91835de1d3c027cfb70b2022e79c3350 0xb050…3350 0.05 weth 0xbd7cf4f4e9f3fdcf12bfc96452371f90bed683d71fbab4c6f21221903405254c 0xfd5cdf02e39b26180949344d8e2f0a2902b2fbfe199536b12a03181f35636534 #222/728 background: none; body: dalmation; neck: redcollar; mouth: none; ears: goldearring; head: hoodie; eyes: vrgoggles 0x84def3b7126dfb4ea3207e6c3dd64fd33aa85d9abbdc105fa5b6e2e842c59c27 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 105 dog #105 105 mission 1 mission 1 polygon settled 0xb0504ffd91835de1d3c027cfb70b2022e79c3350 0xb050…3350 0.05 weth 0xbd7cf4f4e9f3fdcf12bfc96452371f90bed683d71fbab4c6f21221903405254c 0xfd5cdf02e39b26180949344d8e2f0a2902b2fbfe199536b12a03181f35636534 #224/729 background: none; body: dalmation; neck: redcollar; mouth: none; ears: goldearring; head: hoodie; eyes: vrgoggles 0x84def3b7126dfb4ea3207e6c3dd64fd33aa85d9abbdc105fa5b6e2e842c59c27 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28408575,
       "block_time_utc": "2022-05-17T00:15:32Z",
@@ -75,27 +75,27 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -105,7 +105,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

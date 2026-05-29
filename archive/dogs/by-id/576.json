@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#121/728",
-      "rank": 121,
-      "total": 728
+      "display": "#120/729",
+      "rank": 120,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 576 dog #576 576 mission 2 mission 2 degen chain settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 15410 degen 0xda45ea42efb46663e868efef414dc0eade49984e003a644cc8b48417dc3d30e6 0x9ee47bc6318e041ef537fa1c1d2778d5ba31d7931486676763e297afc7dea305 #121/728 background: halo; body: redbrown; neck: none; mouth: none; ears: loopearring; head: crazyhair; eyes: redlasereyes 0xfc5c13ff07515318581b53b3456dbebb99b94a3207d2220c1963930dc323fd81 0x0b7f843335ec6d77e780b386cb4e8f2c90b9008e2078a2e453a8064bcdfa2ca2 0xb3b4a3dfb4e54f497212d6f2ffd9c0b4eec5115942f49f37459713f65abcaa01 0x4488b346e879ceaf9978c3e3069ec341e8e9699994c91fd9aaa0cfbef9dd2fb4 chain_logs contract_getters",
+    "search_text": "dog 576 dog #576 576 mission 2 mission 2 degen chain settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 15410 degen 0xda45ea42efb46663e868efef414dc0eade49984e003a644cc8b48417dc3d30e6 0x9ee47bc6318e041ef537fa1c1d2778d5ba31d7931486676763e297afc7dea305 #120/729 background: halo; body: redbrown; neck: none; mouth: none; ears: loopearring; head: crazyhair; eyes: redlasereyes 0xfc5c13ff07515318581b53b3456dbebb99b94a3207d2220c1963930dc323fd81 0x0b7f843335ec6d77e780b386cb4e8f2c90b9008e2078a2e453a8064bcdfa2ca2 0xb3b4a3dfb4e54f497212d6f2ffd9c0b4eec5115942f49f37459713f65abcaa01 0x4488b346e879ceaf9978c3e3069ec341e8e9699994c91fd9aaa0cfbef9dd2fb4 chain_logs contract_getters",
     "settlement": {
       "block_number": 26605263,
       "block_time_utc": "2025-12-24T07:08:39Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

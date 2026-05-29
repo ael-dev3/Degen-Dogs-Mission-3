@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#694/728",
+      "display": "#694/729",
       "rank": 694,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 101 dog #101 101 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.05 weth 0xb27f0566c6d1eafaf080aef9d59e0615be45841ef6db2a1950a5289c4530fe18 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a #694/728 background: none; body: white; neck: none; mouth: none; ears: none; head: none; eyes: vrgoggles 0x0f739cc9656e8b0558940b8f7d9614f5dd2e87d8ba8657a269a2879b0e5aab2e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 101 dog #101 101 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.05 weth 0xb27f0566c6d1eafaf080aef9d59e0615be45841ef6db2a1950a5289c4530fe18 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a #694/729 background: none; body: white; neck: none; mouth: none; ears: none; head: none; eyes: vrgoggles 0x0f739cc9656e8b0558940b8f7d9614f5dd2e87d8ba8657a269a2879b0e5aab2e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28236055,
       "block_time_utc": "2022-05-12T17:16:02Z",
@@ -75,12 +75,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -90,7 +90,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -100,12 +100,12 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

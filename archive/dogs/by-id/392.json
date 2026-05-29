@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#440/728",
-      "rank": 440,
-      "total": 728
+      "display": "#443/729",
+      "rank": 443,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 392 dog #392 392 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x61e239e0c2746b5492cd50a1be93817225646a82b3421023fffffba14691ec6e 0x5aa1b3df70f2871586d838b19c6e08e87797e2f4d57f1317748d2deb135fa97a #440/728 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: none 0x1867e272970241cb498b8e118b1754a7fa902d95c215cd03f255c1010b84d6e7 chain_logs contract_getters",
+    "search_text": "dog 392 dog #392 392 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x61e239e0c2746b5492cd50a1be93817225646a82b3421023fffffba14691ec6e 0x5aa1b3df70f2871586d838b19c6e08e87797e2f4d57f1317748d2deb135fa97a #443/729 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: none 0x1867e272970241cb498b8e118b1754a7fa902d95c215cd03f255c1010b84d6e7 chain_logs contract_getters",
     "settlement": {
       "block_number": 25912878,
       "block_time_utc": "2025-05-27T00:32:26Z",
@@ -73,22 +73,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

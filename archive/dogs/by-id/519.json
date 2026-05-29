@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#382/728",
-      "rank": 382,
-      "total": 728
+      "display": "#381/729",
+      "rank": 381,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 519 dog #519 519 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 3200 degen 0xe1a75298f79ef387b270fcc8aef9c68e93b7762c1d69b42b220dbf284106bcac 0x85ebb7bad21c5ae57d463246712c4c2f06294e7a5c12b8199b5dca98c409ead1 #382/728 background: none; body: black; neck: redcollar; mouth: pizza; ears: none; head: stripedbeanie; eyes: bluelasereyes 0xf84a126628266bc3713b6e719b9dd2fad1e9d64be7fb942e49ab8bcec7957814 0x14fee9f3e4342ee4021e14e422fcf60d51b89017b78e3f3cca8fd30057953584 0x5315424e25c97d74dbd6f9a83669fced66abef0dde6be02306c2b677d09067cd 0xb2f33727b6c992e60e2244e5afbf7cdccebd57f8f1e04490ca0b59efd1887f0c 0x3a23af15ff7d286fdc09536aa49c7c24a6e293b651de16b0a917f88c0843f507 chain_logs contract_getters",
+    "search_text": "dog 519 dog #519 519 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 3200 degen 0xe1a75298f79ef387b270fcc8aef9c68e93b7762c1d69b42b220dbf284106bcac 0x85ebb7bad21c5ae57d463246712c4c2f06294e7a5c12b8199b5dca98c409ead1 #381/729 background: none; body: black; neck: redcollar; mouth: pizza; ears: none; head: stripedbeanie; eyes: bluelasereyes 0xf84a126628266bc3713b6e719b9dd2fad1e9d64be7fb942e49ab8bcec7957814 0x14fee9f3e4342ee4021e14e422fcf60d51b89017b78e3f3cca8fd30057953584 0x5315424e25c97d74dbd6f9a83669fced66abef0dde6be02306c2b677d09067cd 0xb2f33727b6c992e60e2244e5afbf7cdccebd57f8f1e04490ca0b59efd1887f0c 0x3a23af15ff7d286fdc09536aa49c7c24a6e293b651de16b0a917f88c0843f507 chain_logs contract_getters",
     "settlement": {
       "block_number": 26380310,
       "block_time_utc": "2025-10-25T02:06:28Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,12 +87,12 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },

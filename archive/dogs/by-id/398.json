@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#613/728",
-      "rank": 613,
-      "total": 728
+      "display": "#612/729",
+      "rank": 612,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 398 dog #398 398 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xc97700c7372bd1a9c65f70382dbc384239c445e03c24d2425459c5cbf596e6c1 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d #613/728 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: none 0x8863f999364a5354751b4cf7de13c3d79f438699604d3cbd26ac64dbda03e285 chain_logs contract_getters",
+    "search_text": "dog 398 dog #398 398 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xc97700c7372bd1a9c65f70382dbc384239c445e03c24d2425459c5cbf596e6c1 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d #612/729 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: none 0x8863f999364a5354751b4cf7de13c3d79f438699604d3cbd26ac64dbda03e285 chain_logs contract_getters",
     "settlement": {
       "block_number": 25932418,
       "block_time_utc": "2025-06-01T05:17:23Z",
@@ -73,22 +73,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

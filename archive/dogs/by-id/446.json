@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#449/728",
+      "display": "#449/729",
       "rank": 449,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 446 dog #446 446 mission 2 mission 2 degen chain settled 0xeac5781e7ca68f1c7b6ebe854901e427049d0ab5 0xeac5…0ab5 4404 degen 0xc95e12120138ce650361d83a2496a3ba436273251fa7889b5fdb77f145d5f45f 0x9ecd74e88f5ba75f500a57aa0e420ee069f591a801ff10ea2504855f50e9e62d #449/728 background: none; body: white; neck: redcollar; mouth: tongue; ears: loopearring; head: stripedbeanie; eyes: none 0xc32ac33bf4fc0dc3900a7d0f4e55293f97fd86873d84bbfa9224872670e4d0aa 0x0eb0d833c124df975d9de9ccdbde057cccd2d9b95f8e6549c3f53b432309f698 0xe5e733e82de15038330096f857955580ad7b2747983455f600db9708edb8325e 0x96460d037d43a9fbecb77acbecfdce605dc74a66497c0e35e3b5fdd892d3dc3f 0xee8353a673ef3693722bd8c2b832a26f5d294ee01770d8b1ce4fc9f79d83a935 0x69b4e5d12958b05e12f55ee99cb1ecd9f2374bf509943d28ae25a3c7907ab5b3 0xef8a608d27ba2fda58593f8fd482a20d161cafc58a8f114d1f92216f5c5da257 chain_logs contract_getters",
+    "search_text": "dog 446 dog #446 446 mission 2 mission 2 degen chain settled 0xeac5781e7ca68f1c7b6ebe854901e427049d0ab5 0xeac5…0ab5 4404 degen 0xc95e12120138ce650361d83a2496a3ba436273251fa7889b5fdb77f145d5f45f 0x9ecd74e88f5ba75f500a57aa0e420ee069f591a801ff10ea2504855f50e9e62d #449/729 background: none; body: white; neck: redcollar; mouth: tongue; ears: loopearring; head: stripedbeanie; eyes: none 0xc32ac33bf4fc0dc3900a7d0f4e55293f97fd86873d84bbfa9224872670e4d0aa 0x0eb0d833c124df975d9de9ccdbde057cccd2d9b95f8e6549c3f53b432309f698 0xe5e733e82de15038330096f857955580ad7b2747983455f600db9708edb8325e 0x96460d037d43a9fbecb77acbecfdce605dc74a66497c0e35e3b5fdd892d3dc3f 0xee8353a673ef3693722bd8c2b832a26f5d294ee01770d8b1ce4fc9f79d83a935 0x69b4e5d12958b05e12f55ee99cb1ecd9f2374bf509943d28ae25a3c7907ab5b3 0xef8a608d27ba2fda58593f8fd482a20d161cafc58a8f114d1f92216f5c5da257 chain_logs contract_getters",
     "settlement": {
       "block_number": 26136564,
       "block_time_utc": "2025-08-02T02:29:54Z",
@@ -79,17 +79,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -109,7 +109,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#461/728",
-      "rank": 461,
-      "total": 728
+      "display": "#466/729",
+      "rank": 466,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 568 dog #568 568 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12725 degen 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f #461/728 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: headphones; eyes: vrgoggles 0x3ac6fe663f2458a43cd0368f3b7a981ce162535d43c929edd2412ac2144f3d15 0x83c601dd0fe39a40a776650c5217b0f7d5e82cb5ca73d1e04d2bfbc1e82c5e6b chain_logs contract_getters",
+    "search_text": "dog 568 dog #568 568 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12725 degen 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f #466/729 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: headphones; eyes: vrgoggles 0x3ac6fe663f2458a43cd0368f3b7a981ce162535d43c929edd2412ac2144f3d15 0x83c601dd0fe39a40a776650c5217b0f7d5e82cb5ca73d1e04d2bfbc1e82c5e6b chain_logs contract_getters",
     "settlement": {
       "block_number": 26591436,
       "block_time_utc": "2025-12-16T06:15:21Z",
@@ -74,7 +74,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -84,17 +84,17 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -104,7 +104,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#88/728",
+      "display": "#88/729",
       "rank": 88,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 532 dog #532 532 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2323 degen 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 #88/728 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: none; head: baseballcap; eyes: none 0x210318f218969882e489592244e27ed056b79f56fe97fba02ff98d6771e8c6d5 chain_logs contract_getters",
+    "search_text": "dog 532 dog #532 532 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2323 degen 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 #88/729 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: none; head: baseballcap; eyes: none 0x210318f218969882e489592244e27ed056b79f56fe97fba02ff98d6771e8c6d5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26449668,
       "block_time_utc": "2025-11-10T01:10:19Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,7 +83,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -103,7 +103,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

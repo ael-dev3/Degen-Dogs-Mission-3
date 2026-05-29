@@ -48,12 +48,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#89/728",
+      "display": "#89/729",
       "rank": 89,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #89/728 background: none; body: sugarskull; neck: redcollar; mouth: tongue; ears: loopearring; head: hoodie; eyes: bluelasereyes 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 base_logs archive_indexer",
+    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #89/729 background: none; body: sugarskull; neck: redcollar; mouth: tongue; ears: loopearring; head: hoodie; eyes: bluelasereyes 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 base_logs archive_indexer",
     "settlement": {
       "block_number": 42432933,
       "block_time_utc": "2026-02-21T06:26:53Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -83,7 +83,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },

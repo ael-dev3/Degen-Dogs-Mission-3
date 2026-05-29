@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#30/728",
-      "rank": 30,
-      "total": 728
+      "display": "#31/729",
+      "rank": 31,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 146 dog #146 146 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x3c6e6adc885a361594856194564108c67449535e3d6b555c686dabe8ffa09bba 0x13bb5c1a5abe7fef1b8acddeb9a2112114de883b9621eb2dc0adf8cd401b604d #30/728 background: none; body: grey; neck: goldnecklace; mouth: bone; ears: loopearring; head: toque; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 146 dog #146 146 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x3c6e6adc885a361594856194564108c67449535e3d6b555c686dabe8ffa09bba 0x13bb5c1a5abe7fef1b8acddeb9a2112114de883b9621eb2dc0adf8cd401b604d #31/729 background: none; body: grey; neck: goldnecklace; mouth: bone; ears: loopearring; head: toque; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 30503106,
       "block_time_utc": "2022-07-09T00:21:11Z",
@@ -73,12 +73,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -103,7 +103,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

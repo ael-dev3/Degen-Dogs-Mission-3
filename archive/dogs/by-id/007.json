@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#214/728",
-      "rank": 214,
-      "total": 728
+      "display": "#213/729",
+      "rank": 213,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 7 dog #7 7 mission 1 mission 1 polygon settled 0x7b9eff2abd33bc2af23c7d74ad92bbd3e48e7478 0x7b9e…7478 0.88 weth 0x1e365225c818c1e7c46d54eb0baa56feec813c589b5a1656da9518aeb0cb6fc5 0x2980c06bac0755b5b8cb1075ae7f63396c5db2c8715331640fd10ad4a41f0c70 #214/728 background: halo; body: dalmation; neck: none; mouth: none; ears: earbuds; head: unicorn; eyes: none 0xdb1203370fa8873147e5ac28c0f0d113823fd43bb272e00754819f81fcc0647f 0x2684dff3a92fb35cb5fa87582e8e60e393418f4c85055b10c7308d6e651de600 0x0d66080006b0cc4affceef9a47a85b332de4babd7d00672089df00a9b4ea5df5 0xb3a5860e538d648fabd6a830f7c49f9b9e8ea5faa7b3278a31b3507827a9fe1c 0x68861dfe0ebeb0e48ef1f565bb8a1d5e7a81013162920cb812011eee3c3bbd59 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 7 dog #7 7 mission 1 mission 1 polygon settled 0x7b9eff2abd33bc2af23c7d74ad92bbd3e48e7478 0x7b9e…7478 0.88 weth 0x1e365225c818c1e7c46d54eb0baa56feec813c589b5a1656da9518aeb0cb6fc5 0x2980c06bac0755b5b8cb1075ae7f63396c5db2c8715331640fd10ad4a41f0c70 #213/729 background: halo; body: dalmation; neck: none; mouth: none; ears: earbuds; head: unicorn; eyes: none 0xdb1203370fa8873147e5ac28c0f0d113823fd43bb272e00754819f81fcc0647f 0x2684dff3a92fb35cb5fa87582e8e60e393418f4c85055b10c7308d6e651de600 0x0d66080006b0cc4affceef9a47a85b332de4babd7d00672089df00a9b4ea5df5 0xb3a5860e538d648fabd6a830f7c49f9b9e8ea5faa7b3278a31b3507827a9fe1c 0x68861dfe0ebeb0e48ef1f565bb8a1d5e7a81013162920cb812011eee3c3bbd59 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26060096,
       "block_time_utc": "2022-03-18T02:56:57Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Dalmation (9.8%)",
+        "display": "Body: Dalmation (9.7%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -94,12 +94,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -109,7 +109,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

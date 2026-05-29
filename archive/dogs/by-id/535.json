@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#71/728",
+      "display": "#71/729",
       "rank": 71,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 535 dog #535 535 mission 2 mission 2 degen chain settled 0xb5ffc7dc088a44b3dc5bac396806bfbbc71634ce 0xb5ff…34ce 3000 degen 0x87949f90dc3022844c49915f8447738222b7d3f11d6766cec9fec5e6d166b1db 0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d #71/728 background: none; body: rainbow; neck: none; mouth: tongue; ears: goldearring; head: toque; eyes: vrgoggles 0x18f0668d32642f45c3449bd2c760121d773a2ad0070a7daab6f84bec44f9c46a 0xb643b2d3825b14d475bc8ff4f8b00df694a168ef8e42026c765eba81072a5217 0xc23bb047c1554ca6ca286e5f491a58ffef03542611ec7e44a330631302b01bc0 0x8d6d5a3918728aee6d28d802cb7905f62741e3d8106387e25ed15c99aa159336 0x101d8752919899d8ea8bb5801943020ca8ab156cfb626b227a532eeb3a73fa67 chain_logs contract_getters",
+    "search_text": "dog 535 dog #535 535 mission 2 mission 2 degen chain settled 0xb5ffc7dc088a44b3dc5bac396806bfbbc71634ce 0xb5ff…34ce 3000 degen 0x87949f90dc3022844c49915f8447738222b7d3f11d6766cec9fec5e6d166b1db 0x40838614a99214cce21550df87b9f1cc4379185016cbaf2ad11647bd3729fc2d #71/729 background: none; body: rainbow; neck: none; mouth: tongue; ears: goldearring; head: toque; eyes: vrgoggles 0x18f0668d32642f45c3449bd2c760121d773a2ad0070a7daab6f84bec44f9c46a 0xb643b2d3825b14d475bc8ff4f8b00df694a168ef8e42026c765eba81072a5217 0xc23bb047c1554ca6ca286e5f491a58ffef03542611ec7e44a330631302b01bc0 0x8d6d5a3918728aee6d28d802cb7905f62741e3d8106387e25ed15c99aa159336 0x101d8752919899d8ea8bb5801943020ca8ab156cfb626b227a532eeb3a73fa67 chain_logs contract_getters",
     "settlement": {
       "block_number": 26464828,
       "block_time_utc": "2025-11-13T02:15:11Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -97,7 +97,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: GoldEarring (15.7%)",
+        "display": "Ears: GoldEarring (15.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -107,7 +107,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: VRGoggles (10.0%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

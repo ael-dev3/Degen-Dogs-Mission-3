@@ -62,12 +62,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#525/728",
-      "rank": 525,
-      "total": 728
+      "display": "#524/729",
+      "rank": 524,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 451 dog #451 451 mission 2 mission 2 degen chain settled 0x2a78be7b3b40671fa356798e7908654234bc0444 0x2a78…0444 3810 degen 0x884b35fe99495a0ac0637520f33f984704936cbebb7a6021aef91ac8f8e38783 0x983e02ca660c9fbf841667ce97c96c1024719d3a7fdc49f1ef482f61bda1ee46 #525/728 background: none; body: brown; neck: none; mouth: none; ears: none; head: redmohawk; eyes: bluelasereyes 0xf813da426713952fd6d598fb55a305bba70220beb2f0ae08be6826eb59065ff4 0xdda413fcdc640c712cd3f05981b617beb749a0da3ce7314ddd3207c1f637fcd0 0x6a6103d20b7a791cb625697c6217ff5f72099b7b3245f0eb25e369a9e817df19 0xee8274f5fa697bc4061177590278e3e94d300a899ceff26d23380dbe527ee489 0xe08185a7128a70e0903a27aff47419b690acda70e9d4bae7620abf2d40bbc86c 0x04c2bb15296af70bac1888bd68aa5157d3b42d296825befdc4e52dbf348c3111 0x49de3da39b94a5d365ebdaff5ff78de1c8c936ef045eafa05abd145bafd9196d 0x14bf517a60ef5ceaf6b84ef5fc3a9da2b003f7271051fb345a5d19eafbd6cd93 0xf5226745766b5fba77c0a545ba6e75de9528d03e7e14c5818ddb72f5beb414a2 0xfc7a7769bc954f9beec26967aed29e852cd3a75df476b55d3d9fc8fa267e9ca7 0x0a45936b7b7bef18fa5f76110dae12feb57699d22a65bfcfa704444ea158c7c9 0x7381f4cde1a422e9d2adb64e14c5dd88ddeafe455c125d2c2d3adb4dff60442f 0x56aca896217371aa62cbf34d53ca4ecc0a8a20bc269fd8a0e5297c9f44e7d3db 0x141d19db2f33d950e11fea1ab3d7f6f5d592ab757ff678a331b10680190808f5 0x8c6dc75b6061e661043ff1ba03eaf747b478cdb85f5491a2768b536197b01523 chain_logs contract_getters",
+    "search_text": "dog 451 dog #451 451 mission 2 mission 2 degen chain settled 0x2a78be7b3b40671fa356798e7908654234bc0444 0x2a78…0444 3810 degen 0x884b35fe99495a0ac0637520f33f984704936cbebb7a6021aef91ac8f8e38783 0x983e02ca660c9fbf841667ce97c96c1024719d3a7fdc49f1ef482f61bda1ee46 #524/729 background: none; body: brown; neck: none; mouth: none; ears: none; head: redmohawk; eyes: bluelasereyes 0xf813da426713952fd6d598fb55a305bba70220beb2f0ae08be6826eb59065ff4 0xdda413fcdc640c712cd3f05981b617beb749a0da3ce7314ddd3207c1f637fcd0 0x6a6103d20b7a791cb625697c6217ff5f72099b7b3245f0eb25e369a9e817df19 0xee8274f5fa697bc4061177590278e3e94d300a899ceff26d23380dbe527ee489 0xe08185a7128a70e0903a27aff47419b690acda70e9d4bae7620abf2d40bbc86c 0x04c2bb15296af70bac1888bd68aa5157d3b42d296825befdc4e52dbf348c3111 0x49de3da39b94a5d365ebdaff5ff78de1c8c936ef045eafa05abd145bafd9196d 0x14bf517a60ef5ceaf6b84ef5fc3a9da2b003f7271051fb345a5d19eafbd6cd93 0xf5226745766b5fba77c0a545ba6e75de9528d03e7e14c5818ddb72f5beb414a2 0xfc7a7769bc954f9beec26967aed29e852cd3a75df476b55d3d9fc8fa267e9ca7 0x0a45936b7b7bef18fa5f76110dae12feb57699d22a65bfcfa704444ea158c7c9 0x7381f4cde1a422e9d2adb64e14c5dd88ddeafe455c125d2c2d3adb4dff60442f 0x56aca896217371aa62cbf34d53ca4ecc0a8a20bc269fd8a0e5297c9f44e7d3db 0x141d19db2f33d950e11fea1ab3d7f6f5d592ab757ff678a331b10680190808f5 0x8c6dc75b6061e661043ff1ba03eaf747b478cdb85f5491a2768b536197b01523 chain_logs contract_getters",
     "settlement": {
       "block_number": 26153630,
       "block_time_utc": "2025-08-07T03:25:40Z",
@@ -87,12 +87,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#144/728",
+      "display": "#144/729",
       "rank": 144,
-      "total": 728
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 556 dog #556 556 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 15383 degen 0x30ab2c218bb3892ae3b1125bab32e496f843f91ceec6ef452a591be92ab9941a 0x7da2ad247c63667d6843382eb590807bf67db177a3ba7067bd97c47c39456b37 #144/728 background: none; body: brown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: partyhat; eyes: sunglasses 0xa6926abba879681a749ff93a49684168b5f0f502ed462da5de4133b7a39c8387 0xe3f054c36beab50b36b4b668fc717f9b96c15833ea26025d3edc86357d452915 0x507873a5f6f32e8eebb38680a9ca2ea83c068c62f234acffd5aade46234a3421 0x12b3f3c5ece7765caae6e63d44d5d2e9f55ac432f79ea9f830efb5208c3a9f44 0x16f4e6c67af6681b36bf8526e36230c7ff212bf3096a3b11bc6d3b20a7681f23 chain_logs contract_getters",
+    "search_text": "dog 556 dog #556 556 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 15383 degen 0x30ab2c218bb3892ae3b1125bab32e496f843f91ceec6ef452a591be92ab9941a 0x7da2ad247c63667d6843382eb590807bf67db177a3ba7067bd97c47c39456b37 #144/729 background: none; body: brown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: partyhat; eyes: sunglasses 0xa6926abba879681a749ff93a49684168b5f0f502ed462da5de4133b7a39c8387 0xe3f054c36beab50b36b4b668fc717f9b96c15833ea26025d3edc86357d452915 0x507873a5f6f32e8eebb38680a9ca2ea83c068c62f234acffd5aade46234a3421 0x12b3f3c5ece7765caae6e63d44d5d2e9f55ac432f79ea9f830efb5208c3a9f44 0x16f4e6c67af6681b36bf8526e36230c7ff212bf3096a3b11bc6d3b20a7681f23 chain_logs contract_getters",
     "settlement": {
       "block_number": 26548427,
       "block_time_utc": "2025-12-04T05:00:46Z",
@@ -77,12 +77,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -92,7 +92,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },

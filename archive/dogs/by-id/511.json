@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#332/728",
-      "rank": 332,
-      "total": 728
+      "display": "#331/729",
+      "rank": 331,
+      "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 511 dog #511 511 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xb1915d7d1d4c55a2cfcf72e33e8d3d9ca15649e9bc33a576045218e8f96fdc48 0xf82b860839121e5dc5784fb23bb7ea9c11024842f17349ff5a51c7248a57f7eb #332/728 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: bluelasereyes 0x7ea33ca8520831b0d1df7a34ae1ce032548a8d6bff6ef9d96a765e852dfbae11 chain_logs contract_getters",
+    "search_text": "dog 511 dog #511 511 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xb1915d7d1d4c55a2cfcf72e33e8d3d9ca15649e9bc33a576045218e8f96fdc48 0xf82b860839121e5dc5784fb23bb7ea9c11024842f17349ff5a51c7248a57f7eb #331/729 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: bluelasereyes 0x7ea33ca8520831b0d1df7a34ae1ce032548a8d6bff6ef9d96a765e852dfbae11 chain_logs contract_getters",
     "settlement": {
       "block_number": 26337475,
       "block_time_utc": "2025-10-17T00:39:13Z",
@@ -73,7 +73,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.8%)",
+        "display": "Background: Halo (9.7%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -83,12 +83,12 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
