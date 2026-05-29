@@ -6,6 +6,7 @@
   "scripts": {
     "data": "python3 scripts/build_dashboard.py",
     "check:historical-dogs": "python3 scripts/check_historical_dog_search.py",
+    "check:dashboard-ui": "python3 scripts/check_dashboard_ui.py",
     "archive:mission2": "python3 scripts/archive_mission2_index.py",
     "archive:mission2:check": "python3 scripts/archive_mission2_index.py --check-config",
     "archive:mission2:discover": "python3 archive/mission2/scripts/recover_dune_queries.py",

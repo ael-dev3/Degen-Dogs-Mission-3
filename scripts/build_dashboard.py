@@ -78,8 +78,7 @@ def opensea_trait_url(trait_type: str, trait_value: str) -> str:
         [{"traitType": str(trait_type), "values": [str(trait_value)]}],
         separators=(",", ":"),
     )
-    quote_encoded_payload = payload.replace('"', "%22")
-    encoded = urllib.parse.quote(quote_encoded_payload, safe=":,")
+    encoded = urllib.parse.quote(payload, safe="[]{}:,")
     return f"{OPENSEA_COLLECTION_URL}?traits={encoded}"
 
 # Rewards snapshot supplied by Ael for a 141-Dog wallet. WOOF Vault Bonus is
@@ -1832,13 +1831,13 @@ a:hover{color:var(--accent2)}
 .utility-chip:hover::after{color:var(--accent2)}
 .utility-chip--bid{background:var(--calm-dark);box-shadow:3px 3px 0 var(--calm)}
 .utility-chip--bid:hover{border-color:var(--calm-dark);color:var(--calm-dark);box-shadow:4px 4px 0 var(--calm)}
-.credit-menu{position:relative;display:inline-flex}
-.credit-trigger{cursor:default;background:#fff;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.credit-menu{position:relative;display:inline-flex;padding-bottom:8px;margin-bottom:-8px}
+.credit-trigger{cursor:pointer;background:#fff;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
 .credit-trigger:focus{outline:2px solid var(--accent2);outline-offset:2px}
-.credit-popover{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:6px;min-width:252px;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);padding:10px;opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease}
+.credit-popover{position:absolute;right:0;top:100%;z-index:30;display:grid;gap:6px;min-width:252px;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);padding:10px;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease,visibility .14s ease}
 .credit-head{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;align-items:center;border-bottom:1.5px solid var(--line);padding-bottom:7px;margin-bottom:2px}
 .credit-head img{width:44px;height:44px;object-fit:cover;image-rendering:pixelated;border:2px solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink)}
-.credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover{opacity:1;pointer-events:auto;transform:translateY(0)}
+.credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
 .credit-popover span{font-size:12px;font-weight:850;line-height:1.2;color:var(--ink)}
 .credit-popover a{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--ink);background:var(--panel2);padding:5px 7px;font-size:12px;font-weight:950;line-height:1;text-transform:uppercase;letter-spacing:.06em;box-shadow:2px 2px 0 var(--ink)}
 .credit-popover a::after{content:'↗';color:var(--accent2);font-size:.78em}

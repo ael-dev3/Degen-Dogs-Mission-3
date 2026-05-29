@@ -70,10 +70,10 @@ This block is generated from the latest data refresh, so it changes when `npm ru
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46628491 |
-| Snapshot time UTC | 2026-05-29 09:18:49 |
+| Snapshot block | 46628833 |
+| Snapshot time UTC | 2026-05-29 09:30:13 |
 | Current auction | Dog #727 |
-| Current bid | 0.01 ETH ($20.11) |
+| Current bid | 0.01 ETH ($20.1) |
 | Current high bidder | @0xael.eth |
 | Auction ends UTC | 2026-05-29 18:36:55 |
 | WOOF per Dog / day | 158,351.90 WOOF/day ($0.08/day) |
