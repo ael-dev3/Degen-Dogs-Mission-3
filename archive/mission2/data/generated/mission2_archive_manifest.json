@@ -1,0 +1,164 @@
+{
+  "auction_house_address": "0x3620ca030a023bce87ec59a8b0e979bd7607fdbd",
+  "chain_id": 666666666,
+  "config_confidence": "verified_onchain",
+  "dune_reconciliation_status": "not_recovered",
+  "event_topics": {
+    "AuctionBid": "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3",
+    "AuctionCreated": "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca",
+    "AuctionDurationUpdated": "0xaab6389d8f1c16ba1deb6e9831f5c5442cf4fcf99bf5bfa867460be408a91118",
+    "AuctionExtended": "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e",
+    "AuctionMinBidIncrementPercentageUpdated": "0xec5ccd96cc77b6219e9d44143df916af68fc169339ea7de5008ff15eae13450d",
+    "AuctionReservePriceUpdated": "0x6ab2e127d7fdf53b8f304e59d3aab5bfe97979f52a85479691a6fab27a28a6b2",
+    "AuctionSettled": "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99",
+    "AuctionTimeBufferUpdated": "0x1b55d9f7002bda4490f467e326f22a4a847629c0f2d1ed421607d318d25b410d"
+  },
+  "from_block": 24692180,
+  "generated_files": [
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_created.csv",
+      "csv_sha256": "c1980a3681f7190dbea41e65717b365a4160e2f44614b375eaf83ca0b528dfaf",
+      "json_path": "archive/mission2/data/generated/mission2_auction_created.json",
+      "json_sha256": "c1a94ea942494df0efc74d15b618455703ad40df084f65494db0a77a2f251441",
+      "name": "mission2_auction_created",
+      "rows": 369
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_bids.csv",
+      "csv_sha256": "ccc737f9611beb26cee1eaebce19c20f3a95b8b0f51a711b5314022f1f542101",
+      "json_path": "archive/mission2/data/generated/mission2_auction_bids.json",
+      "json_sha256": "2a4b6a7de04abda2196268acd18dc860367d0e23f8e4a77b8e9de01d6eb3fd76",
+      "name": "mission2_auction_bids",
+      "rows": 1630
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_extended.csv",
+      "csv_sha256": "39f9d7b82f181fc90fd8911ff393cff67454c584bada10eaed36c1b053eccec7",
+      "json_path": "archive/mission2/data/generated/mission2_auction_extended.json",
+      "json_sha256": "1d7b1f4888bcaf28d64f45b43108099ebf040d56275be3656c8ca77ca79a35a6",
+      "name": "mission2_auction_extended",
+      "rows": 273
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_settled.csv",
+      "csv_sha256": "c9a54ec2639b590711faf1ba4684fb7167887a16b27d3078fc6478bc205d8f7a",
+      "json_path": "archive/mission2/data/generated/mission2_auction_settled.json",
+      "json_sha256": "d058055dc3feb4da4ba96d7ce98a000d165c2aec62b737d1d7dbabc0cca03fab",
+      "name": "mission2_auction_settled",
+      "rows": 369
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_winners.csv",
+      "csv_sha256": "bdea07e15605de7d60b79609536b4af341e00465a0e02b6dfb43725e989c3bfa",
+      "json_path": "archive/mission2/data/generated/mission2_auction_winners.json",
+      "json_sha256": "41fd23e1fa7c6a4980d8e2bb765f651e0c0bddc61c43e5e1fcfc1f8ee4efc9dc",
+      "name": "mission2_auction_winners",
+      "rows": 369
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_recent_bids.csv",
+      "csv_sha256": "c289803470de1b39cc5de49e76b754f69a9d6ea866cc136966f9ade3c6c6b551",
+      "json_path": "archive/mission2/data/generated/mission2_recent_bids.json",
+      "json_sha256": "e6380f7afa1fcedb9c882c280880e1ec8600de5cd28236f845b47c13a5a9cf98",
+      "name": "mission2_recent_bids",
+      "rows": 250
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_bidder_leaderboard.csv",
+      "csv_sha256": "0c02b016937902301ed9981258be5ee26a7890a84061a72f2ef72ea599655cf5",
+      "json_path": "archive/mission2/data/generated/mission2_bidder_leaderboard.json",
+      "json_sha256": "2f0fc4ae578c8db3141126a40411bd083ccfae39f805a47e47c0b159afc6883d",
+      "name": "mission2_bidder_leaderboard",
+      "rows": 84
+    },
+    {
+      "json_path": "archive/mission2/data/generated/mission2_dog_search_index.json",
+      "json_sha256": "62f27325033c43f1b21627c4c1778bcf0c4559b869be724568030acf7271ceeb",
+      "name": "mission2_dog_search_index",
+      "rows": 369
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_auction_timeline.csv",
+      "csv_sha256": "c3ee094c0778094f20a10ed1c77d9b21a57e4e764f8a2ffc474610eea021b98b",
+      "json_path": "archive/mission2/data/generated/mission2_auction_timeline.json",
+      "json_sha256": "7a177461e008c53f0e5f259ec8297f58ad89cf8b2c52cb67e4f2b981b63bad7b",
+      "name": "mission2_auction_timeline",
+      "rows": 369
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_daily_activity.csv",
+      "csv_sha256": "662b9b3fea57dd15724c98716bf81bc7dae2955465c3e1846bf8c44bfaa95a5c",
+      "json_path": "archive/mission2/data/generated/mission2_daily_activity.json",
+      "json_sha256": "e255a1bfef60280e5d8e0772bddb9c7656673481854e90ff274be45971ec9177",
+      "name": "mission2_daily_activity",
+      "rows": 380
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_parameter_updates.csv",
+      "csv_sha256": "ee1bf796a92168559c809f95f79eff9d681568545a6aff6edbfddcb10f049875",
+      "json_path": "archive/mission2/data/generated/mission2_parameter_updates.json",
+      "json_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "name": "mission2_parameter_updates",
+      "rows": 0
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_archive_metrics.csv",
+      "csv_sha256": "9c3ee2318a38f2b502a4331b0218e8dac4202a664dac98cdb744940aef6c1137",
+      "json_path": "archive/mission2/data/generated/mission2_archive_metrics.json",
+      "json_sha256": "16b6b7f16fad29200c93bbc9baff5110d1cbddeba65a9fa915b8292c5fc66e26",
+      "name": "mission2_archive_metrics",
+      "rows": 7
+    },
+    {
+      "csv_path": "archive/mission2/data/generated/mission2_woof_vault_allocations.csv",
+      "csv_sha256": "5e28ccbe9b7c14e068b222c084e642a4c4ba2ef53853b74d2d7d49800b54a2d8",
+      "json_path": "archive/mission2/data/generated/mission2_woof_vault_allocations.json",
+      "json_sha256": "71ebb4303f98a681055fd22ac0259340eaf9521ec20442dd4352cb43da14ee76",
+      "name": "mission2_woof_vault_allocations",
+      "rows": 18
+    }
+  ],
+  "known_gaps": [],
+  "network": "Degen Chain",
+  "raw_log_file": {
+    "path": "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson",
+    "rows": 2641,
+    "sha256": "29de7dead6451aaf715cddd4cfe9848de348b917684288021d8c3c4570f9e998"
+  },
+  "row_counts": {
+    "mission2_auction_bids": 1630,
+    "mission2_auction_created": 369,
+    "mission2_auction_extended": 273,
+    "mission2_auction_settled": 369,
+    "mission2_index_gaps": 0,
+    "mission2_parameter_updates": 0,
+    "mission2_raw_logs": 2641,
+    "mission2_woof_vault_allocations": 18
+  },
+  "rpc_used": "https://rpc.degen.tips",
+  "run_id": "mission2_24692180_26823905_20260529T001926Z",
+  "run_timestamp_utc": "2026-05-29T00:19:26Z",
+  "schema_version": 1,
+  "source_files_used": [
+    "archive/mission2/config/mission2_chain.verified.json",
+    "archive/mission2/config/mission2_contracts.verified.json",
+    "archive/mission2/config/mission2_blocks.verified.json",
+    "archive/mission2/config/mission2_event_abis.json",
+    "archive/mission2/config/woof_vault_allocations.json",
+    "archive/mission2/sql/schema.sql",
+    "archive/mission2/sql/marts.sql"
+  ],
+  "sqlite_archive_alias": {
+    "path": "archive/mission2/data/mission2_archive.sqlite",
+    "sha256": "951da99142bf9860c9b02e0330e4a0c34e9cce3357ab0fa87abcfc3a03518a2d"
+  },
+  "sqlite_file": {
+    "path": "archive/mission2/data/sqlite/mission2.sqlite",
+    "sha256": "951da99142bf9860c9b02e0330e4a0c34e9cce3357ab0fa87abcfc3a03518a2d"
+  },
+  "to_block": 26823905,
+  "warnings": [
+    "Verified Mission 2 config files used; Dune reconciliation remains separate.",
+    "Dune query IDs, official SQL, and official Dune result exports remain unrecovered."
+  ]
+}

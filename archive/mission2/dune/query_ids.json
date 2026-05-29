@@ -4,5 +4,7 @@
   "dashboard_url": null,
   "dashboard_id": null,
   "queries": [],
-  "status": "dashboard seen in Dune Discover, query IDs not yet recovered"
+  "status": "not recovered; public Dune search/slug probes did not verify query IDs; authenticated Dune UI or DUNE_API_KEY required",
+  "updated_at_utc": "2026-05-28T23:45:14Z",
+  "search_attempts_ref": "archive/mission2/dune/dune_dashboards.json"
 }

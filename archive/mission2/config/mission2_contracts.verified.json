@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:22:48Z",
+  "confidence": "verified",
+  "chain": {
+    "name": "Degen Chain",
+    "chain_id": 666666666
+  },
+  "contracts": {
+    "auction_house": {
+      "address": "0x3620ca030a023bce87ec59a8b0e979bd7607fdbd",
+      "confidence": "verified",
+      "sources": [
+        "Degen Chain RPC eth_getCode",
+        "Degen Chain RPC eth_call getters",
+        "Degen Chain AuctionCreated/AuctionBid/AuctionExtended/AuctionSettled logs"
+      ],
+      "verified_by": [
+        "eth_getCode returned non-empty bytecode",
+        "nouns() returned 0x77722fa8a43dfcc3e01c1db0b150b9db9d1e53dd",
+        "weth() returned 0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387",
+        "timeBuffer() returned 300",
+        "reservePrice() returned 1000000000000000000000",
+        "minBidIncrementPercentage() returned 10",
+        "duration() returned 86400",
+        "paused() returned true after final Mission 2 auction",
+        "indexed 369 AuctionCreated and 369 AuctionSettled events for Dogs 201-589"
+      ],
+      "notes": "Contract source naming uses nouns()/NounsAuctionHouse lineage, but deployed NFT metadata confirms Degen Dogs."
+    },
+    "dogs_nft": {
+      "address": "0x77722fa8a43dfcc3e01c1db0b150b9db9d1e53dd",
+      "confidence": "verified",
+      "sources": [
+        "auction_house.nouns() getter",
+        "Degen Chain RPC NFT metadata calls"
+      ],
+      "verified_by": [
+        "name() returned Degen Dogs",
+        "symbol() returned DOG",
+        "totalSupply() returned 590",
+        "tokenURI(589) returned https://degendogs.club/meta/589",
+        "contractURI() returned https://degendogs.club/contract.json"
+      ],
+      "notes": "Mission 2 archive starts at Dog 201 and ends at Dog 589; totalSupply 590 includes earlier Dogs before the recovered Mission 2 auction range."
+    },
+    "wdegen": {
+      "address": "0xeb54dacb4c2ccb64f8074eceea33b5ebb38e5387",
+      "confidence": "verified",
+      "sources": [
+        "auction_house.weth() getter",
+        "Degen Chain RPC ERC20 metadata calls"
+      ],
+      "verified_by": [
+        "name() returned Wrapped Degen",
+        "symbol() returned WDEGEN",
+        "decimals() returned 18"
+      ],
+      "notes": "Auction contract uses the weth/WDEGEN ERC20 path; event amounts are stored as exact raw 18-decimal integers."
+    },
+    "woof": {
+      "address": "0x6D5EcD0509B47a78b750CA85cD1ec96D90f4cB3a",
+      "confidence": "verified",
+      "sources": [
+        "Degen Chain RPC ERC20 metadata calls"
+      ],
+      "verified_by": [
+        "name() returned Degen Dogs WOOF",
+        "symbol() returned WOOF",
+        "decimals() returned 18"
+      ],
+      "notes": "WOOF reward accounting is preserved as context, not reconciled to auction outputs in this archive pass."
+    },
+    "woofx": {
+      "address": "0x58e90e043fe47d224cc475349992a90317acbd69",
+      "confidence": "verified_metadata_only",
+      "sources": [
+        "Degen Chain RPC Super Token metadata calls"
+      ],
+      "verified_by": [
+        "name() returned Super WOOF",
+        "symbol() returned WOOFx",
+        "decimals() returned 18"
+      ],
+      "notes": "Token metadata is verified, but stream/pool accounting is not recovered/reconciled yet."
+    },
+    "woof_vault": {
+      "address": "0x14acda738D7773d16fFACF9449790229c9Ab21C9",
+      "confidence": "verified_code_and_source_reference",
+      "sources": [
+        "Degen Chain RPC eth_getCode",
+        "https://raw.githubusercontent.com/markcarey/degendogs/main/Mission3.md"
+      ],
+      "verified_by": [
+        "eth_getCode returned non-empty bytecode",
+        "Mark Carey repo references this vault address for WOOF Vault Bonus context"
+      ],
+      "notes": "Vault allocation source rows are archived separately in woof_vault_allocations.json."
+    }
+  },
+  "unresolved": {
+    "superfluid_pool": {
+      "address": null,
+      "confidence": "unknown",
+      "notes": "Not recovered from Dune or verified source in this pass."
+    },
+    "pool_manager": {
+      "address": null,
+      "confidence": "unknown",
+      "notes": "Not recovered from Dune or verified source in this pass."
+    },
+    "mintclub_bonding_curve_token": {
+      "address": null,
+      "confidence": "unknown",
+      "notes": "Not recovered from Dune or verified source in this pass."
+    }
+  }
+}

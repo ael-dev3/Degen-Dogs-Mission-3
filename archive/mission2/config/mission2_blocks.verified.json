@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:22:48Z",
+  "confidence": "verified",
+  "chain": {
+    "name": "Degen Chain",
+    "chain_id": 666666666
+  },
+  "blocks": {
+    "from_block": 24692180,
+    "to_block": 26622432,
+    "scan_to_block": 26823905,
+    "chunk_size": 10000,
+    "first_created_block": 24692180,
+    "last_created_block": 26620723,
+    "first_settled_block": 24704104,
+    "last_settled_block": 26622432,
+    "sources": [
+      "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson",
+      "archive/mission2/data/sqlite/mission2.sqlite"
+    ],
+    "notes": "Index scan extended beyond final settlement to latest block observed in the recovery run; no later auction lifecycle logs for this auction house were found in that scan."
+  },
+  "dog_range": {
+    "first_token_id": 201,
+    "last_token_id": 589,
+    "created_count": 369,
+    "settled_count": 369,
+    "sources": [
+      "AuctionCreated logs",
+      "AuctionSettled logs",
+      "auction() final state",
+      "dogs_nft.totalSupply() == 590"
+    ],
+    "notes": "Mission 2 recovered auction range is Dogs 201-589. Earlier Dogs 0-200 predate this recovered Mission 2 auction-house range and are not reconstructed here."
+  },
+  "timestamp_range": {
+    "first_created_time_utc": "2024-11-25T15:45:09Z",
+    "last_created_time_utc": "2026-01-05T09:00:32Z",
+    "final_created_end_time_utc": "2026-01-06T09:00:32Z",
+    "final_settled_block_timestamp_utc": "2026-01-06T12:11:25Z"
+  }
+}

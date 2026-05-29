@@ -14,6 +14,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sqlite3
 import sys
 import time
@@ -21,8 +22,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from decimal import Decimal, getcontext
 from pathlib import Path
 from typing import Any, Iterable
+
+getcontext().prec = 80
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / "archive" / "mission2"
@@ -71,6 +75,16 @@ def utc_from_unix(value: int | str | None) -> str | None:
         return None
 
 
+def decimal_18(raw_value: int | str | None) -> str | None:
+    if raw_value in (None, ""):
+        return None
+    value = Decimal(str(raw_value)) / (Decimal(10) ** 18)
+    text = format(value, "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text or "0"
+
+
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -78,6 +92,67 @@ def load_json(path: Path) -> Any:
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def load_chain_config() -> dict[str, Any]:
+    """Load verified chain config when present, falling back to the scaffold file."""
+    verified = CONFIG / "mission2_chain.verified.json"
+    if verified.exists():
+        data = load_json(verified)
+        chain = data.get("chain", {})
+        return {
+            "network": chain.get("name", "Degen Chain"),
+            "chain_id": int(chain.get("chain_id", 666666666)),
+            "rpc_candidates": [item["url"] for item in chain.get("rpc_urls", []) if item.get("url")]
+            or ["https://rpc.degen.tips"],
+            "confidence": data.get("confidence", "verified"),
+            "source_file": "archive/mission2/config/mission2_chain.verified.json",
+        }
+    data = load_json(CONFIG / "mission2_chain.json")
+    data["source_file"] = "archive/mission2/config/mission2_chain.json"
+    return data
+
+
+def load_contract_config() -> dict[str, Any]:
+    """Load verified contracts when present, normalized to the legacy flat shape."""
+    verified = CONFIG / "mission2_contracts.verified.json"
+    if verified.exists():
+        data = load_json(verified)
+        out: dict[str, Any] = {
+            "_config_source": "archive/mission2/config/mission2_contracts.verified.json",
+            "_confidence": data.get("confidence", "verified"),
+        }
+        for name, meta in data.get("contracts", {}).items():
+            out[name] = {
+                "address": meta.get("address"),
+                "confidence": meta.get("confidence", data.get("confidence", "verified")),
+                "source": out["_config_source"],
+                "notes": meta.get("notes"),
+            }
+        for name, meta in data.get("unresolved", {}).items():
+            out[name] = {
+                "address": meta.get("address"),
+                "confidence": meta.get("confidence", "unknown"),
+                "source": out["_config_source"],
+                "notes": meta.get("notes"),
+            }
+        return out
+    out = load_json(CONFIG / "mission2_contracts.unverified.json")
+    out["_config_source"] = "archive/mission2/config/mission2_contracts.unverified.json"
+    out["_confidence"] = "unverified"
+    return out
+
+
+def load_block_config() -> dict[str, Any]:
+    verified = CONFIG / "mission2_blocks.verified.json"
+    if verified.exists():
+        data = load_json(verified)
+        blocks = data.get("blocks", {})
+        blocks = dict(blocks)
+        blocks["confidence"] = data.get("confidence", "verified")
+        blocks["source_file"] = "archive/mission2/config/mission2_blocks.verified.json"
+        return blocks
+    return {"confidence": "unverified", "source_file": None}
 
 
 def sha256_file(path: Path) -> str:
@@ -218,6 +293,7 @@ def write_ndjson(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def log_common(log: dict[str, Any], chain_id: int, address: str, source_confidence: str, run_id: str) -> dict[str, Any]:
     topics = [str(t).lower() for t in log.get("topics", [])]
+    block_ts = hex_int(log.get("blockTimestamp")) if log.get("blockTimestamp") else None
     return {
         "chain_id": chain_id,
         "contract_address": address,
@@ -226,7 +302,7 @@ def log_common(log: dict[str, Any], chain_id: int, address: str, source_confiden
         "tx_hash": log.get("transactionHash"),
         "tx_index": hex_int(log.get("transactionIndex")),
         "log_index": hex_int(log.get("logIndex")),
-        "block_time_utc": None,
+        "block_time_utc": utc_from_unix(block_ts),
         "removed": 1 if log.get("removed") else 0,
         "topics": topics,
         "data": log.get("data", "0x"),
@@ -327,8 +403,8 @@ def decode_events(logs: list[dict[str, Any]], chain_id: int, address: str, topic
                     "dog_id": dog_id,
                     "bidder": bidder,
                     "value_raw": str(value),
-                    "value_display_native": None,
-                    "display_decimals_confidence": None,
+                    "value_display_native": decimal_18(value),
+                    "display_decimals_confidence": "verified_wdegen_18_decimals",
                     "extended": 1 if extended else 0,
                     "source_confidence": source_confidence,
                     "run_id": run_id,
@@ -367,8 +443,8 @@ def decode_events(logs: list[dict[str, Any]], chain_id: int, address: str, topic
                     "dog_id": dog_id,
                     "winner": winner,
                     "amount_raw": str(amount),
-                    "amount_display_native": None,
-                    "display_decimals_confidence": None,
+                    "amount_display_native": decimal_18(amount),
+                    "display_decimals_confidence": "verified_wdegen_18_decimals",
                     "source_confidence": source_confidence,
                     "run_id": run_id,
                 })
@@ -405,17 +481,20 @@ def setup_db(sqlite_path: Path) -> sqlite3.Connection:
 
 
 def upsert_configs(conn: sqlite3.Connection, chain_id: int, run_timestamp: str) -> None:
-    contracts = load_json(CONFIG / "mission2_contracts.unverified.json")
+    contracts = load_contract_config()
     rows = []
+    source_file = contracts.get("_config_source")
     for name, meta in contracts.items():
+        if name.startswith("_"):
+            continue
         rows.append({
             "name": name,
             "chain_id": chain_id,
             "address": meta.get("address"),
             "confidence": meta.get("confidence", "unverified"),
-            "source": "archive/mission2/config/mission2_contracts.unverified.json",
+            "source": meta.get("source") or source_file,
             "how_to_verify": meta.get("how_to_verify"),
-            "notes": None,
+            "notes": meta.get("notes"),
             "updated_at_utc": run_timestamp,
         })
     insert_many(conn, "mission2_known_contracts", rows)
@@ -457,12 +536,163 @@ def export_query(conn: sqlite3.Connection, name: str, query: str) -> dict[str, A
     }
 
 
+def export_dog_search_index(conn: sqlite3.Connection) -> dict[str, Any]:
+    query = """
+        SELECT
+          s.dog_id AS token_id,
+          c.block_number AS auction_created_block,
+          c.tx_hash AS auction_created_tx,
+          c.start_time_utc AS auction_created_time_utc,
+          s.block_number AS settled_block,
+          s.tx_hash AS settled_tx,
+          s.block_time_utc AS settled_time_utc,
+          s.winner,
+          s.amount_raw,
+          s.amount_display_native AS amount_degen,
+          COALESCE(b.bid_count, 0) AS bid_count,
+          COALESCE(b.unique_bidder_count, 0) AS unique_bidder_count
+        FROM mission2_auction_settled s
+        LEFT JOIN mission2_auction_created c ON c.chain_id = s.chain_id AND c.dog_id = s.dog_id
+        LEFT JOIN (
+          SELECT chain_id, dog_id, COUNT(*) AS bid_count, COUNT(DISTINCT bidder) AS unique_bidder_count
+          FROM mission2_auction_bids
+          GROUP BY chain_id, dog_id
+        ) b ON b.chain_id = s.chain_id AND b.dog_id = s.dog_id
+        ORDER BY s.dog_id
+    """
+    rows = []
+    for row in conn.execute(query).fetchall():
+        rows.append({
+            "mission": 2,
+            "chain": "Degen Chain",
+            "token_id": row[0],
+            "dog_id": row[0],
+            "winner": row[7],
+            "amount_raw": row[8],
+            "amount_degen": row[9],
+            "bid_count": row[10],
+            "unique_bidder_count": row[11],
+            "auction_created_block": row[1],
+            "settled_block": row[4],
+            "auction_created_tx": row[2],
+            "settled_tx": row[5],
+            "auction_created_time_utc": row[3],
+            "settled_time_utc": row[6],
+            "confidence": "verified_onchain",
+            "sources": ["chain_logs", "contract_getters"],
+        })
+    json_path = GENERATED_DIR / "mission2_dog_search_index.json"
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+    write_json(json_path, rows)
+    return {
+        "name": "mission2_dog_search_index",
+        "json_path": str(json_path.relative_to(ROOT)),
+        "rows": len(rows),
+        "json_sha256": sha256_file(json_path),
+    }
+
+
 def export_outputs(conn: sqlite3.Connection) -> list[dict[str, Any]]:
+    winners_query = """
+        SELECT
+          s.chain_id,
+          2 AS mission,
+          'Degen Chain' AS chain,
+          s.dog_id AS token_id,
+          c.block_number AS auction_created_block,
+          c.tx_hash AS auction_created_tx,
+          c.start_time_utc AS auction_created_time_utc,
+          s.block_number AS settled_block,
+          s.tx_hash AS settled_tx,
+          s.block_time_utc AS settled_time_utc,
+          s.winner,
+          s.amount_raw,
+          s.amount_display_native AS amount_degen,
+          COALESCE(b.bid_count, 0) AS bid_count,
+          COALESCE(b.unique_bidder_count, 0) AS unique_bidder_count,
+          b.highest_bidder,
+          'verified_onchain' AS confidence,
+          'chain_logs;contract_getters' AS sources
+        FROM mission2_auction_settled s
+        LEFT JOIN mission2_auction_created c ON c.chain_id = s.chain_id AND c.dog_id = s.dog_id
+        LEFT JOIN (
+          SELECT
+            chain_id,
+            dog_id,
+            COUNT(*) AS bid_count,
+            COUNT(DISTINCT bidder) AS unique_bidder_count,
+            (
+              SELECT bidder
+              FROM mission2_auction_bids b2
+              WHERE b2.chain_id = b.chain_id AND b2.dog_id = b.dog_id
+              ORDER BY length(value_raw) DESC, value_raw DESC, block_number DESC, log_index DESC
+              LIMIT 1
+            ) AS highest_bidder
+          FROM mission2_auction_bids b
+          GROUP BY chain_id, dog_id
+        ) b ON b.chain_id = s.chain_id AND b.dog_id = s.dog_id
+        ORDER BY s.dog_id
+    """
     return [
         export_query(conn, "mission2_auction_created", "SELECT * FROM mission2_auction_created ORDER BY block_number, log_index"),
         export_query(conn, "mission2_auction_bids", "SELECT * FROM mission2_auction_bids ORDER BY block_number, log_index"),
         export_query(conn, "mission2_auction_extended", "SELECT * FROM mission2_auction_extended ORDER BY block_number, log_index"),
         export_query(conn, "mission2_auction_settled", "SELECT * FROM mission2_auction_settled ORDER BY block_number, log_index"),
+        export_query(conn, "mission2_auction_winners", winners_query),
+        export_query(conn, "mission2_recent_bids", "SELECT * FROM mission2_auction_bids ORDER BY block_number DESC, log_index DESC LIMIT 250"),
+        export_query(conn, "mission2_bidder_leaderboard", """
+            SELECT
+              bidder,
+              COUNT(*) AS bid_count,
+              COUNT(DISTINCT dog_id) AS dogs_bid_on,
+              MIN(block_number) AS first_bid_block,
+              MAX(block_number) AS last_bid_block,
+              COUNT(CASE WHEN extended = 1 THEN 1 END) AS extension_bid_count,
+              'raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting' AS amount_note,
+              'verified_onchain' AS confidence
+            FROM mission2_auction_bids
+            GROUP BY bidder
+            ORDER BY bid_count DESC, last_bid_block DESC, bidder
+        """),
+        export_dog_search_index(conn),
+        export_query(conn, "mission2_auction_timeline", """
+            SELECT
+              c.dog_id,
+              c.block_number AS created_block,
+              c.tx_hash AS created_tx,
+              c.start_time_utc,
+              c.end_time_utc,
+              s.block_number AS settled_block,
+              s.tx_hash AS settled_tx,
+              s.block_time_utc AS settled_time_utc,
+              s.winner,
+              s.amount_raw,
+              s.amount_display_native AS amount_degen,
+              COALESCE(b.bid_count, 0) AS bid_count,
+              COALESCE(b.unique_bidder_count, 0) AS unique_bidder_count,
+              'verified_onchain' AS confidence
+            FROM mission2_auction_created c
+            LEFT JOIN mission2_auction_settled s ON s.chain_id = c.chain_id AND s.dog_id = c.dog_id
+            LEFT JOIN (
+              SELECT chain_id, dog_id, COUNT(*) AS bid_count, COUNT(DISTINCT bidder) AS unique_bidder_count
+              FROM mission2_auction_bids
+              GROUP BY chain_id, dog_id
+            ) b ON b.chain_id = c.chain_id AND b.dog_id = c.dog_id
+            ORDER BY c.dog_id
+        """),
+        export_query(conn, "mission2_daily_activity", """
+            SELECT
+              substr(block_time_utc, 1, 10) AS activity_date_utc,
+              COUNT(*) AS bid_count,
+              COUNT(DISTINCT dog_id) AS dogs_with_bids,
+              COUNT(DISTINCT bidder) AS unique_bidders,
+              MIN(block_number) AS first_block,
+              MAX(block_number) AS last_block,
+              'verified_onchain' AS confidence
+            FROM mission2_auction_bids
+            GROUP BY activity_date_utc
+            ORDER BY activity_date_utc
+        """),
         export_query(conn, "mission2_parameter_updates", "SELECT * FROM mission2_parameter_updates ORDER BY block_number, log_index"),
         export_query(conn, "mission2_archive_metrics", "SELECT * FROM mission2_archive_metrics"),
         export_query(conn, "mission2_woof_vault_allocations", "SELECT * FROM mission2_woof_vault_allocations ORDER BY address"),
@@ -477,10 +707,22 @@ def row_counts(conn: sqlite3.Connection, tables: list[str]) -> dict[str, int]:
 
 
 def resolve_runtime(args: argparse.Namespace, chain: dict[str, Any], contracts: dict[str, Any]) -> tuple[str | None, int | None, int | str | None, str]:
+    block_config = load_block_config()
     config_auction = (contracts.get("auction_house") or {}).get("address")
     auction = args.auction_house or os.environ.get("MISSION2_AUCTION_HOUSE") or config_auction
-    from_block_raw = args.from_block if args.from_block is not None else os.environ.get("MISSION2_FROM_BLOCK")
-    to_block_raw = args.to_block if args.to_block is not None else os.environ.get("MISSION2_TO_BLOCK")
+    from_block_raw = (
+        args.from_block
+        if args.from_block is not None
+        else os.environ.get("MISSION2_FROM_BLOCK")
+        or block_config.get("from_block")
+    )
+    to_block_raw = (
+        args.to_block
+        if args.to_block is not None
+        else os.environ.get("MISSION2_TO_BLOCK")
+        or block_config.get("scan_to_block")
+        or block_config.get("to_block")
+    )
     rpc_url = args.rpc_url or os.environ.get("DEGEN_RPC_URL") or chain.get("rpc_candidates", ["https://rpc.degen.tips"])[0]
     from_block = int(from_block_raw) if from_block_raw not in (None, "") else None
     to_block: int | str | None
@@ -494,24 +736,31 @@ def resolve_runtime(args: argparse.Namespace, chain: dict[str, Any], contracts: 
 
 
 def check_config() -> int:
-    chain = load_json(CONFIG / "mission2_chain.json")
-    contracts = load_json(CONFIG / "mission2_contracts.unverified.json")
+    chain = load_chain_config()
+    contracts = load_contract_config()
+    block_config = load_block_config()
     event_config = load_json(CONFIG / "mission2_event_abis.json")
     topics = event_topics(event_config)
     missing_runtime = []
-    auction, from_block, _to_block, rpc_url = resolve_runtime(argparse.Namespace(auction_house=None, from_block=None, to_block=None, rpc_url=None), chain, contracts)
+    auction, from_block, to_block, rpc_url = resolve_runtime(argparse.Namespace(auction_house=None, from_block=None, to_block=None, rpc_url=None), chain, contracts)
     if not auction:
         missing_runtime.append("MISSION2_AUCTION_HOUSE")
     if from_block is None:
         missing_runtime.append("MISSION2_FROM_BLOCK")
     result = {
-        "status": "config_ok_indexer_not_ready" if missing_runtime else "config_ok_runtime_ready",
+        "status": "config_ok_runtime_ready" if not missing_runtime else "config_ok_indexer_not_ready",
         "chain_id": chain["chain_id"],
         "rpc_url": redact_url(rpc_url),
         "event_topics_computed": topics,
+        "auction_house": auction,
+        "from_block": from_block,
+        "to_block": to_block,
         "missing_runtime": missing_runtime,
-        "contracts_confidence": {name: meta.get("confidence") for name, meta in contracts.items()},
-        "note": "Normal indexing refuses to run until auction house and from block are supplied. Contract placeholders remain unverified until recovered.",
+        "chain_config_source": chain.get("source_file"),
+        "contracts_config_source": contracts.get("_config_source"),
+        "blocks_config_source": block_config.get("source_file"),
+        "contracts_confidence": {name: meta.get("confidence") for name, meta in contracts.items() if not name.startswith("_")},
+        "note": "Verified configs are available; indexing can run without env overrides. Dune query SQL/results remain separate and unrecovered until DUNE_API_KEY/query IDs are supplied.",
     }
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
@@ -532,8 +781,9 @@ def main() -> int:
     if args.chunk_size <= 0:
         raise SystemExit("--chunk-size / MISSION2_LOG_CHUNK must be a positive integer.")
 
-    chain = load_json(CONFIG / "mission2_chain.json")
-    contracts = load_json(CONFIG / "mission2_contracts.unverified.json")
+    chain = load_chain_config()
+    contracts = load_contract_config()
+    block_config = load_block_config()
     event_config = load_json(CONFIG / "mission2_event_abis.json")
     topics_by_event = event_topics(event_config)
     topic_names = topic_to_event(topics_by_event)
@@ -561,8 +811,12 @@ def main() -> int:
 
     run_timestamp = utc_now()
     run_id = f"mission2_{from_block}_{to_block}_{run_timestamp.replace(':', '').replace('-', '').replace('Z', 'Z')}"
-    source_confidence = "unverified"
-    warning = "Runtime address/range supplied by user or environment; contracts config remains unverified until source is recorded."
+    source_confidence = "verified_onchain" if contracts.get("_confidence") == "verified" else "unverified"
+    warning = (
+        "Verified Mission 2 config files used; Dune reconciliation remains separate."
+        if source_confidence == "verified_onchain"
+        else "Runtime address/range supplied by user or environment; contracts config remains unverified until source is recorded."
+    )
 
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     SQLITE_DIR.mkdir(parents=True, exist_ok=True)
@@ -602,8 +856,22 @@ def main() -> int:
     finally:
         conn.close()
 
+    sqlite_alias = DATA / "mission2_archive.sqlite"
+    shutil.copy2(sqlite_path, sqlite_alias)
+
     manifest_path = GENERATED_DIR / "mission2_archive_manifest.json"
+    source_files = [
+        chain.get("source_file") or "archive/mission2/config/mission2_chain.json",
+        contracts.get("_config_source") or "archive/mission2/config/mission2_contracts.unverified.json",
+        block_config.get("source_file"),
+        "archive/mission2/config/mission2_event_abis.json",
+        "archive/mission2/config/woof_vault_allocations.json",
+        "archive/mission2/sql/schema.sql",
+        "archive/mission2/sql/marts.sql",
+    ]
+    source_files = [item for item in source_files if item]
     manifest = {
+        "schema_version": 1,
         "run_id": run_id,
         "run_timestamp_utc": run_timestamp,
         "chain_id": int(chain["chain_id"]),
@@ -613,17 +881,11 @@ def main() -> int:
         "to_block": to_block,
         "auction_house_address": auction,
         "config_confidence": source_confidence,
-        "warnings": [warning, "Display/native amount conversion is intentionally omitted until decimals and currency path are verified."],
+        "dune_reconciliation_status": "not_recovered",
+        "warnings": [warning, "Dune query IDs, official SQL, and official Dune result exports remain unrecovered."],
         "event_topics": topics_by_event,
         "row_counts": counts,
-        "source_files_used": [
-            "archive/mission2/config/mission2_chain.json",
-            "archive/mission2/config/mission2_contracts.unverified.json",
-            "archive/mission2/config/mission2_event_abis.json",
-            "archive/mission2/config/woof_vault_allocations.json",
-            "archive/mission2/sql/schema.sql",
-            "archive/mission2/sql/marts.sql",
-        ],
+        "source_files_used": source_files,
         "raw_log_file": {
             "path": str(raw_path.relative_to(ROOT)),
             "sha256": sha256_file(raw_path),
@@ -633,10 +895,48 @@ def main() -> int:
             "path": str(sqlite_path.relative_to(ROOT)),
             "sha256": sha256_file(sqlite_path),
         },
+        "sqlite_archive_alias": {
+            "path": str(sqlite_alias.relative_to(ROOT)),
+            "sha256": sha256_file(sqlite_alias),
+        },
         "generated_files": exports,
         "known_gaps": [],
     }
     write_json(manifest_path, manifest)
+    write_json(GENERATED_DIR / "manifest.json", manifest)
+    write_json(RAW_DIR / "mission2_auction_logs.meta.json", {
+        "schema_version": 1,
+        "updated_at_utc": run_timestamp,
+        "run_id": run_id,
+        "chain_id": int(chain["chain_id"]),
+        "rpc_urls_used": [redact_url(rpc_url)],
+        "auction_house": auction,
+        "from_block": from_block,
+        "to_block": to_block,
+        "chunk_size": args.chunk_size,
+        "event_topics": topics_by_event,
+        "total_logs": len(logs),
+        "per_event_log_counts": {
+            "AuctionCreated": counts.get("mission2_auction_created", 0),
+            "AuctionBid": counts.get("mission2_auction_bids", 0),
+            "AuctionExtended": counts.get("mission2_auction_extended", 0),
+            "AuctionSettled": counts.get("mission2_auction_settled", 0),
+        },
+        "failed_chunks": [],
+        "retried_chunks": [],
+        "raw_log_path": str(raw_path.relative_to(ROOT)),
+        "raw_log_sha256": sha256_file(raw_path),
+    })
+    write_json(RAW_DIR / "mission2_rpc_failures.json", {
+        "schema_version": 1,
+        "updated_at_utc": run_timestamp,
+        "failures": [],
+        "notes": "No final failed chunks were recorded in the successful recovery run.",
+    })
+    gap_path = RAW_DIR / "mission2_index_gaps.csv"
+    with gap_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["gap_id", "chain_id", "from_block", "to_block", "reason", "severity", "detected_at_utc", "resolved_at_utc", "notes"])
     print(json.dumps({"run_id": run_id, "row_counts": counts, "manifest": str(manifest_path.relative_to(ROOT))}, indent=2, sort_keys=True))
     return 0
 
