@@ -884,6 +884,19 @@
     "latest_bid_utc": "2026-05-03 22:16:57"
   },
   {
+    "bidder": "@floam",
+    "bidder_url": "https://farcaster.xyz/floam",
+    "bidder_wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
+    "bids": 3,
+    "auctions_bid": 2,
+    "bid_eth": 0.02332,
+    "high_bid_eth": 0.011,
+    "auction_wins": 0,
+    "winning_eth": 0.0,
+    "latest_bid_token_id": 727,
+    "latest_bid_utc": "2026-05-29 13:51:53"
+  },
+  {
     "bidder": "@riff-raff",
     "bidder_url": "https://farcaster.xyz/riff-raff",
     "bidder_wallet": "0x6794c4220791d85f640274b9391d4c70cd92c1b4",
@@ -986,19 +999,6 @@
     "winning_eth": 0.01331,
     "latest_bid_token_id": 712,
     "latest_bid_utc": "2026-05-13 03:10:39"
-  },
-  {
-    "bidder": "@floam",
-    "bidder_url": "https://farcaster.xyz/floam",
-    "bidder_wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
-    "bids": 2,
-    "auctions_bid": 1,
-    "bid_eth": 0.01232,
-    "high_bid_eth": 0.011,
-    "auction_wins": 0,
-    "winning_eth": 0.0,
-    "latest_bid_token_id": 723,
-    "latest_bid_utc": "2026-05-23 19:58:53"
   },
   {
     "bidder": "@nomadicframe",
