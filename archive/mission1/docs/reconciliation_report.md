@@ -1,7 +1,7 @@
 # Mission 1 Reconciliation Report
 
-Generated at UTC: `2026-05-28T23:51:14Z`
-Indexer run: `mission1-20260528T235114Z`
+Generated at UTC: `2026-05-29T00:27:36Z`
+Indexer run: `mission1-20260529T002735Z`
 
 ## Status
 
@@ -16,6 +16,9 @@ Indexer run: `mission1-20260528T235114Z`
 - Raw relevant logs stored: `8359`
 - AuctionCreated rows: `182` (Dog IDs `1` to `200`)
 - AuctionBid rows: `545` (Dog IDs `1` to `166`)
+- Per-Dog bid summary rows: `201` (one row for every minted Mission 1 Dog token ID 0-200)
+- Bid coverage statuses: `{'auction_had_no_recovered_bids': 76, 'has_recovered_bids': 106, 'not_applicable_reward_mint': 19}`
+- Auction Dogs with explicit zero recovered bids: `76`
 - AuctionSettled rows: `181` (Dog IDs `1` to `199`)
 - Latest auction state from `auction()` eth_call: Dog `200`, amount `0` WETH, settled `False`.
 - NFT mint-transfer distinct token IDs: `201` (range `0` to `200`)

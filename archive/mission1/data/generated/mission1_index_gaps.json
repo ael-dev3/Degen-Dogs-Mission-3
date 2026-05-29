@@ -1,7 +1,7 @@
 [
   {
     "chain_id": 137,
-    "detected_at_utc": "2026-05-28T23:51:14Z",
+    "detected_at_utc": "2026-05-29T00:27:35Z",
     "from_block": 25818533,
     "gap_id": "created_without_settlement_ids",
     "notes": "Dog 200 is expected here in the current receipt-backed archive: current auction state shows Dog 200 with zero bid and unsettled at latest. Verify with archive RPC/PolygonScan before final accounting.",

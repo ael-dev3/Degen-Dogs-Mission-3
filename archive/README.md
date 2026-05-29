@@ -8,7 +8,7 @@ The archive is independent and community-built. It is not official Degen Dogs ac
 
 | Era | Status | Notes |
 | --- | --- | --- |
-| Mission 1 | Historical / unknown / incomplete | Placeholder only until contracts, chain, Dog range, and source data are verified. Do not infer or invent missing details. |
+| Mission 1 | Polygon historical archive recovered | Verified Polygon contract constants, receipt-backed auction/NFT/BSCT logs, per-Dog bid summary for token IDs `0-200`, and reconciliation notes live in `archive/mission1/`. It is archive-only and not wired into the live Mission 3 dashboard. |
 | Mission 2 | Degen Chain recovery in progress | Existing recovery notes, Dune provenance, ABI fragments, and local indexing scaffolds live in `archive/mission2/`. Contract addresses and exact ranges remain unverified unless marked otherwise in that folder. |
 | Mission 3 | Base live rolling archive | Active archive for Base auction logs, current auction snapshots, generated CSV/JSON, and future dashboard search/index files. |
 

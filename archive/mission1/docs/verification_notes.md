@@ -1,6 +1,6 @@
 # Mission 1 Verification Notes
 
-Generated at UTC: `2026-05-28T23:51:14Z`
+Generated at UTC: `2026-05-29T00:27:36Z`
 
 Verified means backed by at least one public source plus onchain/PolygonScan evidence. Candidate means source-backed but not yet reconciled end-to-end. Unknown means intentionally left blank.
 
@@ -12,6 +12,7 @@ Verified means backed by at least one public source plus onchain/PolygonScan evi
 - BSCT `name() = Dog Biscuits`, `symbol() = BSCT`, `decimals() = 18` from Polygon RPC calls during discovery.
 - Dog #1 Ukraine auction claim from the Degen Dogs Medium article plus receipt-backed AuctionCreated/AuctionSettled rows for Dog #1.
 - DogMaster reward mint rule from `Dog.sol`: token ID `0` and every `11th` Dog were minted to the dogMaster, explaining why `totalSupply() = 201` while auction rows skip those IDs.
+- `mission1_dog_bid_summary` has one row for every minted Mission 1 Dog token ID `0-200`; `mission1_dog_search_index.json` embeds the recovered per-Dog `bid_history` arrays, with explicit empty bid histories for DogMaster reward mints and no-bid auctions.
 
 ## Not fully verified yet
 

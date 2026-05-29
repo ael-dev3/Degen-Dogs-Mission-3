@@ -42,6 +42,9 @@ archive/mission1/
 - `docs/how_mission1_worked.md`
 - `docs/how_to_rebuild.md`
 - `docs/reconciliation_report.md`
+- `data/generated/mission1_dog_bid_summary.csv`
+- `data/generated/mission1_dog_bid_summary.json`
+- `data/generated/mission1_dog_search_index.json`
 - `data/generated/manifest.json`
 - `data/generated/reconciliation_summary.json`
 - `data/mission1_archive.sqlite`

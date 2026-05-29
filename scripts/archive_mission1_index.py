@@ -514,14 +514,104 @@ def fetch_receipts(tx_items: List[Dict[str, Any]], urls: List[str], full_refresh
     return receipts, failures
 
 
+def validate_generated_archive() -> Dict[str, Any]:
+    """Fail-closed checks for committed Mission 1 archive artifacts."""
+    errors: List[str] = []
+    required = [
+        CONFIG_DIR / "mission1_chain.verified.json",
+        CONFIG_DIR / "mission1_contracts.verified.json",
+        SCHEMA_PATH,
+        MARTS_PATH,
+        SQLITE_PATH,
+        GEN_DIR / "manifest.json",
+        GEN_DIR / "reconciliation_summary.json",
+        GEN_DIR / "mission1_dog_bid_summary.csv",
+        GEN_DIR / "mission1_dog_bid_summary.json",
+        GEN_DIR / "mission1_dog_search_index.json",
+    ]
+    for path in required:
+        if not path.exists():
+            errors.append(f"missing {path.relative_to(ROOT)}")
+    if errors:
+        return {"ok": False, "errors": errors}
+
+    manifest = read_cached_json(GEN_DIR / "manifest.json")
+    summary = read_cached_json(GEN_DIR / "reconciliation_summary.json")
+    search_index = read_cached_json(GEN_DIR / "mission1_dog_search_index.json")
+    for item in manifest.get("generated_files", []):
+        for key in ("csv", "json"):
+            rel = item.get(key)
+            expected = item.get(f"{key}_sha256")
+            if not rel:
+                continue
+            path = ROOT / rel
+            if not path.exists():
+                errors.append(f"manifest path missing: {rel}")
+                continue
+            actual = sha256_file(path)
+            if expected and actual != expected:
+                errors.append(f"manifest hash mismatch: {rel}")
+        csv_rel = item.get("csv")
+        if csv_rel and item.get("rows") is not None:
+            with (ROOT / csv_rel).open(newline="") as fh:
+                row_count = max(sum(1 for _ in fh) - 1, 0)
+            if row_count != item["rows"]:
+                errors.append(f"manifest row mismatch: {csv_rel} expected {item['rows']} got {row_count}")
+
+    conn: Optional[sqlite3.Connection] = None
+    try:
+        conn = sqlite3.connect(SQLITE_PATH)
+        conn.row_factory = sqlite3.Row
+        integrity = conn.execute("PRAGMA integrity_check").fetchone()[0]
+        if integrity != "ok":
+            errors.append(f"sqlite integrity_check failed: {integrity}")
+        bid_rows = conn.execute("SELECT COUNT(*) FROM mission1_auction_bids").fetchone()[0]
+        dog_rows = list(conn.execute("SELECT token_id, dog_type, bid_count, bid_coverage_status FROM mission1_dog_bid_summary ORDER BY token_id"))
+        if len(dog_rows) != 201 or [dog_rows[0]["token_id"], dog_rows[-1]["token_id"]] != [0, 200]:
+            errors.append("mission1_dog_bid_summary must cover token IDs 0-200 with exactly 201 rows")
+        if sum(r["bid_count"] for r in dog_rows) != bid_rows:
+            errors.append("mission1_dog_bid_summary bid_count total does not match mission1_auction_bids")
+        dog_type_counts = dict(conn.execute("SELECT dog_type, COUNT(*) FROM mission1_dog_bid_summary GROUP BY dog_type").fetchall())
+        if dog_type_counts != {"auction_dog": 182, "dogmaster_reward": 19}:
+            errors.append(f"unexpected dog_type_counts: {dog_type_counts}")
+        bid_status_counts = dict(conn.execute("SELECT bid_coverage_status, COUNT(*) FROM mission1_dog_bid_summary GROUP BY bid_coverage_status").fetchall())
+        expected_status_counts = {"auction_had_no_recovered_bids": 76, "has_recovered_bids": 106, "not_applicable_reward_mint": 19}
+        if bid_status_counts != expected_status_counts:
+            errors.append(f"unexpected bid_coverage_status_counts: {bid_status_counts}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+    token_ids = sorted(row.get("token_id") for row in search_index)
+    if token_ids != list(range(201)):
+        errors.append("mission1_dog_search_index must cover token IDs 0-200")
+    embedded_bid_rows = sum(len(row.get("bid_history") or []) for row in search_index)
+    if embedded_bid_rows != 545:
+        errors.append(f"mission1_dog_search_index embedded bid_history total expected 545 got {embedded_bid_rows}")
+    coverage = summary.get("dog_bid_coverage", {})
+    if coverage.get("per_dog_rows") != 201:
+        errors.append("reconciliation_summary dog_bid_coverage.per_dog_rows must equal 201")
+    if coverage.get("dog_type_counts") != {"auction_dog": 182, "dogmaster_reward": 19}:
+        errors.append("reconciliation_summary dog_type_counts mismatch")
+    if coverage.get("bid_coverage_status_counts") != {"auction_had_no_recovered_bids": 76, "has_recovered_bids": 106, "not_applicable_reward_mint": 19}:
+        errors.append("reconciliation_summary bid_coverage_status_counts mismatch")
+    return {
+        "ok": not errors,
+        "errors": errors,
+        "per_dog_rows": 201 if not errors else coverage.get("per_dog_rows"),
+        "embedded_bid_history_rows": embedded_bid_rows,
+        "auction_bid_rows": 545,
+    }
+
+
 def build_archive(full_refresh: bool = False, check_config: bool = False) -> Dict[str, Any]:
     ensure_dirs()
     topics = load_topics()
     urls = rpc_urls()
     if check_config:
-        required = [CONFIG_DIR / "mission1_chain.verified.json", CONFIG_DIR / "mission1_contracts.verified.json", SCHEMA_PATH]
-        missing = [str(p.relative_to(ROOT)) for p in required if not p.exists()]
-        return {"ok": not missing, "missing": missing, "rpc_url_count": len(urls), "topics": topics}
+        result = validate_generated_archive()
+        result.update({"rpc_url_count": len(urls), "topics": topics})
+        return result
 
     run_id = "mission1-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     tx_list_path = RAW_DIR / "mission1_polygonscan_auction_txs.json"
@@ -687,6 +777,7 @@ def build_archive(full_refresh: bool = False, check_config: bool = False) -> Dic
         "mission1_nft_transfers": "SELECT * FROM mission1_nft_transfers ORDER BY block_number, log_index",
         "mission1_bid_tokens_transfers": "SELECT * FROM mission1_bid_tokens_transfers ORDER BY block_number, log_index",
         "mission1_auction_winners": "SELECT * FROM mission1_auction_winners ORDER BY dog_id",
+        "mission1_dog_bid_summary": "SELECT * FROM mission1_dog_bid_summary ORDER BY token_id",
         "mission1_bidder_leaderboard": "SELECT * FROM mission1_bidder_leaderboard ORDER BY bid_count DESC, last_bid_block DESC",
         "mission1_daily_activity": "SELECT * FROM mission1_daily_activity ORDER BY activity_date_utc",
         "mission1_archive_metrics": "SELECT * FROM mission1_archive_metrics",
@@ -765,27 +856,89 @@ def build_archive(full_refresh: bool = False, check_config: bool = False) -> Dic
 
 
 def build_dog_search_index(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
+    minted = {
+        r["token_id"]: dict(r)
+        for r in conn.execute(
+            """
+            SELECT token_id, to_address, block_number, tx_hash, block_time_utc, source_confidence
+            FROM mission1_nft_transfers
+            WHERE from_address=? AND token_id IS NOT NULL
+            ORDER BY token_id, block_number, log_index
+            """,
+            (ZERO_ADDRESS,),
+        )
+    }
     created = {r["dog_id"]: dict(r) for r in conn.execute("SELECT * FROM mission1_auction_created")}
     settled = {r["dog_id"]: dict(r) for r in conn.execute("SELECT * FROM mission1_auction_settled")}
-    ids = sorted(set(created) | set(settled))
+    bid_dog_ids = {r["dog_id"] for r in conn.execute("SELECT DISTINCT dog_id FROM mission1_auction_bids")}
+    ids = sorted(set(minted) | set(created) | set(settled) | bid_dog_ids)
     rows: List[Dict[str, Any]] = []
     for dog_id in ids:
         c = created.get(dog_id, {})
         s = settled.get(dog_id, {})
-        bid_stats = conn.execute(
-            "SELECT COUNT(*) AS bid_count, COUNT(DISTINCT bidder) AS unique_bidder_count FROM mission1_auction_bids WHERE dog_id=?",
-            (dog_id,),
-        ).fetchone()
+        m = minted.get(dog_id, {})
+        is_reward = dog_id == 0 or (dog_id <= 420 and dog_id % 11 == 0)
+        bid_history = [
+            {
+                "bidder": r["bidder"],
+                "value_raw": r["value_raw"],
+                "value_display_weth": r["value_display_weth"],
+                "extended": bool(r["extended"]),
+                "block_number": r["block_number"],
+                "block_time_utc": r["block_time_utc"],
+                "tx_hash": r["tx_hash"],
+                "log_index": r["log_index"],
+                "source_confidence": r["source_confidence"],
+            }
+            for r in conn.execute(
+                """
+                SELECT bidder, value_raw, value_display_weth, extended, block_number, block_time_utc, tx_hash, log_index, source_confidence
+                FROM mission1_auction_bids
+                WHERE dog_id=?
+                ORDER BY block_number, log_index
+                """,
+                (dog_id,),
+            )
+        ]
+        unique_bidders = len({b["bidder"] for b in bid_history if b.get("bidder")})
+        highest_bid = max(
+            bid_history,
+            key=lambda b: (len(str(b.get("value_raw") or "0")), str(b.get("value_raw") or "0"), int(b.get("block_number") or 0), int(b.get("log_index") or 0)),
+            default=None,
+        )
+        if is_reward:
+            dog_type = "dogmaster_reward"
+            auction_status = "no_auction_dogmaster_reward"
+            bid_coverage_status = "not_applicable_reward_mint"
+        elif c and s:
+            dog_type = "auction_dog"
+            auction_status = "settled"
+            bid_coverage_status = "has_recovered_bids" if bid_history else "auction_had_no_recovered_bids"
+        elif c:
+            dog_type = "auction_dog"
+            auction_status = "created_unsettled_or_missing_settlement"
+            bid_coverage_status = "has_recovered_bids" if bid_history else "auction_had_no_recovered_bids"
+        else:
+            dog_type = "minted_without_recovered_auction"
+            auction_status = "minted_without_recovered_auction"
+            bid_coverage_status = "not_applicable_no_recovered_auction"
         rows.append({
             "mission": 1,
             "chain": "Polygon",
             "chain_id": CHAIN_ID,
             "token_id": dog_id,
+            "dog_type": dog_type,
+            "auction_status": auction_status,
+            "bid_coverage_status": bid_coverage_status,
             "special_case": "Ukraine Dog / 72h auction" if dog_id == 1 else None,
+            "minted_to": m.get("to_address"),
+            "mint_block": m.get("block_number"),
+            "mint_tx": m.get("tx_hash"),
+            "mint_time_utc": m.get("block_time_utc"),
             "auction_created_block": c.get("block_number"),
             "auction_created_tx": c.get("tx_hash"),
             "auction_created_time_utc": c.get("block_time_utc") or c.get("start_time_utc"),
-            "settled": bool(s),
+            "settled": bool(s) if not is_reward else None,
             "settled_block": s.get("block_number"),
             "settled_tx": s.get("tx_hash"),
             "settled_time_utc": s.get("block_time_utc"),
@@ -794,11 +947,15 @@ def build_dog_search_index(conn: sqlite3.Connection) -> List[Dict[str, Any]]:
             "amount_token": "WETH",
             "amount_display_weth": s.get("amount_display_weth"),
             "bid_currency": "WETH",
-            "bid_count": int(bid_stats["bid_count"] or 0),
-            "unique_bidder_count": int(bid_stats["unique_bidder_count"] or 0),
+            "bid_count": len(bid_history),
+            "unique_bidder_count": unique_bidders,
+            "first_bid": bid_history[0] if bid_history else None,
+            "last_bid": bid_history[-1] if bid_history else None,
+            "highest_bid": highest_bid,
+            "bid_history": bid_history,
             "nft_contract": DOG_NFT.lower(),
             "auction_house": AUCTION_HOUSE.lower(),
-            "confidence": "verified_receipt_log" if c or s else "unknown",
+            "confidence": "verified_mint_and_receipt_logs" if m else ("verified_receipt_log" if c or s else "unknown"),
             "sources": ["polygon_receipts", "polygonscan_tx_pages", "degen_dogs_docs", "markcarey_github"],
         })
     return rows
@@ -844,6 +1001,10 @@ def build_reconciliation_summary(conn: sqlite3.Connection, tx_items: list, recei
     dogmaster_reward_ids = sorted(i for i in minted_ids if i == 0 or (i <= 420 and i % 11 == 0))
     expected_auction_ids = sorted(minted_ids - set(dogmaster_reward_ids))
     unsettled_created_ids = sorted(created_ids - settled_ids)
+    dog_bid_summary_total = scalar("SELECT COUNT(*) FROM mission1_dog_bid_summary")
+    dog_bid_status_counts = {r["bid_coverage_status"]: r["count"] for r in conn.execute("SELECT bid_coverage_status, COUNT(*) AS count FROM mission1_dog_bid_summary GROUP BY bid_coverage_status")}
+    dog_type_counts = {r["dog_type"]: r["count"] for r in conn.execute("SELECT dog_type, COUNT(*) AS count FROM mission1_dog_bid_summary GROUP BY dog_type")}
+    auction_ids_without_bids = [r["token_id"] for r in conn.execute("SELECT token_id FROM mission1_dog_bid_summary WHERE dog_type='auction_dog' AND bid_count=0 ORDER BY token_id")]
     dune_status = "api_key_present_not_used_by_indexer" if os.getenv("DUNE_API_KEY") else "no_api_key_public_ui_checked_no_mission1_exports_recovered"
     block_range = conn.execute("SELECT MIN(block_number), MAX(block_number) FROM mission1_raw_logs WHERE block_number IS NOT NULL").fetchone()
     return {
@@ -865,6 +1026,14 @@ def build_reconciliation_summary(conn: sqlite3.Connection, tx_items: list, recei
         "event_counts": event_counts,
         "auction_created": {"count": created_minmax[2], "min_dog_id": created_minmax[0], "max_dog_id": created_minmax[1]},
         "auction_bids": {"count": bid_minmax[2], "min_dog_id": bid_minmax[0], "max_dog_id": bid_minmax[1]},
+        "dog_bid_coverage": {
+            "per_dog_rows": dog_bid_summary_total,
+            "dog_type_counts": dog_type_counts,
+            "bid_coverage_status_counts": dog_bid_status_counts,
+            "auction_dogs_without_recovered_bids_count": len(auction_ids_without_bids),
+            "auction_dogs_without_recovered_bids": auction_ids_without_bids,
+            "note": "mission1_dog_bid_summary has one row for every minted Mission 1 Dog token ID 0-200; mission1_dog_search_index embeds each Dog's recovered bid_history array. DogMaster reward mints have no auction/bid history by contract design.",
+        },
         "auction_settled": {"count": settled_minmax[2], "min_dog_id": settled_minmax[0], "max_dog_id": settled_minmax[1]},
         "latest_auction_state": latest_auction_state(),
         "nft_mint_transfers": {"count_distinct_token_ids": minted[2], "min_token_id": minted[0], "max_token_id": minted[1]},

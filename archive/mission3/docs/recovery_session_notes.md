@@ -100,7 +100,7 @@ The current dashboard indexes created, bid, and settled logs. The archive should
 
 ## Candidate / still to verify
 
-- Mission 1 details remain unknown until researched.
+- Mission 1 details were unknown at the time of this Mission 3 phase-0 inspection; that note is now superseded by the recovered Polygon archive in `archive/mission1/`.
 - Mission 2 contract addresses and exact Dog range remain unverified in the existing Mission 2 archive scaffold.
 - Mission 3 Dog #590 transition is verified from Base logs in this session, but any historical narrative should still cite sources and docs separately where possible.
 - Current auction snapshots are live and should be treated as point-in-time archive data, not permanent settled facts.
