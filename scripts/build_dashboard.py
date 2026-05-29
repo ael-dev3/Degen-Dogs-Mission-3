@@ -28,6 +28,16 @@ PUBLIC_GENERATED = ROOT / "public" / "generated"
 CACHE_DIR = ROOT / ".cache"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
 README_TEMPLATE_PATH = ROOT / "README.template.md"
+HISTORICAL_ARCHIVE_INDEXES = {
+    1: ROOT / "archive" / "mission1" / "data" / "generated" / "mission1_dog_search_index.json",
+    2: ROOT / "archive" / "mission2" / "data" / "generated" / "mission2_dog_search_index.json",
+    3: ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_dog_search_index.json",
+}
+MISSION_CHAIN = {
+    1: ("Polygon", 137),
+    2: ("Degen Chain", 666666666),
+    3: ("Base", 8453),
+}
 
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
@@ -84,6 +94,8 @@ REWARD_SUP_FLOW_PER_DAY = Decimal("379.01")
 OUTPUT_TABLES = [
     "mission3_metrics",
     "auction_feed",
+    "historical_dog_search",
+    "historical_dog_report",
     "current_latest_bid",
     "recent_auction_winners",
     "current_auction",
@@ -96,11 +108,13 @@ OUTPUT_TABLES = [
     "recent_bids",
     "top_woof_holders",
 ]
-PRIMARY_TABLES = ["auction_feed"]
+PRIMARY_TABLES = ["auction_feed", "historical_dog_search", "historical_dog_report"]
 
 DATASET_DESCRIPTIONS = {
     "mission3_metrics": "Key dashboard metrics, refresh metadata, and verified contract snapshot values.",
     "auction_feed": "Homepage-ready current auction plus recent settled auctions.",
+    "historical_dog_search": "Combined all-mission Dog lookup with one hosted row per current Dog token ID and searchable hidden metadata.",
+    "historical_dog_report": "Mission-level coverage report for the combined historical Dog lookup.",
     "current_latest_bid": "Current auction latest bid and high-bidder snapshot.",
     "recent_auction_winners": "Recent settled winners formatted for the homepage.",
     "current_auction": "Full current auction state, dog metadata, rarity, and countdown fields.",
@@ -960,8 +974,304 @@ def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def table_dicts(cols: list[str], rows: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
+    return [dict(zip(cols, row)) for row in rows]
+
+
+def text_value(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def first_text(*values: Any) -> str:
+    for value in values:
+        text = text_value(value)
+        if text:
+            return text
+    return ""
+
+
+def int_value(value: Any, default: int = 0) -> int:
+    try:
+        if value is None or value == "":
+            return default
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def is_settled_status(value: Any) -> bool:
+    status = text_value(value).lower()
+    return status == "settled" or (status.startswith("settled") and "unsettled" not in status)
+
+
+def load_json_list(path: Path) -> list[dict[str, Any]]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return []
+    if not isinstance(data, list):
+        return []
+    return [row for row in data if isinstance(row, dict)]
+
+
+def chain_address_url(mission: int, address: str | None) -> str:
+    normalized = normalize_address(address)
+    if not normalized or normalized == ZERO:
+        return ""
+    if mission == 1:
+        return f"https://polygonscan.com/address/{normalized}"
+    if mission == 2:
+        return f"https://explorer.degen.tips/address/{normalized}"
+    return basescan_address_url(normalized)
+
+
+def archive_amount(row: dict[str, Any], mission: int) -> str:
+    if mission == 1:
+        amount = first_text(row.get("amount_display_weth"), row.get("amount_weth"))
+        return f"{amount} WETH" if amount else ""
+    if mission == 2:
+        amount = first_text(row.get("amount_degen"), row.get("amount_display_native"))
+        return f"{amount} DEGEN" if amount else ""
+    amount = first_text(row.get("amount_eth"), row.get("settled_amount_eth"))
+    return f"{amount} ETH" if amount else ""
+
+
+def archive_status(row: dict[str, Any]) -> str:
+    status = first_text(row.get("auction_status"), row.get("auction_state"), row.get("status"))
+    if status:
+        return status
+    settled = row.get("settled")
+    if settled is True or text_value(settled).lower() in {"1", "true", "yes"} or row.get("settled_block"):
+        return "settled"
+    if settled is False or text_value(settled).lower() in {"0", "false", "no"}:
+        return "live_or_unsettled"
+    if row:
+        return "recovered"
+    return "metadata_only"
+
+
+def load_archive_lookup() -> tuple[dict[int, dict[str, Any]], int, int]:
+    lookup: dict[int, dict[str, Any]] = {}
+    mission1_max = 200
+    mission3_min = 590
+    for mission, path in HISTORICAL_ARCHIVE_INDEXES.items():
+        rows = load_json_list(path)
+        token_ids: list[int] = []
+        for row in rows:
+            token_id = int_value(row.get("token_id", row.get("dog_id")), -1)
+            if token_id < 0:
+                continue
+            token_ids.append(token_id)
+            enriched = dict(row)
+            enriched["_archive_mission"] = mission
+            lookup[token_id] = enriched
+        if mission == 1 and token_ids:
+            mission1_max = max(token_ids)
+        if mission == 3 and token_ids:
+            mission3_min = min(token_ids)
+    return lookup, mission1_max, mission3_min
+
+
+def mission_for_token(token_id: int, archive: dict[str, Any], mission1_max: int, mission3_min: int) -> int:
+    archived_mission = int_value(archive.get("_archive_mission"), 0)
+    if archived_mission in MISSION_CHAIN:
+        return archived_mission
+    if token_id <= mission1_max:
+        return 1
+    if token_id < mission3_min:
+        return 2
+    return 3
+
+
+def source_text(value: Any) -> str:
+    if isinstance(value, list):
+        return ",".join(text_value(item) for item in value if text_value(item))
+    return text_value(value)
+
+
+def build_search_text(row: dict[str, Any]) -> str:
+    return " ".join(
+        text_value(value)
+        for value in row.values()
+        if value is not None and not isinstance(value, (list, dict)) and text_value(value)
+    )
+
+
+def build_historical_dog_tables(
+    conn: sqlite3.Connection,
+    total_supply: int,
+    dog_metadata: list[dict[str, Any]],
+) -> None:
+    metadata_by_token = {int_value(row.get("token_id"), -1): row for row in dog_metadata if int_value(row.get("token_id"), -1) >= 0}
+    archive_lookup, mission1_max, mission3_min = load_archive_lookup()
+    timeline_cols, timeline_rows = fetch_table(conn, "auction_timeline")
+    winners_cols, winners_rows = fetch_table(conn, "auction_winners")
+    current_cols, current_rows = fetch_table(conn, "current_auction")
+    timeline_by_token = {int_value(row.get("token_id"), -1): row for row in table_dicts(timeline_cols, timeline_rows)}
+    winners_by_token = {int_value(row.get("token_id"), -1): row for row in table_dicts(winners_cols, winners_rows)}
+    current_by_token = {int_value(row.get("token_id"), -1): row for row in table_dicts(current_cols, current_rows)}
+
+    search_rows: list[dict[str, Any]] = []
+    for token_id in range(total_supply):
+        metadata = metadata_by_token.get(token_id, {})
+        archive = archive_lookup.get(token_id, {})
+        mission = mission_for_token(token_id, archive, mission1_max, mission3_min)
+        chain, chain_id = MISSION_CHAIN[mission]
+        timeline = timeline_by_token.get(token_id, {}) if mission == 3 else {}
+        winner = winners_by_token.get(token_id, {}) if mission == 3 else {}
+        current = current_by_token.get(token_id, {}) if mission == 3 else {}
+
+        dog_label = f"Dog #{token_id}"
+        image_url = first_text(metadata.get("dog_image_url"), timeline.get("dog_image_url"), winner.get("dog_image_url"))
+        external_url = first_text(metadata.get("dog_external_url"), f"https://degendogs.club/#dog{token_id}")
+        opensea_url = first_text(metadata.get("dog_opensea_url"), winner.get("dog_opensea_url"), dog_opensea_url(token_id))
+        traits = first_text(metadata.get("traits"), winner.get("traits"))
+        trait_rarity = first_text(metadata.get("trait_rarity"), winner.get("trait_rarity"))
+        rarity = first_text(metadata.get("rarity"), timeline.get("rarity"), winner.get("rarity"))
+
+        if mission == 3 and (timeline or winner or current):
+            status = first_text(current.get("auction_state"), timeline.get("auction_state"), archive_status(archive))
+            amount = first_text(current.get("current_bid"), winner.get("winning_bid"))
+            if not amount:
+                settled_eth = first_text(timeline.get("settled_eth"), archive.get("amount_eth"))
+                high_bid_eth = first_text(timeline.get("high_bid_eth"))
+                amount = f"{settled_eth or high_bid_eth} ETH" if (settled_eth or high_bid_eth) else ""
+            winner_label = first_text(winner.get("winner"), current.get("bidder"), timeline.get("winner"), timeline.get("latest_bidder"), archive.get("winner"))
+            winner_url = first_text(winner.get("winner_url"), current.get("bidder_url"), timeline.get("winner_url"), timeline.get("latest_bidder_url"))
+            winner_wallet = first_text(winner.get("winner_wallet"), current.get("bidder_wallet"))
+            if not winner_url and winner_wallet:
+                winner_url = chain_address_url(mission, winner_wallet)
+            bid_count = int_value(first_text(timeline.get("bids"), winner.get("bid_count"), archive.get("bid_count")))
+            unique_bidder_count = int_value(first_text(timeline.get("unique_bidders"), winner.get("unique_bidders"), archive.get("unique_bidder_count")))
+            created_utc = first_text(timeline.get("start_time_utc"), archive.get("auction_created_time_utc"))
+            settled_utc = first_text(winner.get("settled_time_utc"), timeline.get("settled_time_utc"), archive.get("settled_time_utc"))
+            confidence = first_text(archive.get("confidence"), "verified_live_base_logs")
+            sources = source_text(archive.get("sources")) or "base_logs,dashboard_builder"
+        else:
+            status = archive_status(archive)
+            amount = archive_amount(archive, mission)
+            raw_winner = first_text(archive.get("winner"))
+            winner_wallet = normalize_address(raw_winner)
+            winner_label = short_address(winner_wallet) if winner_wallet else raw_winner
+            winner_url = chain_address_url(mission, winner_wallet) if winner_wallet else ""
+            bid_count = int_value(archive.get("bid_count"))
+            unique_bidder_count = int_value(archive.get("unique_bidder_count"))
+            created_utc = first_text(archive.get("auction_created_time_utc"), archive.get("mint_time_utc"))
+            settled_utc = first_text(archive.get("settled_time_utc"))
+            confidence = first_text(archive.get("confidence"), "metadata_only")
+            sources = source_text(archive.get("sources")) or "dog_metadata"
+
+        raw_amount = first_text(archive.get("amount_raw"), archive.get("amount_wei"))
+        row = {
+            "mission": mission,
+            "chain": chain,
+            "chain_id": chain_id,
+            "token_id": token_id,
+            "dog": dog_label,
+            "dog_image_url": image_url,
+            "dog_external_url": external_url,
+            "dog_opensea_url": opensea_url,
+            "status": status,
+            "winner": winner_label,
+            "winner_url": winner_url,
+            "winner_wallet": winner_wallet,
+            "amount": amount,
+            "amount_raw": raw_amount,
+            "bid_count": bid_count,
+            "unique_bidder_count": unique_bidder_count,
+            "auction_created_time_utc": created_utc,
+            "settled_time_utc": settled_utc,
+            "rarity": rarity,
+            "traits": traits,
+            "trait_rarity": trait_rarity,
+            "confidence": confidence,
+            "sources": sources,
+        }
+        row["search_text"] = build_search_text(row)
+        search_rows.append(row)
+
+    search_schema = [
+        ("mission", "INTEGER"),
+        ("chain", "TEXT"),
+        ("chain_id", "INTEGER"),
+        ("token_id", "INTEGER"),
+        ("dog", "TEXT"),
+        ("dog_image_url", "TEXT"),
+        ("dog_external_url", "TEXT"),
+        ("dog_opensea_url", "TEXT"),
+        ("status", "TEXT"),
+        ("winner", "TEXT"),
+        ("winner_url", "TEXT"),
+        ("winner_wallet", "TEXT"),
+        ("amount", "TEXT"),
+        ("amount_raw", "TEXT"),
+        ("bid_count", "INTEGER"),
+        ("unique_bidder_count", "INTEGER"),
+        ("auction_created_time_utc", "TEXT"),
+        ("settled_time_utc", "TEXT"),
+        ("rarity", "TEXT"),
+        ("traits", "TEXT"),
+        ("trait_rarity", "TEXT"),
+        ("confidence", "TEXT"),
+        ("sources", "TEXT"),
+        ("search_text", "TEXT"),
+    ]
+    insert_rows(conn, "historical_dog_search", search_rows, search_schema)
+
+    def report_row(label: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
+        statuses = [text_value(row.get("status")).lower() for row in rows]
+        created_times = [text_value(row.get("auction_created_time_utc")) for row in rows if text_value(row.get("auction_created_time_utc"))]
+        activity_times = [
+            text_value(value)
+            for row in rows
+            for value in (row.get("settled_time_utc"), row.get("auction_created_time_utc"))
+            if text_value(value)
+        ]
+        winners = {text_value(row.get("winner_wallet") or row.get("winner")) for row in rows if text_value(row.get("winner_wallet") or row.get("winner"))}
+        mission_int = int_value(label, 0)
+        chain_name = "All missions" if label == "all" else MISSION_CHAIN.get(mission_int, ("", 0))[0]
+        return {
+            "mission": label,
+            "chain": chain_name,
+            "dogs": len(rows),
+            "auctions_or_records": sum(1 for row in rows if text_value(row.get("auction_created_time_utc")) or text_value(row.get("settled_time_utc")) or text_value(row.get("amount"))),
+            "settled": sum(1 for status in statuses if is_settled_status(status)),
+            "live_or_unsettled": sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "created" in status),
+            "metadata_only": sum(1 for status in statuses if status == "metadata_only"),
+            "bid_count": sum(int_value(row.get("bid_count")) for row in rows),
+            "unique_winners_or_high_bidders": len(winners),
+            "first_auction_utc": min(created_times) if created_times else "",
+            "latest_activity_utc": max(activity_times) if activity_times else "",
+            "amount_note": "Per-Dog final/high bid is in historical_dog_search.amount; currencies differ by mission.",
+            "confidence": "combined archived indexes + live Base dashboard metadata",
+        }
+
+    report_rows = [report_row("all", search_rows)]
+    for mission in sorted(MISSION_CHAIN):
+        mission_rows = [row for row in search_rows if int_value(row.get("mission")) == mission]
+        report_rows.append(report_row(str(mission), mission_rows))
+    report_schema = [
+        ("mission", "TEXT"),
+        ("chain", "TEXT"),
+        ("dogs", "INTEGER"),
+        ("auctions_or_records", "INTEGER"),
+        ("settled", "INTEGER"),
+        ("live_or_unsettled", "INTEGER"),
+        ("metadata_only", "INTEGER"),
+        ("bid_count", "INTEGER"),
+        ("unique_winners_or_high_bidders", "INTEGER"),
+        ("first_auction_utc", "TEXT"),
+        ("latest_activity_utc", "TEXT"),
+        ("amount_note", "TEXT"),
+        ("confidence", "TEXT"),
+    ]
+    insert_rows(conn, "historical_dog_report", report_rows, report_schema)
+
 
 HIDDEN_UI_COLUMNS = {
+    "chain_id",
     "dog_image_url",
     "dog_external_url",
     "dog_opensea_url",
@@ -974,7 +1284,6 @@ HIDDEN_UI_COLUMNS = {
     "bidder_winner_wallet",
     "winner_wallet",
     "holder_wallet",
-    "bid_count",
     "unique_bidders",
     "amount_eth",
     "amount_usd",
@@ -999,6 +1308,9 @@ HIDDEN_UI_COLUMNS = {
     "log_index",
     "bid_wei",
     "amount_wei",
+    "amount_raw",
+    "sources",
+    "search_text",
 }
 
 
@@ -1020,8 +1332,14 @@ def css_class_for_col(col: str) -> str:
 
 def display_col_name(col: str) -> str:
     overrides = {
+        "token_id": "dog id",
         "bidder_winner": "high bidder / winner",
         "auction_time_utc": "last bid / settled",
+        "auction_created_time_utc": "created",
+        "amount": "final / high bid",
+        "bid_count": "bids",
+        "unique_bidder_count": "unique bidders",
+        "unique_winners_or_high_bidders": "unique winners / high bidders",
         "last_bid_utc": "last bid",
         "settled_time_utc": "settled",
         "time_remaining": "time left",
@@ -1064,11 +1382,11 @@ def render_cell(col: str, value: Any, row_data: dict[str, Any]) -> str:
         inner = f'<span class="dog-cell">{image_html}{label_html}</span>'
         return inner
     if lowered in {"status", "auction_state"}:
-        tone = "ongoing" if "ongoing" in text or text == "live" else "settled" if "settled" in text else "neutral"
+        tone = "ongoing" if "ongoing" in text or text == "live" else "settled" if is_settled_status(text) else "neutral"
         return f'<span class="status-pill {tone}">{escaped}</span>'
     if col == "auction_time_utc" and text:
-        status = str(row_data.get("status") or row_data.get("auction_state") or "").lower()
-        label = "Settled" if "settled" in status else "Last bid"
+        status = str(row_data.get("status") or row_data.get("auction_state") or "")
+        label = "Settled" if is_settled_status(status) else "Last bid"
         return f'<span class="time-cell"><b>{html.escape(label)}</b>{escaped}</span>'
     if col == "time_remaining" and text:
         status = str(row_data.get("status") or row_data.get("auction_state") or "").lower()
@@ -1095,7 +1413,8 @@ def table_html(name: str, cols: list[str], rows: list[tuple[Any, ...]], *, featu
             value = row_data.get(col)
             label = html.escape(display_col_name(col), quote=True)
             cells.append(f'<td class="{css_class_for_col(col)}" data-label="{label}">{render_cell(col, value, row_data)}</td>')
-        body.append("<tr>" + "".join(cells) + "</tr>")
+        search_blob = row_data.get("search_text") or " ".join(text_value(value) for value in row_data.values() if text_value(value))
+        body.append(f'<tr data-search="{html.escape(str(search_blob), quote=True)}">' + "".join(cells) + "</tr>")
     row_count = len(rows)
     caption_class = "table-caption sr-only" if featured else "table-caption"
     table_label = html.escape(name.replace("_", " "))
@@ -1632,7 +1951,7 @@ const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggl
 const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');tr.hidden=q!==''&&searchable&&!tr.textContent.toLowerCase().includes(q);});updateCounts();});
+filter.addEventListener('input',()=>{const q=filter.value.trim().toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{const table=tr.closest('table');const searchable=table?.closest('.primary-grid');const haystack=(tr.dataset.search||tr.textContent).toLowerCase();tr.hidden=q!==''&&searchable&&!haystack.includes(q);});updateCounts();});
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
 updateCountdowns();
@@ -1659,7 +1978,7 @@ setInterval(updateCountdowns,1000);
     </div>
     <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
   </section>
-  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs" autocomplete="off"></div>
+  <div class="toolbar"><input id="filter" type="search" aria-label="filter visible tables" placeholder="Search auctions, usernames, dogs, traits, wallets" autocomplete="off"></div>
   <main class="primary-grid">{''.join(primary_parts)}</main>
   {site_metric_html}
 </div>
@@ -1717,6 +2036,7 @@ def main() -> None:
     insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
     conn.executescript(SQL_PATH.read_text(encoding="utf-8"))
+    build_historical_dog_tables(conn, dog_total_supply, dog_metadata)
 
     tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]] = {}
     manifest_rows = []

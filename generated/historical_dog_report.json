@@ -1,0 +1,62 @@
+[
+  {
+    "mission": "all",
+    "chain": "All missions",
+    "dogs": 728,
+    "auctions_or_records": 708,
+    "settled": 687,
+    "live_or_unsettled": 2,
+    "metadata_only": 20,
+    "bid_count": 3464,
+    "unique_winners_or_high_bidders": 143,
+    "first_auction_utc": "2022-03-14T14:01:34Z",
+    "latest_activity_utc": "2026-05-28 18:36:55",
+    "amount_note": "Per-Dog final/high bid is in historical_dog_search.amount; currencies differ by mission.",
+    "confidence": "combined archived indexes + live Base dashboard metadata"
+  },
+  {
+    "mission": "1",
+    "chain": "Polygon",
+    "dogs": 201,
+    "auctions_or_records": 201,
+    "settled": 181,
+    "live_or_unsettled": 1,
+    "metadata_only": 0,
+    "bid_count": 545,
+    "unique_winners_or_high_bidders": 55,
+    "first_auction_utc": "2022-03-14T14:01:34Z",
+    "latest_activity_utc": "2023-11-11T14:01:42Z",
+    "amount_note": "Per-Dog final/high bid is in historical_dog_search.amount; currencies differ by mission.",
+    "confidence": "combined archived indexes + live Base dashboard metadata"
+  },
+  {
+    "mission": "2",
+    "chain": "Degen Chain",
+    "dogs": 389,
+    "auctions_or_records": 369,
+    "settled": 369,
+    "live_or_unsettled": 0,
+    "metadata_only": 20,
+    "bid_count": 1630,
+    "unique_winners_or_high_bidders": 55,
+    "first_auction_utc": "2024-11-25T15:45:09Z",
+    "latest_activity_utc": "2026-01-06T14:35:57Z",
+    "amount_note": "Per-Dog final/high bid is in historical_dog_search.amount; currencies differ by mission.",
+    "confidence": "combined archived indexes + live Base dashboard metadata"
+  },
+  {
+    "mission": "3",
+    "chain": "Base",
+    "dogs": 138,
+    "auctions_or_records": 138,
+    "settled": 137,
+    "live_or_unsettled": 1,
+    "metadata_only": 0,
+    "bid_count": 1289,
+    "unique_winners_or_high_bidders": 44,
+    "first_auction_utc": "2026-01-09 00:34:31",
+    "latest_activity_utc": "2026-05-28 18:36:55",
+    "amount_note": "Per-Dog final/high bid is in historical_dog_search.amount; currencies differ by mission.",
+    "confidence": "combined archived indexes + live Base dashboard metadata"
+  }
+]

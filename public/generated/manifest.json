@@ -10,6 +10,16 @@
     "rows": 11
   },
   {
+    "table": "historical_dog_search",
+    "file": "generated/historical_dog_search.csv",
+    "rows": 728
+  },
+  {
+    "table": "historical_dog_report",
+    "file": "generated/historical_dog_report.csv",
+    "rows": 4
+  },
+  {
     "table": "current_latest_bid",
     "file": "generated/current_latest_bid.csv",
     "rows": 1
