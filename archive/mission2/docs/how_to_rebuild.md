@@ -47,7 +47,7 @@ Current derived outputs include winners, bidder leaderboard, daily activity, tim
 
 ## Output locations
 
-- Raw logs: `archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson`
+- Raw logs: `archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson`
 - Raw metadata: `archive/mission2/data/raw/mission2_auction_logs.meta.json`
 - SQLite: `archive/mission2/data/sqlite/mission2.sqlite`
 - SQLite archive alias: `archive/mission2/data/mission2_archive.sqlite`

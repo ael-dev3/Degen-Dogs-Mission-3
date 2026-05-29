@@ -1,16 +1,7 @@
 {
-  "schema_version": 1,
-  "updated_at_utc": "2026-05-28T23:22:48Z",
-  "run_id": "mission2_24692180_26823905_20260528T221540Z",
-  "chain_id": 666666666,
-  "rpc_urls_used": [
-    "https://rpc.degen.tips"
-  ],
   "auction_house": "0x3620ca030a023bce87ec59a8b0e979bd7607fdbd",
-  "from_block": 24692180,
-  "to_block": 26622432,
-  "scan_to_block": 26823905,
-  "chunk_size": 10000,
+  "chain_id": 666666666,
+  "chunk_size": 5000,
   "event_topics": {
     "AuctionBid": "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3",
     "AuctionCreated": "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca",
@@ -21,15 +12,23 @@
     "AuctionSettled": "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99",
     "AuctionTimeBufferUpdated": "0x1b55d9f7002bda4490f467e326f22a4a847629c0f2d1ed421607d318d25b410d"
   },
-  "total_logs": 2641,
+  "failed_chunks": [],
+  "from_block": 24692180,
   "per_event_log_counts": {
-    "AuctionCreated": 369,
     "AuctionBid": 1630,
+    "AuctionCreated": 369,
     "AuctionExtended": 273,
     "AuctionSettled": 369
   },
-  "failed_chunks": [],
-  "retried_chunks": "not preserved by the first indexer run; no final gaps recorded",
-  "raw_log_path": "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson",
-  "raw_log_sha256": "29de7dead6451aaf715cddd4cfe9848de348b917684288021d8c3c4570f9e998"
+  "raw_log_path": "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson",
+  "raw_log_sha256": "29de7dead6451aaf715cddd4cfe9848de348b917684288021d8c3c4570f9e998",
+  "retried_chunks": [],
+  "rpc_urls_used": [
+    "https://rpc.degen.tips"
+  ],
+  "run_id": "mission2_24692180_26823905_20260529T001926Z",
+  "schema_version": 1,
+  "to_block": 26823905,
+  "total_logs": 2641,
+  "updated_at_utc": "2026-05-29T00:19:26Z"
 }

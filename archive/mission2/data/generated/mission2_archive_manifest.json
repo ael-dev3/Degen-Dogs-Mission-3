@@ -17,33 +17,33 @@
   "generated_files": [
     {
       "csv_path": "archive/mission2/data/generated/mission2_auction_created.csv",
-      "csv_sha256": "5d3b6586135c21deb358f31bcbc2d78f1d3a4293215e0e7aed0455b7386293c3",
+      "csv_sha256": "c1980a3681f7190dbea41e65717b365a4160e2f44614b375eaf83ca0b528dfaf",
       "json_path": "archive/mission2/data/generated/mission2_auction_created.json",
-      "json_sha256": "c46d965e15a14a7200452fe9892d6ae20487911e610ad548808ee39d908a99a8",
+      "json_sha256": "c1a94ea942494df0efc74d15b618455703ad40df084f65494db0a77a2f251441",
       "name": "mission2_auction_created",
       "rows": 369
     },
     {
       "csv_path": "archive/mission2/data/generated/mission2_auction_bids.csv",
-      "csv_sha256": "a66ae6e692821156ebc7b4b5abd58fdb0184fe8c9e95a09bc3f92116a95a8405",
+      "csv_sha256": "ccc737f9611beb26cee1eaebce19c20f3a95b8b0f51a711b5314022f1f542101",
       "json_path": "archive/mission2/data/generated/mission2_auction_bids.json",
-      "json_sha256": "e0cc4bba9392d432483539722dbeed5a7df0a6533164ac7746dc0f883a3a5dff",
+      "json_sha256": "2a4b6a7de04abda2196268acd18dc860367d0e23f8e4a77b8e9de01d6eb3fd76",
       "name": "mission2_auction_bids",
       "rows": 1630
     },
     {
       "csv_path": "archive/mission2/data/generated/mission2_auction_extended.csv",
-      "csv_sha256": "19d680bc9258ba16d0385dbef176b7569b44fd7c45c27129b5c735e8a9abb1bb",
+      "csv_sha256": "39f9d7b82f181fc90fd8911ff393cff67454c584bada10eaed36c1b053eccec7",
       "json_path": "archive/mission2/data/generated/mission2_auction_extended.json",
-      "json_sha256": "b8ded63667f36a00aacac51d9278abf1560882bb55bc03b136d89a6c9bf45e9e",
+      "json_sha256": "1d7b1f4888bcaf28d64f45b43108099ebf040d56275be3656c8ca77ca79a35a6",
       "name": "mission2_auction_extended",
       "rows": 273
     },
     {
       "csv_path": "archive/mission2/data/generated/mission2_auction_settled.csv",
-      "csv_sha256": "1d470c42e16a7fd5767db9d2160e812068777da9cea1abfb50c9b3f953c0d02b",
+      "csv_sha256": "c9a54ec2639b590711faf1ba4684fb7167887a16b27d3078fc6478bc205d8f7a",
       "json_path": "archive/mission2/data/generated/mission2_auction_settled.json",
-      "json_sha256": "79bbcdd0232d71ce58eab94b3fcff69a7f6a25a2d8f5f6ec35d9228e16349a20",
+      "json_sha256": "d058055dc3feb4da4ba96d7ce98a000d165c2aec62b737d1d7dbabc0cca03fab",
       "name": "mission2_auction_settled",
       "rows": 369
     },
@@ -57,9 +57,9 @@
     },
     {
       "csv_path": "archive/mission2/data/generated/mission2_recent_bids.csv",
-      "csv_sha256": "41be9b999868510722413c8c41d72cdd854913e7ebd8f55bad42c70a3180fe19",
+      "csv_sha256": "c289803470de1b39cc5de49e76b754f69a9d6ea866cc136966f9ade3c6c6b551",
       "json_path": "archive/mission2/data/generated/mission2_recent_bids.json",
-      "json_sha256": "68097bfa015e9e1b9f1b06b9320949ecdde2179a5658bacded6d65e7ad9bac23",
+      "json_sha256": "e6380f7afa1fcedb9c882c280880e1ec8600de5cd28236f845b47c13a5a9cf98",
       "name": "mission2_recent_bids",
       "rows": 250
     },
@@ -121,7 +121,7 @@
   "known_gaps": [],
   "network": "Degen Chain",
   "raw_log_file": {
-    "path": "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson",
+    "path": "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson",
     "rows": 2641,
     "sha256": "29de7dead6451aaf715cddd4cfe9848de348b917684288021d8c3c4570f9e998"
   },
@@ -136,8 +136,8 @@
     "mission2_woof_vault_allocations": 18
   },
   "rpc_used": "https://rpc.degen.tips",
-  "run_id": "mission2_24692180_26823905_20260528T221540Z",
-  "run_timestamp_utc": "2026-05-28T22:15:40Z",
+  "run_id": "mission2_24692180_26823905_20260529T001926Z",
+  "run_timestamp_utc": "2026-05-29T00:19:26Z",
   "schema_version": 1,
   "source_files_used": [
     "archive/mission2/config/mission2_chain.verified.json",
@@ -150,15 +150,15 @@
   ],
   "sqlite_archive_alias": {
     "path": "archive/mission2/data/mission2_archive.sqlite",
-    "sha256": "73c2be1f9813208343a11554d4dbb8598ae6607ef811cff2610d8af3654c8872"
+    "sha256": "9ebc4f127d10cfee50fa342b2e1833a6e7961455e8c53766a8c71b7006997e61"
   },
   "sqlite_file": {
     "path": "archive/mission2/data/sqlite/mission2.sqlite",
-    "sha256": "73c2be1f9813208343a11554d4dbb8598ae6607ef811cff2610d8af3654c8872"
+    "sha256": "9ebc4f127d10cfee50fa342b2e1833a6e7961455e8c53766a8c71b7006997e61"
   },
   "to_block": 26823905,
   "warnings": [
-    "Degen Chain auction-house, NFT, WDEGEN, WOOF/WOOFx metadata, and Mission 2 block range verified onchain; Dune reconciliation remains unavailable.",
+    "Verified Mission 2 config files used; Dune reconciliation remains separate.",
     "Dune query IDs, official SQL, and official Dune result exports remain unrecovered."
   ]
 }

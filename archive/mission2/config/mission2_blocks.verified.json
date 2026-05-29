@@ -16,7 +16,7 @@
     "first_settled_block": 24704104,
     "last_settled_block": 26622432,
     "sources": [
-      "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson",
+      "archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson",
       "archive/mission2/data/sqlite/mission2.sqlite"
     ],
     "notes": "Index scan extended beyond final settlement to latest block observed in the recovery run; no later auction lifecycle logs for this auction house were found in that scan."

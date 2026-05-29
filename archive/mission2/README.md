@@ -29,7 +29,7 @@ See:
 
 ## Recovered outputs
 
-- Raw logs: `data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson`
+- Raw logs: `data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson`
 - Raw metadata: `data/raw/mission2_auction_logs.meta.json`
 - SQLite: `data/sqlite/mission2.sqlite`
 - SQLite archive alias: `data/mission2_archive.sqlite`

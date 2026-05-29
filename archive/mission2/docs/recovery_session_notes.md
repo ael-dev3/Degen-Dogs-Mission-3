@@ -79,7 +79,7 @@ The repository already had an isolated `archive/mission2/` scaffold with config,
 - archive/mission2/data/mission2_archive.sqlite
 - archive/mission2/data/raw/mission2_auction_logs.meta.json
 - archive/mission2/data/raw/mission2_index_gaps.csv
-- archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260528T221540Z.ndjson
+- archive/mission2/data/raw/mission2_raw_logs_24692180_26823905_20260529T001926Z.ndjson
 - archive/mission2/data/raw/mission2_rpc_failures.json
 - archive/mission2/data/sqlite/mission2.sqlite
 - archive/mission2/dune/README.md
