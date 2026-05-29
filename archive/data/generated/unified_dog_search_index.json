@@ -24,13 +24,14 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
+      "bid_count": 3,
       "last_bid_time_utc": "2026-05-29T13:51:53Z",
-      "unique_bidder_count": 2
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
       "0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d",
-      "0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572"
+      "0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572",
+      "0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -53,7 +54,7 @@
       "total": 728
     },
     "schema_version": 1,
-    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #317/728 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: sunglasses 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 base_logs archive_indexer @floam 0xdbb811ec62338db94858ec21ef1d56b658111922 floam 0.011 21.85 2026-05-29t13:51:53z generated auction feed",
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base ongoing 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 22.31 $22.31 2026-05-29t13:51:53z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #317/728 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo (9.8%) background halo body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.5%) mouth none ears: goldearring (15.7%) ears goldearring head: whitemohawk (6.7%) head whitemohawk eyes: sunglasses (14.8%) eyes sunglasses base_logs archive_indexer generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,

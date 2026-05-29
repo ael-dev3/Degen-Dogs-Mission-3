@@ -31,6 +31,7 @@ MISSION_BID_FILES = {
 HISTORICAL_SEARCH = ROOT / "generated" / "historical_dog_search.json"
 AUCTION_FEED = ROOT / "generated" / "auction_feed.json"
 CURRENT_AUCTION = ROOT / "generated" / "current_auction.json"
+RECENT_BIDS = ROOT / "generated" / "recent_bids.json"
 
 MISSION_CONFIG = {
     1: {
@@ -267,6 +268,43 @@ def load_bid_lookup() -> dict[tuple[int, int], list[dict[str, Any]]]:
     return lookup
 
 
+def load_recent_bids_by_dog() -> dict[int, list[dict[str, Any]]]:
+    """Load current dashboard bid rows keyed by Dog id.
+
+    This file is generated from the same fresh log scan as the top card/feed,
+    so it can fill live-row bid stats and tx hashes when the deeper archive
+    index is behind the latest current-auction bid.
+    """
+    rows = load_json(RECENT_BIDS, [])
+    by_dog: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    if not isinstance(rows, list):
+        return by_dog
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        dog_id = dog_id_from_row(row)
+        if dog_id < 0:
+            continue
+        by_dog[dog_id].append(row)
+    for dog_rows in by_dog.values():
+        dog_rows.sort(key=lambda row: (first_text(row.get("bid_time_utc")), int_value(row.get("block_number"), 0)), reverse=True)
+    return by_dog
+
+
+def load_historical_rows_by_dog() -> dict[int, dict[str, Any]]:
+    rows = load_json(HISTORICAL_SEARCH, [])
+    by_dog: dict[int, dict[str, Any]] = {}
+    if not isinstance(rows, list):
+        return by_dog
+    for row in rows:
+        if not isinstance(row, dict) or int_value(row.get("mission"), 0) != 3:
+            continue
+        dog_id = dog_id_from_row(row)
+        if dog_id >= 0:
+            by_dog[dog_id] = row
+    return by_dog
+
+
 def load_mission_rows() -> tuple[list[dict[str, Any]], list[str]]:
     rows: list[dict[str, Any]] = []
     notes: list[str] = []
@@ -500,6 +538,61 @@ def record_sort_key(record: dict[str, Any]) -> tuple[int, str, int]:
     return (live_rank, activity, int_value(record.get("dog_id"), 0))
 
 
+def current_overlay_search_text(record: dict[str, Any], dog_id: int) -> str:
+    """Build fresh search terms for the live Mission 3 row after overlay.
+
+    Do not append to the previous archive-derived search text: that text can
+    contain stale high-bidder or amount terms from a lagging Mission 3 archive
+    snapshot, which makes searches for an old bidder return the current row.
+    """
+    raw_who = record.get("winner_or_high_bidder")
+    who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}
+    raw_amount = record.get("amount")
+    amount: dict[str, Any] = raw_amount if isinstance(raw_amount, dict) else {}
+    raw_rarity = record.get("rarity")
+    rarity: dict[str, Any] = raw_rarity if isinstance(raw_rarity, dict) else {}
+    raw_source = record.get("source")
+    source: dict[str, Any] = raw_source if isinstance(raw_source, dict) else {}
+    raw_auction_created = record.get("auction_created")
+    auction_created: dict[str, Any] = raw_auction_created if isinstance(raw_auction_created, dict) else {}
+    raw_settlement = record.get("settlement")
+    settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
+    raw_traits = record.get("traits")
+    traits: list[Any] = raw_traits if isinstance(raw_traits, list) else []
+
+    parts: list[Any] = [
+        f"dog {dog_id}",
+        f"dog #{dog_id}",
+        str(dog_id),
+        "Mission 3",
+        "mission 3",
+        "Base",
+        record.get("status"),
+        who.get("wallet"),
+        who.get("display"),
+        who.get("farcaster_handle"),
+        amount.get("native"),
+        amount.get("native_symbol"),
+        amount.get("raw"),
+        amount.get("usd_estimate"),
+        amount.get("usd_estimate_display"),
+        record.get("activity_time_utc"),
+        auction_created.get("tx_hash"),
+        settlement.get("tx_hash"),
+        rarity.get("display"),
+        "generated auction feed",
+    ]
+    for bid_tx_hash in record.get("bid_tx_hashes") or []:
+        parts.append(bid_tx_hash)
+    for trait in traits:
+        if isinstance(trait, dict):
+            parts.extend([trait.get("display"), trait.get("trait_type"), trait.get("value")])
+        else:
+            parts.append(trait)
+    parts.extend(as_sources(source.get("sources")))
+    return " ".join(str(part) for part in parts if text_value(part)).lower()
+
+
 def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dict[str, dict[str, Any]]) -> int:
     """Keep the live/current Mission 3 row aligned with the rendered auction feed.
 
@@ -515,6 +608,8 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
     if not isinstance(current_rows, list):
         current_rows = []
     current_by_id = {dog_id_from_row(row): row for row in current_rows if isinstance(row, dict) and dog_id_from_row(row) >= 0}
+    recent_bids_by_id = load_recent_bids_by_dog()
+    historical_by_id = load_historical_rows_by_dog()
     by_key = {(int_value(record.get("mission")), int_value(record.get("dog_id"))): record for record in records}
     updates = 0
     for feed in feed_rows:
@@ -564,9 +659,29 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         if activity:
             record["activity_time_utc"] = activity
             record["activity_time_basis"] = "last_bid_block_time"
-        bid_stats = record.get("bid_stats") if isinstance(record.get("bid_stats"), dict) else {}
+        raw_bid_stats = record.get("bid_stats")
+        bid_stats: dict[str, Any] = raw_bid_stats if isinstance(raw_bid_stats, dict) else {}
+        historical = historical_by_id.get(dog_id, {})
+        recent_bids = recent_bids_by_id.get(dog_id, [])
         if activity:
             bid_stats["last_bid_time_utc"] = activity
+        bid_count = int_value(historical.get("bid_count"), int_value(bid_stats.get("bid_count"), 0))
+        unique_bidder_count = int_value(historical.get("unique_bidder_count"), int_value(bid_stats.get("unique_bidder_count"), 0))
+        if recent_bids:
+            bid_count = max(bid_count, len(recent_bids))
+            recent_wallets = {normalize_address(row.get("bidder_wallet") or row.get("bidder")) for row in recent_bids}
+            recent_wallets.discard("")
+            unique_bidder_count = max(unique_bidder_count, len(recent_wallets))
+            bid_tx_hashes = list(record.get("bid_tx_hashes") or [])
+            for bid_row in recent_bids:
+                tx_hash = first_text(bid_row.get("tx_hash"), bid_row.get("transaction_hash"))
+                if tx_hash and tx_hash not in bid_tx_hashes:
+                    bid_tx_hashes.append(tx_hash)
+            record["bid_tx_hashes"] = bid_tx_hashes
+        if bid_count:
+            bid_stats["bid_count"] = bid_count
+        if unique_bidder_count:
+            bid_stats["unique_bidder_count"] = unique_bidder_count
         record["bid_stats"] = bid_stats
         record["rarity"] = parse_rarity(first_text(feed.get("rarity"), current.get("rarity"), record.get("rarity", {}).get("display") if isinstance(record.get("rarity"), dict) else ""))
         record["traits"] = parse_traits(first_text(current.get("trait_rarity"), feed.get("trait_rarity"), current.get("traits"), feed.get("traits"))) or record.get("traits", [])
@@ -583,8 +698,7 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         source["confidence"] = "verified"
         source["notes"] = first_text(source.get("notes"), MISSION_CONFIG[3]["source_note"])
         record["source"] = source
-        extra_search = [display, wallet, profile.get("farcaster_handle"), native, usd_value, activity, "generated auction feed"]
-        record["search_text"] = " ".join([text_value(record.get("search_text")), *(str(part) for part in extra_search if part)]).strip().lower()
+        record["search_text"] = current_overlay_search_text(record, dog_id)
         updates += 1
     return updates
 

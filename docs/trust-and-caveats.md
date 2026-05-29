@@ -32,6 +32,10 @@ Do not fabricate missing history. Keep verified, candidate, and unknown data sep
 
 Highest-USD sorting in the hosted feed uses generated historical estimate fields from the static archive, not browser live price calls. Estimates are for browsing/context, not official accounting. Rows without historical USD estimates are kept in the archive and sorted below priced rows when the USD sort is active.
 
+## License and attribution
+
+Original code in this repository is licensed under MIT unless otherwise noted. Third-party materials, including Degen Dogs upstream code/assets/docs referenced here, retain their original licenses and attribution requirements. See [`../NOTICE.md`](../NOTICE.md) and [`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
+
 ## Public SQL
 
 The dashboard does not expose visitor-run SQL. Queries are approved in `sql/mission3_dashboard.sql` and executed by the local runner.

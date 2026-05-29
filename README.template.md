@@ -130,6 +130,10 @@ Read [`docs/trust-and-caveats.md`](docs/trust-and-caveats.md) before using the d
 
 Degen Dogs was created by Mark Carey / dogmaster. This dashboard/archive repo is an independent community-built analytics contribution for the Degen Dogs ecosystem.
 
-## License / attribution
+## License and attribution
 
-No explicit license file is currently present. Treat reuse rights as pending until a license is added or confirmed by the repo owner.
+Original code in this repository is licensed under MIT unless otherwise noted.
+
+Degen Dogs was created by Mark Carey / dogmaster. This repo is an independent community-built analytics/archive dashboard using public onchain data and attributed Degen Dogs materials.
+
+Third-party materials retain their original licenses. See [`LICENSE`](LICENSE), [`NOTICE.md`](NOTICE.md), and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
