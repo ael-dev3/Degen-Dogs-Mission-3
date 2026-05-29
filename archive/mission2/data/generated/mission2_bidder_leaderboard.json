@@ -1,0 +1,842 @@
+[
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 318,
+    "bidder": "0x5d13b662a387a0e40b9320b8759e38c1204ec5ea",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 187,
+    "extension_bid_count": 34,
+    "first_bid_block": 24704016,
+    "last_bid_block": 26123694
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 222,
+    "bidder": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 126,
+    "extension_bid_count": 27,
+    "first_bid_block": 26062690,
+    "last_bid_block": 26621581
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 82,
+    "bidder": "0x2a78be7b3b40671fa356798e7908654234bc0444",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 33,
+    "extension_bid_count": 21,
+    "first_bid_block": 26133131,
+    "last_bid_block": 26316522
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 69,
+    "bidder": "0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 47,
+    "extension_bid_count": 9,
+    "first_bid_block": 24986580,
+    "last_bid_block": 26516178
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 64,
+    "bidder": "0xefbe74a2d564b5da62407d452038db32c9fd6b27",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 34,
+    "extension_bid_count": 1,
+    "first_bid_block": 24755777,
+    "last_bid_block": 26207331
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 63,
+    "bidder": "0x6506e31b88422251354d9deb63a904d90acd8996",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 44,
+    "extension_bid_count": 11,
+    "first_bid_block": 24874615,
+    "last_bid_block": 26153564
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 55,
+    "bidder": "0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 27,
+    "extension_bid_count": 19,
+    "first_bid_block": 26459259,
+    "last_bid_block": 26621591
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 53,
+    "bidder": "0xf561592d05174512905cece6f00efc52423adc3c",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 36,
+    "extension_bid_count": 6,
+    "first_bid_block": 25004097,
+    "last_bid_block": 26247248
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 47,
+    "bidder": "0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 25,
+    "extension_bid_count": 0,
+    "first_bid_block": 25600367,
+    "last_bid_block": 26412508
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 42,
+    "bidder": "0x409538216575caefe49af5af9b12ef4b4496041b",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 24,
+    "extension_bid_count": 17,
+    "first_bid_block": 24767099,
+    "last_bid_block": 26617551
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 37,
+    "bidder": "0xc7aab24ede583b0dc9041343ae51466bb86a1ab7",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 26,
+    "extension_bid_count": 10,
+    "first_bid_block": 26475131,
+    "last_bid_block": 26619097
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 37,
+    "bidder": "0x2cd8cc289e927be809cc396c2075e32fabffd885",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 29,
+    "extension_bid_count": 0,
+    "first_bid_block": 25672314,
+    "last_bid_block": 25970097
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 35,
+    "bidder": "0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 23,
+    "extension_bid_count": 7,
+    "first_bid_block": 26201407,
+    "last_bid_block": 26445187
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 32,
+    "bidder": "0xd2324d0179198edbfcd25282b44bf6e5e317242a",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 23,
+    "extension_bid_count": 3,
+    "first_bid_block": 26009619,
+    "last_bid_block": 26290058
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 27,
+    "bidder": "0xc421401af43d217d8bf16f18ffd076f3c84219d9",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 19,
+    "extension_bid_count": 8,
+    "first_bid_block": 26268863,
+    "last_bid_block": 26610091
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 26,
+    "bidder": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 24,
+    "extension_bid_count": 1,
+    "first_bid_block": 24856073,
+    "last_bid_block": 25416235
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 25,
+    "bidder": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 16,
+    "first_bid_block": 26485285,
+    "last_bid_block": 26513467
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 23,
+    "bidder": "0x19d8da2674e8a025154153297ea3ab918debf96d",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 17,
+    "extension_bid_count": 4,
+    "first_bid_block": 24831765,
+    "last_bid_block": 25429371
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 22,
+    "bidder": "0xbb672bbe37c259e7d22b250d6f1310161eefaece",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 14,
+    "extension_bid_count": 7,
+    "first_bid_block": 26517996,
+    "last_bid_block": 26617177
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 22,
+    "bidder": "0x05f761aacd63e4e96bf98f0fe5614de5ba90856c",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 16,
+    "extension_bid_count": 1,
+    "first_bid_block": 24798991,
+    "last_bid_block": 25449147
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 21,
+    "bidder": "0x09a900eb2ff6e9aca12d4d1a396ddc9be0307661",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 21,
+    "extension_bid_count": 0,
+    "first_bid_block": 24754602,
+    "last_bid_block": 26089893
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 20,
+    "bidder": "0x4bf88042de0220647acb314af3c5f310aec3bcc0",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 13,
+    "extension_bid_count": 0,
+    "first_bid_block": 25429369,
+    "last_bid_block": 25790679
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 17,
+    "bidder": "0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 5,
+    "first_bid_block": 25198402,
+    "last_bid_block": 25514851
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 16,
+    "bidder": "0x4932ae69f9da1ff74944680baad245cd3747d861",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 9,
+    "extension_bid_count": 6,
+    "first_bid_block": 24697532,
+    "last_bid_block": 26179736
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 16,
+    "bidder": "0xe5bd8b07f960e77fea96f4b73271efb53f5dc00d",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 5,
+    "first_bid_block": 25156218,
+    "last_bid_block": 25223566
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 15,
+    "bidder": "0xbc57373c9b99524f6300664e2602a0427a9ec0db",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 9,
+    "extension_bid_count": 1,
+    "first_bid_block": 24692799,
+    "last_bid_block": 24921482
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 14,
+    "bidder": "0x2df06405772f9fe85e1771ff11baaa5d3933f457",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 10,
+    "extension_bid_count": 0,
+    "first_bid_block": 26105552,
+    "last_bid_block": 26161684
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 11,
+    "bidder": "0x903dd30042ae53844ae83bdf2bcf839c4e80eef8",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 1,
+    "first_bid_block": 26523590,
+    "last_bid_block": 26548671
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 11,
+    "bidder": "0x0c65be17e86bcb6019148be0a4e8f0a4510a70cb",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 0,
+    "first_bid_block": 26062598,
+    "last_bid_block": 26497270
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 10,
+    "bidder": "0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 2,
+    "first_bid_block": 25939341,
+    "last_bid_block": 25998793
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 10,
+    "bidder": "0x6de24695bf9946e4a866a81d21ef5b74af4db06b",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 7,
+    "extension_bid_count": 0,
+    "first_bid_block": 25287568,
+    "last_bid_block": 25375884
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 9,
+    "bidder": "0x19c64affde518de2884c1944700e12d2bb7016a4",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 4,
+    "extension_bid_count": 6,
+    "first_bid_block": 26462481,
+    "last_bid_block": 26544795
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 9,
+    "bidder": "0x8847925f96be82ad7e48b26f641e7d47d073fe0a",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 5,
+    "extension_bid_count": 0,
+    "first_bid_block": 26006735,
+    "last_bid_block": 26259252
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 9,
+    "bidder": "0x8f4359d1c2166452b5e7a02742d6fe9ca5448fde",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 8,
+    "extension_bid_count": 0,
+    "first_bid_block": 25982499,
+    "last_bid_block": 26088336
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 9,
+    "bidder": "0xf8a025b42b07db05638fe596cce339707ec3cc71",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 9,
+    "extension_bid_count": 0,
+    "first_bid_block": 24754943,
+    "last_bid_block": 26062724
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 8,
+    "bidder": "0xcfc162ca64a2b993dcc7001dca3f23f718e6dcc2",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 7,
+    "extension_bid_count": 2,
+    "first_bid_block": 26562397,
+    "last_bid_block": 26615567
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 7,
+    "bidder": "0x4bd900f29b1aa6b4742ca43086eb7d8d9ce6d47d",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 7,
+    "first_bid_block": 24841614,
+    "last_bid_block": 24841880
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 7,
+    "bidder": "0x11c1503ba0a3a42773dc1a9a76edfe54b30bcc38",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 3,
+    "extension_bid_count": 5,
+    "first_bid_block": 24755113,
+    "last_bid_block": 24792787
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 6,
+    "bidder": "0xb5ffc7dc088a44b3dc5bac396806bfbbc71634ce",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 4,
+    "extension_bid_count": 6,
+    "first_bid_block": 26464801,
+    "last_bid_block": 26493313
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 6,
+    "bidder": "0xd5d06cb9ddeeb297a84f33a6b396637ffdbdbccd",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 5,
+    "extension_bid_count": 1,
+    "first_bid_block": 26478393,
+    "last_bid_block": 26488840
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 6,
+    "bidder": "0xd2db6ab0dc4743a77719b38d9f7196aa32fa519f",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 4,
+    "extension_bid_count": 0,
+    "first_bid_block": 25515127,
+    "last_bid_block": 25540166
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 6,
+    "bidder": "0xdafcfb204d7c1a48550cc61e6d3a4a3178849899",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 3,
+    "extension_bid_count": 1,
+    "first_bid_block": 25483213,
+    "last_bid_block": 25524507
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 5,
+    "bidder": "0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 5,
+    "extension_bid_count": 2,
+    "first_bid_block": 26242488,
+    "last_bid_block": 26261244
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 5,
+    "bidder": "0xa3072eb2348edb3324cb9c85aab1a47bb42a8486",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 3,
+    "extension_bid_count": 3,
+    "first_bid_block": 25282734,
+    "last_bid_block": 25379190
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 5,
+    "bidder": "0x884ff907d5fb8bae239b64aa8ad18ba3f8196038",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 4,
+    "extension_bid_count": 0,
+    "first_bid_block": 24806964,
+    "last_bid_block": 24953934
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 5,
+    "bidder": "0x58e6d11a458db5bb49903f63d841bed8c5e90fa9",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 4,
+    "extension_bid_count": 1,
+    "first_bid_block": 24789976,
+    "last_bid_block": 24840934
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 4,
+    "bidder": "0xeeb813d8c68cdc2dfcecc3c7eca71f17c830902d",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 2,
+    "first_bid_block": 26600153,
+    "last_bid_block": 26601468
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 4,
+    "bidder": "0x9d3f687a2b1b215b92886bb93e89633bf9579fa7",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 0,
+    "first_bid_block": 25022775,
+    "last_bid_block": 25135129
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 4,
+    "bidder": "0x84d8d4b63c7d40ee5f68e566844e547782c27f39",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 1,
+    "first_bid_block": 24853986,
+    "last_bid_block": 24866609
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0x412b7153504217b405af821bdcdc5f21c71e3cbc",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 3,
+    "extension_bid_count": 2,
+    "first_bid_block": 26605218,
+    "last_bid_block": 26609131
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0x09a80a434a3ea1e247dabc7ec979b7392f34b510",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 26288341,
+    "last_bid_block": 26290063
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0x49dbccda45cb704075e72e15f34c642fcad1c1a8",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 3,
+    "extension_bid_count": 0,
+    "first_bid_block": 26150530,
+    "last_bid_block": 26185397
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0x24856ffb89fd1edc15ea1439148e124cde9dd302",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 2,
+    "first_bid_block": 26105702,
+    "last_bid_block": 26106195
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0xe8cb7d33f18c3d2b265d9c47e02d8ab67f1a116b",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 25281500,
+    "last_bid_block": 25284593
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 3,
+    "bidder": "0x2adb7424d5935797bbdad694126950e427b2c541",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 3,
+    "first_bid_block": 24793005,
+    "last_bid_block": 24804925
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0xa62449301059cf00edb96f4c03acc6aa3b326c30",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 0,
+    "first_bid_block": 26615457,
+    "last_bid_block": 26616148
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 1,
+    "first_bid_block": 26601463,
+    "last_bid_block": 26605255
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0x629d1cfeaaadfcd8c67e40602508968f9c3e2a39",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 0,
+    "first_bid_block": 26523795,
+    "last_bid_block": 26524211
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0xf13f2c2eba28f2aacee7528f741f9e0d1e8d3d9a",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 26499375,
+    "last_bid_block": 26503346
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0x7c527d956f47920fec38dfc5834fe31b5a72db12",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25557004,
+    "last_bid_block": 25558063
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0x042951afa6ff53f93672f7b30eaa797b70a61837",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 0,
+    "first_bid_block": 24714930,
+    "last_bid_block": 24972788
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 2,
+    "bidder": "0xd84d25d80d1dcd6d8589830dc588ba587ca99171",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 2,
+    "extension_bid_count": 0,
+    "first_bid_block": 24754802,
+    "last_bid_block": 24755825
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xe84dea841a7559afd5366859916ad852fbcf9f82",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 26534393,
+    "last_bid_block": 26534393
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xf5ede753787fa89a2960330ba846cc25875c09d4",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 26497286,
+    "last_bid_block": 26497286
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xe04885c3f1419c6e8495c33bdcf5f8387cd88846",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 26482456,
+    "last_bid_block": 26482456
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xeac5781e7ca68f1c7b6ebe854901e427049d0ab5",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 26135520,
+    "last_bid_block": 26135520
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xfb9cb7bcafa053365813212c3228f37b9fe7215e",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25947969,
+    "last_bid_block": 25947969
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xcf2b7c6bc98bfe0d6138a25a3b6162b51f75e05d",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25730295,
+    "last_bid_block": 25730295
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xf9ce34dfcd3cc92804772f3022af27bcd5e43ff2",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25718082,
+    "last_bid_block": 25718082
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xb13a55d8512aec4bf7b15067d733c4c3c68f2439",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25704611,
+    "last_bid_block": 25704611
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x93eac3762e0fee440c4348d2894803b5aaa7e2dc",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 25678316,
+    "last_bid_block": 25678316
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xf58fe388d53e9542f0bddff2d1578b13675228fd",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25668354,
+    "last_bid_block": 25668354
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xb68a6a83cfca2e7fde2aa5749b85e753f55d58cd",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25643222,
+    "last_bid_block": 25643222
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x764e427020ad72624075c61260192c6e486d15a5",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25479804,
+    "last_bid_block": 25479804
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x3ebcecea588e5a6dfad865fc43732d14e1ac850c",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25470091,
+    "last_bid_block": 25470091
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xe9aa0c9618bfb58f63c324a11f6dc43220fc8fea",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25429370,
+    "last_bid_block": 25429370
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xc31ad87abdf3c414f48e922a38c295f5ff41ffa3",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25294818,
+    "last_bid_block": 25294818
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x120afebff136ecbedc4a9eb6976a236591ce0a90",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 1,
+    "first_bid_block": 25284573,
+    "last_bid_block": 25284573
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x55a5705453ee82c742274154136fce8149597058",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 25248041,
+    "last_bid_block": 25248041
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x9a064a0ef88393662de416a59fa4cbe9f4900fc8",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 24996777,
+    "last_bid_block": 24996777
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xdd3b3a67c66a5276aacc499ec2abd5241721e008",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 24842349,
+    "last_bid_block": 24842349
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x70796e8deea0cb8a962917a22c3883f0f595664b",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 24789797,
+    "last_bid_block": 24789797
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0x6ea3b97e28f6d65034fb814cda9770a92bea4bf2",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 24755522,
+    "last_bid_block": 24755522
+  },
+  {
+    "amount_note": "raw total omitted to avoid SQLite integer overflow; use per-bid exact raw rows for accounting",
+    "bid_count": 1,
+    "bidder": "0xf1e7dbedd9e06447e2f99b1310c09287b734addc",
+    "confidence": "verified_onchain",
+    "dogs_bid_on": 1,
+    "extension_bid_count": 0,
+    "first_bid_block": 24693612,
+    "last_bid_block": 24693612
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "updated_at_utc": "2026-05-28T23:44:40Z",
+  "dashboards": [
+    {
+      "title": "Degen Dogs Mission 2",
+      "owner": "ael_dev",
+      "dashboard_url": null,
+      "dashboard_id": null,
+      "source": "user-provided recovery prompt candidate; automated Dune recovery did not verify the dashboard",
+      "recovered_at_utc": "2026-05-28T23:22:48Z",
+      "confidence": "unverified_candidate",
+      "notes": "Direct slug probes returned 404/Cloudflare, r.jina Dune search for exact title/owner did not reveal the Mission 2 dashboard, and browser Dune access was blocked by Cloudflare. Keep as candidate until authenticated Dune UI or Dune API verifies it."
+    }
+  ],
+  "missing": [
+    "dashboard_url",
+    "dashboard_id",
+    "query_ids",
+    "official_sql",
+    "official_results"
+  ],
+  "search_attempts": [
+    {
+      "query": "https://dune.com/ael_dev/degen-dogs-mission-2",
+      "result": "Cloudflare in browser; r.jina view returned 404 Page Not Found"
+    },
+    {
+      "query": "https://dune.com/search?q=Degen Dogs Mission 2",
+      "result": "r.jina public search returned unrelated Degen airdrop/chain queries; no Degen Dogs Mission 2 dashboard/query IDs"
+    },
+    {
+      "query": "https://dune.com/search?q=ael_dev",
+      "result": "r.jina public search did not show ael_dev Degen Dogs dashboard/query records"
+    },
+    {
+      "query": "https://dune.com/search?q=WOOF WOOFx Degen Dogs",
+      "result": "no useful public search results"
+    }
+  ]
+}
