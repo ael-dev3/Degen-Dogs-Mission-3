@@ -1,0 +1,43 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "chain_id": 137,
+  "contracts": {
+    "dog_master": {
+      "confidence": "likely",
+      "notes": "Possible creator/founder reward address; not promoted to verified operational constant yet.",
+      "source_urls": [
+        "https://github.com/markcarey/degendogs/blob/main/scripts/deploy.js"
+      ],
+      "value": "0xFa083DfD09F3a7380f6dF6E25dd277E2780de41D",
+      "verification_method": "Historical deploy.js comments identify dogMaster; needs onchain role/event reconciliation."
+    },
+    "dune_mission1_dashboard": {
+      "confidence": "unknown",
+      "notes": "Recover later with Dune API or browser/manual export.",
+      "source_urls": [
+        "https://dune.com/browse/dashboards?q=Degen%20Dogs"
+      ],
+      "value": null,
+      "verification_method": "Public Dune UI returned HTTP 403 and no DUNE_API_KEY was available."
+    },
+    "token_vestor_v2_or_later": {
+      "confidence": "candidate",
+      "notes": "Keep candidate until stream events/DAO proposals verify role.",
+      "source_urls": [
+        "https://polygonscan.com/address/0x98A63F98E9B952B5C6CCBA47C631461388e78d7A"
+      ],
+      "value": "0x98A63F98E9B952B5C6CCBA47C631461388e78d7A",
+      "verification_method": "Observed in script constants / candidate stream path, but not yet reconciled to Mission 1 reward accounting."
+    },
+    "unchain_ukraine_final_recipient": {
+      "confidence": "unknown",
+      "notes": "Do not fabricate donation recipient.",
+      "source_urls": [
+        "https://medium.com/degen-dogs/degen-dogs-are-nfts-that-stream-defi-tokens-c00743581fed",
+        "https://docs.degendogs.club/developers/contracts.md"
+      ],
+      "value": null,
+      "verification_method": "Docs verify Ukraine.sol forwarding contract, but final charity recipient/flow needs transaction-level analysis."
+    }
+  }
+}

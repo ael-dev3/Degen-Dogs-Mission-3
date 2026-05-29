@@ -1,0 +1,154 @@
+{
+  "auction_bids": {
+    "count": 545,
+    "max_dog_id": 166,
+    "min_dog_id": 1
+  },
+  "auction_created": {
+    "count": 182,
+    "max_dog_id": 200,
+    "min_dog_id": 1
+  },
+  "auction_settled": {
+    "count": 181,
+    "max_dog_id": 199,
+    "min_dog_id": 1
+  },
+  "block_range_recovered": {
+    "from_block": 25818533,
+    "note": "Receipt recovery is transaction-based, not a contiguous archive-node eth_getLogs pass.",
+    "to_block": 52701258
+  },
+  "block_time_failures": [],
+  "bsct_transfer_rows": 708,
+  "data_recovery_method": "PolygonScan auction-house normal transaction pages plus public Polygon RPC transaction receipts",
+  "dog1_ukraine_auction": {
+    "created_time_utc": "2022-03-14T14:01:34Z",
+    "created_tx": "0xa4fbd483360ceb134dc139058ae1c76efd3fb1fd6ce903a91c36886732012513",
+    "settled_time_utc": "2022-03-17T14:02:45Z",
+    "settled_tx": "0xc1fb04317739a5cec95f93318e802e5a15e8bc9e66dfe44ce4e2bdd5e64d88c0",
+    "source_note": "Medium article published by Degen Dogs on 2022-03-14 states Dog #1 / Ukraine Dog was a 72h special auction with 100% donation.",
+    "status": "verified_from_medium_and_receipt_logs_for_dog1_presence; donation flow still needs full treasury/Ukraine reconciliation"
+  },
+  "dog_total_supply_verified_from_onchain_call": 201,
+  "dogmaster_reward_rule": {
+    "expected_auction_id_count": 182,
+    "expected_auction_id_max": 200,
+    "expected_auction_id_min": 1,
+    "recovered_reward_ids": [
+      0,
+      11,
+      22,
+      33,
+      44,
+      55,
+      66,
+      77,
+      88,
+      99,
+      110,
+      121,
+      132,
+      143,
+      154,
+      165,
+      176,
+      187,
+      198
+    ],
+    "rule": "Dog.sol mints a dogMaster reward Dog at token ID 0 and every 11th Dog while lastId <= 420, then mints the auction Dog.",
+    "source": "https://github.com/markcarey/degendogs/blob/main/contracts/Dog.sol#L293-L309",
+    "status": "verified_from_Dog.sol_and_mint_transfer_pattern"
+  },
+  "dune": {
+    "api_available": false,
+    "checked_urls": [
+      "https://dune.com/ael_dev/degen-dogs-mission-3",
+      "https://dune.com/browse/dashboards?q=Degen%20Dogs"
+    ],
+    "notes": "No Mission 1 Dune query/dashboard export is committed in this archive. Add query IDs/results under archive/mission1/dune/ when available.",
+    "status": "no_api_key_public_ui_checked_no_mission1_exports_recovered"
+  },
+  "event_counts": {
+    "AuctionBid": 545,
+    "AuctionCreated": 182,
+    "AuctionExtended": 47,
+    "AuctionSettled": 181,
+    "Transfer": 3048,
+    "unknown": 4356
+  },
+  "generated_at_utc": "2026-05-28T23:51:14Z",
+  "known_gaps": [
+    {
+      "gap_id": "created_without_settlement_ids",
+      "reason": "AuctionCreated rows without recovered AuctionSettled rows for Dog IDs: 200",
+      "severity": "investigate"
+    }
+  ],
+  "latest_auction_state": {
+    "amount_display_weth": "0",
+    "amount_raw": "0",
+    "bidder": "0x0000000000000000000000000000000000000000",
+    "dog_id": 200,
+    "end_time_unix": "1699797702",
+    "end_time_utc": "2023-11-12T14:01:42Z",
+    "rpc_url": "https://polygon.drpc.org",
+    "settled": false,
+    "start_time_unix": "1699711302",
+    "start_time_utc": "2023-11-11T14:01:42Z",
+    "status": "verified_latest_eth_call"
+  },
+  "nft_mint_transfers": {
+    "count_distinct_token_ids": 201,
+    "max_token_id": 200,
+    "min_token_id": 0
+  },
+  "nft_transfer_rows": 583,
+  "polygon_dogs_claim_201_reconciliation": {
+    "docs_claim": "201 Dogs joined the club on Polygon before Mission 2, per current docs/public context.",
+    "dogmaster_reward_ids_excluded_from_auctions": [
+      0,
+      11,
+      22,
+      33,
+      44,
+      55,
+      66,
+      77,
+      88,
+      99,
+      110,
+      121,
+      132,
+      143,
+      154,
+      165,
+      176,
+      187,
+      198
+    ],
+    "notes": "Dog NFT totalSupply() returned 201 and receipt-backed NFT mint transfers cover token IDs 0-200. Dog.sol explains non-auction IDs as dogMaster reward IDs: 0 and every 11th Dog. AuctionCreated rows cover all expected non-reward auction IDs through 200. Dog 200 is created but has no recovered settlement and the latest auction() state shows dogId 200, amount 0, settled false.",
+    "onchain_token_total_supply": 201,
+    "receipt_recovered_auction_created_max_id": 200,
+    "receipt_recovered_nft_mint_count": 201,
+    "recovered_mint_id_range": [
+      0,
+      200
+    ],
+    "status": "exact_match_for_total_supply_and_mint_ids_with_dogmaster_reward_rule; final Dog 200 settlement remains open",
+    "unsettled_created_ids": [
+      200
+    ]
+  },
+  "polygonscan_auction_transactions_found": 862,
+  "raw_relevant_logs": 8359,
+  "receipt_failures": [],
+  "receipts_fetched": 862,
+  "recovery_status": "partial_but_source_backed",
+  "rpc_urls_attempted": [
+    "https://polygon.drpc.org",
+    "https://1rpc.io/matic",
+    "https://polygon-bor-rpc.publicnode.com"
+  ],
+  "run_id": "mission1-20260528T235114Z"
+}

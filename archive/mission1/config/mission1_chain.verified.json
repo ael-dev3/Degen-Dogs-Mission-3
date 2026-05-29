@@ -1,0 +1,50 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "archive_status": {
+    "confidence": "verified",
+    "notes": "Not official unless later approved.",
+    "source_urls": [],
+    "value": "independent community-built archive",
+    "verification_method": "Repository/task scope."
+  },
+  "chain": {
+    "confidence": "verified",
+    "notes": "Mission 1 was the Polygon production era after ETHOnline/testnet origin.",
+    "source_urls": [
+      "https://medium.com/degen-dogs/degen-dogs-are-nfts-that-stream-defi-tokens-c00743581fed",
+      "https://forum.superfluid.org/t/season-5-ideas-established-project-degen-dogs/1556",
+      "https://docs.degendogs.club/developers/contracts.md"
+    ],
+    "value": "Polygon PoS",
+    "verification_method": "Public Degen Dogs/Superfluid sources state production launched on Polygon; onchain contracts and RPC calls use chain ID 137."
+  },
+  "chain_id": {
+    "confidence": "verified",
+    "notes": "",
+    "source_urls": [
+      "https://polygon.drpc.org",
+      "https://chainlist.org/chain/137"
+    ],
+    "value": 137,
+    "verification_method": "Polygon JSON-RPC eth_chainId returned 0x89 in discovery; standard Polygon PoS chain ID."
+  },
+  "native_gas_token": {
+    "confidence": "verified",
+    "notes": "MATIC has been rebranded to POL; historical Mission 1-era gas token was MATIC.",
+    "source_urls": [
+      "https://docs.polygon.technology/"
+    ],
+    "value": "MATIC/POL",
+    "verification_method": "Polygon PoS native gas token convention."
+  },
+  "production_launch": {
+    "confidence": "verified",
+    "notes": "Exact first-auction block recovered separately.",
+    "source_urls": [
+      "https://medium.com/degen-dogs/degen-dogs-are-nfts-that-stream-defi-tokens-c00743581fed",
+      "https://forum.superfluid.org/t/season-5-ideas-established-project-degen-dogs/1556"
+    ],
+    "value": "2022-03-14",
+    "verification_method": "Medium article published 2022-03-14 and Superfluid forum states launched in production on Polygon on 3.14 of 2022."
+  }
+}

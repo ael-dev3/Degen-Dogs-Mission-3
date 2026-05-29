@@ -1,21 +1,66 @@
-# Degen Dogs Mission 1 Archive
+# Degen Dogs Mission 1 Archive — Polygon Era
 
-Mission 1 is a historical placeholder section. No Mission 1 dataset has been recovered or verified in this repository yet.
+Mission 1 is the Polygon production era of Degen Dogs.
 
-## Current status
+Degen Dogs began as an ETHOnline 2021/testnet project by Mark Carey, then launched in production on Polygon around March 14, 2022. The project used one-Dog-at-a-time auctions, WETH bidding, Dog Biscuits/BSCT for bidders, Idle Finance WETH yield strategies, and Superfluid-powered streaming mechanics.
 
-- Data status: not recovered.
-- Contract addresses: unknown / unverified.
-- Chain and exact Dog ID range: unknown / unverified.
-- Local indexer: not implemented.
-- Dashboard integration: not planned until reliable source data exists.
+This folder is an independent/community-built historical archive. It is not official unless later approved by the creator/community. Treat data as verified only when backed by source docs, Polygon logs/receipts, Dune exports, PolygonScan, or explicit reconciliation notes.
 
-## Open questions / TODO
+## Archive status
 
-- Identify the Mission 1 chain and deployed contract addresses.
-- Verify the Dog ID range for Mission 1.
-- Find official docs, explorer links, source repositories, or trusted historical exports.
-- Preserve raw source artifacts before porting or summarizing them.
-- Separate verified facts from candidate notes.
+- Chain: Polygon PoS, chain ID `137`.
+- Bid currency: WETH, verified from the auction contract `weth()` and historical source scripts.
+- Core contracts: stored in `config/mission1_contracts.verified.json`.
+- Candidate/unknown constants: stored separately in `config/mission1_contracts.candidates.json` and `config/mission1_blocks.candidates.json`.
+- Recovery method in this pass: PolygonScan auction-house transaction pages plus public Polygon RPC transaction receipts.
+- Live Mission 3 dashboard UI: not modified by this archive module.
 
-Do not invent Mission 1 details to fill this folder. Add only sourced, verifiable material.
+## Layout
+
+```text
+archive/mission1/
+  README.md
+  config/                 verified/candidate chain, contract, block, event constants
+  docs/                   source, verification, schema, rebuild, reconciliation notes
+  sql/                    SQLite schema + marts
+  data/
+    raw/                  raw receipt/log artifacts and failure manifests
+    generated/            CSV/JSON marts, dog search index, manifest, summary
+  dune/
+    sql/                  recovered Dune SQL, if available later
+    results/              recovered Dune CSV/JSON, if available later
+```
+
+## Key files
+
+- `config/mission1_chain.verified.json`
+- `config/mission1_contracts.verified.json`
+- `config/mission1_contracts.candidates.json`
+- `config/mission1_blocks.verified.json`
+- `config/mission1_blocks.candidates.json`
+- `config/mission1_events.verified.json`
+- `docs/how_mission1_worked.md`
+- `docs/how_to_rebuild.md`
+- `docs/reconciliation_report.md`
+- `data/generated/manifest.json`
+- `data/generated/reconciliation_summary.json`
+- `data/mission1_archive.sqlite`
+
+## Rebuild
+
+```bash
+npm run archive:mission1:discover
+npm run archive:mission1:index
+npm run archive:mission1:reconcile
+```
+
+Optional env vars:
+
+```bash
+POLYGON_RPC_URL=https://your-archive-polygon-rpc
+POLYGON_RPC_URLS=https://rpc1,https://rpc2
+POLYGONSCAN_API_KEY=...
+DUNE_API_KEY=...
+```
+
+No secrets are required for the default receipt-based recovery path. If secrets are used locally, keep them in environment variables and never commit `.env` files.

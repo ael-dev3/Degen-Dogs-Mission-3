@@ -1,0 +1,71 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "block_ranges": {
+    "auction_duration_default_latest": {
+      "confidence": "verified",
+      "notes": "Current/latest contract state; Dog #1 special 72h duration is from Medium/docs and recovered event timestamps.",
+      "source_urls": [
+        "https://polygon.drpc.org"
+      ],
+      "value_seconds": 86400,
+      "verification_method": "Polygon RPC duration() on auction house at latest returned 86400."
+    },
+    "auction_house_first_polygonscan_tx": {
+      "confidence": "verified",
+      "notes": "Approx first auction creation block; not necessarily contract deployment block.",
+      "source_urls": [
+        "https://polygonscan.com/txs?a=0xC9F32Fc6aa9F4D3d734B1b3feC739d55c2f1C1A7&p=18"
+      ],
+      "value": 25935472,
+      "verification_method": "PolygonScan auction-house transaction page and receipt scan; earliest normal transaction recovered from auction house."
+    },
+    "auction_house_last_recovered_tx": {
+      "confidence": "verified",
+      "notes": "Latest transaction on auction house page during recovery; includes late maintenance/migration-era txs.",
+      "source_urls": [
+        "https://polygonscan.com/txs?a=0xC9F32Fc6aa9F4D3d734B1b3feC739d55c2f1C1A7&p=1"
+      ],
+      "value": 52701258,
+      "verification_method": "PolygonScan auction-house transaction page; recovered by indexer."
+    },
+    "auction_min_bid_increment_latest": {
+      "confidence": "verified",
+      "notes": "",
+      "source_urls": [
+        "https://polygon.drpc.org"
+      ],
+      "value_percent": 10,
+      "verification_method": "Polygon RPC minBidIncrementPercentage() returned 10."
+    },
+    "auction_reserve_price_latest_raw_weth": {
+      "confidence": "verified",
+      "display": "0.05 WETH",
+      "notes": "Historical reserve may have changed; use events for full history later.",
+      "source_urls": [
+        "https://polygon.drpc.org"
+      ],
+      "value": "50000000000000000",
+      "verification_method": "Polygon RPC reservePrice() on auction house at latest returned 50000000000000000."
+    },
+    "auction_time_buffer_latest": {
+      "confidence": "verified",
+      "notes": "",
+      "source_urls": [
+        "https://polygon.drpc.org"
+      ],
+      "value_seconds": 300,
+      "verification_method": "Polygon RPC timeBuffer() on auction house at latest returned 300."
+    },
+    "dog_total_supply_latest": {
+      "confidence": "verified",
+      "notes": "Supports the 201 Polygon Dogs claim, but exact Dog ID mapping is reconciled in generated summary.",
+      "source_urls": [
+        "https://polygon.drpc.org",
+        "https://polygonscan.com/token/0xA920464B46548930bEfECcA5467860B2b4C2B5b9"
+      ],
+      "value": 201,
+      "verification_method": "Polygon RPC totalSupply() on Dog NFT returned 201."
+    }
+  },
+  "chain_id": 137
+}

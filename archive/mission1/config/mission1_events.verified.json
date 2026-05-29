@@ -1,0 +1,68 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "chain_id": 137,
+  "events": {
+    "AuctionBid(uint256,address,uint256,bool)": {
+      "confidence": "verified",
+      "data": [
+        "sender",
+        "value",
+        "extended"
+      ],
+      "indexed": [
+        "dogId"
+      ],
+      "notes": "From IDogsAuctionHouse.sol.",
+      "topic0": "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
+    },
+    "AuctionCreated(uint256,uint256,uint256)": {
+      "confidence": "verified",
+      "data": [
+        "startTime",
+        "endTime"
+      ],
+      "indexed": [
+        "dogId"
+      ],
+      "notes": "From IDogsAuctionHouse.sol.",
+      "topic0": "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca"
+    },
+    "AuctionExtended(uint256,uint256)": {
+      "confidence": "verified",
+      "data": [
+        "endTime"
+      ],
+      "indexed": [
+        "dogId"
+      ],
+      "notes": "From IDogsAuctionHouse.sol.",
+      "topic0": "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e"
+    },
+    "AuctionSettled(uint256,address,uint256)": {
+      "confidence": "verified",
+      "data": [
+        "winner",
+        "amount"
+      ],
+      "indexed": [
+        "dogId"
+      ],
+      "notes": "From IDogsAuctionHouse.sol.",
+      "topic0": "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99"
+    },
+    "Transfer(address,address,uint256)": {
+      "confidence": "verified",
+      "data": [
+        "erc20_value_if_not_indexed"
+      ],
+      "indexed": [
+        "from",
+        "to",
+        "tokenId_or_erc20_topics"
+      ],
+      "notes": "Standard ERC721/ERC20 Transfer topic.",
+      "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+    }
+  },
+  "source": "https://github.com/markcarey/degendogs/blob/main/contracts/interfaces/IDogsAuctionHouse.sol"
+}

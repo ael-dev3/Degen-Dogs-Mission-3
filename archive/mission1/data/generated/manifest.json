@@ -1,0 +1,172 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "chain_id": 137,
+  "contracts": {
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bsct": "0x600e5f4920f90132725b43412d47a76bc2219f92",
+    "dog_nft": "0xa920464b46548930befecca5467860b2b4c2b5b9",
+    "idle_weth": "0xfda25d931258df948ffecb66b5518299df6527c4",
+    "idle_wethx": "0xeb5748f9798b11af79f892f344f585e3a88aa784",
+    "token_vestor_v1": "0xe0159f36b6a09e6407df0c7debac433a77511625",
+    "token_vestor_v2": "0x98a63f98e9b952b5c6ccba47c631461388e78d7a",
+    "treasury": "0xb6021d0b1e63596911f2cceef5c14f2db8f28ce1",
+    "ukraine": "0x22b5cd016c8d9c6ac5338cc08174a7fa824bc5e4",
+    "weth": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619"
+  },
+  "generated_at_utc": "2026-05-28T23:51:14Z",
+  "generated_files": [
+    {
+      "csv": "archive/mission1/data/generated/mission1_auction_created.csv",
+      "csv_sha256": "bf52d3f87f16f18023015eb9b76cfcf00612723fd28dba534323f223c4546278",
+      "json": "archive/mission1/data/generated/mission1_auction_created.json",
+      "json_sha256": "476e62589974bbc107145ffefbb2dbb8557e9e4eb94fe33a4caf14af0cc7f1af",
+      "rows": 182,
+      "table": "mission1_auction_created"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_auction_bids.csv",
+      "csv_sha256": "b45864e05ee84dfa7e66ec385f9ef52c203706a6c96492f1571dc6c1c377434e",
+      "json": "archive/mission1/data/generated/mission1_auction_bids.json",
+      "json_sha256": "9a1e126961c34734f2726568514ecbb56ebba86f134ecf010580a8fbce373ada",
+      "rows": 545,
+      "table": "mission1_auction_bids"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_auction_extended.csv",
+      "csv_sha256": "90b4a1a4e7f7f03014ddab6acdf4485a94637ec2f4e6db514ec8921809502bd6",
+      "json": "archive/mission1/data/generated/mission1_auction_extended.json",
+      "json_sha256": "62c7f612bcbc88b990d6fce188c3997bcbbf4a0505d4ee8cf07ae5701bdd757b",
+      "rows": 47,
+      "table": "mission1_auction_extended"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_auction_settled.csv",
+      "csv_sha256": "1ac0ef7d4992cd05f5cd30187c8e4bd37e0c4e8d5b14541e6f98d60c95283fff",
+      "json": "archive/mission1/data/generated/mission1_auction_settled.json",
+      "json_sha256": "fda12ee4ad1aa0a3d2816860e6dcd839951b189bd3913bbd8e7bb3612d24cd8b",
+      "rows": 181,
+      "table": "mission1_auction_settled"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_nft_transfers.csv",
+      "csv_sha256": "1780eae333105fef5513582a6dc002e9b84b3890a230db01608017becfec6c40",
+      "json": "archive/mission1/data/generated/mission1_nft_transfers.json",
+      "json_sha256": "ac29b0101bdba2f9f8b78428c9bdc3faafde364ca2023c9b376c4dc17baa7592",
+      "rows": 583,
+      "table": "mission1_nft_transfers"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_bid_tokens_transfers.csv",
+      "csv_sha256": "4fbfa0495774e021e93a97953ffdab242a48878854341460393201dbebc00703",
+      "json": "archive/mission1/data/generated/mission1_bid_tokens_transfers.json",
+      "json_sha256": "c5ab4ec7720b1423e0349e33b77397152c6e3f682b6fa87a65a58e46d8b66bb9",
+      "rows": 708,
+      "table": "mission1_bid_tokens_transfers"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_auction_winners.csv",
+      "csv_sha256": "abae4e1ee92f0f1eae1131f607f302bb04b72f04fef0e44f599e43f8fc858d0a",
+      "json": "archive/mission1/data/generated/mission1_auction_winners.json",
+      "json_sha256": "a7567d2e42a2b65413458a7e9035e7e4b4cdbfea1a294d090f83dc14ffe4c755",
+      "rows": 181,
+      "table": "mission1_auction_winners"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_bidder_leaderboard.csv",
+      "csv_sha256": "06e3a5d3c46e4c22c4f4814f87a019280daebe7b4cb85e4f948c54cc0d6f3b88",
+      "json": "archive/mission1/data/generated/mission1_bidder_leaderboard.json",
+      "json_sha256": "ded8eaaa8c212d5edb084e7bae819b08ecfbe09b74eedf9e81eb56a44d6b11db",
+      "rows": 76,
+      "table": "mission1_bidder_leaderboard"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_daily_activity.csv",
+      "csv_sha256": "d8274322da7dfa65577cfbecc09ef2a3a11e21cac2908355bce786b203bfae1f",
+      "json": "archive/mission1/data/generated/mission1_daily_activity.json",
+      "json_sha256": "ebe5397b33ad15048f9433e7140da4a0a9a2392c69e9e495678f37a9f8f22f86",
+      "rows": 71,
+      "table": "mission1_daily_activity"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_archive_metrics.csv",
+      "csv_sha256": "e2453e0794d17bb35f05171d21077c5159b6667d22d4e5896e9035beee22bc83",
+      "json": "archive/mission1/data/generated/mission1_archive_metrics.json",
+      "json_sha256": "5dee9bbbe5d9c3273683044bd079c36eb32c30d1ebc32470ad356814adf328f7",
+      "rows": 8,
+      "table": "mission1_archive_metrics"
+    },
+    {
+      "csv": "archive/mission1/data/generated/mission1_index_gaps.csv",
+      "csv_sha256": "22e84cf5fa5fee6701f7f1554697d1aabd7c4ae2610bf12cb6d3bc2a3f36b5a4",
+      "json": "archive/mission1/data/generated/mission1_index_gaps.json",
+      "json_sha256": "ef671360705f218b22771b9122b9b39abf825cd7c140397b16a0684cd716ea4b",
+      "rows": 1,
+      "table": "mission1_index_gaps"
+    },
+    {
+      "csv": null,
+      "csv_sha256": null,
+      "json": "archive/mission1/data/generated/mission1_dog_search_index.json",
+      "json_sha256": "3551647ff560634d57d7dab0309b3229e40c08c44b801d45821c65aec7bcb334",
+      "rows": 182,
+      "table": "mission1_dog_search_index"
+    },
+    {
+      "csv": null,
+      "csv_sha256": null,
+      "json": "archive/mission1/data/generated/reconciliation_summary.json",
+      "json_sha256": "11909258fbb80e990e4e906851615054bf1e2e49f2fa374afc650a90c521b146",
+      "rows": 1,
+      "table": "reconciliation_summary"
+    }
+  ],
+  "notes": [
+    "Raw amounts are exact integer strings in base units.",
+    "Display WETH/BSCT fields use 18 decimals only where token decimals were verified from onchain calls / PolygonScan token pages.",
+    "Receipt-based recovery is useful but not equivalent to a full archive-node eth_getLogs pass. See index gaps and reconciliation notes."
+  ],
+  "raw_files": [
+    {
+      "bytes": 233155,
+      "path": "archive/mission1/data/raw/mission1_polygonscan_auction_txs.json",
+      "sha256": "31b56b4b21c779aea5bd6fce2720c09833a0b77d3e1305557ab1d1426776c72e"
+    },
+    {
+      "bytes": 7808445,
+      "path": "archive/mission1/data/raw/mission1_auction_receipts.ndjson",
+      "sha256": "1a026e731ccc0b847843be88ff08dff6464b574171aec9765c6e29357d3ee390"
+    },
+    {
+      "bytes": 1691295,
+      "path": "archive/mission1/data/raw/mission1_auction_logs.ndjson",
+      "sha256": "05e245d1d4e7f23b532bae062ef40655776e8dabd5e10a36d973ed09ed9dbd45"
+    },
+    {
+      "bytes": 1087010,
+      "path": "archive/mission1/data/raw/mission1_nft_transfer_logs.ndjson",
+      "sha256": "fed33d5ce0bdd67f149572e9edf38ae1ad0b206841dc5e1cf27eea53542b339d"
+    },
+    {
+      "bytes": 1259892,
+      "path": "archive/mission1/data/raw/mission1_bsct_logs.ndjson",
+      "sha256": "158d38503af9c9b22d0ff5b105211309f61d5e23bf8b2b9db148e5e618891083"
+    },
+    {
+      "bytes": 15822549,
+      "path": "archive/mission1/data/raw/mission1_relevant_logs.ndjson",
+      "sha256": "ececb7a1e3f154758be17dbc6dc52b70ef12edaaf880f0e3d9ac73675bd192b1"
+    },
+    {
+      "bytes": 31771,
+      "path": "archive/mission1/data/raw/mission1_block_times.cache.json",
+      "sha256": "5f43e3175c6ec41d2588fa5d83c295a35f44b3cd1c30bdd5f22bda5e6413a2ac"
+    }
+  ],
+  "recovery_method": "PolygonScan auction-house transaction pages plus public Polygon RPC transaction receipts",
+  "rpc_urls_configured": [
+    "https://polygon.drpc.org",
+    "https://1rpc.io/matic",
+    "https://polygon-bor-rpc.publicnode.com"
+  ],
+  "run_id": "mission1-20260528T235114Z"
+}

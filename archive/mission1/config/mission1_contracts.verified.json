@@ -1,0 +1,131 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "chain_id": 137,
+  "contracts": {
+    "auction_owner_latest": {
+      "confidence": "verified",
+      "notes": "Latest owner only; may not identify historical operator at launch.",
+      "source_urls": [
+        "https://polygon.drpc.org"
+      ],
+      "value": "0x258c28aba4f894da9d5131f2a6cb67d60be2c3ba",
+      "verification_method": "Polygon RPC owner() on auction house at latest block during discovery."
+    },
+    "bid_tokens_bsct": {
+      "confidence": "verified",
+      "local_source_file": "scripts/archive_mission1_index.py",
+      "notes": "Dog Biscuits / BidTokens ERC20.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0x600e5F4920f90132725b43412D47A76bC2219F92"
+      ],
+      "value": "0x600e5F4920f90132725b43412D47A76bC2219F92",
+      "verification_method": "Docs and historical scripts match; Polygon RPC name()=Dog Biscuits, symbol()=BSCT, decimals()=18, owner()=auction house."
+    },
+    "dog_auction_house": {
+      "confidence": "verified",
+      "local_source_file": "scripts/archive_mission1_index.py",
+      "notes": "DogsAuctionHouse.sol. Paused at latest during discovery.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://github.com/markcarey/degendogs/blob/main/scripts/auction.js",
+        "https://polygonscan.com/address/0xC9F32Fc6aa9F4D3d734B1b3feC739d55c2f1C1A7"
+      ],
+      "value": "0xC9F32Fc6aa9F4D3d734B1b3feC739d55c2f1C1A7",
+      "verification_method": "Docs and historical GitHub script match; Polygon RPC dogs() points to Dog NFT and weth() points to Polygon WETH; receipts emit AuctionCreated/Bid/Extended/Settled."
+    },
+    "dog_nft": {
+      "confidence": "verified",
+      "local_source_file": "archive/mission1/config/mission1_discovery_results.json after running archive:mission1:discover",
+      "notes": "ERC721 Dog NFT / Dog.sol.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0xA920464B46548930bEfECcA5467860B2b4C2B5b9"
+      ],
+      "value": "0xA920464B46548930bEfECcA5467860B2b4C2B5b9",
+      "verification_method": "Docs contract page plus Polygon RPC eth_call name()=Degen Dogs, symbol()=DOG, totalSupply()=201."
+    },
+    "governance_logic_v1": {
+      "confidence": "verified",
+      "notes": "DegenDAOLogicV1.sol.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0x9bf49265d8538BeD4dAAe7Fe304F2D41b8Cce265"
+      ],
+      "value": "0x9bf49265d8538BeD4dAAe7Fe304F2D41b8Cce265",
+      "verification_method": "Docs contract page."
+    },
+    "governance_proxy": {
+      "confidence": "verified",
+      "notes": "DegenDAOProxy.sol.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0x18288e01e2247166d7dF094743a5669BF7fDAaD2"
+      ],
+      "value": "0x18288e01e2247166d7dF094743a5669BF7fDAaD2",
+      "verification_method": "Docs contract page."
+    },
+    "idle_weth_best_yield": {
+      "confidence": "verified",
+      "notes": "Medium says WETH auction proceeds were deposited into Idle Finance WETH Best Yield strategy.",
+      "source_urls": [
+        "https://github.com/markcarey/degendogs/blob/main/scripts/deploy.js",
+        "https://polygonscan.com/token/0xfdA25D931258Df948ffecb66b5518299Df6527C4",
+        "https://medium.com/degen-dogs/degen-dogs-are-nfts-that-stream-defi-tokens-c00743581fed"
+      ],
+      "value": "0xfdA25D931258Df948ffecb66b5518299Df6527C4",
+      "verification_method": "Historical deploy/gov scripts and Polygon RPC name()=IdleWETH [Best yield], symbol()=idleWETHYield, decimals()=18."
+    },
+    "polygon_weth": {
+      "confidence": "verified",
+      "notes": "Mission 1 bid currency verified as WETH.",
+      "source_urls": [
+        "https://github.com/markcarey/degendogs/blob/main/scripts/auction.js",
+        "https://github.com/markcarey/degendogs/blob/main/scripts/deploy.js",
+        "https://polygonscan.com/token/0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"
+      ],
+      "value": "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619",
+      "verification_method": "Historical scripts and auction contract weth() match; Polygon RPC name()=Wrapped Ether, symbol()=WETH, decimals()=18."
+    },
+    "super_idle_weth": {
+      "confidence": "verified",
+      "notes": "Super token / stream-related token; stream accounting remains TODO.",
+      "source_urls": [
+        "https://polygonscan.com/token/0xEB5748f9798B11aF79F892F344F585E3a88aA784"
+      ],
+      "value": "0xEB5748f9798B11aF79F892F344F585E3a88aA784",
+      "verification_method": "Polygon RPC name()=Super IdleWETH [Best yield], symbol()=idleWETHx, decimals()=18."
+    },
+    "token_vestor_v1": {
+      "confidence": "verified",
+      "local_source_file": "scripts/archive_mission1_index.py",
+      "notes": "Managing token streams to Dog owners; complete stream accounting still TODO.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0xE0159F36b6A09e6407dF0c7debAc433a77511625"
+      ],
+      "value": "0xE0159F36b6A09e6407dF0c7debAc433a77511625",
+      "verification_method": "Docs contract page; historical scripts reference this vestor address."
+    },
+    "treasury_executor": {
+      "confidence": "verified",
+      "notes": "DegenDAOExecutor.sol / treasury / timelock / executor.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0xb6021d0b1e63596911f2cCeEF5c14f2db8f28Ce1"
+      ],
+      "value": "0xb6021d0b1e63596911f2cCeEF5c14f2db8f28Ce1",
+      "verification_method": "Docs contract page and historical bid.js treasury address."
+    },
+    "ukraine_donation_contract": {
+      "confidence": "verified",
+      "notes": "Donation flow accounting still not fully reconciled.",
+      "source_urls": [
+        "https://docs.degendogs.club/developers/contracts.md",
+        "https://polygonscan.com/address/0x22B5CD016C8D9c6aC5338Cc08174a7FA824Bc5E4"
+      ],
+      "value": "0x22B5CD016C8D9c6aC5338Cc08174a7FA824Bc5E4",
+      "verification_method": "Docs contract page identifies Ukraine.sol as forwarding donations to Unchain Ukraine and issuing ERC1155 tokens."
+    }
+  }
+}

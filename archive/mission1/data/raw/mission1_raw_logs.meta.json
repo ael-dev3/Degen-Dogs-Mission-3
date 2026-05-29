@@ -1,0 +1,84 @@
+{
+  "block_range_recovered": {
+    "from_block": 25818533,
+    "note": "Receipt recovery is transaction-based, not a contiguous archive-node eth_getLogs pass.",
+    "to_block": 52701258
+  },
+  "chain_id": 137,
+  "contracts": {
+    "auction_house": "0xc9f32fc6aa9f4d3d734b1b3fec739d55c2f1c1a7",
+    "bsct": "0x600e5f4920f90132725b43412d47a76bc2219f92",
+    "dog_nft": "0xa920464b46548930befecca5467860b2b4c2b5b9",
+    "idle_weth": "0xfda25d931258df948ffecb66b5518299df6527c4",
+    "idle_wethx": "0xeb5748f9798b11af79f892f344f585e3a88aa784",
+    "token_vestor_v1": "0xe0159f36b6a09e6407df0c7debac433a77511625",
+    "token_vestor_v2": "0x98a63f98e9b952b5c6ccba47c631461388e78d7a",
+    "treasury": "0xb6021d0b1e63596911f2cceef5c14f2db8f28ce1",
+    "ukraine": "0x22b5cd016c8d9c6ac5338cc08174a7fa824bc5e4",
+    "weth": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619"
+  },
+  "counts": {
+    "AuctionBid": 545,
+    "AuctionCreated": 182,
+    "AuctionExtended": 47,
+    "AuctionSettled": 181,
+    "Transfer": 3048,
+    "unknown": 4356
+  },
+  "failures": {
+    "block_times": [],
+    "receipts": []
+  },
+  "generated_at_utc": "2026-05-28T23:51:14Z",
+  "raw_files": [
+    {
+      "bytes": 233155,
+      "path": "archive/mission1/data/raw/mission1_polygonscan_auction_txs.json",
+      "sha256": "31b56b4b21c779aea5bd6fce2720c09833a0b77d3e1305557ab1d1426776c72e"
+    },
+    {
+      "bytes": 7808445,
+      "path": "archive/mission1/data/raw/mission1_auction_receipts.ndjson",
+      "sha256": "1a026e731ccc0b847843be88ff08dff6464b574171aec9765c6e29357d3ee390"
+    },
+    {
+      "bytes": 1691295,
+      "path": "archive/mission1/data/raw/mission1_auction_logs.ndjson",
+      "sha256": "05e245d1d4e7f23b532bae062ef40655776e8dabd5e10a36d973ed09ed9dbd45"
+    },
+    {
+      "bytes": 1087010,
+      "path": "archive/mission1/data/raw/mission1_nft_transfer_logs.ndjson",
+      "sha256": "fed33d5ce0bdd67f149572e9edf38ae1ad0b206841dc5e1cf27eea53542b339d"
+    },
+    {
+      "bytes": 1259892,
+      "path": "archive/mission1/data/raw/mission1_bsct_logs.ndjson",
+      "sha256": "158d38503af9c9b22d0ff5b105211309f61d5e23bf8b2b9db148e5e618891083"
+    },
+    {
+      "bytes": 15822549,
+      "path": "archive/mission1/data/raw/mission1_relevant_logs.ndjson",
+      "sha256": "ececb7a1e3f154758be17dbc6dc52b70ef12edaaf880f0e3d9ac73675bd192b1"
+    },
+    {
+      "bytes": 31771,
+      "path": "archive/mission1/data/raw/mission1_block_times.cache.json",
+      "sha256": "5f43e3175c6ec41d2588fa5d83c295a35f44b3cd1c30bdd5f22bda5e6413a2ac"
+    }
+  ],
+  "recovery_method": "PolygonScan auction-house normal transaction pages plus public Polygon RPC transaction receipts",
+  "rpc_urls_attempted": [
+    "https://polygon.drpc.org",
+    "https://1rpc.io/matic",
+    "https://polygon-bor-rpc.publicnode.com"
+  ],
+  "topic_filters": {
+    "AuctionBid": "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3",
+    "AuctionCreated": "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca",
+    "AuctionExtended": "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e",
+    "AuctionSettled": "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99",
+    "Transfer": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+  },
+  "warning": "This raw log set is source-backed and reproducible but partial until reconciled with Dune/PolygonScan API/archive-node eth_getLogs."
+}

@@ -1,0 +1,29 @@
+{
+  "archive": "degen-dogs-mission1-polygon",
+  "block_ranges": {
+    "final_mission1_auction_dog_id": {
+      "confidence": "unknown",
+      "notes": "Likely IDs 0-200/1-200 depending Dog #0/founder path; keep unresolved until reconciliation.",
+      "source_urls": [],
+      "value": null,
+      "verification_method": "Generated receipt archive recovers Dog IDs through 200 and Dog totalSupply=201, but complete Dog ID accounting needs gap resolution."
+    },
+    "full_eth_getlogs_from_block": {
+      "confidence": "candidate",
+      "notes": "Use candidate for broad log recovery only; not final verified launch block.",
+      "source_urls": [
+        "https://polygonscan.com/"
+      ],
+      "value": 25818522,
+      "verification_method": "Earlier contract deployment/creation probing suggested block around 25818522-25818530; needs PolygonScan API getcontractcreation or full archive RPC confirmation."
+    },
+    "mission1_end_block": {
+      "confidence": "unknown",
+      "notes": "Do not infer from last recovered auction-house transaction alone.",
+      "source_urls": [],
+      "value": null,
+      "verification_method": "Needs reconciliation against Mission 2 teleport/migration records."
+    }
+  },
+  "chain_id": 137
+}
