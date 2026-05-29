@@ -69,20 +69,20 @@ This block is generated from the latest data refresh, so it changes when `npm ru
 | --- | --- |
 | site_url | https://ael-dev3.github.io/Degen-Dogs-Mission-3/ |
 | Network | base |
-| Snapshot block | 46605338 |
-| Snapshot time UTC | 2026-05-28 20:27:03 |
+| Snapshot block | 46612333 |
+| Snapshot time UTC | 2026-05-29 00:20:13 |
 | Current auction | Dog #727 |
-| Current bid | 0.001 ETH ($2.02) |
-| Current high bidder | @cryptomill |
+| Current bid | 0.01 ETH ($20.13) |
+| Current high bidder | @0xael.eth |
 | Auction ends UTC | 2026-05-29 18:36:55 |
 | WOOF per Dog / day | 158,351.90 WOOF/day ($0.08/day) |
 | SUP per Dog / day | 2.69 SUP/day ($0.03/day) |
 | Reward total per Dog / day | $0.11/day |
-| Current bid reward payback | ≈19 days |
+| Current bid reward payback | ≈177 days |
 | Rewards basis | 141 Dogs; WOOF Vault Bonus excluded |
 | Created / settled auctions | 138 / 137 |
-| WOOF holders | 390 |
-| Farcaster profiles resolved | 158 |
+| WOOF holders | 384 |
+| Farcaster profiles resolved | 159 |
 
 ## How the data pipeline works
 

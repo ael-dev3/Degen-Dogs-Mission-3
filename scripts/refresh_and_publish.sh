@@ -223,8 +223,12 @@ if not metrics.get("latest_block", "").isdigit():
     errors.append("latest_block metric missing or non-numeric")
 
 index = (root / "index.html").read_text(encoding="utf-8") if (root / "index.html").exists() else ""
-if "auction_feed" not in index or "generated/auction_feed.csv" not in index:
-    errors.append("index.html missing auction_feed/export references")
+if 'data-table="auction_feed"' not in index:
+    errors.append("index.html missing rendered auction_feed table")
+if 'data-table="mission3_metrics"' not in index or "site_url" not in index or "latest_block" not in index:
+    errors.append("index.html missing hidden mission3_metrics verification table")
+if "generated/auction_feed.csv" not in index and not (root / "public" / "generated" / "auction_feed.csv").exists():
+    errors.append("auction_feed public CSV artifact missing")
 
 if errors:
     raise SystemExit("\n".join(errors))
