@@ -49,6 +49,17 @@ Additional unified search files:
 - `archive/data/generated/unified_dog_search_index.json` - archive copy.
 - `archive/dogs/by-id/<dog_id>.json` - per-Dog archive records.
 
+## Farcaster channel snapshot
+
+The social panel reads a cached static snapshot, not a browser-side API key call:
+
+- `generated/farcaster_degendogs_channel.json`
+- `public/generated/farcaster_degendogs_channel.json`
+
+The JSON shape is normalized across sources (`hypersnap`, `snapchain`, or optional
+`neynar` fallback) and contains source metadata, `updated_at_utc`, status/error fields,
+and a bounded recent `casts` array for the `/degendogs` channel.
+
 The hosted feed/search UI reads `public/generated/unified_dog_search_index.json`
 client-side, renders only the current page of results, and keeps the latest-10 default
 state. Mission filters and highest-USD sorting use the generated record fields already

@@ -84,10 +84,28 @@ def assert_creator_popover() -> None:
         raise AssertionError("creator popover lacks an invisible hover bridge/padded hover area")
 
 
+def assert_farcaster_channel_panel() -> None:
+    html = INDEX_PATH.read_text(encoding="utf-8")
+    required_markers = [
+        '<section class="farcaster-channel-panel" aria-label="Degen Dogs Farcaster channel discussion">',
+        'LIVE SOCIAL FEED',
+        'Degen Dogs Channel',
+        'Latest discussion from the /degendogs Farcaster channel.',
+        'href="https://farcaster.xyz/~/channel/degendogs"',
+        'generated/farcaster_degendogs_channel.json',
+        'class="farcaster-feed-scroll"',
+        'Farcaster channel snapshot unavailable. Open /degendogs on Farcaster.',
+    ]
+    for marker in required_markers:
+        if marker not in html:
+            raise AssertionError(f"generated index.html missing Farcaster panel marker: {marker}")
+
+
 def main() -> int:
     assert_trait_links()
     assert_timer_urgency_colors()
     assert_creator_popover()
+    assert_farcaster_channel_panel()
     print("dashboard_ui_checks=pass")
     return 0
 

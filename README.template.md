@@ -50,6 +50,8 @@ The public site shows:
 - recent winners and settled auction history,
 - bidder activity and daily auction trends,
 - WOOF/SUP context and reward-estimate tiles,
+- cached `/degendogs` Farcaster channel discussion fetched through direct/open
+  Farcaster-compatible infrastructure where possible,
 - unified Dog/archive search across available Mission 1, 2, and 3 records,
 - downloadable CSV/JSON exports for published tables.
 
@@ -105,6 +107,8 @@ For setup notes, environment variables, and common failures, see
 
 - [`scripts/build_dashboard.py`](scripts/build_dashboard.py) - Mission 3 data runner,
   decoder, exporter, dashboard renderer, and README generator.
+- [`scripts/fetch_farcaster_channel.py`](scripts/fetch_farcaster_channel.py) - cached
+  read-only `/degendogs` channel snapshot fetcher.
 - [`sql/mission3_dashboard.sql`](sql/mission3_dashboard.sql) - approved SQLite analytics
   query layer.
 - [`generated/`](generated/) and [`public/generated/`](public/generated/) - generated

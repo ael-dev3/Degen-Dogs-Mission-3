@@ -6,11 +6,12 @@ Main command:
 npm run data
 ```
 
-The command runs three steps:
+The command runs four steps:
 
 1. `python3 scripts/build_dashboard.py`
-2. `python3 scripts/build_unified_dog_index.py`
-3. `python3 scripts/archive_apply_usd_estimates.py`
+2. `python3 scripts/fetch_farcaster_channel.py`
+3. `python3 scripts/build_unified_dog_index.py`
+4. `python3 scripts/archive_apply_usd_estimates.py`
 
 ## Mission 3 dashboard generation
 
@@ -28,6 +29,19 @@ The command runs three steps:
 - exports approved tables from `OUTPUT_TABLES`,
 - writes `generated/*.csv`, `generated/*.json`, mirrored public files, `index.html`, and
   `README.md`.
+
+## Farcaster channel snapshot
+
+`scripts/fetch_farcaster_channel.py` writes the cached read-only community panel data
+for `/degendogs`:
+
+- `generated/farcaster_degendogs_channel.json`
+- `public/generated/farcaster_degendogs_channel.json`
+
+The source order is Hypersnap read API first, then a Snapchain-compatible direct node
+when configured, then optional Neynar fallback only when `NEYNAR_FALLBACK_ENABLED=1`
+and `NEYNAR_API_KEY` is present. Source failures write a graceful empty snapshot rather
+than failing the whole dashboard build.
 
 ## Unified archive/search generation
 
@@ -55,6 +69,7 @@ historical USD estimates where price provenance exists under `archive/prices/`.
 Source of truth:
 
 - `scripts/build_dashboard.py`
+- `scripts/fetch_farcaster_channel.py`
 - `scripts/build_unified_dog_index.py`
 - `scripts/archive_apply_usd_estimates.py`
 - `sql/mission3_dashboard.sql`
@@ -65,6 +80,7 @@ Generated outputs:
 
 - `generated/`
 - `public/generated/`
+- `generated/farcaster_degendogs_channel.json` and its `public/generated/` mirror
 - `index.html`
 - `README.md`
 - `archive/data/generated/`

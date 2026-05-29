@@ -26,9 +26,35 @@ Fill only the values you need in `.env.local`.
 | `BASE_LOG_WORKERS` | Concurrent log-fetch workers. | no |
 | `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for metadata/balance calls. | no |
 | `DOG_METADATA_WORKERS` | Concurrent Dog metadata fetch workers. | no |
-| `NEYNAR_API_KEY` | Optional Farcaster identity resolution. | yes |
+| `NEYNAR_API_KEY` | Optional Farcaster identity resolution and last-resort channel feed fallback. | yes |
 | `WOOF_USD_PRICE` | Optional manual WOOF/USD override. | no |
 | `SUP_USD_PRICE` | Optional manual SUP/USD override. | no |
+
+## Farcaster channel feed variables
+
+The dashboard includes a cached read-only `/degendogs` channel panel. The local
+runner writes `generated/farcaster_degendogs_channel.json` and
+`public/generated/farcaster_degendogs_channel.json`; browser code only reads that
+static JSON and never calls secret-key APIs.
+
+Source priority is direct/open first:
+
+1. Hypersnap read API.
+2. Snapchain-compatible direct node endpoint, if configured/available.
+3. Other open Farcaster-compatible reads, if added later.
+4. Neynar only as explicit fallback.
+
+| Variable | Purpose | Sensitive? |
+| --- | --- | --- |
+| `FARCASTER_FEED_ENABLED` | Set `0` to write a disabled empty snapshot; defaults to enabled. | no |
+| `FARCASTER_CHANNEL_ID` | Channel id to snapshot; defaults to `degendogs`. | no |
+| `FARCASTER_CHANNEL_LIMIT` | Recent casts to keep, clamped to 1-50; defaults to 30. | no |
+| `HYPERSNAP_BASE_URL` | Hypersnap/Snapchain public node base; defaults to `https://haatz.quilibrium.com` when unset. Set blank to disable in controlled tests. | no |
+| `HYPERSNAP_READ_API_URL` | Optional Hypersnap read API endpoint/base override. | no |
+| `SNAPCHAIN_RPC_URL` | Optional Snapchain-compatible HTTP base for `/v1/castsByParent`. | no, unless private infra |
+| `FARCASTER_DIRECT_TIMEOUT_SECONDS` | Timeout for direct Farcaster reads; defaults to 15. | no |
+| `NEYNAR_FALLBACK_ENABLED` | Must be `1` before Neynar channel-feed fallback is attempted. | no |
+| `NEYNAR_API_KEY` | Required only for the optional Neynar fallback. Never exposed to generated JSON, HTML, or browser code. | yes |
 
 ## Archive variables
 

@@ -17,8 +17,22 @@ data, commits generated files, and GitHub Pages deploys.
 - Historical Mission 3 auction rows: Base event logs.
 - Dog metadata and traits: token metadata fetched by the pipeline and cached locally.
 - Farcaster identities: optional best-effort resolution.
+- Farcaster `/degendogs` channel panel: cached read-only snapshot fetched by the local
+  runner through direct/open Farcaster infrastructure first. Hypersnap is preferred,
+  a Snapchain-compatible direct node can be used when configured, and Neynar is only an
+  explicit last-resort fallback.
 - Mission 1 and Mission 2 archive rows: era-specific recovery scripts and checked-in
   archive outputs.
+
+## Farcaster channel discussion
+
+The dashboard's `/degendogs` panel is a cached static mirror of recent Farcaster channel
+casts for auction context. It is not a custom chat system, not instant live chat, and not
+official announcements. Visitors should click through to Farcaster to reply or post.
+
+If Hypersnap/Snapchain/open Farcaster sources are unavailable, the panel degrades to a
+link instead of blocking the dashboard build. Source availability and profile detail can
+differ across Hypersnap, Snapchain-compatible nodes, and optional Neynar fallback.
 
 ## Reward and token context
 
