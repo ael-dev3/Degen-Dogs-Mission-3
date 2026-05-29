@@ -8,6 +8,9 @@ __pycache__
 !.env.example
 *.local
 .cache
+.local
+.var
+logs
 archive/mission3/data/mission3_archive.sqlite
 archive/mission3/data/mission3_archive.sqlite-*
 archive/mission3/data/raw/*.ndjson
