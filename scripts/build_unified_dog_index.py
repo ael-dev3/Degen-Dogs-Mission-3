@@ -30,6 +30,7 @@ MISSION_BID_FILES = {
 }
 HISTORICAL_SEARCH = ROOT / "generated" / "historical_dog_search.json"
 AUCTION_FEED = ROOT / "generated" / "auction_feed.json"
+CURRENT_AUCTION = ROOT / "generated" / "current_auction.json"
 
 MISSION_CONFIG = {
     1: {
@@ -128,6 +129,38 @@ def decimal_value(value: Any) -> Decimal | None:
         return Decimal(text)
     except (InvalidOperation, ValueError):
         return None
+
+
+def dog_id_from_row(row: dict[str, Any]) -> int:
+    for key in ("dog_id", "token_id"):
+        dog_id = int_value(row.get(key), -1)
+        if dog_id >= 0:
+            return dog_id
+    text = first_text(row.get("dog"), row.get("dog_name"))
+    parts = "".join(ch if ch.isdigit() else " " for ch in text).split()
+    return int_value(parts[-1], -1) if parts else -1
+
+
+def iso_utc(value: Any) -> str:
+    text = first_text(value)
+    if not text:
+        return ""
+    text = text.replace(" ", "T")
+    return text if text.endswith("Z") else f"{text}Z"
+
+
+def eth_to_wei(value: Any) -> str:
+    amount = decimal_value(value)
+    if amount is None:
+        return ""
+    return str(int(amount * (Decimal(10) ** 18)))
+
+
+def usd_display(value: Any) -> str:
+    amount = decimal_value(value)
+    if amount is None:
+        return ""
+    return f"${amount.quantize(Decimal('0.01')):,.2f}"
 
 
 def as_sources(value: Any) -> list[str]:
@@ -467,20 +500,117 @@ def record_sort_key(record: dict[str, Any]) -> tuple[int, str, int]:
     return (live_rank, activity, int_value(record.get("dog_id"), 0))
 
 
+def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dict[str, dict[str, Any]]) -> int:
+    """Keep the live/current Mission 3 row aligned with the rendered auction feed.
+
+    The full Mission 3 archive can lag the current auction bid stream between
+    hourly archive refreshes. The visible dashboard card and static auction feed
+    are built from current auction state, so the unified archive/search index must
+    overlay that same ongoing row before it is published to public/generated.
+    """
+    feed_rows = load_json(AUCTION_FEED, [])
+    current_rows = load_json(CURRENT_AUCTION, [])
+    if not isinstance(feed_rows, list):
+        feed_rows = []
+    if not isinstance(current_rows, list):
+        current_rows = []
+    current_by_id = {dog_id_from_row(row): row for row in current_rows if isinstance(row, dict) and dog_id_from_row(row) >= 0}
+    by_key = {(int_value(record.get("mission")), int_value(record.get("dog_id"))): record for record in records}
+    updates = 0
+    for feed in feed_rows:
+        if not isinstance(feed, dict):
+            continue
+        status_text = text_value(feed.get("status")).lower()
+        if status_text not in {"ongoing", "live"}:
+            continue
+        dog_id = dog_id_from_row(feed)
+        record = by_key.get((3, dog_id))
+        if not record:
+            continue
+        current = current_by_id.get(dog_id, {})
+        wallet = normalize_address(feed.get("bidder_winner_wallet") or current.get("bidder_wallet"))
+        prior_who = record.get("winner_or_high_bidder") if isinstance(record.get("winner_or_high_bidder"), dict) else {}
+        if not wallet:
+            wallet = normalize_address(prior_who.get("wallet"))
+        profile = identity.get(wallet, {}) if wallet else {}
+        display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet), prior_who.get("display"))
+        profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"), prior_who.get("profile_url"))
+        record["status"] = "ongoing"
+        record["dog_image_url"] = first_text(feed.get("dog_image_url"), current.get("dog_image_url"), record.get("dog_image_url")) or None
+        record["dog_item_url"] = first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), record.get("dog_item_url"), mission3_item_url(dog_id)) or None
+        record["winner_or_high_bidder"] = {
+            "wallet": wallet or None,
+            "display": display or None,
+            "farcaster_fid": profile.get("farcaster_fid"),
+            "farcaster_handle": first_text(profile.get("farcaster_handle"), display.lstrip("@") if display.startswith("@") else "") or None,
+            "profile_url": profile_url or None,
+            "wallet_explorer_url": address_url(3, wallet) or None,
+        }
+        amount = record.get("amount") if isinstance(record.get("amount"), dict) else {}
+        native = first_text(feed.get("amount_eth"), current.get("current_bid_eth"), amount.get("native"))
+        amount["native"] = native or None
+        amount["native_symbol"] = "ETH"
+        amount["price_asset_key"] = "ETH"
+        amount["raw"] = eth_to_wei(native) or amount.get("raw")
+        usd_value = first_text(feed.get("amount_usd"), current.get("current_bid_usd"), amount.get("usd_estimate"))
+        if usd_value:
+            amount["usd_estimate"] = str(decimal_value(usd_value) or usd_value)
+            amount["usd_estimate_display"] = usd_display(usd_value) or amount.get("usd_estimate_display")
+            amount["usd_estimate_source"] = first_text(amount.get("usd_estimate_source"), "generated_auction_feed")
+            amount["usd_estimate_confidence"] = first_text(amount.get("usd_estimate_confidence"), "medium")
+            amount["usd_estimate_time_basis"] = "last_bid_block_time"
+        record["amount"] = amount
+        activity = iso_utc(first_text(feed.get("last_bid_utc"), feed.get("auction_time_utc"), current.get("latest_block_time_utc"), record.get("activity_time_utc")))
+        if activity:
+            record["activity_time_utc"] = activity
+            record["activity_time_basis"] = "last_bid_block_time"
+        bid_stats = record.get("bid_stats") if isinstance(record.get("bid_stats"), dict) else {}
+        if activity:
+            bid_stats["last_bid_time_utc"] = activity
+        record["bid_stats"] = bid_stats
+        record["rarity"] = parse_rarity(first_text(feed.get("rarity"), current.get("rarity"), record.get("rarity", {}).get("display") if isinstance(record.get("rarity"), dict) else ""))
+        record["traits"] = parse_traits(first_text(current.get("trait_rarity"), feed.get("trait_rarity"), current.get("traits"), feed.get("traits"))) or record.get("traits", [])
+        links = record.get("links") if isinstance(record.get("links"), dict) else {}
+        links["item"] = record.get("dog_item_url")
+        links["dog_page"] = first_text(feed.get("dog_external_url"), current.get("dog_external_url"), links.get("dog_page"), f"https://degendogs.club/#dog{dog_id}")
+        links["explorer"] = address_url(3, wallet) or links.get("explorer")
+        record["links"] = links
+        source = record.get("source") if isinstance(record.get("source"), dict) else {}
+        sources = as_sources(source.get("sources"))
+        if "generated_auction_feed" not in sources:
+            sources.append("generated_auction_feed")
+        source["sources"] = sources
+        source["confidence"] = "verified"
+        source["notes"] = first_text(source.get("notes"), MISSION_CONFIG[3]["source_note"])
+        record["source"] = source
+        extra_search = [display, wallet, profile.get("farcaster_handle"), native, usd_value, activity, "generated auction feed"]
+        record["search_text"] = " ".join([text_value(record.get("search_text")), *(str(part) for part in extra_search if part)]).strip().lower()
+        updates += 1
+    return updates
+
+
 def write_per_dog_records(records: list[dict[str, Any]]) -> None:
     by_id = DOG_ARCHIVE / "by-id"
     by_id.mkdir(parents=True, exist_ok=True)
     current_files = set()
+    now = utc_now()
     for record in records:
         dog_id = int_value(record.get("dog_id"), -1)
         if dog_id < 0:
             continue
+        path = by_id / f"{dog_id:03d}.json"
+        existing = load_json(path, {})
+        existing_generated_at = now
+        if isinstance(existing, dict):
+            existing_generated_at = text_value(existing.get("generated_at_utc")) or now
+            if existing.get("record") == record:
+                current_files.add(path.name)
+                continue
         payload = {
             "schema_version": 1,
-            "generated_at_utc": utc_now(),
+            "generated_at_utc": existing_generated_at,
             "record": record,
         }
-        path = by_id / f"{dog_id:03d}.json"
         write_json(path, payload)
         current_files.add(path.name)
     for stale in by_id.glob("*.json"):
@@ -488,7 +618,7 @@ def write_per_dog_records(records: list[dict[str, Any]]) -> None:
             stale.unlink()
     manifest = {
         "schema_version": 1,
-        "updated_at_utc": utc_now(),
+        "updated_at_utc": now,
         "record_count": len(records),
         "paths": [f"archive/dogs/by-id/{int_value(record.get('dog_id')):03d}.json" for record in records],
     }
@@ -511,6 +641,7 @@ def build_unified_index() -> dict[str, Any]:
             continue
         seen.add(key)
         records.append(record)
+    current_overrides = apply_current_auction_overrides(records, identity)
     records.sort(key=record_sort_key, reverse=True)
 
     counts_by_mission = Counter(str(record["mission"]) for record in records)
@@ -522,7 +653,7 @@ def build_unified_index() -> dict[str, Any]:
         "records_by_mission": {str(mission): counts_by_mission.get(str(mission), 0) for mission in [1, 2, 3]},
         "records_by_confidence": dict(sorted(counts_by_conf.items())),
         "source_files": [str(path.relative_to(ROOT)) for path in MISSION_INDEXES.values() if path.exists()],
-        "notes": notes + ["Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."],
+        "notes": notes + [f"current_auction_overrides:{current_overrides}", "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."],
     }
 
     write_json(ARCHIVE_GENERATED / "unified_dog_search_index.json", records)

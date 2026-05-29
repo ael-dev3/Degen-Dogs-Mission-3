@@ -60,6 +60,26 @@ def int_field(row: dict[str, str], key: str) -> int:
     return int(raw)
 
 
+def dog_id_from_feed(row: dict[str, object]) -> int:
+    for key in ("dog_id", "token_id"):
+        raw = row.get(key)
+        if raw not in (None, ""):
+            return int(str(raw))
+    text = str(row.get("dog") or row.get("dog_name") or "")
+    parts = "".join(ch if ch.isdigit() else " " for ch in text).split()
+    return int(parts[-1]) if parts else -1
+
+
+def iso_utc(value: object) -> str:
+    text = str(value or "").strip().replace(" ", "T")
+    return text if not text or text.endswith("Z") else f"{text}Z"
+
+
+def expected_native(value: object) -> str:
+    text = str(value or "").strip()
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
 def expected_report_counts(rows: list[dict[str, str]]) -> dict[str, int]:
     statuses = [(row.get("status") or "").lower() for row in rows]
     return {
@@ -152,6 +172,27 @@ def main() -> int:
         search_text = str(row.get("search_text") or "").lower()
         if f"dog #{row.get('dog_id')}" not in search_text or f"mission {row.get('mission')}" not in search_text:
             raise AssertionError("unified search row missing dog/mission terms")
+
+    auction_feed = json.loads((ROOT / "generated" / "auction_feed.json").read_text(encoding="utf-8"))
+    current_feed = next((row for row in auction_feed if isinstance(row, dict) and str(row.get("status") or "").lower() in {"ongoing", "live"}), None)
+    if current_feed:
+        current_dog_id = dog_id_from_feed(current_feed)
+        current_unified = next((row for row in unified_archive if isinstance(row, dict) and row.get("mission") == 3 and row.get("dog_id") == current_dog_id), None)
+        if not current_unified:
+            raise AssertionError(f"unified index missing current Mission 3 Dog #{current_dog_id}")
+        assert isinstance(current_unified, dict)
+        raw_who = current_unified.get("winner_or_high_bidder")
+        raw_amount = current_unified.get("amount")
+        who = raw_who if isinstance(raw_who, dict) else {}
+        amount = raw_amount if isinstance(raw_amount, dict) else {}
+        if str(who.get("wallet") or "").lower() != str(current_feed.get("bidder_winner_wallet") or "").lower():
+            raise AssertionError("unified current row high-bidder wallet differs from auction_feed")
+        if str(who.get("display") or "") != str(current_feed.get("bidder_winner") or ""):
+            raise AssertionError("unified current row display differs from auction_feed")
+        if expected_native(amount.get("native")) != expected_native(current_feed.get("amount_eth")):
+            raise AssertionError("unified current row amount differs from auction_feed")
+        if iso_utc(current_unified.get("activity_time_utc")) != iso_utc(current_feed.get("last_bid_utc") or current_feed.get("auction_time_utc")):
+            raise AssertionError("unified current row last-bid time differs from auction_feed")
 
     html = (ROOT / "index.html").read_text(encoding="utf-8")
     for marker in [

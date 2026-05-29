@@ -187,11 +187,19 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def write_per_dog(records: list[dict[str, Any]]) -> None:
     DOG_ARCHIVE.mkdir(parents=True, exist_ok=True)
+    now = utc_now()
     for record in records:
         dog_id = record.get("dog_id")
         if dog_id is None:
             continue
-        write_json(DOG_ARCHIVE / f"{int(dog_id):03d}.json", {"schema_version": 1, "generated_at_utc": utc_now(), "record": record})
+        path = DOG_ARCHIVE / f"{int(dog_id):03d}.json"
+        existing = load_json(path, {})
+        generated_at = now
+        if isinstance(existing, dict):
+            generated_at = str(existing.get("generated_at_utc") or now)
+            if existing.get("record") == record:
+                continue
+        write_json(path, {"schema_version": 1, "generated_at_utc": generated_at, "record": record})
 
 
 def main() -> None:
