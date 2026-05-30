@@ -18,7 +18,7 @@ export HOME="$USER_HOME"
 
 REPO_DIR="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 LABEL="${DEGEN_DOGS_WATCHER_LAUNCHD_LABEL:-com.ael.degendogs.mission3.watch-auction}"
-INTERVAL_SECONDS="${MISSION3_WATCHER_INTERVAL_SECONDS:-120}"
+INTERVAL_SECONDS="${MISSION3_WATCHER_INTERVAL_SECONDS:-60}"
 PLIST_DIR="${USER_HOME}/Library/LaunchAgents"
 LOG_DIR="${DEGEN_DOGS_LOG_DIR:-${USER_HOME}/Library/Logs/degen-dogs-mission3}"
 LOCK_DIR="${DEGEN_DOGS_LOCK_DIR:-${USER_HOME}/Library/Caches/degen-dogs-mission3}"

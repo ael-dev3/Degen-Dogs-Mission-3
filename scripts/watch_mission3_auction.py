@@ -258,7 +258,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         lock_path=lock_path,
         log_path=log_path,
         refresh_lock_path=refresh_lock_path,
-        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 120, minimum=30),
+        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 60, minimum=30),
         cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 180, minimum=0),
         bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 60, minimum=0),
         force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 3600, minimum=0),

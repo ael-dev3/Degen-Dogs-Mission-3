@@ -24,9 +24,12 @@ Fill only the values you need in `.env.local`.
 | `BASE_FROM_BLOCK` | First Base block scanned for Mission 3 logs. | no |
 | `BASE_LOG_CHUNK` | Maximum block range per log request. | no |
 | `BASE_LOG_WORKERS` | Concurrent log-fetch workers. | no |
-| `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for metadata/balance calls. | no |
+| `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for balance/metadata calls; capped at 10. | no |
 | `DOG_METADATA_WORKERS` | Concurrent Dog metadata fetch workers. | no |
-| `NEYNAR_API_KEY` | Optional Farcaster identity resolution. | yes |
+| `MISSION3_LOG_CACHE` | Enable the local RPC log cache under `.cache/rpc_logs`; default on. | no |
+| `MISSION3_LOG_CACHE_OVERLAP_BLOCKS` | Re-fetch overlap when extending cached log ranges; default 50 blocks. | no |
+| `MISSION3_BALANCE_CACHE` | Enable the local WOOF holder balance cache under `.cache/woof_balances.json`; default on. | no |
+| `NEYNAR_API_KEY` | Optional Farcaster profile resolution. | yes |
 | `WOOF_USD_PRICE` | Optional manual WOOF/USD override. | no |
 | `SUP_USD_PRICE` | Optional manual SUP/USD override. | no |
 
@@ -50,7 +53,7 @@ These keep Mission 3 current-auction data fresher than the hourly baseline witho
 
 | Variable | Purpose | Sensitive? |
 | --- | --- | --- |
-| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 120 seconds. | no |
+| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 60 seconds. | no |
 | `MISSION3_WATCHER_COOLDOWN_SECONDS` | Minimum delay between non-bid, non-major refreshes. | no |
 | `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` | Shorter minimum delay for same-token bid amount/high-bidder refreshes; default 60 seconds. | no |
 | `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; hourly refresh remains the baseline. | no |

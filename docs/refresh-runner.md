@@ -76,7 +76,7 @@ On first run with no state, the tracker initializes a baseline from latest oncha
 Defaults:
 
 ```bash
-MISSION3_WATCHER_INTERVAL_SECONDS=120
+MISSION3_WATCHER_INTERVAL_SECONDS=60
 MISSION3_WATCHER_COOLDOWN_SECONDS=180
 MISSION3_WATCHER_BID_COOLDOWN_SECONDS=60
 MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=3600
@@ -185,7 +185,7 @@ Do not commit machine-specific plist files, private RPC URLs, logs, or local sta
 ## Cron watcher example
 
 ```cron
-*/2 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
+* * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
 ```
 
 ## Inspecting local state

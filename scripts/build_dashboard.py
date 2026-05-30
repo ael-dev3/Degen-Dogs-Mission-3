@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 import csv
 import concurrent.futures
+import hashlib
 import html
 import json
 import os
@@ -26,7 +27,9 @@ SQL_PATH = ROOT / "sql" / "mission3_dashboard.sql"
 GENERATED = ROOT / "generated"
 PUBLIC_GENERATED = ROOT / "public" / "generated"
 CACHE_DIR = ROOT / ".cache"
+LOG_CACHE_DIR = CACHE_DIR / "rpc_logs"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
+WOOF_BALANCE_CACHE = CACHE_DIR / "woof_balances.json"
 README_TEMPLATE_PATH = ROOT / "README.template.md"
 HISTORICAL_ARCHIVE_INDEXES = {
     1: ROOT / "archive" / "mission1" / "data" / "generated" / "mission1_dog_search_index.json",
@@ -59,6 +62,7 @@ FROM_BLOCK = int(os.environ.get("BASE_FROM_BLOCK", "40500000"))
 LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "10000")), 10000))
 LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
+LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "50")), 500))
 
 AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
 DEGEN_DOGS = "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
@@ -136,6 +140,9 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
+    ("MISSION3_LOG_CACHE", "Enables local RPC log caching under `.cache/rpc_logs`; defaults on."),
+    ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 50 blocks."),
+    ("MISSION3_BALANCE_CACHE", "Enables local WOOF holder balance caching under `.cache/woof_balances.json`; defaults on."),
     ("NEYNAR_API_KEY", "Optional Neynar API key for identity resolution."),
     ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
     ("SUP_USD_PRICE", "Optional manual SUP/USD override; otherwise fetched from Dexscreener Base pools."),
@@ -234,7 +241,92 @@ def log_filter(address: str, topic_filter: str | list[str], start: int, end: int
     return {"address": address, "fromBlock": hex(start), "toBlock": hex(end), "topics": [topic_filter]}
 
 
-def fetch_logs(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
+def _canonical_topics(topics: str | list[str]) -> list[str]:
+    if isinstance(topics, str):
+        return [topics.lower()]
+    return [str(topic).lower() for topic in topics]
+
+
+def _log_cache_enabled() -> bool:
+    raw = os.environ.get("MISSION3_LOG_CACHE", "1").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
+
+
+def _log_cache_path(address: str, topics: str | list[str], from_block: int) -> Path:
+    key = json.dumps(
+        {
+            "address": address.lower(),
+            "topics": _canonical_topics(topics),
+            "from_block": int(from_block),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:20]
+    return LOG_CACHE_DIR / f"{digest}.json"
+
+
+def _load_log_cache(path: Path, address: str, topics: str | list[str], from_block: int) -> tuple[int, list[dict[str, Any]]]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return 0, []
+    except json.JSONDecodeError:
+        return 0, []
+    expected_topics = _canonical_topics(topics)
+    if not isinstance(data, dict):
+        return 0, []
+    if data.get("schema_version") != 1:
+        return 0, []
+    if str(data.get("address", "")).lower() != address.lower():
+        return 0, []
+    if data.get("topics") != expected_topics:
+        return 0, []
+    if int(data.get("from_block") or -1) != int(from_block):
+        return 0, []
+    logs = data.get("logs")
+    if not isinstance(logs, list):
+        return 0, []
+    clean_logs = [item for item in logs if isinstance(item, dict) and item.get("blockNumber")]
+    return int(data.get("to_block") or 0), clean_logs
+
+
+def _save_log_cache(path: Path, address: str, topics: str | list[str], from_block: int, to_block: int, logs: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = {
+        "schema_version": 1,
+        "address": address.lower(),
+        "topics": _canonical_topics(topics),
+        "from_block": int(from_block),
+        "to_block": int(to_block),
+        "updated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "logs": logs,
+    }
+    temp = path.with_suffix(path.suffix + ".tmp")
+    temp.write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
+    temp.replace(path)
+
+
+def _log_sort_key(item: dict[str, Any]) -> tuple[int, str, int]:
+    return (
+        int(str(item.get("blockNumber", "0x0")), 16),
+        str(item.get("transactionHash") or ""),
+        int(str(item.get("logIndex", "0x0")), 16),
+    )
+
+
+def _log_identity(item: dict[str, Any]) -> tuple[int, str, int]:
+    return _log_sort_key(item)
+
+
+def _block_number(item: dict[str, Any]) -> int:
+    try:
+        return int(str(item.get("blockNumber", "0x0")), 16)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _fetch_logs_uncached(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
     logs: list[dict[str, Any]] = []
     topic_filter: str | list[str] = topics
     ranges: list[tuple[int, int]] = []
@@ -253,8 +345,38 @@ def fetch_logs(address: str, topics: str | list[str], from_block: int, to_block:
         for future in concurrent.futures.as_completed(futures):
             logs.extend(future.result())
 
-    logs.sort(key=lambda x: (int(x["blockNumber"], 16), int(x["logIndex"], 16)))
+    logs.sort(key=lambda item: (int(item["blockNumber"], 16), int(item.get("logIndex", "0x0"), 16)))
     return logs
+
+
+def fetch_logs(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
+    if from_block > to_block:
+        return []
+    if not _log_cache_enabled():
+        return _fetch_logs_uncached(address, topics, from_block, to_block)
+
+    cache_path = _log_cache_path(address, topics, from_block)
+    cached_to_block, cached_logs = _load_log_cache(cache_path, address, topics, from_block)
+    if cached_to_block >= to_block:
+        return sorted(
+            [item for item in cached_logs if from_block <= int(str(item.get("blockNumber", "0x0")), 16) <= to_block],
+            key=_log_sort_key,
+        )
+
+    start_block = from_block
+    if cached_logs and cached_to_block >= from_block:
+        start_block = max(from_block, cached_to_block - LOG_CACHE_OVERLAP_BLOCKS + 1)
+    fresh_logs = _fetch_logs_uncached(address, topics, start_block, to_block)
+    by_id: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for item in [*cached_logs, *fresh_logs]:
+        block_number = _block_number(item)
+        if not block_number:
+            continue
+        if from_block <= block_number <= to_block:
+            by_id[_log_identity(item)] = item
+    merged = sorted(by_id.values(), key=_log_sort_key)
+    _save_log_cache(cache_path, address, topics, from_block, to_block, merged)
+    return merged
 
 
 def word(data: str, idx: int) -> int:
@@ -892,36 +1014,127 @@ def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[
     return created, bids, settled
 
 
-def fetch_woof_holders(transfer_logs: list[dict[str, Any]], decimals: int, block_tag: str) -> list[dict[str, Any]]:
-    addresses: set[str] = set()
-    for log in transfer_logs:
-        if len(log.get("topics", [])) >= 3:
-            a = topic_address(log["topics"][1])
-            b = topic_address(log["topics"][2])
-            if a.lower() != ZERO:
-                addresses.add(a)
-            if b.lower() != ZERO:
-                addresses.add(b)
+def _balance_cache_enabled() -> bool:
+    raw = os.environ.get("MISSION3_BALANCE_CACHE", "1").strip().lower()
+    return raw not in {"0", "false", "no", "off"}
 
-    ordered = sorted(addresses, key=str.lower)
-    rows: list[dict[str, Any]] = []
+
+def _block_tag_number(block_tag: str) -> int:
+    try:
+        return int(str(block_tag), 16) if str(block_tag).startswith("0x") else int(block_tag)
+    except (TypeError, ValueError):
+        return 0
+
+
+def load_woof_balance_cache() -> dict[str, Any]:
+    try:
+        data = json.loads(WOOF_BALANCE_CACHE.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(data, dict) or data.get("schema_version") != 1:
+        return {}
+    if str(data.get("woof_token", "")).lower() != WOOF.lower():
+        return {}
+    balances = data.get("balances")
+    if not isinstance(balances, dict):
+        return {}
+    return data
+
+
+def save_woof_balance_cache(cache: dict[str, Any]) -> None:
+    WOOF_BALANCE_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    temp = WOOF_BALANCE_CACHE.with_suffix(WOOF_BALANCE_CACHE.suffix + ".tmp")
+    temp.write_text(json.dumps(cache, separators=(",", ":"), sort_keys=True) + "\n", encoding="utf-8")
+    temp.replace(WOOF_BALANCE_CACHE)
+
+
+def transfer_addresses(log: dict[str, Any]) -> list[str]:
+    topics = log.get("topics", [])
+    if len(topics) < 3:
+        return []
+    addresses = []
+    for topic in (topics[1], topics[2]):
+        address = topic_address(topic).lower()
+        if address != ZERO:
+            addresses.append(address)
+    return addresses
+
+
+def collect_woof_transfer_addresses(transfer_logs: list[dict[str, Any]]) -> tuple[list[str], dict[str, int]]:
+    touched_block_by_address: dict[str, int] = {}
+    for log in transfer_logs:
+        block_number = _block_number(log)
+        for address in transfer_addresses(log):
+            touched_block_by_address[address] = max(touched_block_by_address.get(address, 0), block_number)
+    return sorted(touched_block_by_address, key=str.lower), touched_block_by_address
+
+
+def fetch_balances(addresses: list[str], block_tag: str) -> dict[str, int]:
+    balances: dict[str, int] = {}
     sig = SELECTOR_BALANCE_OF
-    for i in range(0, len(ordered), RPC_BATCH_LIMIT):
-        batch = ordered[i : i + RPC_BATCH_LIMIT]
+    for i in range(0, len(addresses), RPC_BATCH_LIMIT):
+        batch = addresses[i : i + RPC_BATCH_LIMIT]
         calls = []
         for address in batch:
             data = sig + address.lower().replace("0x", "").rjust(64, "0")
             calls.append(("eth_call", [{"to": WOOF, "data": data}, block_tag]))
         results = rpc_batch(calls)
         for address, raw in zip(batch, results):
-            balance = int(raw, 16) if raw else 0
-            rows.append(
-                {
-                    "address": address,
-                    "balance_woof": float(Decimal(balance) / (Decimal(10) ** decimals)),
-                    "balance_raw": str(balance),
-                }
-            )
+            balances[address.lower()] = int(raw, 16) if raw else 0
+    return balances
+
+
+def fetch_woof_holders(transfer_logs: list[dict[str, Any]], decimals: int, block_tag: str) -> list[dict[str, Any]]:
+    ordered, touched_block_by_address = collect_woof_transfer_addresses(transfer_logs)
+    snapshot_block = _block_tag_number(block_tag)
+    cache = load_woof_balance_cache() if _balance_cache_enabled() else {}
+    raw_cached_balances = cache.get("balances")
+    cached_balances: dict[str, Any] = raw_cached_balances if isinstance(raw_cached_balances, dict) else {}
+    checked_block = int(cache.get("checked_block") or 0) if cache else 0
+
+    to_fetch: list[str]
+    if not cache or checked_block <= 0 or checked_block > snapshot_block:
+        to_fetch = ordered
+    else:
+        to_fetch = [
+            address
+            for address in ordered
+            if address not in cached_balances or touched_block_by_address.get(address, 0) > checked_block
+        ]
+
+    fresh_balances = fetch_balances(to_fetch, block_tag)
+    merged_balances: dict[str, str] = {}
+    for address in ordered:
+        if address in fresh_balances:
+            merged_balances[address] = str(fresh_balances[address])
+        elif address in cached_balances:
+            merged_balances[address] = str(cached_balances[address])
+        else:
+            raise RuntimeError(f"Missing WOOF balance for {address} at {block_tag}")
+
+    if _balance_cache_enabled():
+        save_woof_balance_cache(
+            {
+                "schema_version": 1,
+                "woof_token": WOOF.lower(),
+                "checked_block": snapshot_block,
+                "updated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                "balances": merged_balances,
+            }
+        )
+
+    rows: list[dict[str, Any]] = []
+    for address in ordered:
+        balance = int(merged_balances.get(address) or 0)
+        rows.append(
+            {
+                "address": address,
+                "balance_woof": float(Decimal(balance) / (Decimal(10) ** decimals)),
+                "balance_raw": str(balance),
+            }
+        )
     rows.sort(key=lambda r: (-r["balance_woof"], r["address"].lower()))
     return rows
 
@@ -1693,7 +1906,7 @@ def timer_urgency_state(remaining_seconds: int | None, auction_status: str = "")
         return "ended"
     if remaining_seconds <= 600:
         return "critical"
-    if remaining_seconds <= 3600:
+    if remaining_seconds < 3600:
         return "urgent"
     return "calm"
 
@@ -1949,7 +2162,7 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
 @media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span{width:100%;max-width:100%}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 @media (max-width:900px){.topline{align-items:flex-start}.top-actions{justify-content:flex-start;max-width:100%}}
-@media (max-width:640px){.utility-chip,.credit-trigger{font-size:10px;padding:5px 7px;border-width:1.5px;box-shadow:2px 2px 0 var(--accent2)}.utility-chip--bid{box-shadow:2px 2px 0 var(--calm)}.credit-menu{margin-left:auto}.credit-trigger{box-shadow:2px 2px 0 var(--ink)}.credit-popover{left:auto;right:0;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}}
+@media (max-width:640px){.top-actions{display:grid;grid-template-columns:repeat(2,max-content);flex:1 1 100%;width:100%;justify-content:flex-start;align-items:flex-start;gap:6px}.utility-chip,.credit-trigger{font-size:10px;padding:5px 7px;border-width:1.5px;box-shadow:2px 2px 0 var(--accent2)}.utility-chip--bid{box-shadow:2px 2px 0 var(--calm)}.credit-menu{grid-column:1/-1;margin-left:0;max-width:100%}.credit-trigger{box-shadow:2px 2px 0 var(--ink);white-space:normal;text-align:left}.credit-popover{left:0;right:auto;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}}
 
 """.strip()
     script = """
@@ -1974,7 +2187,7 @@ const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=N
 const parseUtc=value=>Date.parse(String(value||'').replace(' ','T')+'Z');
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
 const TIMER_STATES=['calm','normal','urgent','critical','ended'];
-const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<=3600?'urgent':'calm';
+const timerState=(seconds,forceEnded=false)=>forceEnded||seconds<=0?'ended':seconds<=600?'critical':seconds<3600?'urgent':'calm';
 const applyTimerState=(el,state)=>{TIMER_STATES.forEach(name=>el.classList.toggle(`countdown--${name}`,name===state));const box=el.closest('.timer-card');if(box){TIMER_STATES.forEach(name=>box.classList.toggle(`timer-card--${name}`,name===state));}};
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const attr=value=>escapeHtml(value);

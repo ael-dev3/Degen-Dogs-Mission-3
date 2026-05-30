@@ -101,13 +101,13 @@ Dry-run without refreshing or writing watcher state:
 npm run watch:onchain:dry
 ```
 
-Schedule it every two minutes, separately from the hourly full refresh:
+Schedule it every minute, separately from the hourly full refresh:
 
 ```cron
-*/2 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
+* * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
 ```
 
-For macOS launchd, use `StartInterval=120` and run `cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain` through `/bin/bash -lc`.
+For macOS launchd, use `StartInterval=60` and run `cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain` through `/bin/bash -lc`.
 
 Operational state lives at `.local/mission3_onchain_tracker_state.json`, the one-shot overlap lock lives at `.local/mission3_onchain_tracker.lock`, and logs go to `logs/watch-onchain.log`; all are local-only and gitignored.
 

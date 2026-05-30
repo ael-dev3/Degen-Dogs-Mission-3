@@ -47,6 +47,8 @@ def assert_timer_urgency_colors() -> None:
     builder = load_builder()
     if builder.timer_urgency_state(7201, "ongoing") != "calm":
         raise AssertionError("timer should be calm/light green when more than 1 hour remains")
+    if builder.timer_urgency_state(3600, "ongoing") != "calm":
+        raise AssertionError("timer should stay calm/light green at exactly 1 hour remaining")
     if builder.timer_urgency_state(3599, "ongoing") != "urgent":
         raise AssertionError("timer should become urgent when less than 1 hour remains")
     if builder.timer_urgency_state(600, "ongoing") != "critical":
@@ -57,7 +59,7 @@ def assert_timer_urgency_colors() -> None:
         "--paper-calm:#eff8df",
         ".current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm)",
         ".current-detail .timer-card--urgent{background:var(--paper-urgent)",
-        "seconds<=600?'critical':seconds<=3600?'urgent':'calm'",
+        "seconds<=600?'critical':seconds<3600?'urgent':'calm'",
     ]
     for marker in required_markers:
         if marker not in html:
@@ -71,7 +73,8 @@ def assert_creator_popover() -> None:
         'class="credit-trigger" aria-haspopup="true"',
         'class="credit-popover" aria-label="Mark Carey profile links"',
         '.credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover',
-        '.credit-menu{margin-left:auto}.credit-trigger{box-shadow:2px 2px 0 var(--ink)}.credit-popover{left:auto;right:0;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}',
+        '.top-actions{display:grid;grid-template-columns:repeat(2,max-content);flex:1 1 100%;width:100%;justify-content:flex-start;align-items:flex-start;gap:6px}',
+        '.credit-menu{grid-column:1/-1;margin-left:0;max-width:100%}.credit-trigger{box-shadow:2px 2px 0 var(--ink);white-space:normal;text-align:left}.credit-popover{left:0;right:auto;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}',
         'visibility:visible',
         'pointer-events:auto',
     ]
