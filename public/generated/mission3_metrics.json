@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "46686793"
+    "value": "46688344"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-05-30 17:42:13"
+    "value": "2026-05-30 18:33:55"
   },
   {
     "metric": "auction_house",
@@ -57,7 +57,7 @@
   },
   {
     "metric": "sup_usd_price",
-    "value": "0.01163"
+    "value": "0.01165"
   },
   {
     "metric": "sup_usd_source",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2022.06"
+    "value": "2024.15"
   },
   {
     "metric": "eth_usd_source",
@@ -109,7 +109,7 @@
   },
   {
     "metric": "reward_sup_received_usd",
-    "value": "429.56"
+    "value": "430.3"
   },
   {
     "metric": "reward_sup_flow_per_day",
@@ -117,7 +117,7 @@
   },
   {
     "metric": "reward_sup_flow_usd_per_day",
-    "value": "4.41"
+    "value": "4.42"
   },
   {
     "metric": "reward_sup_per_dog_per_day",
@@ -125,27 +125,27 @@
   },
   {
     "metric": "reward_sup_per_dog_usd_per_day",
-    "value": "0.031262"
+    "value": "0.031315"
   },
   {
     "metric": "reward_total_flow_usd_per_day",
-    "value": "16.11"
+    "value": "16.12"
   },
   {
     "metric": "reward_total_per_dog_usd_per_day",
-    "value": "0.114254"
+    "value": "0.114308"
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "194.65"
+    "value": "214.25"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.5137"
+    "value": "0.4668"
   },
   {
     "metric": "woof_holders",
-    "value": "385"
+    "value": "386"
   },
   {
     "metric": "top_woof_holder",
@@ -169,19 +169,19 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.011"
+    "value": "0.0121"
   },
   {
     "metric": "current_bid_usd",
-    "value": "22.24"
+    "value": "24.49"
   },
   {
     "metric": "current_bidder",
-    "value": "@0xleonardo"
+    "value": "@vaibhavmule"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0x502ce9fb1814cb03843967ec5e0d8f6aa3a3c2e1"
+    "value": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad"
   },
   {
     "metric": "current_auction_end_utc",
@@ -197,7 +197,7 @@
   },
   {
     "metric": "total_bid_eth",
-    "value": "34.910413"
+    "value": "34.922513"
   },
   {
     "metric": "total_settled_eth",
