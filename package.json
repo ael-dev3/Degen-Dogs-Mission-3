@@ -27,6 +27,8 @@
     "refresh:local": "npm run data && npm run build",
     "refresh:publish": "bash scripts/refresh_and_publish.sh",
     "refresh:install": "bash scripts/install_hourly_refresh_launchd.sh",
+    "watch:install": "bash scripts/install_auction_watcher_launchd.sh",
+    "refresh:install:watcher": "npm run watch:install",
     "watch:onchain": "python3 scripts/watch_mission3_onchain_activity.py --once",
     "watch:onchain:loop": "python3 scripts/watch_mission3_onchain_activity.py --loop",
     "watch:onchain:dry": "python3 scripts/watch_mission3_onchain_activity.py --once --dry-run",

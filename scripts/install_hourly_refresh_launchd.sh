@@ -18,7 +18,8 @@ REPO_DIR="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
 LABEL="${DEGEN_DOGS_LAUNCHD_LABEL:-com.ael.degendogs.mission3.refresh}"
 INTERVAL_SECONDS="${DEGEN_DOGS_REFRESH_INTERVAL_SECONDS:-3600}"
 PLIST_DIR="${USER_HOME}/Library/LaunchAgents"
-LOG_DIR="${USER_HOME}/Library/Logs/degen-dogs-mission3"
+LOG_DIR="${DEGEN_DOGS_LOG_DIR:-${USER_HOME}/Library/Logs/degen-dogs-mission3}"
+LOCK_DIR="${DEGEN_DOGS_LOCK_DIR:-${USER_HOME}/Library/Caches/degen-dogs-mission3}"
 PLIST_PATH="${PLIST_DIR}/${LABEL}.plist"
 SCRIPT_PATH="${REPO_DIR}/scripts/refresh_and_publish.sh"
 
@@ -35,13 +36,14 @@ fi
 [[ "$REPO_DIR" = /* ]] || fail "repo dir must be absolute: ${REPO_DIR}"
 [[ -f "$SCRIPT_PATH" ]] || fail "refresh script missing: ${SCRIPT_PATH}"
 
-mkdir -p "$PLIST_DIR" "$LOG_DIR"
+mkdir -p "$PLIST_DIR" "$LOG_DIR" "$LOCK_DIR"
+chmod 700 "$LOCK_DIR" || true
 
 if [[ ! -x "$SCRIPT_PATH" ]]; then
   chmod +x "$SCRIPT_PATH"
 fi
 
-PLIST_PATH="$PLIST_PATH" LABEL="$LABEL" SCRIPT_PATH="$SCRIPT_PATH" REPO_DIR="$REPO_DIR" LOG_DIR="$LOG_DIR" INTERVAL_SECONDS="$INTERVAL_SECONDS" python3 - <<'PY'
+PLIST_PATH="$PLIST_PATH" LABEL="$LABEL" SCRIPT_PATH="$SCRIPT_PATH" REPO_DIR="$REPO_DIR" LOG_DIR="$LOG_DIR" LOCK_DIR="$LOCK_DIR" INTERVAL_SECONDS="$INTERVAL_SECONDS" python3 - <<'PY'
 from __future__ import annotations
 
 import os
@@ -61,8 +63,14 @@ plist = {
         "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
         "GIT_TERMINAL_PROMPT": "0",
         "DEGEN_DOGS_REPO_DIR": os.environ["REPO_DIR"],
+        "DEGEN_DOGS_LOG_DIR": os.environ["LOG_DIR"],
+        "DEGEN_DOGS_LOCK_DIR": os.environ["LOCK_DIR"],
     },
 }
+for key in ["DEGEN_DOGS_REMOTE", "DEGEN_DOGS_BRANCH", "DEGEN_DOGS_SKIP_PUSH", "DEGEN_DOGS_SKIP_PULL"]:
+    value = os.environ.get(key)
+    if value:
+        plist["EnvironmentVariables"][key] = value
 path = Path(os.environ["PLIST_PATH"])
 path.write_bytes(plistlib.dumps(plist, sort_keys=False))
 PY
@@ -84,3 +92,4 @@ echo "installed ${LABEL}"
 echo "plist: ${PLIST_PATH}"
 echo "interval_seconds: ${INTERVAL_SECONDS}"
 echo "logs: ${LOG_DIR}/refresh.log"
+echo "lock: ${LOCK_DIR}/refresh.lock"

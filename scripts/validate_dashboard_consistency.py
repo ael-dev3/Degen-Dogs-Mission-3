@@ -2,7 +2,9 @@
 """Validate that live/current auction artifacts agree across dashboard surfaces."""
 from __future__ import annotations
 
+import csv
 import json
+import re
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
@@ -76,6 +78,60 @@ def first_row(path: Path) -> dict[str, Any]:
     return data[0]
 
 
+def load_metrics() -> dict[str, str]:
+    path = ROOT / "generated" / "mission3_metrics.csv"
+    if not path.exists():
+        raise AssertionError("generated/mission3_metrics.csv missing")
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    metrics = {text(row.get("metric")): text(row.get("value")) for row in rows}
+    required = [
+        "latest_block",
+        "latest_block_time_utc",
+        "current_auction_token_id",
+        "current_auction_status",
+        "current_bid_eth",
+        "current_bidder",
+        "current_bidder_wallet",
+    ]
+    missing = [key for key in required if not metrics.get(key)]
+    if missing:
+        raise AssertionError("mission3_metrics missing required current-auction metrics: " + ", ".join(missing))
+    return metrics
+
+
+def readme_snapshot() -> dict[str, str]:
+    path = ROOT / "README.md"
+    if not path.exists():
+        raise AssertionError("README.md missing")
+    values: dict[str, str] = {}
+    in_section = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip() == "## Current snapshot":
+            in_section = True
+            continue
+        if in_section and line.startswith("## "):
+            break
+        if in_section and line.startswith("|") and "---" not in line:
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) >= 2 and cells[0] != "Field":
+                values[cells[0]] = cells[1]
+    if not values:
+        raise AssertionError("README current snapshot table missing or empty")
+    return values
+
+
+def assert_index_contains(label: str, expected: str, index: str) -> None:
+    if expected and expected not in index:
+        raise AssertionError(f"index.html missing {label}: {expected!r}")
+
+
+def assert_metric_cell(metric: str, expected: str, index: str) -> None:
+    cell = f"<td>{metric}</td><td>{expected}</td>"
+    if cell not in index:
+        raise AssertionError(f"index.html hidden mission3_metrics value mismatch for {metric}: expected {expected!r}")
+
+
 def identity_display(wallet: str) -> str:
     profiles = load_json(ROOT / "archive" / "data" / "identity" / "wallet_profiles.json", {})
     if isinstance(profiles, dict):
@@ -138,6 +194,54 @@ def validate_current_surface() -> dict[str, Any]:
     current_dog_id = dog_id(current)
     feed = find_current_feed_row(feed_rows, current_dog_id)
     current_state = text(current.get("auction_state")).lower()
+    metrics = load_metrics()
+    index = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
+    readme = readme_snapshot()
+
+    if int(metrics["current_auction_token_id"]) != current_dog_id:
+        raise AssertionError("mission3_metrics current_auction_token_id differs from current_auction")
+    if metrics["current_auction_status"].lower() != current_state:
+        raise AssertionError("mission3_metrics current_auction_status differs from current_auction")
+    if not decimals_equal(metrics["current_bid_eth"], current.get("current_bid_eth")):
+        raise AssertionError("mission3_metrics current_bid_eth differs from current_auction")
+    if text(metrics["current_bidder"]) != text(current.get("bidder")):
+        raise AssertionError("mission3_metrics current_bidder differs from current_auction")
+    if normalize_address(metrics["current_bidder_wallet"]) != normalize_address(current.get("bidder_wallet")):
+        raise AssertionError("mission3_metrics current_bidder_wallet differs from current_auction")
+    if text(metrics["latest_block"]) != text(current.get("latest_block")):
+        raise AssertionError("mission3_metrics latest_block differs from current_auction")
+    if iso_utc(metrics["latest_block_time_utc"]) != iso_utc(current.get("latest_block_time_utc")):
+        raise AssertionError("mission3_metrics latest_block_time_utc differs from current_auction")
+
+    expected_feed_status = {"live": "ongoing", "ended_unsettled": "ended pending settlement"}.get(current_state, current_state)
+    if text(feed.get("status")).lower() != expected_feed_status:
+        raise AssertionError("auction_feed current row status differs from current_auction")
+
+    assert_metric_cell("latest_block", metrics["latest_block"], index)
+    assert_metric_cell("latest_block_time_utc", metrics["latest_block_time_utc"], index)
+    assert_metric_cell("current_auction_token_id", metrics["current_auction_token_id"], index)
+    assert_metric_cell("current_auction_status", metrics["current_auction_status"], index)
+    assert_metric_cell("current_bid_eth", metrics["current_bid_eth"], index)
+    assert_metric_cell("current_bidder", metrics["current_bidder"], index)
+    assert_metric_cell("current_bidder_wallet", metrics["current_bidder_wallet"], index)
+    assert_index_contains("current Dog heading", f"Dog #{current_dog_id}", index)
+    assert_index_contains("current bid display", text(current.get("current_bid")), index)
+    assert_index_contains("current high-bidder display", text(current.get("bidder")), index)
+    assert_index_contains("current auction status", text(feed.get("status")), index)
+
+    if readme.get("Snapshot block") != metrics["latest_block"]:
+        raise AssertionError("README Snapshot block differs from mission3_metrics latest_block")
+    if iso_utc(readme.get("Snapshot time UTC")) != iso_utc(metrics["latest_block_time_utc"]):
+        raise AssertionError("README Snapshot time UTC differs from mission3_metrics latest_block_time_utc")
+    if readme.get("Current Dog") != f"Dog #{current_dog_id}":
+        raise AssertionError("README Current Dog differs from current_auction")
+    if readme.get("Current status", "").lower() != current_state:
+        raise AssertionError("README Current status differs from current_auction")
+    readme_bid_match = re.search(r"[0-9]+(?:\.[0-9]+)?", readme.get("Current bid", ""))
+    if not readme_bid_match or decimal_value(readme_bid_match.group(0)) != decimal_value(metrics["current_bid_eth"]):
+        raise AssertionError("README Current bid differs from mission3_metrics current_bid_eth")
+    if readme.get("Current high bidder") != metrics["current_bidder"]:
+        raise AssertionError("README Current high bidder differs from mission3_metrics current_bidder")
 
     if current_state == "live" and text(feed.get("status")).lower() != "ongoing":
         raise AssertionError("live current_auction row is not marked ongoing in auction_feed")

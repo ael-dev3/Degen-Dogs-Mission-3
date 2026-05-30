@@ -9,6 +9,7 @@ npm run refresh:local
 npm run refresh:publish
 npm run refresh:archive
 npm run refresh:install
+npm run watch:install
 npm run watch:onchain
 npm run watch:onchain:loop
 npm run watch:onchain:dry
@@ -19,6 +20,7 @@ npm run watch:onchain:force
 - `refresh:publish` runs `scripts/refresh_and_publish.sh`.
 - `refresh:archive` runs Mission 3 archive indexing first, then the normal publish flow.
 - `refresh:install` installs the macOS launchd hourly runner.
+- `watch:install` installs the macOS launchd event watcher runner.
 - `watch:onchain` runs the precise Mission 3 onchain activity tracker once.
 - `watch:onchain:loop` keeps the tracker running and sleeps between checks.
 - `watch:onchain:dry` detects signals and prints intended refreshes without executing the command or writing state.
@@ -60,7 +62,7 @@ The tracker state and logs stay local. `.local/`, `.var/`, and `logs/` are gitig
 
 A refresh is triggered when any of these are new or changed:
 
-- `AuctionBid` log ID, bidder, amount, or token ID,
+- `AuctionBid` log ID, bidder, amount, or token ID, including same-token higher bids,
 - `AuctionCreated` log or current token ID,
 - `AuctionSettled` log or current settled flag,
 - `AuctionExtended` log or end time,
@@ -76,17 +78,22 @@ Defaults:
 ```bash
 MISSION3_WATCHER_INTERVAL_SECONDS=120
 MISSION3_WATCHER_COOLDOWN_SECONDS=180
+MISSION3_WATCHER_BID_COOLDOWN_SECONDS=60
 MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=3600
 MISSION3_WATCHER_LOOKBACK_BLOCKS=2000
 MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS=50
 MISSION3_WATCHER_LOG_CHUNK=2000
+MISSION3_REFRESH_LOCK_PATH=~/Library/Caches/degen-dogs-mission3/refresh.lock
 ```
 
 Rules:
 
-- One-shot runs take a non-blocking lock at `.local/mission3_onchain_tracker.lock` so refreshes do not overlap.
+- One-shot runs take a non-blocking watcher lock at `.local/mission3_onchain_tracker.lock` so watcher checks do not overlap.
+- Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.
-- Bid-only and extension-only changes inside cooldown are stored as `pending_refresh` and retried after cooldown.
+- Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (60s default) instead of the longer general cooldown, so real new bids publish quickly without commit-spamming every repeated signal.
+- Bid-only and extension-only changes inside their active cooldown are stored as `pending_refresh` and retried after cooldown.
+- Direct `auction()` end-time changes trigger `auction_end_time_changed` even if the `AuctionExtended` log was missed.
 - The scan starts from `last_checked_block + 1 - safety_overlap`; duplicate logs are ignored via log IDs.
 - Failed refreshes record local state and back off before retrying.
 - If publish automation produces no generated diff, the publish script exits without committing.
@@ -112,8 +119,9 @@ npm run watch:onchain
 Guardrails:
 
 - Commands that look like they publish (`git push`, `refresh:publish`, `refresh:archive`, `refresh_and_publish`) are refused unless `MISSION3_WATCHER_AUTO_PUSH=1`.
+- `MISSION3_REFRESH_LOCK_PATH` defaults to the same `refresh.lock` path as the hourly publish script (`DEGEN_DOGS_LOCK_DIR` or `~/Library/Caches/degen-dogs-mission3/refresh.lock`). If that lock is busy, the watcher marks the refresh pending instead of starting a second run.
 - `MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1` is enabled by default when auto-push is enabled.
-- The publish script still owns locking, `git pull --ff-only`, expected-path staging, secret scanning, and no-diff/no-commit behavior.
+- The publish script still owns `git pull --ff-only`, expected-path staging, secret scanning, and no-diff/no-commit behavior.
 
 ## One-shot, dry-run, and loop mode
 
@@ -137,34 +145,40 @@ npm run watch:onchain:loop
 
 Prefer scheduler-driven one-shot mode for launchd/cron so crashes do not leave a silent long-running process.
 
-## macOS launchd watcher example
+## macOS launchd watcher setup
 
-Install the hourly runner with `npm run refresh:install` first. Then add a separate LaunchAgent for the watcher:
+Install the hourly fallback first:
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.example.degendogs.mission3.watch-onchain</string>
-  <key>StartInterval</key>
-  <integer>120</integer>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/bash</string>
-    <string>-lc</string>
-    <string>cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain</string>
-  </array>
-  <key>StandardOutPath</key>
-  <string>/path/to/Degen-Dogs-Mission-3/logs/watch-onchain.launchd.log</string>
-  <key>StandardErrorPath</key>
-  <string>/path/to/Degen-Dogs-Mission-3/logs/watch-onchain.launchd.log</string>
-</dict>
-</plist>
+```bash
+npm run refresh:install
 ```
 
-Do not commit machine-specific paths.
+Install the event watcher in safe local-only mode:
+
+```bash
+npm run watch:install
+```
+
+Install the event watcher in publish mode on the Mac mini/local runner:
+
+```bash
+MISSION3_WATCHER_AUTO_PUSH=1 \
+MISSION3_REFRESH_COMMAND="npm run refresh:publish" \
+npm run watch:install
+```
+
+Both LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs.
+
+Useful status checks:
+
+```bash
+launchctl print gui/$(id -u)/com.ael.degendogs.mission3.refresh
+launchctl print gui/$(id -u)/com.ael.degendogs.mission3.watch-auction
+tail -n 80 ~/Library/Logs/degen-dogs-mission3/refresh.log
+tail -n 80 ~/Library/Logs/degen-dogs-mission3/watch-onchain.log
+```
+
+Do not commit machine-specific plist files, private RPC URLs, logs, or local state.
 
 ## Cron watcher example
 
@@ -182,9 +196,30 @@ Check:
 
 - `last_checked_block` advances,
 - `last_seen_bid_tx` / `last_seen_bid_log_index` match the newest bid,
+- `last_seen_amount_wei` and `last_seen_high_bidder` match `generated/current_auction.json[0]`,
 - `last_refresh_status` is `success` after a triggered refresh,
 - `pending_refresh` clears after cooldown,
 - `consecutive_rpc_failures` and `consecutive_refresh_failures` stay low.
+
+Safely reset watcher state if it gets wedged or after moving runners:
+
+```bash
+mv .local/mission3_onchain_tracker_state.json .local/mission3_onchain_tracker_state.$(date -u +%Y%m%dT%H%M%SZ).bak
+npm run watch:onchain:dry
+```
+
+Check whether the latest bid has been published:
+
+```bash
+python3 - <<'PY'
+import json
+from pathlib import Path
+current = json.loads(Path('generated/current_auction.json').read_text())[0]
+feed = json.loads(Path('generated/auction_feed.json').read_text())[0]
+print('current:', current['token_id'], current['current_bid_eth'], current['bidder'], current['bidder_wallet'], current['latest_block'])
+print('feed:', feed['dog'], feed['amount_eth'], feed['bidder_winner'], feed['bidder_winner_wallet'])
+PY
+```
 
 ## Failure handling
 

@@ -95,8 +95,10 @@ class Config(NamedTuple):
     state_path: Path
     lock_path: Path | None
     log_path: Path | None
+    refresh_lock_path: Path | None
     interval_seconds: int
     cooldown_seconds: int
+    bid_cooldown_seconds: int
     force_after_seconds: int
     lookback_blocks: int
     safety_overlap_blocks: int
@@ -142,6 +144,11 @@ def seconds_since(value: Any, now_utc: str) -> int | None:
     if not start or not now:
         return None
     return max(0, int((now - start).total_seconds()))
+
+
+def unix_from_utc(value: Any) -> int:
+    parsed = parse_utc(value)
+    return int(parsed.timestamp()) if parsed else 0
 
 
 def env_bool(env: dict[str, str], name: str, default: bool = False) -> bool:
@@ -191,6 +198,30 @@ def parse_url_list(env: dict[str, str], name: str, default_urls: list[str]) -> l
     return urls or list(default_urls)
 
 
+def default_refresh_lock_path(env: dict[str, str]) -> Path:
+    lock_dir_raw = env.get("DEGEN_DOGS_LOCK_DIR", "").strip()
+    if lock_dir_raw:
+        lock_dir = Path(lock_dir_raw).expanduser()
+    else:
+        lock_dir = Path.home() / "Library" / "Caches" / "degen-dogs-mission3"
+    return lock_dir / "refresh.lock"
+
+
+def optional_path_from_env(env: dict[str, str], name: str, default: Path | None) -> Path | None:
+    raw = env.get(name)
+    if raw is None or raw.strip() == "":
+        path = default
+    elif raw.strip() == "-":
+        return None
+    else:
+        path = Path(raw.strip()).expanduser()
+    if path is None:
+        return None
+    if not path.is_absolute():
+        path = ROOT / path
+    return path
+
+
 def config_from_env(env: dict[str, str] | None = None) -> Config:
     env = dict(os.environ if env is None else env)
     if env.get("BASE_RPC_URL"):
@@ -205,27 +236,13 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
     if not refresh_command:
         refresh_command = DEFAULT_PUBLISH_REFRESH_COMMAND if auto_push else DEFAULT_LOCAL_REFRESH_COMMAND
 
-    state_path = Path(env.get("MISSION3_WATCHER_STATE_PATH", str(DEFAULT_STATE_PATH))).expanduser()
-    if not state_path.is_absolute():
-        state_path = ROOT / state_path
+    state_path = optional_path_from_env(env, "MISSION3_WATCHER_STATE_PATH", DEFAULT_STATE_PATH)
+    if state_path is None:
+        raise SystemExit("MISSION3_WATCHER_STATE_PATH cannot be disabled")
 
-    lock_path_raw = env.get("MISSION3_WATCHER_LOCK_PATH", str(ROOT / ".local" / "mission3_onchain_tracker.lock")).strip()
-    lock_path: Path | None
-    if lock_path_raw in {"", "-"}:
-        lock_path = None
-    else:
-        lock_path = Path(lock_path_raw).expanduser()
-        if not lock_path.is_absolute():
-            lock_path = ROOT / lock_path
-
-    log_path_raw = env.get("MISSION3_WATCHER_LOG_PATH", str(DEFAULT_LOG_PATH)).strip()
-    log_path: Path | None
-    if log_path_raw in {"", "-"}:
-        log_path = None
-    else:
-        log_path = Path(log_path_raw).expanduser()
-        if not log_path.is_absolute():
-            log_path = ROOT / log_path
+    lock_path = optional_path_from_env(env, "MISSION3_WATCHER_LOCK_PATH", ROOT / ".local" / "mission3_onchain_tracker.lock")
+    log_path = optional_path_from_env(env, "MISSION3_WATCHER_LOG_PATH", DEFAULT_LOG_PATH)
+    refresh_lock_path = optional_path_from_env(env, "MISSION3_REFRESH_LOCK_PATH", default_refresh_lock_path(env))
 
     return Config(
         rpc_urls=rpc_urls,
@@ -233,8 +250,10 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         state_path=state_path,
         lock_path=lock_path,
         log_path=log_path,
+        refresh_lock_path=refresh_lock_path,
         interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 120, minimum=30),
         cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 180, minimum=0),
+        bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 60, minimum=0),
         force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 3600, minimum=0),
         lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 2000, minimum=1, maximum=10000),
         safety_overlap_blocks=env_int_any(env, ["MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS", "MISSION3_WATCHER_LOG_SAFETY_OVERLAP_BLOCKS"], 50, minimum=0, maximum=500),
@@ -251,13 +270,37 @@ def redact_url(value: str) -> str:
         parts = urllib.parse.urlsplit(value)
     except Exception:
         return "<redacted-url>"
-    netloc = parts.hostname or ""
+    hostname = parts.hostname or ""
+    lower_host = hostname.lower()
+    sensitive_domains = (
+        "alchemy.com",
+        "infura.io",
+        "quicknode.pro",
+        "quiknode.pro",
+        "ankr.com",
+        "blastapi.io",
+        "drpc.org",
+        "nodereal.io",
+        "chainstack.com",
+        "thirdweb.com",
+        "getblock.io",
+    )
+    if any(lower_host.endswith(domain) for domain in sensitive_domains):
+        domain = next(domain for domain in sensitive_domains if lower_host.endswith(domain))
+        host = f"***.{domain}"
+    else:
+        host = hostname
     if parts.port:
-        netloc += f":{parts.port}"
+        host += f":{parts.port}"
     if parts.username or parts.password:
-        netloc = "***@" + netloc
+        host = "***@" + host
+    path = ""
+    if parts.path and parts.path != "/":
+        path = "/<redacted-path>"
+    elif parts.path == "/":
+        path = "/"
     query = "redacted=1" if parts.query else ""
-    return urllib.parse.urlunsplit((parts.scheme, netloc, parts.path, query, ""))
+    return urllib.parse.urlunsplit((parts.scheme, host, path, query, ""))
 
 
 def redact_command(command: str) -> str:
@@ -527,11 +570,13 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
     temp.replace(path)
 
 
-def acquire_run_lock(config: Config) -> Any | None:
-    if not config.lock_path:
-        return None
-    config.lock_path.parent.mkdir(parents=True, exist_ok=True)
-    handle = config.lock_path.open("a+", encoding="utf-8")
+class RefreshAlreadyRunning(RuntimeError):
+    pass
+
+
+def acquire_file_lock(path: Path, *, label: str) -> Any | None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = path.open("a+", encoding="utf-8")
     try:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
@@ -539,9 +584,15 @@ def acquire_run_lock(config: Config) -> Any | None:
         return None
     handle.seek(0)
     handle.truncate()
-    handle.write(f"pid={os.getpid()}\nstarted_at_utc={utc_now()}\n")
+    handle.write(f"kind={label}\npid={os.getpid()}\nstarted_at_utc={utc_now()}\n")
     handle.flush()
     return handle
+
+
+def acquire_run_lock(config: Config) -> Any | None:
+    if not config.lock_path:
+        return None
+    return acquire_file_lock(config.lock_path, label="watcher")
 
 
 def release_run_lock(handle: Any | None) -> None:
@@ -565,6 +616,29 @@ def pending_backoff_active(state: dict[str, Any], now_utc: str) -> bool:
     return bool(next_allowed and now and now < next_allowed)
 
 
+BID_REFRESH_REASONS = {"auction_bid", "highest_bidder_changed", "highest_bid_amount_changed"}
+MAJOR_REFRESH_REASONS = {"auction_created", "auction_settled", "auction_settled_state_changed", "current_auction_token_changed"}
+
+
+def cooldown_for_reasons(reasons: list[str], *, cooldown_seconds: int, bid_cooldown_seconds: int | None = None) -> int:
+    if bid_cooldown_seconds is None:
+        bid_cooldown_seconds = cooldown_seconds
+    reason_set = set(reasons)
+    if reason_set and reason_set <= BID_REFRESH_REASONS:
+        return max(0, bid_cooldown_seconds)
+    if reason_set & BID_REFRESH_REASONS:
+        return max(0, min(cooldown_seconds, bid_cooldown_seconds))
+    return max(0, cooldown_seconds)
+
+
+def _state_reasons(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item).strip()]
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    return []
+
+
 def decide_refresh(
     state: dict[str, Any],
     snapshot: dict[str, Any],
@@ -572,6 +646,7 @@ def decide_refresh(
     now_utc: str,
     cooldown_seconds: int,
     force_after_seconds: int,
+    bid_cooldown_seconds: int | None = None,
 ) -> RefreshDecision:
     if not state or state.get("last_seen_token_id") in {None, ""}:
         return RefreshDecision(False, ["initialize_state"])
@@ -594,12 +669,16 @@ def decide_refresh(
         reasons.append("highest_bid_amount_changed")
     if bool(snapshot.get("settled")) != bool(state.get("last_seen_settled")):
         reasons.append("auction_settled_state_changed")
+    if int(snapshot.get("end_time_unix") or 0) != int(state.get("last_seen_end_time_unix") or 0):
+        reasons.append("auction_end_time_changed")
 
     if state.get("pending_refresh") and not reasons:
         pending_age = seconds_since(state.get("pending_refresh_since_utc"), now_utc)
         last_refresh_age = seconds_since(state.get("last_refresh_at_utc"), now_utc)
+        pending_reasons = _state_reasons(state.get("pending_refresh_reasons")) or ["pending_refresh_after_cooldown"]
+        pending_cooldown = cooldown_for_reasons(pending_reasons, cooldown_seconds=cooldown_seconds, bid_cooldown_seconds=bid_cooldown_seconds)
         if not pending_backoff_active(state, now_utc) and (
-            last_refresh_age is None or last_refresh_age >= cooldown_seconds or pending_age is None or pending_age >= cooldown_seconds
+            last_refresh_age is None or last_refresh_age >= pending_cooldown or pending_age is None or pending_age >= pending_cooldown
         ):
             return RefreshDecision(True, ["pending_refresh_after_cooldown"])
 
@@ -614,13 +693,13 @@ def decide_refresh(
     if pending_backoff_active(state, now_utc):
         return RefreshDecision(False, reasons, cooldown_skip=True, pending_refresh=True)
 
-    major_reasons = {"auction_created", "auction_settled", "auction_settled_state_changed", "current_auction_token_changed"}
-    bypassed = any(reason in major_reasons for reason in reasons)
+    bypassed = any(reason in MAJOR_REFRESH_REASONS for reason in reasons)
     last_refresh_age = seconds_since(state.get("last_refresh_at_utc"), now_utc)
-    if cooldown_seconds > 0 and last_refresh_age is not None and last_refresh_age < cooldown_seconds and not bypassed:
+    active_cooldown = cooldown_for_reasons(reasons, cooldown_seconds=cooldown_seconds, bid_cooldown_seconds=bid_cooldown_seconds)
+    if active_cooldown > 0 and last_refresh_age is not None and last_refresh_age < active_cooldown and not bypassed:
         return RefreshDecision(False, reasons, cooldown_skip=True, pending_refresh=True)
 
-    return RefreshDecision(True, reasons, bypassed_cooldown=bypassed and last_refresh_age is not None and last_refresh_age < cooldown_seconds)
+    return RefreshDecision(True, reasons, bypassed_cooldown=bypassed and last_refresh_age is not None and last_refresh_age < active_cooldown)
 
 
 def get_snapshot_log(snapshot: dict[str, Any], key: str) -> dict[str, Any]:
@@ -748,6 +827,8 @@ def state_from_generated_dashboard(snapshot: dict[str, Any], *, now_utc: str, ro
         "last_seen_bidder": normalize_address((bid_log.get("bidder") if isinstance(bid_log, dict) else "") or row.get("bidder_wallet")),
         "last_seen_amount_wei": wei_from_eth_text(row.get("current_bid_eth") or 0),
         "last_seen_settled": str(row.get("settled") or "").strip().lower() in {"1", "true", "yes"},
+        "last_seen_start_time_unix": unix_from_utc(row.get("start_time_utc")),
+        "last_seen_end_time_unix": unix_from_utc(row.get("end_time_utc")),
         "last_refresh_at_utc": (block_time or parse_utc(now_utc) or datetime.now(timezone.utc)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "last_refresh_reason": "generated_dashboard_baseline",
         "last_refresh_status": "success",
@@ -829,6 +910,21 @@ def git_status_tracked() -> str:
     return subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, text=True)
 
 
+def acquire_refresh_lock(config: Config) -> Any | None:
+    if not config.refresh_lock_path:
+        return None
+    return acquire_file_lock(config.refresh_lock_path, label="refresh")
+
+
+def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: str, status: str) -> dict[str, Any]:
+    state = dict(state)
+    state["last_refresh_status"] = status
+    state["pending_refresh"] = True
+    state.setdefault("pending_refresh_since_utc", now_utc)
+    state["pending_refresh_reasons"] = reasons
+    return state
+
+
 def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[str, int]:
     validate_refresh_command(config)
     if config.require_clean_tree:
@@ -845,16 +941,30 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[s
         log(config, f"dry-run: would run refresh command: {command_for_log}; reasons={','.join(reasons)}")
         return "dry_run", 0
 
-    log(config, f"running refresh command: {command_for_log}; reasons={','.join(reasons)}")
-    result = subprocess.run(
-        ["/bin/bash", "-lc", config.refresh_command],
-        cwd=ROOT,
-        text=True,
-        timeout=config.timeout_seconds,
-        env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
+    refresh_lock = acquire_refresh_lock(config)
+    if config.refresh_lock_path and refresh_lock is None:
+        raise RefreshAlreadyRunning(f"another refresh is already running at {config.refresh_lock_path}")
+
+    try:
+        child_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+        if refresh_lock and config.refresh_lock_path:
+            # The parent watcher holds the same lock used by refresh_and_publish.sh.
+            # Passing DEGEN_DOGS_LOCK_HELD lets that script run without trying to
+            # reacquire the lock it already owns through this process.
+            child_env["DEGEN_DOGS_LOCK_HELD"] = "1"
+            child_env["DEGEN_DOGS_LOCK_DIR"] = str(config.refresh_lock_path.parent)
+        log(config, f"running refresh command: {command_for_log}; reasons={','.join(reasons)}")
+        result = subprocess.run(
+            ["/bin/bash", "-lc", config.refresh_command],
+            cwd=ROOT,
+            text=True,
+            timeout=config.timeout_seconds,
+            env=child_env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    finally:
+        release_run_lock(refresh_lock)
     stdout_tail = "\n".join((result.stdout or "").splitlines()[-20:])
     stderr_tail = "\n".join((result.stderr or "").splitlines()[-20:])
     if stdout_tail:
@@ -886,6 +996,7 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
         now_utc=now,
         cooldown_seconds=config.cooldown_seconds,
         force_after_seconds=config.force_after_seconds,
+        bid_cooldown_seconds=config.bid_cooldown_seconds,
     )
     if force_refresh and not decision.should_refresh:
         decision = RefreshDecision(True, ["force_refresh"])
@@ -900,6 +1011,12 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
     if decision.should_refresh:
         try:
             status, exit_code = run_refresh(config, decision.reasons, dry_run=dry_run)
+        except RefreshAlreadyRunning as exc:
+            new_state = mark_pending_refresh(new_state, reasons=decision.reasons, now_utc=utc_now(), status="deferred_refresh_lock")
+            if not dry_run:
+                save_state(config.state_path, new_state)
+            log(config, f"refresh_lock_skip pending=1: {exc}; {summary}")
+            return 0
         except Exception as exc:  # noqa: BLE001
             new_state = record_refresh_result(new_state, status="failure", reasons=decision.reasons, now_utc=utc_now(), exit_code=1)
             new_state["last_refresh_error"] = str(exc)[:500]

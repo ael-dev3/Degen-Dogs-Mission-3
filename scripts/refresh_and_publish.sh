@@ -128,7 +128,17 @@ from __future__ import annotations
 import subprocess
 import sys
 
-paths = ["README.md", "index.html", "generated", "public", "archive/mission3/data/generated"]
+paths = [
+    "README.md",
+    "index.html",
+    "generated",
+    "public",
+    "archive/mission3/data/generated",
+    "archive/data/generated",
+    "archive/data/identity/wallet_profiles.json",
+    "archive/dogs",
+    "archive/prices/data/generated",
+]
 status = subprocess.check_output(
     ["git", "status", "--porcelain", "--untracked-files=all", "--", *paths],
     text=True,
@@ -238,7 +248,7 @@ PY
 git diff --check
 npm run build
 
-if git diff --quiet -- README.md index.html generated public archive/mission3/data/generated; then
+if git diff --quiet -- README.md index.html generated public archive/mission3/data/generated archive/data/generated archive/data/identity/wallet_profiles.json archive/dogs archive/prices/data/generated; then
   log "no generated website/archive data changes to publish"
   exit 0
 fi
@@ -260,11 +270,32 @@ with open("generated/manifest.csv", newline="", encoding="utf-8") as handle:
 paths.extend(["generated/manifest.csv", "generated/manifest.json", "public/generated/manifest.csv", "public/generated/manifest.json"])
 archive_public = Path("public/generated/mission3")
 archive_generated = Path("archive/mission3/data/generated")
+unified_archive = Path("archive/data/generated")
+unified_public = Path("public/generated")
+identity_path = Path("archive/data/identity/wallet_profiles.json")
+dog_archive = Path("archive/dogs")
+price_generated = Path("archive/prices/data/generated")
 if archive_public.exists():
     paths.extend(str(path) for path in sorted(archive_public.glob("*.json")))
 if archive_generated.exists():
     paths.extend(str(path) for path in sorted(archive_generated.glob("*.csv")))
     paths.extend(str(path) for path in sorted(archive_generated.glob("*.json")))
+if unified_archive.exists():
+    paths.extend(str(path) for path in sorted(unified_archive.glob("unified_dog_search_*.json")))
+if unified_public.exists():
+    paths.extend(str(path) for path in sorted(unified_public.glob("unified_dog_search_*.json")))
+if identity_path.exists():
+    paths.append(str(identity_path))
+if dog_archive.exists():
+    manifest = dog_archive / "manifest.json"
+    if manifest.exists():
+        paths.append(str(manifest))
+    by_id = dog_archive / "by-id"
+    if by_id.exists():
+        paths.extend(str(path) for path in sorted(by_id.glob("*.json")))
+if price_generated.exists():
+    paths.extend(str(path) for path in sorted(price_generated.glob("*.csv")))
+    paths.extend(str(path) for path in sorted(price_generated.glob("*.json")))
 for path in dict.fromkeys(paths):
     print(path)
 PY
@@ -285,16 +316,22 @@ import sys
 from pathlib import Path
 
 staged = subprocess.check_output(["git", "diff", "--cached", "--name-only"], text=True).splitlines()
-allowed_exact = {"README.md", "index.html"}
+allowed_exact = {"README.md", "index.html", "archive/data/identity/wallet_profiles.json", "archive/dogs/manifest.json"}
 allowed_artifact = re.compile(r"^(generated|public/generated)/[A-Za-z0-9_]+\.(csv|json)$")
 allowed_archive_artifact = re.compile(r"^archive/mission3/data/generated/[A-Za-z0-9_]+\.(csv|json)$")
 allowed_public_archive = re.compile(r"^public/generated/mission3/[A-Za-z0-9_]+\.json$")
+allowed_unified_archive = re.compile(r"^archive/data/generated/unified_dog_search_[A-Za-z0-9_]+\.json$")
+allowed_dog_archive = re.compile(r"^archive/dogs/by-id/[0-9]+\.json$")
+allowed_price_archive = re.compile(r"^archive/prices/data/generated/[A-Za-z0-9_]+\.(csv|json)$")
 unexpected = [
     path for path in staged
     if path not in allowed_exact
     and not allowed_artifact.fullmatch(path)
     and not allowed_archive_artifact.fullmatch(path)
     and not allowed_public_archive.fullmatch(path)
+    and not allowed_unified_archive.fullmatch(path)
+    and not allowed_dog_archive.fullmatch(path)
+    and not allowed_price_archive.fullmatch(path)
 ]
 if unexpected:
     print("refusing to publish unexpected staged paths:", file=sys.stderr)

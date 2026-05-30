@@ -1571,6 +1571,7 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Snapshot block", metric_value(metrics, "latest_block")),
         ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
         ("Current Dog", format_current_auction(metrics)),
+        ("Current status", metric_value(metrics, "current_auction_status")),
         ("Current bid", format_current_bid(metrics)),
         ("Current high bidder", metric_value(metrics, "current_bidder")),
         ("Created / settled auctions", format_created_settled(metrics)),

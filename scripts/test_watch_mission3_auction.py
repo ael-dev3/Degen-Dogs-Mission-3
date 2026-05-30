@@ -231,6 +231,120 @@ def test_new_extended_log_triggers_after_cooldown_and_is_deferred_inside_cooldow
     assert later.reasons == ["auction_extended"]
 
 
+def test_same_dog_bid_changes_can_use_short_bid_cooldown():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_end_time_unix": 200,
+    }
+    snapshot = {
+        "latest_block": 130,
+        "token_id": 728,
+        "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "amount_wei": "200",
+        "settled": False,
+        "end_time_unix": 200,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "130:0xbid2:2", "tx_hash": "0xbid2"},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    early = watcher.decide_refresh(
+        previous,
+        snapshot,
+        now_utc=iso(30),
+        cooldown_seconds=300,
+        bid_cooldown_seconds=60,
+        force_after_seconds=0,
+    )
+    assert early.should_refresh is False
+    assert early.pending_refresh is True
+    later = watcher.decide_refresh(
+        previous,
+        snapshot,
+        now_utc=iso(75),
+        cooldown_seconds=300,
+        bid_cooldown_seconds=60,
+        force_after_seconds=0,
+    )
+    assert later.should_refresh is True
+    assert "auction_bid" in later.reasons
+    assert "highest_bidder_changed" in later.reasons
+    assert "highest_bid_amount_changed" in later.reasons
+
+
+def test_auction_end_time_change_triggers_refresh_when_extension_log_is_missed():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_end_time_unix": 200,
+    }
+    snapshot = {
+        "latest_block": 140,
+        "token_id": 728,
+        "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "amount_wei": "100",
+        "settled": False,
+        "end_time_unix": 260,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
+    assert decision.should_refresh is True
+    assert decision.reasons == ["auction_end_time_changed"]
+
+
+def test_new_created_log_bypasses_cooldown():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 727,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_end_time_unix": 200,
+    }
+    snapshot = {
+        "latest_block": 141,
+        "token_id": 728,
+        "high_bidder": "0x0000000000000000000000000000000000000000",
+        "amount_wei": "0",
+        "settled": False,
+        "end_time_unix": 500,
+        "created_log": {"id": "141:0xcreated2:1", "tx_hash": "0xcreated2"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(30), cooldown_seconds=300, force_after_seconds=0)
+    assert decision.should_refresh is True
+    assert decision.bypassed_cooldown is True
+    assert "auction_created" in decision.reasons
+    assert "current_auction_token_changed" in decision.reasons
+
+
 def test_bid_change_inside_cooldown_is_deferred_not_lost():
     watcher = load_module()
     previous = {
@@ -324,6 +438,21 @@ def test_settlement_state_change_bypasses_cooldown_even_without_log_scan_hit():
     assert decision.reasons == ["auction_settled_state_changed"]
 
 
+def test_redact_url_masks_path_based_rpc_keys():
+    watcher = load_module()
+    redacted = watcher.redact_url("https://base-mainnet.g.alchemy.com/v2/super-secret-key?apikey=also-secret")
+    assert "super-secret-key" not in redacted
+    assert "also-secret" not in redacted
+    assert redacted == "https://***.alchemy.com/<redacted-path>?redacted=1"
+
+    infura = watcher.redact_url("https://mainnet.infura.io/v3/infura-secret")
+    assert "infura-secret" not in infura
+    assert infura == "https://***.infura.io/<redacted-path>"
+
+    public = watcher.redact_url("https://mainnet.base.org")
+    assert public == "https://mainnet.base.org"
+
+
 def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     watcher = load_module()
     env = {}
@@ -333,6 +462,8 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
     assert config.interval_seconds == 120
     assert config.cooldown_seconds == 180
+    assert config.bid_cooldown_seconds == 60
+    assert config.refresh_lock_path and config.refresh_lock_path.name == "refresh.lock"
 
     env = {"MISSION3_WATCHER_AUTO_PUSH": "1"}
     config = watcher.config_from_env(env)
@@ -370,6 +501,28 @@ def test_run_lock_prevents_overlapping_one_shot_runs():
         third = watcher.acquire_run_lock(config)
         assert third is not None
         watcher.release_run_lock(third)
+
+
+def test_refresh_lock_defers_overlapping_refresh_commands():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        refresh_lock_path = Path(tmp) / "refresh.lock"
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
+            "MISSION3_REFRESH_COMMAND": "true",
+        })
+        held = watcher.acquire_refresh_lock(config)
+        assert held is not None
+        try:
+            try:
+                watcher.run_refresh(config, ["auction_bid"], dry_run=False)
+            except watcher.RefreshAlreadyRunning as exc:
+                assert "another refresh" in str(exc)
+            else:
+                raise AssertionError("overlapping refresh should be deferred")
+        finally:
+            watcher.release_run_lock(held)
 
 
 def test_log_scan_start_uses_last_checked_block_safety_overlap_or_recent_lookback():

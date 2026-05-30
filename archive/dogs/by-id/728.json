@@ -2,16 +2,16 @@
   "generated_at_utc": "2026-05-29T19:05:33Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-05-29T18:50:47Z",
+    "activity_time_utc": "2026-05-30T06:09:29Z",
     "amount": {
-      "native": "0.01",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "10000000000000000",
-      "usd_estimate": "20.07711682",
+      "raw": "11000000000000000",
+      "usd_estimate": "22.08482850",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$20.08",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_display": "$22.08",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
       "usd_estimate_price_date_utc": "2026-05-29",
       "usd_estimate_price_usd": "2007.7116820979008",
       "usd_estimate_source": "defillama_coin_prices",
@@ -25,11 +25,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-05-29T18:50:47Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-05-30T06:09:29Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
+      "0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847",
       "0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651"
     ],
     "chain": "Base",
@@ -41,7 +42,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog728",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0x502ce9fb1814cb03843967ec5e0d8f6aa3a3c2e1",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728",
       "repo_archive": "archive/dogs/by-id/728.json",
       "settlement_tx": null
@@ -53,7 +54,7 @@
       "total": 729
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.18 $20.18 2026-05-29t18:50:47z #697/729 generated auction feed 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.2%) body grey neck: redcollar (31.0%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base ongoing 0x502ce9fb1814cb03843967ec5e0d8f6aa3a3c2e1 @0xleonardo 0xleonardo 0.011 eth 11000000000000000 22.16 $22.16 2026-05-30t06:09:29z #697/729 generated auction feed 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.2%) body grey neck: redcollar (31.0%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -108,12 +109,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@0xleonardo",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "0xleonardo",
+      "profile_url": "https://farcaster.xyz/0xleonardo",
+      "wallet": "0x502ce9fb1814cb03843967ec5e0d8f6aa3a3c2e1",
+      "wallet_explorer_url": "https://basescan.org/address/0x502ce9fb1814cb03843967ec5e0d8f6aa3a3c2e1"
     }
   },
   "schema_version": 1
