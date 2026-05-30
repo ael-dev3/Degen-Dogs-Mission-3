@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46684634
-latest_block_time_utc,2026-05-30 16:30:15
+latest_block,46684824
+latest_block_time_utc,2026-05-30 16:36:35
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,729
@@ -13,9 +13,9 @@ woof_usd_price,0.0000005241
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
-sup_usd_price,0.01168
+sup_usd_price,0.01167
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,2024.74
+eth_usd_price,2024.88
 eth_usd_source,coinbase
 reward_basis_dogs,141
 reward_excludes,woof_vault_bonus
@@ -26,16 +26,16 @@ reward_woof_flow_usd_per_day,11.7
 reward_woof_per_dog_per_day,158351.896454
 reward_woof_per_dog_usd_per_day,0.082992
 reward_sup_received,36935.51
-reward_sup_received_usd,431.41
+reward_sup_received_usd,431.04
 reward_sup_flow_per_day,379.01
-reward_sup_flow_usd_per_day,4.43
+reward_sup_flow_usd_per_day,4.42
 reward_sup_per_dog_per_day,2.688014
-reward_sup_per_dog_usd_per_day,0.031396
-reward_total_flow_usd_per_day,16.13
-reward_total_per_dog_usd_per_day,0.114388
-reward_current_bid_payback_days,194.69
-reward_current_bid_daily_roi_pct,0.5136
-woof_holders,389
+reward_sup_per_dog_usd_per_day,0.031369
+reward_total_flow_usd_per_day,16.12
+reward_total_per_dog_usd_per_day,0.114361
+reward_current_bid_payback_days,194.73
+reward_current_bid_daily_roi_pct,0.5135
+woof_holders,402
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,49160239627.356422
 farcaster_profiles_resolved,158
