@@ -71,6 +71,7 @@ def assert_creator_popover() -> None:
         'class="credit-trigger" aria-haspopup="true"',
         'class="credit-popover" aria-label="Mark Carey profile links"',
         '.credit-menu:hover .credit-popover,.credit-menu:focus-within .credit-popover',
+        '.credit-menu{margin-left:auto}.credit-trigger{box-shadow:2px 2px 0 var(--ink)}.credit-popover{left:auto;right:0;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}',
         'visibility:visible',
         'pointer-events:auto',
     ]

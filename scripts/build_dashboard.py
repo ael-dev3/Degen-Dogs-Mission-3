@@ -1947,7 +1947,7 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
 @media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span{width:100%;max-width:100%}.current-copy h1{font-size:clamp(38px,16vw,54px)}}
 @media (max-width:900px){.topline{align-items:flex-start}.top-actions{justify-content:flex-start;max-width:100%}}
-@media (max-width:640px){.utility-chip,.credit-trigger{font-size:10px;padding:5px 7px;border-width:1.5px;box-shadow:2px 2px 0 var(--accent2)}.utility-chip--bid{box-shadow:2px 2px 0 var(--calm)}.credit-trigger{box-shadow:2px 2px 0 var(--ink)}.credit-popover{left:0;right:auto;min-width:min(280px,calc(100vw - 32px))}}
+@media (max-width:640px){.utility-chip,.credit-trigger{font-size:10px;padding:5px 7px;border-width:1.5px;box-shadow:2px 2px 0 var(--accent2)}.utility-chip--bid{box-shadow:2px 2px 0 var(--calm)}.credit-menu{margin-left:auto}.credit-trigger{box-shadow:2px 2px 0 var(--ink)}.credit-popover{left:auto;right:0;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}}
 
 """.strip()
     script = """
