@@ -1,6 +1,6 @@
 # Refresh runner
 
-The public site is served by GitHub Pages, but fresh data comes from a private/local runner that regenerates static files and pushes commits.
+The public site is served by GitHub Pages, but fresh data comes from private/local runners that regenerate static files and push commits. For a fresh-machine reconstruction runbook and future-agent prompts, see [`reconstruction/LOCAL_RUNNERS.md`](../reconstruction/LOCAL_RUNNERS.md).
 
 ## Available commands
 
@@ -176,6 +176,8 @@ launchctl print gui/$(id -u)/com.ael.degendogs.mission3.refresh
 launchctl print gui/$(id -u)/com.ael.degendogs.mission3.watch-auction
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/refresh.log
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/watch-onchain.log
+tail -n 80 ~/Library/Logs/degen-dogs-mission3/watcher.launchd.out.log
+tail -n 80 ~/Library/Logs/degen-dogs-mission3/watcher.launchd.err.log
 ```
 
 Do not commit machine-specific plist files, private RPC URLs, logs, or local state.

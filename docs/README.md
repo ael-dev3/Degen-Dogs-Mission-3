@@ -25,6 +25,7 @@ Start here for deeper Degen Dogs Mission 3 dashboard docs.
 - [Reconstruction / backup runbook](../reconstruction/README.md)
 - [Quickstart recovery](../reconstruction/QUICKSTART.md)
 - [Fork recovery](../reconstruction/FORK_RECOVERY.md)
+- [Local runner reconstruction](../reconstruction/LOCAL_RUNNERS.md)
 
 ## Archive docs
 

@@ -207,6 +207,13 @@ def default_refresh_lock_path(env: dict[str, str]) -> Path:
     return lock_dir / "refresh.lock"
 
 
+def default_log_path(env: dict[str, str]) -> Path:
+    log_dir_raw = env.get("DEGEN_DOGS_LOG_DIR", "").strip()
+    if log_dir_raw:
+        return Path(log_dir_raw).expanduser() / "watch-onchain.log"
+    return DEFAULT_LOG_PATH
+
+
 def optional_path_from_env(env: dict[str, str], name: str, default: Path | None) -> Path | None:
     raw = env.get(name)
     if raw is None or raw.strip() == "":
@@ -241,7 +248,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         raise SystemExit("MISSION3_WATCHER_STATE_PATH cannot be disabled")
 
     lock_path = optional_path_from_env(env, "MISSION3_WATCHER_LOCK_PATH", ROOT / ".local" / "mission3_onchain_tracker.lock")
-    log_path = optional_path_from_env(env, "MISSION3_WATCHER_LOG_PATH", DEFAULT_LOG_PATH)
+    log_path = optional_path_from_env(env, "MISSION3_WATCHER_LOG_PATH", default_log_path(env))
     refresh_lock_path = optional_path_from_env(env, "MISSION3_REFRESH_LOCK_PATH", default_refresh_lock_path(env))
 
     return Config(

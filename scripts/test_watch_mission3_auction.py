@@ -453,6 +453,13 @@ def test_redact_url_masks_path_based_rpc_keys():
     assert public == "https://mainnet.base.org"
 
 
+def test_config_uses_shared_log_dir_for_watcher_log():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        config = watcher.config_from_env({"DEGEN_DOGS_LOG_DIR": tmp})
+        assert config.log_path == Path(tmp) / "watch-onchain.log"
+
+
 def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     watcher = load_module()
     env = {}

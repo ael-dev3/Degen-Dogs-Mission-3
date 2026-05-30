@@ -84,6 +84,9 @@ Linux cron example:
 
 ## Event-aware onchain tracker
 
+For exact macOS launchd reconstruction commands and future-agent prompts, also see
+[`LOCAL_RUNNERS.md`](LOCAL_RUNNERS.md).
+
 The hourly runner remains the reliability baseline. The onchain tracker is an additional cheap check that can refresh faster when Mission 3 auction activity changes.
 
 One-shot check:

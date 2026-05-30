@@ -26,5 +26,6 @@ Your goals:
 7. Produce a summary of changed files and commands run.
 8. Keep secrets, private keys, API keys, and local machine paths out of commits.
 
-Use reconstruction/QUICKSTART.md, reconstruction/RUNBOOK.md, reconstruction/VALIDATION.md, and docs/configuration.md.
+Use reconstruction/QUICKSTART.md, reconstruction/RUNBOOK.md, reconstruction/VALIDATION.md,
+reconstruction/LOCAL_RUNNERS.md, and docs/configuration.md.
 ```
