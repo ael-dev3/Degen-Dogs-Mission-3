@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#635/729",
-      "rank": 635,
-      "total": 729
+      "display": "#636/730",
+      "rank": 636,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 415 dog #415 415 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x27731c9f0fda73c0eb3f4ecb6aa7d46d4d1785b03fe9acea84fe5f971e5373f8 0x0bb317cb27ac38d478002a97d443999806a7fb3024653ec872cf94c15b55f5ef #635/729 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: eyepatch 0x9e35673dc1342dc8ccc01144933a69b09c99c76d1c74ddc35166870bb1d3818e 0xe80f4675d30283ee300d075ab6836f85d8ab6fe38e3d733633b4989697683617 chain_logs contract_getters",
+    "search_text": "dog 415 dog #415 415 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x27731c9f0fda73c0eb3f4ecb6aa7d46d4d1785b03fe9acea84fe5f971e5373f8 0x0bb317cb27ac38d478002a97d443999806a7fb3024653ec872cf94c15b55f5ef #636/730 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: eyepatch 0x9e35673dc1342dc8ccc01144933a69b09c99c76d1c74ddc35166870bb1d3818e 0xe80f4675d30283ee300d075ab6836f85d8ab6fe38e3d733633b4989697683617 chain_logs contract_getters",
     "settlement": {
       "block_number": 25995652,
       "block_time_utc": "2025-06-19T06:03:30Z",
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

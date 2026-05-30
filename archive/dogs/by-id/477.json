@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#40/729",
+      "display": "#40/730",
       "rank": 40,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 477 dog #477 477 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2600 degen 0xdca923b5e3967a9c09090fd67b924c38a35d5d4546193a4d58d0da678e93d9c8 0xbe09f291bc71dc7cd6631d35b62f7a2f5b1240b9c2e8dcd8e9a044dc9d791d06 #40/729 background: halo; body: brown; neck: redcollar; mouth: teeth; ears: earbuds; head: partyhat; eyes: sunglasses 0x5dcdbeb8774d538f8a6b81e24925b08909e86e2cef48a7b76bd430a7d86f39b3 0xd1f7b88a497a4cd246cbd38180201fd8773c680f7fcab2f38000bd580051d4bc 0x12fdded2eb63d46a306f8d8aaad93efd58d6b548bb77afea61ceaec0cca09ed5 chain_logs contract_getters",
+    "search_text": "dog 477 dog #477 477 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2600 degen 0xdca923b5e3967a9c09090fd67b924c38a35d5d4546193a4d58d0da678e93d9c8 0xbe09f291bc71dc7cd6631d35b62f7a2f5b1240b9c2e8dcd8e9a044dc9d791d06 #40/730 background: halo; body: brown; neck: redcollar; mouth: teeth; ears: earbuds; head: partyhat; eyes: sunglasses 0x5dcdbeb8774d538f8a6b81e24925b08909e86e2cef48a7b76bd430a7d86f39b3 0xd1f7b88a497a4cd246cbd38180201fd8773c680f7fcab2f38000bd580051d4bc 0x12fdded2eb63d46a306f8d8aaad93efd58d6b548bb77afea61ceaec0cca09ed5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26237960,
       "block_time_utc": "2025-09-04T12:25:34Z",
@@ -80,7 +80,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -95,7 +95,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

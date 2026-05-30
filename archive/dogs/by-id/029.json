@@ -54,12 +54,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#153/729",
+      "display": "#153/730",
       "rank": 153,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 29 dog #29 29 mission 1 mission 1 polygon settled 0x629898596dc5f16c31af69382ab7985654332e78 0x6298…2e78 0.42 weth 0x0efc804a8b0cae836e99396228915e4268fe9da9da5278749822f82591adc8e1 0x3bb59ca225c3f5e09b4385b40f2efac08494043b81906d0c87d403d631c1e457 #153/729 background: halo; body: redbrown; neck: goldnecklace; mouth: teeth; ears: earbuds; head: none; eyes: glasses 0x969bdd19e509fc4872550415b45073625a9d479836054bf1c079e5d3a52d8ee7 0x373a9d03eafa1a473d185db213c4e2bf3a7f3c32a28fbf1598229173e0587d78 0x51f958ed05bf3aa17a52c78ec811f069f4e057c03f7608c7c36bfe43d6b97519 0x22bbbbabedb6645fa289fe3c85a6df51e56ee7019ab7d37c6518c099d7e10514 0xf727d23ed9fdb1cffb453085d1c7dc64a2eae542f036d1749d661c2bf6279ea0 0x396ecb8b4b331e5f20864d3e66d74e25fa6d666f1be232d8e1f77bb7022f3afb 0x2c633a4c645c7647b2e550a810a7960b17052953550a0d6a9e1d518e65321616 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 29 dog #29 29 mission 1 mission 1 polygon settled 0x629898596dc5f16c31af69382ab7985654332e78 0x6298…2e78 0.42 weth 0x0efc804a8b0cae836e99396228915e4268fe9da9da5278749822f82591adc8e1 0x3bb59ca225c3f5e09b4385b40f2efac08494043b81906d0c87d403d631c1e457 #153/730 background: halo; body: redbrown; neck: goldnecklace; mouth: teeth; ears: earbuds; head: none; eyes: glasses 0x969bdd19e509fc4872550415b45073625a9d479836054bf1c079e5d3a52d8ee7 0x373a9d03eafa1a473d185db213c4e2bf3a7f3c32a28fbf1598229173e0587d78 0x51f958ed05bf3aa17a52c78ec811f069f4e057c03f7608c7c36bfe43d6b97519 0x22bbbbabedb6645fa289fe3c85a6df51e56ee7019ab7d37c6518c099d7e10514 0xf727d23ed9fdb1cffb453085d1c7dc64a2eae542f036d1749d661c2bf6279ea0 0x396ecb8b4b331e5f20864d3e66d74e25fa6d666f1be232d8e1f77bb7022f3afb 0x2c633a4c645c7647b2e550a810a7960b17052953550a0d6a9e1d518e65321616 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26130935,
       "block_time_utc": "2022-03-20T01:41:25Z",
@@ -86,7 +86,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -101,7 +101,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -111,7 +111,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

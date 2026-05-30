@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#207/729",
-      "rank": 207,
-      "total": 729
+      "display": "#204/730",
+      "rank": 204,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 304 dog #304 304 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x3ed49dd04d1e12fba46f5a68f871375f78dc1c311f06daab133cea283122d1f1 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc #207/729 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: toque; eyes: redlasereyes 0x5f4d93aebaee6a95884fcdea4114bb88d9f97f0d7f8104a1307502ee3bda8853 0xe4b98da466cd82865e590c595df9d343846564fae5f6bec2e25589794c3f0ba4 chain_logs contract_getters",
+    "search_text": "dog 304 dog #304 304 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x3ed49dd04d1e12fba46f5a68f871375f78dc1c311f06daab133cea283122d1f1 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc #204/730 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: toque; eyes: redlasereyes 0x5f4d93aebaee6a95884fcdea4114bb88d9f97f0d7f8104a1307502ee3bda8853 0xe4b98da466cd82865e590c595df9d343846564fae5f6bec2e25589794c3f0ba4 chain_logs contract_getters",
     "settlement": {
       "block_number": 25545942,
       "block_time_utc": "2025-03-04T23:37:55Z",
@@ -84,7 +84,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

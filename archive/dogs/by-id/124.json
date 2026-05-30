@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#427/729",
+      "display": "#427/730",
       "rank": 427,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 124 dog #124 124 mission 1 mission 1 polygon settled 0x05f4bc6d7a052e45cee250510cb39329cfacbc19 0x05f4…bc19 0.05 weth 0xe68d763e82aaa9599088738176832ea96f6d810ddb939d8664caa7a7cae853d8 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae #427/729 background: none; body: blue; neck: goldnecklace; mouth: none; ears: earbuds; head: headphones; eyes: glasses 0xeef0b581a804c759f82875cd76299afc18690120addf56725e672f68ff10e963 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 124 dog #124 124 mission 1 mission 1 polygon settled 0x05f4bc6d7a052e45cee250510cb39329cfacbc19 0x05f4…bc19 0.05 weth 0xe68d763e82aaa9599088738176832ea96f6d810ddb939d8664caa7a7cae853d8 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae #427/730 background: none; body: blue; neck: goldnecklace; mouth: none; ears: earbuds; head: headphones; eyes: glasses 0xeef0b581a804c759f82875cd76299afc18690120addf56725e672f68ff10e963 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29237643,
       "block_time_utc": "2022-06-06T13:45:17Z",
@@ -80,7 +80,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -95,7 +95,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -105,7 +105,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

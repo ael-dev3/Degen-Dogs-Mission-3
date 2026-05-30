@@ -1,10 +1,32 @@
 [
   {
+    "token_id": 729,
+    "dog_image_url": "https://api.degendogs.club/images/729.png",
+    "start_time_utc": "2026-05-30 18:40:09",
+    "end_time_utc": "2026-05-31 18:40:09",
+    "auction_state": "live",
+    "bids": 1,
+    "unique_bidders": 1,
+    "high_bid_eth": 0.01,
+    "total_bid_eth": 0.01,
+    "latest_bidder": "@0xael.eth",
+    "latest_bidder_url": "https://farcaster.xyz/0xael.eth",
+    "latest_bid_eth": 0.01,
+    "latest_bid_utc": "2026-05-30 18:40:23",
+    "winner": null,
+    "winner_url": null,
+    "settled_eth": 0.0,
+    "settled_time_utc": null,
+    "rarity": "#581/730",
+    "created_tx_hash": "0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0",
+    "settled_tx_hash": null
+  },
+  {
     "token_id": 728,
     "dog_image_url": "https://api.degendogs.club/images/728.png",
     "start_time_utc": "2026-05-29 18:38:33",
     "end_time_utc": "2026-05-30 18:38:33",
-    "auction_state": "live",
+    "auction_state": "settled",
     "bids": 3,
     "unique_bidders": 3,
     "high_bid_eth": 0.0121,
@@ -13,13 +35,13 @@
     "latest_bidder_url": "https://farcaster.xyz/vaibhavmule",
     "latest_bid_eth": 0.0121,
     "latest_bid_utc": "2026-05-30 18:33:17",
-    "winner": null,
-    "winner_url": null,
-    "settled_eth": 0.0,
-    "settled_time_utc": null,
-    "rarity": "#697/729",
+    "winner": "@vaibhavmule",
+    "winner_url": "https://farcaster.xyz/vaibhavmule",
+    "settled_eth": 0.0121,
+    "settled_time_utc": "2026-05-30 18:40:09",
+    "rarity": "#697/730",
     "created_tx_hash": "0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f",
-    "settled_tx_hash": null
+    "settled_tx_hash": "0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0"
   },
   {
     "token_id": 727,
@@ -39,7 +61,7 @@
     "winner_url": "https://farcaster.xyz/floam",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-05-29 18:38:33",
-    "rarity": "#315/729",
+    "rarity": "#315/730",
     "created_tx_hash": "0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7",
     "settled_tx_hash": "0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f"
   },
@@ -61,7 +83,7 @@
     "winner_url": "https://basescan.org/address/0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-05-28 18:36:55",
-    "rarity": "#137/729",
+    "rarity": "#139/730",
     "created_tx_hash": "0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f",
     "settled_tx_hash": "0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7"
   },
@@ -83,7 +105,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-05-27 16:10:25",
-    "rarity": "#577/729",
+    "rarity": "#577/730",
     "created_tx_hash": "0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293",
     "settled_tx_hash": "0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f"
   },
@@ -105,7 +127,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.01,
     "settled_time_utc": "2026-05-26 16:03:59",
-    "rarity": "#215/729",
+    "rarity": "#217/730",
     "created_tx_hash": "0xa371adf04d31bc48732abe5be9f184ac72d723838956d3bf72d7724e1856d8ee",
     "settled_tx_hash": "0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293"
   },
@@ -127,7 +149,7 @@
     "winner_url": "https://farcaster.xyz/sharas.eth",
     "settled_eth": 0.01541,
     "settled_time_utc": "2026-05-24 15:30:29",
-    "rarity": "#232/729",
+    "rarity": "#233/730",
     "created_tx_hash": "0xb1fa0f5c9dc01718f6f75e9180396e64071dc39d305b2d70e741c1f2d4ed7b2e",
     "settled_tx_hash": "0xa371adf04d31bc48732abe5be9f184ac72d723838956d3bf72d7724e1856d8ee"
   },
@@ -149,7 +171,7 @@
     "winner_url": "https://basescan.org/address/0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "settled_eth": 0.01465,
     "settled_time_utc": "2026-05-23 15:10:41",
-    "rarity": "#334/729",
+    "rarity": "#340/730",
     "created_tx_hash": "0x6dec5c839b0277a38605e72be08b741a15e6755bf7d34adf9eb44d98b53a15e6",
     "settled_tx_hash": "0xb1fa0f5c9dc01718f6f75e9180396e64071dc39d305b2d70e741c1f2d4ed7b2e"
   },
@@ -171,7 +193,7 @@
     "winner_url": "https://farcaster.xyz/staraptor.eth",
     "settled_eth": 0.0158,
     "settled_time_utc": "2026-05-22 14:58:51",
-    "rarity": "#649/729",
+    "rarity": "#649/730",
     "created_tx_hash": "0x52383a8afa8fe46f0d5f52d73ad97a4af00f1f069ea7779227c346cb0cca4d2f",
     "settled_tx_hash": "0x6dec5c839b0277a38605e72be08b741a15e6755bf7d34adf9eb44d98b53a15e6"
   },
@@ -193,7 +215,7 @@
     "winner_url": "https://farcaster.xyz/bitcoinvestor",
     "settled_eth": 0.0165,
     "settled_time_utc": "2026-05-21 14:58:29",
-    "rarity": "#86/729",
+    "rarity": "#86/730",
     "created_tx_hash": "0x178445d9bdc61a9f8170da647829ffb162fb8c817c571cadf218eb4fdc702f23",
     "settled_tx_hash": "0x52383a8afa8fe46f0d5f52d73ad97a4af00f1f069ea7779227c346cb0cca4d2f"
   },
@@ -215,7 +237,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.01952,
     "settled_time_utc": "2026-05-20 14:55:15",
-    "rarity": "#34/729",
+    "rarity": "#34/730",
     "created_tx_hash": "0xf72b90f7c188775bce13f7b9c577d3d9aae5869e16f76e9d771ea65f62f5c0d4",
     "settled_tx_hash": "0x178445d9bdc61a9f8170da647829ffb162fb8c817c571cadf218eb4fdc702f23"
   },
@@ -237,7 +259,7 @@
     "winner_url": "https://basescan.org/address/0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
     "settled_eth": 0.005,
     "settled_time_utc": "2026-05-19 14:54:47",
-    "rarity": "#348/729",
+    "rarity": "#346/730",
     "created_tx_hash": "0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e",
     "settled_tx_hash": "0xf72b90f7c188775bce13f7b9c577d3d9aae5869e16f76e9d771ea65f62f5c0d4"
   },
@@ -259,7 +281,7 @@
     "winner_url": "https://farcaster.xyz/staraptor.eth",
     "settled_eth": 0.016,
     "settled_time_utc": "2026-05-18 03:56:55",
-    "rarity": "#439/729",
+    "rarity": "#446/730",
     "created_tx_hash": "0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad",
     "settled_tx_hash": "0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e"
   },
@@ -281,7 +303,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.01866,
     "settled_time_utc": "2026-05-17 03:55:49",
-    "rarity": "#161/729",
+    "rarity": "#161/730",
     "created_tx_hash": "0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad",
     "settled_tx_hash": "0x0f04f9cbb78bb9dc433c029ba06a701db3e63d7db661ef7f098743ff0cae59ad"
   },
@@ -303,7 +325,7 @@
     "winner_url": "https://farcaster.xyz/farcy",
     "settled_eth": 0.01331,
     "settled_time_utc": "2026-05-16 03:52:29",
-    "rarity": "#450/729",
+    "rarity": "#449/730",
     "created_tx_hash": "0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc",
     "settled_tx_hash": "0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad"
   },
@@ -325,7 +347,7 @@
     "winner_url": "https://farcaster.xyz/staraptor.eth",
     "settled_eth": 0.013,
     "settled_time_utc": "2026-05-15 03:49:25",
-    "rarity": "#376/729",
+    "rarity": "#379/730",
     "created_tx_hash": "0xe28e75e1994b7d1c090def0c0b74619b252c76b89dec36adfafd851e96f65e45",
     "settled_tx_hash": "0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc"
   },
@@ -347,7 +369,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.01612,
     "settled_time_utc": "2026-05-14 03:24:35",
-    "rarity": "#91/729",
+    "rarity": "#91/730",
     "created_tx_hash": "0x67b9ab34a91f77fdf079362f5ef0eed2a5503b1ff24a2085d206bfc0c35be8e4",
     "settled_tx_hash": "0xe28e75e1994b7d1c090def0c0b74619b252c76b89dec36adfafd851e96f65e45"
   },
@@ -369,7 +391,7 @@
     "winner_url": "https://farcaster.xyz/oxygen2",
     "settled_eth": 0.01331,
     "settled_time_utc": "2026-05-13 03:16:01",
-    "rarity": "#405/729",
+    "rarity": "#408/730",
     "created_tx_hash": "0xb795a62203ccc169e59931a1c0a3a23b88a607046413d8d06d69d013494ca4b4",
     "settled_tx_hash": "0x67b9ab34a91f77fdf079362f5ef0eed2a5503b1ff24a2085d206bfc0c35be8e4"
   },
@@ -391,7 +413,7 @@
     "winner_url": "https://farcaster.xyz/zenonseeker",
     "settled_eth": 0.0121,
     "settled_time_utc": "2026-05-12 03:13:03",
-    "rarity": "#484/729",
+    "rarity": "#485/730",
     "created_tx_hash": "0x948f1c73103f0af14e50dc3f68050f20b3dcae2f383cdf259d22553b3cbfda2c",
     "settled_tx_hash": "0xb795a62203ccc169e59931a1c0a3a23b88a607046413d8d06d69d013494ca4b4"
   },
@@ -413,7 +435,7 @@
     "winner_url": "https://farcaster.xyz/schlemiel",
     "settled_eth": 0.01091,
     "settled_time_utc": "2026-05-11 03:12:43",
-    "rarity": "#342/729",
+    "rarity": "#347/730",
     "created_tx_hash": "0x40909440b3b04e35dc90fdec05959d1c8b98683b9c168f02c04cef887d0cb4d9",
     "settled_tx_hash": "0x948f1c73103f0af14e50dc3f68050f20b3dcae2f383cdf259d22553b3cbfda2c"
   },
@@ -435,7 +457,7 @@
     "winner_url": "https://farcaster.xyz/vaibhavmule",
     "settled_eth": 0.0243,
     "settled_time_utc": "2026-05-10 03:11:49",
-    "rarity": "#132/729",
+    "rarity": "#132/730",
     "created_tx_hash": "0x609ad0852601c9176503eb49b45a4b473fe126be2dd5fcdd8a36892d50ddef39",
     "settled_tx_hash": "0x40909440b3b04e35dc90fdec05959d1c8b98683b9c168f02c04cef887d0cb4d9"
   },
@@ -457,7 +479,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.024,
     "settled_time_utc": "2026-05-09 03:01:09",
-    "rarity": "#261/729",
+    "rarity": "#262/730",
     "created_tx_hash": "0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206",
     "settled_tx_hash": "0x609ad0852601c9176503eb49b45a4b473fe126be2dd5fcdd8a36892d50ddef39"
   },
@@ -479,7 +501,7 @@
     "winner_url": "https://farcaster.xyz/kidmyr.eth",
     "settled_eth": 0.033,
     "settled_time_utc": "2026-05-08 03:00:45",
-    "rarity": "#180/729",
+    "rarity": "#179/730",
     "created_tx_hash": "0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504",
     "settled_tx_hash": "0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206"
   },
@@ -501,7 +523,7 @@
     "winner_url": "https://farcaster.xyz/shalexvivek",
     "settled_eth": 0.02265,
     "settled_time_utc": "2026-05-07 02:53:49",
-    "rarity": "#95/729",
+    "rarity": "#95/730",
     "created_tx_hash": "0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971",
     "settled_tx_hash": "0x17183e1f5b1bc223a36cd7c49bf2ad98bd150ed9f0f3ce8e6b7714c34b462504"
   },
@@ -523,7 +545,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.02148,
     "settled_time_utc": "2026-05-05 22:35:57",
-    "rarity": "#558/729",
+    "rarity": "#557/730",
     "created_tx_hash": "0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe",
     "settled_tx_hash": "0x42aadc77b04786b46aecc25a1ec2454944e5f58e53693d643cbe31ab1c4a3971"
   },
@@ -545,7 +567,7 @@
     "winner_url": "https://farcaster.xyz/britomartis",
     "settled_eth": 0.0286,
     "settled_time_utc": "2026-05-04 22:32:33",
-    "rarity": "#382/729",
+    "rarity": "#382/730",
     "created_tx_hash": "0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46",
     "settled_tx_hash": "0xd636b6e8420b7614437af465a74d48b83deff76da29cf05f729b447192a9defe"
   },
@@ -567,7 +589,7 @@
     "winner_url": "https://farcaster.xyz/ajrony",
     "settled_eth": 0.02486,
     "settled_time_utc": "2026-05-03 22:32:07",
-    "rarity": "#21/729",
+    "rarity": "#21/730",
     "created_tx_hash": "0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b",
     "settled_tx_hash": "0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46"
   },
@@ -589,7 +611,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.02645,
     "settled_time_utc": "2026-05-02 22:24:13",
-    "rarity": "#676/729",
+    "rarity": "#677/730",
     "created_tx_hash": "0xf6cb06c6828ae89f992113f98ef4f1da3e29ac15d014c3080fe366935e24744f",
     "settled_tx_hash": "0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b"
   },
@@ -611,7 +633,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.02926,
     "settled_time_utc": "2026-05-01 22:13:11",
-    "rarity": "#24/729",
+    "rarity": "#24/730",
     "created_tx_hash": "0x56079d3c7b12faa1b68f31934f6129b9a4d0e9ce7facef18ca35946b7d29f467",
     "settled_tx_hash": "0xf6cb06c6828ae89f992113f98ef4f1da3e29ac15d014c3080fe366935e24744f"
   },
@@ -633,7 +655,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.02483,
     "settled_time_utc": "2026-04-30 22:04:21",
-    "rarity": "#632/729",
+    "rarity": "#633/730",
     "created_tx_hash": "0xcc5516a3968ec3a1197aa6aabe5652626078ea38a83c2dab40fa3d962e03d77b",
     "settled_tx_hash": "0x56079d3c7b12faa1b68f31934f6129b9a4d0e9ce7facef18ca35946b7d29f467"
   },
@@ -655,7 +677,7 @@
     "winner_url": "https://farcaster.xyz/thec1",
     "settled_eth": 0.02839,
     "settled_time_utc": "2026-04-29 21:54:23",
-    "rarity": "#654/729",
+    "rarity": "#657/730",
     "created_tx_hash": "0x37ec09dda56b77b119e82289ba3ece931b95677d0ece7099cf3c3b4ef2217acb",
     "settled_tx_hash": "0xcc5516a3968ec3a1197aa6aabe5652626078ea38a83c2dab40fa3d962e03d77b"
   },
@@ -677,7 +699,7 @@
     "winner_url": "https://farcaster.xyz/melinoe",
     "settled_eth": 0.02398,
     "settled_time_utc": "2026-04-28 21:39:57",
-    "rarity": "#85/729",
+    "rarity": "#85/730",
     "created_tx_hash": "0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb",
     "settled_tx_hash": "0x37ec09dda56b77b119e82289ba3ece931b95677d0ece7099cf3c3b4ef2217acb"
   },
@@ -699,7 +721,7 @@
     "winner_url": "https://farcaster.xyz/acion",
     "settled_eth": 0.02785,
     "settled_time_utc": "2026-04-27 21:34:17",
-    "rarity": "#528/729",
+    "rarity": "#528/730",
     "created_tx_hash": "0x336a93c0317990ca9c234e81e86e5c98e3fc043c69838f8b6ead0df7107d0509",
     "settled_tx_hash": "0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb"
   },
@@ -721,7 +743,7 @@
     "winner_url": "https://farcaster.xyz/sharas.eth",
     "settled_eth": 0.03371,
     "settled_time_utc": "2026-04-26 21:34:01",
-    "rarity": "#642/729",
+    "rarity": "#645/730",
     "created_tx_hash": "0x6069b5518ed83b759e71a01ae282ee88004b87ba27020ba6ac68b367bbdf2d40",
     "settled_tx_hash": "0x336a93c0317990ca9c234e81e86e5c98e3fc043c69838f8b6ead0df7107d0509"
   },
@@ -743,7 +765,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.0317,
     "settled_time_utc": "2026-04-25 21:29:01",
-    "rarity": "#285/729",
+    "rarity": "#287/730",
     "created_tx_hash": "0x5d8b790f91cb7549b75e110941f8c1ebffcf349b88a73bc8bad5857a0c7f55bf",
     "settled_tx_hash": "0x6069b5518ed83b759e71a01ae282ee88004b87ba27020ba6ac68b367bbdf2d40"
   },
@@ -765,7 +787,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.02694,
     "settled_time_utc": "2026-04-24 21:25:03",
-    "rarity": "#423/729",
+    "rarity": "#424/730",
     "created_tx_hash": "0x3f59db9b231b7b953114fe28a6897dc5a7f95ba3c26938c12019b83b9558176b",
     "settled_tx_hash": "0x5d8b790f91cb7549b75e110941f8c1ebffcf349b88a73bc8bad5857a0c7f55bf"
   },
@@ -787,7 +809,7 @@
     "winner_url": "https://farcaster.xyz/maraudergo",
     "settled_eth": 0.02482,
     "settled_time_utc": "2026-04-23 21:17:53",
-    "rarity": "#460/729",
+    "rarity": "#460/730",
     "created_tx_hash": "0xc75b534c180f6b865913845d2781927915550252d30bf1542ed3426bca0531c8",
     "settled_tx_hash": "0x3f59db9b231b7b953114fe28a6897dc5a7f95ba3c26938c12019b83b9558176b"
   },
@@ -809,7 +831,7 @@
     "winner_url": "https://farcaster.xyz/keldon",
     "settled_eth": 0.02254,
     "settled_time_utc": "2026-04-22 21:16:17",
-    "rarity": "#240/729",
+    "rarity": "#240/730",
     "created_tx_hash": "0x27f8defacfefa4c153d4a58801a7deb02bdb9ae1258cbd1e82f28c3c9301975b",
     "settled_tx_hash": "0xc75b534c180f6b865913845d2781927915550252d30bf1542ed3426bca0531c8"
   },
@@ -831,7 +853,7 @@
     "winner_url": "https://farcaster.xyz/kenshiking.eth",
     "settled_eth": 0.02479,
     "settled_time_utc": "2026-04-21 21:12:35",
-    "rarity": "#597/729",
+    "rarity": "#600/730",
     "created_tx_hash": "0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1",
     "settled_tx_hash": "0x27f8defacfefa4c153d4a58801a7deb02bdb9ae1258cbd1e82f28c3c9301975b"
   },
@@ -853,7 +875,7 @@
     "winner_url": "https://farcaster.xyz/keldon",
     "settled_eth": 0.03255,
     "settled_time_utc": "2026-04-20 20:57:53",
-    "rarity": "#370/729",
+    "rarity": "#369/730",
     "created_tx_hash": "0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0",
     "settled_tx_hash": "0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1"
   },
@@ -875,7 +897,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.02874,
     "settled_time_utc": "2026-04-19 20:57:39",
-    "rarity": "#352/729",
+    "rarity": "#350/730",
     "created_tx_hash": "0x8f9fa9d4df53aaed0e9c51a8c8d684970dfae0ee11bb9eb41812d1ddbab99ab5",
     "settled_tx_hash": "0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0"
   },
@@ -897,7 +919,7 @@
     "winner_url": "https://farcaster.xyz/maraudergo",
     "settled_eth": 0.02721,
     "settled_time_utc": "2026-04-18 20:57:29",
-    "rarity": "#693/729",
+    "rarity": "#694/730",
     "created_tx_hash": "0x5e1a4ac5fb080ef4ab7ee914dc14b367344db9fa2cbd5ab663ae01337ed29865",
     "settled_tx_hash": "0x8f9fa9d4df53aaed0e9c51a8c8d684970dfae0ee11bb9eb41812d1ddbab99ab5"
   },
@@ -919,7 +941,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.03031,
     "settled_time_utc": "2026-04-17 20:57:15",
-    "rarity": "#465/729",
+    "rarity": "#465/730",
     "created_tx_hash": "0x89f9c2b70d8bab48e8a485d02a91f176cd55d849e62c746676bcd9565504c7b8",
     "settled_tx_hash": "0x5e1a4ac5fb080ef4ab7ee914dc14b367344db9fa2cbd5ab663ae01337ed29865"
   },
@@ -941,7 +963,7 @@
     "winner_url": "https://farcaster.xyz/acion",
     "settled_eth": 0.03046,
     "settled_time_utc": "2026-04-16 20:50:05",
-    "rarity": "#571/729",
+    "rarity": "#576/730",
     "created_tx_hash": "0x44cb3d3e9e448836e1ad645ebf5a4904090a57c9d85248bd5110f7522fd107e1",
     "settled_tx_hash": "0x89f9c2b70d8bab48e8a485d02a91f176cd55d849e62c746676bcd9565504c7b8"
   },
@@ -963,7 +985,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.03061,
     "settled_time_utc": "2026-04-15 20:34:19",
-    "rarity": "#316/729",
+    "rarity": "#316/730",
     "created_tx_hash": "0x65c46a3ac644b4a5ea467233570313906375e07a466529d0b5c6246794191527",
     "settled_tx_hash": "0x44cb3d3e9e448836e1ad645ebf5a4904090a57c9d85248bd5110f7522fd107e1"
   },
@@ -985,7 +1007,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.01684,
     "settled_time_utc": "2026-04-14 20:29:23",
-    "rarity": "#107/729",
+    "rarity": "#106/730",
     "created_tx_hash": "0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73",
     "settled_tx_hash": "0x65c46a3ac644b4a5ea467233570313906375e07a466529d0b5c6246794191527"
   },
@@ -1007,7 +1029,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.05678,
     "settled_time_utc": "2026-04-13 19:48:47",
-    "rarity": "#203/729",
+    "rarity": "#209/730",
     "created_tx_hash": "0x9026888695a3f7580be9098668e9a15074cb8fde21f1979955aeac31805f8aa2",
     "settled_tx_hash": "0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73"
   },
@@ -1029,7 +1051,7 @@
     "winner_url": "https://farcaster.xyz/pare",
     "settled_eth": 0.0321,
     "settled_time_utc": "2026-04-12 19:29:41",
-    "rarity": "#621/729",
+    "rarity": "#628/730",
     "created_tx_hash": "0xb294e26df9003b173ea526b5f8a1fc9eba27de24b56256250258c4eebb8ba608",
     "settled_tx_hash": "0x9026888695a3f7580be9098668e9a15074cb8fde21f1979955aeac31805f8aa2"
   },
@@ -1051,7 +1073,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.04314,
     "settled_time_utc": "2026-04-11 18:31:45",
-    "rarity": "#27/729",
+    "rarity": "#27/730",
     "created_tx_hash": "0xe26300d6ddb9edcf9b88ecfef32f4528ff232e05e61ed9e5497cfb32ac520226",
     "settled_tx_hash": "0xb294e26df9003b173ea526b5f8a1fc9eba27de24b56256250258c4eebb8ba608"
   },
@@ -1073,7 +1095,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.02708,
     "settled_time_utc": "2026-04-10 18:31:21",
-    "rarity": "#265/729",
+    "rarity": "#264/730",
     "created_tx_hash": "0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab",
     "settled_tx_hash": "0xe26300d6ddb9edcf9b88ecfef32f4528ff232e05e61ed9e5497cfb32ac520226"
   },
@@ -1095,7 +1117,7 @@
     "winner_url": "https://farcaster.xyz/britomartis",
     "settled_eth": 0.03276,
     "settled_time_utc": "2026-04-09 18:20:29",
-    "rarity": "#584/729",
+    "rarity": "#584/730",
     "created_tx_hash": "0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9",
     "settled_tx_hash": "0xa84dc9788bf2a59c5d5a7de30b376e806bdc9066dd111a661bd32d45b1a8c3ab"
   },
@@ -1117,7 +1139,7 @@
     "winner_url": "https://farcaster.xyz/metasalary",
     "settled_eth": 0.02976,
     "settled_time_utc": "2026-04-08 18:18:49",
-    "rarity": "#451/729",
+    "rarity": "#450/730",
     "created_tx_hash": "0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644",
     "settled_tx_hash": "0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9"
   },
@@ -1139,7 +1161,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.04358,
     "settled_time_utc": "2026-04-07 18:12:45",
-    "rarity": "#35/729",
+    "rarity": "#35/730",
     "created_tx_hash": "0xeea63316bc1f5653e33fcad5a41c2d3bc0501b2fd4ac3e00443e2fc05bfa5164",
     "settled_tx_hash": "0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644"
   },
@@ -1161,7 +1183,7 @@
     "winner_url": "https://farcaster.xyz/pare",
     "settled_eth": 0.0333,
     "settled_time_utc": "2026-04-06 17:58:17",
-    "rarity": "#250/729",
+    "rarity": "#247/730",
     "created_tx_hash": "0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602",
     "settled_tx_hash": "0xeea63316bc1f5653e33fcad5a41c2d3bc0501b2fd4ac3e00443e2fc05bfa5164"
   },
@@ -1183,7 +1205,7 @@
     "winner_url": "https://farcaster.xyz/melinoe",
     "settled_eth": 0.01843,
     "settled_time_utc": "2026-04-05 17:48:03",
-    "rarity": "#279/729",
+    "rarity": "#279/730",
     "created_tx_hash": "0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6",
     "settled_tx_hash": "0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602"
   },
@@ -1205,7 +1227,7 @@
     "winner_url": "https://farcaster.xyz/farcy",
     "settled_eth": 0.02027,
     "settled_time_utc": "2026-04-04 17:38:05",
-    "rarity": "#114/729",
+    "rarity": "#113/730",
     "created_tx_hash": "0x9790f43075ae04a3710790c6a088a8ed4f262c14ddd14a24bbe90fb72bec0968",
     "settled_tx_hash": "0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6"
   },
@@ -1227,7 +1249,7 @@
     "winner_url": "https://farcaster.xyz/pare",
     "settled_eth": 0.03265,
     "settled_time_utc": "2026-04-03 17:32:49",
-    "rarity": "#546/729",
+    "rarity": "#544/730",
     "created_tx_hash": "0xb02c441bd33b0b3b25e4bcfbd23755a8d62f751eba0928b2561167abeaf0a345",
     "settled_tx_hash": "0x9790f43075ae04a3710790c6a088a8ed4f262c14ddd14a24bbe90fb72bec0968"
   },
@@ -1249,7 +1271,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.03589,
     "settled_time_utc": "2026-04-02 17:25:23",
-    "rarity": "#254/729",
+    "rarity": "#251/730",
     "created_tx_hash": "0x4ef2eeb681d1bcc3e0ab3f2e1d66621bce2d06a4bfe268548af24a1cf7743f2d",
     "settled_tx_hash": "0xb02c441bd33b0b3b25e4bcfbd23755a8d62f751eba0928b2561167abeaf0a345"
   },
@@ -1271,7 +1293,7 @@
     "winner_url": "https://farcaster.xyz/badadan",
     "settled_eth": 0.02964,
     "settled_time_utc": "2026-04-01 17:14:45",
-    "rarity": "#252/729",
+    "rarity": "#249/730",
     "created_tx_hash": "0x1a48be448adc549d8ad039c61549df80c7aa437f4533e17af2f5147f26c57f45",
     "settled_tx_hash": "0x4ef2eeb681d1bcc3e0ab3f2e1d66621bce2d06a4bfe268548af24a1cf7743f2d"
   },
@@ -1293,7 +1315,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.0267,
     "settled_time_utc": "2026-03-31 17:05:47",
-    "rarity": "#281/729",
+    "rarity": "#281/730",
     "created_tx_hash": "0x0c4f42c88c390615b6b764d55ed78cf55f5991e8af2928febeefaf2c2129c1a0",
     "settled_tx_hash": "0x1a48be448adc549d8ad039c61549df80c7aa437f4533e17af2f5147f26c57f45"
   },
@@ -1315,7 +1337,7 @@
     "winner_url": "https://farcaster.xyz/xiexi",
     "settled_eth": 0.04885,
     "settled_time_utc": "2026-03-30 17:05:35",
-    "rarity": "#541/729",
+    "rarity": "#537/730",
     "created_tx_hash": "0x0e83e187c8963582324a510d59668bd3b629705972680ad823107e4811be27ab",
     "settled_tx_hash": "0x0c4f42c88c390615b6b764d55ed78cf55f5991e8af2928febeefaf2c2129c1a0"
   },
@@ -1337,7 +1359,7 @@
     "winner_url": "https://farcaster.xyz/pare",
     "settled_eth": 0.05135,
     "settled_time_utc": "2026-03-29 17:02:31",
-    "rarity": "#475/729",
+    "rarity": "#472/730",
     "created_tx_hash": "0x8da47851b222b930846989b188f4ee8894fb0985292cef1295f9eaf85ea2500a",
     "settled_tx_hash": "0x0e83e187c8963582324a510d59668bd3b629705972680ad823107e4811be27ab"
   },
@@ -1359,7 +1381,7 @@
     "winner_url": "https://farcaster.xyz/ashish-007",
     "settled_eth": 0.03937,
     "settled_time_utc": "2026-03-28 16:55:39",
-    "rarity": "#163/729",
+    "rarity": "#162/730",
     "created_tx_hash": "0xb722838af9349940b31a52c458b79ba6a0748f5a56753a4f72fb4730972fc8d4",
     "settled_tx_hash": "0x8da47851b222b930846989b188f4ee8894fb0985292cef1295f9eaf85ea2500a"
   },
@@ -1381,7 +1403,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.061,
     "settled_time_utc": "2026-03-27 16:48:45",
-    "rarity": "#692/729",
+    "rarity": "#693/730",
     "created_tx_hash": "0xc24f2ab61eb5b6e9b7e06e88d49959c910cb712d0f0d1abdd5740c8c9e3e995f",
     "settled_tx_hash": "0xb722838af9349940b31a52c458b79ba6a0748f5a56753a4f72fb4730972fc8d4"
   },
@@ -1403,7 +1425,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.05319,
     "settled_time_utc": "2026-03-26 16:43:27",
-    "rarity": "#76/729",
+    "rarity": "#76/730",
     "created_tx_hash": "0x7a8943e88ae94b4aedd8d48b1204e78b178f965de5c812d84a14260a91d47350",
     "settled_tx_hash": "0xc24f2ab61eb5b6e9b7e06e88d49959c910cb712d0f0d1abdd5740c8c9e3e995f"
   },
@@ -1425,7 +1447,7 @@
     "winner_url": "https://farcaster.xyz/valdore",
     "settled_eth": 0.04835,
     "settled_time_utc": "2026-03-25 16:03:21",
-    "rarity": "#415/729",
+    "rarity": "#414/730",
     "created_tx_hash": "0x3c8c5dee4707b9005b4b3c04f7f19a4b65f64727bf21943c73f322489e3be41f",
     "settled_tx_hash": "0x7a8943e88ae94b4aedd8d48b1204e78b178f965de5c812d84a14260a91d47350"
   },
@@ -1447,7 +1469,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.06052,
     "settled_time_utc": "2026-03-24 15:45:53",
-    "rarity": "#229/729",
+    "rarity": "#229/730",
     "created_tx_hash": "0x47f030af3c3659ac62ed97ed883a4efece0c6c96b850aa472f304842fc482e52",
     "settled_tx_hash": "0x3c8c5dee4707b9005b4b3c04f7f19a4b65f64727bf21943c73f322489e3be41f"
   },
@@ -1469,7 +1491,7 @@
     "winner_url": "https://farcaster.xyz/thec1",
     "settled_eth": 0.07333,
     "settled_time_utc": "2026-03-23 15:38:39",
-    "rarity": "#103/729",
+    "rarity": "#103/730",
     "created_tx_hash": "0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98",
     "settled_tx_hash": "0x47f030af3c3659ac62ed97ed883a4efece0c6c96b850aa472f304842fc482e52"
   },
@@ -1491,7 +1513,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.11111,
     "settled_time_utc": "2026-03-22 15:23:23",
-    "rarity": "#185/729",
+    "rarity": "#185/730",
     "created_tx_hash": "0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3",
     "settled_tx_hash": "0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98"
   },
@@ -1513,7 +1535,7 @@
     "winner_url": "https://farcaster.xyz/kumari",
     "settled_eth": 0.1298,
     "settled_time_utc": "2026-03-21 15:10:27",
-    "rarity": "#73/729",
+    "rarity": "#73/730",
     "created_tx_hash": "0x098d9afeffed2a29a09f1e8b2801b1a4fbe5a552cb55aa5ea93bd05ec5993c22",
     "settled_tx_hash": "0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3"
   },
@@ -1535,7 +1557,7 @@
     "winner_url": "https://farcaster.xyz/satoshimyro.eth",
     "settled_eth": 0.07324,
     "settled_time_utc": "2026-03-20 14:46:01",
-    "rarity": "#594/729",
+    "rarity": "#594/730",
     "created_tx_hash": "0x4b9e96283b89e2444ed4e7850a52bb235800c672ada22f58a8ce44f787f742cd",
     "settled_tx_hash": "0x098d9afeffed2a29a09f1e8b2801b1a4fbe5a552cb55aa5ea93bd05ec5993c22"
   },
@@ -1557,7 +1579,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.1,
     "settled_time_utc": "2026-03-19 14:38:49",
-    "rarity": "#709/729",
+    "rarity": "#710/730",
     "created_tx_hash": "0x8e1fa54b62e6ff566fe80e76b43970bfaf3502514bd991e18198c07a60c7a4a0",
     "settled_tx_hash": "0x4b9e96283b89e2444ed4e7850a52bb235800c672ada22f58a8ce44f787f742cd"
   },
@@ -1579,7 +1601,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.01,
     "settled_time_utc": "2026-03-18 14:30:45",
-    "rarity": "#477/729",
+    "rarity": "#480/730",
     "created_tx_hash": "0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0",
     "settled_tx_hash": "0x8e1fa54b62e6ff566fe80e76b43970bfaf3502514bd991e18198c07a60c7a4a0"
   },
@@ -1601,7 +1623,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-03-17 14:30:27",
-    "rarity": "#202/729",
+    "rarity": "#207/730",
     "created_tx_hash": "0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce",
     "settled_tx_hash": "0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0"
   },
@@ -1623,7 +1645,7 @@
     "winner_url": "https://farcaster.xyz/thec1",
     "settled_eth": 0.0165,
     "settled_time_utc": "2026-03-16 13:40:37",
-    "rarity": "#19/729",
+    "rarity": "#19/730",
     "created_tx_hash": "0xa752e820fbcf6768af149440e5d5e89e28f3372d4325e345ecc29f8bfc3cefcd",
     "settled_tx_hash": "0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce"
   },
@@ -1645,7 +1667,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.015,
     "settled_time_utc": "2026-03-15 13:40:21",
-    "rarity": "#698/729",
+    "rarity": "#699/730",
     "created_tx_hash": "0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b",
     "settled_tx_hash": "0xa752e820fbcf6768af149440e5d5e89e28f3372d4325e345ecc29f8bfc3cefcd"
   },
@@ -1667,7 +1689,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.0121,
     "settled_time_utc": "2026-03-14 13:22:39",
-    "rarity": "#674/729",
+    "rarity": "#674/730",
     "created_tx_hash": "0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205",
     "settled_tx_hash": "0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b"
   },
@@ -1689,7 +1711,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.02,
     "settled_time_utc": "2026-03-13 09:30:07",
-    "rarity": "#400/729",
+    "rarity": "#399/730",
     "created_tx_hash": "0x970d1dcc155c650767147ad00a0e94c0d34baf90d2713c4ea223c16d27790b8d",
     "settled_tx_hash": "0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205"
   },
@@ -1711,7 +1733,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.01465,
     "settled_time_utc": "2026-03-12 09:01:37",
-    "rarity": "#596/729",
+    "rarity": "#597/730",
     "created_tx_hash": "0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f",
     "settled_tx_hash": "0x970d1dcc155c650767147ad00a0e94c0d34baf90d2713c4ea223c16d27790b8d"
   },
@@ -1733,7 +1755,7 @@
     "winner_url": "https://farcaster.xyz/thec1",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-03-11 08:27:57",
-    "rarity": "#646/729",
+    "rarity": "#647/730",
     "created_tx_hash": "0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823",
     "settled_tx_hash": "0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f"
   },
@@ -1755,7 +1777,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.01798,
     "settled_time_utc": "2026-03-10 08:25:23",
-    "rarity": "#691/729",
+    "rarity": "#692/730",
     "created_tx_hash": "0xfe9b367d7fd5f2109c95d126408af2c8135469f5e399215fa84a0da302c343c1",
     "settled_tx_hash": "0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823"
   },
@@ -1777,7 +1799,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.00988,
     "settled_time_utc": "2026-03-09 08:19:19",
-    "rarity": "#12/729",
+    "rarity": "#12/730",
     "created_tx_hash": "0xaf1c2aa8bc9b7eb7d917cf923790e1963c2b85dcddad6a720ebe3615b76533ee",
     "settled_tx_hash": "0xfe9b367d7fd5f2109c95d126408af2c8135469f5e399215fa84a0da302c343c1"
   },
@@ -1799,7 +1821,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.02103,
     "settled_time_utc": "2026-03-08 08:16:11",
-    "rarity": "#267/729",
+    "rarity": "#266/730",
     "created_tx_hash": "0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04",
     "settled_tx_hash": "0xaf1c2aa8bc9b7eb7d917cf923790e1963c2b85dcddad6a720ebe3615b76533ee"
   },
@@ -1821,7 +1843,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.0121,
     "settled_time_utc": "2026-03-07 08:05:31",
-    "rarity": "#123/729",
+    "rarity": "#122/730",
     "created_tx_hash": "0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117",
     "settled_tx_hash": "0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04"
   },
@@ -1843,7 +1865,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.00874,
     "settled_time_utc": "2026-03-06 08:00:27",
-    "rarity": "#249/729",
+    "rarity": "#256/730",
     "created_tx_hash": "0xd80d4f8c31b800ca25a9f16bbefbc583dbff527cc4d47432555cd62592b34554",
     "settled_tx_hash": "0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117"
   },
@@ -1865,7 +1887,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.01,
     "settled_time_utc": "2026-03-05 07:56:43",
-    "rarity": "#599/729",
+    "rarity": "#598/730",
     "created_tx_hash": "0x98ac03e19e015a5d58848994b1bfc2d9a0efbf2a030ae5620187f5447fbd24e8",
     "settled_tx_hash": "0xd80d4f8c31b800ca25a9f16bbefbc583dbff527cc4d47432555cd62592b34554"
   },
@@ -1887,7 +1909,7 @@
     "winner_url": "https://farcaster.xyz/consta",
     "settled_eth": 0.0123,
     "settled_time_utc": "2026-03-04 07:52:37",
-    "rarity": "#564/729",
+    "rarity": "#565/730",
     "created_tx_hash": "0x0cda7a5577643ce286fec661e3ac09af3bad4721427431b54b5fbd71ddbd8d16",
     "settled_tx_hash": "0x98ac03e19e015a5d58848994b1bfc2d9a0efbf2a030ae5620187f5447fbd24e8"
   },
@@ -1909,7 +1931,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.0138,
     "settled_time_utc": "2026-03-03 07:42:23",
-    "rarity": "#277/729",
+    "rarity": "#276/730",
     "created_tx_hash": "0x6518c51c831f8ae06b5841c13627516cfd3422452994ecfee954bddb4eed9b6e",
     "settled_tx_hash": "0x0cda7a5577643ce286fec661e3ac09af3bad4721427431b54b5fbd71ddbd8d16"
   },
@@ -1931,7 +1953,7 @@
     "winner_url": "https://farcaster.xyz/cctv1",
     "settled_eth": 0.00888,
     "settled_time_utc": "2026-03-02 07:30:01",
-    "rarity": "#462/729",
+    "rarity": "#461/730",
     "created_tx_hash": "0x744be070f74b589f7239ccc117baf6368209314ed546a47d00e18a8cd5c3d873",
     "settled_tx_hash": "0x6518c51c831f8ae06b5841c13627516cfd3422452994ecfee954bddb4eed9b6e"
   },
@@ -1953,7 +1975,7 @@
     "winner_url": "https://farcaster.xyz/isodl",
     "settled_eth": 0.00807,
     "settled_time_utc": "2026-03-01 06:59:13",
-    "rarity": "#390/729",
+    "rarity": "#387/730",
     "created_tx_hash": "0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4",
     "settled_tx_hash": "0x744be070f74b589f7239ccc117baf6368209314ed546a47d00e18a8cd5c3d873"
   },
@@ -1975,7 +1997,7 @@
     "winner_url": "https://farcaster.xyz/vaibhavmule",
     "settled_eth": 0.00733,
     "settled_time_utc": "2026-02-28 06:55:55",
-    "rarity": "#326/729",
+    "rarity": "#326/730",
     "created_tx_hash": "0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7",
     "settled_tx_hash": "0x2f0b4dac1b201f9caf30f0f1618f44ab4143c18ee3d62ca619e2300b317522c4"
   },
@@ -1997,7 +2019,7 @@
     "winner_url": "https://farcaster.xyz/cctv1",
     "settled_eth": 0.00733,
     "settled_time_utc": "2026-02-27 06:48:23",
-    "rarity": "#92/729",
+    "rarity": "#92/730",
     "created_tx_hash": "0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25",
     "settled_tx_hash": "0xdbd5a5133acdf90f930b48ce1f5c6d57d737f1974d43d38436aa0617d226ade7"
   },
@@ -2019,7 +2041,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.01,
     "settled_time_utc": "2026-02-26 06:46:45",
-    "rarity": "#284/729",
+    "rarity": "#283/730",
     "created_tx_hash": "0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33",
     "settled_tx_hash": "0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25"
   },
@@ -2041,7 +2063,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-02-25 06:41:25",
-    "rarity": "#214/729",
+    "rarity": "#212/730",
     "created_tx_hash": "0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a",
     "settled_tx_hash": "0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33"
   },
@@ -2063,7 +2085,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.01111,
     "settled_time_utc": "2026-02-24 06:30:03",
-    "rarity": "#581/729",
+    "rarity": "#588/730",
     "created_tx_hash": "0x3e731e292ebeb6be2322ff4e1d80ad6f9c646e66b596a79c96104bb2eefaee91",
     "settled_tx_hash": "0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a"
   },
@@ -2085,7 +2107,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-02-23 06:29:37",
-    "rarity": "#681/729",
+    "rarity": "#681/730",
     "created_tx_hash": "0xb07039137e3d71050c3fbef915d0646e3cda14bdabb7de2adf86142a85e3e529",
     "settled_tx_hash": "0x3e731e292ebeb6be2322ff4e1d80ad6f9c646e66b596a79c96104bb2eefaee91"
   },
@@ -2107,7 +2129,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.02222,
     "settled_time_utc": "2026-02-22 06:28:37",
-    "rarity": "#668/729",
+    "rarity": "#669/730",
     "created_tx_hash": "0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b",
     "settled_tx_hash": "0xb07039137e3d71050c3fbef915d0646e3cda14bdabb7de2adf86142a85e3e529"
   },
@@ -2129,7 +2151,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.01234,
     "settled_time_utc": "2026-02-21 06:26:53",
-    "rarity": "#89/729",
+    "rarity": "#89/730",
     "created_tx_hash": "0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832",
     "settled_tx_hash": "0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b"
   },
@@ -2151,7 +2173,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.01494,
     "settled_time_utc": "2026-02-20 06:21:29",
-    "rarity": "#589/729",
+    "rarity": "#589/730",
     "created_tx_hash": "0x6e67157ba2ec9678423fba58a4a4e3e169710d26de1267d03abab9bb38dc5025",
     "settled_tx_hash": "0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832"
   },
@@ -2173,7 +2195,7 @@
     "winner_url": "https://farcaster.xyz/iiccii",
     "settled_eth": 0.02742,
     "settled_time_utc": "2026-02-19 06:15:05",
-    "rarity": "#119/729",
+    "rarity": "#119/730",
     "created_tx_hash": "0xe606629719c886495dbb95b0f2993cfca09a4ae4db6954e05d9e12e6955ce9e4",
     "settled_tx_hash": "0x6e67157ba2ec9678423fba58a4a4e3e169710d26de1267d03abab9bb38dc5025"
   },
@@ -2195,7 +2217,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.0269,
     "settled_time_utc": "2026-02-18 05:56:53",
-    "rarity": "#428/729",
+    "rarity": "#428/730",
     "created_tx_hash": "0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38",
     "settled_tx_hash": "0xe606629719c886495dbb95b0f2993cfca09a4ae4db6954e05d9e12e6955ce9e4"
   },
@@ -2217,7 +2239,7 @@
     "winner_url": "https://farcaster.xyz/metasalary",
     "settled_eth": 0.0209,
     "settled_time_utc": "2026-02-17 05:52:17",
-    "rarity": "#572/729",
+    "rarity": "#570/730",
     "created_tx_hash": "0xc95b4d0a2e0e969614762d333094ebdfac2b677ad5d68ffdf8170bd794068a72",
     "settled_tx_hash": "0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38"
   },
@@ -2239,7 +2261,7 @@
     "winner_url": "https://farcaster.xyz/thec1",
     "settled_eth": 0.02492,
     "settled_time_utc": "2026-02-16 05:47:05",
-    "rarity": "#341/729",
+    "rarity": "#338/730",
     "created_tx_hash": "0x86d1b150711bc4610eb20bf7a6acff83fe2cda5561b8b59c8325f646e6b457e1",
     "settled_tx_hash": "0xc95b4d0a2e0e969614762d333094ebdfac2b677ad5d68ffdf8170bd794068a72"
   },
@@ -2261,7 +2283,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.02131,
     "settled_time_utc": "2026-02-15 05:31:39",
-    "rarity": "#700/729",
+    "rarity": "#701/730",
     "created_tx_hash": "0xe395b1eb9afa2b9cf5cb62054d13b77c65ce2f827f21313653457c5ae299b140",
     "settled_tx_hash": "0x86d1b150711bc4610eb20bf7a6acff83fe2cda5561b8b59c8325f646e6b457e1"
   },
@@ -2283,7 +2305,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.0286,
     "settled_time_utc": "2026-02-14 05:17:27",
-    "rarity": "#629/729",
+    "rarity": "#627/730",
     "created_tx_hash": "0x08722c191337681fe017e9cccb055231a6656f0e473062bc95bea83270909e04",
     "settled_tx_hash": "0xe395b1eb9afa2b9cf5cb62054d13b77c65ce2f827f21313653457c5ae299b140"
   },
@@ -2305,7 +2327,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.01952,
     "settled_time_utc": "2026-02-13 05:07:13",
-    "rarity": "#598/729",
+    "rarity": "#599/730",
     "created_tx_hash": "0x579ff1dc2617f3a8344ab486c420aa6cb1aa65f877f48d59816565faee62eb76",
     "settled_tx_hash": "0x08722c191337681fe017e9cccb055231a6656f0e473062bc95bea83270909e04"
   },
@@ -2327,7 +2349,7 @@
     "winner_url": "https://farcaster.xyz/iiccii",
     "settled_eth": 0.02363,
     "settled_time_utc": "2026-02-12 04:53:39",
-    "rarity": "#188/729",
+    "rarity": "#188/730",
     "created_tx_hash": "0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce",
     "settled_tx_hash": "0x579ff1dc2617f3a8344ab486c420aa6cb1aa65f877f48d59816565faee62eb76"
   },
@@ -2349,7 +2371,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.03123,
     "settled_time_utc": "2026-02-11 04:40:17",
-    "rarity": "#461/729",
+    "rarity": "#462/730",
     "created_tx_hash": "0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea",
     "settled_tx_hash": "0x4bd68c48ee25b8028ce6c7d7d2ca93be992e081427e3d21f978f991b76eedbce"
   },
@@ -2371,7 +2393,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.0242,
     "settled_time_utc": "2026-02-10 04:26:01",
-    "rarity": "#492/729",
+    "rarity": "#493/730",
     "created_tx_hash": "0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865",
     "settled_tx_hash": "0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea"
   },
@@ -2393,7 +2415,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.01974,
     "settled_time_utc": "2026-02-09 04:16:55",
-    "rarity": "#126/729",
+    "rarity": "#125/730",
     "created_tx_hash": "0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904",
     "settled_tx_hash": "0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865"
   },
@@ -2415,7 +2437,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.02222,
     "settled_time_utc": "2026-02-08 04:16:43",
-    "rarity": "#447/729",
+    "rarity": "#444/730",
     "created_tx_hash": "0xf2221316d3b0545fad3480cec5e096f37a1fedc08a9e80b08b506a2b7308c860",
     "settled_tx_hash": "0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904"
   },
@@ -2437,7 +2459,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.011,
     "settled_time_utc": "2026-02-07 04:10:31",
-    "rarity": "#129/729",
+    "rarity": "#128/730",
     "created_tx_hash": "0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61",
     "settled_tx_hash": "0xf2221316d3b0545fad3480cec5e096f37a1fedc08a9e80b08b506a2b7308c860"
   },
@@ -2459,7 +2481,7 @@
     "winner_url": "https://farcaster.xyz/cryptomill",
     "settled_eth": 0.0242,
     "settled_time_utc": "2026-02-06 04:02:23",
-    "rarity": "#493/729",
+    "rarity": "#492/730",
     "created_tx_hash": "0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d",
     "settled_tx_hash": "0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61"
   },
@@ -2481,7 +2503,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.01816,
     "settled_time_utc": "2026-02-05 04:01:43",
-    "rarity": "#442/729",
+    "rarity": "#451/730",
     "created_tx_hash": "0xacb23b1ef567461d9e95200e012dd52b6f69d960343e46aac605c8c8cc063c65",
     "settled_tx_hash": "0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d"
   },
@@ -2503,7 +2525,7 @@
     "winner_url": "https://farcaster.xyz/vorcha",
     "settled_eth": 0.06666,
     "settled_time_utc": "2026-02-04 04:00:41",
-    "rarity": "#710/729",
+    "rarity": "#711/730",
     "created_tx_hash": "0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d",
     "settled_tx_hash": "0xacb23b1ef567461d9e95200e012dd52b6f69d960343e46aac605c8c8cc063c65"
   },
@@ -2525,7 +2547,7 @@
     "winner_url": "https://farcaster.xyz/dl39",
     "settled_eth": 0.05851,
     "settled_time_utc": "2026-02-03 03:21:59",
-    "rarity": "#643/729",
+    "rarity": "#643/730",
     "created_tx_hash": "0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a",
     "settled_tx_hash": "0xed2d0a4f2d6ae608038f0616403c05b2ce19a082b4955b8edefb897e8aa9896d"
   },
@@ -2547,7 +2569,7 @@
     "winner_url": "https://farcaster.xyz/neghvar.eth",
     "settled_eth": 0.07468,
     "settled_time_utc": "2026-02-02 03:06:19",
-    "rarity": "#157/729",
+    "rarity": "#156/730",
     "created_tx_hash": "0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05",
     "settled_tx_hash": "0x8ff9c219f286e110c59df5cf77a3e1541d700fbca9b8c6db8b94f89c7daf7a3a"
   },
@@ -2569,7 +2591,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.07624,
     "settled_time_utc": "2026-02-01 03:01:03",
-    "rarity": "#499/729",
+    "rarity": "#498/730",
     "created_tx_hash": "0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace",
     "settled_tx_hash": "0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05"
   },
@@ -2591,7 +2613,7 @@
     "winner_url": "https://farcaster.xyz/iiccii",
     "settled_eth": 0.07701,
     "settled_time_utc": "2026-01-31 03:00:13",
-    "rarity": "#106/729",
+    "rarity": "#107/730",
     "created_tx_hash": "0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064",
     "settled_tx_hash": "0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace"
   },
@@ -2613,7 +2635,7 @@
     "winner_url": "https://farcaster.xyz/yes2crypto.eth",
     "settled_eth": 0.10253,
     "settled_time_utc": "2026-01-30 02:51:53",
-    "rarity": "#237/729",
+    "rarity": "#237/730",
     "created_tx_hash": "0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634",
     "settled_tx_hash": "0xf762e9730f2ad9ca2fd09a516b9021fada207d1c3fb6430bc99ddaa95c052064"
   },
@@ -2635,7 +2657,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.0802,
     "settled_time_utc": "2026-01-29 02:41:57",
-    "rarity": "#547/729",
+    "rarity": "#545/730",
     "created_tx_hash": "0xa60ad4856076d9cd643664bb826ff17a0aab905259dc1b883598aa84d47a2f93",
     "settled_tx_hash": "0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634"
   },
@@ -2657,7 +2679,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.0968,
     "settled_time_utc": "2026-01-28 02:36:17",
-    "rarity": "#454/729",
+    "rarity": "#453/730",
     "created_tx_hash": "0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4",
     "settled_tx_hash": "0xa60ad4856076d9cd643664bb826ff17a0aab905259dc1b883598aa84d47a2f93"
   },
@@ -2679,7 +2701,7 @@
     "winner_url": "https://farcaster.xyz/hydropho.eth",
     "settled_eth": 0.085,
     "settled_time_utc": "2026-01-27 02:26:13",
-    "rarity": "#371/729",
+    "rarity": "#368/730",
     "created_tx_hash": "0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4",
     "settled_tx_hash": "0x29af2677e80c5b66fb2c72b73f20aafb5cbc579f5bb53026fc73ec33b57732d4"
   },
@@ -2701,7 +2723,7 @@
     "winner_url": "https://farcaster.xyz/ohosttcod",
     "settled_eth": 0.08073,
     "settled_time_utc": "2026-01-26 02:11:31",
-    "rarity": "#75/729",
+    "rarity": "#75/730",
     "created_tx_hash": "0xe3067188f714e719d34fb1bd29f35f34736e0ce1999ffb6d95cdbd1b37403748",
     "settled_tx_hash": "0xdd43a530bfa766343a1c141a1c793831988f442a4951a84aa2d65fe7bfe3efb4"
   },
@@ -2723,7 +2745,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.1359,
     "settled_time_utc": "2026-01-25 02:04:35",
-    "rarity": "#670/729",
+    "rarity": "#671/730",
     "created_tx_hash": "0x06fea1251127e9639e5d571f7a1bda02c6643b6b76fb209a9ab153df3e353e73",
     "settled_tx_hash": "0xe3067188f714e719d34fb1bd29f35f34736e0ce1999ffb6d95cdbd1b37403748"
   },
@@ -2745,7 +2767,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.18232,
     "settled_time_utc": "2026-01-24 01:52:47",
-    "rarity": "#77/729",
+    "rarity": "#77/730",
     "created_tx_hash": "0xd8f31d36afcf368d72f4a0f7b358b36b5856d7d96999c5c7fb73ff1a915ae617",
     "settled_tx_hash": "0x06fea1251127e9639e5d571f7a1bda02c6643b6b76fb209a9ab153df3e353e73"
   },
@@ -2767,7 +2789,7 @@
     "winner_url": "https://farcaster.xyz/ohosttcod",
     "settled_eth": 0.19818,
     "settled_time_utc": "2026-01-23 01:52:25",
-    "rarity": "#467/729",
+    "rarity": "#464/730",
     "created_tx_hash": "0xc134a46ad7bceaabd381287b09e9a3270063dfdf57548536fa6d856fbbb93ed3",
     "settled_tx_hash": "0xd8f31d36afcf368d72f4a0f7b358b36b5856d7d96999c5c7fb73ff1a915ae617"
   },
@@ -2789,7 +2811,7 @@
     "winner_url": "https://farcaster.xyz/ohosttcod",
     "settled_eth": 0.18,
     "settled_time_utc": "2026-01-22 01:52:07",
-    "rarity": "#687/729",
+    "rarity": "#687/730",
     "created_tx_hash": "0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f",
     "settled_tx_hash": "0xc134a46ad7bceaabd381287b09e9a3270063dfdf57548536fa6d856fbbb93ed3"
   },
@@ -2811,7 +2833,7 @@
     "winner_url": "https://farcaster.xyz/vaibhavmule",
     "settled_eth": 0.23692,
     "settled_time_utc": "2026-01-21 01:47:35",
-    "rarity": "#555/729",
+    "rarity": "#561/730",
     "created_tx_hash": "0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5",
     "settled_tx_hash": "0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f"
   },
@@ -2833,7 +2855,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.2046,
     "settled_time_utc": "2026-01-20 01:32:05",
-    "rarity": "#534/729",
+    "rarity": "#534/730",
     "created_tx_hash": "0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d",
     "settled_tx_hash": "0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5"
   },
@@ -2855,7 +2877,7 @@
     "winner_url": "https://farcaster.xyz/stemo.eth",
     "settled_eth": 0.21805,
     "settled_time_utc": "2026-01-19 01:28:37",
-    "rarity": "#101/729",
+    "rarity": "#101/730",
     "created_tx_hash": "0xcd0a6897e54e25237722bdd3ca22d21f23cbf95539240344349e1615e2104d5c",
     "settled_tx_hash": "0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d"
   },
@@ -2877,7 +2899,7 @@
     "winner_url": "https://farcaster.xyz/cryptocloudtv",
     "settled_eth": 0.19812,
     "settled_time_utc": "2026-01-18 01:26:59",
-    "rarity": "#533/729",
+    "rarity": "#533/730",
     "created_tx_hash": "0x9994b6ad734104e3035f3c199fdc1b4759503e211f584383f01ff18859313390",
     "settled_tx_hash": "0xcd0a6897e54e25237722bdd3ca22d21f23cbf95539240344349e1615e2104d5c"
   },
@@ -2899,7 +2921,7 @@
     "winner_url": "https://farcaster.xyz/mr-r0b0t",
     "settled_eth": 0.1947,
     "settled_time_utc": "2026-01-17 01:26:57",
-    "rarity": "#375/729",
+    "rarity": "#372/730",
     "created_tx_hash": "0x9779001e2fa95e2bfbf995c58c6d1001fa7b4761f11a5b4cfcf53b8342b66f6a",
     "settled_tx_hash": "0x9994b6ad734104e3035f3c199fdc1b4759503e211f584383f01ff18859313390"
   },
@@ -2921,7 +2943,7 @@
     "winner_url": "https://farcaster.xyz/vaibhavmule",
     "settled_eth": 0.17441,
     "settled_time_utc": "2026-01-16 01:26:11",
-    "rarity": "#535/729",
+    "rarity": "#535/730",
     "created_tx_hash": "0xae903ebf76404904f3f2b09817305f74054fe338d36411e3b5eab58d9c24ddb6",
     "settled_tx_hash": "0x9779001e2fa95e2bfbf995c58c6d1001fa7b4761f11a5b4cfcf53b8342b66f6a"
   },
@@ -2943,7 +2965,7 @@
     "winner_url": "https://farcaster.xyz/doldole",
     "settled_eth": 0.15691,
     "settled_time_utc": "2026-01-15 01:14:37",
-    "rarity": "#338/729",
+    "rarity": "#335/730",
     "created_tx_hash": "0x6ee1e80cc606e534e6fa9d9092a01cb94290b84559ba3a6469b2c212681feef7",
     "settled_tx_hash": "0xae903ebf76404904f3f2b09817305f74054fe338d36411e3b5eab58d9c24ddb6"
   },
@@ -2965,7 +2987,7 @@
     "winner_url": "https://farcaster.xyz/ohosttcod",
     "settled_eth": 0.15974,
     "settled_time_utc": "2026-01-14 01:08:51",
-    "rarity": "#680/729",
+    "rarity": "#682/730",
     "created_tx_hash": "0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7",
     "settled_tx_hash": "0x6ee1e80cc606e534e6fa9d9092a01cb94290b84559ba3a6469b2c212681feef7"
   },
@@ -2987,7 +3009,7 @@
     "winner_url": "https://farcaster.xyz/skunkape",
     "settled_eth": 0.14301,
     "settled_time_utc": "2026-01-13 01:08:39",
-    "rarity": "#358/729",
+    "rarity": "#358/730",
     "created_tx_hash": "0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c",
     "settled_tx_hash": "0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7"
   },
@@ -3009,7 +3031,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.16,
     "settled_time_utc": "2026-01-12 01:08:17",
-    "rarity": "#539/729",
+    "rarity": "#540/730",
     "created_tx_hash": "0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f",
     "settled_tx_hash": "0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c"
   },
@@ -3031,7 +3053,7 @@
     "winner_url": "https://farcaster.xyz/vaibhavmule",
     "settled_eth": 0.3021,
     "settled_time_utc": "2026-01-11 01:06:41",
-    "rarity": "#419/729",
+    "rarity": "#418/730",
     "created_tx_hash": "0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b",
     "settled_tx_hash": "0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f"
   },
@@ -3053,7 +3075,7 @@
     "winner_url": "https://farcaster.xyz/0xael.eth",
     "settled_eth": 0.16455,
     "settled_time_utc": "2026-01-10 00:43:31",
-    "rarity": "#84/729",
+    "rarity": "#84/730",
     "created_tx_hash": "0x875be581184c855641547daf148a091a709a3001740ee0ac26ea85a55a5a4400",
     "settled_tx_hash": "0x077dd8302e353010633eb5c10283eb766f5ae45f5a75ae8ba5ba8c5611a6650b"
   }

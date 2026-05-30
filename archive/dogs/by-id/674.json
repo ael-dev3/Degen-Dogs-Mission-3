@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#114/729",
-      "rank": 114,
-      "total": 729
+      "display": "#113/730",
+      "rank": 113,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 674 dog #674 674 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.02027 eth 0x9790f43075ae04a3710790c6a088a8ed4f262c14ddd14a24bbe90fb72bec0968 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 #114/729 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: monocle 0x57eabad5990e172d447eb645e107d4ba8aadfc6b7641bb2162ea3df2b05ca820 0x5dae86eb70c0a4c82104e998db473eb06977559a6324674c929224578173553e 0x5b43776293001e64403adc1013d2fbbfc4ed0ab092f73291e5c651892fd78b1c 0x1f124aef40bda2af7f21c505363f51776857bd7ba489d19857d5e05f5b439453 0x8e900cdac3f508837f643ab6707bbec3630998479b0a10a8d946926f9e460324 0x2c35470621a29c7408d79664fb5aa70fb165235b6c58670cee46068059fce2c2 0x99ceef6b901cdece7198bd2b94013bc70c38787e9a8cf3ea132a59e8baf30c03 base_logs archive_indexer",
+    "search_text": "dog 674 dog #674 674 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.02027 eth 0x9790f43075ae04a3710790c6a088a8ed4f262c14ddd14a24bbe90fb72bec0968 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 #113/730 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: monocle 0x57eabad5990e172d447eb645e107d4ba8aadfc6b7641bb2162ea3df2b05ca820 0x5dae86eb70c0a4c82104e998db473eb06977559a6324674c929224578173553e 0x5b43776293001e64403adc1013d2fbbfc4ed0ab092f73291e5c651892fd78b1c 0x1f124aef40bda2af7f21c505363f51776857bd7ba489d19857d5e05f5b439453 0x8e900cdac3f508837f643ab6707bbec3630998479b0a10a8d946926f9e460324 0x2c35470621a29c7408d79664fb5aa70fb165235b6c58670cee46068059fce2c2 0x99ceef6b901cdece7198bd2b94013bc70c38787e9a8cf3ea132a59e8baf30c03 base_logs archive_indexer",
     "settlement": {
       "block_number": 44267469,
       "block_time_utc": "2026-04-04T17:38:05Z",
@@ -89,7 +89,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

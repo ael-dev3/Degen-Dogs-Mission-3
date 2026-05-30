@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#99/729",
+      "display": "#99/730",
       "rank": 99,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 307 dog #307 307 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 0x5f1cd6b14e577123bf9cdaa9810d0a90cd993b02c2255f3d99dc6fa3029370e1 #99/729 background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: eyepatch 0x3698515c49d65ecec73854a150b715797b95e3c47150df599cf6e9a27272a967 chain_logs contract_getters",
+    "search_text": "dog 307 dog #307 307 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 0x5f1cd6b14e577123bf9cdaa9810d0a90cd993b02c2255f3d99dc6fa3029370e1 #99/730 background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: eyepatch 0x3698515c49d65ecec73854a150b715797b95e3c47150df599cf6e9a27272a967 chain_logs contract_getters",
     "settlement": {
       "block_number": 25569612,
       "block_time_utc": "2025-03-07T23:40:26Z",
@@ -93,7 +93,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -103,7 +103,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

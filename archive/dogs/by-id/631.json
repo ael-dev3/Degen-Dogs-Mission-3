@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#589/729",
+      "display": "#589/730",
       "rank": 589,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 631 dog #631 631 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.01494 eth 0x6e67157ba2ec9678423fba58a4a4e3e169710d26de1267d03abab9bb38dc5025 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 #589/729 background: none; body: grey; neck: goldnecklace; mouth: tongue; ears: earbuds; head: none; eyes: none 0x3fbb7fa8d836c79d9fe2cbcdf23b1f231632531dc4e4b3f0acae05a42f59c399 0x157fd4a7fedf42a2c7ecf7b192f5bbc3168b7c40f7fc2fd29d200e1eba76a835 0x5f680b53f4b78103d9f3d9e44e94dcf047ad06bce1ef01f8459fc091d612e207 0x28b6d3de8ddc713110068dac846ff3e45adc2a8595a1e5383adc324080306450 0x30e214e9a986249d2c4280a6000cef1fb3baeda4e7c97f6eec604a4571a24a60 0x530df15e155caae7483d8a08a1c5fa3cbed0361f7ec32d1281b2ab19d78e1bb2 base_logs archive_indexer",
+    "search_text": "dog 631 dog #631 631 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.01494 eth 0x6e67157ba2ec9678423fba58a4a4e3e169710d26de1267d03abab9bb38dc5025 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 #589/730 background: none; body: grey; neck: goldnecklace; mouth: tongue; ears: earbuds; head: none; eyes: none 0x3fbb7fa8d836c79d9fe2cbcdf23b1f231632531dc4e4b3f0acae05a42f59c399 0x157fd4a7fedf42a2c7ecf7b192f5bbc3168b7c40f7fc2fd29d200e1eba76a835 0x5f680b53f4b78103d9f3d9e44e94dcf047ad06bce1ef01f8459fc091d612e207 0x28b6d3de8ddc713110068dac846ff3e45adc2a8595a1e5383adc324080306450 0x30e214e9a986249d2c4280a6000cef1fb3baeda4e7c97f6eec604a4571a24a60 0x530df15e155caae7483d8a08a1c5fa3cbed0361f7ec32d1281b2ab19d78e1bb2 base_logs archive_indexer",
     "settlement": {
       "block_number": 42389571,
       "block_time_utc": "2026-02-20T06:21:29Z",
@@ -98,7 +98,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

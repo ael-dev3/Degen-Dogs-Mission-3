@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#450/729",
-      "rank": 450,
-      "total": 729
+      "display": "#449/730",
+      "rank": 449,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 715 dog #715 715 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.01331 eth 0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc 0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad #450/729 background: none; body: white; neck: none; mouth: none; ears: none; head: toque; eyes: eyepatch 0xe590da709f9788a0080f6c18ff3f1df6ec6f950bd9437a1fdc35cb2af5d3f906 0x32b6de3dd4c0002d6780c213da9ca49429fd979f06f75b945d76953da50a8a0c 0xc79a5e9e011b767ce685856e86164a6cf851897bafcc4ed0ed667b81eb7cf8e6 0xae84db56e367f35d246ea6f24010c4655b3530fe3696ba938132f32a5792e4a1 0xa18859fd1ec26be07d61ab373f56d8928f2d21070f85bdf2977dc038eb448e80 base_logs archive_indexer",
+    "search_text": "dog 715 dog #715 715 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.01331 eth 0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc 0x61dc277510787cc95eeadbc246ff5eb3707494de38cc8d0aeb5a39e74df1edad #449/730 background: none; body: white; neck: none; mouth: none; ears: none; head: toque; eyes: eyepatch 0xe590da709f9788a0080f6c18ff3f1df6ec6f950bd9437a1fdc35cb2af5d3f906 0x32b6de3dd4c0002d6780c213da9ca49429fd979f06f75b945d76953da50a8a0c 0xc79a5e9e011b767ce685856e86164a6cf851897bafcc4ed0ed667b81eb7cf8e6 0xae84db56e367f35d246ea6f24010c4655b3530fe3696ba938132f32a5792e4a1 0xa18859fd1ec26be07d61ab373f56d8928f2d21070f85bdf2977dc038eb448e80 base_logs archive_indexer",
     "settlement": {
       "block_number": 46057101,
       "block_time_utc": "2026-05-16T03:52:29Z",
@@ -87,7 +87,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

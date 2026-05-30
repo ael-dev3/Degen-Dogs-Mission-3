@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#211/729",
-      "rank": 211,
-      "total": 729
+      "display": "#213/730",
+      "rank": 213,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 428 dog #428 428 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 1100 degen 0x15846ab3ecd22fdda6bc1422e42617152482194de5661594a50dd77f1c46dc1a 0x897482ae97b1dfcaacdffc9d56d59782203b0de5257f824c110339a49d4bc2f6 #211/729 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: 3dglasses 0x9b8a29f3fc0ef679fd860379e39bb479dcb82d0fb042ab4e1df5c4371c84367e 0xc9eead692180b25274a3fbfca60befe9139f7d5aa5bddcff69135535695b7bb1 chain_logs contract_getters",
+    "search_text": "dog 428 dog #428 428 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 1100 degen 0x15846ab3ecd22fdda6bc1422e42617152482194de5661594a50dd77f1c46dc1a 0x897482ae97b1dfcaacdffc9d56d59782203b0de5257f824c110339a49d4bc2f6 #213/730 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: 3dglasses 0x9b8a29f3fc0ef679fd860379e39bb479dcb82d0fb042ab4e1df5c4371c84367e 0xc9eead692180b25274a3fbfca60befe9139f7d5aa5bddcff69135535695b7bb1 chain_logs contract_getters",
     "settlement": {
       "block_number": 26069009,
       "block_time_utc": "2025-07-12T15:15:49Z",
@@ -79,7 +79,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },

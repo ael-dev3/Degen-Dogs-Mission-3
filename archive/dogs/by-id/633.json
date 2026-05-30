@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#668/729",
-      "rank": 668,
-      "total": 729
+      "display": "#669/730",
+      "rank": 669,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 633 dog #633 633 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.02222 eth 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b 0xb07039137e3d71050c3fbef915d0646e3cda14bdabb7de2adf86142a85e3e529 #668/729 background: none; body: sugarskull; neck: none; mouth: none; ears: none; head: none; eyes: none 0x2621139a5d6bd02ec420677ed7e7986ea2dbeb608d94dd9e88eee25db752634a 0xba3511f81bb1481c9332de743591fb8378b0603aa44a3488c6273faf2fb98018 0x785cef3663fd1ba90151323adc359ab3c50300743e3049ea3255233101573190 0xb1d3dc49e8a557e6abd79f9dbf1ee1a47497349722b3afd5f5850108bcbc744a 0xc8674dd643c201dac39ca656efdd1bad1dcb1194ca71c4cc07ad38c0ae8e8d1b base_logs archive_indexer",
+    "search_text": "dog 633 dog #633 633 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.02222 eth 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b 0xb07039137e3d71050c3fbef915d0646e3cda14bdabb7de2adf86142a85e3e529 #669/730 background: none; body: sugarskull; neck: none; mouth: none; ears: none; head: none; eyes: none 0x2621139a5d6bd02ec420677ed7e7986ea2dbeb608d94dd9e88eee25db752634a 0xba3511f81bb1481c9332de743591fb8378b0603aa44a3488c6273faf2fb98018 0x785cef3663fd1ba90151323adc359ab3c50300743e3049ea3255233101573190 0xb1d3dc49e8a557e6abd79f9dbf1ee1a47497349722b3afd5f5850108bcbc744a 0xc8674dd643c201dac39ca656efdd1bad1dcb1194ca71c4cc07ad38c0ae8e8d1b base_logs archive_indexer",
     "settlement": {
       "block_number": 42476185,
       "block_time_utc": "2026-02-22T06:28:37Z",
@@ -87,7 +87,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

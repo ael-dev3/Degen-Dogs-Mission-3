@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#422/729",
-      "rank": 422,
-      "total": 729
+      "display": "#419/730",
+      "rank": 419,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 258 dog #258 258 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9091 degen 0x9526f0260246666c671ad248adab993f81449641dbf77185d483d1df5b3d0388 0x6e26cc8e56a5e1f7fa8c3d1c9f1707e79f9980b098ca45e976122737546fe34a #422/729 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: eyepatch 0x4c7ef361708b6a03466b03a7ea837ac81d87b79616386c2b15e74aa7716309b4 chain_logs contract_getters",
+    "search_text": "dog 258 dog #258 258 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9091 degen 0x9526f0260246666c671ad248adab993f81449641dbf77185d483d1df5b3d0388 0x6e26cc8e56a5e1f7fa8c3d1c9f1707e79f9980b098ca45e976122737546fe34a #419/730 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: eyepatch 0x4c7ef361708b6a03466b03a7ea837ac81d87b79616386c2b15e74aa7716309b4 chain_logs contract_getters",
     "settlement": {
       "block_number": 25276218,
       "block_time_utc": "2025-01-19T05:46:15Z",
@@ -78,7 +78,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -103,7 +103,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#459/729",
-      "rank": 459,
-      "total": 729
+      "display": "#458/730",
+      "rank": 458,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 201 dog #201 201 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8000 degen 0xa074e3b71b7e840d8f5e72b865a7b1465b751e56e86d2e842899cd49215cba48 0x8f7a43cccddb964657cf1dce8ef074cdeed4d5bdd4ca3a29bc8fa1ce82aeb3ce #459/729 background: none; body: orange; neck: goldnecklace; mouth: none; ears: earbuds; head: baseballcap; eyes: eyepatch 0xcbeb83a74249615fe39e3c029c2fa3d359c26d9826b31122b87c7bf8ae27cae6 0x5496fad593350b6a594c5c4885bc71d474bf1e63fa30127448a5e04c22490393 0x37f2fab9ccb67a79554c67b13f3f3ab5cc28e82adfaef6c7040823ff89adee24 0x492ae3952546dc3f42afa34af936e2c275fd87ed31b84aca31e7a968a059b2ea 0x4c0fdc86324cdd7f041f8cdecd9b2dccda2bff07cea67285cc5bb6396f034b07 0x928e081419edc743160f9750fb30605ca4fc8fd9e872ec631f3306997fe84e6c chain_logs contract_getters",
+    "search_text": "dog 201 dog #201 201 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8000 degen 0xa074e3b71b7e840d8f5e72b865a7b1465b751e56e86d2e842899cd49215cba48 0x8f7a43cccddb964657cf1dce8ef074cdeed4d5bdd4ca3a29bc8fa1ce82aeb3ce #458/730 background: none; body: orange; neck: goldnecklace; mouth: none; ears: earbuds; head: baseballcap; eyes: eyepatch 0xcbeb83a74249615fe39e3c029c2fa3d359c26d9826b31122b87c7bf8ae27cae6 0x5496fad593350b6a594c5c4885bc71d474bf1e63fa30127448a5e04c22490393 0x37f2fab9ccb67a79554c67b13f3f3ab5cc28e82adfaef6c7040823ff89adee24 0x492ae3952546dc3f42afa34af936e2c275fd87ed31b84aca31e7a968a059b2ea 0x4c0fdc86324cdd7f041f8cdecd9b2dccda2bff07cea67285cc5bb6396f034b07 0x928e081419edc743160f9750fb30605ca4fc8fd9e872ec631f3306997fe84e6c chain_logs contract_getters",
     "settlement": {
       "block_number": 24704104,
       "block_time_utc": "2024-11-26T15:55:54Z",
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -51,12 +51,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#261/729",
-      "rank": 261,
-      "total": 729
+      "display": "#262/730",
+      "rank": 262,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 708 dog #708 708 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.024 eth 0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206 0x609ad0852601c9176503eb49b45a4b473fe126be2dd5fcdd8a36892d50ddef39 #261/729 background: none; body: white; neck: redcollar; mouth: tongue; ears: none; head: headphones; eyes: glasses 0x31e21f3b482e47747fbb112b35f568527771e8f7ce7611f8bf6194073b5aab38 0xfb224bb7373ed6326e1c71ba7b386abc94b3600f8f9045593377474e88ca5506 0xa6346eb905cbd5df8b345f024b9d886183c68709acae177bddc849406a85187d 0xd838ea836bd3130b19476b80afd330339df579f08a0b0471d663a2d0f7bc1a21 base_logs archive_indexer",
+    "search_text": "dog 708 dog #708 708 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.024 eth 0x4f993befa02edf6b162e16c8e854f3264ae5ce2d29a8bbac63fa71dd34304206 0x609ad0852601c9176503eb49b45a4b473fe126be2dd5fcdd8a36892d50ddef39 #262/730 background: none; body: white; neck: redcollar; mouth: tongue; ears: none; head: headphones; eyes: glasses 0x31e21f3b482e47747fbb112b35f568527771e8f7ce7611f8bf6194073b5aab38 0xfb224bb7373ed6326e1c71ba7b386abc94b3600f8f9045593377474e88ca5506 0xa6346eb905cbd5df8b345f024b9d886183c68709acae177bddc849406a85187d 0xd838ea836bd3130b19476b80afd330339df579f08a0b0471d663a2d0f7bc1a21 base_logs archive_indexer",
     "settlement": {
       "block_number": 45753161,
       "block_time_utc": "2026-05-09T03:01:09Z",
@@ -106,7 +106,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#391/729",
-      "rank": 391,
-      "total": 729
+      "display": "#388/730",
+      "rank": 388,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 207 dog #207 207 mission 2 mission 2 degen chain settled 0xbc57373c9b99524f6300664e2602a0427a9ec0db 0xbc57…c0db 10690 degen 0x771ea3baf6ede29f70d45686a93e1d5ffc45a839316217452accd10782374a34 0xe583a188520cb9829e5b0abdb5d85aeff2bdf351347340071cd8e7a44b43d940 #391/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: vrgoggles 0xa43c716e956e098640a3824f65d11fee753b75ef04340b74f9a90ccfdb99fbd1 0xc8b39857a2125eceeb9e9af18ca09d7069dd4ae27f98d1f25597d4dcbbb58697 chain_logs contract_getters",
+    "search_text": "dog 207 dog #207 207 mission 2 mission 2 degen chain settled 0xbc57373c9b99524f6300664e2602a0427a9ec0db 0xbc57…c0db 10690 degen 0x771ea3baf6ede29f70d45686a93e1d5ffc45a839316217452accd10782374a34 0xe583a188520cb9829e5b0abdb5d85aeff2bdf351347340071cd8e7a44b43d940 #388/730 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: vrgoggles 0xa43c716e956e098640a3824f65d11fee753b75ef04340b74f9a90ccfdb99fbd1 0xc8b39857a2125eceeb9e9af18ca09d7069dd4ae27f98d1f25597d4dcbbb58697 chain_logs contract_getters",
     "settlement": {
       "block_number": 24779923,
       "block_time_utc": "2024-12-02T16:21:17Z",
@@ -104,7 +104,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

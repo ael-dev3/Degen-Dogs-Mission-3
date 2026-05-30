@@ -62,12 +62,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#332/729",
-      "rank": 332,
-      "total": 729
+      "display": "#336/730",
+      "rank": 336,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 545 dog #545 545 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 10000 degen 0x6654804870457ffbc8dec847e8d2af6bcd1d09cfd9bcabba68aaa95bf2edab4f 0x8e6921f0629d55dd831a1562adaf49ef62d90e6d5bd55dd941092d996af12f44 #332/729 background: none; body: grey; neck: redcollar; mouth: none; ears: goldearring; head: blackcap; eyes: eyepatch 0xc3c07689e7daea9012aca5905f0b274a5afc18371c6d23516d81b46e6e9fe38c 0x017ed2f036a85b383744b2c1f0b16e1452c122368903799d62bd78c78f6d1b1a 0x72b41ae49cb45cd8147388f9667fece743b2e002e2378416509dc649270facdb 0xa42b86447d039ef636d28d471696184eb319c6da0b67b1ea17416a258519078f 0xbab0c00a19f159b1d314de18e0c8da50fdb31b8d13b3e8dee63f593f959fa2be 0xe12f07a1b27405de312a2b56b4e59b6593a14cf967be4b31bf7ecd2c814c0929 0x1650c4c5dcc653f43d0fedda0ce54624f166eeb9eb53d5dc5d9f771b265d26bc 0xb7988ea3131676ab1c8255284fa7e49f120ca8a171c2ccb3002312efb5b10a79 0x44179f9170cb4063c546d73a1e6676ca598cbdf99b67c07bd478561718ce7e83 0x23deacb20b00ee4ac51b4f143ae797f97e5c6a23bcc5c13d0871b34ad9474aac 0x292c313f64745ab8fa6df0137654cde153562058cabd878b4ab967394d86a8b6 0x25eeed32f637384d2e382ef966d23a839d13d43fa4a2842bdf3dbda5fd479402 0xbd7c562054db874f5a10e243670ffd7bdb7864aa904c21464477b500415c5cc6 0x1ae9b94c8c4a80f6546717fefb551ed502463af2a65636847a26cace64c2e3c0 0x633a1c1535df2e503f64445c2e7dfcb39b129d1bc995636316f3305a256d57ec chain_logs contract_getters",
+    "search_text": "dog 545 dog #545 545 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 10000 degen 0x6654804870457ffbc8dec847e8d2af6bcd1d09cfd9bcabba68aaa95bf2edab4f 0x8e6921f0629d55dd831a1562adaf49ef62d90e6d5bd55dd941092d996af12f44 #336/730 background: none; body: grey; neck: redcollar; mouth: none; ears: goldearring; head: blackcap; eyes: eyepatch 0xc3c07689e7daea9012aca5905f0b274a5afc18371c6d23516d81b46e6e9fe38c 0x017ed2f036a85b383744b2c1f0b16e1452c122368903799d62bd78c78f6d1b1a 0x72b41ae49cb45cd8147388f9667fece743b2e002e2378416509dc649270facdb 0xa42b86447d039ef636d28d471696184eb319c6da0b67b1ea17416a258519078f 0xbab0c00a19f159b1d314de18e0c8da50fdb31b8d13b3e8dee63f593f959fa2be 0xe12f07a1b27405de312a2b56b4e59b6593a14cf967be4b31bf7ecd2c814c0929 0x1650c4c5dcc653f43d0fedda0ce54624f166eeb9eb53d5dc5d9f771b265d26bc 0xb7988ea3131676ab1c8255284fa7e49f120ca8a171c2ccb3002312efb5b10a79 0x44179f9170cb4063c546d73a1e6676ca598cbdf99b67c07bd478561718ce7e83 0x23deacb20b00ee4ac51b4f143ae797f97e5c6a23bcc5c13d0871b34ad9474aac 0x292c313f64745ab8fa6df0137654cde153562058cabd878b4ab967394d86a8b6 0x25eeed32f637384d2e382ef966d23a839d13d43fa4a2842bdf3dbda5fd479402 0xbd7c562054db874f5a10e243670ffd7bdb7864aa904c21464477b500415c5cc6 0x1ae9b94c8c4a80f6546717fefb551ed502463af2a65636847a26cace64c2e3c0 0x633a1c1535df2e503f64445c2e7dfcb39b129d1bc995636316f3305a256d57ec chain_logs contract_getters",
     "settlement": {
       "block_number": 26507539,
       "block_time_utc": "2025-11-23T04:01:59Z",
@@ -112,12 +112,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

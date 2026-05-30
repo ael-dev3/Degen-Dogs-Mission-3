@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#639/729",
-      "rank": 639,
-      "total": 729
+      "display": "#641/730",
+      "rank": 641,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 95 dog #95 95 mission 1 mission 1 polygon settled 0x6079e2dc633d0c3bb6f2d74d4a358ac0996e3e9e 0x6079…3e9e 0.06 weth 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c 0xa74f200a5f97b40f1b34b6941a8f28b94c0f7efdfd1937a669b7c8a094c04837 #639/729 background: none; body: white; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: glasses 0x8d5c53d222aee428bc703fa5403048503332f0003efd03c19239b81c83735305 0xf572bc3bca7e9433fdd8cbb297e46640d79f5377b41dbb43f14aa7155ad00d3a polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 95 dog #95 95 mission 1 mission 1 polygon settled 0x6079e2dc633d0c3bb6f2d74d4a358ac0996e3e9e 0x6079…3e9e 0.06 weth 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c 0xa74f200a5f97b40f1b34b6941a8f28b94c0f7efdfd1937a669b7c8a094c04837 #641/730 background: none; body: white; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: glasses 0x8d5c53d222aee428bc703fa5403048503332f0003efd03c19239b81c83735305 0xf572bc3bca7e9433fdd8cbb297e46640d79f5377b41dbb43f14aa7155ad00d3a polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28036217,
       "block_time_utc": "2022-05-07T15:01:55Z",
@@ -86,7 +86,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -106,7 +106,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

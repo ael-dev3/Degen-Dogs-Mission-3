@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#429/729",
-      "rank": 429,
-      "total": 729
+      "display": "#430/730",
+      "rank": 430,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 358 dog #358 358 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff #429/729 background: none; body: brown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: eyepatch 0xad5815f6d94f78ca557a6360d463a5ee8d8447faeb072a275368cfd7e045fdfd chain_logs contract_getters",
+    "search_text": "dog 358 dog #358 358 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff #430/730 background: none; body: brown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: eyepatch 0xad5815f6d94f78ca557a6360d463a5ee8d8447faeb072a275368cfd7e045fdfd chain_logs contract_getters",
     "settlement": {
       "block_number": 25790678,
       "block_time_utc": "2025-04-24T21:07:59Z",
@@ -78,7 +78,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -103,7 +103,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#648/729",
+      "display": "#648/730",
       "rank": 648,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 567 dog #567 567 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15000 degen 0x5aacd48c45be1df2861b3e0d07428e660def586ca6ae7f469e37346aa5b8b417 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b #648/729 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: none; eyes: eyepatch 0x1b4b888a3d92be2a1f1656b7163b4d2b807a619e62f1cd012b2c6909afc250eb chain_logs contract_getters",
+    "search_text": "dog 567 dog #567 567 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15000 degen 0x5aacd48c45be1df2861b3e0d07428e660def586ca6ae7f469e37346aa5b8b417 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b #648/730 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: none; eyes: eyepatch 0x1b4b888a3d92be2a1f1656b7163b4d2b807a619e62f1cd012b2c6909afc250eb chain_logs contract_getters",
     "settlement": {
       "block_number": 26587659,
       "block_time_utc": "2025-12-15T06:14:34Z",
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#485/729",
-      "rank": 485,
-      "total": 729
+      "display": "#484/730",
+      "rank": 484,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 318 dog #318 318 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 4440 degen 0x3f49f61c936d729cfbd271a170f06d8e0b139c2384830b69bc73e3e5c6ee34dc 0x470282a7d1c2765a37a4b8007298f5567ccc973e4c171b6221a117c1ed498f27 #485/729 background: none; body: redbrown; neck: none; mouth: pizza; ears: none; head: redmohawk; eyes: none 0xa6794db260a3788c34a558f0b8c696b50d241fad953880e1746b170a8ebbee79 0x2d66a2ae6f8c2a550a9d61f4fc6bf3aa94b5cd12fbc70e2c6c22b10d82dba033 chain_logs contract_getters",
+    "search_text": "dog 318 dog #318 318 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 4440 degen 0x3f49f61c936d729cfbd271a170f06d8e0b139c2384830b69bc73e3e5c6ee34dc 0x470282a7d1c2765a37a4b8007298f5567ccc973e4c171b6221a117c1ed498f27 #484/730 background: none; body: redbrown; neck: none; mouth: pizza; ears: none; head: redmohawk; eyes: none 0xa6794db260a3788c34a558f0b8c696b50d241fad953880e1746b170a8ebbee79 0x2d66a2ae6f8c2a550a9d61f4fc6bf3aa94b5cd12fbc70e2c6c22b10d82dba033 chain_logs contract_getters",
     "settlement": {
       "block_number": 25616208,
       "block_time_utc": "2025-03-18T14:57:37Z",
@@ -79,12 +79,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "None"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },

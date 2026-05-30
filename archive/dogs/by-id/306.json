@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#540/729",
-      "rank": 540,
-      "total": 729
+      "display": "#541/730",
+      "rank": 541,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 306 dog #306 306 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555 degen 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 #540/729 background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: glasses 0x9a9ffcff5fd4c09840aec4ad203c336bee2077ded6c7e7a2787a438ac80665a3 0xf11ea4295d22a285292e86ea75d88e7c42a0c07d77db28ee1f76e7ca58e50572 0xe7ff9561165f6730c872229b0d942afa2123e25e18c0d6a6f63e5768eed417c0 0xaf02080ec6a1fe3656bd89b31bf1122a3f009d6274c5344dd320788d83c1e3c9 0xc3735d276db2a7cf74a756c09f081d3ce42d1900a7441b505b84d49ea610e247 chain_logs contract_getters",
+    "search_text": "dog 306 dog #306 306 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5555 degen 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 #541/730 background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: glasses 0x9a9ffcff5fd4c09840aec4ad203c336bee2077ded6c7e7a2787a438ac80665a3 0xf11ea4295d22a285292e86ea75d88e7c42a0c07d77db28ee1f76e7ca58e50572 0xe7ff9561165f6730c872229b0d942afa2123e25e18c0d6a6f63e5768eed417c0 0xaf02080ec6a1fe3656bd89b31bf1122a3f009d6274c5344dd320788d83c1e3c9 0xc3735d276db2a7cf74a756c09f081d3ce42d1900a7441b505b84d49ea610e247 chain_logs contract_getters",
     "settlement": {
       "block_number": 25563706,
       "block_time_utc": "2025-03-06T23:40:14Z",
@@ -82,12 +82,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -58,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#185/729",
+      "display": "#185/730",
       "rank": 185,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 661 dog #661 661 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.11111 eth 0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3 0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98 #185/729 background: none; body: dalmation; neck: none; mouth: pizza; ears: loopearring; head: partyhat; eyes: none 0x1e6ebe4f257501d77657d46515003a8b2422943b770b7a9607841a12e2587b74 0xea9c5caeccf9de6328c134f119cb801d20d5819d70579fc0757a2c23c00e8d2b 0xcf4768ae546f4a128ea9018afdbac52978546572c711c14cd83dc116043fab0b 0x0539ec5d87223848d4dabc803572a241bd8a329ed63ca20c2665aa845fd7f0a5 0xfeab3a5fa236e9815b511d8fc7932f50caedffe6dd60d4a510b5a5e187fee87c 0xdce707602e13e61e89391c798e8cae32d57576e708b071d054e85450e9efd6ea 0xd54dd8aec0a5ab3aef78fb1d47a1d6c6614b3a6ca2436b0b768d85eb325c6bbb 0xfaef176c13c2007823864969b6108db04bb87821e50c92e9af3e06433a4e2ba7 0x4841e4a5d24ba8a881f5a888bc4ae9d5771b9906b7540a05336f33131e63ad99 0x7424705ac30940fa6fd9abe77b90fb10cdae8d80c60e2e42d222e18c304886ba 0xfa561c739abe8469493e593569c5c2ccaebe4c695d457ff6b7b011a16b08a2bc base_logs archive_indexer",
+    "search_text": "dog 661 dog #661 661 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.11111 eth 0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3 0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98 #185/730 background: none; body: dalmation; neck: none; mouth: pizza; ears: loopearring; head: partyhat; eyes: none 0x1e6ebe4f257501d77657d46515003a8b2422943b770b7a9607841a12e2587b74 0xea9c5caeccf9de6328c134f119cb801d20d5819d70579fc0757a2c23c00e8d2b 0xcf4768ae546f4a128ea9018afdbac52978546572c711c14cd83dc116043fab0b 0x0539ec5d87223848d4dabc803572a241bd8a329ed63ca20c2665aa845fd7f0a5 0xfeab3a5fa236e9815b511d8fc7932f50caedffe6dd60d4a510b5a5e187fee87c 0xdce707602e13e61e89391c798e8cae32d57576e708b071d054e85450e9efd6ea 0xd54dd8aec0a5ab3aef78fb1d47a1d6c6614b3a6ca2436b0b768d85eb325c6bbb 0xfaef176c13c2007823864969b6108db04bb87821e50c92e9af3e06433a4e2ba7 0x4841e4a5d24ba8a881f5a888bc4ae9d5771b9906b7540a05336f33131e63ad99 0x7424705ac30940fa6fd9abe77b90fb10cdae8d80c60e2e42d222e18c304886ba 0xfa561c739abe8469493e593569c5c2ccaebe4c695d457ff6b7b011a16b08a2bc base_logs archive_indexer",
     "settlement": {
       "block_number": 43701828,
       "block_time_utc": "2026-03-22T15:23:23Z",
@@ -93,7 +93,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

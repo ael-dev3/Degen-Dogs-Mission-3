@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#447/729",
-      "rank": 447,
-      "total": 729
+      "display": "#444/730",
+      "rank": 444,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 619 dog #619 619 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.02222 eth 0xf2221316d3b0545fad3480cec5e096f37a1fedc08a9e80b08b506a2b7308c860 0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904 #447/729 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: earbuds; head: crazyhair; eyes: bluelasereyes 0x2263298ccc0e7e855368b1999f7b4c19a57a6bfb659127ba1f4a54a5aac1c37b 0xe44e0979561d9fc49054ad6fd8e39129a6e8b23a8091ba79fd6334335fb08a16 0x16df484cbc981dd4caa0ee0c0dc8a242446d1dc1da62e54ea7b46ca37e2bb0dd 0xa9fb26cb363893bbe561c4007aa02796dc86f7cf5816e6a052a787347a262c6d 0xfd2333e6c0c7149b16eb8471064099714b5bb15139f32365c0f3b802ef1288dd 0x32fced309151f903fa376eab4454a62b0d16430feceb18088da1c788b45113ee 0x172c035cccf87bb50fae674b29786df967379136ff696536196c53b45a1793f0 0x4fafb8ee473026397c13a0bb7cd7088a850de2af4d28e12bb06b97f975a17793 base_logs archive_indexer",
+    "search_text": "dog 619 dog #619 619 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.02222 eth 0xf2221316d3b0545fad3480cec5e096f37a1fedc08a9e80b08b506a2b7308c860 0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904 #444/730 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: earbuds; head: crazyhair; eyes: bluelasereyes 0x2263298ccc0e7e855368b1999f7b4c19a57a6bfb659127ba1f4a54a5aac1c37b 0xe44e0979561d9fc49054ad6fd8e39129a6e8b23a8091ba79fd6334335fb08a16 0x16df484cbc981dd4caa0ee0c0dc8a242446d1dc1da62e54ea7b46ca37e2bb0dd 0xa9fb26cb363893bbe561c4007aa02796dc86f7cf5816e6a052a787347a262c6d 0xfd2333e6c0c7149b16eb8471064099714b5bb15139f32365c0f3b802ef1288dd 0x32fced309151f903fa376eab4454a62b0d16430feceb18088da1c788b45113ee 0x172c035cccf87bb50fae674b29786df967379136ff696536196c53b45a1793f0 0x4fafb8ee473026397c13a0bb7cd7088a850de2af4d28e12bb06b97f975a17793 base_logs archive_indexer",
     "settlement": {
       "block_number": 41867428,
       "block_time_utc": "2026-02-08T04:16:43Z",
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

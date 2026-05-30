@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#36/729",
+      "display": "#36/730",
       "rank": 36,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 326 dog #326 326 mission 2 mission 2 degen chain settled 0xb68a6a83cfca2e7fde2aa5749b85e753f55d58cd 0xb68a…58cd 5500 degen 0x233bf456a00ca70908c7eeab1cefe5e71f622dd113c3a50107fbba6c6cb6d100 0x7f14748738a88a0c92965c745ff5270ba4e4ee7125d15140dec9065e63cc7f62 #36/729 background: none; body: brown; neck: goldnecklace; mouth: coin; ears: earbuds; head: toque; eyes: eyepatch 0x13916b3225bbba24a3f9bdef58c39fb68cbc7c886762a481da1885858281bf1d 0x0c3f45b827c781f20d8a1281d982e51ca91790fccc10de908cfddd5d327a2b4c 0xf9aa2874d5233bd9dd2fe8028d085234887dbbedb5e7a0b4fa8c4b2e0f0beb6c chain_logs contract_getters",
+    "search_text": "dog 326 dog #326 326 mission 2 mission 2 degen chain settled 0xb68a6a83cfca2e7fde2aa5749b85e753f55d58cd 0xb68a…58cd 5500 degen 0x233bf456a00ca70908c7eeab1cefe5e71f622dd113c3a50107fbba6c6cb6d100 0x7f14748738a88a0c92965c745ff5270ba4e4ee7125d15140dec9065e63cc7f62 #36/730 background: none; body: brown; neck: goldnecklace; mouth: coin; ears: earbuds; head: toque; eyes: eyepatch 0x13916b3225bbba24a3f9bdef58c39fb68cbc7c886762a481da1885858281bf1d 0x0c3f45b827c781f20d8a1281d982e51ca91790fccc10de908cfddd5d327a2b4c 0xf9aa2874d5233bd9dd2fe8028d085234887dbbedb5e7a0b4fa8c4b2e0f0beb6c chain_logs contract_getters",
     "settlement": {
       "block_number": 25643383,
       "block_time_utc": "2025-03-25T16:53:48Z",
@@ -80,7 +80,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -95,7 +95,7 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -105,7 +105,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

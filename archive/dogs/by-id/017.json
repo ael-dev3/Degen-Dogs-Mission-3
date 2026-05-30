@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#274/729",
+      "display": "#274/730",
       "rank": 274,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 17 dog #17 17 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.56 weth 0x8d4b1bdbfb2aff0196bf81924dfc8e2f83cb0ef50895bc681dfb38ef61b17ccc 0x291c8aa26682bb9744f6f3c2d1f559eab6f8b782b80d900ff565a4522c6069d9 #274/729 background: none; body: blue; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: sunglasses 0xd2a4b573a114159ec8f9f3bdcce82acbf4b6088990e4ff864ddbc096775e9181 0xc09297fd5e37eaeea56bad1eb2db4d97b5d26cd0868c19c8cfda13ed459bfd04 0x5ef56164dcf2e9703e4c3bcd606a46af68b7321708dd2f1b8da3de48a3aa4ee9 0x47ab1e186ab1521940e40cb583463b16b753af55ba9682c6e058154622b0ca76 0xf914b3dd7fad7ff2aace753ddb1420cceb0f2298fd556a4bf62e525d1a275c93 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 17 dog #17 17 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.56 weth 0x8d4b1bdbfb2aff0196bf81924dfc8e2f83cb0ef50895bc681dfb38ef61b17ccc 0x291c8aa26682bb9744f6f3c2d1f559eab6f8b782b80d900ff565a4522c6069d9 #274/730 background: none; body: blue; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: sunglasses 0xd2a4b573a114159ec8f9f3bdcce82acbf4b6088990e4ff864ddbc096775e9181 0xc09297fd5e37eaeea56bad1eb2db4d97b5d26cd0868c19c8cfda13ed459bfd04 0x5ef56164dcf2e9703e4c3bcd606a46af68b7321708dd2f1b8da3de48a3aa4ee9 0x47ab1e186ab1521940e40cb583463b16b753af55ba9682c6e058154622b0ca76 0xf914b3dd7fad7ff2aace753ddb1420cceb0f2298fd556a4bf62e525d1a275c93 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26088410,
       "block_time_utc": "2022-03-18T21:20:24Z",
@@ -84,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -104,7 +104,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },

@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#225/729",
+      "display": "#225/730",
       "rank": 225,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 433 dog #433 433 mission 2 mission 2 degen chain settled 0x8f4359d1c2166452b5e7a02742d6fe9ca5448fde 0x8f43…8fde 2700 degen 0x4ca633a6e63adae9f4e37a241190607bef10405431c2c7770d5b86fe87fc5066 0xb113f5513a7305b23fd8bc4da8698f9bac0b62492a6c47606c6228d2a65fec83 #225/729 background: halo; body: dalmation; neck: redcollar; mouth: pizza; ears: earbuds; head: none; eyes: eyepatch 0x05c39c663632f0d108a4760cb706aeaafb7fbe9e0cc50ac324436f7ede9f52ab 0x09ec679832ef95a5e6e849b1a46a3f029b9cd31a5c048e7ad343b8108b64882d 0x44e355e8798f888895701bf0d273b156995637f1e014af3f9f7b24a35f0c375e chain_logs contract_getters",
+    "search_text": "dog 433 dog #433 433 mission 2 mission 2 degen chain settled 0x8f4359d1c2166452b5e7a02742d6fe9ca5448fde 0x8f43…8fde 2700 degen 0x4ca633a6e63adae9f4e37a241190607bef10405431c2c7770d5b86fe87fc5066 0xb113f5513a7305b23fd8bc4da8698f9bac0b62492a6c47606c6228d2a65fec83 #225/730 background: halo; body: dalmation; neck: redcollar; mouth: pizza; ears: earbuds; head: none; eyes: eyepatch 0x05c39c663632f0d108a4760cb706aeaafb7fbe9e0cc50ac324436f7ede9f52ab 0x09ec679832ef95a5e6e849b1a46a3f029b9cd31a5c048e7ad343b8108b64882d 0x44e355e8798f888895701bf0d273b156995637f1e014af3f9f7b24a35f0c375e chain_logs contract_getters",
     "settlement": {
       "block_number": 26088323,
       "block_time_utc": "2025-07-18T11:44:01Z",
@@ -95,7 +95,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -105,7 +105,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

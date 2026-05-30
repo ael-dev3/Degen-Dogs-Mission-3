@@ -55,12 +55,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#565/729",
-      "rank": 565,
-      "total": 729
+      "display": "#564/730",
+      "rank": 564,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 24 dog #24 24 mission 1 mission 1 polygon settled 0x1c81f6a5dbd715be1a66a38f7ed3bbcd4098edd4 0x1c81…edd4 0.5 weth 0xb4bc56416e84a1ce6de6e8ecfa0dbbd49fc6ce57bfa4bba135d4ed298bee96fc 0xfab24247902f3ce6e5d3b7541b5a2b1b051dbed5113b6d96b09bd78c518a45cf #565/729 background: none; body: grey; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: eyepatch 0xff830987963cc830938c369e52d4ebf2d0bd2a9c9d8fb6deedd7fbaf4d1f0d46 0xa4131f429e59045c5e84d995c49e7bcd44d0e05f41f3fe331bb49383725c388b 0x3bc4023508aba837c0b61e7e91c4e6f461f856608577eb67101c07e12c0f0c15 0xb443f668190fb29ad403e0d97b70c09a6595052c56adc08439424dd299c875b3 0xea649353efb7e05a19eb6ad33fe14fccc3769be3f0baebe71ebd28f10dc948e5 0xbb616a1c80ce8fbef1a92fb82df46643fb9118a2e53849a1f4baba95518075be 0x3b73523bf5ad36adb34da57d90085abda18d663d54db0f75a73167e14aeb6dad 0xbcb0d88e911badb6a61e3ec40b46da3e90ff8716ac7a0c61cd13e727d2c6e259 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 24 dog #24 24 mission 1 mission 1 polygon settled 0x1c81f6a5dbd715be1a66a38f7ed3bbcd4098edd4 0x1c81…edd4 0.5 weth 0xb4bc56416e84a1ce6de6e8ecfa0dbbd49fc6ce57bfa4bba135d4ed298bee96fc 0xfab24247902f3ce6e5d3b7541b5a2b1b051dbed5113b6d96b09bd78c518a45cf #564/730 background: none; body: grey; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: eyepatch 0xff830987963cc830938c369e52d4ebf2d0bd2a9c9d8fb6deedd7fbaf4d1f0d46 0xa4131f429e59045c5e84d995c49e7bcd44d0e05f41f3fe331bb49383725c388b 0x3bc4023508aba837c0b61e7e91c4e6f461f856608577eb67101c07e12c0f0c15 0xb443f668190fb29ad403e0d97b70c09a6595052c56adc08439424dd299c875b3 0xea649353efb7e05a19eb6ad33fe14fccc3769be3f0baebe71ebd28f10dc948e5 0xbb616a1c80ce8fbef1a92fb82df46643fb9118a2e53849a1f4baba95518075be 0x3b73523bf5ad36adb34da57d90085abda18d663d54db0f75a73167e14aeb6dad 0xbcb0d88e911badb6a61e3ec40b46da3e90ff8716ac7a0c61cd13e727d2c6e259 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26106607,
       "block_time_utc": "2022-03-19T09:26:25Z",
@@ -112,7 +112,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

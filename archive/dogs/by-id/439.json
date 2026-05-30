@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#206/729",
-      "rank": 206,
-      "total": 729
+      "display": "#205/730",
+      "rank": 205,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 439 dog #439 439 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 5222 degen 0xb8fb6e897f4965c8bebbac4c12bc36bf6411e49379757ab27c0f5dae93c4a6da 0x68331eace13b516aaabb185e0cda92c7039edae5bccc45bc0da66dae079a5e68 #206/729 background: halo; body: white; neck: redcollar; mouth: tongue; ears: loopearring; head: baseballcap; eyes: glasses 0x5a061108617f0101218f988055fc6dc67c317421b9f12b781e0b40c8333f4575 0xf43bcee1e58bbbbd04ae77ca151ac8074d40ae281c54deca24fb376aa7d7fadc 0xe7036863328d5b3893173b55d7dbc5a263a4b941707fec506c3331ccedb96e23 0x3a59ca056cd2f4372f7506d27988784f3e88f95e0fe7f9f4b3a578bef3a44e94 chain_logs contract_getters",
+    "search_text": "dog 439 dog #439 439 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 5222 degen 0xb8fb6e897f4965c8bebbac4c12bc36bf6411e49379757ab27c0f5dae93c4a6da 0x68331eace13b516aaabb185e0cda92c7039edae5bccc45bc0da66dae079a5e68 #205/730 background: halo; body: white; neck: redcollar; mouth: tongue; ears: loopearring; head: baseballcap; eyes: glasses 0x5a061108617f0101218f988055fc6dc67c317421b9f12b781e0b40c8333f4575 0xf43bcee1e58bbbbd04ae77ca151ac8074d40ae281c54deca24fb376aa7d7fadc 0xe7036863328d5b3893173b55d7dbc5a263a4b941707fec506c3331ccedb96e23 0x3a59ca056cd2f4372f7506d27988784f3e88f95e0fe7f9f4b3a578bef3a44e94 chain_logs contract_getters",
     "settlement": {
       "block_number": 26112309,
       "block_time_utc": "2025-07-25T23:26:18Z",
@@ -106,7 +106,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

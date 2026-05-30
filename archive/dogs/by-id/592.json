@@ -60,12 +60,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#539/729",
-      "rank": 539,
-      "total": 729
+      "display": "#540/730",
+      "rank": 540,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 592 dog #592 592 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.16 eth 0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f 0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c #539/729 background: none; body: redbrown; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: glasses 0x7463961891af15d400742b18dc960a2cc20b1704895398df380946b6542f2071 0xc295872acec4cbebaf0096646ac1191dfc1a25b30e3162f3fcc63895a980c0ab 0x43e4f2b59c10d8841c816495c650586acd341753f0b8ddc32615b6e7d9da5a9a 0xf5acad78164b48b77ddac56c02ac31f4b7a1983ad9ac93b459d7bbe36b5cc601 0xdd7851bff7fe8b5a21550cf88355f09919feb769365323b4c9cb8c8edabdace9 0x920bfe6ae02f017be1892fd6caf3b851867235cbcb468d16b5a8ffbbfaddaccb 0xe77a5f6838c90b9ff0347f6b501ce9a1c9414cfa8f56d58b4db76e0698cd4f6b 0xc70b59e2aea497ffcd5b14ae8a7a17a96993e04f7494adc8114847d42f0cdd21 0xab491271248d205ba1e23276e42fcc0a328b578d85492be4292a7d9dc2db11ea 0x6ffcbc0c35192229ece065a15e77686e3364036211dbc249d42c9f8ad6b94747 0x1597f6428d2da4dca750ff1ba6c0371c1a500cf9aedd1f1b02a5138ea212713a 0xaa120542f24c5c850bba1978926cfb1e851ddf995d6d8721a699d44de1513d9a 0x7f59af52bc309f10755f3e3589079504d2e80fa097c41f7e21f8859fe2384a70 base_logs archive_indexer",
+    "search_text": "dog 592 dog #592 592 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.16 eth 0x1bda55b7096a2b03ba5f7d05c2b581ef5556581eba33ad307715d45e8eea3f1f 0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c #540/730 background: none; body: redbrown; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: glasses 0x7463961891af15d400742b18dc960a2cc20b1704895398df380946b6542f2071 0xc295872acec4cbebaf0096646ac1191dfc1a25b30e3162f3fcc63895a980c0ab 0x43e4f2b59c10d8841c816495c650586acd341753f0b8ddc32615b6e7d9da5a9a 0xf5acad78164b48b77ddac56c02ac31f4b7a1983ad9ac93b459d7bbe36b5cc601 0xdd7851bff7fe8b5a21550cf88355f09919feb769365323b4c9cb8c8edabdace9 0x920bfe6ae02f017be1892fd6caf3b851867235cbcb468d16b5a8ffbbfaddaccb 0xe77a5f6838c90b9ff0347f6b501ce9a1c9414cfa8f56d58b4db76e0698cd4f6b 0xc70b59e2aea497ffcd5b14ae8a7a17a96993e04f7494adc8114847d42f0cdd21 0xab491271248d205ba1e23276e42fcc0a328b578d85492be4292a7d9dc2db11ea 0x6ffcbc0c35192229ece065a15e77686e3364036211dbc249d42c9f8ad6b94747 0x1597f6428d2da4dca750ff1ba6c0371c1a500cf9aedd1f1b02a5138ea212713a 0xaa120542f24c5c850bba1978926cfb1e851ddf995d6d8721a699d44de1513d9a 0x7f59af52bc309f10755f3e3589079504d2e80fa097c41f7e21f8859fe2384a70 base_logs archive_indexer",
     "settlement": {
       "block_number": 40695375,
       "block_time_utc": "2026-01-12T01:08:17Z",
@@ -90,12 +90,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -115,7 +115,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#700/729",
-      "rank": 700,
-      "total": 729
+      "display": "#701/730",
+      "rank": 701,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 626 dog #626 626 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.02131 eth 0xe395b1eb9afa2b9cf5cb62054d13b77c65ce2f827f21313653457c5ae299b140 0x86d1b150711bc4610eb20bf7a6acff83fe2cda5561b8b59c8325f646e6b457e1 #700/729 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: none; eyes: vrgoggles 0xb03858f650d426a14212115bfd4f827b927b22e27506f109f500b3df34ac7d82 0x274321ede85e4fb35017afef3bad5cad973e866727b197388d7a4bd434e011fa 0x209a7e9980a709eb1571cf16a51d915eb056c5189a41c3630e5f3c5674393e7b 0xfd754f8caf90291baf16eb73895c5e65a00f024d9b0e1965d621c70f08fb0cc3 0x5dc546045c33d6a23faa13ac22b5cd79b39913b89b11f9b27d658c918b1759f0 0x9dbc12a67041c2e4cb6a128809358903c4f30fc51336705e3226b6ebf84b2cb6 0x1e2699a46700a48f272fd6a02c2546d7e073263be770d6bcf40dbde509f2415c 0x906d68bd0804e637c904e28101287d797bb3753461b5c5f2c7c62fa6eb2305ed base_logs archive_indexer",
+    "search_text": "dog 626 dog #626 626 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.02131 eth 0xe395b1eb9afa2b9cf5cb62054d13b77c65ce2f827f21313653457c5ae299b140 0x86d1b150711bc4610eb20bf7a6acff83fe2cda5561b8b59c8325f646e6b457e1 #701/730 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: none; eyes: vrgoggles 0xb03858f650d426a14212115bfd4f827b927b22e27506f109f500b3df34ac7d82 0x274321ede85e4fb35017afef3bad5cad973e866727b197388d7a4bd434e011fa 0x209a7e9980a709eb1571cf16a51d915eb056c5189a41c3630e5f3c5674393e7b 0xfd754f8caf90291baf16eb73895c5e65a00f024d9b0e1965d621c70f08fb0cc3 0x5dc546045c33d6a23faa13ac22b5cd79b39913b89b11f9b27d658c918b1759f0 0x9dbc12a67041c2e4cb6a128809358903c4f30fc51336705e3226b6ebf84b2cb6 0x1e2699a46700a48f272fd6a02c2546d7e073263be770d6bcf40dbde509f2415c 0x906d68bd0804e637c904e28101287d797bb3753461b5c5f2c7c62fa6eb2305ed base_logs archive_indexer",
     "settlement": {
       "block_number": 42172076,
       "block_time_utc": "2026-02-15T05:31:39Z",
@@ -90,7 +90,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

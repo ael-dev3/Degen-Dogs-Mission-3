@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#379/729",
-      "rank": 379,
-      "total": 729
+      "display": "#375/730",
+      "rank": 375,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 438 dog #438 438 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 3700 degen 0xdbb7eadd3e67322aea301b0e034e3b33b29857e6199058499f6b9415ef5c5ee8 0xb8fb6e897f4965c8bebbac4c12bc36bf6411e49379757ab27c0f5dae93c4a6da #379/729 background: none; body: black; neck: goldnecklace; mouth: none; ears: none; head: toque; eyes: eyepatch 0xc45315c1b329988caa51cae7a9a12e4e06e6e8586712ed1e0695d8860f84c331 0x5541705153f4d3465704ca675bc15ea0a7703d48002bfe887b4c5a99ae4d4a71 0xaef2be5b00ca435b49a96c43279de5e3ea9bd66526a37848a2c068cd05cb6fc1 0x432268953e98ba660f5a9c39b34c4cc5e83e0200e8a728a19e40a6eb1767453b 0x988c191dcffa2055141be1b87911fb9a973ddcbb6d0d16645965e010f9bfb35b chain_logs contract_getters",
+    "search_text": "dog 438 dog #438 438 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 3700 degen 0xdbb7eadd3e67322aea301b0e034e3b33b29857e6199058499f6b9415ef5c5ee8 0xb8fb6e897f4965c8bebbac4c12bc36bf6411e49379757ab27c0f5dae93c4a6da #375/730 background: none; body: black; neck: goldnecklace; mouth: none; ears: none; head: toque; eyes: eyepatch 0xc45315c1b329988caa51cae7a9a12e4e06e6e8586712ed1e0695d8860f84c331 0x5541705153f4d3465704ca675bc15ea0a7703d48002bfe887b4c5a99ae4d4a71 0xaef2be5b00ca435b49a96c43279de5e3ea9bd66526a37848a2c068cd05cb6fc1 0x432268953e98ba660f5a9c39b34c4cc5e83e0200e8a728a19e40a6eb1767453b 0x988c191dcffa2055141be1b87911fb9a973ddcbb6d0d16645965e010f9bfb35b chain_logs contract_getters",
     "settlement": {
       "block_number": 26109243,
       "block_time_utc": "2025-07-24T23:14:26Z",
@@ -82,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -107,7 +107,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

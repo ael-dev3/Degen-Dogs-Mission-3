@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#21/729",
+      "display": "#21/730",
       "rank": 21,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 703 dog #703 703 mission 3 mission 3 base settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 0.02486 eth 0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b 0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46 #21/729 background: halo; body: dalmation; neck: none; mouth: coin; ears: none; head: blackcap; eyes: masksnorkel 0xb86e6d118fbecd5a99c96ef10d6ede55266977f89e46735e2c1b87971a389216 0x741de65cb01fc6b8ccb785a89fd125eb41fdeb6e033d0169485d860237f1b212 0x0f3de1586ec27e55e83bcd584fe87895f92e4ad5aa29cf0dd1901c218707a55a 0x6b27ab86084600caac9dbc5c637e25b0196fd93763f46661e459bdc1dfd2168f 0x6cb683e0921ad698809f3b976dfd22e81c31e732c8630375ca5d911eddb6b552 0x52f795c8de0d2301ef31c195521e797799174ab0e8cedaa8e8bc3ee12e138222 0x764bb77bbdcd6155843b852c3616f3379b661503263d902ff52878b7fb46b8ee base_logs archive_indexer",
+    "search_text": "dog 703 dog #703 703 mission 3 mission 3 base settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 0.02486 eth 0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b 0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46 #21/730 background: halo; body: dalmation; neck: none; mouth: coin; ears: none; head: blackcap; eyes: masksnorkel 0xb86e6d118fbecd5a99c96ef10d6ede55266977f89e46735e2c1b87971a389216 0x741de65cb01fc6b8ccb785a89fd125eb41fdeb6e033d0169485d860237f1b212 0x0f3de1586ec27e55e83bcd584fe87895f92e4ad5aa29cf0dd1901c218707a55a 0x6b27ab86084600caac9dbc5c637e25b0196fd93763f46661e459bdc1dfd2168f 0x6cb683e0921ad698809f3b976dfd22e81c31e732c8630375ca5d911eddb6b552 0x52f795c8de0d2301ef31c195521e797799174ab0e8cedaa8e8bc3ee12e138222 0x764bb77bbdcd6155843b852c3616f3379b661503263d902ff52878b7fb46b8ee base_logs archive_indexer",
     "settlement": {
       "block_number": 45529090,
       "block_time_utc": "2026-05-03T22:32:07Z",
@@ -89,7 +89,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

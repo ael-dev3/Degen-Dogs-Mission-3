@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#492/729",
-      "rank": 492,
-      "total": 729
+      "display": "#493/730",
+      "rank": 493,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 621 dog #621 621 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.0242 eth 0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865 0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea #492/729 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: headphones; eyes: glasses 0xaab0b650bf4abec3769283696ad9377ac8ec083637715886bbae07a57b4534a9 0xbfcdeed7e48ad71f11459f0053576439a6a15e126f9876acb1326c805cda2f82 0xf2689b27369f72a703a86fe605c4d283d35b9d715b96b9d2eac7dd0c13c066de 0xd8cb23142b20a68780a55cb079b508f100af8af2d24e40f3471c3c73f23a5d9b 0xb576c578115877243a96e1d7c10994231b892c0dc8d22ea5153b1d6e713590fe 0x90791de40bbfbdcf7a1d94e93a818b4ca97a617aab3eea6470201fae4e218bfc 0xe152b0146e58906ee3530e8c3ff76360bf03ad77e57aa25f85a62a7480183487 base_logs archive_indexer",
+    "search_text": "dog 621 dog #621 621 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.0242 eth 0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865 0x4d15d96913daaab1ec32829b4bc8a95fbd44746dd397e57fd80f5119d31c80ea #493/730 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: headphones; eyes: glasses 0xaab0b650bf4abec3769283696ad9377ac8ec083637715886bbae07a57b4534a9 0xbfcdeed7e48ad71f11459f0053576439a6a15e126f9876acb1326c805cda2f82 0xf2689b27369f72a703a86fe605c4d283d35b9d715b96b9d2eac7dd0c13c066de 0xd8cb23142b20a68780a55cb079b508f100af8af2d24e40f3471c3c73f23a5d9b 0xb576c578115877243a96e1d7c10994231b892c0dc8d22ea5153b1d6e713590fe 0x90791de40bbfbdcf7a1d94e93a818b4ca97a617aab3eea6470201fae4e218bfc 0xe152b0146e58906ee3530e8c3ff76360bf03ad77e57aa25f85a62a7480183487 base_logs archive_indexer",
     "settlement": {
       "block_number": 41954107,
       "block_time_utc": "2026-02-10T04:26:01Z",
@@ -89,7 +89,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

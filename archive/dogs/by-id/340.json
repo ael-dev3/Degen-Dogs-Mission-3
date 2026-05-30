@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#125/729",
-      "rank": 125,
-      "total": 729
+      "display": "#124/730",
+      "rank": 124,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 340 dog #340 340 mission 2 mission 2 degen chain settled 0x4bf88042de0220647acb314af3c5f310aec3bcc0 0x4bf8…bcc0 6667 degen 0x1aa2830f16bfc39898c83e9dbc5dec8c922b9019c6c80dad1c37b98dda47a14b 0x7d23e6ed22bf55d3e8bd148b930d42c73f791cbe64c7f30e5dd9f11e168a0b85 #125/729 background: none; body: blue; neck: goldnecklace; mouth: tongue; ears: none; head: stripedbeanie; eyes: monocle 0x141d40adbd43b449358df6688050c61024acc14324e010f42b4a0f4b1b1b7449 0xb6239e65bb2ddb1e6b03868830e63a1db86519f008480cd98fd89601e72a6291 0x905406948b5989fa6585fb85cd3893dd4136578917a4856e59332c8eb802e0f8 0x2dfdae081a45532b84a129e382aef30d024144af389e049d98a5245f5c22d4f4 chain_logs contract_getters",
+    "search_text": "dog 340 dog #340 340 mission 2 mission 2 degen chain settled 0x4bf88042de0220647acb314af3c5f310aec3bcc0 0x4bf8…bcc0 6667 degen 0x1aa2830f16bfc39898c83e9dbc5dec8c922b9019c6c80dad1c37b98dda47a14b 0x7d23e6ed22bf55d3e8bd148b930d42c73f791cbe64c7f30e5dd9f11e168a0b85 #124/730 background: none; body: blue; neck: goldnecklace; mouth: tongue; ears: none; head: stripedbeanie; eyes: monocle 0x141d40adbd43b449358df6688050c61024acc14324e010f42b4a0f4b1b1b7449 0xb6239e65bb2ddb1e6b03868830e63a1db86519f008480cd98fd89601e72a6291 0x905406948b5989fa6585fb85cd3893dd4136578917a4856e59332c8eb802e0f8 0x2dfdae081a45532b84a129e382aef30d024144af389e049d98a5245f5c22d4f4 chain_logs contract_getters",
     "settlement": {
       "block_number": 25692979,
       "block_time_utc": "2025-04-08T00:51:58Z",
@@ -81,7 +81,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },

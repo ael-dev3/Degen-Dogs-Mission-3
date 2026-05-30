@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#425/729",
+      "display": "#425/730",
       "rank": 425,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 371 dog #371 371 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 3669 degen 0xfc4a348041811b69c9b7a183f16404432ac68d4effedafc3a0ce9c988c79ad41 0x581fae421b96bc95714a4344be013b9fd1758353cbad763ad3b011bdfc7a1cd3 #425/729 background: halo; body: black; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: glasses 0xe69d57e627506e2255292b61bffadf675bd2c52d71f6a01fa0b2ca6b15464b52 0xa136a690de57f6bee549971fdf93bc46b26dcbd845a7bcde3d6f3a3537ba7bdd chain_logs contract_getters",
+    "search_text": "dog 371 dog #371 371 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 3669 degen 0xfc4a348041811b69c9b7a183f16404432ac68d4effedafc3a0ce9c988c79ad41 0x581fae421b96bc95714a4344be013b9fd1758353cbad763ad3b011bdfc7a1cd3 #425/730 background: halo; body: black; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: glasses 0xe69d57e627506e2255292b61bffadf675bd2c52d71f6a01fa0b2ca6b15464b52 0xa136a690de57f6bee549971fdf93bc46b26dcbd845a7bcde3d6f3a3537ba7bdd chain_logs contract_getters",
     "settlement": {
       "block_number": 25833671,
       "block_time_utc": "2025-05-07T19:48:29Z",
@@ -79,12 +79,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -104,7 +104,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

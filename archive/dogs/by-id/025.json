@@ -53,12 +53,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#175/729",
-      "rank": 175,
-      "total": 729
+      "display": "#174/730",
+      "rank": 174,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 25 dog #25 25 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.41 weth 0xfab24247902f3ce6e5d3b7541b5a2b1b051dbed5113b6d96b09bd78c518a45cf 0x81f829475b45a8fee05cde73522fecc838dce4e409ba97def4b33b4c62fae576 #175/729 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: vrgoggles 0x918093a059b27754d44a48c96d28ad70104a52823e3ff62848b7c739bbd81a8c 0x39f3b781a9aa3b4da6a6a667109ce14eee5ebfaa035d574e86b97bd5d2465358 0xcd1d0824a030d149300a48bc52c195610ed474f70a6f6125bd4b49e89bd070d0 0x2c9e4704664e3ef1e5c45f81e58de12e3d59ec56fe31f92ce1758f30dc2ef213 0xe668cfdf10e847ab1758bbb9637ce2dbb9c705cf580a31756de1e2f122fa19f1 0x2e76a54927f2d6bdb964a776cb2bda17dd07223675dc85e03003dc078abcf11d polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 25 dog #25 25 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.41 weth 0xfab24247902f3ce6e5d3b7541b5a2b1b051dbed5113b6d96b09bd78c518a45cf 0x81f829475b45a8fee05cde73522fecc838dce4e409ba97def4b33b4c62fae576 #174/730 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: unicorn; eyes: vrgoggles 0x918093a059b27754d44a48c96d28ad70104a52823e3ff62848b7c739bbd81a8c 0x39f3b781a9aa3b4da6a6a667109ce14eee5ebfaa035d574e86b97bd5d2465358 0xcd1d0824a030d149300a48bc52c195610ed474f70a6f6125bd4b49e89bd070d0 0x2c9e4704664e3ef1e5c45f81e58de12e3d59ec56fe31f92ce1758f30dc2ef213 0xe668cfdf10e847ab1758bbb9637ce2dbb9c705cf580a31756de1e2f122fa19f1 0x2e76a54927f2d6bdb964a776cb2bda17dd07223675dc85e03003dc078abcf11d polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26109609,
       "block_time_utc": "2022-03-19T11:26:43Z",
@@ -110,7 +110,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

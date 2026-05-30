@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#37/729",
+      "display": "#37/730",
       "rank": 37,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 16 dog #16 16 mission 1 mission 1 polygon settled 0xb0331b22161ca290a15f825a29c008dcb5e1ff68 0xb033…ff68 0.785 weth 0xce5726e239fb339c05bb4fbd8ece23c04b198f2dd4b342261eb785061b410d6b 0x8d4b1bdbfb2aff0196bf81924dfc8e2f83cb0ef50895bc681dfb38ef61b17ccc #37/729 background: none; body: black; neck: studdedcollar; mouth: bone; ears: goldearring; head: none; eyes: vrgoggles 0x13fe315b09070da8eb5d628732beda0b5be963148950792d2eba5f4640162db2 0x994df6b9ab29483eef33f83981da5e21c07169d66f8adf32a09d57538ef4d8a0 0x6066681033fd579e9135d13763b8e046850d111cd907781139d065e7472f8264 0x1cb2e638600d35224706a6ca7d341ac94831356f8f055d678a96d728c379864f 0x92f0b78e2f1a17b1a93a34a6cb5feecbeb52e79b3963b3205f6e67cfc6a6e656 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 16 dog #16 16 mission 1 mission 1 polygon settled 0xb0331b22161ca290a15f825a29c008dcb5e1ff68 0xb033…ff68 0.785 weth 0xce5726e239fb339c05bb4fbd8ece23c04b198f2dd4b342261eb785061b410d6b 0x8d4b1bdbfb2aff0196bf81924dfc8e2f83cb0ef50895bc681dfb38ef61b17ccc #37/730 background: none; body: black; neck: studdedcollar; mouth: bone; ears: goldearring; head: none; eyes: vrgoggles 0x13fe315b09070da8eb5d628732beda0b5be963148950792d2eba5f4640162db2 0x994df6b9ab29483eef33f83981da5e21c07169d66f8adf32a09d57538ef4d8a0 0x6066681033fd579e9135d13763b8e046850d111cd907781139d065e7472f8264 0x1cb2e638600d35224706a6ca7d341ac94831356f8f055d678a96d728c379864f 0x92f0b78e2f1a17b1a93a34a6cb5feecbeb52e79b3963b3205f6e67cfc6a6e656 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26085284,
       "block_time_utc": "2022-03-18T19:20:06Z",
@@ -84,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -109,7 +109,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

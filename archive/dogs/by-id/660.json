@@ -64,12 +64,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#73/729",
+      "display": "#73/730",
       "rank": 73,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 660 dog #660 660 mission 3 mission 3 base settled 0x7eaa7613f4cf84a10fb1daf07472e07031ff01d4 @kumari kumari 0.1298 eth 0x098d9afeffed2a29a09f1e8b2801b1a4fbe5a552cb55aa5ea93bd05ec5993c22 0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3 #73/729 background: none; body: rainbow; neck: none; mouth: pizza; ears: earbuds; head: partyhat; eyes: none 0x8b66d70e3ab664d571519d820331cfa879b92d8e9deab658c86abf179cb3a78c 0x0318ce2851be5e612a6655c1ad1ac6615d9a12fb0f58f85447bb5555be4fad33 0xdd0f1de6ec97f95c38ce51b202db8dac11cb1b057c9d74c64844b0c2029b2c92 0xe5e41edfcb204f400b69a939710dbb573a1fb44ffa1632a949e0988056282c3c 0xbe7636583f1175dcbd56342b5499c8d22ea7ed1eb9b94b5a32593ea3fa217b70 0x8ff9e4017321120859bc5ea75976912fbbe2fd763b82e38eff880ce8505f57b5 0x194f555f12651b9d569c772af00949455a0d52d918ef85c20868bba56816f999 0xa01177d2b7ac6c4484dfda3900a59cb7a0a20b6a8dc62d52bc7c435e093515b8 0x2ed0a9e82cc2795857f3a5001f1c8f26ceeaaa00432a1d797a16636d66fe1d36 0xf07c826d2d752a27a3ab89b1905485d8472066b855f878c3e8ded504d18e73d0 0x4ca1a9dddeeb7cef4e022566a5e653825354058a6d1325a7fd855b0985ba1629 0x8aafa00555c97bf584c63e2851695a2f6aef0903040eee3c74f9f967a125decc 0x342e67fc2434bd39ed41c62866d0fe99ae03992239039dd44ae7acd6163fd2be 0xd7d303b6e3251a90374d17fda24ac526f8281fb451e6276f741693534d3394b8 0x844727fca32cd9ac8574ad962c6b5575aa84fcd034a6555f353637623ca9ba5c 0x219a5774f34e1ede925bd41880bb486a5295aacd77c90d6af6135dd4ea70e2d3 0xdea0702008d6dd84ee600ab193700cb0f0774bc055771e19a7b1bc8a185935cb base_logs archive_indexer",
+    "search_text": "dog 660 dog #660 660 mission 3 mission 3 base settled 0x7eaa7613f4cf84a10fb1daf07472e07031ff01d4 @kumari kumari 0.1298 eth 0x098d9afeffed2a29a09f1e8b2801b1a4fbe5a552cb55aa5ea93bd05ec5993c22 0x4a22213fbfeddb72fcdcf2ff895832a9416dec9cf580e2d2ba50a2d2be4426d3 #73/730 background: none; body: rainbow; neck: none; mouth: pizza; ears: earbuds; head: partyhat; eyes: none 0x8b66d70e3ab664d571519d820331cfa879b92d8e9deab658c86abf179cb3a78c 0x0318ce2851be5e612a6655c1ad1ac6615d9a12fb0f58f85447bb5555be4fad33 0xdd0f1de6ec97f95c38ce51b202db8dac11cb1b057c9d74c64844b0c2029b2c92 0xe5e41edfcb204f400b69a939710dbb573a1fb44ffa1632a949e0988056282c3c 0xbe7636583f1175dcbd56342b5499c8d22ea7ed1eb9b94b5a32593ea3fa217b70 0x8ff9e4017321120859bc5ea75976912fbbe2fd763b82e38eff880ce8505f57b5 0x194f555f12651b9d569c772af00949455a0d52d918ef85c20868bba56816f999 0xa01177d2b7ac6c4484dfda3900a59cb7a0a20b6a8dc62d52bc7c435e093515b8 0x2ed0a9e82cc2795857f3a5001f1c8f26ceeaaa00432a1d797a16636d66fe1d36 0xf07c826d2d752a27a3ab89b1905485d8472066b855f878c3e8ded504d18e73d0 0x4ca1a9dddeeb7cef4e022566a5e653825354058a6d1325a7fd855b0985ba1629 0x8aafa00555c97bf584c63e2851695a2f6aef0903040eee3c74f9f967a125decc 0x342e67fc2434bd39ed41c62866d0fe99ae03992239039dd44ae7acd6163fd2be 0xd7d303b6e3251a90374d17fda24ac526f8281fb451e6276f741693534d3394b8 0x844727fca32cd9ac8574ad962c6b5575aa84fcd034a6555f353637623ca9ba5c 0x219a5774f34e1ede925bd41880bb486a5295aacd77c90d6af6135dd4ea70e2d3 0xdea0702008d6dd84ee600ab193700cb0f0774bc055771e19a7b1bc8a185935cb base_logs archive_indexer",
     "settlement": {
       "block_number": 43658240,
       "block_time_utc": "2026-03-21T15:10:27Z",
@@ -99,7 +99,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

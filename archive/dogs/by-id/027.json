@@ -50,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#212/729",
-      "rank": 212,
-      "total": 729
+      "display": "#214/730",
+      "rank": 214,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 27 dog #27 27 mission 1 mission 1 polygon settled 0xf9ce34dfcd3cc92804772f3022af27bcd5e43ff2 0xf9ce…3ff2 0.48 weth 0x894d1146c57c56c2280c834669dcda669f13da4324271990751a024aa9281c2f 0xd0c175e4e983056c4b9aef76256b9a7d425636e6c4f5bbfce7abed7406de36ad #212/729 background: none; body: brown; neck: none; mouth: tongue; ears: loopearring; head: toque; eyes: eyepatch 0xf5a1da39a7ceeee1b669d840027940a3fe0b49cf8e54e437afa06a8f6870b887 0x318ec70ec41d8f362aa4ba4f1a1c313b0762a34ed1d037415c1d57e9087b22ac 0xdcd2ae858366bad18102a9d8ee05d2abfa2d2deb6f5e2ab52dc4db42ce952a59 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 27 dog #27 27 mission 1 mission 1 polygon settled 0xf9ce34dfcd3cc92804772f3022af27bcd5e43ff2 0xf9ce…3ff2 0.48 weth 0x894d1146c57c56c2280c834669dcda669f13da4324271990751a024aa9281c2f 0xd0c175e4e983056c4b9aef76256b9a7d425636e6c4f5bbfce7abed7406de36ad #214/730 background: none; body: brown; neck: none; mouth: tongue; ears: loopearring; head: toque; eyes: eyepatch 0xf5a1da39a7ceeee1b669d840027940a3fe0b49cf8e54e437afa06a8f6870b887 0x318ec70ec41d8f362aa4ba4f1a1c313b0762a34ed1d037415c1d57e9087b22ac 0xdcd2ae858366bad18102a9d8ee05d2abfa2d2deb6f5e2ab52dc4db42ce952a59 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26118854,
       "block_time_utc": "2022-03-19T17:36:02Z",
@@ -82,12 +82,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

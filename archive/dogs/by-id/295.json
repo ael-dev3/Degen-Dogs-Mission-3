@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#336/729",
-      "rank": 336,
-      "total": 729
+      "display": "#333/730",
+      "rank": 333,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 295 dog #295 295 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3667.000000000000262144 degen 0xf3a333fb5f1e6d7574db6e997f58170429a27f2f19c15a826080a3cfe1db175a 0xa4662225aa2b8f325646bd1c28541814b55cf90aa06ad538b9ba5037cab7279e #336/729 background: none; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: sunglasses 0x13d63cd817b831d13ecc4ed0fafe3abf8cea587a49e5dfd6d2462f38594e0362 0x6f9eee789c7e0df88b6f7972b18e73910ca6de6df078214c3976276262104d52 0x4d42fe51083a506c82d9bf2450e217bec6a738aff839eba8af996a6be9d33b49 0xc95a3cec9588863e2a43f1e13cba05aabb666b159fc05015fa601efe6950cf6b 0x8bb3ad8370920cecf5d6ff8ed6f67c8ece3fb900b709db53456455607e5cba15 chain_logs contract_getters",
+    "search_text": "dog 295 dog #295 295 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3667.000000000000262144 degen 0xf3a333fb5f1e6d7574db6e997f58170429a27f2f19c15a826080a3cfe1db175a 0xa4662225aa2b8f325646bd1c28541814b55cf90aa06ad538b9ba5037cab7279e #333/730 background: none; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: sunglasses 0x13d63cd817b831d13ecc4ed0fafe3abf8cea587a49e5dfd6d2462f38594e0362 0x6f9eee789c7e0df88b6f7972b18e73910ca6de6df078214c3976276262104d52 0x4d42fe51083a506c82d9bf2450e217bec6a738aff839eba8af996a6be9d33b49 0xc95a3cec9588863e2a43f1e13cba05aabb666b159fc05015fa601efe6950cf6b 0x8bb3ad8370920cecf5d6ff8ed6f67c8ece3fb900b709db53456455607e5cba15 chain_logs contract_getters",
     "settlement": {
       "block_number": 25504016,
       "block_time_utc": "2025-02-24T21:16:53Z",
@@ -87,7 +87,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#480/729",
-      "rank": 480,
-      "total": 729
+      "display": "#479/730",
+      "rank": 479,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 269 dog #269 269 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5500 degen 0x0f5d4a1c5dea48a238fc934713aa49d86f371b255474d371b44ff70e7ef64630 0x76f09d590caccb4e60e390d6ebaeb10e4f391fa62f1adeba65508a6b03d203e1 #480/729 background: none; body: grey; neck: redcollar; mouth: none; ears: loopearring; head: redmohawk; eyes: masksnorkel 0x14b2c5b9084101af000f049822e7f884bd09938974053e2a9c202be3a1d24951 0x9c87a437e8b5f33fc5d6f47e6419ee6485935a9d4ea01036ff0eaa932058ea48 0x2426e028b05cce38d53505b73010e4dfe7c260b51e857e9bf993bc200316f081 0x11564848d987c5752a69d3d7c99d0f320eaf5094d3ecdddc377b7982b0cf9e1f 0x9e81d5d2558faf83b572d55b4d123bce7d21d77edb3d1a54ea4e1b617f2a0aea 0x1d77959a6e49fa035e4920ba7e7ad595023b638dd22ffcf0fcef4cdcc940a1a7 0x52bfbcb0920ecbf3f280f61a7add80183d8387476340a65495e7ef000179b42a chain_logs contract_getters",
+    "search_text": "dog 269 dog #269 269 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 5500 degen 0x0f5d4a1c5dea48a238fc934713aa49d86f371b255474d371b44ff70e7ef64630 0x76f09d590caccb4e60e390d6ebaeb10e4f391fa62f1adeba65508a6b03d203e1 #479/730 background: none; body: grey; neck: redcollar; mouth: none; ears: loopearring; head: redmohawk; eyes: masksnorkel 0x14b2c5b9084101af000f049822e7f884bd09938974053e2a9c202be3a1d24951 0x9c87a437e8b5f33fc5d6f47e6419ee6485935a9d4ea01036ff0eaa932058ea48 0x2426e028b05cce38d53505b73010e4dfe7c260b51e857e9bf993bc200316f081 0x11564848d987c5752a69d3d7c99d0f320eaf5094d3ecdddc377b7982b0cf9e1f 0x9e81d5d2558faf83b572d55b4d123bce7d21d77edb3d1a54ea4e1b617f2a0aea 0x1d77959a6e49fa035e4920ba7e7ad595023b638dd22ffcf0fcef4cdcc940a1a7 0x52bfbcb0920ecbf3f280f61a7add80183d8387476340a65495e7ef000179b42a chain_logs contract_getters",
     "settlement": {
       "block_number": 25372914,
       "block_time_utc": "2025-01-29T13:35:57Z",
@@ -104,7 +104,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },

@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#160/729",
-      "rank": 160,
-      "total": 729
+      "display": "#159/730",
+      "rank": 159,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 420 dog #420 420 mission 2 mission 2 degen chain settled 0x8847925f96be82ad7e48b26f641e7d47d073fe0a 0x8847…fe0a 4000 degen 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 0xc19350aba749b83b65f565f04881f8b2545787b6a068c703c7d11adc10b16394 #160/729 background: none; body: white; neck: redcollar; mouth: teeth; ears: earbuds; head: beanie; eyes: none 0xa4b81cd871809c21ab9a20b74b4c05c221392899d8053fd75016063c89b6ca8b 0x395e8d9844c841b073e2062e7ce0b234edd95fd01408b157e7729d3c68aa05c7 0x751f47cfd12762c9ab87947c5bae6ec6d9287ef29dce12c4dac76bd28f7597bc 0x9e18720c9067edffef93a43acbc87eba775f0351fe60848d59e73f29a2dfa38c 0xae5e51875836f2b65c973a1d3d39beb361da727cfded61179eabdf116e136aae 0x5c012daad6cde15355cc28d260ed036f9dcef3f1480fcc96cbed49447beb0d21 chain_logs contract_getters",
+    "search_text": "dog 420 dog #420 420 mission 2 mission 2 degen chain settled 0x8847925f96be82ad7e48b26f641e7d47d073fe0a 0x8847…fe0a 4000 degen 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 0xc19350aba749b83b65f565f04881f8b2545787b6a068c703c7d11adc10b16394 #159/730 background: none; body: white; neck: redcollar; mouth: teeth; ears: earbuds; head: beanie; eyes: none 0xa4b81cd871809c21ab9a20b74b4c05c221392899d8053fd75016063c89b6ca8b 0x395e8d9844c841b073e2062e7ce0b234edd95fd01408b157e7729d3c68aa05c7 0x751f47cfd12762c9ab87947c5bae6ec6d9287ef29dce12c4dac76bd28f7597bc 0x9e18720c9067edffef93a43acbc87eba775f0351fe60848d59e73f29a2dfa38c 0xae5e51875836f2b65c973a1d3d39beb361da727cfded61179eabdf116e136aae 0x5c012daad6cde15355cc28d260ed036f9dcef3f1480fcc96cbed49447beb0d21 chain_logs contract_getters",
     "settlement": {
       "block_number": 26026185,
       "block_time_utc": "2025-06-28T15:10:34Z",
@@ -98,7 +98,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

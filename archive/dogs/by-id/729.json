@@ -1,0 +1,120 @@
+{
+  "generated_at_utc": "2026-05-30T18:46:46Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-05-30T18:40:23Z",
+    "amount": {
+      "native": "0.01",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "10000000000000000",
+      "usd_estimate": "20.07711682",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$20.08",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-05-29",
+      "usd_estimate_price_usd": "2007.7116820979008",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-05-30T18:40:09Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-05-30T18:40:23Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 729,
+    "dog_image_url": "https://api.degendogs.club/images/729.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/729",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog729",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/729",
+      "repo_archive": "archive/dogs/by-id/729.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#581/730",
+      "rank": 581,
+      "total": 730
+    },
+    "schema_version": 1,
+    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.27 $20.27 2026-05-30t18:40:23z #581/730 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.3%) background none body: brown (11.0%) body brown neck: none (39.5%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.1%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.6%) eyes glasses generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "generated_auction_feed",
+      "sources": [
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None (90.3%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Brown (11.0%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: None (39.5%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.6%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (32.1%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: BlackCap (6.8%)",
+        "trait_type": "Head",
+        "value": "BlackCap"
+      },
+      {
+        "display": "Eyes: Glasses (12.6%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}

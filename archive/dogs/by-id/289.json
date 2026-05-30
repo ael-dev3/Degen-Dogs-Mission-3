@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#194/729",
+      "display": "#194/730",
       "rank": 194,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 289 dog #289 289 mission 2 mission 2 degen chain settled 0x3ebcecea588e5a6dfad865fc43732d14e1ac850c 0x3ebc…850c 5555 degen 0xe0bbb886093691caed09f7be280e8b92c328f017e560ee2f580ec122b405bb56 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 #194/729 background: none; body: dalmation; neck: none; mouth: none; ears: loopearring; head: beanie; eyes: 3dglasses 0xf6c1c9395010aef3d06e445b51dfd58e5b1874235bc08c48fb8e739845e75e6a 0xcac1eba75c9f1bfba57ca3b8b9247d10b8c70d52f0263913577bfd3116f3fbd1 0xce18d4d829f7125b48c9b18db05d22a94f25708e5b21390d7a4189f0e57ec5d6 chain_logs contract_getters",
+    "search_text": "dog 289 dog #289 289 mission 2 mission 2 degen chain settled 0x3ebcecea588e5a6dfad865fc43732d14e1ac850c 0x3ebc…850c 5555 degen 0xe0bbb886093691caed09f7be280e8b92c328f017e560ee2f580ec122b405bb56 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 #194/730 background: none; body: dalmation; neck: none; mouth: none; ears: loopearring; head: beanie; eyes: 3dglasses 0xf6c1c9395010aef3d06e445b51dfd58e5b1874235bc08c48fb8e739845e75e6a 0xcac1eba75c9f1bfba57ca3b8b9247d10b8c70d52f0263913577bfd3116f3fbd1 0xce18d4d829f7125b48c9b18db05d22a94f25708e5b21390d7a4189f0e57ec5d6 chain_logs contract_getters",
     "settlement": {
       "block_number": 25473783,
       "block_time_utc": "2025-02-18T19:08:47Z",
@@ -85,7 +85,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

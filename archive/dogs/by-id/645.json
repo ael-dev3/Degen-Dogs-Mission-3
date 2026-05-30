@@ -58,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#249/729",
-      "rank": 249,
-      "total": 729
+      "display": "#256/730",
+      "rank": 256,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 645 dog #645 645 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00874 eth 0xd80d4f8c31b800ca25a9f16bbefbc583dbff527cc4d47432555cd62592b34554 0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117 #249/729 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: blackcap; eyes: redlasereyes 0x7c5c85d2c3f51bb0e08d5728b693352b31037e898f5180212d608f65840a38b4 0x70d6e58939c21482cff3b87636d9e7015cb40c6138bc185c71a7ea8124921770 0x3528827dce5e9bd7c2242847830b0d08f957c7bbc0bd6f29abf84e50f69c89b6 0x826db6913ea2dfcc85b1f6a96aba8487402d8d58a146eec24e40b7e1aeb9f8e0 0x816d8a7fe3fbbbf74cdc3b524d6859aec18b8ffd1d5818bb61394552a65e9fba 0xbcb150bb1249354cfa17604af78896bdb93f38a0174b4dadbdf4efbc59727f72 0xcffc59f8104d1273ed8661b368bd5ae3e64f1a599c4a204ff8da0b5373f9b3f9 0x0168762ad43a7193eef140fd31de93ee465e6d4ce07fa736de35d9a1ab70347d 0xd5ac6efbd28a33b773fa0f72f2fb9ae6a686d01bf099e6aa197cc5d28b741762 0x965c14848f9b762f10dc683a1d0ba6b673544d0e5d5860763aae12f2ab90214d 0x71d48d8976a258d709b0ac56e27c6427a44e9bcc9c4c76d5031222607ec25f3d base_logs archive_indexer",
+    "search_text": "dog 645 dog #645 645 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00874 eth 0xd80d4f8c31b800ca25a9f16bbefbc583dbff527cc4d47432555cd62592b34554 0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117 #256/730 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: blackcap; eyes: redlasereyes 0x7c5c85d2c3f51bb0e08d5728b693352b31037e898f5180212d608f65840a38b4 0x70d6e58939c21482cff3b87636d9e7015cb40c6138bc185c71a7ea8124921770 0x3528827dce5e9bd7c2242847830b0d08f957c7bbc0bd6f29abf84e50f69c89b6 0x826db6913ea2dfcc85b1f6a96aba8487402d8d58a146eec24e40b7e1aeb9f8e0 0x816d8a7fe3fbbbf74cdc3b524d6859aec18b8ffd1d5818bb61394552a65e9fba 0xbcb150bb1249354cfa17604af78896bdb93f38a0174b4dadbdf4efbc59727f72 0xcffc59f8104d1273ed8661b368bd5ae3e64f1a599c4a204ff8da0b5373f9b3f9 0x0168762ad43a7193eef140fd31de93ee465e6d4ce07fa736de35d9a1ab70347d 0xd5ac6efbd28a33b773fa0f72f2fb9ae6a686d01bf099e6aa197cc5d28b741762 0x965c14848f9b762f10dc683a1d0ba6b673544d0e5d5860763aae12f2ab90214d 0x71d48d8976a258d709b0ac56e27c6427a44e9bcc9c4c76d5031222607ec25f3d base_logs archive_indexer",
     "settlement": {
       "block_number": 42997340,
       "block_time_utc": "2026-03-06T08:00:27Z",
@@ -93,7 +93,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

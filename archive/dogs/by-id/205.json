@@ -64,12 +64,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#217/729",
-      "rank": 217,
-      "total": 729
+      "display": "#216/730",
+      "rank": 216,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 205 dog #205 205 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9800 degen 0xb94821084b6195c79e1f8dcbb0775ab7e40764d11709fca1e9307a662e284b0c 0x11fffae7e78b7767666ff3aba42894f7a3761c1678d4f57bcf441916ed268edc #217/729 background: none; body: black; neck: none; mouth: teeth; ears: earbuds; head: baseballcap; eyes: vrgoggles 0xbd269056549e9b214f33723c65c60b2444e845d050d63288b6e35b93ff9c367f 0xa92aa9a0c707632209351a73f12fb3649f8969b598fdcd5b2e04973ce6f02c74 0xf9ad4614f561f347e43b067db73be5e041421e93792f200d1f7eea94e2528d15 0x7bc86fb0a82b8b9e217215c8e7e08c282cb806969fae73f7c6f34b89c54a9568 0x43f8f5f1104db9767fa287ffaa4331b86f5f9aec18e65ffdf49daf62fd1ff470 0x3076d9a6100a6f725ecf799b6ce7c9628f98f78ad0c72f4313e5ad90e6b57921 0xd938eee4dad3e2fe11c102673d035962d83e25973b6a36fb825daaf45ce7e559 0x937fb1374d1d9d6915461f0bf4b7a3e073c8402ef9b1be9dd65a3e9f0267d991 0xa15ac1446e0f32a1daddc36b1f9e9760725f9462022fdc47ccf42a21c8efb413 0xc80b4aafad291cb38fe15af23fcea8e4de5daa3714af606158d89f9f854cb3ee 0xd27a605837d520dd34d770f4bbc6e185cde046814da3bdaeca2627efa80cdab2 0xa854f2ffa880a85fad01f8a261d086bda6d819db68b1deca1b49fe165d24ac74 0x2db9850c9f6071ac80e096f7dac86d2caf5b59f0065e6e8531008fc855bfb586 0xfb407eaacff1ad4ed9e22eec90471b623cfa0ee2899fbd18bc206419f2b1590a 0xa57cdaab2ce686a33afb0333427b616a59324f0d7a453e0c539918761f38b743 0x79924bc0cc65d611198b2a7a813803b3bc963b5802072510cb9cc0b7da1ace03 0x5d37644808a962bbf00a4fe58a7c4825ed458965fd07806273fa24e676c9da76 chain_logs contract_getters",
+    "search_text": "dog 205 dog #205 205 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9800 degen 0xb94821084b6195c79e1f8dcbb0775ab7e40764d11709fca1e9307a662e284b0c 0x11fffae7e78b7767666ff3aba42894f7a3761c1678d4f57bcf441916ed268edc #216/730 background: none; body: black; neck: none; mouth: teeth; ears: earbuds; head: baseballcap; eyes: vrgoggles 0xbd269056549e9b214f33723c65c60b2444e845d050d63288b6e35b93ff9c367f 0xa92aa9a0c707632209351a73f12fb3649f8969b598fdcd5b2e04973ce6f02c74 0xf9ad4614f561f347e43b067db73be5e041421e93792f200d1f7eea94e2528d15 0x7bc86fb0a82b8b9e217215c8e7e08c282cb806969fae73f7c6f34b89c54a9568 0x43f8f5f1104db9767fa287ffaa4331b86f5f9aec18e65ffdf49daf62fd1ff470 0x3076d9a6100a6f725ecf799b6ce7c9628f98f78ad0c72f4313e5ad90e6b57921 0xd938eee4dad3e2fe11c102673d035962d83e25973b6a36fb825daaf45ce7e559 0x937fb1374d1d9d6915461f0bf4b7a3e073c8402ef9b1be9dd65a3e9f0267d991 0xa15ac1446e0f32a1daddc36b1f9e9760725f9462022fdc47ccf42a21c8efb413 0xc80b4aafad291cb38fe15af23fcea8e4de5daa3714af606158d89f9f854cb3ee 0xd27a605837d520dd34d770f4bbc6e185cde046814da3bdaeca2627efa80cdab2 0xa854f2ffa880a85fad01f8a261d086bda6d819db68b1deca1b49fe165d24ac74 0x2db9850c9f6071ac80e096f7dac86d2caf5b59f0065e6e8531008fc855bfb586 0xfb407eaacff1ad4ed9e22eec90471b623cfa0ee2899fbd18bc206419f2b1590a 0xa57cdaab2ce686a33afb0333427b616a59324f0d7a453e0c539918761f38b743 0x79924bc0cc65d611198b2a7a813803b3bc963b5802072510cb9cc0b7da1ace03 0x5d37644808a962bbf00a4fe58a7c4825ed458965fd07806273fa24e676c9da76 chain_logs contract_getters",
     "settlement": {
       "block_number": 24755261,
       "block_time_utc": "2024-11-30T16:19:30Z",
@@ -94,12 +94,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -119,7 +119,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

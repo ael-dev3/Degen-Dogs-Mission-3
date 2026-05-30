@@ -61,12 +61,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#203/729",
-      "rank": 203,
-      "total": 729
+      "display": "#209/730",
+      "rank": 209,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 683 dog #683 683 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.05678 eth 0x9026888695a3f7580be9098668e9a15074cb8fde21f1979955aeac31805f8aa2 0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73 #203/729 background: none; body: blue; neck: goldnecklace; mouth: pizza; ears: goldearring; head: blackcap; eyes: sunglasses 0xe7ea5f6addd1161247d6a276f7a9150825f2abd8b2520d987752ad0726a72256 0x666348fecfaa1c0ca5f2d5a4c078fb1f1e720d4c1f3c0f0b054fc3b9dbefd2a5 0x4be22b280b58e15d6863d93b444f04b38e872945a2ba4e15135fb163c02de506 0xc6a4acfeeb10e34e7cb3a906956b990dbb97dce46c1c1fa9a1991399c4588200 0x05f1183add9c0546db5ba4bcd8744aad61ac25393921c1da205579b53d1df99e 0xc38cff74215c16f234eedec1617a0b6e3ce9c3568b2fb49b20a06e7ec0344c1e 0xbdf330deb0188df87ccf2606c7fe61ac54d993c6bc1672f51035917165901fa4 0xc4b3050e68df257d7beaf26f3a448a02701d13b6d8f9c9da5e100eb3a9e055d6 0x9ef2689b07f80a770c41d06bca6ae681c73fe116fb2853e635dfeeb558417c3c 0x21fe6f9683ec0e921f4f9b88c68e3ad52af2ec23d7a6aeebb308e38891444ea9 0xcd9c7dbb70689b9293a333d1db4949f9f88f8f124a33da1b51b9a844cdcaa846 0xf1e2eb794c014fa43f35854d52a26ebaf7953b1a9a96ddc1e12c5025365c0e53 0x0dac09d9dbf7a40c7e5e384dcb5015148ae6c3a9333bbf44dcd403b89b691f56 0xe0dc49f2d03703b5a54f967d2b10ea797c02a8fb41555c40e55a603b092b319b base_logs archive_indexer",
+    "search_text": "dog 683 dog #683 683 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.05678 eth 0x9026888695a3f7580be9098668e9a15074cb8fde21f1979955aeac31805f8aa2 0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73 #209/730 background: none; body: blue; neck: goldnecklace; mouth: pizza; ears: goldearring; head: blackcap; eyes: sunglasses 0xe7ea5f6addd1161247d6a276f7a9150825f2abd8b2520d987752ad0726a72256 0x666348fecfaa1c0ca5f2d5a4c078fb1f1e720d4c1f3c0f0b054fc3b9dbefd2a5 0x4be22b280b58e15d6863d93b444f04b38e872945a2ba4e15135fb163c02de506 0xc6a4acfeeb10e34e7cb3a906956b990dbb97dce46c1c1fa9a1991399c4588200 0x05f1183add9c0546db5ba4bcd8744aad61ac25393921c1da205579b53d1df99e 0xc38cff74215c16f234eedec1617a0b6e3ce9c3568b2fb49b20a06e7ec0344c1e 0xbdf330deb0188df87ccf2606c7fe61ac54d993c6bc1672f51035917165901fa4 0xc4b3050e68df257d7beaf26f3a448a02701d13b6d8f9c9da5e100eb3a9e055d6 0x9ef2689b07f80a770c41d06bca6ae681c73fe116fb2853e635dfeeb558417c3c 0x21fe6f9683ec0e921f4f9b88c68e3ad52af2ec23d7a6aeebb308e38891444ea9 0xcd9c7dbb70689b9293a333d1db4949f9f88f8f124a33da1b51b9a844cdcaa846 0xf1e2eb794c014fa43f35854d52a26ebaf7953b1a9a96ddc1e12c5025365c0e53 0x0dac09d9dbf7a40c7e5e384dcb5015148ae6c3a9333bbf44dcd403b89b691f56 0xe0dc49f2d03703b5a54f967d2b10ea797c02a8fb41555c40e55a603b092b319b base_logs archive_indexer",
     "settlement": {
       "block_number": 44660190,
       "block_time_utc": "2026-04-13T19:48:47Z",
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -111,7 +111,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

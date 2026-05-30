@@ -48,12 +48,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#284/729",
-      "rank": 284,
-      "total": 729
+      "display": "#283/730",
+      "rank": 283,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #284/729 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d base_logs archive_indexer",
+    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #283/730 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d base_logs archive_indexer",
     "settlement": {
       "block_number": 42649529,
       "block_time_utc": "2026-02-26T06:46:45Z",
@@ -83,7 +83,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -93,7 +93,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

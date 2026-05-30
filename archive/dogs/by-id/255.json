@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#110/729",
-      "rank": 110,
-      "total": 729
+      "display": "#109/730",
+      "rank": 109,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 255 dog #255 255 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 9790 degen 0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e 0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2 #110/729 background: none; body: sugarskull; neck: none; mouth: none; ears: none; head: headphones; eyes: 3dglasses 0x3985afc24540f81e044cd08c47e97cbfdf6421cb3f1a7541ba004f2eeeea5d31 0xe5fe580065b2abc5092d6ac3bf335b93f505e9103ad3b7ec7165f1d04bf902a8 0x71cbbf9a23b5e67cafbe74088676a144b1825d9bfe4d44da86378d348912659f 0x96c5362e6334af50d4b98c6577a0b49ed3dfcc71529a3709c8f2f78f945d8643 chain_logs contract_getters",
+    "search_text": "dog 255 dog #255 255 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 9790 degen 0x95458e59e79be9d788a6b738eeac8b41ed61fa91a394c595035be36a292a3d4e 0xfa2937dadc5ea96cd685d7c65bf715a5635e66178d8d59deeacd40e273e5e9a2 #109/730 background: none; body: sugarskull; neck: none; mouth: none; ears: none; head: headphones; eyes: 3dglasses 0x3985afc24540f81e044cd08c47e97cbfdf6421cb3f1a7541ba004f2eeeea5d31 0xe5fe580065b2abc5092d6ac3bf335b93f505e9103ad3b7ec7165f1d04bf902a8 0x71cbbf9a23b5e67cafbe74088676a144b1825d9bfe4d44da86378d348912659f 0x96c5362e6334af50d4b98c6577a0b49ed3dfcc71529a3709c8f2f78f945d8643 chain_logs contract_getters",
     "settlement": {
       "block_number": 25252729,
       "block_time_utc": "2025-01-16T04:52:22Z",
@@ -86,7 +86,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

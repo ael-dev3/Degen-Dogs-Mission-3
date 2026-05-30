@@ -58,12 +58,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#414/729",
-      "rank": 414,
-      "total": 729
+      "display": "#413/730",
+      "rank": 413,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 427 dog #427 427 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 2635 degen 0x3efc1b133edb1f2350d7e5ea376406a2b3fc42dcfe2481043b1aebf355eb0edb 0x15846ab3ecd22fdda6bc1422e42617152482194de5661594a50dd77f1c46dc1a #414/729 background: none; body: white; neck: studdedcollar; mouth: none; ears: earbuds; head: whitemohawk; eyes: sunglasses 0x4bc844fa8583b4a7a67c3514ceb922a4897b1f6dbfd8229be4b31d1f4492bbb7 0x9d5120359e3d852cb07ce114806bbabe4b023f635b051a930c13f7b98b23ba22 0x292aa202a629660454568a96e9125bd2680eeb7d2308a9cd33b74a2609eb96d8 0x896001580cb3583026984b0bb160148f834f8e1dd063e8af016e843097027707 0xaf62a2f1c2045b8edf6eb572676e488873b0bacc3af3defc7aa15da558da1970 0x06e318f81b75546e900e23e4d6267940357a57bd17a001e52520c461bae19280 0x82c3fde8bbeff51f7980299dc938182bcc7e0168b4175757f513c4da84f9d1ac 0x9a3221f7f7280bac800ab826aaa8c33c7909881dec2d2b9d344bfc958b0f51ac 0x77f04b3f159680a849ccfe272c9dfd7feef78b4c304e641e7c7e3eff382c47aa 0xbf2867f6c623b9bfa75def3b283de4ecc8bcb9c73aa89763149d7a0142fe2af1 0xbc82132c752c0739af7a977e9b740ba4ab0a0be971b0678eccce2972b413686e chain_logs contract_getters",
+    "search_text": "dog 427 dog #427 427 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 2635 degen 0x3efc1b133edb1f2350d7e5ea376406a2b3fc42dcfe2481043b1aebf355eb0edb 0x15846ab3ecd22fdda6bc1422e42617152482194de5661594a50dd77f1c46dc1a #413/730 background: none; body: white; neck: studdedcollar; mouth: none; ears: earbuds; head: whitemohawk; eyes: sunglasses 0x4bc844fa8583b4a7a67c3514ceb922a4897b1f6dbfd8229be4b31d1f4492bbb7 0x9d5120359e3d852cb07ce114806bbabe4b023f635b051a930c13f7b98b23ba22 0x292aa202a629660454568a96e9125bd2680eeb7d2308a9cd33b74a2609eb96d8 0x896001580cb3583026984b0bb160148f834f8e1dd063e8af016e843097027707 0xaf62a2f1c2045b8edf6eb572676e488873b0bacc3af3defc7aa15da558da1970 0x06e318f81b75546e900e23e4d6267940357a57bd17a001e52520c461bae19280 0x82c3fde8bbeff51f7980299dc938182bcc7e0168b4175757f513c4da84f9d1ac 0x9a3221f7f7280bac800ab826aaa8c33c7909881dec2d2b9d344bfc958b0f51ac 0x77f04b3f159680a849ccfe272c9dfd7feef78b4c304e641e7c7e3eff382c47aa 0xbf2867f6c623b9bfa75def3b283de4ecc8bcb9c73aa89763149d7a0142fe2af1 0xbc82132c752c0739af7a977e9b740ba4ab0a0be971b0678eccce2972b413686e chain_logs contract_getters",
     "settlement": {
       "block_number": 26065865,
       "block_time_utc": "2025-07-11T15:00:07Z",
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

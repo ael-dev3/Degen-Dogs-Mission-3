@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#415/729",
-      "rank": 415,
-      "total": 729
+      "display": "#414/730",
+      "rank": 414,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 664 dog #664 664 mission 3 mission 3 base settled 0x8a1721bf6127b16836c2bcd33c612765ff9f0687 @valdore valdore 0.04835 eth 0x3c8c5dee4707b9005b4b3c04f7f19a4b65f64727bf21943c73f322489e3be41f 0x7a8943e88ae94b4aedd8d48b1204e78b178f965de5c812d84a14260a91d47350 #415/729 background: halo; body: redbrown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: sunglasses 0x906dada4faf74a63ae6ade8b5453a468b443afd579b5c284b56acbca13926327 0x9e1fd66359130c95d1facb216f2ac9e98ee2bf333dcec3ddeaa69dc4e6c9c393 0x9c572077fb61c7bf5128f22af6aedb3249e1d90d1ca20c28b62d091c67712825 0xcd6c1be2cfe3d2f68c0bff9afa8357e147e2ed70f0d6c370a10b886367417d60 0x312499f44b70998e4f2832ee8c9fab563dcfc7ea0b152070988ea36d6995fab7 0x62e0f8cbd212e13f0b7e376ea37bf02c170111081c36b932dfd1194ebe9e9769 0x8fde535a9159ea5124d3f18f4e8768b3abc4eb1a852d37f6c49a95d23764499c 0x647885087b21b8a7c301aeb2d351e64374d42d9bd21e88146b4295d35aa67a19 0x006333a6ab6758f7736fed9e8c5de3061264668169b393d6e86da5a3a6e5670d 0xf052017d63c95a50b5e8c100f9bbb38aa8d46cc3b2dc9a433757bdf6c871d6d2 base_logs archive_indexer",
+    "search_text": "dog 664 dog #664 664 mission 3 mission 3 base settled 0x8a1721bf6127b16836c2bcd33c612765ff9f0687 @valdore valdore 0.04835 eth 0x3c8c5dee4707b9005b4b3c04f7f19a4b65f64727bf21943c73f322489e3be41f 0x7a8943e88ae94b4aedd8d48b1204e78b178f965de5c812d84a14260a91d47350 #414/730 background: halo; body: redbrown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: sunglasses 0x906dada4faf74a63ae6ade8b5453a468b443afd579b5c284b56acbca13926327 0x9e1fd66359130c95d1facb216f2ac9e98ee2bf333dcec3ddeaa69dc4e6c9c393 0x9c572077fb61c7bf5128f22af6aedb3249e1d90d1ca20c28b62d091c67712825 0xcd6c1be2cfe3d2f68c0bff9afa8357e147e2ed70f0d6c370a10b886367417d60 0x312499f44b70998e4f2832ee8c9fab563dcfc7ea0b152070988ea36d6995fab7 0x62e0f8cbd212e13f0b7e376ea37bf02c170111081c36b932dfd1194ebe9e9769 0x8fde535a9159ea5124d3f18f4e8768b3abc4eb1a852d37f6c49a95d23764499c 0x647885087b21b8a7c301aeb2d351e64374d42d9bd21e88146b4295d35aa67a19 0x006333a6ab6758f7736fed9e8c5de3061264668169b393d6e86da5a3a6e5670d 0xf052017d63c95a50b5e8c100f9bbb38aa8d46cc3b2dc9a433757bdf6c871d6d2 base_logs archive_indexer",
     "settlement": {
       "block_number": 43832627,
       "block_time_utc": "2026-03-25T16:03:21Z",
@@ -87,12 +87,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

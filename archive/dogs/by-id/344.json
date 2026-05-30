@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#478/729",
+      "display": "#478/730",
       "rank": 478,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 344 dog #344 344 mission 2 mission 2 degen chain settled 0xb13a55d8512aec4bf7b15067d733c4c3c68f2439 0xb13a…2439 9999 degen 0xcf08a669c889be5d0691f9808f07acbb5bef0e0cbd515f3978d308602ec1547b 0x8ec4476e5c36bf5c049db5622e91a3c71f0a01735b3b43a93c3bbe62b312e171 #478/729 background: none; body: grey; neck: none; mouth: tongue; ears: earbuds; head: baseballcap; eyes: glasses 0x12ac73fe9fb04a1d942309c8b9a3948b1dcdc0696cf753b80f520f17e5865cbd 0x1f4705a8a36cd4deaf49e30ebebfd96bb1df1a09c11ff375141d73aebbc5eb80 0x7fa20fa8152d493aa0e40ad923075f21b0de42358a31184ae432fe16389cf33d chain_logs contract_getters",
+    "search_text": "dog 344 dog #344 344 mission 2 mission 2 degen chain settled 0xb13a55d8512aec4bf7b15067d733c4c3c68f2439 0xb13a…2439 9999 degen 0xcf08a669c889be5d0691f9808f07acbb5bef0e0cbd515f3978d308602ec1547b 0x8ec4476e5c36bf5c049db5622e91a3c71f0a01735b3b43a93c3bbe62b312e171 #478/730 background: none; body: grey; neck: none; mouth: tongue; ears: earbuds; head: baseballcap; eyes: glasses 0x12ac73fe9fb04a1d942309c8b9a3948b1dcdc0696cf753b80f520f17e5865cbd 0x1f4705a8a36cd4deaf49e30ebebfd96bb1df1a09c11ff375141d73aebbc5eb80 0x7fa20fa8152d493aa0e40ad923075f21b0de42358a31184ae432fe16389cf33d chain_logs contract_getters",
     "settlement": {
       "block_number": 25705890,
       "block_time_utc": "2025-04-11T05:35:03Z",
@@ -85,7 +85,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -95,7 +95,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -105,7 +105,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

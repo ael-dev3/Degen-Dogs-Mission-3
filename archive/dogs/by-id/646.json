@@ -58,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#123/729",
-      "rank": 123,
-      "total": 729
+      "display": "#122/730",
+      "rank": 122,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 646 dog #646 646 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0121 eth 0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117 0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04 #123/729 background: halo; body: blue; neck: goldnecklace; mouth: none; ears: loopearring; head: crazyhair; eyes: eyepatch 0x7ba0096334e74f8bf852d997ba09f2cdc59d40c00a0cad07a5fdf2305d9729cc 0x437abdea21fe9a738844d5e73ad9f60dde85bbdee4be5bf81bd30de7ac3731a6 0xcec110cf3373c46f15c32bd4ad6c5c940338686ec429bbd74bc6a8e6e4534bc8 0xf1f3d3d1b7117a2befc722c8782587f9212d782d7988ea345af9d33810723446 0xb6a536f9c251b1a8196e09e36b1b6040482a1af139507db058ea05f7e545da96 0xb508d51bdc7a5146126222694ab77b1558f76ae34ebc9100fe3f947b24fe542d 0xa976ac8461314ed937c24ced9094ab2ac13d41cab7a3ac0dab563edb9fb3fcfa 0x49b76c0d8e5dd81a9b45bd4f89f7185a9c2a040fdbf1b3e978a438a0a00da653 0x44c81fc34b036100e4418c8cf6a24c9af7e6754b7fbc3ed9e1eafba9e69f82b0 0x403f3922104f837972c80a3da4a8ef1a8071e97980e4d242af63ecefef38fe60 0x338d8c236754450e73633901e215ee3b7270e051a9d1b99225a414bfb070517e base_logs archive_indexer",
+    "search_text": "dog 646 dog #646 646 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.0121 eth 0x79ccf924c106907b21afd71aa45495a51beb96b7da7b09ca2f94429135b55117 0x67d9fcd08e312c367d1f3b22c97500ddb1a02b671f291ccb47a750f92ebfbe04 #122/730 background: halo; body: blue; neck: goldnecklace; mouth: none; ears: loopearring; head: crazyhair; eyes: eyepatch 0x7ba0096334e74f8bf852d997ba09f2cdc59d40c00a0cad07a5fdf2305d9729cc 0x437abdea21fe9a738844d5e73ad9f60dde85bbdee4be5bf81bd30de7ac3731a6 0xcec110cf3373c46f15c32bd4ad6c5c940338686ec429bbd74bc6a8e6e4534bc8 0xf1f3d3d1b7117a2befc722c8782587f9212d782d7988ea345af9d33810723446 0xb6a536f9c251b1a8196e09e36b1b6040482a1af139507db058ea05f7e545da96 0xb508d51bdc7a5146126222694ab77b1558f76ae34ebc9100fe3f947b24fe542d 0xa976ac8461314ed937c24ced9094ab2ac13d41cab7a3ac0dab563edb9fb3fcfa 0x49b76c0d8e5dd81a9b45bd4f89f7185a9c2a040fdbf1b3e978a438a0a00da653 0x44c81fc34b036100e4418c8cf6a24c9af7e6754b7fbc3ed9e1eafba9e69f82b0 0x403f3922104f837972c80a3da4a8ef1a8071e97980e4d242af63ecefef38fe60 0x338d8c236754450e73633901e215ee3b7270e051a9d1b99225a414bfb070517e base_logs archive_indexer",
     "settlement": {
       "block_number": 43040692,
       "block_time_utc": "2026-03-07T08:05:31Z",
@@ -88,7 +88,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -113,7 +113,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

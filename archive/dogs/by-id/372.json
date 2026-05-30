@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#41/729",
+      "display": "#41/730",
       "rank": 41,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 372 dog #372 372 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x581fae421b96bc95714a4344be013b9fd1758353cbad763ad3b011bdfc7a1cd3 0xe3543da29b6a860a69c77b1f3f745cff9cba8f9fe6f0be0a1225bd6bb7d40eb8 #41/729 background: none; body: white; neck: goldnecklace; mouth: coin; ears: earbuds; head: redmohawk; eyes: vrgoggles 0x82b4e012ff63c0ca7cdef42fa85ea211d5a1d317acced7cda6492b58f68a6557 chain_logs contract_getters",
+    "search_text": "dog 372 dog #372 372 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x581fae421b96bc95714a4344be013b9fd1758353cbad763ad3b011bdfc7a1cd3 0xe3543da29b6a860a69c77b1f3f745cff9cba8f9fe6f0be0a1225bd6bb7d40eb8 #41/730 background: none; body: white; neck: goldnecklace; mouth: coin; ears: earbuds; head: redmohawk; eyes: vrgoggles 0x82b4e012ff63c0ca7cdef42fa85ea211d5a1d317acced7cda6492b58f68a6557 chain_logs contract_getters",
     "settlement": {
       "block_number": 25837411,
       "block_time_utc": "2025-05-08T21:19:00Z",
@@ -93,17 +93,17 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

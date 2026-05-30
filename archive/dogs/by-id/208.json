@@ -55,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#514/729",
-      "rank": 514,
-      "total": 729
+      "display": "#513/730",
+      "rank": 513,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 208 dog #208 208 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 12300 degen 0xe583a188520cb9829e5b0abdb5d85aeff2bdf351347340071cd8e7a44b43d940 0x789d9b3d7406d762dc8d1b178a77020218e6f3e75bf26e726efc2530f02674d1 #514/729 background: none; body: brown; neck: redcollar; mouth: none; ears: goldearring; head: toque; eyes: sunglasses 0x2745c6fe4e772897cdd32003e5d6ac197522fa703f92256c7a7d0ce4c9366921 0x01867d671a5c060882410d714d43035f1fcf6295d78f569a7f32117f58377b46 0x9a5964095e587772eee68865de261bf51d8045df0dc66c7b3c72cf5b50549887 0x11215918d4c8bfd3cb3d5ec6351c472bbd63cf38f17c261049dc15dd2830446c 0x31da60e21f1a8b6efd54d73a9a9499542f1ca27a2bafb5cead93423a478b3754 0x6c1aa4738e20e5dd404f7298d5b9a57369b7e63d9d200845416f0b12515e8dd9 0x34e8c5860ef9f0926e0ef791a02ed33a9ffb94d2172ccd16e18bd6ea53c4781c 0x4fe5814d0b4bbf2f5c9dedbb274db1191115739b02b6281e32a59e4ee27b2515 chain_logs contract_getters",
+    "search_text": "dog 208 dog #208 208 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 12300 degen 0xe583a188520cb9829e5b0abdb5d85aeff2bdf351347340071cd8e7a44b43d940 0x789d9b3d7406d762dc8d1b178a77020218e6f3e75bf26e726efc2530f02674d1 #513/730 background: none; body: brown; neck: redcollar; mouth: none; ears: goldearring; head: toque; eyes: sunglasses 0x2745c6fe4e772897cdd32003e5d6ac197522fa703f92256c7a7d0ce4c9366921 0x01867d671a5c060882410d714d43035f1fcf6295d78f569a7f32117f58377b46 0x9a5964095e587772eee68865de261bf51d8045df0dc66c7b3c72cf5b50549887 0x11215918d4c8bfd3cb3d5ec6351c472bbd63cf38f17c261049dc15dd2830446c 0x31da60e21f1a8b6efd54d73a9a9499542f1ca27a2bafb5cead93423a478b3754 0x6c1aa4738e20e5dd404f7298d5b9a57369b7e63d9d200845416f0b12515e8dd9 0x34e8c5860ef9f0926e0ef791a02ed33a9ffb94d2172ccd16e18bd6ea53c4781c 0x4fe5814d0b4bbf2f5c9dedbb274db1191115739b02b6281e32a59e4ee27b2515 chain_logs contract_getters",
     "settlement": {
       "block_number": 24793040,
       "block_time_utc": "2024-12-03T16:26:15Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },

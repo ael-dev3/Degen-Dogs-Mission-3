@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#615/729",
+      "display": "#615/730",
       "rank": 615,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 90 dog #90 90 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.05 weth 0x2a074890944bf2619f7732c450f10b66feabaad9d673d00b213ca4fcb2cab0d4 0x2ecb18a8671c3daf7ee131168a515233ecedb05d3aaae1f363574bfcdf20c442 #615/729 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: vrgoggles 0x5eafeb90be72d380b35b6972c4d07f1d1e053f9edb5fd46dd20ca7d967400886 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 90 dog #90 90 mission 1 mission 1 polygon settled 0xd0ac50d9f7516be16e2449539394a3967bea03c7 0xd0ac…03c7 0.05 weth 0x2a074890944bf2619f7732c450f10b66feabaad9d673d00b213ca4fcb2cab0d4 0x2ecb18a8671c3daf7ee131168a515233ecedb05d3aaae1f363574bfcdf20c442 #615/730 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: vrgoggles 0x5eafeb90be72d380b35b6972c4d07f1d1e053f9edb5fd46dd20ca7d967400886 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27838762,
       "block_time_utc": "2022-05-02T14:56:09Z",
@@ -105,7 +105,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

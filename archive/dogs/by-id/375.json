@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#169/729",
-      "rank": 169,
-      "total": 729
+      "display": "#171/730",
+      "rank": 171,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 375 dog #375 375 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 5000 degen 0x442fbec1b7dc871f71b8803aab14d68f854fcdc1c753bae80264971f7d6b95d2 0x5e5f6037080380442af44d35d21cb731ca3fae29ad5567803848a29da8ae18df #169/729 background: none; body: brown; neck: studdedcollar; mouth: none; ears: loopearring; head: unicorn; eyes: vrgoggles 0x813231604bcb134dd0091544fff1a61f5a0c30ae24dfbb39400a9799b61697b0 0xccd8cb10db4be65a38a7c42816ac7b1c3efd66c9ecb4197179f87e5080175aec 0x7dc06ce3c1fac45824b8701861193819db5445ad601e26bb371df3aa982bcc46 0x835b1d0c9dfe95efbdde6f1ec196621f282cd1ae43dfadfce4db98d7b4959813 0x74b00fc879d36d72a997be2dbee83d12786734e3e4ec36bb1a40f1973381d80f chain_logs contract_getters",
+    "search_text": "dog 375 dog #375 375 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 5000 degen 0x442fbec1b7dc871f71b8803aab14d68f854fcdc1c753bae80264971f7d6b95d2 0x5e5f6037080380442af44d35d21cb731ca3fae29ad5567803848a29da8ae18df #171/730 background: none; body: brown; neck: studdedcollar; mouth: none; ears: loopearring; head: unicorn; eyes: vrgoggles 0x813231604bcb134dd0091544fff1a61f5a0c30ae24dfbb39400a9799b61697b0 0xccd8cb10db4be65a38a7c42816ac7b1c3efd66c9ecb4197179f87e5080175aec 0x7dc06ce3c1fac45824b8701861193819db5445ad601e26bb371df3aa982bcc46 0x835b1d0c9dfe95efbdde6f1ec196621f282cd1ae43dfadfce4db98d7b4959813 0x74b00fc879d36d72a997be2dbee83d12786734e3e4ec36bb1a40f1973381d80f chain_logs contract_getters",
     "settlement": {
       "block_number": 25844995,
       "block_time_utc": "2025-05-10T22:25:50Z",
@@ -82,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -107,7 +107,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

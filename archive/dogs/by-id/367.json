@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#57/729",
+      "display": "#57/730",
       "rank": 57,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 367 dog #367 367 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8888 degen 0xc1434c0402ddb093ecdcefca481a90de4225e7f5e9e27c4968655ac7281a8e01 0xde1d1dd4599d8d30ab67996a9d488929df4abf1a403ecb4a7b33173d5d889f9e #57/729 background: none; body: rainbow; neck: none; mouth: pizza; ears: none; head: hoodie; eyes: vrgoggles 0x277ecb5cd52dbe6fd24a2260e654f7d3411ebcfb8787f7f3fa34b0e452bfa940 0x291ab18f5ba8474c3ca8945af708049df40c405fc420d066599ede65bd574e0b 0x00966964d6c03f8ad1b4547da08d02b60554e04e3898db90fe629755f21b8b1c 0x56dbc8b3abdf8d041f8477efe72760d6b20b896ec80ff5b742c734b1fe5e35cc 0x8317c0fbf853e09d317676e3cb45078591e5b21c7ea40cf7af7daacbb6c90d5c 0xd1f0c1ef92c8692bf0b8e87c27a980cbc00ee96502dea4dc090860cd321da6c3 chain_logs contract_getters",
+    "search_text": "dog 367 dog #367 367 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8888 degen 0xc1434c0402ddb093ecdcefca481a90de4225e7f5e9e27c4968655ac7281a8e01 0xde1d1dd4599d8d30ab67996a9d488929df4abf1a403ecb4a7b33173d5d889f9e #57/730 background: none; body: rainbow; neck: none; mouth: pizza; ears: none; head: hoodie; eyes: vrgoggles 0x277ecb5cd52dbe6fd24a2260e654f7d3411ebcfb8787f7f3fa34b0e452bfa940 0x291ab18f5ba8474c3ca8945af708049df40c405fc420d066599ede65bd574e0b 0x00966964d6c03f8ad1b4547da08d02b60554e04e3898db90fe629755f21b8b1c 0x56dbc8b3abdf8d041f8477efe72760d6b20b896ec80ff5b742c734b1fe5e35cc 0x8317c0fbf853e09d317676e3cb45078591e5b21c7ea40cf7af7daacbb6c90d5c 0xd1f0c1ef92c8692bf0b8e87c27a980cbc00ee96502dea4dc090860cd321da6c3 chain_logs contract_getters",
     "settlement": {
       "block_number": 25818725,
       "block_time_utc": "2025-05-03T04:22:48Z",
@@ -88,7 +88,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

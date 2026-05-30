@@ -53,12 +53,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#673/729",
-      "rank": 673,
-      "total": 729
+      "display": "#675/730",
+      "rank": 675,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 19 dog #19 19 mission 1 mission 1 polygon settled 0xc6ffc3a5af16fb93c86c75280413ef7c48d79e36 0xc6ff…9e36 0.62 weth 0xe9d2bfba4a773568e5d6f723e2e10852c75ffb38c6d7b37249e151ed29fecf41 0x86d9aeed0e8d8f87814835edba7070e5983670ed1afd9618401fc6eb65cb8cc9 #673/729 background: none; body: dalmation; neck: none; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x3e2327cbf8c26113b650a9a07fffbcabb24ffcd2497591ee2ec0c3c623bf686d 0x12d133771ceac49d652c78cf7d70f1a191e1c0844f5fe667c1afc88fe673de37 0x610614eb949c2c8f06637569012d5b51f4529fa07322d617bb5f7a94b916e5c8 0xe592fac4f28ac2ebdd764c891bc9e08799ba4787ef35190885aad26741a4c952 0xf4dc2610bd93de0796e6516515385bb55d3169adc7ea799f63c5fa89e0d4b103 0xdc823b30d41c620ab51dff379004a596df67a0239f63abe19a2f7568ee6d99bb polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 19 dog #19 19 mission 1 mission 1 polygon settled 0xc6ffc3a5af16fb93c86c75280413ef7c48d79e36 0xc6ff…9e36 0.62 weth 0xe9d2bfba4a773568e5d6f723e2e10852c75ffb38c6d7b37249e151ed29fecf41 0x86d9aeed0e8d8f87814835edba7070e5983670ed1afd9618401fc6eb65cb8cc9 #675/730 background: none; body: dalmation; neck: none; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x3e2327cbf8c26113b650a9a07fffbcabb24ffcd2497591ee2ec0c3c623bf686d 0x12d133771ceac49d652c78cf7d70f1a191e1c0844f5fe667c1afc88fe673de37 0x610614eb949c2c8f06637569012d5b51f4529fa07322d617bb5f7a94b916e5c8 0xe592fac4f28ac2ebdd764c891bc9e08799ba4787ef35190885aad26741a4c952 0xf4dc2610bd93de0796e6516515385bb55d3169adc7ea799f63c5fa89e0d4b103 0xdc823b30d41c620ab51dff379004a596df67a0239f63abe19a2f7568ee6d99bb polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26094625,
       "block_time_utc": "2022-03-19T01:23:58Z",
@@ -90,7 +90,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

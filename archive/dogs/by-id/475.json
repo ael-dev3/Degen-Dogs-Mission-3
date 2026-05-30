@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#559/729",
-      "rank": 559,
-      "total": 729
+      "display": "#556/730",
+      "rank": 556,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 475 dog #475 475 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2800 degen 0xffc9a6f9cda8a2cd160bd1efaeb830f1a2c08ad4e4c4a4be532fdd3541572315 0xa62c5e026851117352c852955fa05f0b9800385aa6675fc84a765e540c9eaa70 #559/729 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: baseballcap; eyes: masksnorkel 0x21e7967d8b9a88dd73aa46be9bb9e0777dc80362edbb90e0a86c384d3d968181 0xda2a1fcef2a4918cc5d10273842aa11f63b1f7b9416775ed6be6eba4a2955468 chain_logs contract_getters",
+    "search_text": "dog 475 dog #475 475 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2800 degen 0xffc9a6f9cda8a2cd160bd1efaeb830f1a2c08ad4e4c4a4be532fdd3541572315 0xa62c5e026851117352c852955fa05f0b9800385aa6675fc84a765e540c9eaa70 #556/730 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: baseballcap; eyes: masksnorkel 0x21e7967d8b9a88dd73aa46be9bb9e0777dc80362edbb90e0a86c384d3d968181 0xda2a1fcef2a4918cc5d10273842aa11f63b1f7b9416775ed6be6eba4a2955468 chain_logs contract_getters",
     "settlement": {
       "block_number": 26232057,
       "block_time_utc": "2025-09-01T04:47:22Z",
@@ -84,7 +84,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

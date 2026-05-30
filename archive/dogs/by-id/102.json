@@ -50,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#42/729",
-      "rank": 42,
-      "total": 729
+      "display": "#44/730",
+      "rank": 44,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 102 dog #102 102 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.07 weth 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d #42/729 background: none; body: rainbow; neck: goldnecklace; mouth: teeth; ears: earbuds; head: redmohawk; eyes: glasses 0xaf8a241ead5bb113ec7b194e9a20c9b6d20819d761d676f4c340266c85cf3faa 0xcd8f527ea531902dd4287882871f29880cf9955fcd2c2df704575890facac4df 0x50fa3d5d8d01314d202cb6f601dc972081da427b34939bd511d5fd034631ad61 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 102 dog #102 102 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.07 weth 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d #44/730 background: none; body: rainbow; neck: goldnecklace; mouth: teeth; ears: earbuds; head: redmohawk; eyes: glasses 0xaf8a241ead5bb113ec7b194e9a20c9b6d20819d761d676f4c340266c85cf3faa 0xcd8f527ea531902dd4287882871f29880cf9955fcd2c2df704575890facac4df 0x50fa3d5d8d01314d202cb6f601dc972081da427b34939bd511d5fd034631ad61 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28275685,
       "block_time_utc": "2022-05-13T17:25:01Z",
@@ -97,17 +97,17 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

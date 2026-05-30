@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#269/729",
-      "rank": 269,
-      "total": 729
+      "display": "#268/730",
+      "rank": 268,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 499 dog #499 499 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xc595f65f746e16b5433fbf2c8e2f73c728ba07a7c4ae816d3878c75e70451c9e 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 #269/729 background: halo; body: grey; neck: redcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: sunglasses 0x5ce293530da90b2c05c176ccf61195dd36cef7d1098e72695a835cdb316ce4d9 0x4894afb87ea066d49f4121671518bb558e86d3cb17d9a99359d72015a93b563b chain_logs contract_getters",
+    "search_text": "dog 499 dog #499 499 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xc595f65f746e16b5433fbf2c8e2f73c728ba07a7c4ae816d3878c75e70451c9e 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 #268/730 background: halo; body: grey; neck: redcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: sunglasses 0x5ce293530da90b2c05c176ccf61195dd36cef7d1098e72695a835cdb316ce4d9 0x4894afb87ea066d49f4121671518bb558e86d3cb17d9a99359d72015a93b563b chain_logs contract_getters",
     "settlement": {
       "block_number": 26277054,
       "block_time_utc": "2025-09-27T00:34:54Z",
@@ -99,7 +99,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },

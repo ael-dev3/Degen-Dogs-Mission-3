@@ -50,12 +50,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#499/729",
-      "rank": 499,
-      "total": 729
+      "display": "#498/730",
+      "rank": 498,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 612 dog #612 612 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.07624 eth 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace 0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05 #499/729 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: eyepatch 0x2dfba80496f17c9a7f357a4d80dbb6efdd7c3180d595f1be167c2d1cf954496c 0xf39e963cdee7b00ab69ce79496d2f5812cb2db71eaeaa82e9ae8ebb23fefd238 0x8a02290973713c5a14dbd233e0abdb751d7e09fd528027977e8f19909d6df1a4 base_logs archive_indexer",
+    "search_text": "dog 612 dog #612 612 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.07624 eth 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace 0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05 #498/730 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: eyepatch 0x2dfba80496f17c9a7f357a4d80dbb6efdd7c3180d595f1be167c2d1cf954496c 0xf39e963cdee7b00ab69ce79496d2f5812cb2db71eaeaa82e9ae8ebb23fefd238 0x8a02290973713c5a14dbd233e0abdb751d7e09fd528027977e8f19909d6df1a4 base_logs archive_indexer",
     "settlement": {
       "block_number": 41562758,
       "block_time_utc": "2026-02-01T03:01:03Z",
@@ -105,7 +105,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

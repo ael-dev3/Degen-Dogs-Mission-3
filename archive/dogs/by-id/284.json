@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#168/729",
-      "rank": 168,
-      "total": 729
+      "display": "#167/730",
+      "rank": 167,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 284 dog #284 284 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xae8591094776c3e532957609027cb75b5bd1de19dbc8cc9b7008660dd75d6e7b 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 #168/729 background: none; body: orange; neck: redcollar; mouth: pizza; ears: loopearring; head: crazyhair; eyes: eyepatch 0xe294a0bfcf8bda9d40fccf14fbd559feed88cea4bd7b809f1ce556949aad0131 chain_logs contract_getters",
+    "search_text": "dog 284 dog #284 284 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xae8591094776c3e532957609027cb75b5bd1de19dbc8cc9b7008660dd75d6e7b 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 #167/730 background: none; body: orange; neck: redcollar; mouth: pizza; ears: loopearring; head: crazyhair; eyes: eyepatch 0xe294a0bfcf8bda9d40fccf14fbd559feed88cea4bd7b809f1ce556949aad0131 chain_logs contract_getters",
     "settlement": {
       "block_number": 25453057,
       "block_time_utc": "2025-02-14T05:31:26Z",
@@ -103,7 +103,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

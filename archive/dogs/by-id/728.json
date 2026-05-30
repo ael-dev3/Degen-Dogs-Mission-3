@@ -1,8 +1,8 @@
 {
   "generated_at_utc": "2026-05-29T19:05:33Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-05-30T18:33:17Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-30T18:40:09Z",
     "amount": {
       "native": "0.0121",
       "native_symbol": "ETH",
@@ -19,7 +19,7 @@
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-05-29T18:38:33Z",
+      "block_time_utc": "2026-05-30T18:40:09Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -50,16 +50,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#697/729",
+      "display": "#697/730",
       "rank": 697,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base ongoing 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.49 $24.49 2026-05-30t18:33:17z #697/729 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.2%) body grey neck: redcollar (31.0%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.52 $24.52 2026-05-30t18:40:09z #697/730 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.2%) body grey neck: redcollar (31.0%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.1%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.1%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-05-30T18:40:09Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -71,7 +71,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

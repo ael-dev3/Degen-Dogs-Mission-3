@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "46688344"
+    "value": "46688570"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-05-30 18:33:55"
+    "value": "2026-05-30 18:41:27"
   },
   {
     "metric": "auction_house",
@@ -25,7 +25,7 @@
   },
   {
     "metric": "dog_total_supply",
-    "value": "729"
+    "value": "730"
   },
   {
     "metric": "woof_token",
@@ -57,7 +57,7 @@
   },
   {
     "metric": "sup_usd_price",
-    "value": "0.01165"
+    "value": "0.01167"
   },
   {
     "metric": "sup_usd_source",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2024.15"
+    "value": "2026.85"
   },
   {
     "metric": "eth_usd_source",
@@ -109,7 +109,7 @@
   },
   {
     "metric": "reward_sup_received_usd",
-    "value": "430.3"
+    "value": "431.04"
   },
   {
     "metric": "reward_sup_flow_per_day",
@@ -125,7 +125,7 @@
   },
   {
     "metric": "reward_sup_per_dog_usd_per_day",
-    "value": "0.031315"
+    "value": "0.031369"
   },
   {
     "metric": "reward_total_flow_usd_per_day",
@@ -133,15 +133,15 @@
   },
   {
     "metric": "reward_total_per_dog_usd_per_day",
-    "value": "0.114308"
+    "value": "0.114361"
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "214.25"
+    "value": "177.25"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4668"
+    "value": "0.5642"
   },
   {
     "metric": "woof_holders",
@@ -161,7 +161,7 @@
   },
   {
     "metric": "current_auction_token_id",
-    "value": "728"
+    "value": "729"
   },
   {
     "metric": "current_auction_status",
@@ -169,39 +169,39 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.0121"
+    "value": "0.01"
   },
   {
     "metric": "current_bid_usd",
-    "value": "24.49"
+    "value": "20.27"
   },
   {
     "metric": "current_bidder",
-    "value": "@vaibhavmule"
+    "value": "@0xael.eth"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad"
+    "value": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "metric": "current_auction_end_utc",
-    "value": "2026-05-30 18:38:33"
+    "value": "2026-05-31 18:40:09"
   },
   {
     "metric": "created_auctions",
-    "value": "139"
+    "value": "140"
   },
   {
     "metric": "settled_auctions",
-    "value": "138"
+    "value": "139"
   },
   {
     "metric": "total_bid_eth",
-    "value": "34.922513"
+    "value": "34.932513"
   },
   {
     "metric": "total_settled_eth",
-    "value": "6.74847"
+    "value": "6.76057"
   },
   {
     "metric": "highest_bid_eth",
@@ -213,6 +213,6 @@
   },
   {
     "metric": "season5_rewards_allocated_sup",
-    "value": "943304.34784"
+    "value": "958043.478275"
   }
 ]

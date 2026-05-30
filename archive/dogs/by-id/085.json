@@ -51,12 +51,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#297/729",
-      "rank": 297,
-      "total": 729
+      "display": "#296/730",
+      "rank": 296,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 85 dog #85 85 mission 1 mission 1 polygon settled 0x869ec00fa1dc112917c781942cc01c68521c415e 0x869e…415e 0.08 weth 0x046f39545330b73ca03c3a6e347d3187f21220a54c0392db4800f67bae8d1ec9 0x8833804da8830f33f861e9d40c4b02e5e8e705890a0b7091bef124bb73158af7 #297/729 background: halo; body: blue; neck: none; mouth: pizza; ears: earbuds; head: none; eyes: bluelasereyes 0x13cd0cea197d61a67f71b4da0d31b61ff84dcf64b3d9de1dc2ff1b9b8651e3bb 0x41b35fe5a9ecdb8c047cc48e00bdc021d0a682dd4c4de52a228b1a3999cfe2ef 0xb1b4cbb63d635735c089c9cb9b599186e27d00470beca2e61289fcdd903a6c4b 0x1d3c7f9232a57a2fd36b1490b82c9eeb0628f081ac52b0432d7b650e5d787141 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 85 dog #85 85 mission 1 mission 1 polygon settled 0x869ec00fa1dc112917c781942cc01c68521c415e 0x869e…415e 0.08 weth 0x046f39545330b73ca03c3a6e347d3187f21220a54c0392db4800f67bae8d1ec9 0x8833804da8830f33f861e9d40c4b02e5e8e705890a0b7091bef124bb73158af7 #296/730 background: halo; body: blue; neck: none; mouth: pizza; ears: earbuds; head: none; eyes: bluelasereyes 0x13cd0cea197d61a67f71b4da0d31b61ff84dcf64b3d9de1dc2ff1b9b8651e3bb 0x41b35fe5a9ecdb8c047cc48e00bdc021d0a682dd4c4de52a228b1a3999cfe2ef 0xb1b4cbb63d635735c089c9cb9b599186e27d00470beca2e61289fcdd903a6c4b 0x1d3c7f9232a57a2fd36b1490b82c9eeb0628f081ac52b0432d7b650e5d787141 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27607415,
       "block_time_utc": "2022-04-26T18:40:26Z",
@@ -83,12 +83,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

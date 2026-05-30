@@ -49,12 +49,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#281/729",
+      "display": "#281/730",
       "rank": 281,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 670 dog #670 670 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0267 eth 0x0c4f42c88c390615b6b764d55ed78cf55f5991e8af2928febeefaf2c2129c1a0 0x1a48be448adc549d8ad039c61549df80c7aa437f4533e17af2f5147f26c57f45 #281/729 background: none; body: blue; neck: redcollar; mouth: none; ears: goldearring; head: unicorn; eyes: sunglasses 0x97a75e7aabb2d193500011a30f1f0139bfbdb252b3f735883a334cd0c798d306 0xa64d185341884f09bd581f4da6885a199badbe95f5e7b99f80ec4d089b29e3e8 base_logs archive_indexer",
+    "search_text": "dog 670 dog #670 670 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0267 eth 0x0c4f42c88c390615b6b764d55ed78cf55f5991e8af2928febeefaf2c2129c1a0 0x1a48be448adc549d8ad039c61549df80c7aa437f4533e17af2f5147f26c57f45 #281/730 background: none; body: blue; neck: redcollar; mouth: none; ears: goldearring; head: unicorn; eyes: sunglasses 0x97a75e7aabb2d193500011a30f1f0139bfbdb252b3f735883a334cd0c798d306 0xa64d185341884f09bd581f4da6885a199badbe95f5e7b99f80ec4d089b29e3e8 base_logs archive_indexer",
     "settlement": {
       "block_number": 44093700,
       "block_time_utc": "2026-03-31T17:05:47Z",
@@ -79,7 +79,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },

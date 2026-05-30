@@ -54,12 +54,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#109/729",
-      "rank": 109,
-      "total": 729
+      "display": "#110/730",
+      "rank": 110,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 13 dog #13 13 mission 1 mission 1 polygon settled 0x2a0660e203c9fd5ba5a9e77e9b7517741f54e2aa 0x2a06…e2aa 0.84 weth 0x3365a7561c6311b561c64f0c572bc5cf6f49bf593f70f9e4eb948040ebded5ae 0xbb0e77c392ec736db73105fcaf58fa5a90d9f8e42575b92c9400731b3d56c631 #109/729 background: none; body: orange; neck: goldnecklace; mouth: tongue; ears: goldearring; head: blackcap; eyes: masksnorkel 0xf155a0d819738f4d60aac058c7e7286a4c6d0b10493f721ce8c26701a23ac940 0x23d8304f0d674288b8fc004c722e14653ed9aa1bda5f5c68d2d90a274fda5ed1 0x5835daa4f6b789781f356cfa37ee8d61abe2b59a10f31416b828edda074ec769 0x8638bcf2a539d6401fddab45dbf71d636154016c1321a0add752c7362869ef96 0xf8dff19eb957366bc60bec028e6ec136324f9af5ab798eb9f463a53cf0da0b0e 0x97305949fb60a84ae5638acd420808016240d7c2f0129b0948fc410cd40865bb 0x5c50f7500faf92ef6066f6698f269f1f10c0712a7898f485166489636d446574 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 13 dog #13 13 mission 1 mission 1 polygon settled 0x2a0660e203c9fd5ba5a9e77e9b7517741f54e2aa 0x2a06…e2aa 0.84 weth 0x3365a7561c6311b561c64f0c572bc5cf6f49bf593f70f9e4eb948040ebded5ae 0xbb0e77c392ec736db73105fcaf58fa5a90d9f8e42575b92c9400731b3d56c631 #110/730 background: none; body: orange; neck: goldnecklace; mouth: tongue; ears: goldearring; head: blackcap; eyes: masksnorkel 0xf155a0d819738f4d60aac058c7e7286a4c6d0b10493f721ce8c26701a23ac940 0x23d8304f0d674288b8fc004c722e14653ed9aa1bda5f5c68d2d90a274fda5ed1 0x5835daa4f6b789781f356cfa37ee8d61abe2b59a10f31416b828edda074ec769 0x8638bcf2a539d6401fddab45dbf71d636154016c1321a0add752c7362869ef96 0xf8dff19eb957366bc60bec028e6ec136324f9af5ab798eb9f463a53cf0da0b0e 0x97305949fb60a84ae5638acd420808016240d7c2f0129b0948fc410cd40865bb 0x5c50f7500faf92ef6066f6698f269f1f10c0712a7898f485166489636d446574 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26075558,
       "block_time_utc": "2022-03-18T13:05:13Z",
@@ -106,7 +106,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

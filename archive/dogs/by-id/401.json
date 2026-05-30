@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#537/729",
-      "rank": 537,
-      "total": 729
+      "display": "#539/730",
+      "rank": 539,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 401 dog #401 401 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4000 degen 0xd3fd9ebe46dd0bef09a2803d8c47d61c1e6d0197afebb3f4b6a6a9ed31364fc3 0x7ebb85556454e7ae3a2e8538073313bf1e53c25060b49380481b5ec448f8277e #537/729 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: glasses 0xaf0e9373cdf4e1c57c9cc767de04e708a7a06d6b7027a9307c10081887f685f0 0xa03bba764915a8897c4d0c662bc99e73d76a17315b160de46b2a5094bc7669be 0xb58b48cc5ec588ed43c5d73ec2d0b699f5997d5d9ca22d2c32e5b323062f700b 0x9d61f9cfcf668e54147506b8e6b24a425d6c95a48e8720f053384ebb6733f83d 0xddc948cd7298da6bd765a4cd2f628b88d7c4f6eeb93a5871e3c83100fd7ab8d4 0xaa9d0be80b0e643c4ef8ce3f6df52a29ce30083ad2545b0e143cfb6972fe2642 0xe63fad649e6970acb0d9a4540e66171c603356b228bd3c0327a055a0883a8ca4 chain_logs contract_getters",
+    "search_text": "dog 401 dog #401 401 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 4000 degen 0xd3fd9ebe46dd0bef09a2803d8c47d61c1e6d0197afebb3f4b6a6a9ed31364fc3 0x7ebb85556454e7ae3a2e8538073313bf1e53c25060b49380481b5ec448f8277e #539/730 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: glasses 0xaf0e9373cdf4e1c57c9cc767de04e708a7a06d6b7027a9307c10081887f685f0 0xa03bba764915a8897c4d0c662bc99e73d76a17315b160de46b2a5094bc7669be 0xb58b48cc5ec588ed43c5d73ec2d0b699f5997d5d9ca22d2c32e5b323062f700b 0x9d61f9cfcf668e54147506b8e6b24a425d6c95a48e8720f053384ebb6733f83d 0xddc948cd7298da6bd765a4cd2f628b88d7c4f6eeb93a5871e3c83100fd7ab8d4 0xaa9d0be80b0e643c4ef8ce3f6df52a29ce30083ad2545b0e143cfb6972fe2642 0xe63fad649e6970acb0d9a4540e66171c603356b228bd3c0327a055a0883a8ca4 chain_logs contract_getters",
     "settlement": {
       "block_number": 25943622,
       "block_time_utc": "2025-06-04T07:56:47Z",
@@ -109,7 +109,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

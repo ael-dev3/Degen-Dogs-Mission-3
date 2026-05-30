@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#367/729",
-      "rank": 367,
-      "total": 729
+      "display": "#377/730",
+      "rank": 377,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 335 dog #335 335 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 10243.999999999998951424 degen 0x9be81205c30a12384082e51f8f568c442aa9ea27907df688a18f14d2f760aba4 0x5d3fd7a8a9d2f86a02b797e82920ac5306e0a00c8eda056cd8ea9d5e0cfea4ac #367/729 background: none; body: black; neck: goldnecklace; mouth: none; ears: goldearring; head: blackcap; eyes: vrgoggles 0x0c7131bc9276866c8e1a3b936a813c8ee390e6f068b1f465d89ec8c0a29797e6 0xe635a0260de9bbc9cea6ebb698b871de76fc7c2553527d5dea3f9fd0e2387d93 0x49a2f1754fa8a72b0e278d578ba1ad31d241cbdb59d5e7b55beeaf1da05758ef 0xe9f99aded8abc5fc7a9e15588986f0276c958645edea80b8c41e9ef40b4a791e 0xc5a31a8cf07db029aab257fc89057cb6cb060c8131cac8c22d9d27e21c05271e 0xa156356208432eb66c29fed71e4fdba31255ba00d94ab22d6b6e82ef1ee6f7d2 0x34484a68275863cbde28682c15d711cfa732efccacd5e53a06bd1032bf6d3cbb chain_logs contract_getters",
+    "search_text": "dog 335 dog #335 335 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 10243.999999999998951424 degen 0x9be81205c30a12384082e51f8f568c442aa9ea27907df688a18f14d2f760aba4 0x5d3fd7a8a9d2f86a02b797e82920ac5306e0a00c8eda056cd8ea9d5e0cfea4ac #377/730 background: none; body: black; neck: goldnecklace; mouth: none; ears: goldearring; head: blackcap; eyes: vrgoggles 0x0c7131bc9276866c8e1a3b936a813c8ee390e6f068b1f465d89ec8c0a29797e6 0xe635a0260de9bbc9cea6ebb698b871de76fc7c2553527d5dea3f9fd0e2387d93 0x49a2f1754fa8a72b0e278d578ba1ad31d241cbdb59d5e7b55beeaf1da05758ef 0xe9f99aded8abc5fc7a9e15588986f0276c958645edea80b8c41e9ef40b4a791e 0xc5a31a8cf07db029aab257fc89057cb6cb060c8131cac8c22d9d27e21c05271e 0xa156356208432eb66c29fed71e4fdba31255ba00d94ab22d6b6e82ef1ee6f7d2 0x34484a68275863cbde28682c15d711cfa732efccacd5e53a06bd1032bf6d3cbb chain_logs contract_getters",
     "settlement": {
       "block_number": 25674635,
       "block_time_utc": "2025-04-02T23:04:16Z",
@@ -84,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -104,12 +104,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

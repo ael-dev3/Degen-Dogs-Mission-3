@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#103/729",
+      "display": "#103/730",
       "rank": 103,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 662 dog #662 662 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.07333 eth 0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98 0x47f030af3c3659ac62ed97ed883a4efece0c6c96b850aa472f304842fc482e52 #103/729 background: none; body: white; neck: none; mouth: tongue; ears: loopearring; head: crazyhair; eyes: redlasereyes 0x5d2a3d62303c04ec695f4eeba1415bddc8c5c07c36d211d545b2ad0510d60141 0x0d719d3bde7c9ed54f850ae76187e43fad389d86e8fcc3aefc05cc23e4d43668 0x2c537e943d354ba8d2b791eb87255f7efa2e509d0725ba44b2b57b58fa57c61c 0x82ce219e7e78208f92683e824150fc6357f509407561fdc2acf73bf7ec796264 0x2c45fa6f30a3fec0d8f0e881e319da5de46092343781d9b33f2217944badb4e3 0x3941a93a2607b80393f600453e11da83956076e02ab398e5449bf1509b8fb60f 0x7cdf3b509a56be738b12f89eafd19c374af5828d18cb001424586e4be16b6b5d 0x073f8542d1c6254bb637cc5a726cb2477c2717883ded3d777497f16ce0ffdda5 0x01e2eb3ea53400885f33ffabf89a989b860a172c1e21ada69ae1ce9e601c333c 0x09a7f182a9ef25905c11ab10b60afeeed9ccccaadc64f79fc273bc7d5200e741 base_logs archive_indexer",
+    "search_text": "dog 662 dog #662 662 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.07333 eth 0xf3950982275da81bc9837fc00580e9128884769266cf018b58941a6bd9100a98 0x47f030af3c3659ac62ed97ed883a4efece0c6c96b850aa472f304842fc482e52 #103/730 background: none; body: white; neck: none; mouth: tongue; ears: loopearring; head: crazyhair; eyes: redlasereyes 0x5d2a3d62303c04ec695f4eeba1415bddc8c5c07c36d211d545b2ad0510d60141 0x0d719d3bde7c9ed54f850ae76187e43fad389d86e8fcc3aefc05cc23e4d43668 0x2c537e943d354ba8d2b791eb87255f7efa2e509d0725ba44b2b57b58fa57c61c 0x82ce219e7e78208f92683e824150fc6357f509407561fdc2acf73bf7ec796264 0x2c45fa6f30a3fec0d8f0e881e319da5de46092343781d9b33f2217944badb4e3 0x3941a93a2607b80393f600453e11da83956076e02ab398e5449bf1509b8fb60f 0x7cdf3b509a56be738b12f89eafd19c374af5828d18cb001424586e4be16b6b5d 0x073f8542d1c6254bb637cc5a726cb2477c2717883ded3d777497f16ce0ffdda5 0x01e2eb3ea53400885f33ffabf89a989b860a172c1e21ada69ae1ce9e601c333c 0x09a7f182a9ef25905c11ab10b60afeeed9ccccaadc64f79fc273bc7d5200e741 base_logs archive_indexer",
     "settlement": {
       "block_number": 43745486,
       "block_time_utc": "2026-03-23T15:38:39Z",
@@ -92,7 +92,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

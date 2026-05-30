@@ -61,12 +61,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#375/729",
-      "rank": 375,
-      "total": 729
+      "display": "#372/730",
+      "rank": 372,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 597 dog #597 597 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.1947 eth 0x9779001e2fa95e2bfbf995c58c6d1001fa7b4761f11a5b4cfcf53b8342b66f6a 0x9994b6ad734104e3035f3c199fdc1b4759503e211f584383f01ff18859313390 #375/729 background: none; body: dalmation; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: vrgoggles 0x90c43df1e897ee2bd76aa93338fb5bf6a263420955a01965a81ce2f88b1e3469 0xcec6d6f33aa3397e2e230ab18e17896bdce115d241a448968b4c22163e3700fa 0x958ea8b4e4b3c5d89dc67bdce645caf4b12bf7a475f10d34c8bada8c115d600a 0x3ad176d6beb049a61680fd6e79751b4d39a8ace32dbf7165bb6123d5ceb3a119 0x3e9bd1120488922055eef81fd944c516b90befb4e9be9cd30818fd55e7e77091 0x0eaf1fbfdb66f9e6f8a3c52ce538f7bb9b071e71944119e80c6245e8f0b1207e 0xf0e806e1a0d02f29285adacf85a7c3c64288f59586c7e7d22c02a8166398cab9 0x3ac25cff6d8ee1e33669cc39e820c42aa4326dba7ac722088bda0efd23fcdd10 0x0e4e1a6266ffc16d7896507f38f9e0c728b8e10dcf722907f9ed49ffb788ee1b 0x0551860c063e8539c5aeba9ae9aaf6ad4318f37153d4dbb2aac1081dc7f70b45 0x65164d207ca65f5bfc31cb99ff6f358effd59c21d3a788ad8b58bf1577bbff53 0x0914e88ec9c03ec63208a5fa8abc5dcbb11da7091d19f7efe5b3f84e5b8f2d35 0x2115f369f9cdf2aa083032cfbb2b1896d265f0abd552c3e34880f74bc6861147 0xe97ee2e27e268cd565aef9bd342c7c4d3eeebc318e01f1af46f4189a4f4138b9 base_logs archive_indexer",
+    "search_text": "dog 597 dog #597 597 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.1947 eth 0x9779001e2fa95e2bfbf995c58c6d1001fa7b4761f11a5b4cfcf53b8342b66f6a 0x9994b6ad734104e3035f3c199fdc1b4759503e211f584383f01ff18859313390 #372/730 background: none; body: dalmation; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: vrgoggles 0x90c43df1e897ee2bd76aa93338fb5bf6a263420955a01965a81ce2f88b1e3469 0xcec6d6f33aa3397e2e230ab18e17896bdce115d241a448968b4c22163e3700fa 0x958ea8b4e4b3c5d89dc67bdce645caf4b12bf7a475f10d34c8bada8c115d600a 0x3ad176d6beb049a61680fd6e79751b4d39a8ace32dbf7165bb6123d5ceb3a119 0x3e9bd1120488922055eef81fd944c516b90befb4e9be9cd30818fd55e7e77091 0x0eaf1fbfdb66f9e6f8a3c52ce538f7bb9b071e71944119e80c6245e8f0b1207e 0xf0e806e1a0d02f29285adacf85a7c3c64288f59586c7e7d22c02a8166398cab9 0x3ac25cff6d8ee1e33669cc39e820c42aa4326dba7ac722088bda0efd23fcdd10 0x0e4e1a6266ffc16d7896507f38f9e0c728b8e10dcf722907f9ed49ffb788ee1b 0x0551860c063e8539c5aeba9ae9aaf6ad4318f37153d4dbb2aac1081dc7f70b45 0x65164d207ca65f5bfc31cb99ff6f358effd59c21d3a788ad8b58bf1577bbff53 0x0914e88ec9c03ec63208a5fa8abc5dcbb11da7091d19f7efe5b3f84e5b8f2d35 0x2115f369f9cdf2aa083032cfbb2b1896d265f0abd552c3e34880f74bc6861147 0xe97ee2e27e268cd565aef9bd342c7c4d3eeebc318e01f1af46f4189a4f4138b9 base_logs archive_indexer",
     "settlement": {
       "block_number": 40911935,
       "block_time_utc": "2026-01-17T01:26:57Z",
@@ -96,7 +96,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -116,7 +116,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

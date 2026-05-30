@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#626/729",
-      "rank": 626,
-      "total": 729
+      "display": "#629/730",
+      "rank": 629,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 514 dog #514 514 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2222 degen 0xe289be2a9d15f07ec4140ea42a7e7e2cda1a118324dffca16f1428b301ace174 0x5161a0c4d4b0a7e2ead871126d6ef0ef7e691372ac915511149118faa8b4a99c #626/729 background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: vrgoggles 0x959025d6e7c7520a0558368e292110dd4fbf1c15274d1cb48c4156df7ab0e364 chain_logs contract_getters",
+    "search_text": "dog 514 dog #514 514 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2222 degen 0xe289be2a9d15f07ec4140ea42a7e7e2cda1a118324dffca16f1428b301ace174 0x5161a0c4d4b0a7e2ead871126d6ef0ef7e691372ac915511149118faa8b4a99c #629/730 background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: vrgoggles 0x959025d6e7c7520a0558368e292110dd4fbf1c15274d1cb48c4156df7ab0e364 chain_logs contract_getters",
     "settlement": {
       "block_number": 26354404,
       "block_time_utc": "2025-10-20T01:00:14Z",
@@ -78,7 +78,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -93,7 +93,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -103,7 +103,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

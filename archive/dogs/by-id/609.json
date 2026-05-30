@@ -50,12 +50,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#547/729",
-      "rank": 547,
-      "total": 729
+      "display": "#545/730",
+      "rank": 545,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 609 dog #609 609 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0802 eth 0xa60ad4856076d9cd643664bb826ff17a0aab905259dc1b883598aa84d47a2f93 0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634 #547/729 background: none; body: orange; neck: none; mouth: none; ears: earbuds; head: headphones; eyes: none 0xbb97994240c4ba3c0790312ccddb8a4495ef18bc6e23421b452f72e40627615d 0x78a8c0b7ea5ccda3bf194051d6ae5cae6cb2d45033e7593f36584801ea5451e6 0x6e933a37274490887cf05c17e7c09dc1926b4f0bbbb4a6855422dd575b724031 base_logs archive_indexer",
+    "search_text": "dog 609 dog #609 609 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0802 eth 0xa60ad4856076d9cd643664bb826ff17a0aab905259dc1b883598aa84d47a2f93 0x64a681b5d8a5439659975f6eb8f11799b00f7999b8b82c5f99c946d428c9b634 #545/730 background: none; body: orange; neck: none; mouth: none; ears: earbuds; head: headphones; eyes: none 0xbb97994240c4ba3c0790312ccddb8a4495ef18bc6e23421b452f72e40627615d 0x78a8c0b7ea5ccda3bf194051d6ae5cae6cb2d45033e7593f36584801ea5451e6 0x6e933a37274490887cf05c17e7c09dc1926b4f0bbbb4a6855422dd575b724031 base_logs archive_indexer",
     "settlement": {
       "block_number": 41432585,
       "block_time_utc": "2026-01-29T02:41:57Z",
@@ -85,7 +85,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -95,7 +95,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

@@ -49,12 +49,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#407/729",
-      "rank": 407,
-      "total": 729
+      "display": "#410/730",
+      "rank": 410,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 483 dog #483 483 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 4000 degen 0x3a991db2c4fe400861ab8beb7aae0195619b39e9e442d3f965c2a1fa164e0a97 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 #407/729 background: none; body: sugarskull; neck: none; mouth: none; ears: earbuds; head: crazyhair; eyes: glasses 0xbcad9162dff8d302d1b0120724eb581091941e44bb8e7e0fba6119c999954897 0x3c38c10e47b531439724167ae73963d54852a1fc6ec4825e2395bc8c3c1559f5 chain_logs contract_getters",
+    "search_text": "dog 483 dog #483 483 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 4000 degen 0x3a991db2c4fe400861ab8beb7aae0195619b39e9e442d3f965c2a1fa164e0a97 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 #410/730 background: none; body: sugarskull; neck: none; mouth: none; ears: earbuds; head: crazyhair; eyes: glasses 0xbcad9162dff8d302d1b0120724eb581091941e44bb8e7e0fba6119c999954897 0x3c38c10e47b531439724167ae73963d54852a1fc6ec4825e2395bc8c3c1559f5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26248963,
       "block_time_utc": "2025-09-10T14:18:01Z",
@@ -84,7 +84,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -104,7 +104,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

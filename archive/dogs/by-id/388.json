@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#61/729",
+      "display": "#61/730",
       "rank": 61,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 388 dog #388 388 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x199f5b8cd94f1f8ff357ea1b75d37798c41562157bda422c78dd9baa01c0cf9a 0x6de1adf18429344db09df0cb879b1aa59a573e148a6f3b967b18c01b811f6583 #61/729 background: none; body: blue; neck: studdedcollar; mouth: teeth; ears: none; head: crazyhair; eyes: vrgoggles 0xc102b13b34049e66b5943e133ee7039f46d99aafe02d66c4a480e5b89c9d6d15 chain_logs contract_getters",
+    "search_text": "dog 388 dog #388 388 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x199f5b8cd94f1f8ff357ea1b75d37798c41562157bda422c78dd9baa01c0cf9a 0x6de1adf18429344db09df0cb879b1aa59a573e148a6f3b967b18c01b811f6583 #61/730 background: none; body: blue; neck: studdedcollar; mouth: teeth; ears: none; head: crazyhair; eyes: vrgoggles 0xc102b13b34049e66b5943e133ee7039f46d99aafe02d66c4a480e5b89c9d6d15 chain_logs contract_getters",
     "settlement": {
       "block_number": 25897641,
       "block_time_utc": "2025-05-22T23:46:14Z",
@@ -78,7 +78,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -103,7 +103,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

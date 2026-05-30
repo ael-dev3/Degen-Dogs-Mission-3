@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#389/729",
-      "rank": 389,
-      "total": 729
+      "display": "#393/730",
+      "rank": 393,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 327 dog #327 327 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7000 degen 0x7f14748738a88a0c92965c745ff5270ba4e4ee7125d15140dec9065e63cc7f62 0x0981a37fde3e89c98b60566b81469b071f42c71491fe13245126a26d6521a50b #389/729 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: crazyhair; eyes: glasses 0x07903f00342414bb0216aa6ae49b6b13ad6a9da5f6aa5c89a3a440102e65da10 0x898fe97042ba101c743e0be50df2a0dd6a444894f2bd16735169189bd18d60be 0xcd0d40a0c1fa37914d402b159ae35f7391b095b526339aec2a57e754eb95e040 0xfe71baca348ee7cdb488836dbd2086a3260675152617f149593e69341274d75b chain_logs contract_getters",
+    "search_text": "dog 327 dog #327 327 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7000 degen 0x7f14748738a88a0c92965c745ff5270ba4e4ee7125d15140dec9065e63cc7f62 0x0981a37fde3e89c98b60566b81469b071f42c71491fe13245126a26d6521a50b #393/730 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: crazyhair; eyes: glasses 0x07903f00342414bb0216aa6ae49b6b13ad6a9da5f6aa5c89a3a440102e65da10 0x898fe97042ba101c743e0be50df2a0dd6a444894f2bd16735169189bd18d60be 0xcd0d40a0c1fa37914d402b159ae35f7391b095b526339aec2a57e754eb95e040 0xfe71baca348ee7cdb488836dbd2086a3260675152617f149593e69341274d75b chain_logs contract_getters",
     "settlement": {
       "block_number": 25647311,
       "block_time_utc": "2025-03-26T17:18:26Z",
@@ -86,7 +86,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

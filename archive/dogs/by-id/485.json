@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#402/729",
-      "rank": 402,
-      "total": 729
+      "display": "#403/730",
+      "rank": 403,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 485 dog #485 485 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 0x6481234583e35d5ebc36cb7062487587d2cda1a19daa462b1f4d896575a1a598 #402/729 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: glasses 0xfce1ee2a12000e5e0324561cb5e9f5ac40f6f093ca1035b464217fa275579c9a chain_logs contract_getters",
+    "search_text": "dog 485 dog #485 485 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 0x6481234583e35d5ebc36cb7062487587d2cda1a19daa462b1f4d896575a1a598 #403/730 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: glasses 0xfce1ee2a12000e5e0324561cb5e9f5ac40f6f093ca1035b464217fa275579c9a chain_logs contract_getters",
     "settlement": {
       "block_number": 26252075,
       "block_time_utc": "2025-09-12T15:04:38Z",
@@ -83,7 +83,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

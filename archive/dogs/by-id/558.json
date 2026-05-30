@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#60/729",
+      "display": "#60/730",
       "rank": 60,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 558 dog #558 558 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15196 degen 0xeedec2bc9c2d17d694db4320e83acbf5915cb9da4dd468b61fb241a914038cfe 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 #60/729 background: none; body: brown; neck: none; mouth: bone; ears: goldearring; head: baseballcap; eyes: sunglasses 0x3672c9df0a3d6bff4879cbe888959d5a1cf5e1e01a616c2922c708ecb9b51f5c 0x60cad62b05c723d196671c0b9b90b782100cc5ac0238f22133b5bc25b920a8e6 0xfd818b5feb65f9ea0ee0bf383b4facb55da26fe95d1eca4c23afeb21ed4cc0a3 0xb3339043140b51d8b5aa04baf4659f9a328a63be91484f9f45c8a85d92c4467c chain_logs contract_getters",
+    "search_text": "dog 558 dog #558 558 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15196 degen 0xeedec2bc9c2d17d694db4320e83acbf5915cb9da4dd468b61fb241a914038cfe 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 #60/730 background: none; body: brown; neck: none; mouth: bone; ears: goldearring; head: baseballcap; eyes: sunglasses 0x3672c9df0a3d6bff4879cbe888959d5a1cf5e1e01a616c2922c708ecb9b51f5c 0x60cad62b05c723d196671c0b9b90b782100cc5ac0238f22133b5bc25b920a8e6 0xfd818b5feb65f9ea0ee0bf383b4facb55da26fe95d1eca4c23afeb21ed4cc0a3 0xb3339043140b51d8b5aa04baf4659f9a328a63be91484f9f45c8a85d92c4467c chain_logs contract_getters",
     "settlement": {
       "block_number": 26555280,
       "block_time_utc": "2025-12-06T05:05:33Z",
@@ -81,12 +81,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

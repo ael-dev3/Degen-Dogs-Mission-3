@@ -48,12 +48,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#20/729",
+      "display": "#20/730",
       "rank": 20,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 402 dog #402 402 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x7ebb85556454e7ae3a2e8538073313bf1e53c25060b49380481b5ec448f8277e 0x1bba26184e62be5f10b2f0459c72150c7d8b1e39682eb96156fd06f79a08a55f #20/729 background: none; body: orange; neck: none; mouth: coin; ears: none; head: crazyhair; eyes: redlasereyes 0x3cee80f79c6cb84acc8bbecb456557c8f1e93058d99978a259625b5fa6957097 chain_logs contract_getters",
+    "search_text": "dog 402 dog #402 402 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x7ebb85556454e7ae3a2e8538073313bf1e53c25060b49380481b5ec448f8277e 0x1bba26184e62be5f10b2f0459c72150c7d8b1e39682eb96156fd06f79a08a55f #20/730 background: none; body: orange; neck: none; mouth: coin; ears: none; head: crazyhair; eyes: redlasereyes 0x3cee80f79c6cb84acc8bbecb456557c8f1e93058d99978a259625b5fa6957097 chain_logs contract_getters",
     "settlement": {
       "block_number": 25947863,
       "block_time_utc": "2025-06-05T11:59:00Z",
@@ -83,7 +83,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

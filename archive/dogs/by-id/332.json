@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#385/729",
-      "rank": 385,
-      "total": 729
+      "display": "#384/730",
+      "rank": 384,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 332 dog #332 332 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 7666 degen 0x287e70382bbb5aa5a47a5d71f74e7952bb75928c899409ccd99a15a1bf2bb76e 0xf4d30ff781536e592b27d094f18d3fd8ca62e25098869358a021aec6f0b237ff #385/729 background: none; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: eyepatch 0x741733038dcfe4b409990c4e3d0a1577a4a7d3bbd11675e997584e5dfa5e529a 0x6c0c8b66e46fb19a5bc80d0b7a6ed940456d6286c3537c32d672de6beaa52140 0x670bee6bd7a4b695c3e4d697bf8049332fd51c311adaa5d053a590daea759f39 chain_logs contract_getters",
+    "search_text": "dog 332 dog #332 332 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 7666 degen 0x287e70382bbb5aa5a47a5d71f74e7952bb75928c899409ccd99a15a1bf2bb76e 0xf4d30ff781536e592b27d094f18d3fd8ca62e25098869358a021aec6f0b237ff #384/730 background: none; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: eyepatch 0x741733038dcfe4b409990c4e3d0a1577a4a7d3bbd11675e997584e5dfa5e529a 0x6c0c8b66e46fb19a5bc80d0b7a6ed940456d6286c3537c32d672de6beaa52140 0x670bee6bd7a4b695c3e4d697bf8049332fd51c311adaa5d053a590daea759f39 chain_logs contract_getters",
     "settlement": {
       "block_number": 25662007,
       "block_time_utc": "2025-03-30T19:58:23Z",
@@ -80,7 +80,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -105,7 +105,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

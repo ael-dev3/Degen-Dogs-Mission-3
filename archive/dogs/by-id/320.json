@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#165/729",
+      "display": "#165/730",
       "rank": 165,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 320 dog #320 320 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7776.999999999999737856 degen 0x470282a7d1c2765a37a4b8007298f5567ccc973e4c171b6221a117c1ed498f27 0x0281c203ef75d998d2773b0f2b0e9cb82aba291b05d8256569e67f314e3a5e54 #165/729 background: none; body: dalmation; neck: none; mouth: tongue; ears: goldearring; head: beanie; eyes: vrgoggles 0xd24ba05ba316f0e698ea6a9c621c1583166a5d81560f7866868ae894ff2f6a3d 0x9b70818ce30ee1208d5a9de235a753a6e870c813ef60dbb10a1ed3e8768001f3 0xf9ff0ae6029da10266e1331aa0c85c222a4c00b1aeaf326da795d5427bb3ea87 0x6b426fb3aa31187f28cd2121d14ed94afdd57973559e61a7e24abe685c293803 chain_logs contract_getters",
+    "search_text": "dog 320 dog #320 320 mission 2 mission 2 degen chain settled 0xe20d0d6b62d6bd2a536d21654f682f28f78f8f66 0xe20d…8f66 7776.999999999999737856 degen 0x470282a7d1c2765a37a4b8007298f5567ccc973e4c171b6221a117c1ed498f27 0x0281c203ef75d998d2773b0f2b0e9cb82aba291b05d8256569e67f314e3a5e54 #165/730 background: none; body: dalmation; neck: none; mouth: tongue; ears: goldearring; head: beanie; eyes: vrgoggles 0xd24ba05ba316f0e698ea6a9c621c1583166a5d81560f7866868ae894ff2f6a3d 0x9b70818ce30ee1208d5a9de235a753a6e870c813ef60dbb10a1ed3e8768001f3 0xf9ff0ae6029da10266e1331aa0c85c222a4c00b1aeaf326da795d5427bb3ea87 0x6b426fb3aa31187f28cd2121d14ed94afdd57973559e61a7e24abe685c293803 chain_logs contract_getters",
     "settlement": {
       "block_number": 25620297,
       "block_time_utc": "2025-03-19T15:27:06Z",
@@ -86,7 +86,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

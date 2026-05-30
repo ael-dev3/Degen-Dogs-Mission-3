@@ -55,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#139/729",
-      "rank": 139,
-      "total": 729
+      "display": "#141/730",
+      "rank": 141,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 210 dog #210 210 mission 2 mission 2 degen chain settled 0x2adb7424d5935797bbdad694126950e427b2c541 0x2adb…c541 10065 degen 0x789d9b3d7406d762dc8d1b178a77020218e6f3e75bf26e726efc2530f02674d1 0xb434b4917a2e764d0a9028ce482f5dec674b5fd2312a4188228e1648221b1910 #139/729 background: none; body: brown; neck: redcollar; mouth: teeth; ears: earbuds; head: beanie; eyes: sunglasses 0xb4e78179218c74caba94f19ccd02768403b1fc1aeb73ef502e207a14d59feba6 0x89ce62af0c6fe9eb57a43f494e4f7ff5c21cdde0c733b66fee04de83b91cf441 0x6f2e3a8734e8b908ad192c42cfdeaec361d322dc9f00dfb0d59c175c6e2f1a3c 0x1690da5d55485f5b82ffa6007d1beccfeeabd4602eb705ff41fd4dfb96be4bb0 0x3b0a1df355dc6f1ce70b0b7b27a7e66ff891392d21bb2bad772de744178a569b 0xa805838e67e0fa6a689f567d1bf03b2616c1fd1af876775b501026ce0c081279 0x89bd8eb800a76cee11627956a87c270a4d19bdc2681d00a23f892fc162068d54 0x83d4adccfd2951c8dd036f227fe99f0557e9a5a674278d70500485bf6a5a928c chain_logs contract_getters",
+    "search_text": "dog 210 dog #210 210 mission 2 mission 2 degen chain settled 0x2adb7424d5935797bbdad694126950e427b2c541 0x2adb…c541 10065 degen 0x789d9b3d7406d762dc8d1b178a77020218e6f3e75bf26e726efc2530f02674d1 0xb434b4917a2e764d0a9028ce482f5dec674b5fd2312a4188228e1648221b1910 #141/730 background: none; body: brown; neck: redcollar; mouth: teeth; ears: earbuds; head: beanie; eyes: sunglasses 0xb4e78179218c74caba94f19ccd02768403b1fc1aeb73ef502e207a14d59feba6 0x89ce62af0c6fe9eb57a43f494e4f7ff5c21cdde0c733b66fee04de83b91cf441 0x6f2e3a8734e8b908ad192c42cfdeaec361d322dc9f00dfb0d59c175c6e2f1a3c 0x1690da5d55485f5b82ffa6007d1beccfeeabd4602eb705ff41fd4dfb96be4bb0 0x3b0a1df355dc6f1ce70b0b7b27a7e66ff891392d21bb2bad772de744178a569b 0xa805838e67e0fa6a689f567d1bf03b2616c1fd1af876775b501026ce0c081279 0x89bd8eb800a76cee11627956a87c270a4d19bdc2681d00a23f892fc162068d54 0x83d4adccfd2951c8dd036f227fe99f0557e9a5a674278d70500485bf6a5a928c chain_logs contract_getters",
     "settlement": {
       "block_number": 24804989,
       "block_time_utc": "2024-12-04T16:34:30Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (11.0%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -100,7 +100,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

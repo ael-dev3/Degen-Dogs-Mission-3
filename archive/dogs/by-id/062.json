@@ -54,12 +54,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#369/729",
-      "rank": 369,
-      "total": 729
+      "display": "#366/730",
+      "rank": 366,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 62 dog #62 62 mission 1 mission 1 polygon settled 0xb0331b22161ca290a15f825a29c008dcb5e1ff68 0xb033…ff68 0.25 weth 0x7d84c196aa35b515e755049d34497945d8b9de94122c0386f72ac5efae83447e 0xd241e26a69e8a3c31acec18f2000ee52507f63ae828dbfe3526275176be5e5a7 #369/729 background: none; body: orange; neck: redcollar; mouth: none; ears: earbuds; head: toque; eyes: eyepatch 0x03b112ddab92a1647ac826018dc46190eaed9ad47d5fa5920c67c1272cbd1f34 0xd5439bdd8a3672b81eb6ed3cc5c940cf486e4b6d9e53745edbfca68669a3533f 0x5c1f28c0729ac3168604fd6d4491c906181ac9257e8a8de889dcc7cf38a2b573 0xc62677e91a242b604fbd0a6dd65d576401316a0906cbf64d5f6ddf4b50db892d 0x0a867ceade798a2755a47f372009bccc2f49b709f32c0e5516ffed446ea4c246 0x39b0af9136e8950e1561b7e591ae80c12a27e39d50185a5c6558c0d1df7e7cc2 0xf8cf3bc9bfde6f3441cb80e5fe8679e4ceaf3761ef91e9966054a788cdf4183b polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 62 dog #62 62 mission 1 mission 1 polygon settled 0xb0331b22161ca290a15f825a29c008dcb5e1ff68 0xb033…ff68 0.25 weth 0x7d84c196aa35b515e755049d34497945d8b9de94122c0386f72ac5efae83447e 0xd241e26a69e8a3c31acec18f2000ee52507f63ae828dbfe3526275176be5e5a7 #366/730 background: none; body: orange; neck: redcollar; mouth: none; ears: earbuds; head: toque; eyes: eyepatch 0x03b112ddab92a1647ac826018dc46190eaed9ad47d5fa5920c67c1272cbd1f34 0xd5439bdd8a3672b81eb6ed3cc5c940cf486e4b6d9e53745edbfca68669a3533f 0x5c1f28c0729ac3168604fd6d4491c906181ac9257e8a8de889dcc7cf38a2b573 0xc62677e91a242b604fbd0a6dd65d576401316a0906cbf64d5f6ddf4b50db892d 0x0a867ceade798a2755a47f372009bccc2f49b709f32c0e5516ffed446ea4c246 0x39b0af9136e8950e1561b7e591ae80c12a27e39d50185a5c6558c0d1df7e7cc2 0xf8cf3bc9bfde6f3441cb80e5fe8679e4ceaf3761ef91e9966054a788cdf4183b polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26776386,
       "block_time_utc": "2022-04-05T14:26:59Z",
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -111,7 +111,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

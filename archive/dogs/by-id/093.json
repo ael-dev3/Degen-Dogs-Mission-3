@@ -48,12 +48,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#557/729",
-      "rank": 557,
-      "total": 729
+      "display": "#555/730",
+      "rank": 555,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 93 dog #93 93 mission 1 mission 1 polygon settled 0xdf3f91843624a977e11324b5c030cf0435c974df 0xdf3f…74df 0.05 weth 0xcdb5a9cda7aca91db23d196d4f88d029d6ddff223f4de1fac9bed65bab4e9962 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 #557/729 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: redmohawk; eyes: glasses 0xa9f7236dae1365a33b155025fd30cbd35ee414415286598fde8f2f0841203fa6 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 93 dog #93 93 mission 1 mission 1 polygon settled 0xdf3f91843624a977e11324b5c030cf0435c974df 0xdf3f…74df 0.05 weth 0xcdb5a9cda7aca91db23d196d4f88d029d6ddff223f4de1fac9bed65bab4e9962 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 #555/730 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: redmohawk; eyes: glasses 0xa9f7236dae1365a33b155025fd30cbd35ee414415286598fde8f2f0841203fa6 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27956673,
       "block_time_utc": "2022-05-05T14:57:37Z",
@@ -80,7 +80,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -100,12 +100,12 @@
         "value": "None"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

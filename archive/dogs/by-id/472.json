@@ -50,12 +50,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#586/729",
-      "rank": 586,
-      "total": 729
+      "display": "#585/730",
+      "rank": 585,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 472 dog #472 472 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2690 degen 0x608d27644d74935a02a458f3fdaa3d33ecaacc67f77b9c14d3fc1ee23da315eb 0xa95b04c43895fc3f4bbf918b8806d86019bafce1a54b66b9a5d94709cd47de75 #586/729 background: none; body: grey; neck: none; mouth: none; ears: none; head: stripedbeanie; eyes: vrgoggles 0x28e7267907a53a343fe9336701cb9c1e02a70b74c96eaeec93e0dd646bf1c18d 0x65ff17cbc6eba6d76f5a49d9576e4b274bc1457e08f6253d2b94d4a3fcd51db3 0x928e5c14ae9a4998104fdcfb5ea1b27e4becda22c6201b30b2e5913178c2bd54 chain_logs contract_getters",
+    "search_text": "dog 472 dog #472 472 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2690 degen 0x608d27644d74935a02a458f3fdaa3d33ecaacc67f77b9c14d3fc1ee23da315eb 0xa95b04c43895fc3f4bbf918b8806d86019bafce1a54b66b9a5d94709cd47de75 #585/730 background: none; body: grey; neck: none; mouth: none; ears: none; head: stripedbeanie; eyes: vrgoggles 0x28e7267907a53a343fe9336701cb9c1e02a70b74c96eaeec93e0dd646bf1c18d 0x65ff17cbc6eba6d76f5a49d9576e4b274bc1457e08f6253d2b94d4a3fcd51db3 0x928e5c14ae9a4998104fdcfb5ea1b27e4becda22c6201b30b2e5913178c2bd54 chain_logs contract_getters",
     "settlement": {
       "block_number": 26223025,
       "block_time_utc": "2025-08-29T02:15:15Z",
@@ -85,7 +85,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

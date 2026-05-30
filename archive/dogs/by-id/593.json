@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#358/729",
+      "display": "#358/730",
       "rank": 358,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 593 dog #593 593 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.14301 eth 0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c 0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7 #358/729 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: redmohawk; eyes: vrgoggles 0x1b2e45bea6b726f5c728f95c5e20129667067bab17948e6346374568955c240a 0x178e90f5c247c8a32cff7e2d5ee7701814a6df5e84a9a01d9c78063e7717d37d 0x3b003f4e9c581f41006d2712f36434153e9b89853a1f73f8ac0675f78a27207d 0x41c25024455f6e8e7428f52f9f1e29f7a926b96df84119a4e160ac8284a0ae3a 0xed5c508f3e4eb03be85d15b819e041bb3668df8b835fecbf93fd2f5aba6f521f 0x67a5da48d9b914109a2fae03f78b13712c646153ec5b9de3ee99f5661201cc5c base_logs archive_indexer",
+    "search_text": "dog 593 dog #593 593 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.14301 eth 0xedb60c22a757fc316d8b511fe71827b12c6f5531b9a9288e4be7b62fe060a35c 0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7 #358/730 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: redmohawk; eyes: vrgoggles 0x1b2e45bea6b726f5c728f95c5e20129667067bab17948e6346374568955c240a 0x178e90f5c247c8a32cff7e2d5ee7701814a6df5e84a9a01d9c78063e7717d37d 0x3b003f4e9c581f41006d2712f36434153e9b89853a1f73f8ac0675f78a27207d 0x41c25024455f6e8e7428f52f9f1e29f7a926b96df84119a4e160ac8284a0ae3a 0xed5c508f3e4eb03be85d15b819e041bb3668df8b835fecbf93fd2f5aba6f521f 0x67a5da48d9b914109a2fae03f78b13712c646153ec5b9de3ee99f5661201cc5c base_logs archive_indexer",
     "settlement": {
       "block_number": 40738586,
       "block_time_utc": "2026-01-13T01:08:39Z",
@@ -88,7 +88,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: RedMohawk (6.9%)",
+        "display": "Head: RedMohawk (6.8%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#156/729",
-      "rank": 156,
-      "total": 729
+      "display": "#160/730",
+      "rank": 160,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 239 dog #239 239 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 10230 degen 0xa8eeabc302fc20abfb55692a656c94b2b2cff00a4d44be4bf3c51b0b0d097006 0x66b7ecfb3b9d53a096a7d073dc2113ddde5fa052422fe85996b4fed91c6c1432 #156/729 background: none; body: dalmation; neck: none; mouth: none; ears: goldearring; head: blackcap; eyes: 3dglasses 0x01d2faf5d4a5c879f8823a272b104a9ab3def731696a72cf3f1b7af0b52f0ac1 0x1ec3af0fbd04636d822bf9a3da0035ff83bd5c1bd1e36d881a03a1f283cdc6f6 0xe15d45b4b92ac771ba19a62a2de95970a6366c3f848b9e050841d5cde49aedf6 0x39da308072723de2f535ed6ad6cee3f9e9db28c7b637cc5f69b60eaaf056fab7 0xcb681abef233229d8df8af3709a238213c2e4913d0c38042068681d287ba78e0 0xb2212f535b17427dbf509ab372313e367b9626e15aacf7efc5eabdd6da3e8894 0x5cb6d53bba94780bc23f7c16543e23342801c81ee4700328a9602819624ad290 chain_logs contract_getters",
+    "search_text": "dog 239 dog #239 239 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 10230 degen 0xa8eeabc302fc20abfb55692a656c94b2b2cff00a4d44be4bf3c51b0b0d097006 0x66b7ecfb3b9d53a096a7d073dc2113ddde5fa052422fe85996b4fed91c6c1432 #160/730 background: none; body: dalmation; neck: none; mouth: none; ears: goldearring; head: blackcap; eyes: 3dglasses 0x01d2faf5d4a5c879f8823a272b104a9ab3def731696a72cf3f1b7af0b52f0ac1 0x1ec3af0fbd04636d822bf9a3da0035ff83bd5c1bd1e36d881a03a1f283cdc6f6 0xe15d45b4b92ac771ba19a62a2de95970a6366c3f848b9e050841d5cde49aedf6 0x39da308072723de2f535ed6ad6cee3f9e9db28c7b637cc5f69b60eaaf056fab7 0xcb681abef233229d8df8af3709a238213c2e4913d0c38042068681d287ba78e0 0xb2212f535b17427dbf509ab372313e367b9626e15aacf7efc5eabdd6da3e8894 0x5cb6d53bba94780bc23f7c16543e23342801c81ee4700328a9602819624ad290 chain_logs contract_getters",
     "settlement": {
       "block_number": 25117795,
       "block_time_utc": "2025-01-02T00:02:10Z",
@@ -89,7 +89,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -104,7 +104,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

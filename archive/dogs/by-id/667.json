@@ -61,12 +61,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#163/729",
-      "rank": 163,
-      "total": 729
+      "display": "#162/730",
+      "rank": 162,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 667 dog #667 667 mission 3 mission 3 base settled 0x2df06405772f9fe85e1771ff11baaa5d3933f457 @ashish-007 ashish-007 0.03937 eth 0xb722838af9349940b31a52c458b79ba6a0748f5a56753a4f72fb4730972fc8d4 0x8da47851b222b930846989b188f4ee8894fb0985292cef1295f9eaf85ea2500a #163/729 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: eyepatch 0x4459b22f5d93f0bc50777d7bd3a159a2fe5a11c27672443c02e28660660d0ff5 0x1e62925113088993fe3d42e192e19d87d8e4dc62fc934c27c902effd7e190ae0 0x256aab19449b38ffbab0abd28ac3ea7676d4ae3636ff9f63fc21ec07cd92297d 0x3e1203234c86d2954054c83579a4a257f8fbe87dda2040543c131f502b83cee3 0x541d3f610c62f5c38d3d47e166032a92052532cc0287339ff3f305771c934758 0x53a2ed16b1a7d2779244fe3ebdf6a9c95258f29c368730bfcc6619476e045f2d 0x40e1540e3fb8d1c75bb9ed4cc123515eb8d7416c2376ae2eeb1537c98ff14588 0x855a0b34de5cdb738cda3718d46d8fb9820d3b782f6e56cd65755e7b9d6a74bf 0xad54acef7a67d9978487d9e52535edd53efab00960727bedba07123b0abf0669 0xf9f4db9ebea5ed3c925972dec0c099491561678717a2e248566e1a33ab8f6888 0x4978de16df8c597515ab3b7a1385eb01e5c4c9c00286cdf1358104f535106106 0xbb90fc365f3605850212e6d366770809b57c9575efcb7915b532448db3f3fb62 0x002e7dab37d842109519ef3d47aee3ec475b16812b3cfc0978d2ad3a5a787f18 0x478963dddbf012768fb0dc22f4c9afd301afdaffb9b9794f6f942d095180d660 base_logs archive_indexer",
+    "search_text": "dog 667 dog #667 667 mission 3 mission 3 base settled 0x2df06405772f9fe85e1771ff11baaa5d3933f457 @ashish-007 ashish-007 0.03937 eth 0xb722838af9349940b31a52c458b79ba6a0748f5a56753a4f72fb4730972fc8d4 0x8da47851b222b930846989b188f4ee8894fb0985292cef1295f9eaf85ea2500a #162/730 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: eyepatch 0x4459b22f5d93f0bc50777d7bd3a159a2fe5a11c27672443c02e28660660d0ff5 0x1e62925113088993fe3d42e192e19d87d8e4dc62fc934c27c902effd7e190ae0 0x256aab19449b38ffbab0abd28ac3ea7676d4ae3636ff9f63fc21ec07cd92297d 0x3e1203234c86d2954054c83579a4a257f8fbe87dda2040543c131f502b83cee3 0x541d3f610c62f5c38d3d47e166032a92052532cc0287339ff3f305771c934758 0x53a2ed16b1a7d2779244fe3ebdf6a9c95258f29c368730bfcc6619476e045f2d 0x40e1540e3fb8d1c75bb9ed4cc123515eb8d7416c2376ae2eeb1537c98ff14588 0x855a0b34de5cdb738cda3718d46d8fb9820d3b782f6e56cd65755e7b9d6a74bf 0xad54acef7a67d9978487d9e52535edd53efab00960727bedba07123b0abf0669 0xf9f4db9ebea5ed3c925972dec0c099491561678717a2e248566e1a33ab8f6888 0x4978de16df8c597515ab3b7a1385eb01e5c4c9c00286cdf1358104f535106106 0xbb90fc365f3605850212e6d366770809b57c9575efcb7915b532448db3f3fb62 0x002e7dab37d842109519ef3d47aee3ec475b16812b3cfc0978d2ad3a5a787f18 0x478963dddbf012768fb0dc22f4c9afd301afdaffb9b9794f6f942d095180d660 base_logs archive_indexer",
     "settlement": {
       "block_number": 43963796,
       "block_time_utc": "2026-03-28T16:55:39Z",
@@ -96,7 +96,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -116,7 +116,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

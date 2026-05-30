@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#534/729",
+      "display": "#534/730",
       "rank": 534,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 600 dog #600 600 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.2046 eth 0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d 0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5 #534/729 background: none; body: grey; neck: none; mouth: tongue; ears: loopearring; head: none; eyes: vrgoggles 0xeec78279f232e896efe0d2cd89273fc4eabb3c70a9fc6004714bee3cb3ae6fdb 0xd66d0ad433d96395e99c7449685c5a3ced3971952f63e47976611cea98269bba 0x0f72bad9dad86285a45fa1ecc913f95a403f013311dfaf039dfc59958dcb8df4 0x0ab9580a2333f7dbe1cb4ae94696e8934aca6ac4daf2281c5b236c39f898b9d8 0xca4aafcc2e28ec4373ee33a9ba696eab794d189a36f3c2e83b410e13631dd04e 0xa1225bb58bf79e3d84d259f98c90e7625cc82bf583495b0da99f02eb3e8dbfb3 base_logs archive_indexer",
+    "search_text": "dog 600 dog #600 600 mission 3 mission 3 base settled 0x86e36c9ba3c6a2542fd761bc2b4fd61a110ea6cd @mr-r0b0t mr-r0b0t 0.2046 eth 0x34c6b56279a313cbc81d9decc27842db66eee25c7036d608893ce0bced4faa8d 0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5 #534/730 background: none; body: grey; neck: none; mouth: tongue; ears: loopearring; head: none; eyes: vrgoggles 0xeec78279f232e896efe0d2cd89273fc4eabb3c70a9fc6004714bee3cb3ae6fdb 0xd66d0ad433d96395e99c7449685c5a3ced3971952f63e47976611cea98269bba 0x0f72bad9dad86285a45fa1ecc913f95a403f013311dfaf039dfc59958dcb8df4 0x0ab9580a2333f7dbe1cb4ae94696e8934aca6ac4daf2281c5b236c39f898b9d8 0xca4aafcc2e28ec4373ee33a9ba696eab794d189a36f3c2e83b410e13631dd04e 0xa1225bb58bf79e3d84d259f98c90e7625cc82bf583495b0da99f02eb3e8dbfb3 base_logs archive_indexer",
     "settlement": {
       "block_number": 41041689,
       "block_time_utc": "2026-01-20T01:32:05Z",
@@ -88,7 +88,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

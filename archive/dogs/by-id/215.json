@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#682/729",
-      "rank": 682,
-      "total": 729
+      "display": "#683/730",
+      "rank": 683,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 215 dog #215 215 mission 2 mission 2 degen chain settled 0x84d8d4b63c7d40ee5f68e566844e547782c27f39 0x84d8…7f39 7666 degen 0xa7a96a784dc00f9881aa5b6cc8638efbc3b4de3859000a4d051c324acddab678 0x7e341db89f4fb73fc89ff6f05c3f2f7ee3f87ef95e1291760b7668842b1ce68d #682/729 background: none; body: blue; neck: redcollar; mouth: none; ears: goldearring; head: none; eyes: none 0x0d6017bdb8c2a8865dbf9645f326732e3f7186d58b64855d431a30f9437f9190 0x60ed6860d990f2b2c1935a50cebc39f49300f239788c791f6cb6ad8818ac18ec 0x3df88a5bd6c50e2f3e34456836ab6d1178dd59de8153118aea1fa5cf24c6cc4a 0xa5e3efc604b6ba612dd1d4a8e0ad9ddd553fda28e7d7aa38f78802c18cda4102 0xcb560ae26c0f0e236bec34a2ced913524f2b98c96d201c5719ce1e6ce38e047b 0xfcaca8a473bbb973744ca80f9a5ef40e5686b2c7a996ed0fa18b7376f8bce1d4 chain_logs contract_getters",
+    "search_text": "dog 215 dog #215 215 mission 2 mission 2 degen chain settled 0x84d8d4b63c7d40ee5f68e566844e547782c27f39 0x84d8…7f39 7666 degen 0xa7a96a784dc00f9881aa5b6cc8638efbc3b4de3859000a4d051c324acddab678 0x7e341db89f4fb73fc89ff6f05c3f2f7ee3f87ef95e1291760b7668842b1ce68d #683/730 background: none; body: blue; neck: redcollar; mouth: none; ears: goldearring; head: none; eyes: none 0x0d6017bdb8c2a8865dbf9645f326732e3f7186d58b64855d431a30f9437f9190 0x60ed6860d990f2b2c1935a50cebc39f49300f239788c791f6cb6ad8818ac18ec 0x3df88a5bd6c50e2f3e34456836ab6d1178dd59de8153118aea1fa5cf24c6cc4a 0xa5e3efc604b6ba612dd1d4a8e0ad9ddd553fda28e7d7aa38f78802c18cda4102 0xcb560ae26c0f0e236bec34a2ced913524f2b98c96d201c5719ce1e6ce38e047b 0xfcaca8a473bbb973744ca80f9a5ef40e5686b2c7a996ed0fa18b7376f8bce1d4 chain_logs contract_getters",
     "settlement": {
       "block_number": 24866840,
       "block_time_utc": "2024-12-09T17:12:15Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },

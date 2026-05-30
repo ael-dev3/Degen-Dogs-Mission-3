@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#5/729",
+      "display": "#5/730",
       "rank": 5,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 589 dog #589 589 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 111111 degen 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 0x4feabc8afb4f627baa067c56aad9c6d29387576b0ae5f3c7f137d46f8ecf5d98 #5/729 background: none; body: alien; neck: none; mouth: pizza; ears: goldearring; head: none; eyes: monocle 0x5b300a8a0bf1b8347c3740b3b8b2c1938e5c87362feb1f37a31cf3536d49e907 0x4974a93ebeadf7933e2bec011eda9fa4b6b5383134c138ada23fd6a348439dd1 0xdbe435bacf238eac7e9fd49db2b495447b7f554e57cedc1d9267ff70ab73e071 0x83fb2b326f011cac1e66d4e6e91d85a8bb36543c398b5a7d9673098ebdd2a6cb 0x0aed03293e45e6b96c503e9008364962df14dfe8a74714f1940139b870cd5775 chain_logs contract_getters",
+    "search_text": "dog 589 dog #589 589 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 111111 degen 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 0x4feabc8afb4f627baa067c56aad9c6d29387576b0ae5f3c7f137d46f8ecf5d98 #5/730 background: none; body: alien; neck: none; mouth: pizza; ears: goldearring; head: none; eyes: monocle 0x5b300a8a0bf1b8347c3740b3b8b2c1938e5c87362feb1f37a31cf3536d49e907 0x4974a93ebeadf7933e2bec011eda9fa4b6b5383134c138ada23fd6a348439dd1 0xdbe435bacf238eac7e9fd49db2b495447b7f554e57cedc1d9267ff70ab73e071 0x83fb2b326f011cac1e66d4e6e91d85a8bb36543c398b5a7d9673098ebdd2a6cb 0x0aed03293e45e6b96c503e9008364962df14dfe8a74714f1940139b870cd5775 chain_logs contract_getters",
     "settlement": {
       "block_number": 26622432,
       "block_time_utc": "2026-01-06T14:35:57Z",
@@ -87,7 +87,7 @@
         "value": "Alien"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#572/729",
-      "rank": 572,
-      "total": 729
+      "display": "#570/730",
+      "rank": 570,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 628 dog #628 628 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.0209 eth 0xc95b4d0a2e0e969614762d333094ebdfac2b677ad5d68ffdf8170bd794068a72 0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38 #572/729 background: none; body: redbrown; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: bluelasereyes 0xc927d7c9ff4d91ae9a0c194bcf957f8a246b772bc95d146bee3143fce767121d 0xcee6a6da0257dda932090737a2e98e3c662416eb28ed85ae7cda77abfa17a77c 0xb544341c157094a6a284a98626a427b777d7ed432ab3f834eea40590fca835fb 0x076bb589ee5a8421fbd208f88d1f51bee69e37aff5503d9999a64c9d3cdf10d8 0xf17a6227f6652e3c00e629b9a81b35555c12d04596248903e18e73805ba79da7 base_logs archive_indexer",
+    "search_text": "dog 628 dog #628 628 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.0209 eth 0xc95b4d0a2e0e969614762d333094ebdfac2b677ad5d68ffdf8170bd794068a72 0x2d62171c4d5ebbc70cad3ec656e9de3b433d0261e1229a1a29a8528c17266a38 #570/730 background: none; body: redbrown; neck: redcollar; mouth: none; ears: none; head: whitemohawk; eyes: bluelasereyes 0xc927d7c9ff4d91ae9a0c194bcf957f8a246b772bc95d146bee3143fce767121d 0xcee6a6da0257dda932090737a2e98e3c662416eb28ed85ae7cda77abfa17a77c 0xb544341c157094a6a284a98626a427b777d7ed432ab3f834eea40590fca835fb 0x076bb589ee5a8421fbd208f88d1f51bee69e37aff5503d9999a64c9d3cdf10d8 0xf17a6227f6652e3c00e629b9a81b35555c12d04596248903e18e73805ba79da7 base_logs archive_indexer",
     "settlement": {
       "block_number": 42259095,
       "block_time_utc": "2026-02-17T05:52:17Z",
@@ -82,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },

@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#292/729",
-      "rank": 292,
-      "total": 729
+      "display": "#290/730",
+      "rank": 290,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 578 dog #578 578 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 17220 degen 0x08c4d63440dfc578b7fd280cb16e41fea2cbde927c2e0d5d9790628fd19794c5 0x983f5faa2680638157ec4fc102c41451e3bedd033559cff620d28b7cec4c9ae6 #292/729 background: none; body: white; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: bluelasereyes 0xdba2cd21b66f4876bde2be4b7bc04525a45a5ebe4a087a472bcf17a0cd4d6f45 0x8265c1b7c9143f170c6248d4394076ca58ec9689a58320a7282a182445372b7c 0x8fdb32f42659167faaf7d608c52eb4c70f18a71c9cbd14dd3b4d57f463177ab1 0x3252fb236371245edd0e2ab5a575ffa53fbdb664677c9b899e894e3d20bf7f79 0x01e242e657aa541f76c57a5449b389cb50dbdca78ad7a2e6df3c7403472a0e80 chain_logs contract_getters",
+    "search_text": "dog 578 dog #578 578 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 17220 degen 0x08c4d63440dfc578b7fd280cb16e41fea2cbde927c2e0d5d9790628fd19794c5 0x983f5faa2680638157ec4fc102c41451e3bedd033559cff620d28b7cec4c9ae6 #290/730 background: none; body: white; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: bluelasereyes 0xdba2cd21b66f4876bde2be4b7bc04525a45a5ebe4a087a472bcf17a0cd4d6f45 0x8265c1b7c9143f170c6248d4394076ca58ec9689a58320a7282a182445372b7c 0x8fdb32f42659167faaf7d608c52eb4c70f18a71c9cbd14dd3b4d57f463177ab1 0x3252fb236371245edd0e2ab5a575ffa53fbdb664677c9b899e894e3d20bf7f79 0x01e242e657aa541f76c57a5449b389cb50dbdca78ad7a2e6df3c7403472a0e80 chain_logs contract_getters",
     "settlement": {
       "block_number": 26608025,
       "block_time_utc": "2025-12-26T07:22:25Z",
@@ -87,7 +87,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },

@@ -55,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#590/729",
-      "rank": 590,
-      "total": 729
+      "display": "#595/730",
+      "rank": 595,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 549 dog #549 549 mission 2 mission 2 degen chain settled 0x903dd30042ae53844ae83bdf2bcf839c4e80eef8 0x903d…eef8 19965 degen 0x4f77673c900862b99c7eea73665dd86c4450cb58795571c87d39224e506a41f2 0x950f739dbeb5895ff5912e36dc7d6e6198abc2de88669418d2c72a0508cff821 #590/729 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: blackcap; eyes: sunglasses 0x67643605438a362f325b4aa82d1629b520a6f72f1d7a334913790a36297312a1 0x8794e2478470563a35975f49606cc1245aa109da4a49ac6c4b55784084c20c71 0x1f1cd79d5227d139becf52eeb22f924fd265daddff40c398d9ac465d17f305ce 0xc8dc87e6de3f326e57c01b1ec03a5d61ab49105bc2a1b70abd9981385a35e0e0 0x6eb4598fccb2cbdb611be4dd15e49c614e2ea6543872c9c2cd3f0b807e5c424a 0x016ba1bd4dac9e865ddd2b891fbaaf3bd0b85d1c976c0e52aed882175e2d3872 0x3659b0bdab11fadaace65cc4d41dc1f114cc16bcd543f5db23d104abe2c4c3eb 0x3325f27c708c9a7f62ff9758b2f37e1dc2064a5fd467104becfa8c09f6dec031 chain_logs contract_getters",
+    "search_text": "dog 549 dog #549 549 mission 2 mission 2 degen chain settled 0x903dd30042ae53844ae83bdf2bcf839c4e80eef8 0x903d…eef8 19965 degen 0x4f77673c900862b99c7eea73665dd86c4450cb58795571c87d39224e506a41f2 0x950f739dbeb5895ff5912e36dc7d6e6198abc2de88669418d2c72a0508cff821 #595/730 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: blackcap; eyes: sunglasses 0x67643605438a362f325b4aa82d1629b520a6f72f1d7a334913790a36297312a1 0x8794e2478470563a35975f49606cc1245aa109da4a49ac6c4b55784084c20c71 0x1f1cd79d5227d139becf52eeb22f924fd265daddff40c398d9ac465d17f305ce 0xc8dc87e6de3f326e57c01b1ec03a5d61ab49105bc2a1b70abd9981385a35e0e0 0x6eb4598fccb2cbdb611be4dd15e49c614e2ea6543872c9c2cd3f0b807e5c424a 0x016ba1bd4dac9e865ddd2b891fbaaf3bd0b85d1c976c0e52aed882175e2d3872 0x3659b0bdab11fadaace65cc4d41dc1f114cc16bcd543f5db23d104abe2c4c3eb 0x3325f27c708c9a7f62ff9758b2f37e1dc2064a5fd467104becfa8c09f6dec031 chain_logs contract_getters",
     "settlement": {
       "block_number": 26524178,
       "block_time_utc": "2025-11-27T04:17:47Z",
@@ -90,7 +90,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

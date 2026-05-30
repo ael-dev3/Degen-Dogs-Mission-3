@@ -52,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#455/729",
+      "display": "#455/730",
       "rank": 455,
-      "total": 729
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 10 dog #10 10 mission 1 mission 1 polygon settled 0x00493aa44bcfd6f0c2ecc7f8b154e4fb352d1c81 0x0049…1c81 0.85 weth 0x20b7d5fbf144f6487886ecb3b08617d5cfcfe9dabc1e67ec68023a8fdbaaaba3 0x4fe60fc991af4319c73c585f22e8a5a3d4f8d85fb84f75636e5300ab85104b20 #455/729 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: stripedbeanie; eyes: vrgoggles 0xbb4c485a8203c812754253cfbeddad7a0edd7edd46ee2fa5f1ad3589645f8266 0x5720c84e75aa0ab983262d291093e70b994dbe1521d277beadbe9e06aaa68a48 0xaab2e185dc39d5cc8b299657e3bab9e09f7e53f5f540a18abdb72494fd489a8a 0xcce2f79f0785cf547d18376c100d57ce66a45de1b818f142edfd4d903b44cc52 0x9eabe88cc3cfc5e0dd0e874ba910fc73136467e325d6c88c8a6326584635404f polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 10 dog #10 10 mission 1 mission 1 polygon settled 0x00493aa44bcfd6f0c2ecc7f8b154e4fb352d1c81 0x0049…1c81 0.85 weth 0x20b7d5fbf144f6487886ecb3b08617d5cfcfe9dabc1e67ec68023a8fdbaaaba3 0x4fe60fc991af4319c73c585f22e8a5a3d4f8d85fb84f75636e5300ab85104b20 #455/730 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: stripedbeanie; eyes: vrgoggles 0xbb4c485a8203c812754253cfbeddad7a0edd7edd46ee2fa5f1ad3589645f8266 0x5720c84e75aa0ab983262d291093e70b994dbe1521d277beadbe9e06aaa68a48 0xaab2e185dc39d5cc8b299657e3bab9e09f7e53f5f540a18abdb72494fd489a8a 0xcce2f79f0785cf547d18376c100d57ce66a45de1b818f142edfd4d903b44cc52 0x9eabe88cc3cfc5e0dd0e874ba910fc73136467e325d6c88c8a6326584635404f polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26069373,
       "block_time_utc": "2022-03-18T09:02:43Z",
@@ -89,7 +89,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.4%)",
+        "display": "Neck: None (39.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles (10.1%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

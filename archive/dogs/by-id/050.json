@@ -57,12 +57,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#372/729",
-      "rank": 372,
-      "total": 729
+      "display": "#370/730",
+      "rank": 370,
+      "total": 730
     },
     "schema_version": 1,
-    "search_text": "dog 50 dog #50 50 mission 1 mission 1 polygon settled 0xb5d8a3281f21617f27e624b56a6b97c28c2dae3c 0xb5d8…ae3c 0.43 weth 0xf1e2dc8d7568b1d63141297c454cb29c5fef48c268853d4cd087a6395ce966bd 0x8ecfec283c1dbfbbfb9f41a138e90368cdb40040840f31c16e56353c732988b3 #372/729 background: halo; body: orange; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: glasses 0x36ffaad6afbbf69ab0687d36be35130595539b609c3b7aa07e4f809e4f7f47da 0xa130eaa4d9d78fbe1c25c9f226dff15a1026ff08b6397aa2f8b1e3a5f2d02e9d 0xf9f7cc5f236b01a3dce84112f7f65f1675cac4a8a6778329d8f051000b05978b 0xbae7ff8bbdf89ac040aefff2c11efa244f6a6273c71b5b2fb294280e1df9d5f4 0xd226e4135614d4c02d06fe87bc943226ce9643a301c590442933cf1df2369973 0x845db296dd7f52a7b5fb7cb0913bb0db4aeea6099797a89bb54817fc81bd976c 0xf29cbac19728cf2830cf41421c7afb870664afcbffe6a37fdb7df95e324d8f8c 0x3f2fe068bd4ff629be85277dc29ce6518906e3ac98f299787edb1ea0f6b25cf3 0x494038e67cad732d9c7ecb292b35f790a7a9419e6ead41ea15bc2ccca6eca3ae 0x31f9194b64cabf2e8977ac3cc6f64202261c6389084414a5b5a62b0ab31c646e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 50 dog #50 50 mission 1 mission 1 polygon settled 0xb5d8a3281f21617f27e624b56a6b97c28c2dae3c 0xb5d8…ae3c 0.43 weth 0xf1e2dc8d7568b1d63141297c454cb29c5fef48c268853d4cd087a6395ce966bd 0x8ecfec283c1dbfbbfb9f41a138e90368cdb40040840f31c16e56353c732988b3 #370/730 background: halo; body: orange; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: glasses 0x36ffaad6afbbf69ab0687d36be35130595539b609c3b7aa07e4f809e4f7f47da 0xa130eaa4d9d78fbe1c25c9f226dff15a1026ff08b6397aa2f8b1e3a5f2d02e9d 0xf9f7cc5f236b01a3dce84112f7f65f1675cac4a8a6778329d8f051000b05978b 0xbae7ff8bbdf89ac040aefff2c11efa244f6a6273c71b5b2fb294280e1df9d5f4 0xd226e4135614d4c02d06fe87bc943226ce9643a301c590442933cf1df2369973 0x845db296dd7f52a7b5fb7cb0913bb0db4aeea6099797a89bb54817fc81bd976c 0xf29cbac19728cf2830cf41421c7afb870664afcbffe6a37fdb7df95e324d8f8c 0x3f2fe068bd4ff629be85277dc29ce6518906e3ac98f299787edb1ea0f6b25cf3 0x494038e67cad732d9c7ecb292b35f790a7a9419e6ead41ea15bc2ccca6eca3ae 0x31f9194b64cabf2e8977ac3cc6f64202261c6389084414a5b5a62b0ab31c646e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26347861,
       "block_time_utc": "2022-03-25T14:15:13Z",
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -114,7 +114,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }
