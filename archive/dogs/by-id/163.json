@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#543/730",
-      "rank": 543,
-      "total": 730
+      "display": "#549/731",
+      "rank": 549,
+      "total": 731
     },
     "schema_version": 1,
-    "search_text": "dog 163 dog #163 163 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9 0x835822c3be7770584880946f646e7c89b0dbe340056b12a2d8ebec3e87037308 #543/730 background: none; body: white; neck: goldnecklace; mouth: none; ears: earbuds; head: stripedbeanie; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 163 dog #163 163 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x0faa33b0054737173dd256a8c14128d6e39e5e6c85be545c35acced7ee49ffb9 0x835822c3be7770584880946f646e7c89b0dbe340056b12a2d8ebec3e87037308 #549/731 background: none; body: white; neck: goldnecklace; mouth: none; ears: earbuds; head: stripedbeanie; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 32516445,
       "block_time_utc": "2022-08-31T12:01:46Z",
@@ -83,17 +83,17 @@
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.6%)",
+        "display": "Neck: GoldNecklace (19.7%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -103,7 +103,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.1%)",
+        "display": "Eyes: VRGoggles (10.3%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

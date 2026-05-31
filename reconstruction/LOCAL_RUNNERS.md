@@ -138,7 +138,7 @@ Run these before calling the runner healthy:
 
 ```bash
 npm run validate:dashboard
-npm run test:watcher
+npm run test:dashboard
 npm run check:dashboard-ui
 npm run check:historical-dogs
 npm run archive:mission3:health

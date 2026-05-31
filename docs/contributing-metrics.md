@@ -27,8 +27,10 @@ Use this workflow when adding or changing dashboard metrics.
 
 ```bash
 npm run data
-npm run check:historical-dogs
+npm run validate:dashboard
+npm run test:dashboard
 npm run check:dashboard-ui
+npm run check:historical-dogs
 npm run archive:prices:validate
 npm run build
 git diff --check

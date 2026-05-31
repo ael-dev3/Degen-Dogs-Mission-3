@@ -44,6 +44,8 @@ The build output goes to `dist/` and is ignored by git.
 ## Useful checks
 
 ```bash
+npm run validate:dashboard
+npm run test:dashboard
 npm run check:historical-dogs
 npm run check:dashboard-ui
 npm run archive:prices:validate

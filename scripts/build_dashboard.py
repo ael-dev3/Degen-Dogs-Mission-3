@@ -16,7 +16,7 @@ import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
-from decimal import Decimal, getcontext
+from decimal import Decimal, ROUND_HALF_UP, getcontext
 from pathlib import Path
 from typing import Any
 
@@ -463,6 +463,58 @@ def fetch_eth_usd_price() -> tuple[Decimal, str]:
 def decimal_value_str(value: Decimal, max_places: int = 6) -> str:
     s = f"{value:.{max_places}f}".rstrip("0").rstrip(".")
     return s if s else "0"
+
+
+def decimal_from(value: Any) -> Decimal | None:
+    raw = str(value or "").replace(",", "").strip()
+    if not raw or raw.upper() == "N/A":
+        return None
+    try:
+        return Decimal(raw)
+    except Exception:
+        return None
+
+
+def quantized_decimal_str(value: Decimal, places: int) -> str:
+    quant = Decimal(1).scaleb(-places)
+    return f"{value.quantize(quant, rounding=ROUND_HALF_UP):f}".rstrip("0").rstrip(".") or "0"
+
+
+def reward_apr_display_value(apr: Decimal | None) -> str:
+    if apr is None or apr <= 0:
+        return "N/A"
+    rounded = apr.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    return f"≈{rounded:,.0f}% APR"
+
+
+def current_bid_reward_stats(current: dict[str, Any], token_stats: dict[str, str]) -> dict[str, str]:
+    unavailable = {
+        "reward_current_bid_payback_days": "N/A",
+        "reward_current_bid_daily_roi_pct": "N/A",
+        "reward_current_bid_apr_pct": "N/A",
+        "reward_current_bid_apr_display": "N/A",
+    }
+    amount_wei = decimal_from(current.get("amount_wei"))
+    eth_usd = decimal_from(token_stats.get("eth_usd_price"))
+    per_dog_daily_usd = decimal_from(token_stats.get("reward_total_per_dog_usd_per_day"))
+    if amount_wei is None or eth_usd is None or per_dog_daily_usd is None:
+        return unavailable
+    if amount_wei <= 0 or eth_usd <= 0 or per_dog_daily_usd <= 0:
+        return unavailable
+
+    current_bid_usd = ((amount_wei / (Decimal(10) ** 18)) * eth_usd).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    if current_bid_usd <= 0:
+        return unavailable
+
+    payback_days = current_bid_usd / per_dog_daily_usd
+    daily_roi_pct = (per_dog_daily_usd / current_bid_usd) * Decimal(100)
+    apr_pct = daily_roi_pct * Decimal(365)
+    return {
+        "reward_current_bid_payback_days": quantized_decimal_str(payback_days, 2),
+        "reward_current_bid_daily_roi_pct": quantized_decimal_str(daily_roi_pct, 4),
+        "reward_current_bid_apr_pct": quantized_decimal_str(apr_pct, 2),
+        "reward_current_bid_apr_display": reward_apr_display_value(apr_pct),
+    }
 
 
 def configured_price(symbol: str) -> tuple[Decimal, str] | None:
@@ -1722,13 +1774,29 @@ def reward_usd_display(metrics: dict[str, str], key: str) -> str:
 
 
 def reward_payback_display(metrics: dict[str, str]) -> str:
+    raw = metric_value(metrics, "reward_current_bid_payback_days").strip()
     days = metric_decimal(metrics, "reward_current_bid_payback_days")
     if days is None or days <= 0:
-        return ""
+        return "N/A" if raw else ""
     if days < 1:
         return "<1 day"
     places = 1 if days < 10 else 0
     return f"≈{format_decimal_display(days, places)} days"
+
+
+def reward_apr_display(metrics: dict[str, str]) -> str:
+    explicit = metric_value(metrics, "reward_current_bid_apr_display").strip()
+    if explicit:
+        return explicit
+    apr = metric_decimal(metrics, "reward_current_bid_apr_pct")
+    return reward_apr_display_value(apr) if apr is not None else ""
+
+
+def reward_payback_apr_summary(metrics: dict[str, str]) -> str:
+    payback = reward_payback_display(metrics)
+    apr = reward_apr_display(metrics)
+    values = [value for value in (payback, apr) if value]
+    return " / ".join(values)
 
 
 def render_reward_strip(metrics: dict[str, str]) -> str:
@@ -1736,17 +1804,34 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     sup = reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)
     total = reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")
     payback = reward_payback_display(metrics)
-    tiles = [
-        ("WOOF / Dog", woof, "Base WOOF flow"),
-        ("SUP / Dog", sup, "SUP flow"),
-        ("Total / Dog", total, "WOOF + SUP"),
-        ("Bid payback", payback, "Current bid / per-Dog flow"),
-    ]
-    body = "".join(
-        f'<span class="reward-tile"><b>{html.escape(label)}</b><strong>{html.escape(value)}</strong><em>{html.escape(note)}</em></span>'
-        for label, value, note in tiles
-        if value
+    apr = reward_apr_display(metrics)
+    apr_copy = (
+        "Simple APR estimate. Annualized from the current bid divided by the current estimated "
+        "per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; "
+        "changes with token prices, bid, auction state, and reward-flow assumptions; not guaranteed future return."
     )
+    tiles = [
+        ("WOOF / Dog", html.escape(woof), "Base WOOF flow", ""),
+        ("SUP / Dog", html.escape(sup), "SUP flow", ""),
+        ("Total / Dog", html.escape(total), "WOOF + SUP", ""),
+        (
+            "Bid payback",
+            f'<span class="payback-days">{html.escape(payback)}</span><span class="payback-apr">{html.escape(apr)}</span>',
+            "Current bid / per-Dog WOOF + SUP flow",
+            apr_copy,
+        ),
+    ]
+    body_parts = []
+    for label, value_html, note, title in tiles:
+        if not value_html or value_html == "<span class=\"payback-days\"></span><span class=\"payback-apr\"></span>":
+            continue
+        title_attr = f' title="{html.escape(title, quote=True)}"' if title else ""
+        caveat_html = f'<small class="reward-caveat sr-only">{html.escape(title)}</small>' if title else ""
+        body_parts.append(
+            f'<span class="reward-tile"{title_attr}><b>{html.escape(label)}</b><strong>{value_html}</strong>'
+            f'<em>{html.escape(note)}</em>{caveat_html}</span>'
+        )
+    body = "".join(body_parts)
     if not body:
         return ""
     return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}</section>'
@@ -1787,6 +1872,7 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Current status", metric_value(metrics, "current_auction_status")),
         ("Current bid", format_current_bid(metrics)),
         ("Current high bidder", metric_value(metrics, "current_bidder")),
+        ("Bid payback / APR", reward_payback_apr_summary(metrics)),
         ("Created / settled auctions", format_created_settled(metrics)),
         ("WOOF holders", metric_value(metrics, "woof_holders")),
     ]
@@ -2063,6 +2149,7 @@ a:hover{color:var(--accent2)}
 .reward-tile{display:flex;min-width:0;flex-direction:column;gap:2px;border:1.5px solid var(--ink);background:#eff8df;padding:7px 8px;font-weight:900;line-height:1.12;box-shadow:2px 2px 0 rgba(36,84,23,.18)}
 .reward-tile b{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#31551f}
 .reward-tile strong{font-size:clamp(13px,1.35vw,18px);font-weight:950;letter-spacing:-.025em;overflow-wrap:anywhere}
+.reward-tile strong span{display:block}
 .reward-tile em{font-style:normal;color:#5d6b48;font-size:10.5px;font-weight:800}
 .reward-strip p{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px;font-weight:800}
 .current-detail > span{display:flex;min-height:48px;flex:0 1 auto;width:max-content;max-width:100%;flex-direction:column;justify-content:center;align-items:flex-start;border:1.5px solid var(--ink);background:var(--panel2);padding:7px 9px;font-weight:900;line-height:1.18}
@@ -2296,6 +2383,7 @@ def main() -> None:
     token_stats["dog_total_supply"] = str(dog_total_supply)
     dog_metadata = fetch_dog_metadata_rows(dog_total_supply, snapshot_tag)
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
+    token_stats.update(current_bid_reward_stats(current, token_stats))
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
     identity_addresses = collect_identity_addresses(current, bids, settled, holders)

@@ -1,8 +1,8 @@
 {
   "generated_at_utc": "2026-05-30T18:46:46Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-05-30T18:40:23Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-05-31T19:12:29Z",
     "amount": {
       "native": "0.01",
       "native_symbol": "ETH",
@@ -11,7 +11,7 @@
       "usd_estimate": "20.07711682",
       "usd_estimate_confidence": "medium",
       "usd_estimate_display": "$20.08",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 2 day(s) before event.",
       "usd_estimate_price_date_utc": "2026-05-29",
       "usd_estimate_price_usd": "2007.7116820979008",
       "usd_estimate_source": "defillama_coin_prices",
@@ -19,7 +19,7 @@
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-05-30T18:40:09Z",
+      "block_time_utc": "2026-05-31T19:12:29Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -48,16 +48,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#581/730",
-      "rank": 581,
-      "total": 730
+      "display": "#579/731",
+      "rank": 579,
+      "total": 731
     },
     "schema_version": 1,
-    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.99 $19.99 2026-05-30t18:40:23z #581/730 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.3%) background none body: brown (11.0%) body brown neck: none (39.5%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.1%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.6%) eyes glasses generated_auction_feed",
+    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.01 $20.01 2026-05-31t19:12:29z #579/731 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.0%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.6%) eyes glasses generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-05-31T19:12:29Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -69,7 +69,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -77,22 +77,22 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.0%)",
+        "display": "Body: Brown (10.9%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.5%)",
+        "display": "Neck: None (39.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

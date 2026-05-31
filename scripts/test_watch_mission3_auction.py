@@ -196,6 +196,35 @@ def test_new_bid_log_event_triggers_refresh_even_when_contract_snapshot_is_uncha
     assert decision.reasons == ["auction_bid"]
 
 
+def test_already_seen_bid_log_does_not_duplicate_refresh():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "last_seen_amount_wei": "200",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "110:0xnewbid:4",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+    }
+    snapshot = {
+        "latest_block": 111,
+        "token_id": 728,
+        "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "amount_wei": "200",
+        "settled": False,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "110:0xnewbid:4", "tx_hash": "0xnewbid", "log_index": 4, "token_id": 728},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
+    assert decision.should_refresh is False
+    assert decision.reasons == []
+
+
 def test_new_extended_log_triggers_after_cooldown_and_is_deferred_inside_cooldown():
     watcher = load_module()
     previous = {

@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 import json
 import re
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +59,28 @@ def decimal_value(value: Any) -> Decimal:
         raise AssertionError(f"invalid decimal value {value!r}") from exc
 
 
+def optional_decimal_value(value: Any) -> Decimal | None:
+    raw = text(value).replace(",", "")
+    if not raw or raw.upper() == "N/A":
+        return None
+    try:
+        return Decimal(raw)
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def quantized_decimal_str(value: Decimal, places: int) -> str:
+    quant = Decimal(1).scaleb(-places)
+    return f"{value.quantize(quant, rounding=ROUND_HALF_UP):f}".rstrip("0").rstrip(".") or "0"
+
+
+def reward_apr_display(apr: Decimal | None) -> str:
+    if apr is None or apr <= 0:
+        return "N/A"
+    rounded = apr.quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+    return f"≈{rounded:,.0f}% APR"
+
+
 def decimals_equal(left: Any, right: Any) -> bool:
     return decimal_value(left) == decimal_value(right)
 
@@ -80,19 +102,37 @@ def first_row(path: Path) -> dict[str, Any]:
 
 def load_metrics() -> dict[str, str]:
     path = ROOT / "generated" / "mission3_metrics.csv"
+    json_path = ROOT / "generated" / "mission3_metrics.json"
     if not path.exists():
         raise AssertionError("generated/mission3_metrics.csv missing")
     with path.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     metrics = {text(row.get("metric")): text(row.get("value")) for row in rows}
+
+    json_rows = load_json(json_path)
+    if not isinstance(json_rows, list):
+        raise AssertionError("generated/mission3_metrics.json is not a list")
+    json_metrics = {text(row.get("metric")): text(row.get("value")) for row in json_rows if isinstance(row, dict)}
+    if metrics != json_metrics:
+        raise AssertionError("generated mission3_metrics CSV and JSON differ")
+    public_json = ROOT / "public" / "generated" / "mission3_metrics.json"
+    if public_json.exists() and public_json.read_bytes() != json_path.read_bytes():
+        raise AssertionError("public/generated/mission3_metrics.json differs from generated/mission3_metrics.json")
+
     required = [
         "latest_block",
         "latest_block_time_utc",
         "current_auction_token_id",
         "current_auction_status",
         "current_bid_eth",
+        "current_bid_usd",
         "current_bidder",
         "current_bidder_wallet",
+        "reward_total_per_dog_usd_per_day",
+        "reward_current_bid_payback_days",
+        "reward_current_bid_daily_roi_pct",
+        "reward_current_bid_apr_pct",
+        "reward_current_bid_apr_display",
     ]
     missing = [key for key in required if not metrics.get(key)]
     if missing:
@@ -130,6 +170,11 @@ def assert_metric_cell(metric: str, expected: str, index: str) -> None:
     cell = f"<td>{metric}</td><td>{expected}</td>"
     if cell not in index:
         raise AssertionError(f"index.html hidden mission3_metrics value mismatch for {metric}: expected {expected!r}")
+
+
+def reward_strip_surface(index: str) -> str:
+    match = re.search(r'<section\b[^>]*class="[^"]*\breward-strip\b[^"]*"[^>]*>.*?</section>', index, flags=re.DOTALL)
+    return match.group(0) if match else ""
 
 
 def identity_display(wallet: str) -> str:
@@ -183,6 +228,50 @@ def find_unified_current(path: Path, current_dog_id: int) -> dict[str, Any]:
     raise AssertionError(f"{path.relative_to(ROOT)} missing Mission 3 Dog #{current_dog_id}")
 
 
+def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[str, str]) -> None:
+    current_bid_usd = optional_decimal_value(metrics.get("current_bid_usd"))
+    daily_flow = optional_decimal_value(metrics.get("reward_total_per_dog_usd_per_day"))
+    if current_bid_usd is None or current_bid_usd <= 0 or daily_flow is None or daily_flow <= 0:
+        expected = {
+            "reward_current_bid_payback_days": "N/A",
+            "reward_current_bid_daily_roi_pct": "N/A",
+            "reward_current_bid_apr_pct": "N/A",
+            "reward_current_bid_apr_display": "N/A",
+        }
+    else:
+        payback = current_bid_usd / daily_flow
+        daily_roi = daily_flow / current_bid_usd * Decimal(100)
+        apr = daily_roi * Decimal(365)
+        expected = {
+            "reward_current_bid_payback_days": quantized_decimal_str(payback, 2),
+            "reward_current_bid_daily_roi_pct": quantized_decimal_str(daily_roi, 4),
+            "reward_current_bid_apr_pct": quantized_decimal_str(apr, 2),
+            "reward_current_bid_apr_display": reward_apr_display(apr),
+        }
+    for key, expected_value in expected.items():
+        if text(metrics.get(key)) != expected_value:
+            raise AssertionError(f"mission3_metrics {key} differs from current bid reward math: expected {expected_value!r}, got {metrics.get(key)!r}")
+        assert_metric_cell(key, expected_value, index)
+
+    expected_display = expected["reward_current_bid_apr_display"]
+    reward_surface = reward_strip_surface(index)
+    if not reward_surface:
+        raise AssertionError("index.html missing reward-strip APR/payback surface")
+    if expected_display and expected_display not in reward_surface:
+        raise AssertionError(f"index.html missing reward APR display: {expected_display!r}")
+    payback_display = "N/A"
+    payback_days = optional_decimal_value(expected["reward_current_bid_payback_days"])
+    if payback_days is not None and payback_days > 0:
+        places = 1 if payback_days < 10 else 0
+        payback_display = f"≈{payback_days:,.{places}f} days"
+    if payback_display and payback_display not in reward_surface:
+        raise AssertionError(f"index.html missing reward payback display: {payback_display!r}")
+    readme_summary = readme.get("Bid payback / APR")
+    expected_summary = f"{payback_display} / {expected_display}"
+    if readme_summary != expected_summary:
+        raise AssertionError("README Bid payback / APR differs from mission3_metrics reward estimate")
+
+
 def validate_current_surface() -> dict[str, Any]:
     current = first_row(ROOT / "generated" / "current_auction.json")
     latest = first_row(ROOT / "generated" / "current_latest_bid.json")
@@ -228,6 +317,7 @@ def validate_current_surface() -> dict[str, Any]:
     assert_index_contains("current bid display", text(current.get("current_bid")), index)
     assert_index_contains("current high-bidder display", text(current.get("bidder")), index)
     assert_index_contains("current auction status", text(feed.get("status")), index)
+    validate_reward_metrics(metrics, index, readme)
 
     if readme.get("Snapshot block") != metrics["latest_block"]:
         raise AssertionError("README Snapshot block differs from mission3_metrics latest_block")
@@ -280,7 +370,7 @@ def validate_current_surface() -> dict[str, Any]:
         if text(historical.get("amount")) != text(feed.get("bid")):
             raise AssertionError("historical_dog_search current row amount differs from auction_feed")
 
-    for table_name in ["current_auction", "current_latest_bid", "auction_feed", "historical_dog_search", "recent_bids"]:
+    for table_name in ["mission3_metrics", "current_auction", "current_latest_bid", "auction_feed", "historical_dog_search", "recent_bids"]:
         generated_path = ROOT / "generated" / f"{table_name}.json"
         public_path = ROOT / "public" / "generated" / f"{table_name}.json"
         if generated_path.exists() and public_path.exists() and generated_path.read_bytes() != public_path.read_bytes():

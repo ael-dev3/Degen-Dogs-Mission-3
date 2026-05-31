@@ -114,6 +114,59 @@ def test_fetch_woof_holders_reuses_cached_balances_until_address_is_touched() ->
         assert [(row["address"], row["balance_raw"]) for row in third] == [(carol, "300"), (bob, "250"), (alice, "100")]
 
 
+def test_current_bid_reward_stats_calculates_payback_daily_roi_and_simple_apr() -> None:
+    dashboard = load_module()
+    stats = dashboard.current_bid_reward_stats(
+        {"amount_wei": "10000000000000000"},
+        {"eth_usd_price": "1998", "reward_total_per_dog_usd_per_day": "0.113508"},
+    )
+    assert stats["reward_current_bid_payback_days"] == "176.02"
+    assert stats["reward_current_bid_daily_roi_pct"] == "0.5681"
+    assert stats["reward_current_bid_apr_pct"] == "207.36"
+    assert stats["reward_current_bid_apr_display"] == "≈207% APR"
+
+
+def test_current_bid_reward_stats_unavailable_when_bid_or_daily_flow_missing() -> None:
+    dashboard = load_module()
+    zero_bid = dashboard.current_bid_reward_stats(
+        {"amount_wei": "0"},
+        {"eth_usd_price": "1998", "reward_total_per_dog_usd_per_day": "0.113508"},
+    )
+    assert zero_bid["reward_current_bid_payback_days"] == "N/A"
+    assert zero_bid["reward_current_bid_apr_pct"] == "N/A"
+    assert zero_bid["reward_current_bid_apr_display"] == "N/A"
+
+    zero_flow = dashboard.current_bid_reward_stats(
+        {"amount_wei": "10000000000000000"},
+        {"eth_usd_price": "1998", "reward_total_per_dog_usd_per_day": "0"},
+    )
+    assert zero_flow["reward_current_bid_payback_days"] == "N/A"
+    assert zero_flow["reward_current_bid_apr_pct"] == "N/A"
+    assert zero_flow["reward_current_bid_apr_display"] == "N/A"
+
+
+def test_reward_strip_renders_apr_inside_bid_payback_card_with_caveat_copy() -> None:
+    dashboard = load_module()
+    metrics = {
+        "reward_woof_per_dog_per_day": "158351.896454",
+        "reward_woof_per_dog_usd_per_day": "0.08",
+        "reward_sup_per_dog_per_day": "2.687",
+        "reward_sup_per_dog_usd_per_day": "0.03",
+        "reward_total_per_dog_usd_per_day": "0.113508",
+        "reward_current_bid_payback_days": "176.02",
+        "reward_current_bid_apr_pct": "207.36",
+        "reward_current_bid_apr_display": "≈207% APR",
+    }
+    rendered = dashboard.render_reward_strip(metrics)
+    assert "<b>Bid payback</b>" in rendered
+    assert "≈176 days" in rendered
+    assert "≈207% APR" in rendered
+    assert "Current bid / per-Dog WOOF + SUP flow" in rendered
+    assert "Simple APR estimate" in rendered
+    assert "not guaranteed" in rendered.lower()
+    assert "guaranteed return" not in rendered.lower()
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

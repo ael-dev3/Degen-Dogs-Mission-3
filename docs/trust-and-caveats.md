@@ -23,8 +23,19 @@ data, commits generated files, and GitHub Pages deploys.
 ## Reward and token context
 
 WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses 141
-Dogs and the vault bonus is not included in that estimate basis. Treat the values as
-estimates unless confirmed against official reward/accounting logic.
+Dogs and the WOOF Vault Bonus is not included in that estimate basis. Treat the values
+as estimates unless confirmed against official reward/accounting logic.
+
+The BID PAYBACK tile also shows a simple annualized APR estimate:
+
+- `daily ROI % = current estimated per-Dog daily WOOF + SUP USD flow / current bid USD * 100`
+- `APR % = daily ROI % * 365`
+
+This is APR, not APY. It does not compound, excludes the WOOF Vault Bonus for the same
+reason the per-Dog reward basis excludes it, changes with token prices, current bid,
+auction state, and reward-flow assumptions, and is not a guaranteed future return.
+If the current bid or daily reward-flow estimate is zero/missing, the dashboard renders
+payback and APR as `N/A`.
 
 ## Archive completeness
 
