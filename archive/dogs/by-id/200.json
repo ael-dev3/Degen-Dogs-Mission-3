@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#381/731",
-      "rank": 381,
-      "total": 731
+      "display": "#379/732",
+      "rank": 379,
+      "total": 732
     },
     "schema_version": 1,
-    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon created_unsettled_or_missing_settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #381/731 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon created_unsettled_or_missing_settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #379/732 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,7 +70,7 @@
     "status": "created_unsettled_or_missing_settlement",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -85,7 +85,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

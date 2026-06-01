@@ -1,11 +1,11 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46775865
-latest_block_time_utc,2026-06-01 19:11:17
+latest_block,46776306
+latest_block_time_utc,2026-06-01 19:25:59
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
-dog_total_supply,731
+dog_total_supply,732
 woof_token,0x3e5c4FA0cAA794516eD0DF77f31daA534918d492
 woof_symbol,WOOF
 woof_total_supply,100000000000
@@ -13,9 +13,9 @@ woof_usd_price,0.0000005123
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
-sup_usd_price,0.0111
+sup_usd_price,0.01109
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1991.19
+eth_usd_price,1992.89
 eth_usd_source,coinbase
 reward_basis_dogs,141
 reward_excludes,woof_vault_bonus
@@ -26,32 +26,32 @@ reward_woof_flow_usd_per_day,11.44
 reward_woof_per_dog_per_day,158351.896454
 reward_woof_per_dog_usd_per_day,0.081124
 reward_sup_received,36935.51
-reward_sup_received_usd,409.98
+reward_sup_received_usd,409.61
 reward_sup_flow_per_day,379.01
-reward_sup_flow_usd_per_day,4.21
+reward_sup_flow_usd_per_day,4.2
 reward_sup_per_dog_per_day,2.688014
-reward_sup_per_dog_usd_per_day,0.029837
-reward_total_flow_usd_per_day,15.65
-reward_total_per_dog_usd_per_day,0.110961
-reward_current_bid_payback_days,197.37
-reward_current_bid_daily_roi_pct,0.5067
-reward_current_bid_apr_pct,184.94
-reward_current_bid_apr_display,≈185% APR
+reward_sup_per_dog_usd_per_day,0.02981
+reward_total_flow_usd_per_day,15.64
+reward_total_per_dog_usd_per_day,0.110934
+reward_current_bid_payback_days,17.94
+reward_current_bid_daily_roi_pct,5.5746
+reward_current_bid_apr_pct,2034.72
+reward_current_bid_apr_display,"≈2,035% APR"
 woof_holders,403
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,49270292548.761437
 farcaster_profiles_resolved,158
-current_auction_token_id,730
+current_auction_token_id,731
 current_auction_status,live
-current_bid_eth,0.011
-current_bid_usd,21.9
-current_bidder,@badadan
-current_bidder_wallet,0xa2648350f3566e4f18a9519734928d08d3ea08c4
-current_auction_end_utc,2026-06-01 19:16:05
-created_auctions,141
-settled_auctions,140
-total_bid_eth,34.953513
-total_settled_eth,6.77057
+current_bid_eth,0.001
+current_bid_usd,1.99
+current_bidder,@sharas.eth
+current_bidder_wallet,0xd722d7cef1870733a85e779ab3d306ba286c0af0
+current_auction_end_utc,2026-06-02 19:24:33
+created_auctions,142
+settled_auctions,141
+total_bid_eth,34.954513
+total_settled_eth,6.78157
 highest_bid_eth,0.3021
 season5_reward_total_sup,1017000
-season5_rewards_allocated_sup,972782.60871
+season5_rewards_allocated_sup,987521.739145

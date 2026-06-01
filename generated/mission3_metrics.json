@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "46775865"
+    "value": "46776306"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-06-01 19:11:17"
+    "value": "2026-06-01 19:25:59"
   },
   {
     "metric": "auction_house",
@@ -25,7 +25,7 @@
   },
   {
     "metric": "dog_total_supply",
-    "value": "731"
+    "value": "732"
   },
   {
     "metric": "woof_token",
@@ -57,7 +57,7 @@
   },
   {
     "metric": "sup_usd_price",
-    "value": "0.0111"
+    "value": "0.01109"
   },
   {
     "metric": "sup_usd_source",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1991.19"
+    "value": "1992.89"
   },
   {
     "metric": "eth_usd_source",
@@ -109,7 +109,7 @@
   },
   {
     "metric": "reward_sup_received_usd",
-    "value": "409.98"
+    "value": "409.61"
   },
   {
     "metric": "reward_sup_flow_per_day",
@@ -117,7 +117,7 @@
   },
   {
     "metric": "reward_sup_flow_usd_per_day",
-    "value": "4.21"
+    "value": "4.2"
   },
   {
     "metric": "reward_sup_per_dog_per_day",
@@ -125,31 +125,31 @@
   },
   {
     "metric": "reward_sup_per_dog_usd_per_day",
-    "value": "0.029837"
+    "value": "0.02981"
   },
   {
     "metric": "reward_total_flow_usd_per_day",
-    "value": "15.65"
+    "value": "15.64"
   },
   {
     "metric": "reward_total_per_dog_usd_per_day",
-    "value": "0.110961"
+    "value": "0.110934"
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "197.37"
+    "value": "17.94"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.5067"
+    "value": "5.5746"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "184.94"
+    "value": "2034.72"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈185% APR"
+    "value": "≈2,035% APR"
   },
   {
     "metric": "woof_holders",
@@ -169,7 +169,7 @@
   },
   {
     "metric": "current_auction_token_id",
-    "value": "730"
+    "value": "731"
   },
   {
     "metric": "current_auction_status",
@@ -177,39 +177,39 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.011"
+    "value": "0.001"
   },
   {
     "metric": "current_bid_usd",
-    "value": "21.9"
+    "value": "1.99"
   },
   {
     "metric": "current_bidder",
-    "value": "@badadan"
+    "value": "@sharas.eth"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0xa2648350f3566e4f18a9519734928d08d3ea08c4"
+    "value": "0xd722d7cef1870733a85e779ab3d306ba286c0af0"
   },
   {
     "metric": "current_auction_end_utc",
-    "value": "2026-06-01 19:16:05"
+    "value": "2026-06-02 19:24:33"
   },
   {
     "metric": "created_auctions",
-    "value": "141"
+    "value": "142"
   },
   {
     "metric": "settled_auctions",
-    "value": "140"
+    "value": "141"
   },
   {
     "metric": "total_bid_eth",
-    "value": "34.953513"
+    "value": "34.954513"
   },
   {
     "metric": "total_settled_eth",
-    "value": "6.77057"
+    "value": "6.78157"
   },
   {
     "metric": "highest_bid_eth",
@@ -221,6 +221,6 @@
   },
   {
     "metric": "season5_rewards_allocated_sup",
-    "value": "972782.60871"
+    "value": "987521.739145"
   }
 ]

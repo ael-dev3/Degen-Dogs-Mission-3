@@ -1,0 +1,120 @@
+{
+  "generated_at_utc": "2026-06-01T19:26:24Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-06-01T19:25:11Z",
+    "amount": {
+      "native": "0.001",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "1000000000000000",
+      "usd_estimate": "2.00771168",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$2.01",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 3 day(s) before event.",
+      "usd_estimate_price_date_utc": "2026-05-29",
+      "usd_estimate_price_usd": "2007.7116820979008",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-06-01T19:24:33Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-06-01T19:25:11Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x2a74ad17c4250361d4ff436ccac714293e1daa0e44945c2dbb15ab443bf04f6c"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 731,
+    "dog_image_url": "https://api.degendogs.club/images/731.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/731",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog731",
+      "explorer": "https://basescan.org/address/0xd722d7cef1870733a85e779ab3d306ba286c0af0",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/731",
+      "repo_archive": "archive/dogs/by-id/731.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#74/732",
+      "rank": 74,
+      "total": 732
+    },
+    "schema_version": 1,
+    "search_text": "dog 731 dog #731 731 mission 3 mission 3 base ongoing 0xd722d7cef1870733a85e779ab3d306ba286c0af0 @sharas.eth sharas.eth 0.001 eth 1000000000000000 1.99 $1.99 2026-06-01t19:25:11z #74/732 generated auction feed 0x2a74ad17c4250361d4ff436ccac714293e1daa0e44945c2dbb15ab443bf04f6c background: halo (9.8%) background halo body: white (11.3%) body white neck: redcollar (31.0%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.1%) ears earbuds head: hoodie (4.8%) head hoodie eyes: redlasereyes (5.2%) eyes redlasereyes generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "generated_auction_feed",
+      "sources": [
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: Halo (9.8%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: White (11.3%)",
+        "trait_type": "Body",
+        "value": "White"
+      },
+      {
+        "display": "Neck: RedCollar (31.0%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.6%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (32.1%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: Hoodie (4.8%)",
+        "trait_type": "Head",
+        "value": "Hoodie"
+      },
+      {
+        "display": "Eyes: RedLaserEyes (5.2%)",
+        "trait_type": "Eyes",
+        "value": "RedLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@sharas.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "sharas.eth",
+      "profile_url": "https://farcaster.xyz/sharas.eth",
+      "wallet": "0xd722d7cef1870733a85e779ab3d306ba286c0af0",
+      "wallet_explorer_url": "https://basescan.org/address/0xd722d7cef1870733a85e779ab3d306ba286c0af0"
+    }
+  },
+  "schema_version": 1
+}
