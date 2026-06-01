@@ -2,16 +2,16 @@
   "generated_at_utc": "2026-05-31T20:35:16Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-05-31T19:13:33Z",
+    "activity_time_utc": "2026-06-01T19:11:05Z",
     "amount": {
-      "native": "0.01",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "10000000000000000",
-      "usd_estimate": "20.07711682",
+      "raw": "11000000000000000",
+      "usd_estimate": "22.08482850",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$20.08",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 2 day(s) before event.",
+      "usd_estimate_display": "$22.08",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 3 day(s) before event.",
       "usd_estimate_price_date_utc": "2026-05-29",
       "usd_estimate_price_usd": "2007.7116820979008",
       "usd_estimate_source": "defillama_coin_prices",
@@ -25,11 +25,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-05-31T19:13:33Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-06-01T19:11:05Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
+      "0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001",
       "0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad"
     ],
     "chain": "Base",
@@ -41,7 +42,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog730",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/730",
       "repo_archive": "archive/dogs/by-id/730.json",
       "settlement_tx": null
@@ -53,7 +54,7 @@
       "total": 731
     },
     "schema_version": 1,
-    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.91 $19.91 2026-05-31t19:13:33z #92/731 generated auction feed 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.3%) background none body: orange (8.8%) body orange neck: goldnecklace (19.7%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.2%) ears none head: toque (7.1%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.011 eth 11000000000000000 21.9 $21.90 2026-06-01t19:11:05z #92/731 generated auction feed 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.3%) background none body: orange (8.8%) body orange neck: goldnecklace (19.7%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.2%) ears none head: toque (7.1%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -108,12 +109,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@badadan",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "badadan",
+      "profile_url": "https://farcaster.xyz/badadan",
+      "wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
+      "wallet_explorer_url": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4"
     }
   },
   "schema_version": 1
