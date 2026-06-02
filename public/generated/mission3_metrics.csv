@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46808579
-latest_block_time_utc,2026-06-02 13:21:45
+latest_block,46810063
+latest_block_time_utc,2026-06-02 14:11:13
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,732
@@ -13,9 +13,9 @@ woof_usd_price,0.0000005089
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
-sup_usd_price,0.01065
+sup_usd_price,0.01062
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1975.16
+eth_usd_price,1961.18
 eth_usd_source,coinbase
 reward_basis_dogs,141
 reward_excludes,woof_vault_bonus
@@ -26,17 +26,17 @@ reward_woof_flow_usd_per_day,11.36
 reward_woof_per_dog_per_day,158351.896454
 reward_woof_per_dog_usd_per_day,0.080585
 reward_sup_received,36935.51
-reward_sup_received_usd,393.36
+reward_sup_received_usd,392.26
 reward_sup_flow_per_day,379.01
-reward_sup_flow_usd_per_day,4.04
+reward_sup_flow_usd_per_day,4.03
 reward_sup_per_dog_per_day,2.688014
-reward_sup_per_dog_usd_per_day,0.028627
-reward_total_flow_usd_per_day,15.4
-reward_total_per_dog_usd_per_day,0.109213
-reward_current_bid_payback_days,198.97
-reward_current_bid_daily_roi_pct,0.5026
-reward_current_bid_apr_pct,183.45
-reward_current_bid_apr_display,≈183% APR
+reward_sup_per_dog_usd_per_day,0.028547
+reward_total_flow_usd_per_day,15.39
+reward_total_per_dog_usd_per_day,0.109132
+reward_current_bid_payback_days,197.65
+reward_current_bid_daily_roi_pct,0.5059
+reward_current_bid_apr_pct,184.67
+reward_current_bid_apr_display,≈185% APR
 woof_holders,403
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,49367310222.581444
@@ -44,7 +44,7 @@ farcaster_profiles_resolved,159
 current_auction_token_id,731
 current_auction_status,live
 current_bid_eth,0.011
-current_bid_usd,21.73
+current_bid_usd,21.57
 current_bidder,@badadan
 current_bidder_wallet,0xa2648350f3566e4f18a9519734928d08d3ea08c4
 current_auction_end_utc,2026-06-02 19:24:33
