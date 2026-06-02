@@ -37,12 +37,13 @@ def hidden_metrics_table(metrics: dict[str, str]) -> str:
 def write_fixture(
     root: Path,
     *,
-    apr_pct: str = "207.36",
-    daily_roi_pct: str = "0.5681",
-    payback_days: str = "176.02",
+    apr_pct: str = "195.58",
+    daily_roi_pct: str = "0.5358",
+    payback_days: str = "186.63",
     index_dog: str = "Dog #729",
-    index_apr: str = "≈207% APR",
+    index_apr: str = "≈196% APR",
     apr_display: str | None = None,
+    reward_basis_dogs: str = "133",
     feed_bidder: str = "@0xael.eth",
     season6_projected_raw_display: str = "Projected if current bid wins: ≈1,000 SUP / ≈$2,000 raw estimate",
     season6_by_winner_capped: str = "1000",
@@ -59,7 +60,20 @@ def write_fixture(
         "current_bidder": "@0xael.eth",
         "current_bidder_wallet": wallet,
         "current_auction_end_utc": "2026-05-31 20:40:09",
-        "reward_total_per_dog_usd_per_day": "0.113508",
+        "woof_usd_price": "0.0000005",
+        "sup_usd_price": "0.02",
+        "reward_basis_dogs": reward_basis_dogs,
+        "reward_basis_source": "observed_stream_snapshot_133_dogs",
+        "reward_snapshot_utc": "2026-06-02T20:55:15Z",
+        "reward_excludes": "woof_vault_bonus",
+        "reward_observed_dogs_count": reward_basis_dogs,
+        "reward_observed_woof_flow_per_day": "20494201.3",
+        "reward_observed_sup_flow_per_day": "199.58",
+        "reward_observed_woof_per_dog_per_day": "154091.739097744361",
+        "reward_observed_sup_per_dog_per_day": "1.5006015037593985",
+        "reward_woof_per_dog_per_day": "154091.739097744361",
+        "reward_sup_per_dog_per_day": "1.5006015037593985",
+        "reward_total_per_dog_usd_per_day": "0.107058",
         "reward_current_bid_payback_days": payback_days,
         "reward_current_bid_daily_roi_pct": daily_roi_pct,
         "reward_current_bid_apr_pct": apr_pct,
@@ -204,8 +218,9 @@ def write_fixture(
     index = (
         f"<html><body><h1>{index_dog}</h1><span>0.01000 ETH ($20)</span>"
         f"<span>@0xael.eth</span><span>ongoing</span><span>2026-05-31 20:40:09</span>"
-        f"<section class=\"reward-strip\"><span><b>Bid payback</b><strong>≈176 days</strong>"
-        f"<span>{index_apr}</span><em>Simple APR estimate. Annualized from current per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; not guaranteed future return.</em></span></section>"
+        f"<section class=\"reward-strip\"><p>Observed 133-Dog stream: ≈154,092 WOOF + ≈1.50 SUP / Dog / day; WOOF Vault Bonus excluded.</p>"
+        f"<span><b>Bid payback</b><strong><span>≈187 days</span>"
+        f"<span>{index_apr}</span></strong><em>Simple APR estimate. Annualized from observed per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; not guaranteed future return.</em></span></section>"
         f"<section class=\"season6-sup\"><h2>Season 6 SUP rewards live</h2>"
         f"<span>Pool: 251,340 SUP</span><span>Cap: 12,500 SUP per wallet-level estimate</span>"
         f"<span>100 XP per settled Dog win</span><span>{season6_projected_raw_display}</span>"
@@ -213,7 +228,7 @@ def write_fixture(
         f"{hidden_metrics_table(metrics)}</body></html>"
     )
     write_text(root / "index.html", index)
-    write_text(root / "README.md", """# Fixture\n\n## Current snapshot\n\n| Field | Value |\n| --- | --- |\n| Snapshot block | 46732183 |\n| Snapshot time UTC | 2026-05-31 18:55:13 |\n| Current Dog | Dog #729 |\n| Current status | live |\n| Current bid | 0.01 ETH ($19.98) |\n| Current high bidder | @0xael.eth |\n| Bid payback / APR | ≈176 days / ≈207% APR |\n\n## Next\n""")
+    write_text(root / "README.md", """# Fixture\n\n## Current snapshot\n\n| Field | Value |\n| --- | --- |\n| Snapshot block | 46732183 |\n| Snapshot time UTC | 2026-05-31 18:55:13 |\n| Current Dog | Dog #729 |\n| Current status | live |\n| Current bid | 0.01 ETH ($19.98) |\n| Current high bidder | @0xael.eth |\n| Bid payback / APR | ≈187 days / ≈196% APR |\n\n## Next\n""")
 
 
 def run_validation(root: Path) -> dict[str, Any]:
@@ -250,7 +265,7 @@ def test_validator_catches_apr_math_mismatch() -> None:
 def test_validator_catches_apr_mismatch_between_metrics_and_rendered_html() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        write_fixture(root, index_apr="≈999% APR", apr_display="≈207% APR")
+        write_fixture(root, index_apr="≈999% APR", apr_display="≈196% APR")
         assert_raises_contains(lambda: run_validation(root), "reward APR display")
 
 
@@ -280,6 +295,33 @@ def test_validator_catches_season6_capped_value_over_configured_cap() -> None:
         root = Path(tmp)
         write_fixture(root, season6_by_winner_capped="13000")
         assert_raises_contains(lambda: run_validation(root), "Season 6 capped SUP exceeds configured cap")
+
+
+def test_validator_catches_stale_observed_reward_basis_count() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root, reward_basis_dogs="141")
+        assert_raises_contains(lambda: run_validation(root), "observed 133-Dog reward basis")
+
+
+def test_validator_catches_stale_observed_per_dog_reward_math() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        metric_rows = json.loads((root / "generated" / "mission3_metrics.json").read_text(encoding="utf-8"))
+        for row in metric_rows:
+            if row.get("metric") == "reward_woof_per_dog_per_day":
+                row["value"] = "158351.896454"
+        write_json(root / "generated" / "mission3_metrics.json", metric_rows)
+        write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
+        csv_lines = ["metric,value"] + [f"{row['metric']},{row['value']}" for row in metric_rows]
+        write_text(root / "generated" / "mission3_metrics.csv", "\n".join(csv_lines) + "\n")
+        stale_index = (root / "index.html").read_text(encoding="utf-8").replace(
+            "<td>reward_woof_per_dog_per_day</td><td>154091.739097744361</td>",
+            "<td>reward_woof_per_dog_per_day</td><td>158351.896454</td>",
+        )
+        write_text(root / "index.html", stale_index)
+        assert_raises_contains(lambda: run_validation(root), "reward_woof_per_dog_per_day")
 
 
 if __name__ == "__main__":

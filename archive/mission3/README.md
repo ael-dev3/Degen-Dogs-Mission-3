@@ -69,9 +69,9 @@ metrics JSON.
 ## Reward estimate provenance
 
 The public dashboard may show per-Dog WOOF/SUP reward estimate tiles. The repo documents
-that these estimates use a 141-Dog reward-basis snapshot and intentionally exclude WOOF
-Vault Bonus. Treat reward values as estimates unless confirmed against official reward
-logic.
+that these estimates use the observed 133-Dog reward-stream snapshot in
+`config/reward_stream_snapshot.json` and intentionally exclude WOOF Vault Bonus. Treat
+reward values as estimates unless confirmed against official reward logic.
 
 ## Not official
 

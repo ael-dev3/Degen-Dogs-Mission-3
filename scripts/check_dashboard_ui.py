@@ -58,7 +58,7 @@ def assert_timer_urgency_colors() -> None:
 
     html = INDEX_PATH.read_text(encoding="utf-8")
     required_markers = [
-        "--paper-calm:#eff8df",
+        "--paper-calm:#f0fbea",
         ".current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm)",
         ".current-detail .timer-card--urgent{background:var(--paper-urgent)",
         "seconds<=600?'critical':seconds<3600?'urgent':'calm'",

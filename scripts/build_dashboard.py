@@ -86,14 +86,85 @@ def opensea_trait_url(trait_type: str, trait_value: str) -> str:
     encoded = urllib.parse.quote(payload, safe="[]{}:,")
     return f"{OPENSEA_COLLECTION_URL}?traits={encoded}"
 
-# Rewards snapshot supplied by Ael for a 141-Dog wallet. WOOF Vault Bonus is
-# intentionally excluded so the per-Dog reward estimate reflects only the base
-# WOOF stream and SUP stream a new bidder should reason about.
-REWARD_DOG_COUNT = Decimal("141")
-REWARD_WOOF_RECEIVED = Decimal("2750407020.46")
-REWARD_WOOF_FLOW_PER_DAY = Decimal("22327617.40")
-REWARD_SUP_RECEIVED = Decimal("36935.51")
-REWARD_SUP_FLOW_PER_DAY = Decimal("379.01")
+REWARD_STREAM_SNAPSHOT_PATH = ROOT / "config" / "reward_stream_snapshot.json"
+REWARD_EXCLUDES = "woof_vault_bonus"
+
+
+@dataclass(frozen=True)
+class RewardStreamSnapshot:
+    snapshot_utc: str
+    dogs_count: Decimal
+    woof_received: Decimal | None
+    woof_flow_per_day: Decimal
+    sup_received: Decimal | None
+    sup_flow_per_day: Decimal
+    basis_source: str
+    note: str = ""
+    excludes: str = REWARD_EXCLUDES
+
+    @property
+    def woof_per_dog_per_day(self) -> Decimal:
+        return self.woof_flow_per_day / self.dogs_count
+
+    @property
+    def sup_per_dog_per_day(self) -> Decimal:
+        return self.sup_flow_per_day / self.dogs_count
+
+
+def required_decimal_field(data: dict[str, Any], key: str, path: Path) -> Decimal:
+    raw = str(data.get(key, "")).replace(",", "").strip()
+    if not raw:
+        raise ValueError(f"{path.relative_to(ROOT)} missing required decimal field {key}")
+    value = Decimal(raw)
+    if value <= 0:
+        raise ValueError(f"{path.relative_to(ROOT)} {key} must be positive")
+    return value
+
+
+def optional_decimal_field(data: dict[str, Any], key: str, path: Path) -> Decimal | None:
+    raw = str(data.get(key, "")).replace(",", "").strip()
+    if not raw or raw.upper() == "N/A":
+        return None
+    value = Decimal(raw)
+    if value < 0:
+        raise ValueError(f"{path.relative_to(ROOT)} {key} must not be negative")
+    return value
+
+
+def validate_derived_reward_value(data: dict[str, Any], key: str, calculated: Decimal, path: Path) -> None:
+    if key not in data:
+        return
+    supplied = required_decimal_field(data, key, path)
+    quant = Decimal(1).scaleb(supplied.as_tuple().exponent)
+    expected = calculated.quantize(quant, rounding=ROUND_HALF_UP)
+    if supplied != expected:
+        raise ValueError(
+            f"{path.relative_to(ROOT)} {key} stale: expected {expected:f} from observed stream, got {supplied:f}"
+        )
+
+
+def load_reward_stream_snapshot(path: Path = REWARD_STREAM_SNAPSHOT_PATH) -> RewardStreamSnapshot:
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError(f"{path.relative_to(ROOT)} must contain a JSON object")
+    dogs_count = required_decimal_field(data, "reward_account_dogs_count", path)
+    snapshot = RewardStreamSnapshot(
+        snapshot_utc=str(data.get("snapshot_utc") or "").strip(),
+        dogs_count=dogs_count,
+        woof_received=optional_decimal_field(data, "account_woof_received", path),
+        woof_flow_per_day=required_decimal_field(data, "account_woof_flow_per_day", path),
+        sup_received=optional_decimal_field(data, "account_sup_received", path),
+        sup_flow_per_day=required_decimal_field(data, "account_sup_flow_per_day", path),
+        basis_source=str(data.get("basis_source") or "observed_stream_snapshot").strip(),
+        note=str(data.get("note") or "").strip(),
+    )
+    if not snapshot.snapshot_utc:
+        raise ValueError(f"{path.relative_to(ROOT)} missing snapshot_utc")
+    if not snapshot.basis_source:
+        raise ValueError(f"{path.relative_to(ROOT)} missing basis_source")
+    validate_derived_reward_value(data, "derived_woof_per_dog_per_day", snapshot.woof_per_dog_per_day, path)
+    validate_derived_reward_value(data, "derived_sup_per_dog_per_day", snapshot.sup_per_dog_per_day, path)
+    return snapshot
 
 
 @dataclass(frozen=True)
@@ -938,29 +1009,46 @@ def fetch_token_usd_price(symbol: str, token_address: str) -> tuple[Decimal, str
     return Decimal(0), "unavailable"
 
 
-def reward_token_stats(woof_usd: Decimal, sup_usd: Decimal) -> dict[str, str]:
-    woof_per_dog = REWARD_WOOF_FLOW_PER_DAY / REWARD_DOG_COUNT
-    sup_per_dog = REWARD_SUP_FLOW_PER_DAY / REWARD_DOG_COUNT
-    woof_flow_usd = REWARD_WOOF_FLOW_PER_DAY * woof_usd
-    sup_flow_usd = REWARD_SUP_FLOW_PER_DAY * sup_usd
+def optional_reward_decimal_str(value: Decimal | None, max_places: int = 6) -> str:
+    return "N/A" if value is None else decimal_value_str(value, max_places)
+
+
+def reward_token_stats(woof_usd: Decimal, sup_usd: Decimal, snapshot: RewardStreamSnapshot | None = None) -> dict[str, str]:
+    snapshot = snapshot or load_reward_stream_snapshot()
+    woof_per_dog = snapshot.woof_per_dog_per_day
+    sup_per_dog = snapshot.sup_per_dog_per_day
+    woof_flow_usd = snapshot.woof_flow_per_day * woof_usd
+    sup_flow_usd = snapshot.sup_flow_per_day * sup_usd
+    woof_received_usd = snapshot.woof_received * woof_usd if snapshot.woof_received is not None else None
+    sup_received_usd = snapshot.sup_received * sup_usd if snapshot.sup_received is not None else None
     woof_per_dog_usd = woof_per_dog * woof_usd
     sup_per_dog_usd = sup_per_dog * sup_usd
     total_flow_usd = woof_flow_usd + sup_flow_usd
     total_per_dog_usd = woof_per_dog_usd + sup_per_dog_usd
     return {
-        "reward_basis_dogs": decimal_value_str(REWARD_DOG_COUNT, 0),
-        "reward_excludes": "woof_vault_bonus",
-        "reward_woof_received": decimal_value_str(REWARD_WOOF_RECEIVED, 2),
-        "reward_woof_received_usd": decimal_value_str(REWARD_WOOF_RECEIVED * woof_usd, 2),
-        "reward_woof_flow_per_day": decimal_value_str(REWARD_WOOF_FLOW_PER_DAY, 2),
+        "reward_basis_dogs": decimal_value_str(snapshot.dogs_count, 0),
+        "reward_basis_source": snapshot.basis_source,
+        "reward_snapshot_utc": snapshot.snapshot_utc,
+        "reward_excludes": snapshot.excludes,
+        "reward_observed_dogs_count": decimal_value_str(snapshot.dogs_count, 0),
+        "reward_observed_woof_received": optional_reward_decimal_str(snapshot.woof_received, 2),
+        "reward_observed_woof_flow_per_day": decimal_value_str(snapshot.woof_flow_per_day, 2),
+        "reward_observed_woof_per_dog_per_day": decimal_value_str(woof_per_dog, 12),
+        "reward_observed_sup_received": optional_reward_decimal_str(snapshot.sup_received, 2),
+        "reward_observed_sup_flow_per_day": decimal_value_str(snapshot.sup_flow_per_day, 2),
+        "reward_observed_sup_per_dog_per_day": decimal_value_str(sup_per_dog, 16),
+        "reward_basis_note": snapshot.note,
+        "reward_woof_received": optional_reward_decimal_str(snapshot.woof_received, 2),
+        "reward_woof_received_usd": optional_reward_decimal_str(woof_received_usd, 2),
+        "reward_woof_flow_per_day": decimal_value_str(snapshot.woof_flow_per_day, 2),
         "reward_woof_flow_usd_per_day": decimal_value_str(woof_flow_usd, 2),
-        "reward_woof_per_dog_per_day": decimal_value_str(woof_per_dog, 6),
+        "reward_woof_per_dog_per_day": decimal_value_str(woof_per_dog, 12),
         "reward_woof_per_dog_usd_per_day": decimal_value_str(woof_per_dog_usd, 6),
-        "reward_sup_received": decimal_value_str(REWARD_SUP_RECEIVED, 2),
-        "reward_sup_received_usd": decimal_value_str(REWARD_SUP_RECEIVED * sup_usd, 2),
-        "reward_sup_flow_per_day": decimal_value_str(REWARD_SUP_FLOW_PER_DAY, 2),
+        "reward_sup_received": optional_reward_decimal_str(snapshot.sup_received, 2),
+        "reward_sup_received_usd": optional_reward_decimal_str(sup_received_usd, 2),
+        "reward_sup_flow_per_day": decimal_value_str(snapshot.sup_flow_per_day, 2),
         "reward_sup_flow_usd_per_day": decimal_value_str(sup_flow_usd, 2),
-        "reward_sup_per_dog_per_day": decimal_value_str(sup_per_dog, 6),
+        "reward_sup_per_dog_per_day": decimal_value_str(sup_per_dog, 16),
         "reward_sup_per_dog_usd_per_day": decimal_value_str(sup_per_dog_usd, 6),
         "reward_total_flow_usd_per_day": decimal_value_str(total_flow_usd, 2),
         "reward_total_per_dog_usd_per_day": decimal_value_str(total_per_dog_usd, 6),
@@ -2206,25 +2294,45 @@ def reward_payback_apr_summary(metrics: dict[str, str]) -> str:
     return " / ".join(values)
 
 
+def reward_basis_label(metrics: dict[str, str]) -> str:
+    count = metric_value(metrics, "reward_basis_dogs").strip()
+    source = metric_value(metrics, "reward_basis_source").strip().lower()
+    if count and "observed" in source:
+        return f"Observed {count}-Dog stream"
+    if count:
+        return f"{count}-Dog reward basis"
+    return "Observed reward stream"
+
+
+def reward_basis_summary(metrics: dict[str, str]) -> str:
+    label = reward_basis_label(metrics)
+    woof = metric_decimal(metrics, "reward_woof_per_dog_per_day")
+    sup = metric_decimal(metrics, "reward_sup_per_dog_per_day")
+    if woof is None or sup is None:
+        return label
+    return f"{label}: ≈{woof:,.0f} WOOF + ≈{sup:,.2f} SUP / Dog / day"
+
+
 def render_reward_strip(metrics: dict[str, str]) -> str:
     woof = reward_token_display(metrics, "reward_woof_per_dog_per_day", "reward_woof_per_dog_usd_per_day", "WOOF", 2)
     sup = reward_token_display(metrics, "reward_sup_per_dog_per_day", "reward_sup_per_dog_usd_per_day", "SUP", 2)
     total = reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")
     payback = reward_payback_display(metrics)
     apr = reward_apr_display(metrics)
+    basis = reward_basis_summary(metrics)
     apr_copy = (
-        "Simple APR estimate. Annualized from the current bid divided by the current estimated "
+        "Simple APR estimate. Annualized from the current bid divided by the observed estimated "
         "per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; "
         "changes with token prices, bid, auction state, and reward-flow assumptions; not guaranteed future return."
     )
     tiles = [
-        ("WOOF / Dog", html.escape(woof), "Base WOOF flow", ""),
-        ("SUP / Dog", html.escape(sup), "SUP flow", ""),
+        ("WOOF / Dog", html.escape(woof), "Observed stream", ""),
+        ("SUP / Dog", html.escape(sup), "Observed stream", ""),
         ("Total / Dog", html.escape(total), "WOOF + SUP", ""),
         (
             "Bid payback",
             f'<span class="payback-days">{html.escape(payback)}</span><span class="payback-apr">{html.escape(apr)}</span>',
-            "Current bid / per-Dog WOOF + SUP flow",
+            "Current bid / observed per-Dog flow",
             apr_copy,
         ),
     ]
@@ -2241,7 +2349,8 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     body = "".join(body_parts)
     if not body:
         return ""
-    return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}</section>'
+    basis_html = f'<p class="reward-basis">{html.escape(basis)}; WOOF Vault Bonus excluded.</p>' if basis else ""
+    return f'<section class="reward-strip" aria-label="Observed per-Dog reward estimate">{basis_html}{body}</section>'
 
 
 def comma_decimal_display(value: Any, places: int = 0, prefix: str = "", suffix: str = "") -> str:
@@ -2564,7 +2673,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     season6_strip = render_season6_strip(metrics)
     chips = trait_chips(current)
     css = """
-:root{color-scheme:light;--paper:#e8ded5;--paper-calm:#eff8df;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--calm:#55a653;--calm-dark:#245a32;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root{color-scheme:light;--paper:#e8ded5;--paper-calm:#f0fbea;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--calm:#61bf6b;--calm-dark:#1f6b3b;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
 html{background:var(--paper)}
 body{margin:0;min-width:320px;background:var(--paper);color:var(--ink);font-size:14px}
@@ -2620,7 +2729,7 @@ a:hover{color:var(--accent2)}
 .current-detail .detail-rarity{min-width:104px}
 .current-detail .detail-bidder{min-width:0}
 .current-detail .timer-card{min-width:180px;position:relative;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
-.current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:#9bd78d;box-shadow:3px 3px 0 rgba(85,166,83,.14)}
+.current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:#a7dfa0;box-shadow:3px 3px 0 rgba(65,155,79,.16)}
 .current-detail .timer-card--urgent{background:var(--paper-urgent);color:var(--ink);border-color:var(--urgent);box-shadow:3px 3px 0 rgba(229,27,50,.18)}
 .current-detail .timer-card--critical{background:var(--critical-bg);color:white;border-color:var(--critical-red);box-shadow:3px 3px 0 var(--critical-red)}
 .current-detail .timer-card--ended{background:#eee7dd;color:#4a403a;border-color:#8a8178;box-shadow:none}

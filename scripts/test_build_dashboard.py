@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import sys
 import tempfile
@@ -148,23 +149,86 @@ def test_current_bid_reward_stats_unavailable_when_bid_or_daily_flow_missing() -
     assert zero_flow["reward_current_bid_apr_display"] == "N/A"
 
 
+def test_timer_urgency_stays_calm_until_less_than_one_hour_remains() -> None:
+    dashboard = load_module()
+    assert dashboard.timer_urgency_state(3601, "live") == "calm"
+    assert dashboard.timer_urgency_state(3600, "live") == "calm"
+    assert dashboard.timer_urgency_state(3599, "live") == "urgent"
+    assert dashboard.timer_urgency_state(600, "live") == "critical"
+    assert dashboard.timer_urgency_state(0, "live") == "ended"
+
+
+def write_reward_snapshot(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
+        "snapshot_utc": "2026-06-02T20:55:15Z",
+        "reward_account_dogs_count": "133",
+        "account_woof_flow_per_day": "20494201.30",
+        "account_sup_flow_per_day": "199.58",
+        "account_woof_received": "2856495886.75",
+        "account_sup_received": "38733.66",
+        "derived_woof_per_dog_per_day": "154091.739097744361",
+        "derived_sup_per_dog_per_day": "1.5006015037593985",
+        "basis_source": "observed_stream_snapshot_133_dogs",
+        "note": "Observed reward account stream snapshot; update when the live stream changes.",
+    }, indent=2) + "\n", encoding="utf-8")
+
+
+def test_load_reward_stream_snapshot_derives_observed_per_dog_values() -> None:
+    dashboard = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        snapshot_path = Path(tmp) / "config" / "reward_stream_snapshot.json"
+        write_reward_snapshot(snapshot_path)
+        snapshot = dashboard.load_reward_stream_snapshot(snapshot_path)
+        assert snapshot.dogs_count == Decimal("133")
+        assert snapshot.woof_flow_per_day == Decimal("20494201.30")
+        assert snapshot.sup_flow_per_day == Decimal("199.58")
+        assert dashboard.decimal_value_str(snapshot.woof_per_dog_per_day, 12) == "154091.739097744361"
+        assert dashboard.decimal_value_str(snapshot.sup_per_dog_per_day, 16) == "1.5006015037593985"
+
+
+def test_reward_token_stats_uses_observed_snapshot_for_per_dog_flows_and_usd_totals() -> None:
+    dashboard = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        snapshot_path = Path(tmp) / "config" / "reward_stream_snapshot.json"
+        write_reward_snapshot(snapshot_path)
+        snapshot = dashboard.load_reward_stream_snapshot(snapshot_path)
+    stats = dashboard.reward_token_stats(Decimal("0.0000005"), Decimal("0.02"), snapshot=snapshot)
+    assert stats["reward_basis_dogs"] == "133"
+    assert stats["reward_basis_source"] == "observed_stream_snapshot_133_dogs"
+    assert stats["reward_observed_dogs_count"] == "133"
+    assert stats["reward_observed_woof_flow_per_day"] == "20494201.3"
+    assert stats["reward_observed_sup_flow_per_day"] == "199.58"
+    assert stats["reward_observed_woof_received"] == "2856495886.75"
+    assert stats["reward_observed_sup_received"] == "38733.66"
+    assert stats["reward_observed_woof_per_dog_per_day"] == "154091.739097744361"
+    assert stats["reward_observed_sup_per_dog_per_day"] == "1.5006015037593985"
+    assert stats["reward_woof_per_dog_per_day"] == "154091.739097744361"
+    assert stats["reward_sup_per_dog_per_day"] == "1.5006015037593985"
+    assert stats["reward_total_per_dog_usd_per_day"] == "0.107058"
+
+
 def test_reward_strip_renders_apr_inside_bid_payback_card_with_caveat_copy() -> None:
     dashboard = load_module()
     metrics = {
-        "reward_woof_per_dog_per_day": "158351.896454",
-        "reward_woof_per_dog_usd_per_day": "0.08",
-        "reward_sup_per_dog_per_day": "2.687",
-        "reward_sup_per_dog_usd_per_day": "0.03",
-        "reward_total_per_dog_usd_per_day": "0.113508",
-        "reward_current_bid_payback_days": "176.02",
-        "reward_current_bid_apr_pct": "207.36",
-        "reward_current_bid_apr_display": "≈207% APR",
+        "reward_basis_dogs": "133",
+        "reward_basis_source": "observed_stream_snapshot_133_dogs",
+        "reward_woof_per_dog_per_day": "154091.739097744361",
+        "reward_woof_per_dog_usd_per_day": "0.077046",
+        "reward_sup_per_dog_per_day": "1.5006015037593985",
+        "reward_sup_per_dog_usd_per_day": "0.030012",
+        "reward_total_per_dog_usd_per_day": "0.107058",
+        "reward_current_bid_payback_days": "186.63",
+        "reward_current_bid_apr_pct": "195.58",
+        "reward_current_bid_apr_display": "≈196% APR",
     }
     rendered = dashboard.render_reward_strip(metrics)
     assert "<b>Bid payback</b>" in rendered
-    assert "≈176 days" in rendered
-    assert "≈207% APR" in rendered
-    assert "Current bid / per-Dog WOOF + SUP flow" in rendered
+    assert "Observed 133-Dog stream" in rendered
+    assert "≈154,092 WOOF + ≈1.50 SUP / Dog / day" in rendered
+    assert "≈187 days" in rendered
+    assert "≈196% APR" in rendered
+    assert "Current bid / observed per-Dog flow" in rendered
     assert "Simple APR estimate" in rendered
     assert "not guaranteed" in rendered.lower()
     assert "guaranteed return" not in rendered.lower()

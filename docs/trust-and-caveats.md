@@ -22,9 +22,10 @@ data, commits generated files, and GitHub Pages deploys.
 
 ## Reward and token context
 
-WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses 141
-Dogs and the WOOF Vault Bonus is not included in that estimate basis. Treat the values
-as estimates unless confirmed against official reward/accounting logic.
+WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses an
+observed 133-Dog reward-stream snapshot from [`config/reward_stream_snapshot.json`](../config/reward_stream_snapshot.json).
+The WOOF Vault Bonus is not included in that estimate basis. Treat the values as
+estimates unless confirmed against official reward/accounting logic.
 
 Season 6 SUP projections are also estimates. They use a time-sliced XP model from
 settled Dog wins, apply a wallet-level cap, and do not redistribute cap overflow. The
@@ -33,7 +34,7 @@ end time; it is useful context, not official accounting.
 
 The BID PAYBACK tile also shows a simple annualized APR estimate:
 
-- `daily ROI % = current estimated per-Dog daily WOOF + SUP USD flow / current bid USD * 100`
+- `daily ROI % = observed estimated per-Dog daily WOOF + SUP USD flow / current bid USD * 100`
 - `APR % = daily ROI % * 365`
 
 This is APR, not APY. It does not compound, excludes the WOOF Vault Bonus for the same

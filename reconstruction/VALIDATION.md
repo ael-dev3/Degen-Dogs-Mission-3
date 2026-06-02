@@ -24,12 +24,12 @@ grep -R "latest_block" -n generated public/generated README.md
 ## Dashboard text checks
 
 ```bash
-grep -R "Per-Dog stream estimate across 141"" Dogs" -n index.html generated public README.md docs || true
-grep -R "WOOF Vault Bonus"" excluded" -n index.html generated public README.md docs || true
+grep -R "Observed 133-Dog stream" -n index.html generated public README.md docs || true
+grep -R "reward_basis_dogs,133" -n generated public/generated || true
 ```
 
-The dashboard-visible sentence should not appear in `index.html` or public generated
-output.
+These checks should find the observed 133-Dog basis in the generated dashboard and the
+published metrics artifacts.
 
 ## Link and integrity checks
 

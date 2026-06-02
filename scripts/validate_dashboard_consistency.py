@@ -128,6 +128,17 @@ def load_metrics() -> dict[str, str]:
         "current_bid_usd",
         "current_bidder",
         "current_bidder_wallet",
+        "woof_usd_price",
+        "sup_usd_price",
+        "reward_basis_dogs",
+        "reward_basis_source",
+        "reward_snapshot_utc",
+        "reward_observed_woof_flow_per_day",
+        "reward_observed_sup_flow_per_day",
+        "reward_observed_woof_per_dog_per_day",
+        "reward_observed_sup_per_dog_per_day",
+        "reward_woof_per_dog_per_day",
+        "reward_sup_per_dog_per_day",
         "reward_total_per_dog_usd_per_day",
         "reward_current_bid_payback_days",
         "reward_current_bid_daily_roi_pct",
@@ -259,6 +270,40 @@ def find_unified_current(path: Path, current_dog_id: int) -> dict[str, Any]:
 
 
 def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[str, str]) -> None:
+    basis_count = optional_decimal_value(metrics.get("reward_basis_dogs"))
+    observed_count = optional_decimal_value(metrics.get("reward_observed_dogs_count"))
+    if basis_count != Decimal("133") or observed_count not in (None, Decimal("133")):
+        raise AssertionError("mission3_metrics reward_basis_dogs must use the observed 133-Dog reward basis")
+    if "observed" not in text(metrics.get("reward_basis_source")).lower():
+        raise AssertionError("mission3_metrics reward_basis_source must identify the observed reward stream snapshot")
+
+    woof_flow = optional_decimal_value(metrics.get("reward_observed_woof_flow_per_day"))
+    sup_flow = optional_decimal_value(metrics.get("reward_observed_sup_flow_per_day"))
+    woof_usd = optional_decimal_value(metrics.get("woof_usd_price"))
+    sup_usd = optional_decimal_value(metrics.get("sup_usd_price"))
+    if basis_count is None or woof_flow is None or sup_flow is None or woof_usd is None or sup_usd is None:
+        raise AssertionError("mission3_metrics missing observed reward basis inputs")
+    expected_woof_per_dog = woof_flow / basis_count
+    expected_sup_per_dog = sup_flow / basis_count
+    expected_values = {
+        "reward_observed_woof_per_dog_per_day": quantized_decimal_str(expected_woof_per_dog, 12),
+        "reward_woof_per_dog_per_day": quantized_decimal_str(expected_woof_per_dog, 12),
+        "reward_observed_sup_per_dog_per_day": quantized_decimal_str(expected_sup_per_dog, 16),
+        "reward_sup_per_dog_per_day": quantized_decimal_str(expected_sup_per_dog, 16),
+        "reward_total_per_dog_usd_per_day": quantized_decimal_str((expected_woof_per_dog * woof_usd) + (expected_sup_per_dog * sup_usd), 6),
+    }
+    for key, expected_value in expected_values.items():
+        if text(metrics.get(key)) != expected_value:
+            raise AssertionError(f"mission3_metrics {key} differs from observed 133-Dog reward basis: expected {expected_value!r}, got {metrics.get(key)!r}")
+        assert_metric_cell(key, expected_value, index)
+
+    basis_display = "Observed 133-Dog stream"
+    reward_surface = reward_strip_surface(index)
+    if not reward_surface:
+        raise AssertionError("index.html missing reward-strip APR/payback surface")
+    if basis_display not in reward_surface:
+        raise AssertionError(f"index.html missing observed reward basis display: {basis_display!r}")
+
     current_bid_usd = optional_decimal_value(metrics.get("current_bid_usd"))
     daily_flow = optional_decimal_value(metrics.get("reward_total_per_dog_usd_per_day"))
     if current_bid_usd is None or current_bid_usd <= 0 or daily_flow is None or daily_flow <= 0:
