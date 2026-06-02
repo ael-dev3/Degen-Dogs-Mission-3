@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import sys
 import tempfile
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +19,7 @@ def load_module() -> Any:
     spec = importlib.util.spec_from_file_location("build_dashboard", MODULE_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -165,6 +168,95 @@ def test_reward_strip_renders_apr_inside_bid_payback_card_with_caveat_copy() -> 
     assert "Simple APR estimate" in rendered
     assert "not guaranteed" in rendered.lower()
     assert "guaranteed return" not in rendered.lower()
+
+
+def season6_test_config(dashboard: Any, *, total: str = "1000", cap: str = "600") -> Any:
+    return dashboard.Season6SupConfig(
+        total_sup=Decimal(total),
+        cap_sup=Decimal(cap),
+        xp_per_settled_win=Decimal("100"),
+        xp_start_utc="2026-06-02T00:00:00Z",
+        reward_start_utc="2026-06-02T00:00:00Z",
+        campaign_end_utc="2026-06-02T00:01:40Z",
+        cap_percent_label="5% cap",
+    )
+
+
+def test_season6_time_sliced_rewards_split_after_later_xp_event() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    bob = "0x00000000000000000000000000000000000000b2"
+    outputs = dashboard.build_season6_sup_outputs(
+        [
+            {"token_id": 1, "winner": alice, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"},
+            {"token_id": 2, "winner": bob, "amount_eth": 0.02, "block_time_utc": "2026-06-02T00:00:50Z"},
+        ],
+        {"token_id": 3, "bidder": bob, "amount_eth": 0.03, "end_time_utc": "2026-06-02T00:01:40Z"},
+        {"sup_usd_price": "2", "sup_usd_source": "unit-test", "eth_usd_price": "1000"},
+        snapshot_time_utc="2026-06-02T00:01:40Z",
+        config=season6_test_config(dashboard),
+    )
+    by_winner = {row["winner_wallet"]: row for row in outputs["season6_sup_by_winner"]}
+    assert by_winner[alice]["season6_wins_confirmed"] == 1
+    assert by_winner[alice]["season6_xp_confirmed"] == 100
+    assert by_winner[alice]["season6_raw_sup_projected_full"] == "750"
+    assert by_winner[bob]["season6_raw_sup_projected_full"] == "250"
+    assert by_winner[alice]["season6_capped_sup_projected_full"] == "600"
+    assert by_winner[alice]["season6_cap_limited"] == "true"
+    assert outputs["season6_metrics"]["season6_sup_unallocated_due_to_zero_xp"] == "0"
+
+
+def test_season6_cap_uses_explicit_12500_sup_not_percent_math() -> None:
+    dashboard = load_module()
+    wallet = "0x00000000000000000000000000000000000000a1"
+    outputs = dashboard.build_season6_sup_outputs(
+        [{"token_id": 1, "winner": wallet, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"}],
+        {},
+        {"sup_usd_price": "1", "sup_usd_source": "unit-test"},
+        snapshot_time_utc="2026-06-02T00:01:40Z",
+        config=season6_test_config(dashboard, total="251340", cap="12500"),
+    )
+    row = outputs["season6_sup_by_winner"][0]
+    assert row["season6_raw_sup_projected_full"] == "251340"
+    assert row["season6_cap_sup"] == "12500"
+    assert row["season6_capped_sup_projected_full"] == "12500"
+    assert row["season6_cap_limited"] == "true"
+
+
+def test_season6_price_missing_keeps_raw_sup_and_na_usd() -> None:
+    dashboard = load_module()
+    wallet = "0x00000000000000000000000000000000000000a1"
+    outputs = dashboard.build_season6_sup_outputs(
+        [{"token_id": 1, "winner": wallet, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"}],
+        {},
+        {"sup_usd_price": "0", "sup_usd_source": "unavailable"},
+        snapshot_time_utc="2026-06-02T00:01:40Z",
+        config=season6_test_config(dashboard),
+    )
+    row = outputs["season6_sup_by_winner"][0]
+    assert row["season6_raw_sup_projected_full"] == "1000"
+    assert row["season6_raw_usd_projected_full"] == "N/A"
+    assert row["season6_capped_usd_projected_full"] == "N/A"
+
+
+def test_season6_current_bidder_projection_adds_hypothetical_win_and_prior_status() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    outputs = dashboard.build_season6_sup_outputs(
+        [{"token_id": 1, "winner": alice, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"}],
+        {"token_id": 2, "bidder": alice, "amount_eth": 0.02, "end_time_utc": "2026-06-02T00:00:50Z"},
+        {"sup_usd_price": "2", "sup_usd_source": "unit-test", "eth_usd_price": "1000"},
+        snapshot_time_utc="2026-06-02T00:00:50Z",
+        config=season6_test_config(dashboard),
+    )
+    status = outputs["season6_sup_current_bidder_status"][0]
+    assert status["current_bidder_wallet"] == alice
+    assert status["prior_s6_wins_confirmed"] == 1
+    assert status["prior_s6_xp_confirmed"] == 100
+    assert status["projected_s6_wins_if_current_bid_wins"] == 2
+    assert status["projected_s6_xp_if_current_bid_wins"] == 200
+    assert status["projected_capped_sup_if_current_bid_wins"] == "600"
+    assert status["current_bidder_cap_status"] == "cap_limited_projected"
 
 
 if __name__ == "__main__":

@@ -46,12 +46,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#660/732",
-      "rank": 660,
-      "total": 732
+      "display": "#661/733",
+      "rank": 661,
+      "total": 733
     },
     "schema_version": 1,
-    "search_text": "dog 120 dog #120 120 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 #660/732 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 120 dog #120 120 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 #661/733 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29009585,
       "block_time_utc": "2022-05-31T22:44:48Z",
@@ -103,7 +103,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Sunglasses (14.8%)",
+        "display": "Eyes: Sunglasses (14.7%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

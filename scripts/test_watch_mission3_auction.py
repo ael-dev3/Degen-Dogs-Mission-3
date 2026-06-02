@@ -310,6 +310,39 @@ def test_same_dog_bid_changes_can_use_short_bid_cooldown():
     assert "highest_bid_amount_changed" in later.reasons
 
 
+def test_auction_start_time_change_triggers_refresh_when_direct_state_changes():
+    watcher = load_module()
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(0),
+        "last_seen_bid_log_id": "100:0xbid:1",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_start_time_unix": 100,
+        "last_seen_end_time_unix": 200,
+    }
+    snapshot = {
+        "latest_block": 140,
+        "token_id": 728,
+        "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "amount_wei": "100",
+        "settled": False,
+        "start_time_unix": 120,
+        "end_time_unix": 200,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    decision = watcher.decide_refresh(previous, snapshot, now_utc=iso(600), cooldown_seconds=300, force_after_seconds=0)
+    assert decision.should_refresh is True
+    assert decision.reasons == ["auction_start_time_changed"]
+
+
 def test_auction_end_time_change_triggers_refresh_when_extension_log_is_missed():
     watcher = load_module()
     previous = {

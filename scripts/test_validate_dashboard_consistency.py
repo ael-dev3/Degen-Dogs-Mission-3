@@ -44,6 +44,8 @@ def write_fixture(
     index_apr: str = "≈207% APR",
     apr_display: str | None = None,
     feed_bidder: str = "@0xael.eth",
+    season6_projected_raw_display: str = "Projected if current bid wins: ≈1,000 SUP / ≈$2,000 raw estimate",
+    season6_by_winner_capped: str = "1000",
 ) -> None:
     wallet = "0x76d0e7a13248945ee9f808b4a472262b28778942"
     apr_display_value = apr_display or index_apr
@@ -62,6 +64,31 @@ def write_fixture(
         "reward_current_bid_daily_roi_pct": daily_roi_pct,
         "reward_current_bid_apr_pct": apr_pct,
         "reward_current_bid_apr_display": apr_display_value,
+        "season6_sup_status": "live_estimate",
+        "season6_sup_total_allocated": "251340",
+        "season6_sup_cap_per_wallet": "12500",
+        "season6_sup_cap_percent_label": "5% cap",
+        "season6_sup_xp_per_settled_win": "100",
+        "season6_sup_xp_start_utc": "2026-06-02T00:00:00Z",
+        "season6_sup_reward_start_utc": "2026-06-02T00:00:00Z",
+        "season6_sup_campaign_end_utc": "2026-08-31T23:59:59Z",
+        "season6_sup_days_remaining": "92",
+        "season6_sup_confirmed_wins": "1",
+        "season6_sup_confirmed_wallets": "1",
+        "season6_sup_total_xp_confirmed": "100",
+        "season6_sup_raw_allocated_to_date": "100",
+        "season6_sup_raw_projected_full_allocated": "1000",
+        "season6_sup_capped_projected_full_allocated": "1000",
+        "season6_sup_unallocated_due_to_zero_xp": "0",
+        "season6_sup_cap_overflow_policy": "no_redistribution_assumed",
+        "season6_sup_usd_price_used": "2",
+        "season6_sup_usd_source_used": "unit-test",
+        "season6_current_bidder_prior_wins": "1",
+        "season6_current_bidder_cap_remaining_sup": "11500",
+        "season6_current_bidder_projected_raw_sup_if_wins": "1000",
+        "season6_current_bidder_projected_capped_sup_if_wins": "1000",
+        "season6_current_bidder_projected_raw_usd_if_wins": "2000",
+        "season6_current_bidder_projected_capped_usd_if_wins": "2000",
     }
     metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
     write_text(root / "generated" / "mission3_metrics.csv", "metric,value\n" + "".join(f"{key},{value}\n" for key, value in metrics.items()))
@@ -96,6 +123,69 @@ def write_fixture(
     }])
     write_json(root / "generated" / "historical_dog_search.json", [{"mission": 3, "token_id": 729, "winner": "@0xael.eth", "winner_wallet": wallet, "amount": "0.01000 ETH ($20)"}])
     write_json(root / "generated" / "recent_bids.json", [])
+    season6_winner = {
+        "winner_wallet": wallet,
+        "winner_display": "@0xael.eth",
+        "farcaster_username": "0xael.eth",
+        "season6_wins_confirmed": 1,
+        "season6_xp_confirmed": 100,
+        "season6_raw_sup_earned_to_date": "100",
+        "season6_raw_sup_projected_full": "1000",
+        "season6_capped_sup_projected_full": season6_by_winner_capped,
+        "season6_cap_sup": "12500",
+        "season6_cap_remaining_sup": "11500",
+        "season6_cap_limited": "false",
+        "season6_raw_usd_earned_to_date": "200",
+        "season6_raw_usd_projected_full": "2000",
+        "season6_capped_usd_projected_full": "2000",
+        "first_s6_win_time_utc": "2026-06-02T00:00:00Z",
+        "latest_s6_win_time_utc": "2026-06-02T00:00:00Z",
+        "season6_wallet_note": "wallet-level estimate",
+    }
+    season6_auction = {
+        "auction_id": 729,
+        "token_id": 729,
+        "dog": "Dog #729",
+        "winner_wallet": wallet,
+        "winner_display": "@0xael.eth",
+        "settled_time_utc": "2026-06-02T00:00:00Z",
+        "winning_bid_eth": "0.01",
+        "winning_bid_usd": "19.98",
+        "season6_xp": 100,
+        "season6_raw_sup_earned_to_date": "100",
+        "season6_raw_sup_projected_full": "1000",
+        "season6_capped_sup_projected_full": "1000",
+        "season6_raw_usd_earned_to_date": "200",
+        "season6_raw_usd_projected_full": "2000",
+        "season6_capped_usd_projected_full": "2000",
+        "cap_limited_by_wallet": "false",
+    }
+    season6_status = {
+        "current_auction_token_id": 729,
+        "current_bidder_wallet": wallet,
+        "current_bidder_display": "@0xael.eth",
+        "current_bid_eth": "0.01",
+        "current_bid_usd": "19.98",
+        "current_auction_end_utc": "2026-05-31 20:40:09",
+        "prior_s6_wins_confirmed": 1,
+        "prior_s6_xp_confirmed": 100,
+        "prior_s6_raw_sup_projected_full": "1000",
+        "prior_s6_capped_sup_projected_full": "1000",
+        "prior_s6_cap_remaining_sup": "11500",
+        "projected_s6_wins_if_current_bid_wins": 2,
+        "projected_s6_xp_if_current_bid_wins": 200,
+        "projected_raw_sup_if_current_bid_wins": "1000",
+        "projected_capped_sup_if_current_bid_wins": "1000",
+        "projected_cap_remaining_sup_if_current_bid_wins": "11500",
+        "projected_raw_usd_if_current_bid_wins": "2000",
+        "projected_capped_usd_if_current_bid_wins": "2000",
+        "current_bidder_cap_status": "ok",
+        "projection_note": "estimated wallet-level projection",
+    }
+    for folder in (root / "generated", root / "public" / "generated"):
+        write_json(folder / "season6_sup_by_winner.json", [season6_winner])
+        write_json(folder / "season6_sup_rewards_by_auction.json", [season6_auction])
+        write_json(folder / "season6_sup_current_bidder_status.json", [season6_status])
     unified_row = {
         "mission": 3,
         "dog_id": 729,
@@ -116,6 +206,10 @@ def write_fixture(
         f"<span>@0xael.eth</span><span>ongoing</span><span>2026-05-31 20:40:09</span>"
         f"<section class=\"reward-strip\"><span><b>Bid payback</b><strong>≈176 days</strong>"
         f"<span>{index_apr}</span><em>Simple APR estimate. Annualized from current per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; not guaranteed future return.</em></span></section>"
+        f"<section class=\"season6-sup\"><h2>Season 6 SUP rewards live</h2>"
+        f"<span>Pool: 251,340 SUP</span><span>Cap: 12,500 SUP per wallet-level estimate</span>"
+        f"<span>100 XP per settled Dog win</span><span>{season6_projected_raw_display}</span>"
+        f"<span>Cap-limited estimate: ≈1,000 SUP / ≈$2,000</span></section>"
         f"{hidden_metrics_table(metrics)}</body></html>"
     )
     write_text(root / "index.html", index)
@@ -172,6 +266,20 @@ def test_validator_catches_stale_current_bidder_generated_surface() -> None:
         root = Path(tmp)
         write_fixture(root, feed_bidder="@stale")
         assert_raises_contains(lambda: run_validation(root), "high-bidder display")
+
+
+def test_validator_catches_stale_season6_rendered_projection() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root, season6_projected_raw_display="Projected if current bid wins: ≈999 SUP / ≈$1,998 raw estimate")
+        assert_raises_contains(lambda: run_validation(root), "Season 6 current bidder projection")
+
+
+def test_validator_catches_season6_capped_value_over_configured_cap() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root, season6_by_winner_capped="13000")
+        assert_raises_contains(lambda: run_validation(root), "Season 6 capped SUP exceeds configured cap")
 
 
 if __name__ == "__main__":

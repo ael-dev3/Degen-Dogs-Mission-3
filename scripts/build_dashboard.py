@@ -15,6 +15,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP, getcontext
 from pathlib import Path
@@ -94,6 +95,85 @@ REWARD_WOOF_FLOW_PER_DAY = Decimal("22327617.40")
 REWARD_SUP_RECEIVED = Decimal("36935.51")
 REWARD_SUP_FLOW_PER_DAY = Decimal("379.01")
 
+
+@dataclass(frozen=True)
+class Season6SupConfig:
+    total_sup: Decimal = Decimal("251340")
+    cap_sup: Decimal = Decimal("12500")
+    xp_per_settled_win: Decimal = Decimal("100")
+    xp_start_utc: str = "2026-06-02T00:00:00Z"
+    reward_start_utc: str = "2026-06-02T00:00:00Z"
+    campaign_end_utc: str = "2026-08-31T23:59:59Z"
+    cap_percent_label: str = "5% cap"
+    cap_overflow_policy: str = "no_redistribution_assumed"
+
+
+SEASON6_SUP_CONFIG = Season6SupConfig()
+
+SEASON6_BY_WINNER_COLUMNS = [
+    "winner_wallet",
+    "winner_display",
+    "winner_url",
+    "farcaster_username",
+    "season6_wins_confirmed",
+    "season6_xp_confirmed",
+    "season6_raw_sup_earned_to_date",
+    "season6_raw_sup_projected_full",
+    "season6_capped_sup_projected_full",
+    "season6_cap_sup",
+    "season6_cap_remaining_sup",
+    "season6_cap_limited",
+    "season6_raw_usd_earned_to_date",
+    "season6_raw_usd_projected_full",
+    "season6_capped_usd_projected_full",
+    "first_s6_win_time_utc",
+    "latest_s6_win_time_utc",
+    "season6_wallet_note",
+    "season6_token_ids",
+]
+SEASON6_REWARDS_BY_AUCTION_COLUMNS = [
+    "auction_id",
+    "token_id",
+    "dog",
+    "winner_wallet",
+    "winner_display",
+    "winner_url",
+    "farcaster_username",
+    "settled_time_utc",
+    "winning_bid_eth",
+    "winning_bid_usd",
+    "season6_xp",
+    "season6_raw_sup_earned_to_date",
+    "season6_raw_sup_projected_full",
+    "season6_capped_sup_projected_full",
+    "season6_raw_usd_earned_to_date",
+    "season6_raw_usd_projected_full",
+    "season6_capped_usd_projected_full",
+    "cap_limited_by_wallet",
+]
+SEASON6_CURRENT_BIDDER_STATUS_COLUMNS = [
+    "current_auction_token_id",
+    "current_bidder_wallet",
+    "current_bidder_display",
+    "current_bid_eth",
+    "current_bid_usd",
+    "current_auction_end_utc",
+    "prior_s6_wins_confirmed",
+    "prior_s6_xp_confirmed",
+    "prior_s6_raw_sup_projected_full",
+    "prior_s6_capped_sup_projected_full",
+    "prior_s6_cap_remaining_sup",
+    "projected_s6_wins_if_current_bid_wins",
+    "projected_s6_xp_if_current_bid_wins",
+    "projected_raw_sup_if_current_bid_wins",
+    "projected_capped_sup_if_current_bid_wins",
+    "projected_cap_remaining_sup_if_current_bid_wins",
+    "projected_raw_usd_if_current_bid_wins",
+    "projected_capped_usd_if_current_bid_wins",
+    "current_bidder_cap_status",
+    "projection_note",
+]
+
 OUTPUT_TABLES = [
     "mission3_metrics",
     "auction_feed",
@@ -107,6 +187,10 @@ OUTPUT_TABLES = [
     "auction_bidder_leaderboard",
     "season5_sup_by_winner",
     "season5_sup_rewards_by_auction",
+    "season6_metrics",
+    "season6_sup_by_winner",
+    "season6_sup_rewards_by_auction",
+    "season6_sup_current_bidder_status",
     "auction_winners",
     "recent_bids",
     "top_woof_holders",
@@ -126,6 +210,10 @@ DATASET_DESCRIPTIONS = {
     "auction_bidder_leaderboard": "Ranked bidder activity across decoded auction events.",
     "season5_sup_by_winner": "Estimated Season 5 SUP rewards grouped by winning wallet/profile.",
     "season5_sup_rewards_by_auction": "Estimated Season 5 SUP rewards per auction.",
+    "season6_metrics": "Season 6 SUP reward configuration, projection totals, pricing, and current bidder metrics.",
+    "season6_sup_by_winner": "Time-sliced Season 6 SUP projections grouped by winning wallet/profile.",
+    "season6_sup_rewards_by_auction": "Season 6 settled Dog win rows with XP and wallet-level SUP projection context.",
+    "season6_sup_current_bidder_status": "Current high bidder Season 6 SUP status plus hypothetical projection if the current bid wins.",
     "auction_winners": "Settled auction winners with bid values and identity fields.",
     "recent_bids": "Latest bid events decoded from the auction house.",
     "top_woof_holders": "WOOF holder snapshot from transfer participants and balance checks.",
@@ -461,7 +549,9 @@ def fetch_eth_usd_price() -> tuple[Decimal, str]:
 
 
 def decimal_value_str(value: Decimal, max_places: int = 6) -> str:
-    s = f"{value:.{max_places}f}".rstrip("0").rstrip(".")
+    s = f"{value:.{max_places}f}"
+    if "." in s:
+        s = s.rstrip("0").rstrip(".")
     return s if s else "0"
 
 
@@ -514,6 +604,287 @@ def current_bid_reward_stats(current: dict[str, Any], token_stats: dict[str, str
         "reward_current_bid_daily_roi_pct": quantized_decimal_str(daily_roi_pct, 4),
         "reward_current_bid_apr_pct": quantized_decimal_str(apr_pct, 2),
         "reward_current_bid_apr_display": reward_apr_display_value(apr_pct),
+    }
+
+
+def parse_utc_datetime(value: Any) -> datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    normalized = raw.replace(" ", "T")
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def iso_utc_z(value: datetime | None) -> str:
+    if value is None:
+        return ""
+    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def season6_wallet_display(wallet: str, profiles_by_address: dict[str, dict[str, Any]]) -> tuple[str, str, str]:
+    profile = profiles_by_address.get(wallet, {})
+    username = str(profile.get("username") or "").strip()
+    display = str(profile.get("display_name") or "").strip()
+    label = f"@{username}" if username else display or short_address(wallet)
+    url = f"https://farcaster.xyz/{username}" if username else basescan_address_url(wallet)
+    return label, url, username
+
+
+def season6_decimal_display(value: Decimal, max_places: int = 6) -> str:
+    return decimal_value_str(value, max_places)
+
+
+def season6_usd_value(value: Decimal, sup_usd: Decimal) -> str:
+    if sup_usd <= 0:
+        return "N/A"
+    return decimal_value_str(value * sup_usd, 2)
+
+
+def season6_event_time(row: dict[str, Any]) -> datetime | None:
+    return parse_utc_datetime(row.get("settled_time_utc") or row.get("block_time_utc") or row.get("auction_time_utc"))
+
+
+def season6_allocate_time_slices(
+    events: list[tuple[datetime, str, Decimal]],
+    *,
+    config: Season6SupConfig,
+    allocation_end: datetime,
+) -> tuple[dict[str, Decimal], Decimal]:
+    reward_start = parse_utc_datetime(config.reward_start_utc)
+    campaign_end = parse_utc_datetime(config.campaign_end_utc)
+    if reward_start is None or campaign_end is None or campaign_end <= reward_start:
+        return {}, Decimal(0)
+    end = min(allocation_end, campaign_end)
+    if end <= reward_start:
+        return {}, Decimal(0)
+
+    total_seconds = Decimal(str((campaign_end - reward_start).total_seconds()))
+    active_xp: defaultdict[str, Decimal] = defaultdict(Decimal)
+    allocations: defaultdict[str, Decimal] = defaultdict(Decimal)
+    unallocated = Decimal(0)
+    sorted_events = sorted((event_time, wallet, xp) for event_time, wallet, xp in events if wallet and xp > 0)
+
+    idx = 0
+    current_time = reward_start
+    while idx < len(sorted_events) and sorted_events[idx][0] <= current_time:
+        _event_time, wallet, xp = sorted_events[idx]
+        active_xp[wallet] += xp
+        idx += 1
+
+    while current_time < end:
+        next_event_time = sorted_events[idx][0] if idx < len(sorted_events) else end
+        interval_end = min(next_event_time, end)
+        if interval_end > current_time:
+            interval_seconds = Decimal(str((interval_end - current_time).total_seconds()))
+            interval_sup = config.total_sup * interval_seconds / total_seconds
+            total_xp = sum(active_xp.values(), Decimal(0))
+            if total_xp > 0:
+                for wallet, xp in active_xp.items():
+                    if xp > 0:
+                        allocations[wallet] += interval_sup * xp / total_xp
+            else:
+                unallocated += interval_sup
+            current_time = interval_end
+        while idx < len(sorted_events) and sorted_events[idx][0] <= current_time:
+            _event_time, wallet, xp = sorted_events[idx]
+            active_xp[wallet] += xp
+            idx += 1
+        if interval_end == end:
+            break
+    return dict(allocations), unallocated
+
+
+def build_season6_sup_outputs(
+    settled_rows: list[dict[str, Any]],
+    current: dict[str, Any],
+    token_stats: dict[str, str],
+    *,
+    snapshot_time_utc: str,
+    config: Season6SupConfig = SEASON6_SUP_CONFIG,
+    profiles: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    xp_start = parse_utc_datetime(config.xp_start_utc)
+    reward_start = parse_utc_datetime(config.reward_start_utc)
+    campaign_end = parse_utc_datetime(config.campaign_end_utc)
+    snapshot_time = parse_utc_datetime(snapshot_time_utc) or datetime.now(timezone.utc)
+    if xp_start is None or reward_start is None or campaign_end is None:
+        raise ValueError("invalid Season 6 SUP config dates")
+
+    profiles_by_address = {
+        normalize_address(row.get("address")): row
+        for row in profiles or []
+        if normalize_address(row.get("address"))
+    }
+    sup_usd = decimal_from(token_stats.get("sup_usd_price")) or Decimal(0)
+    sup_usd_source = token_stats.get("sup_usd_source") or "unavailable"
+    eth_usd = decimal_from(token_stats.get("eth_usd_price")) or Decimal(0)
+
+    events: list[tuple[datetime, str, Decimal]] = []
+    win_rows: list[dict[str, Any]] = []
+    grouped: dict[str, dict[str, Any]] = {}
+    for row in settled_rows:
+        event_time = season6_event_time(row)
+        wallet = normalize_address(row.get("winner") or row.get("winner_wallet"))
+        if not event_time or not wallet or wallet == ZERO:
+            continue
+        if event_time < xp_start or event_time > campaign_end or event_time > snapshot_time:
+            continue
+        xp = config.xp_per_settled_win
+        events.append((event_time, wallet, xp))
+        amount_eth = decimal_from(row.get("amount_eth")) or Decimal(0)
+        amount_usd = amount_eth * eth_usd if eth_usd > 0 else Decimal(0)
+        label, url, username = season6_wallet_display(wallet, profiles_by_address)
+        token_id = int_value(row.get("token_id"), 0)
+        win_rows.append({
+            "auction_id": token_id,
+            "token_id": token_id,
+            "dog": f"Dog #{token_id}" if token_id else "",
+            "winner_wallet": wallet,
+            "winner_display": label,
+            "winner_url": url,
+            "farcaster_username": username,
+            "settled_time_utc": iso_utc_z(event_time),
+            "winning_bid_eth": season6_decimal_display(amount_eth, 8),
+            "winning_bid_usd": season6_usd_value(amount_eth, eth_usd) if eth_usd > 0 else "N/A",
+            "season6_xp": int(xp),
+        })
+        entry = grouped.setdefault(wallet, {"wins": 0, "xp": Decimal(0), "tokens": [], "first": event_time, "latest": event_time, "display": label, "url": url, "username": username})
+        entry["wins"] += 1
+        entry["xp"] += xp
+        entry["tokens"].append(str(token_id))
+        entry["first"] = min(entry["first"], event_time)
+        entry["latest"] = max(entry["latest"], event_time)
+
+    full_allocations, full_unallocated = season6_allocate_time_slices(events, config=config, allocation_end=campaign_end)
+    to_date_end = min(snapshot_time, campaign_end)
+    earned_to_date, unallocated_to_date = season6_allocate_time_slices(events, config=config, allocation_end=to_date_end)
+
+    by_winner: list[dict[str, Any]] = []
+    for wallet, entry in grouped.items():
+        raw_full = full_allocations.get(wallet, Decimal(0))
+        earned = earned_to_date.get(wallet, Decimal(0))
+        capped_full = min(raw_full, config.cap_sup)
+        cap_remaining = max(config.cap_sup - capped_full, Decimal(0))
+        by_winner.append({
+            "winner_wallet": wallet,
+            "winner_display": entry["display"],
+            "winner_url": entry["url"],
+            "farcaster_username": entry["username"],
+            "season6_wins_confirmed": int(entry["wins"]),
+            "season6_xp_confirmed": int(entry["xp"]),
+            "season6_raw_sup_earned_to_date": season6_decimal_display(earned),
+            "season6_raw_sup_projected_full": season6_decimal_display(raw_full),
+            "season6_capped_sup_projected_full": season6_decimal_display(capped_full),
+            "season6_cap_sup": season6_decimal_display(config.cap_sup, 0),
+            "season6_cap_remaining_sup": season6_decimal_display(cap_remaining),
+            "season6_cap_limited": "true" if raw_full > config.cap_sup else "false",
+            "season6_raw_usd_earned_to_date": season6_usd_value(earned, sup_usd),
+            "season6_raw_usd_projected_full": season6_usd_value(raw_full, sup_usd),
+            "season6_capped_usd_projected_full": season6_usd_value(capped_full, sup_usd),
+            "first_s6_win_time_utc": iso_utc_z(entry["first"]),
+            "latest_s6_win_time_utc": iso_utc_z(entry["latest"]),
+            "season6_wallet_note": "wallet-level estimate; cap overflow redistribution not assumed",
+            "season6_token_ids": ",".join(entry["tokens"]),
+        })
+    by_winner.sort(key=lambda row: (decimal_from(row["season6_capped_sup_projected_full"]) or Decimal(0), row["season6_wins_confirmed"]), reverse=True)
+    by_wallet = {row["winner_wallet"]: row for row in by_winner}
+
+    rewards_by_auction: list[dict[str, Any]] = []
+    for row in win_rows:
+        winner = by_wallet.get(row["winner_wallet"], {})
+        rewards_by_auction.append({
+            **row,
+            "season6_raw_sup_earned_to_date": winner.get("season6_raw_sup_earned_to_date", "0"),
+            "season6_raw_sup_projected_full": winner.get("season6_raw_sup_projected_full", "0"),
+            "season6_capped_sup_projected_full": winner.get("season6_capped_sup_projected_full", "0"),
+            "season6_raw_usd_earned_to_date": winner.get("season6_raw_usd_earned_to_date", "N/A"),
+            "season6_raw_usd_projected_full": winner.get("season6_raw_usd_projected_full", "N/A"),
+            "season6_capped_usd_projected_full": winner.get("season6_capped_usd_projected_full", "N/A"),
+            "cap_limited_by_wallet": winner.get("season6_cap_limited", "false"),
+        })
+    rewards_by_auction.sort(key=lambda row: (row.get("settled_time_utc", ""), row.get("token_id", 0)), reverse=True)
+
+    current_status: list[dict[str, Any]] = []
+    current_bidder = normalize_address(current.get("bidder") or current.get("bidder_wallet"))
+    if current_bidder and current_bidder != ZERO:
+        current_end = parse_utc_datetime(current.get("end_time_utc")) or snapshot_time
+        current_amount_eth = decimal_from(current.get("amount_eth")) or Decimal(0)
+        projected_events = list(events)
+        if xp_start <= current_end <= campaign_end:
+            projected_events.append((current_end, current_bidder, config.xp_per_settled_win))
+        projected_allocations, _projected_unallocated = season6_allocate_time_slices(projected_events, config=config, allocation_end=campaign_end)
+        projected_raw = projected_allocations.get(current_bidder, Decimal(0))
+        projected_capped = min(projected_raw, config.cap_sup)
+        projected_remaining = max(config.cap_sup - projected_capped, Decimal(0))
+        prior = grouped.get(current_bidder, {"wins": 0, "xp": Decimal(0)})
+        prior_row = by_wallet.get(current_bidder, {})
+        label, _url, _username = season6_wallet_display(current_bidder, profiles_by_address)
+        cap_status = "cap_limited_projected" if projected_raw > config.cap_sup else "ok"
+        current_status.append({
+            "current_auction_token_id": int_value(current.get("token_id"), 0),
+            "current_bidder_wallet": current_bidder,
+            "current_bidder_display": label,
+            "current_bid_eth": season6_decimal_display(current_amount_eth, 8),
+            "current_bid_usd": season6_usd_value(current_amount_eth, eth_usd) if eth_usd > 0 else "N/A",
+            "current_auction_end_utc": iso_utc_z(current_end),
+            "prior_s6_wins_confirmed": int(prior.get("wins", 0)),
+            "prior_s6_xp_confirmed": int(prior.get("xp", Decimal(0))),
+            "prior_s6_raw_sup_projected_full": prior_row.get("season6_raw_sup_projected_full", "0"),
+            "prior_s6_capped_sup_projected_full": prior_row.get("season6_capped_sup_projected_full", "0"),
+            "prior_s6_cap_remaining_sup": prior_row.get("season6_cap_remaining_sup", season6_decimal_display(config.cap_sup, 0)),
+            "projected_s6_wins_if_current_bid_wins": int(prior.get("wins", 0)) + (1 if xp_start <= current_end <= campaign_end else 0),
+            "projected_s6_xp_if_current_bid_wins": int(prior.get("xp", Decimal(0)) + (config.xp_per_settled_win if xp_start <= current_end <= campaign_end else Decimal(0))),
+            "projected_raw_sup_if_current_bid_wins": season6_decimal_display(projected_raw),
+            "projected_capped_sup_if_current_bid_wins": season6_decimal_display(projected_capped),
+            "projected_cap_remaining_sup_if_current_bid_wins": season6_decimal_display(projected_remaining),
+            "projected_raw_usd_if_current_bid_wins": season6_usd_value(projected_raw, sup_usd),
+            "projected_capped_usd_if_current_bid_wins": season6_usd_value(projected_capped, sup_usd),
+            "current_bidder_cap_status": cap_status,
+            "projection_note": "estimated wallet-level projection; cap overflow redistribution not assumed",
+        })
+
+    current_row = current_status[0] if current_status else {}
+    days_remaining = max(Decimal(0), Decimal(str((campaign_end - to_date_end).total_seconds())) / Decimal(86400))
+    metrics = {
+        "season6_sup_status": "live_estimate",
+        "season6_sup_total_allocated": season6_decimal_display(config.total_sup, 0),
+        "season6_sup_cap_per_wallet": season6_decimal_display(config.cap_sup, 0),
+        "season6_sup_cap_percent_label": config.cap_percent_label,
+        "season6_sup_xp_per_settled_win": season6_decimal_display(config.xp_per_settled_win, 0),
+        "season6_sup_xp_start_utc": config.xp_start_utc,
+        "season6_sup_reward_start_utc": config.reward_start_utc,
+        "season6_sup_campaign_end_utc": config.campaign_end_utc,
+        "season6_sup_days_remaining": season6_decimal_display(days_remaining, 2),
+        "season6_sup_confirmed_wins": str(len(win_rows)),
+        "season6_sup_confirmed_wallets": str(len(grouped)),
+        "season6_sup_total_xp_confirmed": season6_decimal_display(sum((entry["xp"] for entry in grouped.values()), Decimal(0)), 0),
+        "season6_sup_raw_allocated_to_date": season6_decimal_display(sum(earned_to_date.values(), Decimal(0))),
+        "season6_sup_raw_projected_full_allocated": season6_decimal_display(sum(full_allocations.values(), Decimal(0))),
+        "season6_sup_capped_projected_full_allocated": season6_decimal_display(sum((decimal_from(row["season6_capped_sup_projected_full"]) or Decimal(0)) for row in by_winner)),
+        "season6_sup_unallocated_due_to_zero_xp": season6_decimal_display(full_unallocated + unallocated_to_date * Decimal(0)),
+        "season6_sup_cap_overflow_policy": config.cap_overflow_policy,
+        "season6_sup_usd_price_used": season6_decimal_display(sup_usd, 8) if sup_usd > 0 else "N/A",
+        "season6_sup_usd_source_used": sup_usd_source,
+        "season6_current_bidder_prior_wins": str(current_row.get("prior_s6_wins_confirmed", 0)),
+        "season6_current_bidder_cap_remaining_sup": str(current_row.get("projected_cap_remaining_sup_if_current_bid_wins", "N/A")),
+        "season6_current_bidder_projected_raw_sup_if_wins": str(current_row.get("projected_raw_sup_if_current_bid_wins", "N/A")),
+        "season6_current_bidder_projected_capped_sup_if_wins": str(current_row.get("projected_capped_sup_if_current_bid_wins", "N/A")),
+        "season6_current_bidder_projected_raw_usd_if_wins": str(current_row.get("projected_raw_usd_if_current_bid_wins", "N/A")),
+        "season6_current_bidder_projected_capped_usd_if_wins": str(current_row.get("projected_capped_usd_if_current_bid_wins", "N/A")),
+    }
+    return {
+        "season6_metrics": metrics,
+        "season6_sup_by_winner": by_winner,
+        "season6_sup_rewards_by_auction": rewards_by_auction,
+        "season6_sup_current_bidder_status": current_status,
     }
 
 
@@ -1217,6 +1588,42 @@ def insert_rows(conn: sqlite3.Connection, table: str, rows: list[dict[str, Any]]
     conn.executemany(insert_sql, [[row.get(col) for col in cols] for row in rows])
 
 
+def season6_table_schema(columns: list[str]) -> list[tuple[str, str]]:
+    integer_columns = {
+        "auction_id",
+        "token_id",
+        "season6_wins_confirmed",
+        "season6_xp_confirmed",
+        "season6_xp",
+        "current_auction_token_id",
+        "prior_s6_wins_confirmed",
+        "prior_s6_xp_confirmed",
+        "projected_s6_wins_if_current_bid_wins",
+        "projected_s6_xp_if_current_bid_wins",
+    }
+    return [(column, "INTEGER" if column in integer_columns else "TEXT") for column in columns]
+
+
+def insert_season6_outputs(conn: sqlite3.Connection, outputs: dict[str, Any]) -> None:
+    metric_rows = [
+        {"metric": str(key), "value": str(value)}
+        for key, value in sorted((outputs.get("season6_metrics") or {}).items())
+    ]
+    insert_rows(conn, "season6_metrics", metric_rows, [("metric", "TEXT"), ("value", "TEXT")])
+    if metric_rows:
+        conn.executemany(
+            "INSERT INTO mission3_metrics (metric, value) VALUES (?, ?)",
+            [(row["metric"], row["value"]) for row in metric_rows],
+        )
+
+    for table_name, columns in {
+        "season6_sup_by_winner": SEASON6_BY_WINNER_COLUMNS,
+        "season6_sup_rewards_by_auction": SEASON6_REWARDS_BY_AUCTION_COLUMNS,
+        "season6_sup_current_bidder_status": SEASON6_CURRENT_BIDDER_STATUS_COLUMNS,
+    }.items():
+        insert_rows(conn, table_name, outputs.get(table_name) or [], season6_table_schema(columns))
+
+
 def fetch_table(conn: sqlite3.Connection, table: str) -> tuple[list[str], list[tuple[Any, ...]]]:
     select_sql = f"SELECT * FROM {quote_ident(table)}"
     cur = conn.execute(select_sql)
@@ -1837,6 +2244,57 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}</section>'
 
 
+def comma_decimal_display(value: Any, places: int = 0, prefix: str = "", suffix: str = "") -> str:
+    decimal = decimal_from(value)
+    if decimal is None:
+        return "N/A"
+    quantized = decimal.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP)
+    text = f"{quantized:,.{places}f}" if places > 0 else f"{quantized:,.0f}"
+    if places > 0:
+        text = text.rstrip("0").rstrip(".")
+    return f"{prefix}{text}{suffix}"
+
+
+def season6_sup_display(value: Any, *, approximate: bool = True) -> str:
+    rendered = comma_decimal_display(value, 0, suffix=" SUP")
+    if rendered == "N/A":
+        return rendered
+    return f"≈{rendered}" if approximate else rendered
+
+
+def season6_usd_display(value: Any) -> str:
+    rendered = comma_decimal_display(value, 0, prefix="$")
+    if rendered == "N/A":
+        return rendered
+    return f"≈{rendered}"
+
+
+def render_season6_strip(metrics: dict[str, str]) -> str:
+    if not metric_value(metrics, "season6_sup_status"):
+        return ""
+    pool = season6_sup_display(metric_value(metrics, "season6_sup_total_allocated"), approximate=False)
+    cap = season6_sup_display(metric_value(metrics, "season6_sup_cap_per_wallet"), approximate=False)
+    xp = comma_decimal_display(metric_value(metrics, "season6_sup_xp_per_settled_win"), 0, suffix=" XP")
+    projected_raw = season6_sup_display(metric_value(metrics, "season6_current_bidder_projected_raw_sup_if_wins"))
+    projected_raw_usd = season6_usd_display(metric_value(metrics, "season6_current_bidder_projected_raw_usd_if_wins"))
+    projected_capped = season6_sup_display(metric_value(metrics, "season6_current_bidder_projected_capped_sup_if_wins"))
+    projected_capped_usd = season6_usd_display(metric_value(metrics, "season6_current_bidder_projected_capped_usd_if_wins"))
+    tiles = [
+        f"Pool: {pool}",
+        f"Cap: {cap} per wallet-level estimate",
+        f"{xp} per settled Dog win",
+        f"Projected if current bid wins: {projected_raw} / {projected_raw_usd} raw estimate",
+        f"Cap-limited estimate: {projected_capped} / {projected_capped_usd}",
+    ]
+    body = "".join(f"<span>{html.escape(tile)}</span>" for tile in tiles if tile)
+    return (
+        '<section class="season6-sup" aria-label="Season 6 SUP reward projection">'
+        "<h2>Season 6 SUP rewards live</h2>"
+        f"{body}"
+        "</section>"
+    )
+
+
 def format_current_auction(metrics: dict[str, str]) -> str:
     token_id = metric_value(metrics, "current_auction_token_id")
     return f"Dog #{token_id}" if token_id else ""
@@ -2103,6 +2561,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         ]
     )
     reward_strip = render_reward_strip(metrics)
+    season6_strip = render_season6_strip(metrics)
     chips = trait_chips(current)
     css = """
 :root{color-scheme:light;--paper:#e8ded5;--paper-calm:#eff8df;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--calm:#55a653;--calm-dark:#245a32;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -2146,12 +2605,15 @@ a:hover{color:var(--accent2)}
 .subtitle{margin:0;color:var(--muted);font-weight:700}
 .current-detail{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;margin-top:auto}
 .reward-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:2px}
-.reward-tile{display:flex;min-width:0;flex-direction:column;gap:2px;border:1.5px solid var(--ink);background:#eff8df;padding:7px 8px;font-weight:900;line-height:1.12;box-shadow:2px 2px 0 rgba(36,84,23,.18)}
+.reward-tile,.season6-sup span{display:flex;min-width:0;flex-direction:column;gap:2px;border:1.5px solid var(--ink);background:#eff8df;padding:7px 8px;font-weight:900;line-height:1.12;box-shadow:2px 2px 0 rgba(36,84,23,.18)}
 .reward-tile b{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#31551f}
 .reward-tile strong{font-size:clamp(13px,1.35vw,18px);font-weight:950;letter-spacing:-.025em;overflow-wrap:anywhere}
 .reward-tile strong span{display:block}
 .reward-tile em{font-style:normal;color:#5d6b48;font-size:10.5px;font-weight:800}
 .reward-strip p{grid-column:1/-1;margin:0;color:var(--muted);font-size:11px;font-weight:800}
+.season6-sup{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:2px}
+.season6-sup h2{grid-column:1/-1;margin:2px 0 -2px;color:#31551f;font-size:10px;font-weight:950;letter-spacing:.1em;text-transform:uppercase}
+.season6-sup span{display:block;background:#f3fae8;color:#1b3f24;overflow-wrap:anywhere}
 .current-detail > span{display:flex;min-height:48px;flex:0 1 auto;width:max-content;max-width:100%;flex-direction:column;justify-content:center;align-items:flex-start;border:1.5px solid var(--ink);background:var(--panel2);padding:7px 9px;font-weight:900;line-height:1.18}
 .current-detail .detail-status{min-width:96px}
 .current-detail .detail-bid{min-width:142px}
@@ -2242,8 +2704,8 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 .identity{max-width:180px;overflow:hidden;text-overflow:ellipsis}
 .identity a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:reduce){.timer-card,.timer-card *,.dot--live{animation:none!important;transition:none!important}}
-@media (max-width:1100px){.reward-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:640px){.reward-strip{grid-template-columns:1fr;gap:5px}.reward-tile{padding:6px 7px}.reward-tile strong{font-size:13px}.reward-strip p{font-size:10px}}
+@media (max-width:1100px){.reward-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.season6-sup{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.reward-strip,.season6-sup{grid-template-columns:1fr;gap:5px}.reward-tile,.season6-sup span{padding:6px 7px}.reward-tile strong{font-size:13px}.reward-strip p{font-size:10px}}
 @media (max-width:900px){.shell{width:min(100% - 10px,760px);padding:8px 0 18px}.current-card{grid-template-columns:1fr;min-height:0}.current-copy{border-right:0;border-bottom:2px solid var(--ink);padding:14px}.dog-stage{min-height:220px}.dog-stage img{max-height:240px}.toolbar{grid-template-columns:1fr;align-items:stretch}.toolbar input{width:100%}.toolbar-group{align-items:flex-start}.pagination{justify-content:flex-start}.current-copy h1{font-size:clamp(34px,13vw,58px)}th,td{padding:6px 7px}table{font-size:12.5px}.traits{max-height:70px}}
 @media (max-width:640px){body{font-size:13px}.shell{width:calc(100% - 8px);padding:4px 0 14px}.current-card,.table-card{border-width:1.5px;box-shadow:0 6px 16px rgba(10,10,10,.1)}.current-card{margin-bottom:8px}.current-copy{padding:12px;gap:8px;border-bottom:1.5px solid var(--ink)}.eyebrow{font-size:11px;gap:6px}.dot{width:8px;height:8px}.current-copy h1{font-size:clamp(42px,17vw,62px);max-width:none;line-height:.88}.subtitle{font-size:12px}.current-detail{gap:6px}.current-detail > span{min-width:0;min-height:42px;padding:6px 7px;font-size:12.5px;overflow-wrap:anywhere}.current-detail .timer-card{flex:1 1 100%;width:100%;max-width:100%;min-width:0}.current-detail .detail-rarity,.current-detail .detail-status{min-width:84px}.current-detail .countdown{font-size:clamp(22px,9vw,36px)}.current-detail b,.time-cell b{font-size:9px}.current-detail a,.identity a,td.time a{max-width:100%;font-size:12px;box-shadow:1.5px 1.5px 0 var(--ink)}.traits{display:grid;grid-template-columns:1fr;gap:4px;max-height:none;overflow:visible}.traits .trait-pill{padding:3px 5px;font-size:9.5px;line-height:1.12;white-space:normal;overflow-wrap:anywhere}.dog-stage{min-height:166px;padding:4px}.dog-stage img{width:min(58vw,204px);height:min(58vw,204px)}.toolbar{margin:8px 0;gap:6px}.toolbar input,.toolbar select{padding:8px 10px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}.mission-toggle button,.page-btn{padding:7px 8px;border-width:1.5px;box-shadow:1.5px 1.5px 0 var(--ink)}.archive-status,.archive-caveat{width:100%;white-space:normal}table{font-size:12px}.featured-table .table-scroll{overflow:visible}.featured-table table{display:block;background:transparent}.featured-table caption.table-caption:not(.sr-only){display:flex;padding:7px 8px;border-bottom:1.5px solid var(--ink)}.featured-table thead{display:none}.featured-table tbody{display:grid;gap:7px;padding:7px;background:var(--panel2)}.featured-table tr{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 8px;align-items:center;border:1.5px solid var(--ink);background:var(--panel);padding:7px;box-shadow:2px 2px 0 rgba(10,10,10,.18)}.featured-table tr:hover{background:var(--panel)}.featured-table td{display:block;min-width:0;border:0;padding:0;white-space:normal}.featured-table td::before{content:attr(data-label);display:block;margin-bottom:2px;color:var(--muted);font-size:8.5px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}.featured-table td.state{align-self:start}.featured-table td.state::before{display:none}.featured-table td.dog-col{grid-column:2;grid-row:1/span 2}.featured-table td.identity{grid-column:1/-1;max-width:none}.featured-table td.num{grid-column:1/-1;text-align:left;font-size:13px;font-weight:950}.featured-table td.time{grid-column:1/-1}.featured-table td:not(.state):not(.dog-col):not(.identity):not(.num):not(.time){grid-column:1/-1}.dog-cell{gap:6px}.dog-thumb{width:34px;height:34px}.time-cell{gap:1px}.status-pill{padding:3px 6px;font-size:9px}}
 @media (max-width:420px){.traits{grid-template-columns:1fr}.dog-stage img{width:min(54vw,196px);height:min(54vw,196px)}}
@@ -2282,7 +2744,7 @@ const shortAddress=value=>{const s=String(value||'');return s.startsWith('0x')&&
 const toNumber=value=>{if(value===null||value===undefined)return null;const text=String(value).replace(/[$,]/g,'').trim();if(!text)return null;const n=Number.parseFloat(text);return Number.isFinite(n)?n:null;};
 const firstNumeric=values=>{for(const value of values){const n=toNumber(value);if(n!==null)return n;}return null;};
 const getUsdSortValue=record=>{const amount=record.amount||{};return firstNumeric([amount.usd_estimate,amount.estimated_usd_value,record.amount_usd_estimate,record.final_bid_usd_estimate,record.high_bid_usd_estimate,record.usd_at_time,record.usd_value,record.estimated_usd]);};
-const newestRank=record=>{const status=String(record.status||'').toLowerCase();return status==='live'||status.includes('ongoing')?1:0;};
+const newestRank=record=>{const status=String(record.status||'').toLowerCase();return status==='live'||status.includes('ongoing')||status.includes('pending settlement')||status.startsWith('ended')?1:0;};
 const compareNewest=(a,b)=>{const live=newestRank(b)-newestRank(a);if(live)return live;const at=Date.parse(a.activity_time_utc||'')||0;const bt=Date.parse(b.activity_time_utc||'')||0;if(bt!==at)return bt-at;return Number(b.dog_id||0)-Number(a.dog_id||0);};
 const exactDogQuery=q=>{const dog=q.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/);if(dog)return Number(dog[1]);const bare=q.match(/^#?(\d{1,4})$/);return bare?Number(bare[1]):null;};
 const rowSearchText=record=>{const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};return [record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.usd_estimate_display,amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...(record.bid_tx_hashes||[])].filter(Boolean).join(' ').toLowerCase();};
@@ -2338,6 +2800,7 @@ setInterval(updateCountdowns,1000);
       <h1>{current_dog_html}</h1>
       <div class="current-detail">{current_detail}</div>
       {reward_strip}
+      {season6_strip}
       <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
     </div>
     <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
@@ -2408,6 +2871,14 @@ def main() -> None:
 
     conn.executescript(SQL_PATH.read_text(encoding="utf-8"))
     build_historical_dog_tables(conn, dog_total_supply, dog_metadata)
+    season6_outputs = build_season6_sup_outputs(
+        settled,
+        current,
+        token_stats,
+        snapshot_time_utc=latest_time,
+        profiles=farcaster_profiles,
+    )
+    insert_season6_outputs(conn, season6_outputs)
 
     tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]] = {}
     manifest_rows = []

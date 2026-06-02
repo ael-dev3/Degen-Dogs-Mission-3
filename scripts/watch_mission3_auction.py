@@ -676,6 +676,8 @@ def decide_refresh(
         reasons.append("highest_bid_amount_changed")
     if bool(snapshot.get("settled")) != bool(state.get("last_seen_settled")):
         reasons.append("auction_settled_state_changed")
+    if int(snapshot.get("start_time_unix") or 0) != int(state.get("last_seen_start_time_unix") or 0):
+        reasons.append("auction_start_time_changed")
     if int(snapshot.get("end_time_unix") or 0) != int(state.get("last_seen_end_time_unix") or 0):
         reasons.append("auction_end_time_changed")
 

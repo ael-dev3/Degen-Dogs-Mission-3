@@ -532,8 +532,20 @@ def normalize_record(row: dict[str, Any], metadata: dict[int, dict[str, Any]], i
     return record
 
 
+def archive_status_from_feed(status_text: str) -> str:
+    lowered = text_value(status_text).lower()
+    if "settled" in lowered:
+        return "settled"
+    if "ended" in lowered or "pending settlement" in lowered:
+        return "ended pending settlement"
+    if lowered in {"ongoing", "live"}:
+        return "ongoing"
+    return lowered
+
+
 def record_sort_key(record: dict[str, Any]) -> tuple[int, str, int]:
-    live_rank = 1 if text_value(record.get("status")).lower() in {"ongoing", "live"} else 0
+    status = text_value(record.get("status")).lower()
+    live_rank = 1 if status in {"ongoing", "live"} or "pending settlement" in status or status.startswith("ended") else 0
     activity = text_value(record.get("activity_time_utc"))
     return (live_rank, activity, int_value(record.get("dog_id"), 0))
 
@@ -596,7 +608,7 @@ def current_overlay_search_text(record: dict[str, Any], dog_id: int) -> str:
 def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identity: dict[str, dict[str, Any]]) -> dict[str, Any]:
     dog_id = dog_id_from_row(feed)
     status_text = text_value(feed.get("status")).lower()
-    status = "settled" if "settled" in status_text else "ongoing"
+    status = archive_status_from_feed(status_text)
     wallet = normalize_address(feed.get("bidder_winner_wallet") or current.get("bidder_wallet"))
     profile = identity.get(wallet, {}) if wallet else {}
     display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet))
@@ -709,7 +721,8 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         if not isinstance(feed, dict):
             continue
         status_text = text_value(feed.get("status")).lower()
-        if status_text not in {"ongoing", "live", "settled"}:
+        feed_status = archive_status_from_feed(status_text)
+        if feed_status not in {"ongoing", "settled", "ended pending settlement"}:
             continue
         dog_id = dog_id_from_row(feed)
         record = by_key.get((3, dog_id))
@@ -725,7 +738,7 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         profile = identity.get(wallet, {}) if wallet else {}
         display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet), prior_who.get("display"))
         profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"), prior_who.get("profile_url"))
-        record["status"] = "settled" if "settled" in status_text else "ongoing"
+        record["status"] = feed_status
         record["dog_image_url"] = first_text(feed.get("dog_image_url"), current.get("dog_image_url"), record.get("dog_image_url")) or None
         record["dog_item_url"] = first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), record.get("dog_item_url"), mission3_item_url(dog_id)) or None
         record["winner_or_high_bidder"] = {

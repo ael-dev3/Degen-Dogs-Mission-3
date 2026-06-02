@@ -1,0 +1,118 @@
+{
+  "generated_at_utc": "2026-06-02T19:39:10Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-06-02T19:38:45Z",
+    "amount": {
+      "native": "0.0",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "0",
+      "usd_estimate": null,
+      "usd_estimate_confidence": "missing",
+      "usd_estimate_display": null,
+      "usd_estimate_notes": "missing_price",
+      "usd_estimate_price_date_utc": null,
+      "usd_estimate_price_usd": null,
+      "usd_estimate_source": null,
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-06-02T19:37:21Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 0,
+      "last_bid_time_utc": "2026-06-02T19:38:45Z",
+      "unique_bidder_count": 0
+    },
+    "bid_tx_hashes": [],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 732,
+    "dog_image_url": "https://api.degendogs.club/images/732.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/732",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog732",
+      "explorer": null,
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/732",
+      "repo_archive": "archive/dogs/by-id/732.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#224/733",
+      "rank": 224,
+      "total": 733
+    },
+    "schema_version": 1,
+    "search_text": "dog 732 dog #732 732 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-02t19:38:45z #224/733 generated auction feed background: none (90.2%) background none body: orange (8.9%) body orange neck: none (39.4%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: redmohawk (7.0%) head redmohawk eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "generated_auction_feed",
+      "sources": [
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Orange (8.9%)",
+        "trait_type": "Body",
+        "value": "Orange"
+      },
+      {
+        "display": "Neck: None (39.4%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.6%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: None (25.2%)",
+        "trait_type": "Ears",
+        "value": "None"
+      },
+      {
+        "display": "Head: RedMohawk (7.0%)",
+        "trait_type": "Head",
+        "value": "RedMohawk"
+      },
+      {
+        "display": "Eyes: RedLaserEyes (5.3%)",
+        "trait_type": "Eyes",
+        "value": "RedLaserEyes"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "no bids yet",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0x0000000000000000000000000000000000000000",
+      "wallet_explorer_url": null
+    }
+  },
+  "schema_version": 1
+}

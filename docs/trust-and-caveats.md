@@ -26,6 +26,11 @@ WOOF/SUP reward tiles are estimates for dashboard context. The reward basis uses
 Dogs and the WOOF Vault Bonus is not included in that estimate basis. Treat the values
 as estimates unless confirmed against official reward/accounting logic.
 
+Season 6 SUP projections are also estimates. They use a time-sliced XP model from
+settled Dog wins, apply a wallet-level cap, and do not redistribute cap overflow. The
+current-bidder projection assumes the current high bidder wins at the current auction
+end time; it is useful context, not official accounting.
+
 The BID PAYBACK tile also shows a simple annualized APR estimate:
 
 - `daily ROI % = current estimated per-Dog daily WOOF + SUP USD flow / current bid USD * 100`
