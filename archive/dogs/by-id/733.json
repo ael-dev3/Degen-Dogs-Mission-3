@@ -2,18 +2,18 @@
   "generated_at_utc": "2026-06-03T19:44:10Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-03T19:52:41Z",
+    "activity_time_utc": "2026-06-03T20:00:45Z",
     "amount": {
-      "native": "0.0011",
+      "native": "0.00122",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1100000000000000",
-      "usd_estimate": "1.98000000",
+      "raw": "1220000000000000",
+      "usd_estimate": "2.19000000",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$1.98",
+      "usd_estimate_display": "$2.19",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-03",
-      "usd_estimate_price_usd": "1.8E+3",
+      "usd_estimate_price_usd": "1795.0819672131147540983606557377049180327868852459016393442622950819672131147541",
       "usd_estimate_source": "generated_auction_feed",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -25,11 +25,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-06-03T19:52:41Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-06-03T20:00:45Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
+      "0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18",
       "0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f",
       "0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80"
     ],
@@ -42,7 +43,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog733",
-      "explorer": "https://basescan.org/address/0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d",
+      "explorer": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733",
       "repo_archive": "archive/dogs/by-id/733.json",
       "settlement_tx": null
@@ -54,7 +55,7 @@
       "total": 734
     },
     "schema_version": 1,
-    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base ongoing 0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d @oddlyaugmented.eth oddlyaugmented.eth 0.0011 eth 1100000000000000 1.98 $1.98 2026-06-03t19:52:41z #555/734 generated auction feed 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.2%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.4%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base ongoing 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.00122 eth 1220000000000000 2.19 $2.19 2026-06-03t20:00:45z #555/734 generated auction feed 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.2%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.4%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -109,12 +110,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@oddlyaugmented.eth",
+      "display": "@floam",
       "farcaster_fid": null,
-      "farcaster_handle": "oddlyaugmented.eth",
-      "profile_url": "https://farcaster.xyz/oddlyaugmented.eth",
-      "wallet": "0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d",
-      "wallet_explorer_url": "https://basescan.org/address/0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d"
+      "farcaster_handle": "floam",
+      "profile_url": "https://farcaster.xyz/floam",
+      "wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
+      "wallet_explorer_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922"
     }
   },
   "schema_version": 1
