@@ -166,7 +166,7 @@ def write_fixture(
     }
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
-    write_json(root / "generated" / "current_latest_bid.json", [{"latest_bid_eth": 0.01, "bidder": "@0xael.eth", "bidder_wallet": wallet, "bid_time_utc": "2026-05-30 18:40:23"}])
+    write_json(root / "generated" / "current_latest_bid.json", [{"latest_bid_eth": 0.01, "latest_bid_usd": 19.98, "bidder": "@0xael.eth", "bidder_wallet": wallet, "bid_time_utc": "2026-05-30 18:40:23"}])
     write_json(root / "generated" / "auction_feed.json", [{
         "status": "ongoing",
         "dog": "Dog #729",
@@ -257,11 +257,18 @@ def write_fixture(
         "mission": 3,
         "dog_id": 729,
         "winner_or_high_bidder": {"wallet": wallet, "display": "@0xael.eth"},
-        "amount": {"native": "0.01"},
+        "amount": {
+            "native": "0.01",
+            "native_symbol": "ETH",
+            "usd_estimate": "19.98",
+            "usd_estimate_display": "$19.98",
+            "usd_estimate_source": "generated_auction_feed",
+            "usd_estimate_confidence": "medium",
+        },
         "activity_time_utc": "2026-05-30T18:40:23Z",
         "bid_stats": {"bid_count": 0, "unique_bidder_count": 0},
         "bid_tx_hashes": [],
-        "search_text": f"dog 729 {wallet} @0xael.eth 0.01 eth",
+        "search_text": f"dog 729 {wallet} @0xael.eth 0.01 eth 19.98 $19.98",
     }
     write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "public" / "generated" / "unified_dog_search_index.json", [unified_row])
@@ -333,6 +340,58 @@ def test_validator_catches_stale_current_bidder_generated_surface() -> None:
         root = Path(tmp)
         write_fixture(root, feed_bidder="@stale")
         assert_raises_contains(lambda: run_validation(root), "high-bidder display")
+
+
+def test_validator_catches_unified_current_row_missing_live_usd() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        for rel in [
+            "archive/data/generated/unified_dog_search_index.json",
+            "public/generated/unified_dog_search_index.json",
+        ]:
+            rows = json.loads((root / rel).read_text(encoding="utf-8"))
+            rows[0]["amount"]["usd_estimate"] = None
+            rows[0]["amount"]["usd_estimate_display"] = None
+            rows[0]["amount"]["usd_estimate_source"] = None
+            rows[0]["amount"]["usd_estimate_confidence"] = "missing"
+            write_json(root / rel, rows)
+        assert_raises_contains(lambda: run_validation(root), "current row USD estimate")
+
+
+def test_validator_catches_unified_current_row_bad_live_usd() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        for rel in [
+            "archive/data/generated/unified_dog_search_index.json",
+            "public/generated/unified_dog_search_index.json",
+        ]:
+            rows = json.loads((root / rel).read_text(encoding="utf-8"))
+            rows[0]["amount"]["usd_estimate"] = "1.00"
+            rows[0]["amount"]["usd_estimate_display"] = "$1.00"
+            write_json(root / rel, rows)
+        assert_raises_contains(lambda: run_validation(root), "current row USD estimate")
+
+
+def test_validator_catches_current_latest_bid_missing_live_usd() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        latest = json.loads((root / "generated" / "current_latest_bid.json").read_text(encoding="utf-8"))
+        latest[0]["latest_bid_usd"] = None
+        write_json(root / "generated" / "current_latest_bid.json", latest)
+        assert_raises_contains(lambda: run_validation(root), "current_latest_bid USD amount")
+
+
+def test_validator_catches_auction_feed_bad_live_usd() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        feed = json.loads((root / "generated" / "auction_feed.json").read_text(encoding="utf-8"))
+        feed[0]["amount_usd"] = "1.00"
+        write_json(root / "generated" / "auction_feed.json", feed)
+        assert_raises_contains(lambda: run_validation(root), "auction_feed current row amount_usd differs from current_auction")
 
 
 def test_validator_catches_stale_season6_rendered_projection() -> None:

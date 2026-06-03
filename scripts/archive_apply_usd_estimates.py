@@ -47,6 +47,42 @@ def decimal_or_none(value: Any) -> Decimal | None:
         return None
 
 
+LIVE_USD_SOURCES = {
+    "generated_auction_feed",
+    "generated_current_auction",
+    "generated_current_latest_bid",
+    "generated_recent_bids",
+}
+
+
+def text_value(value: Any) -> str:
+    return "" if value is None else str(value).strip()
+
+
+def source_tokens(record: dict[str, Any], amount: dict[str, Any]) -> set[str]:
+    tokens: set[str] = set()
+    for key in ["usd_estimate_source", "usd_estimate_confidence"]:
+        token = text_value(amount.get(key))
+        if token:
+            tokens.add(token.lower())
+    raw_source = record.get("source")
+    source: dict[str, Any] = raw_source if isinstance(raw_source, dict) else {}
+    for key in ["raw_confidence", "confidence"]:
+        token = text_value(source.get(key))
+        if token:
+            tokens.add(token.lower())
+    raw_sources = source.get("sources")
+    if isinstance(raw_sources, list):
+        tokens.update(text_value(item).lower() for item in raw_sources if text_value(item))
+    elif isinstance(raw_sources, str):
+        tokens.update(part.strip().lower() for part in raw_sources.split(",") if part.strip())
+    return tokens
+
+
+def should_preserve_source_usd(record: dict[str, Any], amount: dict[str, Any]) -> bool:
+    return bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
+
+
 def parse_day(value: Any) -> datetime | None:
     text = str(value or "").strip()
     if not text:
@@ -122,7 +158,29 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
     price_row, status = find_price(price_map, asset, event_day)
     estimate: Decimal | None = None
     price_usd: Decimal | None = None
-    if price_row:
+    price_source: Any = None
+    price_source_detail: Any = None
+    price_date_utc: Any = None
+    price_confidence: Any = None
+    notes: Any = ""
+
+    source_estimate = decimal_or_none(amount.get("usd_estimate"))
+    if should_preserve_source_usd(record, amount) and source_estimate is not None and source_estimate >= 0:
+        estimate = source_estimate
+        price_usd = (estimate / native) if native != 0 else None
+        price_source = text_value(amount.get("usd_estimate_source")) or "generated_auction_feed"
+        price_source_detail = "precomputed generated auction-feed USD estimate"
+        price_date_utc = text_value(amount.get("usd_estimate_price_date_utc")) or event_day
+        price_confidence = text_value(amount.get("usd_estimate_confidence")) or "medium"
+        notes = text_value(amount.get("usd_estimate_notes")) or "preserved_source_usd_estimate"
+        amount["usd_estimate"] = str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP))
+        amount["usd_estimate_display"] = money_display(estimate)
+        amount["usd_estimate_source"] = price_source
+        amount["usd_estimate_confidence"] = price_confidence
+        amount["usd_estimate_price_date_utc"] = price_date_utc
+        amount["usd_estimate_price_usd"] = str(price_usd) if price_usd is not None else None
+        amount["usd_estimate_notes"] = notes
+    elif price_row:
         price_usd = decimal_or_none(price_row.get("price_usd"))
         if price_usd is not None:
             estimate = native * price_usd
@@ -133,6 +191,11 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
             amount["usd_estimate_price_date_utc"] = price_row.get("date_utc")
             amount["usd_estimate_price_usd"] = str(price_usd)
             amount["usd_estimate_notes"] = price_row.get("notes") or ""
+            price_source = price_row.get("source")
+            price_source_detail = price_row.get("source_detail")
+            price_date_utc = price_row.get("date_utc")
+            price_confidence = amount.get("usd_estimate_confidence")
+            notes = amount.get("usd_estimate_notes") or ""
     if estimate is None:
         amount["usd_estimate"] = None
         amount["usd_estimate_display"] = None
@@ -141,6 +204,8 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         amount["usd_estimate_price_date_utc"] = None
         amount["usd_estimate_price_usd"] = None
         amount["usd_estimate_notes"] = status
+        price_confidence = "missing"
+        notes = status
     record["amount"] = amount
     raw_settlement = record.get("settlement")
     settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
@@ -162,12 +227,12 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         "price_usd": str(price_usd) if price_usd is not None else None,
         "estimated_usd_value": str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)) if estimate is not None else None,
         "estimated_usd_display": money_display(estimate) if estimate is not None else None,
-        "price_date_utc": price_row.get("date_utc") if price_row else None,
-        "price_source": price_row.get("source") if price_row else None,
-        "price_source_detail": price_row.get("source_detail") if price_row else None,
-        "price_confidence": amount.get("usd_estimate_confidence"),
+        "price_date_utc": price_date_utc,
+        "price_source": price_source,
+        "price_source_detail": price_source_detail,
+        "price_confidence": price_confidence or amount.get("usd_estimate_confidence"),
         "price_status": "priced" if estimate is not None else "missing",
-        "notes": amount.get("usd_estimate_notes") or "",
+        "notes": notes or amount.get("usd_estimate_notes") or "",
     }
 
 

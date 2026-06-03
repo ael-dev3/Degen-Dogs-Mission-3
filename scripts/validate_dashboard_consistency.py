@@ -85,6 +85,10 @@ def quantized_decimal_str(value: Decimal, places: int) -> str:
     return f"{value.quantize(quant, rounding=ROUND_HALF_UP):f}".rstrip("0").rstrip(".") or "0"
 
 
+def money_display(value: Decimal) -> str:
+    return f"${value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP):,.2f}"
+
+
 def reward_apr_display(apr: Decimal | None) -> str:
     if apr is None or apr <= 0:
         return "N/A"
@@ -94,6 +98,18 @@ def reward_apr_display(apr: Decimal | None) -> str:
 
 def decimals_equal(left: Any, right: Any) -> bool:
     return decimal_value(left) == decimal_value(right)
+
+
+def optional_decimals_equal(left: Any, right: Any) -> bool:
+    return optional_decimal_value(left) == optional_decimal_value(right)
+
+
+def first_optional_decimal(*values: Any) -> Decimal | None:
+    for value in values:
+        parsed = optional_decimal_value(value)
+        if parsed is not None:
+            return parsed
+    return None
 
 
 def iso_utc(value: Any) -> str:
@@ -532,6 +548,8 @@ def validate_current_surface() -> dict[str, Any]:
         raise AssertionError("mission3_metrics current_auction_status differs from current_auction")
     if not decimals_equal(metrics["current_bid_eth"], current.get("current_bid_eth")):
         raise AssertionError("mission3_metrics current_bid_eth differs from current_auction")
+    if not optional_decimals_equal(metrics.get("current_bid_usd"), current.get("current_bid_usd")):
+        raise AssertionError("mission3_metrics current_bid_usd differs from current_auction")
     if text(metrics["current_bidder"]) != text(current.get("bidder")):
         raise AssertionError("mission3_metrics current_bidder differs from current_auction")
     if normalize_address(metrics["current_bidder_wallet"]) != normalize_address(current.get("bidder_wallet")):
@@ -550,6 +568,7 @@ def validate_current_surface() -> dict[str, Any]:
     assert_metric_cell("current_auction_token_id", metrics["current_auction_token_id"], index)
     assert_metric_cell("current_auction_status", metrics["current_auction_status"], index)
     assert_metric_cell("current_bid_eth", metrics["current_bid_eth"], index)
+    assert_metric_cell("current_bid_usd", metrics["current_bid_usd"], index)
     assert_metric_cell("current_bidder", metrics["current_bidder"], index)
     assert_metric_cell("current_bidder_wallet", metrics["current_bidder_wallet"], index)
     assert_index_contains("current Dog heading", f"Dog #{current_dog_id}", index)
@@ -593,6 +612,14 @@ def validate_current_surface() -> dict[str, Any]:
             raise AssertionError("auction_feed current row amount_eth differs from current_auction")
         if not decimals_equal(latest.get("latest_bid_eth"), current.get("current_bid_eth")):
             raise AssertionError("current_latest_bid amount differs from current_auction")
+        expected_live_usd = first_optional_decimal(current.get("current_bid_usd"), metrics.get("current_bid_usd"), latest.get("latest_bid_usd"), feed.get("amount_usd"))
+        if expected_live_usd is not None:
+            if optional_decimal_value(feed.get("amount_usd")) != expected_live_usd:
+                raise AssertionError("auction_feed current row amount_usd differs from current_auction")
+            if optional_decimal_value(latest.get("latest_bid_usd")) != expected_live_usd:
+                raise AssertionError("current_latest_bid USD amount differs from current_auction")
+            if optional_decimal_value(current.get("current_bid_usd")) != expected_live_usd:
+                raise AssertionError("current_auction current_bid_usd differs from auction_feed")
         if text(feed.get("bid")) != text(current.get("current_bid")):
             raise AssertionError("auction_feed current row bid display differs from current_auction")
         if iso_utc(feed.get("last_bid_utc")) != iso_utc(latest.get("bid_time_utc")):
@@ -626,6 +653,8 @@ def validate_current_surface() -> dict[str, Any]:
     expected_wallet = normalize_address(feed.get("bidder_winner_wallet"))
     expected_display = text(feed.get("bidder_winner"))
     expected_native = decimal_value(feed.get("amount_eth"))
+    expected_usd = first_optional_decimal(feed.get("amount_usd"), latest.get("latest_bid_usd"), current.get("current_bid_usd"), metrics.get("current_bid_usd"))
+    expected_usd_display = money_display(expected_usd) if expected_usd is not None else ""
     expected_last_bid = iso_utc(feed.get("last_bid_utc") or feed.get("auction_time_utc"))
     recent_rows_raw = load_json(RECENT_BIDS)
     recent_rows = [row for row in recent_rows_raw if isinstance(row, dict) and dog_id(row) == current_dog_id] if isinstance(recent_rows_raw, list) else []
@@ -645,6 +674,14 @@ def validate_current_surface() -> dict[str, Any]:
             raise AssertionError(f"{path.relative_to(ROOT)} current row display differs from auction_feed")
         if decimal_value(amount.get("native")) != expected_native:
             raise AssertionError(f"{path.relative_to(ROOT)} current row native amount differs from auction_feed")
+        if expected_usd is not None:
+            actual_usd = optional_decimal_value(amount.get("usd_estimate"))
+            if actual_usd != expected_usd:
+                raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate differs from auction_feed")
+            if text(amount.get("usd_estimate_display")) != expected_usd_display:
+                raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate display differs from auction_feed")
+            if text(amount.get("usd_estimate_source")) == "" or text(amount.get("usd_estimate_confidence")).lower() == "missing":
+                raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate provenance missing")
         if iso_utc(unified.get("activity_time_utc")) != expected_last_bid:
             raise AssertionError(f"{path.relative_to(ROOT)} current row activity time differs from auction_feed")
         raw_bid_stats = unified.get("bid_stats")
@@ -657,7 +694,10 @@ def validate_current_surface() -> dict[str, Any]:
             if latest_recent_tx and latest_recent_tx not in (unified.get("bid_tx_hashes") or []):
                 raise AssertionError(f"{path.relative_to(ROOT)} current row bid_tx_hashes missing latest recent bid tx")
         search_text = text(unified.get("search_text")).lower()
-        for required in [expected_wallet, expected_display.lower(), f"{expected_native.normalize()} eth"]:
+        required_terms = [expected_wallet, expected_display.lower(), f"{expected_native.normalize()} eth"]
+        if expected_usd is not None:
+            required_terms.extend([str(expected_usd.normalize()), expected_usd_display.lower()])
+        for required in required_terms:
             if required and required not in search_text:
                 raise AssertionError(f"{path.relative_to(ROOT)} current row search_text missing {required!r}")
         if latest_recent_tx and latest_recent_tx not in search_text:
