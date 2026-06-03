@@ -260,6 +260,19 @@
     "latest_bid_utc": "2026-03-21 15:04:51"
   },
   {
+    "bidder": "@pare",
+    "bidder_url": "https://farcaster.xyz/pare",
+    "bidder_wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
+    "bids": 13,
+    "auctions_bid": 10,
+    "bid_eth": 0.39717,
+    "high_bid_eth": 0.05135,
+    "auction_wins": 4,
+    "winning_eth": 0.1494,
+    "latest_bid_token_id": 732,
+    "latest_bid_utc": "2026-06-03 12:50:11"
+  },
+  {
     "bidder": "@arok378",
     "bidder_url": "https://farcaster.xyz/arok378",
     "bidder_wallet": "0x903dd30042ae53844ae83bdf2bcf839c4e80eef8",
@@ -284,19 +297,6 @@
     "winning_eth": 0.04912,
     "latest_bid_token_id": 731,
     "latest_bid_utc": "2026-06-01 19:25:11"
-  },
-  {
-    "bidder": "@pare",
-    "bidder_url": "https://farcaster.xyz/pare",
-    "bidder_wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
-    "bids": 12,
-    "auctions_bid": 9,
-    "bid_eth": 0.36717,
-    "high_bid_eth": 0.05135,
-    "auction_wins": 4,
-    "winning_eth": 0.1494,
-    "latest_bid_token_id": 731,
-    "latest_bid_utc": "2026-06-02 19:27:11"
   },
   {
     "bidder": "@ashish-007",
