@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "sup_token": "0xa69f80524381275a7ffdb3ae01c54150644c8792",
+  "season_start_utc": "2026-06-02T00:00:00Z",
+  "season_end_utc": "2026-09-01T00:00:00Z",
+  "total_allocation_sup": "251340",
+  "wallet_cap_sup": "12500",
+  "xp_per_settled_win": "100",
+  "reward_start_delay_days": 0,
+  "cap_level": "wallet_estimate",
+  "projection_model": "time_weighted_xp_with_expected_future_daily_auctions",
+  "expected_future_settlement_interval_seconds": 86400,
+  "visible_dashboard_mode": "compact_final_estimate_only"
+}

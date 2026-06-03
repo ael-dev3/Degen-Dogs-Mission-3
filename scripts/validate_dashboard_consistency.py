@@ -200,7 +200,10 @@ def reward_strip_surface(index: str) -> str:
 
 
 def season6_surface(index: str) -> str:
-    match = re.search(r'<section\b[^>]*class="[^"]*\bseason6-sup\b[^"]*"[^>]*>.*?</section>', index, flags=re.DOTALL)
+    reward_surface = reward_strip_surface(index)
+    if "Season 6 SUP estimate" in reward_surface:
+        return reward_surface
+    match = re.search(r'<[^>]+class="[^"]*\bseason6-sup-estimate\b[^"]*"[^>]*>.*?</[^>]+>', index, flags=re.DOTALL)
     return match.group(0) if match else ""
 
 
@@ -227,6 +230,17 @@ def season6_usd_display(value: Any) -> str:
     if rendered == "N/A":
         return rendered
     return f"≈{rendered}"
+
+
+def season6_readme_estimate_summary(metrics: dict[str, str]) -> str:
+    if text(metrics.get("season6_sup_enabled")).lower() not in {"true", "1", "yes"}:
+        return ""
+    status = text(metrics.get("season6_sup_estimate_status"))
+    if status == "no_current_bid" or not normalize_address(metrics.get("season6_sup_current_bidder_wallet")):
+        return "Bid to estimate S6 SUP"
+    sup = season6_sup_display(metrics.get("season6_sup_current_bid_estimated_cap_aware_sup"))
+    usd = season6_usd_display(metrics.get("season6_sup_current_bid_estimated_cap_aware_usd"))
+    return f"{sup} / {usd}"
 
 
 def identity_display(wallet: str) -> str:
@@ -361,7 +375,36 @@ def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[st
 def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
     if not text(metrics.get("season6_sup_status")):
         return
+    enabled = text(metrics.get("season6_sup_enabled")).lower()
+    if enabled in {"false", "0", "no", "disabled"}:
+        return
+    estimate_status = text(metrics.get("season6_sup_estimate_status"))
+    current_bidder = normalize_address(metrics.get("season6_sup_current_bidder_wallet"))
     required = [
+        "season6_sup_enabled",
+        "season6_sup_token",
+        "season6_sup_usd_price",
+        "season6_sup_total_allocation",
+        "season6_sup_wallet_cap",
+        "season6_sup_xp_per_win",
+        "season6_sup_start_utc",
+        "season6_sup_end_utc",
+        "season6_sup_reward_start_delay_days",
+        "season6_sup_settled_win_count_to_date",
+        "season6_sup_current_bidder_prior_s6_wins",
+        "season6_sup_current_bidder_prior_s6_xp",
+        "season6_sup_current_bid_estimated_win_time_utc",
+        "season6_sup_current_bid_estimated_raw_incremental_sup",
+        "season6_sup_current_bid_estimated_cap_aware_sup",
+        "season6_sup_current_bid_estimated_cap_aware_usd",
+        "season6_sup_current_bid_projected_total_without_win_sup",
+        "season6_sup_current_bid_projected_total_with_win_sup",
+        "season6_sup_current_bid_cap_remaining_before_win_sup",
+        "season6_sup_projection_model",
+        "season6_sup_future_dilution_enabled",
+        "season6_sup_expected_future_settlement_interval_seconds",
+        "season6_sup_estimate_status",
+        # Legacy aliases kept for generated-data compatibility.
         "season6_sup_total_allocated",
         "season6_sup_cap_per_wallet",
         "season6_sup_xp_per_settled_win",
@@ -370,13 +413,27 @@ def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
         "season6_current_bidder_projected_raw_usd_if_wins",
         "season6_current_bidder_projected_capped_usd_if_wins",
     ]
+    if estimate_status != "no_current_bid":
+        required.append("season6_sup_current_bidder_wallet")
     missing = [key for key in required if not text(metrics.get(key))]
     if missing:
         raise AssertionError("mission3_metrics missing Season 6 metrics: " + ", ".join(missing))
+    if estimate_status != "no_current_bid" and not current_bidder:
+        raise AssertionError("mission3_metrics season6_sup_current_bidder_wallet invalid")
 
-    cap = optional_decimal_value(metrics.get("season6_sup_cap_per_wallet"))
+    cap = optional_decimal_value(metrics.get("season6_sup_wallet_cap") or metrics.get("season6_sup_cap_per_wallet"))
     if cap is None or cap <= 0:
-        raise AssertionError("mission3_metrics season6_sup_cap_per_wallet invalid")
+        raise AssertionError("mission3_metrics season6_sup_wallet_cap invalid")
+    estimate = optional_decimal_value(metrics.get("season6_sup_current_bid_estimated_cap_aware_sup"))
+    if estimate is not None and estimate > cap:
+        raise AssertionError("Season 6 current-bid cap-aware estimate exceeds configured cap")
+    raw_incremental = optional_decimal_value(metrics.get("season6_sup_current_bid_estimated_raw_incremental_sup"))
+    if estimate is not None and raw_incremental is not None and estimate > raw_incremental:
+        raise AssertionError("Season 6 cap-aware estimate exceeds raw incremental estimate")
+    cap_remaining = optional_decimal_value(metrics.get("season6_sup_current_bid_cap_remaining_before_win_sup"))
+    if estimate is not None and cap_remaining is not None and estimate > cap_remaining:
+        raise AssertionError("Season 6 cap-aware estimate exceeds cap remaining before current win")
+
     for path in [ROOT / "generated" / "season6_sup_by_winner.json", ROOT / "public" / "generated" / "season6_sup_by_winner.json"]:
         rows = load_json(path)
         if not isinstance(rows, list):
@@ -397,29 +454,61 @@ def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
         if generated_path.exists() and public_path.exists() and generated_path.read_bytes() != public_path.read_bytes():
             raise AssertionError(f"public/generated/{table_name}.json differs from generated/{table_name}.json")
 
+    status_rows = load_json(ROOT / "generated" / "season6_sup_current_bidder_status.json")
+    if current_bidder:
+        if not isinstance(status_rows, list) or not status_rows or not isinstance(status_rows[0], dict):
+            raise AssertionError("generated/season6_sup_current_bidder_status.json missing current bidder row")
+        status = status_rows[0]
+        if normalize_address(status.get("current_bidder_wallet")) != current_bidder:
+            raise AssertionError("Season 6 current bidder status wallet differs from mission3_metrics")
+        if text(status.get("prior_s6_wins_confirmed")) != text(metrics.get("season6_sup_current_bidder_prior_s6_wins")):
+            raise AssertionError("Season 6 current bidder prior wins differ from status row")
+        if text(status.get("prior_s6_xp_confirmed")) != text(metrics.get("season6_sup_current_bidder_prior_s6_xp")):
+            raise AssertionError("Season 6 current bidder prior XP differs from status row")
+        if text(status.get("estimated_cap_aware_incremental_sup")) != text(metrics.get("season6_sup_current_bid_estimated_cap_aware_sup")):
+            raise AssertionError("Season 6 status cap-aware estimate differs from mission3_metrics")
+        if text(status.get("estimated_cap_aware_incremental_usd")) != text(metrics.get("season6_sup_current_bid_estimated_cap_aware_usd")):
+            raise AssertionError("Season 6 status USD estimate differs from mission3_metrics")
+
+    forbidden_fragments = [
+        "Pool: 251,340 SUP",
+        "Cap: 12,500 SUP",
+        "100 XP per settled Dog win",
+        "Projected if current bid wins",
+        "Cap-limited estimate",
+        "Season 6 SUP rewards live",
+    ]
+    for fragment in forbidden_fragments:
+        if fragment in index:
+            raise AssertionError(f"index.html still exposes verbose Season 6 UI fragment: {fragment!r}")
+
     surface = season6_surface(index)
     if not surface:
-        raise AssertionError("index.html missing Season 6 SUP surface")
-    expected_fragments = [
-        "Season 6 SUP rewards live",
-        f"Pool: {season6_sup_display(metrics.get('season6_sup_total_allocated'), approximate=False)}",
-        f"Cap: {season6_sup_display(metrics.get('season6_sup_cap_per_wallet'), approximate=False)} per wallet-level estimate",
-        f"{comma_decimal_display(metrics.get('season6_sup_xp_per_settled_win'), 0, suffix=' XP')} per settled Dog win",
-        (
-            "Projected if current bid wins: "
-            f"{season6_sup_display(metrics.get('season6_current_bidder_projected_raw_sup_if_wins'))} / "
-            f"{season6_usd_display(metrics.get('season6_current_bidder_projected_raw_usd_if_wins'))} raw estimate"
-        ),
-        (
-            "Cap-limited estimate: "
-            f"{season6_sup_display(metrics.get('season6_current_bidder_projected_capped_sup_if_wins'))} / "
-            f"{season6_usd_display(metrics.get('season6_current_bidder_projected_capped_usd_if_wins'))}"
-        ),
-    ]
+        raise AssertionError("index.html missing compact Season 6 SUP estimate surface")
+    if "Season 6 SUP estimate" not in surface:
+        raise AssertionError("index.html missing compact Season 6 SUP estimate title")
+    season_pos = surface.find("Season 6 SUP estimate")
+    payback_pos = surface.lower().find("bid payback")
+    if payback_pos == -1:
+        raise AssertionError("index.html reward surface missing Bid payback card")
+    if season_pos == -1 or season_pos > payback_pos:
+        raise AssertionError("Season 6 SUP estimate must appear before Bid payback")
+
+    estimate_status = text(metrics.get("season6_sup_estimate_status"))
+    if estimate_status == "no_current_bid" or not current_bidder:
+        expected_fragments = ["Bid to estimate S6 SUP"]
+    else:
+        expected_fragments = [
+            season6_sup_display(metrics.get("season6_sup_current_bid_estimated_cap_aware_sup")),
+            f"{season6_usd_display(metrics.get('season6_sup_current_bid_estimated_cap_aware_usd'))} if current bid wins",
+        ]
+        if estimate_status == "wallet_near_cap":
+            expected_fragments.append("Wallet estimate already near cap.")
+        else:
+            expected_fragments.append("Adjusted for prior S6 wins; estimate only.")
     for fragment in expected_fragments:
         if fragment and fragment not in surface:
-            raise AssertionError(f"Season 6 current bidder projection mismatch: missing {fragment!r}")
-
+            raise AssertionError(f"Season 6 compact card mismatch: missing {fragment!r}")
 
 def validate_current_surface() -> dict[str, Any]:
     current = first_row(ROOT / "generated" / "current_auction.json")
@@ -469,6 +558,9 @@ def validate_current_surface() -> dict[str, Any]:
     assert_index_contains("current auction status", text(feed.get("status")), index)
     validate_reward_metrics(metrics, index, readme)
     validate_season6_metrics(metrics, index)
+    expected_season6_readme = season6_readme_estimate_summary(metrics)
+    if expected_season6_readme and readme.get("Season 6 SUP estimate if current bid wins") != expected_season6_readme:
+        raise AssertionError("README Season 6 SUP estimate differs from mission3_metrics")
 
     if readme.get("Snapshot block") != metrics["latest_block"]:
         raise AssertionError("README Snapshot block differs from mission3_metrics latest_block")

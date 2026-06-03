@@ -50,7 +50,7 @@ The public site shows:
 - current Dog, current high bid, high bidder, and countdown,
 - recent winners and settled auction history,
 - bidder activity and daily auction trends,
-- WOOF/SUP context, reward-estimate tiles, and Season 6 SUP projection context,
+- WOOF/SUP context, reward-estimate tiles, and a compact Season 6 SUP estimate,
 - unified Dog/archive search across available Mission 1, 2, and 3 records,
 - downloadable CSV/JSON exports for published tables.
 

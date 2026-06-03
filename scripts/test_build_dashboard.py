@@ -234,14 +234,29 @@ def test_reward_strip_renders_apr_inside_bid_payback_card_with_caveat_copy() -> 
     assert "guaranteed return" not in rendered.lower()
 
 
-def season6_test_config(dashboard: Any, *, total: str = "1000", cap: str = "600") -> Any:
+def season6_test_config(
+    dashboard: Any,
+    *,
+    total: str = "1000",
+    cap: str = "600",
+    campaign_seconds: int = 100,
+    expected_future_settlement_interval_seconds: int = 0,
+    projection_model: str = "time_weighted_xp_unit_test",
+) -> Any:
+    campaign_end = f"2026-06-02T00:{campaign_seconds // 60:02d}:{campaign_seconds % 60:02d}Z"
     return dashboard.Season6SupConfig(
+        enabled=True,
+        sup_token=dashboard.SUP.lower(),
+        season_start_utc="2026-06-02T00:00:00Z",
+        season_end_utc=campaign_end,
         total_sup=Decimal(total),
         cap_sup=Decimal(cap),
         xp_per_settled_win=Decimal("100"),
-        xp_start_utc="2026-06-02T00:00:00Z",
-        reward_start_utc="2026-06-02T00:00:00Z",
-        campaign_end_utc="2026-06-02T00:01:40Z",
+        reward_start_delay_days=0,
+        cap_level="wallet_estimate",
+        projection_model=projection_model,
+        expected_future_settlement_interval_seconds=expected_future_settlement_interval_seconds,
+        visible_dashboard_mode="compact_final_estimate_only",
         cap_percent_label="5% cap",
     )
 
@@ -314,13 +329,115 @@ def test_season6_current_bidder_projection_adds_hypothetical_win_and_prior_statu
         config=season6_test_config(dashboard),
     )
     status = outputs["season6_sup_current_bidder_status"][0]
+    metrics = outputs["season6_metrics"]
     assert status["current_bidder_wallet"] == alice
     assert status["prior_s6_wins_confirmed"] == 1
     assert status["prior_s6_xp_confirmed"] == 100
     assert status["projected_s6_wins_if_current_bid_wins"] == 2
     assert status["projected_s6_xp_if_current_bid_wins"] == 200
     assert status["projected_capped_sup_if_current_bid_wins"] == "600"
-    assert status["current_bidder_cap_status"] == "cap_limited_projected"
+    assert status["current_bidder_cap_status"] == "wallet_near_cap"
+    assert metrics["season6_sup_current_bidder_prior_s6_wins"] == "1"
+    assert metrics["season6_sup_current_bid_estimated_cap_aware_sup"] == "0"
+    assert metrics["season6_sup_current_bid_estimate_status"] == "wallet_near_cap"
+
+
+def test_season6_three_equal_winners_split_one_third_after_third_win() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    bob = "0x00000000000000000000000000000000000000b2"
+    carol = "0x00000000000000000000000000000000000000c3"
+    outputs = dashboard.build_season6_sup_outputs(
+        [
+            {"token_id": 1, "winner": alice, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"},
+            {"token_id": 2, "winner": bob, "amount_eth": 0.02, "block_time_utc": "2026-06-02T00:00:30Z"},
+            {"token_id": 3, "winner": carol, "amount_eth": 0.03, "block_time_utc": "2026-06-02T00:01:00Z"},
+        ],
+        {},
+        {"sup_usd_price": "1", "sup_usd_source": "unit-test", "eth_usd_price": "1000"},
+        snapshot_time_utc="2026-06-02T00:01:30Z",
+        config=season6_test_config(dashboard, total="90", cap="1000", campaign_seconds=90),
+    )
+    by_winner = {row["winner_wallet"]: row for row in outputs["season6_sup_by_winner"]}
+    assert by_winner[alice]["season6_raw_sup_projected_full"] == "55"
+    assert by_winner[bob]["season6_raw_sup_projected_full"] == "25"
+    assert by_winner[carol]["season6_raw_sup_projected_full"] == "10"
+
+
+def test_season6_current_bid_estimate_is_incremental_cap_aware_and_counts_prior_wins() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    bob = "0x00000000000000000000000000000000000000b2"
+    outputs = dashboard.build_season6_sup_outputs(
+        [
+            {"token_id": 1, "winner": alice, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"},
+            {"token_id": 2, "winner": bob, "amount_eth": 0.02, "block_time_utc": "2026-06-02T00:00:50Z"},
+        ],
+        {"token_id": 3, "bidder": alice, "amount_eth": 0.03, "end_time_utc": "2026-06-02T00:01:15Z"},
+        {"sup_usd_price": "2", "sup_usd_source": "unit-test", "eth_usd_price": "1000"},
+        snapshot_time_utc="2026-06-02T00:01:15Z",
+        config=season6_test_config(dashboard, total="1000", cap="760", campaign_seconds=100),
+    )
+    metrics = outputs["season6_metrics"]
+    assert metrics["season6_sup_current_bidder_prior_s6_wins"] == "1"
+    assert metrics["season6_sup_current_bidder_prior_s6_xp"] == "100"
+    assert metrics["season6_sup_current_bid_projected_total_without_win_sup"] == "750"
+    assert metrics["season6_sup_current_bid_projected_total_with_win_sup"] == "791.666667"
+    assert metrics["season6_sup_current_bid_estimated_raw_incremental_sup"] == "41.666667"
+    assert metrics["season6_sup_current_bid_cap_remaining_before_win_sup"] == "10"
+    assert metrics["season6_sup_current_bid_estimated_cap_aware_sup"] == "10"
+    assert metrics["season6_sup_current_bid_estimated_cap_aware_usd"] == "20"
+
+
+def test_season6_future_daily_dilution_reduces_current_bid_estimate() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    current = {"token_id": 1, "bidder": alice, "amount_eth": 0.01, "end_time_utc": "2026-06-02T00:00:00Z"}
+    no_future = dashboard.build_season6_sup_outputs(
+        [],
+        current,
+        {"sup_usd_price": "1", "sup_usd_source": "unit-test"},
+        snapshot_time_utc="2026-06-02T00:00:00Z",
+        config=season6_test_config(dashboard, total="1000", cap="2000", campaign_seconds=100, expected_future_settlement_interval_seconds=0),
+    )["season6_metrics"]
+    with_future = dashboard.build_season6_sup_outputs(
+        [],
+        current,
+        {"sup_usd_price": "1", "sup_usd_source": "unit-test"},
+        snapshot_time_utc="2026-06-02T00:00:00Z",
+        config=season6_test_config(dashboard, total="1000", cap="2000", campaign_seconds=100, expected_future_settlement_interval_seconds=50),
+    )["season6_metrics"]
+    assert no_future["season6_sup_current_bid_estimated_cap_aware_sup"] == "1000"
+    assert with_future["season6_sup_future_dilution_enabled"] == "true"
+    assert with_future["season6_sup_current_bid_estimated_cap_aware_sup"] == "750"
+    assert Decimal(with_future["season6_sup_current_bid_estimated_cap_aware_sup"]) < Decimal(no_future["season6_sup_current_bid_estimated_cap_aware_sup"])
+
+
+def test_season6_compact_card_uses_final_cap_aware_estimate_only() -> None:
+    dashboard = load_module()
+    rendered = dashboard.render_season6_strip({
+        "season6_sup_enabled": "true",
+        "season6_sup_estimate_status": "estimated",
+        "season6_sup_current_bid_estimated_cap_aware_sup": "11240.25",
+        "season6_sup_current_bid_estimated_cap_aware_usd": "118.02",
+    })
+    assert "Season 6 SUP estimate" in rendered
+    assert "≈11,240 SUP" in rendered
+    assert "≈$118 if current bid wins" in rendered
+    assert "Adjusted for prior S6 wins; estimate only." in rendered
+    forbidden = ["Pool:", "Cap:", "100 XP per settled Dog win", "Projected if current bid wins", "Cap-limited estimate"]
+    assert not any(text in rendered for text in forbidden)
+
+
+def test_season6_compact_card_neutral_without_current_high_bidder() -> None:
+    dashboard = load_module()
+    rendered = dashboard.render_season6_strip({
+        "season6_sup_enabled": "true",
+        "season6_sup_estimate_status": "no_current_bid",
+    })
+    assert "Bid to estimate S6 SUP" in rendered
+    assert "Pool:" not in rendered
+    assert "Cap:" not in rendered
 
 
 if __name__ == "__main__":

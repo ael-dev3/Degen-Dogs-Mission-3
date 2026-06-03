@@ -8,7 +8,8 @@ Start here for deeper Degen Dogs Mission 3 dashboard docs.
 - [Architecture](architecture.md)
 - [Data pipeline](data-pipeline.md)
 - [Datasets](datasets.md)
-- [Season 6 SUP reward projections](season6-sup-rewards.md)
+- [Season 6 SUP reward projections](season6-sup-rewards.md) - compact homepage
+  estimate, generated fields, and full time-weighted XP methodology.
 - [Local development](local-development.md)
 - [Configuration](configuration.md)
 - [Refresh runner](refresh-runner.md)
