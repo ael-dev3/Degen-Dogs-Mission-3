@@ -3,8 +3,8 @@
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 732,
-    "estimated_usd_display": "$55.57",
-    "estimated_usd_value": "55.57000000",
+    "estimated_usd_display": "$55.56",
+    "estimated_usd_value": "55.56000000",
     "event_time_utc": "2026-06-03T12:50:11Z",
     "event_tx_hash": null,
     "event_type": "current_bid",
@@ -19,14 +19,14 @@
     "price_source": "generated_auction_feed",
     "price_source_detail": "precomputed generated auction-feed USD estimate",
     "price_status": "priced",
-    "price_usd": "1852.3333333333333333333333333333333333333333333333333333333333333333333333333333"
+    "price_usd": "1852"
   },
   {
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 731,
-    "estimated_usd_display": "$79.85",
-    "estimated_usd_value": "79.85000000",
+    "estimated_usd_display": "$79.84",
+    "estimated_usd_value": "79.84000000",
     "event_time_utc": "2026-06-02T19:37:21Z",
     "event_tx_hash": null,
     "event_type": "settlement",
@@ -41,7 +41,7 @@
     "price_source": "generated_auction_feed",
     "price_source_detail": "precomputed generated auction-feed USD estimate",
     "price_status": "priced",
-    "price_usd": "1852.2384597541173741591278125724889816747854326142426351194618418000463929482719"
+    "price_usd": "1852.0064950127580607747622361401067037810252841568081651588958478311296682904199"
   },
   {
     "chain": "Base",
@@ -223,8 +223,8 @@
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 722,
-    "estimated_usd_display": "$27.14",
-    "estimated_usd_value": "27.14000000",
+    "estimated_usd_display": "$27.13",
+    "estimated_usd_value": "27.13000000",
     "event_time_utc": "2026-05-23T15:10:41Z",
     "event_tx_hash": "0xb1fa0f5c9dc01718f6f75e9180396e64071dc39d305b2d70e741c1f2d4ed7b2e",
     "event_type": "settlement",
@@ -239,7 +239,7 @@
     "price_source": "generated_auction_feed",
     "price_source_detail": "precomputed generated auction-feed USD estimate",
     "price_status": "priced",
-    "price_usd": "1852.5597269624573378839590443686006825938566552901023890784982935153583617747440"
+    "price_usd": "1851.8771331058020477815699658703071672354948805460750853242320819112627986348123"
   },
   {
     "chain": "Base",
