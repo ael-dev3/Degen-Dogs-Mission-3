@@ -88,6 +88,11 @@ DEFAULT_LOG_PATH = ROOT / "logs" / "watch-onchain.log"
 DEFAULT_LOCAL_REFRESH_COMMAND = "npm run data && npm run build"
 DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
 
+try:
+    import refresh_telemetry
+except Exception:  # pragma: no cover - watcher still works without telemetry helper on ad-hoc copies.
+    refresh_telemetry = None  # type: ignore[assignment]
+
 
 class Config(NamedTuple):
     rpc_urls: list[str]
@@ -730,6 +735,49 @@ def latest_activity_block(snapshot: dict[str, Any]) -> int:
     return int(snapshot.get("latest_block") or snapshot.get("checked_to_block") or 0)
 
 
+def latest_activity_event(snapshot: dict[str, Any]) -> dict[str, Any]:
+    events = []
+    for key in ("created_log", "bid_log", "extended_log", "settled_log"):
+        item = get_snapshot_log(snapshot, key)
+        if item:
+            events.append(item)
+    if not events:
+        return {}
+    return max(events, key=lambda item: (int(item.get("block_number") or 0), int(item.get("log_index") or 0)))
+
+
+def telemetry_base_row(started_at_utc: str, completed_at_utc: str, snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
+    snapshot = snapshot or {}
+    event = latest_activity_event(snapshot) if snapshot else {}
+    row: dict[str, Any] = {
+        "started_at_utc": started_at_utc,
+        "completed_at_utc": completed_at_utc,
+        "duration_seconds": seconds_since(started_at_utc, completed_at_utc),
+        "checked_from_block": snapshot.get("checked_from_block"),
+        "checked_to_block": snapshot.get("checked_to_block") or snapshot.get("latest_block"),
+        "latest_block": snapshot.get("latest_block"),
+        "token_id": snapshot.get("token_id"),
+        "high_bidder": normalize_address(snapshot.get("high_bidder")),
+        "amount_wei": str(snapshot.get("amount_wei") or ""),
+        "settled": bool(snapshot.get("settled")) if snapshot else None,
+        "checked_log_count": snapshot.get("checked_log_count"),
+        "event_name": event.get("event_name"),
+        "event_block_number": event.get("block_number"),
+        "event_tx_hash": event.get("tx_hash"),
+        "event_log_index": event.get("log_index"),
+    }
+    return {key: value for key, value in row.items() if value not in (None, "")}
+
+
+def record_watcher_telemetry(config: Config, row: dict[str, Any]) -> None:
+    if refresh_telemetry is None:
+        return
+    try:
+        refresh_telemetry.record_watcher_check(row, root=ROOT)
+    except Exception as exc:  # noqa: BLE001
+        log(config, f"warning: unable to record watcher telemetry: {exc}")
+
+
 def state_from_snapshot(
     snapshot: dict[str, Any],
     *,
@@ -934,7 +982,7 @@ def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: 
     return state
 
 
-def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[str, int]:
+def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dict[str, Any] | None = None) -> tuple[str, int]:
     validate_refresh_command(config)
     if config.require_clean_tree:
         tracked = git_status_tracked().strip()
@@ -955,7 +1003,19 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[s
         raise RefreshAlreadyRunning(f"another refresh is already running at {config.refresh_lock_path}")
 
     try:
-        child_env = {**os.environ, "GIT_TERMINAL_PROMPT": "0"}
+        child_env = {
+            **os.environ,
+            "GIT_TERMINAL_PROMPT": "0",
+            "DEGEN_DOGS_REFRESH_TRIGGER": "watcher",
+            "DEGEN_DOGS_REFRESH_REASONS": json.dumps(reasons),
+            "DEGEN_DOGS_DETECTED_AT_UTC": utc_now(),
+        }
+        event = event or {}
+        if event:
+            child_env["DEGEN_DOGS_EVENT_NAME"] = str(event.get("event_name") or "")
+            child_env["DEGEN_DOGS_EVENT_BLOCK_NUMBER"] = str(event.get("block_number") or "")
+            child_env["DEGEN_DOGS_EVENT_TX_HASH"] = str(event.get("tx_hash") or "")
+            child_env["DEGEN_DOGS_EVENT_LOG_INDEX"] = str(event.get("log_index") or "")
         if refresh_lock and config.refresh_lock_path:
             # The parent watcher holds the same lock used by refresh_and_publish.sh.
             # Passing DEGEN_DOGS_LOCK_HELD lets that script run without trying to
@@ -986,13 +1046,25 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool) -> tuple[s
 
 
 def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: bool = False) -> int:
-    now = utc_now()
+    check_started = utc_now()
+    now = check_started
     state = load_state(config.state_path)
     try:
         snapshot = fetch_snapshot(config, state)
     except Exception as exc:  # noqa: BLE001
         if not dry_run:
             record_rpc_error(config.state_path, state, exc, now)
+        completed = utc_now()
+        record_watcher_telemetry(
+            config,
+            {
+                **telemetry_base_row(check_started, completed),
+                "result": "failed",
+                "error": str(exc)[:500],
+                "dry_run": dry_run,
+                "force_refresh": force_refresh,
+            },
+        )
         log(config, f"rpc_error: {exc}")
         return 1
 
@@ -1016,14 +1088,29 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
         f"bidder={snapshot.get('high_bidder')} amount_wei={snapshot.get('amount_wei')} "
         f"logs={snapshot.get('checked_log_count')} reasons={','.join(decision.reasons) or 'none'}"
     )
+    activity_event = latest_activity_event(snapshot)
 
     if decision.should_refresh:
         try:
-            status, exit_code = run_refresh(config, decision.reasons, dry_run=dry_run)
+            status, exit_code = run_refresh(config, decision.reasons, dry_run=dry_run, event=activity_event)
         except RefreshAlreadyRunning as exc:
             new_state = mark_pending_refresh(new_state, reasons=decision.reasons, now_utc=utc_now(), status="deferred_refresh_lock")
             if not dry_run:
                 save_state(config.state_path, new_state)
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed, snapshot),
+                    "result": "deferred_refresh_lock",
+                    "reasons": decision.reasons,
+                    "pending_refresh": True,
+                    "refresh_status": "deferred_refresh_lock",
+                    "error": str(exc)[:500],
+                    "dry_run": dry_run,
+                    "force_refresh": force_refresh,
+                },
+            )
             log(config, f"refresh_lock_skip pending=1: {exc}; {summary}")
             return 0
         except Exception as exc:  # noqa: BLE001
@@ -1031,11 +1118,40 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
             new_state["last_refresh_error"] = str(exc)[:500]
             if not dry_run:
                 save_state(config.state_path, new_state)
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed, snapshot),
+                    "result": "refresh_failed",
+                    "reasons": decision.reasons,
+                    "pending_refresh": True,
+                    "refresh_status": "failure",
+                    "refresh_exit_code": 1,
+                    "error": str(exc)[:500],
+                    "dry_run": dry_run,
+                    "force_refresh": force_refresh,
+                },
+            )
             log(config, f"refresh_error: {exc}; {summary}")
             return 2
         new_state = record_refresh_result(new_state, status=status, reasons=decision.reasons, now_utc=utc_now(), exit_code=exit_code)
         if not dry_run:
             save_state(config.state_path, new_state)
+        completed = utc_now()
+        record_watcher_telemetry(
+            config,
+            {
+                **telemetry_base_row(check_started, completed, snapshot),
+                "result": "refresh_failed" if status == "failure" else f"refresh_{status}",
+                "reasons": decision.reasons,
+                "pending_refresh": bool(new_state.get("pending_refresh")),
+                "refresh_status": status,
+                "refresh_exit_code": exit_code,
+                "dry_run": dry_run,
+                "force_refresh": force_refresh,
+            },
+        )
         if status == "failure":
             log(config, f"refresh_failed exit_code={exit_code}; {summary}")
             return 2
@@ -1044,6 +1160,18 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
 
     if not dry_run:
         save_state(config.state_path, new_state)
+    completed = utc_now()
+    record_watcher_telemetry(
+        config,
+        {
+            **telemetry_base_row(check_started, completed, snapshot),
+            "result": "cooldown_skip" if decision.cooldown_skip else "no_refresh",
+            "reasons": decision.reasons,
+            "pending_refresh": bool(new_state.get("pending_refresh")),
+            "dry_run": dry_run,
+            "force_refresh": force_refresh,
+        },
+    )
     if decision.cooldown_skip:
         log(config, f"cooldown_skip pending=1; {summary}")
     else:
@@ -1054,6 +1182,8 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
 def run_once(config: Config, *, dry_run: bool = False, force_refresh: bool = False) -> int:
     lock_handle = acquire_run_lock(config)
     if config.lock_path and lock_handle is None:
+        now = utc_now()
+        record_watcher_telemetry(config, {"started_at_utc": now, "completed_at_utc": now, "duration_seconds": 0, "result": "lock_skip"})
         log(config, f"lock_skip: another watcher run is active at {config.lock_path}")
         return 0
     try:

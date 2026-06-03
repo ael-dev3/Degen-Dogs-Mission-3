@@ -24,6 +24,17 @@ COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
 SKIP_PUSH="${DEGEN_DOGS_SKIP_PUSH:-0}"
 SKIP_PULL="${DEGEN_DOGS_SKIP_PULL:-0}"
 RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-0}"
+LIVE_VERIFY_AFTER_PUSH="${DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH:-0}"
+
+utc_stamp() {
+  date -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+export DEGEN_DOGS_REFRESH_RUN_ID="${DEGEN_DOGS_REFRESH_RUN_ID:-refresh-$(date -u '+%Y%m%dT%H%M%SZ')-$$}"
+export DEGEN_DOGS_REFRESH_QUEUED_AT_UTC="${DEGEN_DOGS_REFRESH_QUEUED_AT_UTC:-$(utc_stamp)}"
+export DEGEN_DOGS_REFRESH_TRIGGER="${DEGEN_DOGS_REFRESH_TRIGGER:-hourly_refresh}"
+export DEGEN_DOGS_REFRESH_TELEMETRY_PATH="${DEGEN_DOGS_REFRESH_TELEMETRY_PATH:-${REPO_DIR}/.local/refresh_runs.jsonl}"
+export DEGEN_DOGS_REFRESH_METRICS_PATH="${DEGEN_DOGS_REFRESH_METRICS_PATH:-${REPO_DIR}/logs/refresh-metrics.jsonl}"
 
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_FILE:-${LOG_DIR}/refresh.log}"
@@ -34,6 +45,7 @@ log() {
 }
 
 fail() {
+  export DEGEN_DOGS_REFRESH_ERROR="$*"
   log "error: $*"
   exit 1
 }
@@ -58,6 +70,7 @@ import fcntl
 import os
 import stat
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 script = os.path.abspath(sys.argv[1])
@@ -85,12 +98,30 @@ os.set_inheritable(fd, True)
 env = os.environ.copy()
 env["DEGEN_DOGS_LOCK_HELD"] = "1"
 env["DEGEN_DOGS_LOCK_FD"] = str(fd)
+env["DEGEN_DOGS_LOCK_ACQUIRED_AT_UTC"] = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 os.execvpe(script, [script, *args], env)
 PY
 fi
 
+export DEGEN_DOGS_REFRESH_STARTED_AT_UTC="${DEGEN_DOGS_REFRESH_STARTED_AT_UTC:-$(utc_stamp)}"
+
 finish() {
   local status=$?
+  local result="${DEGEN_DOGS_REFRESH_RESULT:-}"
+  if [[ -z "$result" ]]; then
+    if [[ "$status" == "0" ]]; then
+      result="success"
+    else
+      result="failed"
+    fi
+  fi
+  export DEGEN_DOGS_REFRESH_RESULT="$result"
+  if [[ "$status" != "0" && -z "${DEGEN_DOGS_REFRESH_ERROR:-}" ]]; then
+    export DEGEN_DOGS_REFRESH_ERROR="exit status ${status}"
+  fi
+  if [[ -f "${REPO_DIR}/scripts/refresh_telemetry.py" ]]; then
+    python3 "${REPO_DIR}/scripts/refresh_telemetry.py" record-refresh --result "$result" --error "${DEGEN_DOGS_REFRESH_ERROR:-}" >/dev/null 2>&1 || true
+  fi
   log "finished status=${status}"
   exit "$status"
 }
@@ -152,8 +183,10 @@ if untracked:
 PY
 
 if [[ "$SKIP_PULL" != "1" ]]; then
+  export DEGEN_DOGS_GIT_PULL_STARTED_AT_UTC="$(utc_stamp)"
   git fetch "$REMOTE" "$BRANCH"
   git pull --ff-only "$REMOTE" "$BRANCH"
+  export DEGEN_DOGS_GIT_PULL_COMPLETED_AT_UTC="$(utc_stamp)"
 fi
 
 if [[ ! -d node_modules || package-lock.json -nt node_modules/.package-lock.json ]]; then
@@ -169,9 +202,12 @@ if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
 fi
 
 log "running blockchain data generator"
+export DEGEN_DOGS_DATA_STARTED_AT_UTC="$(utc_stamp)"
 npm run data
+export DEGEN_DOGS_DATA_COMPLETED_AT_UTC="$(utc_stamp)"
 
 log "validating generated artifacts"
+export DEGEN_DOGS_VALIDATION_STARTED_AT_UTC="$(utc_stamp)"
 python3 -m py_compile scripts/build_dashboard.py
 python3 - <<'PY'
 from __future__ import annotations
@@ -244,12 +280,24 @@ if errors:
     raise SystemExit("\n".join(errors))
 print("artifact validation ok")
 PY
+python3 scripts/refresh_telemetry.py validate-status
+export DEGEN_DOGS_VALIDATION_COMPLETED_AT_UTC="$(utc_stamp)"
 
 git diff --check
+export DEGEN_DOGS_BUILD_STARTED_AT_UTC="$(utc_stamp)"
 npm run build
+export DEGEN_DOGS_BUILD_COMPLETED_AT_UTC="$(utc_stamp)"
+
+DEGEN_DOGS_REFRESH_RESULT=success_generated python3 scripts/refresh_telemetry.py write-status --prefer-current-env >/dev/null
+python3 scripts/refresh_telemetry.py validate-status
+
+export DEGEN_DOGS_GIT_STATUS_STARTED_AT_UTC="$(utc_stamp)"
+export DEGEN_DOGS_CHANGED_FILES="$(git diff --name-only -- README.md index.html generated public archive/mission3/data/generated archive/data/generated archive/data/identity/wallet_profiles.json archive/dogs archive/prices/data/generated | python3 -c 'import json,sys; print(json.dumps([line.strip() for line in sys.stdin if line.strip()]))')"
+export DEGEN_DOGS_GIT_STATUS_COMPLETED_AT_UTC="$(utc_stamp)"
 
 if git diff --quiet -- README.md index.html generated public archive/mission3/data/generated archive/data/generated archive/data/identity/wallet_profiles.json archive/dogs archive/prices/data/generated; then
   log "no generated website/archive data changes to publish"
+  export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
   exit 0
 fi
 
@@ -267,7 +315,7 @@ with open("generated/manifest.csv", newline="", encoding="utf-8") as handle:
         csv_path = Path(rel)
         json_path = csv_path.with_suffix(".json")
         paths.extend([str(csv_path), str(json_path), str(Path("public") / csv_path), str(Path("public") / json_path)])
-paths.extend(["generated/manifest.csv", "generated/manifest.json", "public/generated/manifest.csv", "public/generated/manifest.json"])
+paths.extend(["generated/manifest.csv", "generated/manifest.json", "public/generated/manifest.csv", "public/generated/manifest.json", "generated/refresh_status.json", "public/generated/refresh_status.json"])
 archive_public = Path("public/generated/mission3")
 archive_generated = Path("archive/mission3/data/generated")
 unified_archive = Path("archive/data/generated")
@@ -379,17 +427,38 @@ PY
 
 commit_message="${COMMIT_PREFIX} refresh Mission 3 data"
 
+export DEGEN_DOGS_COMMIT_STARTED_AT_UTC="$(utc_stamp)"
 git commit \
   -m "$commit_message" \
   -m "Snapshot block: ${latest_block}" \
   -m "Current dog: ${current_dog}" \
   -m "Automated refresh from the private Mac mini runner."
+export DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC="$(utc_stamp)"
+export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
 
 if [[ "$SKIP_PUSH" == "1" ]]; then
   log "DEGEN_DOGS_SKIP_PUSH=1; leaving commit local"
+  export DEGEN_DOGS_REFRESH_RESULT="success_skip_push"
   exit 0
 fi
 
 log "pushing generated data refresh"
+export DEGEN_DOGS_PUSH_STARTED_AT_UTC="$(utc_stamp)"
 git push "$REMOTE" "$BRANCH"
+export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
+export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
+
+if [[ "$LIVE_VERIFY_AFTER_PUSH" == "1" ]]; then
+  live_env="$(mktemp -t degen-dogs-live-verify.XXXXXX)"
+  if python3 scripts/refresh_telemetry.py verify-live --env-file "$live_env"; then
+    # shellcheck disable=SC1090
+    source "$live_env"
+  else
+    # shellcheck disable=SC1090
+    source "$live_env" || true
+    export DEGEN_DOGS_REFRESH_RESULT="success_pushed_live_timeout"
+    log "warning: live verification did not complete before timeout"
+  fi
+  rm -f "$live_env"
+fi
 log "published snapshot block=${latest_block} current_dog=${current_dog}"

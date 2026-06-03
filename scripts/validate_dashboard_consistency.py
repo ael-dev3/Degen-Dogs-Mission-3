@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import importlib.util
 import json
 import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
@@ -12,6 +13,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 ZERO = "0x0000000000000000000000000000000000000000"
 RECENT_BIDS = ROOT / "generated" / "recent_bids.json"
+REFRESH_TELEMETRY_PATH = ROOT / "scripts" / "refresh_telemetry.py"
 
 
 def load_json(path: Path, default: Any | None = None) -> Any:
@@ -21,6 +23,15 @@ def load_json(path: Path, default: Any | None = None) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError:
         return default
+
+
+def load_refresh_telemetry() -> Any:
+    spec = importlib.util.spec_from_file_location("refresh_telemetry", REFRESH_TELEMETRY_PATH)
+    if not spec or not spec.loader:
+        raise AssertionError("unable to load scripts/refresh_telemetry.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def text(value: Any) -> str:
@@ -422,6 +433,7 @@ def validate_current_surface() -> dict[str, Any]:
     feed = find_current_feed_row(feed_rows, current_dog_id)
     current_state = text(current.get("auction_state")).lower()
     metrics = load_metrics()
+    refresh_status = load_refresh_telemetry().validate_refresh_status(root=ROOT)
     index = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
     readme = readme_snapshot()
 
@@ -578,8 +590,9 @@ def validate_current_surface() -> dict[str, Any]:
         "high_bidder": expected_display,
         "bid_eth": str(expected_native.normalize()),
         "feed_rows_for_current_dog": 1,
+        "refresh_status_result": text(refresh_status.get("last_refresh_result")),
         "checked": [str(path.relative_to(ROOT)) for path in unified_paths]
-        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/historical_dog_search.json"],
+        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
     }
 
 

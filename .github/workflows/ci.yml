@@ -15,7 +15,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py
+      - run: python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py
       - run: npm run test:dashboard
       - run: npm run validate:dashboard
       - run: npm run check:dashboard-ui

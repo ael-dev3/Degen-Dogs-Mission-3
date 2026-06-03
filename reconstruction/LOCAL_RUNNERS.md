@@ -45,6 +45,8 @@ Do not commit these machine-specific paths:
 - refresh lock: `$HOME/Library/Caches/degen-dogs-mission3/refresh.lock`
 - watcher state: `.local/mission3_onchain_tracker_state.json`
 - watcher one-shot lock: `.local/mission3_onchain_tracker.lock`
+- refresh telemetry: `.local/refresh_runs.jsonl`, `logs/refresh-metrics.jsonl`
+- watcher telemetry: `.local/watcher_checks.jsonl`
 - private `.env` files or credentialed RPC URLs
 
 Both runners share the same `refresh.lock`, so the hourly refresh and event-triggered
@@ -120,6 +122,8 @@ tail -n 80 "$HOME/Library/Logs/degen-dogs-mission3/watch-onchain.log"
 tail -n 80 "$HOME/Library/Logs/degen-dogs-mission3/watcher.launchd.out.log"
 tail -n 80 "$HOME/Library/Logs/degen-dogs-mission3/watcher.launchd.err.log"
 python3 -m json.tool .local/mission3_onchain_tracker_state.json
+npm run refresh:metrics
+npm run refresh:status:validate
 ```
 
 Healthy no-change watcher output looks like:
@@ -131,6 +135,8 @@ no_refresh; block=<block> token=<token_id> bidder=<wallet> amount_wei=<wei> logs
 A real new bid should produce refresh reasons such as `auction_bid`,
 `highest_bidder_changed`, or `highest_bid_amount_changed`, then run the configured
 refresh command.
+
+Structured rows are written to `.local/watcher_checks.jsonl` and `.local/refresh_runs.jsonl`. The public-safe freshness sidecar is `generated/refresh_status.json` plus `public/generated/refresh_status.json`; it should contain the current generated block, Dog, bid, high bidder, auction status, trigger/reason, and last generation result without local paths or secrets. Final publish outcomes such as no-diff, skip-push, pushed, live-timeout, and failure stay in private JSONL telemetry.
 
 ## Local validation commands
 
@@ -144,7 +150,7 @@ npm run check:historical-dogs
 npm run archive:mission3:health
 npm run archive:prices:validate
 npm run build
-python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py
+python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py
 bash -n scripts/refresh_and_publish.sh scripts/install_hourly_refresh_launchd.sh scripts/install_auction_watcher_launchd.sh
 ```
 

@@ -3,16 +3,26 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "watch_mission3_auction.py"
+TELEMETRY_MODULE_PATH = ROOT / "scripts" / "refresh_telemetry.py"
 
 
 def load_module():
     spec = importlib.util.spec_from_file_location("watch_mission3_auction", MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_telemetry_module():
+    spec = importlib.util.spec_from_file_location("refresh_telemetry", TELEMETRY_MODULE_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -675,10 +685,108 @@ def test_dry_run_does_not_write_state_and_reports_refresh_intent():
         }
         called = {"refresh": False}
         setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
-        setattr(watcher, "run_refresh", lambda _config, _reasons, dry_run: called.update(refresh=True) or ("dry_run", 0))
+        setattr(watcher, "run_refresh", lambda _config, _reasons, dry_run, event=None: called.update(refresh=True) or ("dry_run", 0))
         assert watcher.run_once(config, dry_run=True) == 0
         assert called["refresh"] is True
         assert json.loads(state_path.read_text(encoding="utf-8")) == original_state
+
+
+def test_run_refresh_exports_structured_event_environment():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        out_path = Path(tmp) / "env.json"
+        capture_script = Path(tmp) / "capture_env.py"
+        capture_script.write_text(
+            "import json, os\n"
+            "from pathlib import Path\n"
+            "keys = ['DEGEN_DOGS_REFRESH_TRIGGER', 'DEGEN_DOGS_REFRESH_REASONS', 'DEGEN_DOGS_DETECTED_AT_UTC', 'DEGEN_DOGS_EVENT_NAME', 'DEGEN_DOGS_EVENT_BLOCK_NUMBER', 'DEGEN_DOGS_EVENT_TX_HASH', 'DEGEN_DOGS_EVENT_LOG_INDEX']\n"
+            "Path(os.environ['WATCH_TEST_OUT']).write_text(json.dumps({key: os.environ.get(key) for key in keys}, sort_keys=True), encoding='utf-8')\n",
+            encoding="utf-8",
+        )
+        old_out = os.environ.get("WATCH_TEST_OUT")
+        os.environ["WATCH_TEST_OUT"] = str(out_path)
+        try:
+            config = watcher.config_from_env({
+                "MISSION3_WATCHER_LOG_PATH": "-",
+                "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
+                "MISSION3_REFRESH_COMMAND": f"python3 {capture_script}",
+            })
+            status, exit_code = watcher.run_refresh(
+                config,
+                ["auction_bid", "highest_bid_amount_changed"],
+                dry_run=False,
+                event={"event_name": "AuctionBid", "block_number": 123, "tx_hash": "0xabc", "log_index": 7},
+            )
+        finally:
+            if old_out is None:
+                os.environ.pop("WATCH_TEST_OUT", None)
+            else:
+                os.environ["WATCH_TEST_OUT"] = old_out
+        assert (status, exit_code) == ("success", 0)
+        captured = json.loads(out_path.read_text(encoding="utf-8"))
+        assert captured["DEGEN_DOGS_REFRESH_TRIGGER"] == "watcher"
+        assert json.loads(captured["DEGEN_DOGS_REFRESH_REASONS"]) == ["auction_bid", "highest_bid_amount_changed"]
+        assert captured["DEGEN_DOGS_DETECTED_AT_UTC"]
+        assert captured["DEGEN_DOGS_EVENT_NAME"] == "AuctionBid"
+        assert captured["DEGEN_DOGS_EVENT_BLOCK_NUMBER"] == "123"
+        assert captured["DEGEN_DOGS_EVENT_TX_HASH"] == "0xabc"
+        assert captured["DEGEN_DOGS_EVENT_LOG_INDEX"] == "7"
+
+
+def test_run_once_writes_structured_watcher_telemetry():
+    watcher = load_module()
+    setattr(watcher, "refresh_telemetry", load_telemetry_module())
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        telemetry_path = tmp_path / "watcher_checks.jsonl"
+        now = watcher.utc_now()
+        snapshot = {
+            "latest_block": 101,
+            "checked_from_block": 100,
+            "checked_to_block": 101,
+            "token_id": 727,
+            "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_wei": "200",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated", "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "101:0xbid:4", "tx_hash": "0xbid", "block_number": 101, "log_index": 4, "event_name": "AuctionBid"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        state = watcher.state_from_snapshot(snapshot, now_utc=now, previous_state={})
+        state["last_refresh_at_utc"] = now
+        state_path.write_text(json.dumps(state, sort_keys=True), encoding="utf-8")
+        old_path = os.environ.get("MISSION3_WATCHER_TELEMETRY_PATH")
+        os.environ["MISSION3_WATCHER_TELEMETRY_PATH"] = str(telemetry_path)
+        try:
+            config = watcher.config_from_env({
+                "MISSION3_WATCHER_STATE_PATH": str(state_path),
+                "MISSION3_WATCHER_LOG_PATH": "-",
+                "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
+                "MISSION3_REFRESH_COMMAND": "true",
+            })
+            setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+            assert watcher.run_once(config) == 0
+        finally:
+            if old_path is None:
+                os.environ.pop("MISSION3_WATCHER_TELEMETRY_PATH", None)
+            else:
+                os.environ["MISSION3_WATCHER_TELEMETRY_PATH"] = old_path
+        rows = [json.loads(line) for line in telemetry_path.read_text(encoding="utf-8").splitlines() if line]
+        assert len(rows) == 1
+        row = rows[0]
+        assert row["kind"] == "watcher_check"
+        assert row["result"] == "no_refresh"
+        assert row["token_id"] == 727
+        assert row["checked_to_block"] == 101
+        assert row["event_name"] == "AuctionBid"
+        assert row["event_tx_hash"] == "0xbid"
+        assert row["pending_refresh"] is False
+        assert row["duration_seconds"] >= 0
 
 
 if __name__ == "__main__":

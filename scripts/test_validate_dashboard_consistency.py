@@ -122,6 +122,25 @@ def write_fixture(
         "latest_block_time_utc": "2026-05-31 18:55:13",
     }
     write_json(root / "generated" / "current_auction.json", [current])
+    refresh_status = {
+        "schema_version": 1,
+        "kind": "refresh_status",
+        "site_url": "https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
+        "last_successful_refresh_time_utc": "2026-05-31T18:55:13Z",
+        "latest_generated_block": 46732183,
+        "latest_generated_block_time_utc": "2026-05-31T18:55:13Z",
+        "trigger": "unit_test",
+        "refresh_reason": "fixture",
+        "current_dog_token_id": 729,
+        "current_bid_eth": "0.01",
+        "current_high_bidder": "@0xael.eth",
+        "current_high_bidder_wallet": wallet,
+        "current_auction_status": "live",
+        "current_auction_end_time_utc": "2026-05-31T20:40:09Z",
+        "last_refresh_result": "success_generated",
+    }
+    write_json(root / "generated" / "refresh_status.json", refresh_status)
+    write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "generated" / "current_latest_bid.json", [{"latest_bid_eth": 0.01, "bidder": "@0xael.eth", "bidder_wallet": wallet, "bid_time_utc": "2026-05-30 18:40:23"}])
     write_json(root / "generated" / "auction_feed.json", [{
         "status": "ongoing",
@@ -322,6 +341,17 @@ def test_validator_catches_stale_observed_per_dog_reward_math() -> None:
         )
         write_text(root / "index.html", stale_index)
         assert_raises_contains(lambda: run_validation(root), "reward_woof_per_dog_per_day")
+
+
+def test_validator_catches_refresh_status_block_mismatch() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        status = json.loads((root / "generated" / "refresh_status.json").read_text(encoding="utf-8"))
+        status["latest_generated_block"] = 1
+        write_json(root / "generated" / "refresh_status.json", status)
+        write_json(root / "public" / "generated" / "refresh_status.json", status)
+        assert_raises_contains(lambda: run_validation(root), "refresh_status latest_generated_block")
 
 
 if __name__ == "__main__":

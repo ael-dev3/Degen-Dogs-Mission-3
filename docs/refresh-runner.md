@@ -8,6 +8,9 @@ The public site is served by GitHub Pages, but fresh data comes from private/loc
 npm run refresh:local
 npm run refresh:publish
 npm run refresh:archive
+npm run refresh:status
+npm run refresh:status:validate
+npm run refresh:metrics
 npm run refresh:install
 npm run watch:install
 npm run watch:onchain
@@ -19,6 +22,9 @@ npm run watch:onchain:force
 - `refresh:local` runs `npm run data && npm run build` without committing or pushing.
 - `refresh:publish` runs `scripts/refresh_and_publish.sh`.
 - `refresh:archive` runs Mission 3 archive indexing first, then the normal publish flow.
+- `refresh:status` writes the public `generated/refresh_status.json` sidecar and public copy.
+- `refresh:status:validate` checks the status sidecar against current generated metrics/auction artifacts.
+- `refresh:metrics` prints local operator telemetry from refresh/watch JSONL logs, including pending refresh state and recent durations.
 - `refresh:install` installs the macOS launchd hourly runner.
 - `watch:install` installs the macOS launchd event watcher runner.
 - `watch:onchain` runs the precise Mission 3 onchain activity tracker once.
@@ -54,9 +60,9 @@ The precise tracker is a local-only accelerator for Mission 3 auction freshness.
    - `AuctionExtended(uint256,uint256)`.
 5. Uses local state at `.local/mission3_onchain_tracker_state.json` to dedupe `(transactionHash, logIndex)` activity.
 6. Triggers the configured refresh command only when a meaningful signal changed.
-7. Writes concise operational logs to `logs/watch-onchain.log`.
+7. Writes concise operational logs to `logs/watch-onchain.log` and structured watcher rows to `.local/watcher_checks.jsonl`.
 
-The tracker state and logs stay local. `.local/`, `.var/`, and `logs/` are gitignored.
+The tracker state and logs stay local. `.local/`, `.var/`, and `logs/` are gitignored. Public refresh freshness is exposed only through sanitized `generated/refresh_status.json` and `public/generated/refresh_status.json`.
 
 ## Trigger logic
 
@@ -97,6 +103,26 @@ Rules:
 - The scan starts from `last_checked_block + 1 - safety_overlap`; duplicate logs are ignored via log IDs.
 - Failed refreshes record local state and back off before retrying.
 - If publish automation produces no generated diff, the publish script exits without committing.
+
+## Structured telemetry and refresh status
+
+`scripts/refresh_and_publish.sh` exports phase timestamps and records a redacted JSONL row at the end of every run:
+
+- `.local/refresh_runs.jsonl` for local/private run history,
+- `logs/refresh-metrics.jsonl` for operator metrics,
+- `.local/watcher_checks.jsonl` for one-shot watcher checks.
+
+The JSONL rows include trigger, reasons, event metadata, lock wait, data/build/push durations, no-diff/skip-push/failure/live-timeout outcomes, and changed-file lists. The helper redacts private paths and provider/API tokens before writing rows. Publish-specific final outcomes live in the private JSONL rows; the public status sidecar reports the generated snapshot and its generation result, so it does not need to expose local runner/push internals.
+
+The public sidecar is intentionally small and safe:
+
+```bash
+npm run refresh:status
+npm run refresh:status:validate
+npm run refresh:metrics
+```
+
+`generated/refresh_status.json` mirrors the current generated block, Dog, bid, high bidder, auction status, trigger/reason, and last refresh result. It must match `public/generated/refresh_status.json` and is validated as part of `refresh:publish`.
 
 ## Safe refresh command and auto-push
 
