@@ -416,6 +416,19 @@
     "latest_bid_utc": "2026-04-27 21:34:33"
   },
   {
+    "bidder": "@staraptor.eth",
+    "bidder_url": "https://farcaster.xyz/staraptor.eth",
+    "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
+    "bids": 12,
+    "auctions_bid": 8,
+    "bid_eth": 0.1737,
+    "high_bid_eth": 0.02,
+    "auction_wins": 3,
+    "winning_eth": 0.0448,
+    "latest_bid_token_id": 733,
+    "latest_bid_utc": "2026-06-03 20:39:35"
+  },
+  {
     "bidder": "@streetphoto",
     "bidder_url": "https://farcaster.xyz/streetphoto",
     "bidder_wallet": "0x7c6f3877c942089866b6ca13c2f58e94cfe72978",
@@ -466,19 +479,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 591,
     "latest_bid_utc": "2026-01-10 23:44:15"
-  },
-  {
-    "bidder": "@staraptor.eth",
-    "bidder_url": "https://farcaster.xyz/staraptor.eth",
-    "bidder_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
-    "bids": 11,
-    "auctions_bid": 7,
-    "bid_eth": 0.1537,
-    "high_bid_eth": 0.0169,
-    "auction_wins": 3,
-    "winning_eth": 0.0448,
-    "latest_bid_token_id": 732,
-    "latest_bid_utc": "2026-06-03 02:05:09"
   },
   {
     "bidder": "@farcy",
