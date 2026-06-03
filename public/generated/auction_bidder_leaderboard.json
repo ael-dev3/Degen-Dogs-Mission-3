@@ -234,6 +234,19 @@
     "latest_bid_utc": "2026-05-05 04:08:19"
   },
   {
+    "bidder": "@pare",
+    "bidder_url": "https://farcaster.xyz/pare",
+    "bidder_wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
+    "bids": 15,
+    "auctions_bid": 10,
+    "bid_eth": 0.48557,
+    "high_bid_eth": 0.05135,
+    "auction_wins": 4,
+    "winning_eth": 0.1494,
+    "latest_bid_token_id": 732,
+    "latest_bid_utc": "2026-06-03 19:26:11"
+  },
+  {
     "bidder": "@yes2crypto.eth",
     "bidder_url": "https://farcaster.xyz/yes2crypto.eth",
     "bidder_wallet": "0xe068579e46ca32a7ed3d51f217fcc5a0d829fca0",
@@ -245,19 +258,6 @@
     "winning_eth": 0.10253,
     "latest_bid_token_id": 610,
     "latest_bid_utc": "2026-01-30 02:37:27"
-  },
-  {
-    "bidder": "@pare",
-    "bidder_url": "https://farcaster.xyz/pare",
-    "bidder_wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
-    "bids": 14,
-    "auctions_bid": 10,
-    "bid_eth": 0.43717,
-    "high_bid_eth": 0.05135,
-    "auction_wins": 4,
-    "winning_eth": 0.1494,
-    "latest_bid_token_id": 732,
-    "latest_bid_utc": "2026-06-03 17:50:39"
   },
   {
     "bidder": "@kumari",
