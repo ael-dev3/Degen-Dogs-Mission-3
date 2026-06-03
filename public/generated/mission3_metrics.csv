@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,46842960
-latest_block_time_utc,2026-06-03 08:27:47
+latest_block,46843217
+latest_block_time_utc,2026-06-03 08:36:21
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,733
@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.01035
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1871.24
+eth_usd_price,1875.31
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -43,18 +43,18 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.015531
 reward_total_flow_usd_per_day,13.15
 reward_total_per_dog_usd_per_day,0.098849
-reward_current_bid_payback_days,319.88
-reward_current_bid_daily_roi_pct,0.3126
-reward_current_bid_apr_pct,114.1
+reward_current_bid_payback_days,320.59
+reward_current_bid_daily_roi_pct,0.3119
+reward_current_bid_apr_pct,113.85
 reward_current_bid_apr_display,≈114% APR
 woof_holders,405
 top_woof_holder,0x1c45…6637
-top_woof_holder_balance,46582380791.5701
+top_woof_holder_balance,46582380791.570145
 farcaster_profiles_resolved,162
 current_auction_token_id,732
 current_auction_status,live
 current_bid_eth,0.0169
-current_bid_usd,31.62
+current_bid_usd,31.69
 current_bidder,@staraptor.eth
 current_bidder_wallet,0x3516006709b775e01b48dfb5fad355a4e793e347
 current_auction_end_utc,2026-06-03 19:37:21
@@ -78,8 +78,8 @@ season6_sup_cap_percent_label,5% cap
 season6_sup_capped_projected_full_allocated,12500
 season6_sup_confirmed_wallets,1
 season6_sup_confirmed_wins,1
-season6_sup_days_remaining,89.65
-season6_sup_raw_allocated_to_date,1477.722364
+season6_sup_days_remaining,89.64
+season6_sup_raw_allocated_to_date,1494.153578
 season6_sup_raw_projected_full_allocated,249081.794974
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
 season6_sup_status,live_estimate
