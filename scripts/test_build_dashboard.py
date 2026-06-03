@@ -224,8 +224,8 @@ def test_reward_strip_renders_apr_inside_bid_payback_card_with_caveat_copy() -> 
     }
     rendered = dashboard.render_reward_strip(metrics)
     assert "<b>Bid payback</b>" in rendered
-    assert "Observed 133-Dog stream" in rendered
-    assert "≈154,092 WOOF + ≈1.50 SUP / Dog / day" in rendered
+    assert "Observed 133-Dog stream" not in rendered
+    assert "WOOF Vault Bonus excluded." not in rendered
     assert "≈187 days" in rendered
     assert "≈196% APR" in rendered
     assert "Current bid / observed per-Dog flow" in rendered

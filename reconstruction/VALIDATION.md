@@ -24,12 +24,12 @@ grep -R "latest_block" -n generated public/generated README.md
 ## Dashboard text checks
 
 ```bash
-grep -R "Observed 133-Dog stream" -n index.html generated public README.md docs || true
+grep -R "Observed 133-Dog stream" -n index.html README.md docs && exit 1 || true
 grep -R "reward_basis_dogs,133" -n generated public/generated || true
 ```
 
-These checks should find the observed 133-Dog basis in the generated dashboard and the
-published metrics artifacts.
+The removed long observed-stream sentence should stay out of visible dashboard/docs
+surfaces, while the observed 133-Dog basis remains in generated metrics artifacts.
 
 ## Link and integrity checks
 

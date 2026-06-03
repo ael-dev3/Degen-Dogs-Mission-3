@@ -2505,7 +2505,6 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     total = reward_usd_display(metrics, "reward_total_per_dog_usd_per_day")
     payback = reward_payback_display(metrics)
     apr = reward_apr_display(metrics)
-    basis = reward_basis_summary(metrics)
     apr_copy = (
         "Simple APR estimate. Annualized from the current bid divided by the observed estimated "
         "per-Dog daily WOOF + SUP flow; excludes WOOF Vault Bonus; does not compound; "
@@ -2539,8 +2538,7 @@ def render_reward_strip(metrics: dict[str, str]) -> str:
     body = "".join(body_parts)
     if not body:
         return ""
-    basis_html = f'<p class="reward-basis">{html.escape(basis)}; WOOF Vault Bonus excluded.</p>' if basis else ""
-    return f'<section class="reward-strip" aria-label="Observed per-Dog reward estimate">{basis_html}{body}</section>'
+    return f'<section class="reward-strip" aria-label="Per-Dog reward estimate">{body}</section>'
 
 
 def comma_decimal_display(value: Any, places: int = 0, prefix: str = "", suffix: str = "") -> str:

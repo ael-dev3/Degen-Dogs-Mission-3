@@ -278,7 +278,7 @@ def write_fixture(
     index = (
         f"<html><body><h1>{index_dog}</h1><span>0.01000 ETH ($20)</span>"
         f"<span>@0xael.eth</span><span>ongoing</span><span>2026-05-31 20:40:09</span>"
-        f"<section class=\"reward-strip\"><p>Observed 133-Dog stream: ≈154,092 WOOF + ≈1.50 SUP / Dog / day; WOOF Vault Bonus excluded.</p>"
+        f"<section class=\"reward-strip\">"
         f"<span class=\"reward-tile season6-sup-estimate\"><b>Season 6 SUP estimate</b>"
         f"<strong>{season6_estimate_display}<span>≈$2,000 if current bid wins</span></strong>"
         f"<em>Adjusted for prior S6 wins; estimate only.</em></span>"

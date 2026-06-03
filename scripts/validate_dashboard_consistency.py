@@ -338,12 +338,12 @@ def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[st
             raise AssertionError(f"mission3_metrics {key} differs from observed 133-Dog reward basis: expected {expected_value!r}, got {metrics.get(key)!r}")
         assert_metric_cell(key, expected_value, index)
 
-    basis_display = "Observed 133-Dog stream"
     reward_surface = reward_strip_surface(index)
     if not reward_surface:
         raise AssertionError("index.html missing reward-strip APR/payback surface")
-    if basis_display not in reward_surface:
-        raise AssertionError(f"index.html missing observed reward basis display: {basis_display!r}")
+    for removed_copy in ("Observed 133-Dog stream", "WOOF Vault Bonus excluded."):
+        if removed_copy in reward_surface:
+            raise AssertionError(f"index.html still renders removed reward basis copy: {removed_copy!r}")
 
     current_bid_usd = optional_decimal_value(metrics.get("current_bid_usd"))
     daily_flow = optional_decimal_value(metrics.get("reward_total_per_dog_usd_per_day"))
