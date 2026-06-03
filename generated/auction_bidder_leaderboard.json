@@ -572,6 +572,19 @@
     "latest_bid_utc": "2026-05-17 04:01:25"
   },
   {
+    "bidder": "@floam",
+    "bidder_url": "https://farcaster.xyz/floam",
+    "bidder_wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
+    "bids": 5,
+    "auctions_bid": 3,
+    "bid_eth": 0.10956,
+    "high_bid_eth": 0.05324,
+    "auction_wins": 1,
+    "winning_eth": 0.011,
+    "latest_bid_token_id": 732,
+    "latest_bid_utc": "2026-06-03 19:35:43"
+  },
+  {
     "bidder": "@consta",
     "bidder_url": "https://farcaster.xyz/consta",
     "bidder_wallet": "0x045acd980764824b9eb6f312f0a2cdd9f3183503",
@@ -674,19 +687,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 701,
     "latest_bid_utc": "2026-05-01 21:59:47"
-  },
-  {
-    "bidder": "@floam",
-    "bidder_url": "https://farcaster.xyz/floam",
-    "bidder_wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
-    "bids": 4,
-    "auctions_bid": 3,
-    "bid_eth": 0.05632,
-    "high_bid_eth": 0.033,
-    "auction_wins": 1,
-    "winning_eth": 0.011,
-    "latest_bid_token_id": 732,
-    "latest_bid_utc": "2026-06-03 17:18:59"
   },
   {
     "bidder": "@biang-kerok.eth",

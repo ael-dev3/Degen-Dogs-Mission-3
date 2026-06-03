@@ -2,18 +2,18 @@
   "generated_at_utc": "2026-06-02T19:39:10Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-03T19:26:11Z",
+    "activity_time_utc": "2026-06-03T19:35:43Z",
     "amount": {
-      "native": "0.0484",
+      "native": "0.05324",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "48400000000000000",
-      "usd_estimate": "87.74000000",
+      "raw": "53240000000000000",
+      "usd_estimate": "96.65000000",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$87.74",
+      "usd_estimate_display": "$96.65",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-03",
-      "usd_estimate_price_usd": "1812.8099173553719008264462809917355371900826446280991735537190082644628099173554",
+      "usd_estimate_price_usd": "1815.3643876784372652141247182569496619083395942900075131480090157776108189331330",
       "usd_estimate_source": "generated_auction_feed",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -25,11 +25,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 9,
-      "last_bid_time_utc": "2026-06-03T19:26:11Z",
+      "bid_count": 10,
+      "last_bid_time_utc": "2026-06-03T19:35:43Z",
       "unique_bidder_count": 6
     },
     "bid_tx_hashes": [
+      "0x2197f912989dfe6ba63a74d73e12e83040e5bac67215980bc7050410fef54e7d",
       "0xe1944f5dc9024b4f62814a74d2e2702fb817800fdac841afc8701bd3d754e21a",
       "0xfb5c8038a7632aabac3b02896ac6947903410903c409ac61d500269fe8e3a3a0",
       "0x48754454893d88b7c58f9d1883673db6c08fb8bbd7d74dee717ea0dcec76bbcf",
@@ -49,7 +50,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog732",
-      "explorer": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
+      "explorer": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/732",
       "repo_archive": "archive/dogs/by-id/732.json",
       "settlement_tx": null
@@ -61,7 +62,7 @@
       "total": 733
     },
     "schema_version": 1,
-    "search_text": "dog 732 dog #732 732 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0484 eth 48400000000000000 87.74 $87.74 2026-06-03t19:26:11z #224/733 generated auction feed 0xe1944f5dc9024b4f62814a74d2e2702fb817800fdac841afc8701bd3d754e21a 0xfb5c8038a7632aabac3b02896ac6947903410903c409ac61d500269fe8e3a3a0 0x48754454893d88b7c58f9d1883673db6c08fb8bbd7d74dee717ea0dcec76bbcf 0x713daa3848a3d30b20f3d909880e894872501bf6ed6b97ba04cc222eac24036e 0x82e41000fde1ac4387bfe5688ea7a6589e6e4007d4ac5c6e7965d407d06fff04 0x0e96ca133c9f1f88063c7d859335b943be693d071aaececf6616249dc885f654 0xead99c6556939033a853a22913cbe529fa2fde90a992d569075898f96b97b0f5 0xe562291e2a691ef0afa89ca0d9903149dfb59896c5df7f63aac9595e600334eb 0x0ee0cd8998099b3bf31887472da5022082931f70b00b666f3beb107f1f27878f background: none (90.2%) background none body: orange (8.9%) body orange neck: none (39.4%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: redmohawk (7.0%) head redmohawk eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
+    "search_text": "dog 732 dog #732 732 mission 3 mission 3 base ongoing 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.05324 eth 53240000000000000 96.65 $96.65 2026-06-03t19:35:43z #224/733 generated auction feed 0x2197f912989dfe6ba63a74d73e12e83040e5bac67215980bc7050410fef54e7d 0xe1944f5dc9024b4f62814a74d2e2702fb817800fdac841afc8701bd3d754e21a 0xfb5c8038a7632aabac3b02896ac6947903410903c409ac61d500269fe8e3a3a0 0x48754454893d88b7c58f9d1883673db6c08fb8bbd7d74dee717ea0dcec76bbcf 0x713daa3848a3d30b20f3d909880e894872501bf6ed6b97ba04cc222eac24036e 0x82e41000fde1ac4387bfe5688ea7a6589e6e4007d4ac5c6e7965d407d06fff04 0x0e96ca133c9f1f88063c7d859335b943be693d071aaececf6616249dc885f654 0xead99c6556939033a853a22913cbe529fa2fde90a992d569075898f96b97b0f5 0xe562291e2a691ef0afa89ca0d9903149dfb59896c5df7f63aac9595e600334eb 0x0ee0cd8998099b3bf31887472da5022082931f70b00b666f3beb107f1f27878f background: none (90.2%) background none body: orange (8.9%) body orange neck: none (39.4%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: redmohawk (7.0%) head redmohawk eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@pare",
+      "display": "@floam",
       "farcaster_fid": null,
-      "farcaster_handle": "pare",
-      "profile_url": "https://farcaster.xyz/pare",
-      "wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
-      "wallet_explorer_url": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1"
+      "farcaster_handle": "floam",
+      "profile_url": "https://farcaster.xyz/floam",
+      "wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
+      "wallet_explorer_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922"
     }
   },
   "schema_version": 1
