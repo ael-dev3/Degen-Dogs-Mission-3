@@ -8,12 +8,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.91000000",
+      "usd_estimate": "20.08000000",
       "usd_estimate_confidence": "missing",
-      "usd_estimate_display": "$19.91",
+      "usd_estimate_display": "$20.08",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-05-29",
-      "usd_estimate_price_usd": "1.81E+3",
+      "usd_estimate_price_usd": "1825.4545454545454545454545454545454545454545454545454545454545454545454545454545",
       "usd_estimate_source": "generated_auction_feed",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -55,7 +55,7 @@
       "total": 734
     },
     "schema_version": 1,
-    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 19.91 $19.91 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #316/734 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo (9.8%) background halo body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.7%) mouth none ears: goldearring (15.5%) ears goldearring head: whitemohawk (6.7%) head whitemohawk eyes: sunglasses (14.7%) eyes sunglasses base_logs archive_indexer generated_auction_feed",
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 20.08 $20.08 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #316/734 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo (9.8%) background halo body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.7%) mouth none ears: goldearring (15.5%) ears goldearring head: whitemohawk (6.7%) head whitemohawk eyes: sunglasses (14.7%) eyes sunglasses base_logs archive_indexer generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-29T18:38:33Z",
