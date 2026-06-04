@@ -8,12 +8,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.74000000",
+      "usd_estimate": "19.72000000",
       "usd_estimate_confidence": "missing",
-      "usd_estimate_display": "$19.74",
+      "usd_estimate_display": "$19.72",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-05-27",
-      "usd_estimate_price_usd": "1794.5454545454545454545454545454545454545454545454545454545454545454545454545455",
+      "usd_estimate_price_usd": "1792.7272727272727272727272727272727272727272727272727272727272727272727272727273",
       "usd_estimate_source": "generated_auction_feed",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -54,7 +54,7 @@
       "total": 734
     },
     "schema_version": 1,
-    "search_text": "dog 725 dog #725 725 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 19.74 $19.74 2026-05-27t16:10:25z 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f #583/734 generated auction feed 0x2c7cb603b1edc86159bf9b2b858a1a3f113fe34796a17f94caf439d7e0c2ee52 0x12e311c271d5847d6b71c2148b99992f2893c3d206f062160f188fd1cdb96f4a background: none (90.2%) background none body: brown (10.9%) body brown neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.0%) ears earbuds head: stripedbeanie (8.6%) head stripedbeanie eyes: masksnorkel (9.1%) eyes masksnorkel base_logs archive_indexer generated_auction_feed",
+    "search_text": "dog 725 dog #725 725 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 19.72 $19.72 2026-05-27t16:10:25z 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 0x7968d69d6ca67f11b3d8f57235e5b3fad4a2bd309a20026d6019e814d1768d5f #583/734 generated auction feed 0x2c7cb603b1edc86159bf9b2b858a1a3f113fe34796a17f94caf439d7e0c2ee52 0x12e311c271d5847d6b71c2148b99992f2893c3d206f062160f188fd1cdb96f4a background: none (90.2%) background none body: brown (10.9%) body brown neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.0%) ears earbuds head: stripedbeanie (8.6%) head stripedbeanie eyes: masksnorkel (9.1%) eyes masksnorkel base_logs archive_indexer generated_auction_feed",
     "settlement": {
       "block_number": 46554439,
       "block_time_utc": "2026-05-27T16:10:25Z",
