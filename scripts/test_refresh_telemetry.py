@@ -34,8 +34,11 @@ def assert_raises_contains(fn: Any, needle: str) -> None:
     raise AssertionError(f"expected AssertionError containing {needle!r}")
 
 
+TEST_BASE_TIME = datetime.now(timezone.utc).replace(microsecond=0) - timedelta(minutes=5)
+
+
 def iso(offset_seconds: int = 0) -> str:
-    return (datetime(2026, 6, 2, 20, 0, tzinfo=timezone.utc) + timedelta(seconds=offset_seconds)).isoformat().replace("+00:00", "Z")
+    return (TEST_BASE_TIME + timedelta(seconds=offset_seconds)).isoformat().replace("+00:00", "Z")
 
 
 def write_fixture(root: Path) -> None:
