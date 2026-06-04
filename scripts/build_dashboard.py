@@ -3056,7 +3056,7 @@ td.time{font-variant-numeric:tabular-nums;color:#2a2725}
 @media (max-width:640px){.top-actions{display:grid;grid-template-columns:repeat(2,max-content);flex:1 1 100%;width:100%;justify-content:flex-start;align-items:flex-start;gap:6px}.utility-chip,.credit-trigger{font-size:10px;padding:5px 7px;border-width:1.5px;box-shadow:2px 2px 0 var(--accent2)}.utility-chip--bid{box-shadow:2px 2px 0 var(--calm)}.credit-menu{grid-column:1/-1;margin-left:0;max-width:100%}.credit-trigger{box-shadow:2px 2px 0 var(--ink);white-space:normal;text-align:left}.credit-popover{left:0;right:auto;min-width:min(280px,calc(100vw - 24px));max-width:calc(100vw - 24px)}}
 
 """.strip()
-    script = """
+    script = r"""
 const filter=document.getElementById('filter');
 const missionButtons=[...document.querySelectorAll('[data-mission-filter]')];
 const sortSelect=document.getElementById('auction-sort');
