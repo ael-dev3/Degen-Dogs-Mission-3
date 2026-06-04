@@ -25,8 +25,8 @@
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 732,
-    "estimated_usd_display": "$96.10",
-    "estimated_usd_value": "96.10000000",
+    "estimated_usd_display": "$96.11",
+    "estimated_usd_value": "96.11000000",
     "event_time_utc": "2026-06-03T19:41:49Z",
     "event_tx_hash": null,
     "event_type": "settlement",
@@ -41,14 +41,14 @@
     "price_source": "generated_auction_feed",
     "price_source_detail": "precomputed generated auction-feed USD estimate",
     "price_status": "priced",
-    "price_usd": "1805.0338091660405709992486851990984222389181066867017280240420736288504883546206"
+    "price_usd": "1805.2216378662659654395191585274229902329075882794891059353869271224643125469572"
   },
   {
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 731,
-    "estimated_usd_display": "$77.81",
-    "estimated_usd_value": "77.81000000",
+    "estimated_usd_display": "$77.82",
+    "estimated_usd_value": "77.82000000",
     "event_time_utc": "2026-06-02T19:37:21Z",
     "event_tx_hash": null,
     "event_type": "settlement",
@@ -63,7 +63,7 @@
     "price_source": "generated_auction_feed",
     "price_source_detail": "precomputed generated auction-feed USD estimate",
     "price_status": "priced",
-    "price_usd": "1804.9176525168174437485502203665042913477151472976107631639990721410345627464625"
+    "price_usd": "1805.1496172581767571329157967988865692414752957550452331245650661099512874043145"
   },
   {
     "chain": "Base",
