@@ -6,7 +6,7 @@ import csv
 import json
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, getcontext
 from pathlib import Path
 from typing import Any
@@ -130,22 +130,37 @@ def load_price_map() -> dict[tuple[str, str], dict[str, Any]]:
     return price_map
 
 
-def find_price(price_map: dict[tuple[str, str], dict[str, Any]], asset: str, event_day: str | None) -> tuple[dict[str, Any] | None, str]:
-    if not event_day:
+def find_price(price_map: dict[tuple[str, str], dict[str, Any]], asset: str, event_time: Any) -> tuple[dict[str, Any] | None, str]:
+    parsed_event = parse_day(event_time)
+    if not parsed_event:
         return None, "missing_event_time"
+    if parsed_event.tzinfo is None:
+        parsed_event = parsed_event.replace(tzinfo=timezone.utc)
+    event_day = parsed_event.date().isoformat()
     if (asset, event_day) in price_map:
         return price_map[(asset, event_day)], "same_day"
-    try:
-        parsed = datetime.strptime(event_day, "%Y-%m-%d").date()
-    except ValueError:
-        return None, "invalid_event_time"
-    for days_back in range(1, 4):
-        candidate = (parsed - timedelta(days=days_back)).isoformat()
-        if (asset, candidate) in price_map:
-            row = dict(price_map[(asset, candidate)])
-            row["confidence"] = "medium"
-            row["notes"] = (row.get("notes") or "") + f" Used nearest prior price {days_back} day(s) before event."
-            return row, "nearest_prior"
+    candidates: list[tuple[float, dict[str, Any]]] = []
+    for (row_asset, row_day), row in price_map.items():
+        if row_asset != asset:
+            continue
+        row_time = parse_day(row.get("timestamp_utc")) or parse_day(row_day)
+        if not row_time:
+            continue
+        if row_time.tzinfo is None:
+            row_time = row_time.replace(tzinfo=timezone.utc)
+        distance = abs((row_time - parsed_event).total_seconds())
+        if distance <= 3 * 86400:
+            candidates.append((distance, row))
+    if candidates:
+        distance, base_row = min(candidates, key=lambda item: item[0])
+        row = dict(base_row)
+        days = distance / 86400
+        row["confidence"] = row.get("confidence") or "medium"
+        row["notes"] = (
+            (row.get("notes") or "").rstrip()
+            + f" Used nearest available daily price ({row.get('date_utc')}) {days:.2f} day(s) from event."
+        ).strip()
+        return row, "nearest_daily"
     return None, "missing_price"
 
 
@@ -162,7 +177,7 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         return None
     asset = str(amount.get("price_asset_key") or "").strip()
     event_day = day_key(record.get("activity_time_utc"))
-    price_row, status = find_price(price_map, asset, event_day)
+    price_row, status = find_price(price_map, asset, record.get("activity_time_utc"))
     estimate: Decimal | None = None
     price_usd: Decimal | None = None
     price_source: Any = None

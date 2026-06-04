@@ -14,7 +14,7 @@
       "usd_estimate": "14.15118574",
       "usd_estimate_confidence": "medium",
       "usd_estimate_display": "$14.15",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-02-27) 0.29 day(s) from event.",
       "usd_estimate_price_date_utc": "2026-02-27",
       "usd_estimate_price_usd": "1930.5846847420019",
       "usd_estimate_source": "defillama_coin_prices",

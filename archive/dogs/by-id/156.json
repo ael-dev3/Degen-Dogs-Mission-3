@@ -5,8 +5,8 @@
     "activity_time_utc": "2022-08-09T14:15:01Z",
     "amount": {
       "amount_usd_at_event": "0E-8",
-      "eth_usd_price_at_event": "1701.4080063235397",
-      "eth_usd_price_date_utc": "2022-08-08",
+      "eth_usd_price_at_event": "1696.6566739956986",
+      "eth_usd_price_date_utc": "2022-08-10",
       "native": "0",
       "native_symbol": "WETH",
       "price_asset_key": "ETH",
@@ -14,9 +14,9 @@
       "usd_estimate": "0E-8",
       "usd_estimate_confidence": "medium",
       "usd_estimate_display": "$0.00",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest prior price 1 day(s) before event.",
-      "usd_estimate_price_date_utc": "2022-08-08",
-      "usd_estimate_price_usd": "1701.4080063235397",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2022-08-10) 0.41 day(s) from event.",
+      "usd_estimate_price_date_utc": "2022-08-10",
+      "usd_estimate_price_usd": "1696.6566739956986",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },

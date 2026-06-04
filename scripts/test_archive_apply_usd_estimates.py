@@ -177,6 +177,42 @@ def test_regular_archive_record_still_uses_historical_price() -> None:
     assert estimate["price_usd"] == "1200"
 
 
+def test_regular_archive_record_uses_nearest_daily_price_when_exact_day_is_absent() -> None:
+    archive_usd = load_module()
+    record = {
+        "mission": 3,
+        "dog_id": 729,
+        "chain": "Base",
+        "chain_id": 8453,
+        "status": "settled",
+        "activity_time_utc": "2026-05-31T19:12:29Z",
+        "settlement": {"settled": True, "block_time_utc": "2026-05-31T19:12:29Z"},
+        "amount": {"native": "0.01", "native_symbol": "ETH", "price_asset_key": "ETH", "raw": "10000000000000000"},
+    }
+    price_map = {
+        ("ETH", "2026-06-01"): {
+            "asset_key": "ETH",
+            "date_utc": "2026-06-01",
+            "price_usd": "2000",
+            "source": "unit_test_nearest_daily_price",
+            "confidence": "medium",
+            "timestamp_utc": "2026-06-01T00:00:02Z",
+        }
+    }
+
+    estimate = archive_usd.update_record(record, price_map)
+
+    amount = record["amount"]
+    assert amount["usd_estimate"] == "20.00000000"
+    assert amount["amount_usd_at_event"] == "20.00000000"
+    assert amount["eth_usd_price_at_event"] == "2000"
+    assert amount["eth_usd_price_date_utc"] == "2026-06-01"
+    assert amount["usd_estimate_source"] == "unit_test_nearest_daily_price"
+    assert estimate is not None
+    assert estimate["price_status"] == "priced"
+    assert "nearest available daily price" in estimate["notes"]
+
+
 def test_archive_validator_rejects_settled_current_price_without_event_provenance() -> None:
     validator = load_validator_module()
     with tempfile.TemporaryDirectory() as tmp:

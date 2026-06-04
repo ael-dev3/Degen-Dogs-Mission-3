@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-06-03T19:44:10Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-03T20:39:35Z",
+    "activity_time_utc": "2026-06-04T13:26:01Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": null,
-      "native": "0.02",
+      "native": "0.044",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "20000000000000000",
-      "usd_estimate": "35.21000000",
+      "raw": "44000000000000000",
+      "usd_estimate": "78.53000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$35.21",
+      "usd_estimate_display": "$78.53",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-04",
-      "usd_estimate_price_usd": "1760.500000",
+      "usd_estimate_price_usd": "1784.7727272727272727272727272727272727272727272727272727272727272727272727272727",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,11 +29,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 5,
-      "last_bid_time_utc": "2026-06-03T20:39:35Z",
-      "unique_bidder_count": 5
+      "bid_count": 6,
+      "last_bid_time_utc": "2026-06-04T13:26:01Z",
+      "unique_bidder_count": 6
     },
     "bid_tx_hashes": [
+      "0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c",
       "0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2",
       "0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666",
       "0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18",
@@ -49,7 +50,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog733",
-      "explorer": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347",
+      "explorer": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733",
       "repo_archive": "archive/dogs/by-id/733.json",
       "settlement_tx": null
@@ -61,7 +62,7 @@
       "total": 734
     },
     "schema_version": 1,
-    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base ongoing 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.02 eth 20000000000000000 35.21 $35.21 2026-06-03t20:39:35z #555/734 generated auction feed 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.2%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.4%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.044 eth 44000000000000000 78.53 $78.53 2026-06-04t13:26:01z #555/734 generated auction feed 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.5%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.2%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.4%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@staraptor.eth",
+      "display": "@pare",
       "farcaster_fid": null,
-      "farcaster_handle": "staraptor.eth",
-      "profile_url": "https://farcaster.xyz/staraptor.eth",
-      "wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
-      "wallet_explorer_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347"
+      "farcaster_handle": "pare",
+      "profile_url": "https://farcaster.xyz/pare",
+      "wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
+      "wallet_explorer_url": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1"
     }
   },
   "schema_version": 1

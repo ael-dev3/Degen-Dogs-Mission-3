@@ -32,6 +32,26 @@ WHERE UPPER(asset_key) = 'ETH'
 
 DROP TABLE IF EXISTS recent_bids;
 CREATE TABLE recent_bids AS
+WITH priced_bids AS (
+  SELECT
+    b.*,
+    hp.price_usd,
+    hp.price_usd_real,
+    hp.source AS price_source,
+    hp.source_detail AS price_source_detail,
+    hp.confidence AS price_confidence,
+    hp.date_utc AS price_date_utc,
+    ROW_NUMBER() OVER (
+      PARTITION BY b.block_number, b.log_index, b.tx_hash
+      ORDER BY
+        CASE WHEN hp.price_usd_real IS NULL THEN 1 ELSE 0 END,
+        CASE WHEN hp.date_utc = DATE(b.block_time_utc) THEN 0 ELSE 1 END,
+        ABS(CAST(strftime('%s', COALESCE(NULLIF(hp.timestamp_utc, ''), hp.date_utc || 'T12:00:00Z')) AS INTEGER) - CAST(strftime('%s', b.block_time_utc) AS INTEGER))
+    ) AS price_rank
+  FROM auction_bids b
+  LEFT JOIN event_eth_prices hp
+    ON hp.date_utc BETWEEN DATE(b.block_time_utc, '-3 day') AND DATE(b.block_time_utc, '+3 day')
+)
 SELECT
   b.block_time_utc AS bid_time_utc,
   b.token_id,
@@ -39,24 +59,28 @@ SELECT
   COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(b.bidder)) AS bidder_url,
   b.bidder AS bidder_wallet,
   CASE
-    WHEN hp.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * hp.price_usd_real)
+    WHEN b.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * b.price_usd_real)
     ELSE printf('%.5f ETH', b.bid_eth)
   END AS bid,
   ROUND(b.bid_eth, 8) AS bid_eth,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * hp.price_usd_real, 2) ELSE NULL END AS bid_usd,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * hp.price_usd_real, 2) ELSE NULL END AS bid_usd_at_event,
-  hp.price_usd AS eth_usd_price_at_event,
-  hp.date_utc AS eth_usd_price_date_utc,
-  hp.source AS usd_estimate_source,
-  hp.source_detail AS usd_estimate_source_detail,
-  hp.confidence AS usd_estimate_confidence,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN 'bid_date_eth_usd' ELSE 'missing_event_eth_usd' END AS usd_estimate_basis,
+  CASE WHEN b.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * b.price_usd_real, 2) ELSE NULL END AS bid_usd,
+  CASE WHEN b.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * b.price_usd_real, 2) ELSE NULL END AS bid_usd_at_event,
+  b.price_usd AS eth_usd_price_at_event,
+  b.price_date_utc AS eth_usd_price_date_utc,
+  b.price_source AS usd_estimate_source,
+  b.price_source_detail AS usd_estimate_source_detail,
+  b.price_confidence AS usd_estimate_confidence,
+  CASE
+    WHEN b.price_usd_real IS NULL THEN 'missing_event_eth_usd'
+    WHEN b.price_date_utc = DATE(b.block_time_utc) THEN 'bid_date_eth_usd'
+    ELSE 'nearest_bid_date_eth_usd'
+  END AS usd_estimate_basis,
   b.extended,
   b.block_number,
   b.tx_hash
-FROM auction_bids b
-LEFT JOIN event_eth_prices hp ON hp.date_utc = DATE(b.block_time_utc)
+FROM priced_bids b
 LEFT JOIN address_labels l ON l.address_lc = LOWER(b.bidder)
+WHERE b.price_rank = 1
 ORDER BY b.block_number DESC, b.log_index DESC
 LIMIT 100;
 
@@ -72,6 +96,26 @@ WITH bid_counts AS (
     MAX(bid_eth) AS max_seen_bid_eth
   FROM auction_bids
   GROUP BY token_id
+),
+priced_settlements AS (
+  SELECT
+    s.*,
+    hp.price_usd,
+    hp.price_usd_real,
+    hp.source AS price_source,
+    hp.source_detail AS price_source_detail,
+    hp.confidence AS price_confidence,
+    hp.date_utc AS price_date_utc,
+    ROW_NUMBER() OVER (
+      PARTITION BY s.block_number, s.tx_hash, s.token_id
+      ORDER BY
+        CASE WHEN hp.price_usd_real IS NULL THEN 1 ELSE 0 END,
+        CASE WHEN hp.date_utc = DATE(s.block_time_utc) THEN 0 ELSE 1 END,
+        ABS(CAST(strftime('%s', COALESCE(NULLIF(hp.timestamp_utc, ''), hp.date_utc || 'T12:00:00Z')) AS INTEGER) - CAST(strftime('%s', s.block_time_utc) AS INTEGER))
+    ) AS price_rank
+  FROM auction_settled s
+  LEFT JOIN event_eth_prices hp
+    ON hp.date_utc BETWEEN DATE(s.block_time_utc, '-3 day') AND DATE(s.block_time_utc, '+3 day')
 )
 SELECT
   s.block_time_utc AS settled_time_utc,
@@ -88,29 +132,33 @@ SELECT
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
   COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(s.winner)) AS winner_url,
   CASE
-    WHEN hp.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * hp.price_usd_real)
+    WHEN s.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * s.price_usd_real)
     ELSE printf('%.5f ETH', s.amount_eth)
   END AS winning_bid,
   ROUND(s.amount_eth, 8) AS winning_bid_eth,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * hp.price_usd_real, 2) ELSE NULL END AS winning_bid_usd,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * hp.price_usd_real, 2) ELSE NULL END AS winning_bid_usd_at_settlement,
-  hp.price_usd AS eth_usd_price_at_event,
-  hp.date_utc AS eth_usd_price_date_utc,
-  hp.source AS usd_estimate_source,
-  hp.source_detail AS usd_estimate_source_detail,
-  hp.confidence AS usd_estimate_confidence,
-  CASE WHEN hp.price_usd_real IS NOT NULL THEN 'settlement_date_eth_usd' ELSE 'missing_event_eth_usd' END AS usd_estimate_basis,
+  CASE WHEN s.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * s.price_usd_real, 2) ELSE NULL END AS winning_bid_usd,
+  CASE WHEN s.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * s.price_usd_real, 2) ELSE NULL END AS winning_bid_usd_at_settlement,
+  s.price_usd AS eth_usd_price_at_event,
+  s.price_date_utc AS eth_usd_price_date_utc,
+  s.price_source AS usd_estimate_source,
+  s.price_source_detail AS usd_estimate_source_detail,
+  s.price_confidence AS usd_estimate_confidence,
+  CASE
+    WHEN s.price_usd_real IS NULL THEN 'missing_event_eth_usd'
+    WHEN s.price_date_utc = DATE(s.block_time_utc) THEN 'settlement_date_eth_usd'
+    ELSE 'nearest_settlement_date_eth_usd'
+  END AS usd_estimate_basis,
   COALESCE(b.bid_count, 0) AS bid_count,
   COALESCE(b.unique_bidders, 0) AS unique_bidders,
   b.first_bid_utc,
   b.last_bid_utc,
   s.block_number,
   s.tx_hash
-FROM auction_settled s
-LEFT JOIN event_eth_prices hp ON hp.date_utc = DATE(s.block_time_utc)
+FROM priced_settlements s
 LEFT JOIN bid_counts b USING (token_id)
 LEFT JOIN address_labels l ON l.address_lc = LOWER(s.winner)
 LEFT JOIN dog_metadata d USING (token_id)
+WHERE s.price_rank = 1
 ORDER BY s.token_id DESC;
 
 DROP TABLE IF EXISTS recent_auction_winners;
