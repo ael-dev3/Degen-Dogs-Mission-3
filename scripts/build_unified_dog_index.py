@@ -614,7 +614,16 @@ def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identit
     display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet))
     profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"))
     native = first_text(feed.get("amount_eth"), current.get("current_bid_eth"))
-    usd_value = first_text(feed.get("amount_usd"), current.get("current_bid_usd"))
+    event_priced = status != "ongoing"
+    usd_value = first_text(
+        feed.get("amount_usd_at_event") if event_priced else "",
+        feed.get("amount_usd"),
+        current.get("current_bid_usd"),
+    )
+    price_usd = first_text(feed.get("eth_usd_price_at_event"), feed.get("eth_usd_price_live"), current.get("eth_usd_price_live"))
+    price_date = first_text(feed.get("eth_usd_price_date_utc"), current.get("eth_usd_price_date_utc"))
+    usd_source = first_text(feed.get("usd_estimate_source"), "generated_auction_feed" if usd_value else "")
+    usd_confidence = first_text(feed.get("usd_estimate_confidence"), "medium" if usd_value else "missing")
     amount = {
         "raw": eth_to_wei(native) or None,
         "native": native or None,
@@ -622,8 +631,14 @@ def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identit
         "price_asset_key": "ETH",
         "usd_estimate": str(decimal_value(usd_value) or usd_value) if usd_value else None,
         "usd_estimate_display": usd_display(usd_value) or None,
-        "usd_estimate_source": "generated_auction_feed" if usd_value else None,
-        "usd_estimate_confidence": "medium" if usd_value else "missing",
+        "usd_estimate_source": usd_source or None,
+        "usd_estimate_source_detail": first_text(feed.get("usd_estimate_source_detail")) or None,
+        "usd_estimate_confidence": usd_confidence,
+        "usd_estimate_price_usd": price_usd or None,
+        "usd_estimate_price_date_utc": price_date or None,
+        "amount_usd_at_event": str(decimal_value(feed.get("amount_usd_at_event")) or feed.get("amount_usd_at_event")) if feed.get("amount_usd_at_event") not in (None, "") else None,
+        "eth_usd_price_at_event": first_text(feed.get("eth_usd_price_at_event")) or None,
+        "eth_usd_price_date_utc": price_date or None,
         "usd_estimate_time_basis": ("settlement_block_time" if status == "settled" else "last_bid_block_time") if native else None,
     }
     activity = iso_utc(first_text(
@@ -749,19 +764,34 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
             "profile_url": profile_url or None,
             "wallet_explorer_url": address_url(3, wallet) or None,
         }
-        amount = record.get("amount") if isinstance(record.get("amount"), dict) else {}
+        raw_amount = record.get("amount")
+        amount: dict[str, Any] = raw_amount if isinstance(raw_amount, dict) else {}
         native = first_text(feed.get("amount_eth"), current.get("current_bid_eth"), amount.get("native"))
         amount["native"] = native or None
         amount["native_symbol"] = "ETH"
         amount["price_asset_key"] = "ETH"
         amount["raw"] = eth_to_wei(native) or amount.get("raw")
-        usd_value = first_text(feed.get("amount_usd"), current.get("current_bid_usd"), amount.get("usd_estimate"))
+        event_priced = feed_status != "ongoing"
+        usd_value = first_text(
+            feed.get("amount_usd_at_event") if event_priced else "",
+            feed.get("amount_usd"),
+            current.get("current_bid_usd"),
+            amount.get("usd_estimate"),
+        )
         if usd_value:
             amount["usd_estimate"] = str(decimal_value(usd_value) or usd_value)
             amount["usd_estimate_display"] = usd_display(usd_value) or amount.get("usd_estimate_display")
-            amount["usd_estimate_source"] = first_text(amount.get("usd_estimate_source"), "generated_auction_feed")
-            amount["usd_estimate_confidence"] = first_text(amount.get("usd_estimate_confidence"), "medium")
-            amount["usd_estimate_time_basis"] = "last_bid_block_time"
+            amount["usd_estimate_source"] = first_text(feed.get("usd_estimate_source"), amount.get("usd_estimate_source"), "generated_auction_feed")
+            amount["usd_estimate_source_detail"] = first_text(feed.get("usd_estimate_source_detail"), amount.get("usd_estimate_source_detail")) or None
+            amount["usd_estimate_confidence"] = first_text(feed.get("usd_estimate_confidence"), amount.get("usd_estimate_confidence"), "medium")
+            price_usd = first_text(feed.get("eth_usd_price_at_event"), feed.get("eth_usd_price_live"), current.get("eth_usd_price_live"), amount.get("usd_estimate_price_usd"))
+            price_date = first_text(feed.get("eth_usd_price_date_utc"), current.get("eth_usd_price_date_utc"), amount.get("usd_estimate_price_date_utc"))
+            amount["usd_estimate_price_usd"] = price_usd or None
+            amount["usd_estimate_price_date_utc"] = price_date or None
+            amount["amount_usd_at_event"] = str(decimal_value(feed.get("amount_usd_at_event")) or feed.get("amount_usd_at_event")) if feed.get("amount_usd_at_event") not in (None, "") else amount.get("amount_usd_at_event")
+            amount["eth_usd_price_at_event"] = first_text(feed.get("eth_usd_price_at_event"), amount.get("eth_usd_price_at_event")) or None
+            amount["eth_usd_price_date_utc"] = price_date or None
+            amount["usd_estimate_time_basis"] = "settlement_block_time" if feed_status == "settled" else "last_bid_block_time"
         record["amount"] = amount
         activity = iso_utc(first_text(
             feed.get("settled_time_utc") if record["status"] == "settled" else "",

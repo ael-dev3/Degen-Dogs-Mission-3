@@ -13,6 +13,7 @@ PUBLIC_UNIFIED = ROOT / "public" / "generated" / "unified_dog_search_index.json"
 PRICES = ROOT / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json"
 ESTIMATES = ROOT / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json"
 MANIFEST = ROOT / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json"
+LIVE_USD_SOURCES = {"generated_auction_feed", "current_eth_usd_price", "token_stats.eth_usd_price"}
 
 
 def load_json(path: Path) -> Any:
@@ -31,6 +32,51 @@ def decimal_or_none(value: Any) -> Decimal | None:
 
 def fail(message: str) -> None:
     raise SystemExit(f"historical USD validation failed: {message}")
+
+
+def text_value(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def is_live_or_current(record: dict[str, Any]) -> bool:
+    status = text_value(record.get("status")).lower()
+    raw_settlement = record.get("settlement")
+    settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
+    return status in {"ongoing", "live"} and not settlement.get("settled")
+
+
+def validate_historical_event_provenance(
+    *,
+    mission: Any,
+    dog_id: Any,
+    record: dict[str, Any],
+    amount: dict[str, Any],
+    row: dict[str, Any],
+) -> None:
+    if is_live_or_current(record):
+        return
+    source = text_value(amount.get("usd_estimate_source") or row.get("price_source"))
+    if source in LIVE_USD_SOURCES:
+        fail(f"historical event USD provenance uses live/current source for mission {mission} dog {dog_id}")
+    required_amount_fields = ["amount_usd_at_event", "eth_usd_price_at_event", "eth_usd_price_date_utc"]
+    missing_amount_fields = [field for field in required_amount_fields if text_value(amount.get(field)) == ""]
+    required_row_fields = ["amount_usd_at_event", "eth_usd_price_at_event", "eth_usd_price_date_utc"]
+    missing_row_fields = [field for field in required_row_fields if text_value(row.get(field)) == ""]
+    if missing_amount_fields or missing_row_fields:
+        fail(
+            "historical event USD provenance missing "
+            f"for mission {mission} dog {dog_id}: amount={missing_amount_fields} estimate={missing_row_fields}"
+        )
+    amount_usd = decimal_or_none(amount.get("amount_usd_at_event"))
+    row_usd = decimal_or_none(row.get("amount_usd_at_event"))
+    if amount_usd is None or row_usd is None or amount_usd != row_usd:
+        fail(f"historical event USD provenance amount mismatch for mission {mission} dog {dog_id}")
+    amount_price = decimal_or_none(amount.get("eth_usd_price_at_event"))
+    row_price = decimal_or_none(row.get("eth_usd_price_at_event"))
+    if amount_price is None or row_price is None or amount_price != row_price:
+        fail(f"historical event USD provenance ETH price mismatch for mission {mission} dog {dog_id}")
+    if text_value(amount.get("eth_usd_price_date_utc")) != text_value(row.get("eth_usd_price_date_utc")):
+        fail(f"historical event USD provenance date mismatch for mission {mission} dog {dog_id}")
 
 
 def main() -> None:
@@ -72,7 +118,7 @@ def main() -> None:
             # Non-auction rows can legitimately lack amounts.
             continue
         row = estimate_by_key.get((mission, dog_id))
-        if not row:
+        if not isinstance(row, dict):
             fail(f"missing estimate row for mission {mission} dog {dog_id}")
         status = row.get("price_status")
         if status == "priced":
@@ -85,6 +131,13 @@ def main() -> None:
                 fail(f"positive native amount priced to non-positive USD for mission {mission} dog {dog_id}")
             if not row.get("price_source") or not row.get("price_date_utc"):
                 fail(f"priced estimate lacks provenance for mission {mission} dog {dog_id}")
+            validate_historical_event_provenance(
+                mission=mission,
+                dog_id=dog_id,
+                record=record,
+                amount=amount,
+                row=row,
+            )
         elif status == "missing":
             missing += 1
             if row.get("estimated_usd_value") not in (None, ""):

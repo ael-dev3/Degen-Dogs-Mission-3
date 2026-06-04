@@ -4,6 +4,9 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2022-03-27T14:17:25Z",
     "amount": {
+      "amount_usd_at_event": "1156.38093005",
+      "eth_usd_price_at_event": "3285.1730967305425",
+      "eth_usd_price_date_utc": "2022-03-27",
       "native": "0.352",
       "native_symbol": "WETH",
       "price_asset_key": "ETH",

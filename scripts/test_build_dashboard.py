@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import sqlite3
 import sys
 import tempfile
 from decimal import Decimal
@@ -156,6 +157,90 @@ def test_timer_urgency_stays_calm_until_less_than_one_hour_remains() -> None:
     assert dashboard.timer_urgency_state(3599, "live") == "urgent"
     assert dashboard.timer_urgency_state(600, "live") == "critical"
     assert dashboard.timer_urgency_state(0, "live") == "ended"
+
+
+def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, list[dict[str, Any]]]:
+    conn = sqlite3.connect(":memory:")
+    dashboard.insert_rows(conn, "auction_created", [
+        {"token_id": 10, "start_time_utc": "2026-06-01 00:00:00", "end_time_utc": "2026-06-01 12:00:00", "block_number": 100, "tx_hash": "0xcreated10"},
+        {"token_id": 11, "start_time_utc": "2026-06-02 00:00:00", "end_time_utc": "2026-06-03 00:00:00", "block_number": 200, "tx_hash": "0xcreated11"},
+    ], [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
+    dashboard.insert_rows(conn, "auction_bids", [
+        {"token_id": 10, "bidder": "0x00000000000000000000000000000000000000a1", "bid_eth": 0.5, "bid_wei": "500000000000000000", "extended": 0, "block_number": 110, "tx_hash": "0xbid10", "log_index": 0, "block_time_utc": "2026-06-01 11:00:00"},
+        {"token_id": 11, "bidder": "0x00000000000000000000000000000000000000b2", "bid_eth": 1.0, "bid_wei": "1000000000000000000", "extended": 0, "block_number": 210, "tx_hash": "0xbid11", "log_index": 0, "block_time_utc": "2026-06-02 01:00:00"},
+    ], [("token_id", "INTEGER"), ("bidder", "TEXT"), ("bid_eth", "REAL"), ("bid_wei", "TEXT"), ("extended", "INTEGER"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
+    dashboard.insert_rows(conn, "auction_settled", [
+        {"token_id": 10, "winner": "0x00000000000000000000000000000000000000a1", "amount_eth": 0.5, "amount_wei": "500000000000000000", "block_number": 120, "tx_hash": "0xsettled10", "log_index": 0, "block_time_utc": "2026-06-01 12:00:00"},
+    ], [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
+    dashboard.insert_rows(conn, "woof_holders", [], [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
+    dashboard.insert_rows(conn, "farcaster_profiles", [], [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
+    dashboard.insert_rows(conn, "dog_metadata", [
+        {"token_id": 10, "dog_name": "Degen Dog #10", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0},
+        {"token_id": 11, "dog_name": "Degen Dog #11", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0},
+    ], [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
+    dashboard.insert_rows(conn, "token_stats", [
+        {"metric": "eth_usd_price", "value": current_eth_usd},
+        {"metric": "eth_usd_source", "value": "unit_current_price"},
+        {"metric": "woof_total_supply", "value": "1"},
+    ], [("metric", "TEXT"), ("value", "TEXT")])
+    dashboard.insert_rows(conn, "current_auction_source", [{
+        "token_id": 11,
+        "amount_eth": 1.0,
+        "amount_wei": "1000000000000000000",
+        "start_time_utc": "2026-06-02 00:00:00",
+        "end_time_utc": "2026-06-03 00:00:00",
+        "bidder": "0x00000000000000000000000000000000000000b2",
+        "settled": 0,
+        "latest_block": 220,
+        "latest_block_time_utc": "2026-06-02 02:00:00",
+    }], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
+    dashboard.insert_rows(conn, "historical_prices_daily", [{
+        "asset_key": "ETH",
+        "date_utc": "2026-06-01",
+        "price_usd": "1000",
+        "source": "unit_event_price",
+        "source_detail": "unit fixture",
+        "confidence": "high",
+        "timestamp_utc": "2026-06-01T23:59:59Z",
+        "notes": "fixture",
+    }], [("asset_key", "TEXT"), ("date_utc", "TEXT"), ("price_usd", "TEXT"), ("source", "TEXT"), ("source_detail", "TEXT"), ("confidence", "TEXT"), ("timestamp_utc", "TEXT"), ("notes", "TEXT")])
+    conn.executescript(dashboard.SQL_PATH.read_text(encoding="utf-8"))
+    return {
+        name: dashboard.table_dicts(*dashboard.fetch_table(conn, name))
+        for name in ["recent_bids", "auction_winners", "auction_feed", "current_auction"]
+    }
+
+
+def test_historical_auction_usd_uses_event_day_price_while_live_bid_uses_current_price() -> None:
+    dashboard = load_module()
+    low_current = run_pricing_sql_fixture(dashboard, "2000")
+    high_current = run_pricing_sql_fixture(dashboard, "9000")
+
+    low_winner = low_current["auction_winners"][0]
+    high_winner = high_current["auction_winners"][0]
+    assert low_winner["winning_bid_usd"] == high_winner["winning_bid_usd"] == 500.0
+    assert low_winner["winning_bid_usd_at_settlement"] == 500.0
+    assert low_winner["eth_usd_price_at_event"] == "1000"
+    assert low_winner["eth_usd_price_date_utc"] == "2026-06-01"
+    assert low_winner["usd_estimate_source"] == "unit_event_price"
+    assert low_winner["usd_estimate_confidence"] == "high"
+
+    historical_bid = next(row for row in low_current["recent_bids"] if row["token_id"] == 10)
+    assert historical_bid["bid_usd"] == 500.0
+    assert historical_bid["bid_usd_at_event"] == 500.0
+    assert historical_bid["usd_estimate_source"] == "unit_event_price"
+
+    low_feed_settled = next(row for row in low_current["auction_feed"] if row["status"] == "settled")
+    high_feed_settled = next(row for row in high_current["auction_feed"] if row["status"] == "settled")
+    assert low_feed_settled["amount_usd"] == high_feed_settled["amount_usd"] == 500.0
+    assert low_feed_settled["amount_usd_at_event"] == 500.0
+    assert low_feed_settled["eth_usd_price_at_event"] == "1000"
+
+    low_live = next(row for row in low_current["auction_feed"] if row["status"] == "ongoing")
+    high_live = next(row for row in high_current["auction_feed"] if row["status"] == "ongoing")
+    assert low_live["amount_usd"] == 2000.0
+    assert high_live["amount_usd"] == 9000.0
+    assert low_live["usd_estimate_source"] == "current_eth_usd_price"
 
 
 def write_reward_snapshot(path: Path) -> None:

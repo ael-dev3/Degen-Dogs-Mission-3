@@ -4,6 +4,9 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2023-08-02T20:28:08Z",
     "amount": {
+      "amount_usd_at_event": "0E-8",
+      "eth_usd_price_at_event": "1838.36",
+      "eth_usd_price_date_utc": "2023-08-02",
       "native": "0",
       "native_symbol": "WETH",
       "price_asset_key": "ETH",

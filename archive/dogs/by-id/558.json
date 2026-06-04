@@ -4,6 +4,9 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-12-06T05:05:33Z",
     "amount": {
+      "amount_usd_at_event": "20.58408144",
+      "eth_usd_price_at_event": "0.0013545723505708207",
+      "eth_usd_price_date_utc": "2025-12-06",
       "native": "15196",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",

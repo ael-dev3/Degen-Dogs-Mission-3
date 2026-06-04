@@ -37,6 +37,17 @@ HISTORICAL_ARCHIVE_INDEXES = {
     2: ROOT / "archive" / "mission2" / "data" / "generated" / "mission2_dog_search_index.json",
     3: ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_dog_search_index.json",
 }
+HISTORICAL_PRICES_DAILY = ROOT / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json"
+HISTORICAL_PRICE_SCHEMA = [
+    ("asset_key", "TEXT"),
+    ("date_utc", "TEXT"),
+    ("price_usd", "TEXT"),
+    ("source", "TEXT"),
+    ("source_detail", "TEXT"),
+    ("confidence", "TEXT"),
+    ("timestamp_utc", "TEXT"),
+    ("notes", "TEXT"),
+]
 MISSION_CHAIN = {
     1: ("Polygon", 137),
     2: ("Degen Chain", 666666666),
@@ -1961,6 +1972,15 @@ def load_json_list(path: Path) -> list[dict[str, Any]]:
     return [row for row in data if isinstance(row, dict)]
 
 
+def load_historical_price_rows(path: Path = HISTORICAL_PRICES_DAILY) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for row in load_json_list(path):
+        normalized = {column: text_value(row.get(column)) for column, _typ in HISTORICAL_PRICE_SCHEMA}
+        if normalized.get("asset_key") and normalized.get("date_utc") and normalized.get("price_usd"):
+            rows.append(normalized)
+    return rows
+
+
 def chain_address_url(mission: int, address: str | None) -> str:
     normalized = normalize_address(address)
     if not normalized or normalized == ZERO:
@@ -2238,6 +2258,20 @@ HIDDEN_UI_COLUMNS = {
     "winning_bid_usd",
     "current_bid_eth",
     "current_bid_usd",
+    "current_bid_usd_live",
+    "bid_usd_at_event",
+    "amount_usd_at_event",
+    "winning_bid_usd_at_settlement",
+    "eth_usd_price_live",
+    "eth_usd_price_at_event",
+    "eth_usd_price_date_utc",
+    "eth_usd_price_source",
+    "eth_usd_price_source_detail",
+    "eth_usd_price_timestamp_utc",
+    "usd_estimate_source",
+    "usd_estimate_source_detail",
+    "usd_estimate_confidence",
+    "usd_estimate_basis",
     "time_remaining",
     "auction_end_utc",
     "end_time_utc",
@@ -3174,6 +3208,7 @@ def main() -> None:
     insert_rows(conn, "farcaster_profiles", farcaster_profiles, [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
     insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
+    insert_rows(conn, "historical_prices_daily", load_historical_price_rows(), HISTORICAL_PRICE_SCHEMA)
     insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
     conn.executescript(SQL_PATH.read_text(encoding="utf-8"))

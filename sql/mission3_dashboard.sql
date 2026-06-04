@@ -15,25 +15,47 @@ SELECT
   display_name
 FROM farcaster_profiles;
 
+DROP TABLE IF EXISTS event_eth_prices;
+CREATE TEMP TABLE event_eth_prices AS
+SELECT
+  date_utc,
+  price_usd,
+  CAST(price_usd AS REAL) AS price_usd_real,
+  source,
+  source_detail,
+  COALESCE(NULLIF(confidence, ''), 'high') AS confidence,
+  timestamp_utc,
+  notes
+FROM historical_prices_daily
+WHERE UPPER(asset_key) = 'ETH'
+  AND COALESCE(price_usd, '') != '';
+
 DROP TABLE IF EXISTS recent_bids;
 CREATE TABLE recent_bids AS
-WITH eth_price AS (
-  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
-)
 SELECT
   b.block_time_utc AS bid_time_utc,
   b.token_id,
   COALESCE(l.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
   COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(b.bidder)) AS bidder_url,
   b.bidder AS bidder_wallet,
-  printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * eth_price.eth_usd) AS bid,
+  CASE
+    WHEN hp.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * hp.price_usd_real)
+    ELSE printf('%.5f ETH', b.bid_eth)
+  END AS bid,
   ROUND(b.bid_eth, 8) AS bid_eth,
-  ROUND(b.bid_eth * eth_price.eth_usd, 2) AS bid_usd,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * hp.price_usd_real, 2) ELSE NULL END AS bid_usd,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(b.bid_eth * hp.price_usd_real, 2) ELSE NULL END AS bid_usd_at_event,
+  hp.price_usd AS eth_usd_price_at_event,
+  hp.date_utc AS eth_usd_price_date_utc,
+  hp.source AS usd_estimate_source,
+  hp.source_detail AS usd_estimate_source_detail,
+  hp.confidence AS usd_estimate_confidence,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN 'bid_date_eth_usd' ELSE 'missing_event_eth_usd' END AS usd_estimate_basis,
   b.extended,
   b.block_number,
   b.tx_hash
 FROM auction_bids b
-CROSS JOIN eth_price
+LEFT JOIN event_eth_prices hp ON hp.date_utc = DATE(b.block_time_utc)
 LEFT JOIN address_labels l ON l.address_lc = LOWER(b.bidder)
 ORDER BY b.block_number DESC, b.log_index DESC
 LIMIT 100;
@@ -50,9 +72,6 @@ WITH bid_counts AS (
     MAX(bid_eth) AS max_seen_bid_eth
   FROM auction_bids
   GROUP BY token_id
-),
-eth_price AS (
-  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
 )
 SELECT
   s.block_time_utc AS settled_time_utc,
@@ -68,9 +87,19 @@ SELECT
   s.winner AS winner_wallet,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
   COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(s.winner)) AS winner_url,
-  printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * eth_price.eth_usd) AS winning_bid,
+  CASE
+    WHEN hp.price_usd_real IS NOT NULL THEN printf('%.5f ETH ($%.0f)', s.amount_eth, s.amount_eth * hp.price_usd_real)
+    ELSE printf('%.5f ETH', s.amount_eth)
+  END AS winning_bid,
   ROUND(s.amount_eth, 8) AS winning_bid_eth,
-  ROUND(s.amount_eth * eth_price.eth_usd, 2) AS winning_bid_usd,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * hp.price_usd_real, 2) ELSE NULL END AS winning_bid_usd,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN ROUND(s.amount_eth * hp.price_usd_real, 2) ELSE NULL END AS winning_bid_usd_at_settlement,
+  hp.price_usd AS eth_usd_price_at_event,
+  hp.date_utc AS eth_usd_price_date_utc,
+  hp.source AS usd_estimate_source,
+  hp.source_detail AS usd_estimate_source_detail,
+  hp.confidence AS usd_estimate_confidence,
+  CASE WHEN hp.price_usd_real IS NOT NULL THEN 'settlement_date_eth_usd' ELSE 'missing_event_eth_usd' END AS usd_estimate_basis,
   COALESCE(b.bid_count, 0) AS bid_count,
   COALESCE(b.unique_bidders, 0) AS unique_bidders,
   b.first_bid_utc,
@@ -78,7 +107,7 @@ SELECT
   s.block_number,
   s.tx_hash
 FROM auction_settled s
-CROSS JOIN eth_price
+LEFT JOIN event_eth_prices hp ON hp.date_utc = DATE(s.block_time_utc)
 LEFT JOIN bid_counts b USING (token_id)
 LEFT JOIN address_labels l ON l.address_lc = LOWER(s.winner)
 LEFT JOIN dog_metadata d USING (token_id)
@@ -96,6 +125,13 @@ SELECT
   winning_bid,
   winning_bid_eth,
   winning_bid_usd,
+  winning_bid_usd_at_settlement,
+  eth_usd_price_at_event,
+  eth_usd_price_date_utc,
+  usd_estimate_source,
+  usd_estimate_source_detail,
+  usd_estimate_confidence,
+  usd_estimate_basis,
   rarity,
   last_bid_utc,
   settled_time_utc
@@ -370,7 +406,9 @@ ORDER BY rank;
 DROP TABLE IF EXISTS current_auction;
 CREATE TABLE current_auction AS
 WITH eth_price AS (
-  SELECT COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd
+  SELECT
+    COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd,
+    COALESCE((SELECT value FROM token_stats WHERE metric = 'eth_usd_source'), 'unavailable') AS eth_usd_source
 ),
 base AS (
   SELECT
@@ -395,6 +433,13 @@ SELECT
   printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
   ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd,
+  ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd_live,
+  CAST(eth_price.eth_usd AS TEXT) AS eth_usd_price_live,
+  DATE(COALESCE(NULLIF(c.latest_block_time_utc, ''), 'now')) AS eth_usd_price_date_utc,
+  'current_eth_usd_price' AS usd_estimate_source,
+  eth_price.eth_usd_source AS usd_estimate_source_detail,
+  'live_current' AS usd_estimate_confidence,
+  'current_eth_usd_price' AS usd_estimate_basis,
   CASE
     WHEN LOWER(c.bidder) = '0x0000000000000000000000000000000000000000' THEN 'no bids yet'
     ELSE COALESCE(l.label, substr(LOWER(c.bidder), 1, 6) || '…' || substr(LOWER(c.bidder), -4))
@@ -447,6 +492,13 @@ SELECT
   c.current_bid AS latest_bid,
   c.current_bid_eth AS latest_bid_eth,
   c.current_bid_usd AS latest_bid_usd,
+  c.current_bid_usd_live AS latest_bid_usd_live,
+  c.eth_usd_price_live,
+  c.eth_usd_price_date_utc,
+  c.usd_estimate_source,
+  c.usd_estimate_source_detail,
+  c.usd_estimate_confidence,
+  c.usd_estimate_basis,
   c.bidder,
   c.bidder_url,
   c.bidder_wallet,
@@ -494,6 +546,14 @@ combined AS (
     c.current_bid AS bid,
     c.current_bid_eth AS amount_eth,
     c.current_bid_usd AS amount_usd,
+    NULL AS amount_usd_at_event,
+    c.eth_usd_price_live AS eth_usd_price_live,
+    NULL AS eth_usd_price_at_event,
+    c.eth_usd_price_date_utc AS eth_usd_price_date_utc,
+    c.usd_estimate_source AS usd_estimate_source,
+    c.usd_estimate_source_detail AS usd_estimate_source_detail,
+    c.usd_estimate_confidence AS usd_estimate_confidence,
+    c.usd_estimate_basis AS usd_estimate_basis,
     COALESCE((SELECT bid_time_utc FROM latest_bid WHERE bid_rank = 1), c.latest_block_time_utc) AS last_bid_utc,
     '' AS settled_time_utc,
     c.time_remaining,
@@ -518,6 +578,14 @@ combined AS (
     winning_bid AS bid,
     winning_bid_eth AS amount_eth,
     winning_bid_usd AS amount_usd,
+    winning_bid_usd_at_settlement AS amount_usd_at_event,
+    NULL AS eth_usd_price_live,
+    eth_usd_price_at_event,
+    eth_usd_price_date_utc,
+    usd_estimate_source,
+    usd_estimate_source_detail,
+    usd_estimate_confidence,
+    usd_estimate_basis,
     last_bid_utc,
     settled_time_utc,
     '' AS time_remaining,
@@ -540,6 +608,14 @@ SELECT
   bid,
   amount_eth,
   amount_usd,
+  amount_usd_at_event,
+  eth_usd_price_live,
+  eth_usd_price_at_event,
+  eth_usd_price_date_utc,
+  usd_estimate_source,
+  usd_estimate_source_detail,
+  usd_estimate_confidence,
+  usd_estimate_basis,
   CASE
     WHEN status = 'settled' THEN settled_time_utc
     ELSE last_bid_utc

@@ -80,6 +80,13 @@ def source_tokens(record: dict[str, Any], amount: dict[str, Any]) -> set[str]:
 
 
 def should_preserve_source_usd(record: dict[str, Any], amount: dict[str, Any]) -> bool:
+    raw_settlement = record.get("settlement")
+    settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
+    status = text_value(record.get("status")).lower()
+    if settlement.get("settled") or status in {"settled", "ended pending settlement", "ended_unsettled"}:
+        return False
+    if status and status not in {"ongoing", "live"}:
+        return False
     return bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
 
 
@@ -180,6 +187,9 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         amount["usd_estimate_price_date_utc"] = price_date_utc
         amount["usd_estimate_price_usd"] = str(price_usd) if price_usd is not None else None
         amount["usd_estimate_notes"] = notes
+        amount["amount_usd_at_event"] = None
+        amount["eth_usd_price_at_event"] = None
+        amount["eth_usd_price_date_utc"] = None
     elif price_row:
         price_usd = decimal_or_none(price_row.get("price_usd"))
         if price_usd is not None:
@@ -191,6 +201,9 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
             amount["usd_estimate_price_date_utc"] = price_row.get("date_utc")
             amount["usd_estimate_price_usd"] = str(price_usd)
             amount["usd_estimate_notes"] = price_row.get("notes") or ""
+            amount["amount_usd_at_event"] = str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP))
+            amount["eth_usd_price_at_event"] = str(price_usd)
+            amount["eth_usd_price_date_utc"] = price_row.get("date_utc")
             price_source = price_row.get("source")
             price_source_detail = price_row.get("source_detail")
             price_date_utc = price_row.get("date_utc")
@@ -204,6 +217,9 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         amount["usd_estimate_price_date_utc"] = None
         amount["usd_estimate_price_usd"] = None
         amount["usd_estimate_notes"] = status
+        amount["amount_usd_at_event"] = None
+        amount["eth_usd_price_at_event"] = None
+        amount["eth_usd_price_date_utc"] = None
         price_confidence = "missing"
         notes = status
     record["amount"] = amount
@@ -227,6 +243,9 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         "price_usd": str(price_usd) if price_usd is not None else None,
         "estimated_usd_value": str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)) if estimate is not None else None,
         "estimated_usd_display": money_display(estimate) if estimate is not None else None,
+        "amount_usd_at_event": amount.get("amount_usd_at_event"),
+        "eth_usd_price_at_event": amount.get("eth_usd_price_at_event"),
+        "eth_usd_price_date_utc": amount.get("eth_usd_price_date_utc"),
         "price_date_utc": price_date_utc,
         "price_source": price_source,
         "price_source_detail": price_source_detail,
@@ -240,7 +259,8 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     cols = [
         "mission", "dog_id", "chain", "chain_id", "event_type", "event_time_utc", "event_tx_hash",
         "native_amount_raw", "native_amount", "native_symbol", "price_asset_key", "price_usd",
-        "estimated_usd_value", "estimated_usd_display", "price_date_utc", "price_source", "price_source_detail",
+        "estimated_usd_value", "estimated_usd_display", "amount_usd_at_event", "eth_usd_price_at_event",
+        "eth_usd_price_date_utc", "price_date_utc", "price_source", "price_source_detail",
         "price_confidence", "price_status", "notes",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)

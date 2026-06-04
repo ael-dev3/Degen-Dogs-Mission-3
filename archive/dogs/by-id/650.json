@@ -4,6 +4,9 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-03-11T08:27:57Z",
     "amount": {
+      "amount_usd_at_event": "22.40092985",
+      "eth_usd_price_at_event": "2036.4481677486033",
+      "eth_usd_price_date_utc": "2026-03-11",
       "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
