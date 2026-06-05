@@ -1,29 +1,29 @@
 {
   "generated_at_utc": "2026-06-04T20:00:10Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-04T21:20:15Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-05T20:03:17Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "66.83869238",
+      "eth_usd_price_at_event": "1811.346676900944",
+      "eth_usd_price_date_utc": "2026-06-04",
       "native": "0.0369",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "36900000000000000",
-      "usd_estimate": "57.13000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$57.13",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-05",
-      "usd_estimate_price_usd": "1548.2384823848238482384823848238482384823848238482384823848238482384823848238482",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": "66.83869238",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$66.84",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-06-04) 1.84 day(s) from event.",
+      "usd_estimate_price_date_utc": "2026-06-04",
+      "usd_estimate_price_usd": "1811.346676900944",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-06-04T19:59:03Z",
+      "block_time_utc": "2026-06-05T20:03:17Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -53,16 +53,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#529/735",
+      "display": "#529/736",
       "rank": 529,
-      "total": 735
+      "total": 736
     },
     "schema_version": 1,
-    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base ongoing 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 57.13 $57.13 2026-06-04t21:20:15z #529/735 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.1%) neck studdedcollar mouth: none (68.7%) mouth none ears: loopearring (27.3%) ears loopearring head: stripedbeanie (8.7%) head stripedbeanie eyes: none (17.8%) eyes none generated_auction_feed",
+    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 66.84 $66.84 2026-06-05t20:03:17z #529/736 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.1%) neck studdedcollar mouth: none (68.6%) mouth none ears: loopearring (27.4%) ears loopearring head: stripedbeanie (8.7%) head stripedbeanie eyes: none (17.8%) eyes none generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-05T20:03:17Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -74,7 +74,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.2%)",
@@ -92,12 +92,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.4%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

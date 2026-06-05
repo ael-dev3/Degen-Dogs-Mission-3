@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#357/735",
-      "rank": 357,
-      "total": 735
+      "display": "#363/736",
+      "rank": 363,
+      "total": 736
     },
     "schema_version": 1,
-    "search_text": "dog 186 dog #186 186 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x15e901b6e172273a28a4e862fcf7b4fc6d34a86afdf6f67a460d236a762975b4 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d #357/735 background: none; body: grey; neck: none; mouth: none; ears: none; head: redmohawk; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 186 dog #186 186 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x15e901b6e172273a28a4e862fcf7b4fc6d34a86afdf6f67a460d236a762975b4 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d #363/736 background: none; body: grey; neck: none; mouth: none; ears: none; head: redmohawk; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 37616694,
       "block_time_utc": "2023-01-03T09:10:46Z",
@@ -81,22 +81,22 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.2%)",
+        "display": "Body: Grey (11.1%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.5%)",
+        "display": "Neck: None (39.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.2%)",
+        "display": "Ears: None (25.1%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.7%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

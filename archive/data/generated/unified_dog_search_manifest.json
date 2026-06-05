@@ -7,12 +7,12 @@
     "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."
   ],
   "records_by_confidence": {
-    "verified": 715
+    "verified": 716
   },
   "records_by_mission": {
     "1": 201,
     "2": 369,
-    "3": 145
+    "3": 146
   },
   "schema_version": 1,
   "source_files": [
@@ -20,6 +20,6 @@
     "archive/mission2/data/generated/mission2_dog_search_index.json",
     "archive/mission3/data/generated/mission3_dog_search_index.json"
   ],
-  "total_records": 715,
-  "updated_at_utc": "2026-06-05T19:42:50Z"
+  "total_records": 716,
+  "updated_at_utc": "2026-06-05T20:05:33Z"
 }
