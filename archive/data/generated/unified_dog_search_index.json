@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "33000000000000000",
-      "usd_estimate": "51.75000000",
+      "usd_estimate": "51.50000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$51.75",
+      "usd_estimate_display": "$51.50",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-06",
-      "usd_estimate_price_usd": "1568.1818181818181818181818181818181818181818181818181818181818181818181818181818",
+      "usd_estimate_price_usd": "1560.6060606060606060606060606060606060606060606060606060606060606060606060606061",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 736
     },
     "schema_version": 1,
-    "search_text": "dog 735 dog #735 735 mission 3 mission 3 base ongoing 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0x4119…72cb 0.033 eth 33000000000000000 51.75 $51.75 2026-06-06t00:47:41z #175/736 generated auction feed 0x4f9f87f1f1a11e1f551fa73236408460b16e130b91fcf18ef1800412f0c98a1e 0xf39346804f9ad7cb6e91f829579d80fdeac0a4776b5f946ee16c2602ccba8743 background: none (90.2%) background none body: redbrown (15.4%) body redbrown neck: redcollar (31.0%) neck redcollar mouth: tongue (9.4%) mouth tongue ears: loopearring (27.4%) ears loopearring head: headphones (6.4%) head headphones eyes: monocle (6.7%) eyes monocle generated_auction_feed",
+    "search_text": "dog 735 dog #735 735 mission 3 mission 3 base ongoing 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0x4119…72cb 0.033 eth 33000000000000000 51.5 $51.50 2026-06-06t00:47:41z #175/736 generated auction feed 0x4f9f87f1f1a11e1f551fa73236408460b16e130b91fcf18ef1800412f0c98a1e 0xf39346804f9ad7cb6e91f829579d80fdeac0a4776b5f946ee16c2602ccba8743 background: none (90.2%) background none body: redbrown (15.4%) body redbrown neck: redcollar (31.0%) neck redcollar mouth: tongue (9.4%) mouth tongue ears: loopearring (27.4%) ears loopearring head: headphones (6.4%) head headphones eyes: monocle (6.7%) eyes monocle generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
