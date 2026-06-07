@@ -518,6 +518,43 @@ CROSS JOIN eth_price
 LEFT JOIN address_labels l ON l.address_lc = LOWER(c.bidder)
 LEFT JOIN dog_metadata d USING (token_id);
 
+DROP TABLE IF EXISTS current_auction_bid_history;
+CREATE TABLE current_auction_bid_history AS
+WITH eth_price AS (
+  SELECT
+    COALESCE((SELECT value FROM token_stats WHERE metric = 'eth_usd_price'), '0') AS eth_usd_text,
+    COALESCE(CAST((SELECT value FROM token_stats WHERE metric = 'eth_usd_price') AS REAL), 0) AS eth_usd,
+    COALESCE((SELECT value FROM token_stats WHERE metric = 'eth_usd_source'), 'unavailable') AS eth_usd_source
+),
+current_row AS (
+  SELECT * FROM current_auction LIMIT 1
+)
+SELECT
+  b.block_time_utc AS bid_time_utc,
+  b.token_id,
+  'Dog #' || b.token_id AS dog,
+  COALESCE(l.label, substr(LOWER(b.bidder), 1, 6) || '…' || substr(LOWER(b.bidder), -4)) AS bidder,
+  COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(b.bidder)) AS bidder_url,
+  b.bidder AS bidder_wallet,
+  printf('%.5f ETH ($%.0f)', b.bid_eth, b.bid_eth * eth_price.eth_usd) AS bid,
+  ROUND(b.bid_eth, 8) AS bid_eth,
+  ROUND(b.bid_eth * eth_price.eth_usd, 2) AS bid_usd,
+  eth_price.eth_usd_text AS eth_usd_price_live,
+  DATE(COALESCE(NULLIF(c.latest_block_time_utc, ''), 'now')) AS eth_usd_price_date_utc,
+  'current_eth_usd_price' AS usd_estimate_source,
+  eth_price.eth_usd_source AS usd_estimate_source_detail,
+  'live_current' AS usd_estimate_confidence,
+  'current_auction_bid_history_live_eth_usd' AS usd_estimate_basis,
+  b.extended,
+  b.block_number,
+  b.log_index,
+  b.tx_hash
+FROM auction_bids b
+JOIN current_row c ON c.token_id = b.token_id
+CROSS JOIN eth_price
+LEFT JOIN address_labels l ON l.address_lc = LOWER(b.bidder)
+ORDER BY b.block_number DESC, b.log_index DESC;
+
 DROP TABLE IF EXISTS current_latest_bid;
 CREATE TABLE current_latest_bid AS
 WITH current_row AS (

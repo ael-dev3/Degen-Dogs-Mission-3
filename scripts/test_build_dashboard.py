@@ -169,6 +169,7 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
     dashboard.insert_rows(conn, "auction_bids", [
         {"token_id": 9, "bidder": "0x0000000000000000000000000000000000000099", "bid_eth": 0.25, "bid_wei": "250000000000000000", "extended": 0, "block_number": 95, "tx_hash": "0xbid9", "log_index": 0, "block_time_utc": "2026-05-31 19:00:00"},
         {"token_id": 10, "bidder": "0x00000000000000000000000000000000000000a1", "bid_eth": 0.5, "bid_wei": "500000000000000000", "extended": 0, "block_number": 110, "tx_hash": "0xbid10", "log_index": 0, "block_time_utc": "2026-06-01 19:00:00"},
+        {"token_id": 11, "bidder": "0x00000000000000000000000000000000000000c3", "bid_eth": 0.75, "bid_wei": "750000000000000000", "extended": 0, "block_number": 205, "tx_hash": "0xbid11early", "log_index": 0, "block_time_utc": "2026-06-02 00:30:00"},
         {"token_id": 11, "bidder": "0x00000000000000000000000000000000000000b2", "bid_eth": 1.0, "bid_wei": "1000000000000000000", "extended": 0, "block_number": 210, "tx_hash": "0xbid11", "log_index": 0, "block_time_utc": "2026-06-02 01:00:00"},
     ], [("token_id", "INTEGER"), ("bidder", "TEXT"), ("bid_eth", "REAL"), ("bid_wei", "TEXT"), ("extended", "INTEGER"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     dashboard.insert_rows(conn, "auction_settled", [
@@ -176,7 +177,10 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
         {"token_id": 10, "winner": "0x00000000000000000000000000000000000000a1", "amount_eth": 0.5, "amount_wei": "500000000000000000", "block_number": 120, "tx_hash": "0xsettled10", "log_index": 0, "block_time_utc": "2026-06-01 20:00:00"},
     ], [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     dashboard.insert_rows(conn, "woof_holders", [], [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
-    dashboard.insert_rows(conn, "farcaster_profiles", [], [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
+    dashboard.insert_rows(conn, "farcaster_profiles", [
+        {"address": "0x00000000000000000000000000000000000000b2", "fid": 102, "username": "unitcurrent", "display_name": "Unit Current", "pfp_url": ""},
+        {"address": "0x00000000000000000000000000000000000000c3", "fid": 103, "username": "unitearly", "display_name": "Unit Early", "pfp_url": ""},
+    ], [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
     dashboard.insert_rows(conn, "dog_metadata", [
         {"token_id": 9, "dog_name": "Degen Dog #9", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0},
         {"token_id": 10, "dog_name": "Degen Dog #10", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0},
@@ -220,7 +224,7 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
     conn.executescript(dashboard.SQL_PATH.read_text(encoding="utf-8"))
     return {
         name: dashboard.table_dicts(*dashboard.fetch_table(conn, name))
-        for name in ["recent_bids", "auction_winners", "auction_feed", "current_auction"]
+        for name in ["recent_bids", "auction_winners", "auction_feed", "current_auction", "current_auction_bid_history"]
     }
 
 
@@ -266,6 +270,102 @@ def test_historical_auction_usd_uses_event_day_price_while_live_bid_uses_current
     assert low_live["amount_usd"] == 2000.0
     assert high_live["amount_usd"] == 9000.0
     assert low_live["usd_estimate_source"] == "current_eth_usd_price"
+
+
+def test_current_auction_bid_history_archives_all_current_bids_with_live_usd_and_profiles() -> None:
+    dashboard = load_module()
+    result = run_pricing_sql_fixture(dashboard, "2000")
+    history = result["current_auction_bid_history"]
+
+    assert [row["token_id"] for row in history] == [11, 11]
+    assert [row["bidder"] for row in history] == ["@unitcurrent", "@unitearly"]
+    assert [row["bidder_wallet"] for row in history] == [
+        "0x00000000000000000000000000000000000000b2",
+        "0x00000000000000000000000000000000000000c3",
+    ]
+    assert history[0]["bid_eth"] == 1.0
+    assert history[0]["bid_usd"] == 2000.0
+    assert history[0]["bid"] == "1.00000 ETH ($2000)"
+    assert history[1]["bid_eth"] == 0.75
+    assert history[1]["bid_usd"] == 1500.0
+    assert history[0]["eth_usd_price_live"] == "2000"
+    assert history[0]["usd_estimate_basis"] == "current_auction_bid_history_live_eth_usd"
+    assert history[0]["tx_hash"] == "0xbid11"
+    assert history[1]["tx_hash"] == "0xbid11early"
+
+
+def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None:
+    dashboard = load_module()
+    wallet = "0x00000000000000000000000000000000000000b2"
+    tables = {
+        "mission3_metrics": (
+            ["metric", "value"],
+            [("site_url", "https://example.test"), ("current_auction_token_id", "11")],
+        ),
+        "auction_feed": (
+            [
+                "status",
+                "dog",
+                "dog_image_url",
+                "dog_external_url",
+                "dog_opensea_url",
+                "bidder_winner",
+                "bidder_winner_url",
+                "bidder_winner_wallet",
+                "bid",
+                "amount_eth",
+                "amount_usd",
+                "time_remaining",
+                "auction_end_utc",
+                "rarity",
+                "traits",
+                "trait_rarity",
+            ],
+            [(
+                "ongoing",
+                "Dog #11",
+                "",
+                "",
+                "",
+                "@unitcurrent",
+                "https://farcaster.xyz/unitcurrent",
+                wallet,
+                "1.00000 ETH ($2000)",
+                1.0,
+                2000.0,
+                "02:00:00",
+                "2026-06-02 04:00:00",
+                "Rank 1",
+                "",
+                "",
+            )],
+        ),
+        "current_auction_bid_history": (
+            ["bid_time_utc", "token_id", "dog", "bidder", "bidder_url", "bidder_wallet", "bid", "bid_eth", "bid_usd", "block_number", "log_index", "tx_hash"],
+            [
+                ("2026-06-02 01:00:00", 11, "Dog #11", "@unitcurrent", "https://farcaster.xyz/unitcurrent", wallet, "1.00000 ETH ($2000)", 1.0, 2000.0, 210, 0, "0xbid11"),
+                ("2026-06-02 00:30:00", 11, "Dog #11", "@unitearly", "https://farcaster.xyz/unitearly", "0x00000000000000000000000000000000000000c3", "0.75000 ETH ($1500)", 0.75, 1500.0, 205, 0, "0xbid11early"),
+            ],
+        ),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    assert 'class="bid-history-menu"' in rendered
+    assert "Bid history" in rendered
+    assert "2 bids" in rendered
+    assert "@unitcurrent" in rendered
+    assert wallet in rendered
+    assert "1.00000 ETH ($2000)" in rendered
+    assert rendered.index("detail-bidder") < rendered.index("bid-history-menu")
+    assert 'data-table="current_auction_bid_history"' not in rendered
+    assert 'data-name="current_auction_bid_history"' not in rendered
 
 
 def write_reward_snapshot(path: Path) -> None:

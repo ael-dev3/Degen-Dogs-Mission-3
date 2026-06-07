@@ -12,7 +12,7 @@
   {
     "table": "historical_dog_search",
     "file": "generated/historical_dog_search.csv",
-    "rows": 737
+    "rows": 738
   },
   {
     "table": "historical_dog_report",
@@ -22,6 +22,11 @@
   {
     "table": "current_latest_bid",
     "file": "generated/current_latest_bid.csv",
+    "rows": 1
+  },
+  {
+    "table": "current_auction_bid_history",
+    "file": "generated/current_auction_bid_history.csv",
     "rows": 1
   },
   {
@@ -37,7 +42,7 @@
   {
     "table": "auction_timeline",
     "file": "generated/auction_timeline.csv",
-    "rows": 147
+    "rows": 148
   },
   {
     "table": "auction_daily_activity",
@@ -67,12 +72,12 @@
   {
     "table": "season6_sup_by_winner",
     "file": "generated/season6_sup_by_winner.csv",
-    "rows": 5
+    "rows": 6
   },
   {
     "table": "season6_sup_rewards_by_auction",
     "file": "generated/season6_sup_rewards_by_auction.csv",
-    "rows": 5
+    "rows": 6
   },
   {
     "table": "season6_sup_current_bidder_status",
@@ -82,7 +87,7 @@
   {
     "table": "auction_winners",
     "file": "generated/auction_winners.csv",
-    "rows": 146
+    "rows": 147
   },
   {
     "table": "recent_bids",

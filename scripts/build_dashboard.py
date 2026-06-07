@@ -354,6 +354,7 @@ OUTPUT_TABLES = [
     "historical_dog_search",
     "historical_dog_report",
     "current_latest_bid",
+    "current_auction_bid_history",
     "recent_auction_winners",
     "current_auction",
     "auction_timeline",
@@ -377,6 +378,7 @@ DATASET_DESCRIPTIONS = {
     "historical_dog_search": "Combined all-mission Dog lookup with one hosted row per current Dog token ID and searchable hidden metadata.",
     "historical_dog_report": "Mission-level coverage report for the combined historical Dog lookup.",
     "current_latest_bid": "Current auction latest bid and high-bidder snapshot.",
+    "current_auction_bid_history": "All decoded bid events for the current ongoing auction with Farcaster identity and live USD estimates.",
     "recent_auction_winners": "Recent settled winners formatted for the homepage.",
     "current_auction": "Full current auction state, dog metadata, rarity, and countdown fields.",
     "auction_timeline": "One row per auction with bid, winner, and settlement summary.",
@@ -1489,6 +1491,13 @@ def basescan_address_url(address: str | None) -> str:
     if not normalized or normalized == ZERO:
         return ""
     return f"https://basescan.org/address/{normalized}"
+
+
+def basescan_tx_url(tx_hash: str | None) -> str:
+    text = text_value(tx_hash)
+    if not text.startswith("0x") or len(text) < 10:
+        return ""
+    return f"https://basescan.org/tx/{text}"
 
 
 def collect_identity_addresses(
@@ -2751,6 +2760,55 @@ def trait_chips(current: dict[str, str]) -> str:
     return "".join(chips)
 
 
+def current_bid_history_dicts(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> list[dict[str, str]]:
+    cols, rows = tables.get("current_auction_bid_history", ([], []))
+    if not cols or not rows:
+        return []
+    return [
+        {col: text_value(row[idx] if idx < len(row) else "") for idx, col in enumerate(cols)}
+        for row in rows
+    ]
+
+
+def render_bid_history_menu(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> str:
+    history = current_bid_history_dicts(tables)
+    if not history:
+        return ""
+    count = len(history)
+    count_label = f"{count} bid{'s' if count != 1 else ''}"
+    items = []
+    for index, row in enumerate(history):
+        bidder = first_text(row.get("bidder"), short_address(row.get("bidder_wallet") or ""), "Unknown bidder")
+        bidder_url = first_text(row.get("bidder_url"), basescan_address_url(row.get("bidder_wallet")))
+        bidder_html = html.escape(bidder)
+        if bidder_url:
+            bidder_html = f'<a href="{html.escape(bidder_url, quote=True)}" target="_blank" rel="noopener noreferrer">{bidder_html}</a>'
+        tx_hash = text_value(row.get("tx_hash"))
+        tx_url = basescan_tx_url(tx_hash)
+        tx_html = ""
+        if tx_url:
+            tx_html = f'<a class="bid-history-tx" href="{html.escape(tx_url, quote=True)}" target="_blank" rel="noopener noreferrer">Tx</a>'
+        wallet = text_value(row.get("bidder_wallet"))
+        wallet_html = f'<code class="bid-history-wallet">{html.escape(wallet)}</code>' if wallet else ""
+        bid = first_text(row.get("bid"), f"{row.get('bid_eth')} ETH" if row.get("bid_eth") else "")
+        time = text_value(row.get("bid_time_utc"))
+        rank = "High bid" if index == 0 else f"Bid {count - index}"
+        items.append(
+            '<li class="bid-history-row">'
+            f'<span class="bid-history-rank">{html.escape(rank)}</span>'
+            f'<span class="bid-history-main"><strong>{html.escape(bid)}</strong>{bidder_html}</span>'
+            f'<span class="bid-history-meta"><time>{html.escape(time)}</time>{tx_html}</span>'
+            f'{wallet_html}'
+            '</li>'
+        )
+    return (
+        '<details class="bid-history-menu">'
+        f'<summary><span>Bid history</span><b>{html.escape(count_label)}</b></summary>'
+        f'<ol class="bid-history-list">{"".join(items)}</ol>'
+        '</details>'
+    )
+
+
 def public_png_data_uri(filename: str) -> str:
     path = ROOT / "public" / filename
     try:
@@ -2891,6 +2949,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     if image:
         image_html = f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image">'
     rarity = current.get("rarity", "")
+    bid_history_menu = render_bid_history_menu(tables)
     current_detail = "".join(
         [
             f'<span class="detail-status"><b>Status</b>{html.escape(status)}</span>' if status else "",
@@ -2901,6 +2960,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             ) if time_left else "",
             f'<span class="detail-rarity"><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
             f'<span class="detail-bidder"><b>High bidder</b>{participant_html}</span>' if participant else "",
+            bid_history_menu,
         ]
     )
     reward_strip = render_reward_strip(metrics)
@@ -2961,6 +3021,19 @@ a:hover{color:var(--accent2)}
 .current-detail .detail-bid{min-width:142px}
 .current-detail .detail-rarity{min-width:104px}
 .current-detail .detail-bidder{min-width:0}
+.bid-history-menu{position:relative;flex:0 1 230px;min-width:210px;max-width:100%;font-weight:900;line-height:1.12}
+.bid-history-menu summary{list-style:none;cursor:pointer;display:flex;min-height:48px;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid var(--ink);background:#f3fae8;padding:7px 9px;box-shadow:2px 2px 0 rgba(31,107,59,.2)}
+.bid-history-menu summary::-webkit-details-marker{display:none}
+.bid-history-menu summary::after{content:'⌄';font-size:15px;color:var(--calm-dark);transition:transform .16s ease}
+.bid-history-menu[open] summary::after{transform:rotate(180deg)}
+.bid-history-menu summary span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--calm-dark);font-weight:950}
+.bid-history-menu summary b{font-size:13px;color:var(--ink);white-space:nowrap}
+.bid-history-list{position:absolute;left:0;top:calc(100% + 6px);z-index:24;width:min(420px,calc(100vw - 32px));max-height:260px;overflow:auto;display:grid;gap:6px;margin:0;padding:8px;list-style:none;border:2px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink)}
+.bid-history-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 8px;border:1.5px solid var(--line);background:#fffdf6;padding:7px}
+.bid-history-rank{grid-row:1/3;border:1.5px solid var(--ink);background:var(--paper-calm);padding:4px 5px;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.06em;color:var(--calm-dark);align-self:start;white-space:nowrap}
+.bid-history-main{display:flex;align-items:baseline;gap:6px;min-width:0;flex-wrap:wrap}.bid-history-main strong{font-size:13px}.bid-history-main a{font-size:12px}
+.bid-history-meta{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:11px;font-weight:850}.bid-history-tx{border:1.5px solid var(--ink);background:var(--panel2);padding:2px 6px;font-size:10px;font-weight:950;text-transform:uppercase;box-shadow:1.5px 1.5px 0 var(--ink)}
+.bid-history-wallet{grid-column:1/-1;max-width:100%;overflow:hidden;text-overflow:ellipsis;border-top:1px solid var(--line);padding-top:4px;color:var(--muted);font-size:10px;background:transparent}
 .current-detail .timer-card{min-width:180px;position:relative;overflow:hidden;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
 .current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm);color:var(--ink);border-color:#a7dfa0;box-shadow:3px 3px 0 rgba(65,155,79,.16)}
 .current-detail .timer-card--urgent{background:var(--paper-urgent);color:var(--ink);border-color:var(--urgent);box-shadow:3px 3px 0 rgba(229,27,50,.18)}
