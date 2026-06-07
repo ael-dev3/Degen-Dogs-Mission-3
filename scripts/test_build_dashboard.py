@@ -378,10 +378,10 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
     assert 'data-table="current_auction_bid_history"' not in rendered
     assert 'data-name="current_auction_bid_history"' not in rendered
     css_markers = [
-        ".bid-history-menu{position:relative;align-self:stretch;flex:0 1 172px;min-width:164px;max-width:100%;margin-inline:auto",
+        ".bid-history-menu{position:relative;align-self:stretch;flex:0 1 158px;min-width:150px;max-width:100%;margin-inline:0",
         ".bid-history-menu summary{list-style:none;cursor:pointer;position:relative;display:flex;min-height:48px;height:100%;flex-direction:column;align-items:center;justify-content:center;text-align:center",
-        ".bid-history-list{position:absolute;left:50%;top:calc(100% + 6px);z-index:24;transform:translateX(-50%);width:min(360px,calc(100vw - 32px))",
-        "@media (max-width:640px){.bid-history-menu{flex:1 1 auto;min-width:128px}",
+        ".bid-history-list{position:absolute;left:50%;top:calc(100% + 3px);z-index:24;transform:translateX(-50%);width:min(340px,calc(100vw - 24px))",
+        "@media (max-width:640px){.bid-history-menu{flex:0 1 150px;min-width:136px}",
         "@media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span,.bid-history-menu{width:100%;max-width:100%}",
     ]
     for marker in css_markers:

@@ -412,6 +412,56 @@ def test_validator_catches_auction_feed_bad_live_usd() -> None:
         assert_raises_contains(lambda: run_validation(root), "auction_feed current row amount_usd differs from current_auction")
 
 
+def test_validator_catches_recent_settled_unified_row_missing_usd() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        settled_wallet = "0x0000000000000000000000000000000000000728"
+        feed = json.loads((root / "generated" / "auction_feed.json").read_text(encoding="utf-8"))
+        feed.append({
+            "status": "settled",
+            "dog": "Dog #728",
+            "bidder_winner": "@settled",
+            "bidder_winner_wallet": settled_wallet,
+            "bid": "0.02662 ETH ($48)",
+            "amount_eth": "0.02662",
+            "amount_usd": "48.22",
+            "amount_usd_at_event": "48.22",
+            "eth_usd_price_at_event": "1811.346676900944",
+            "eth_usd_price_date_utc": "2026-06-04",
+            "usd_estimate_source": "defillama_coin_prices",
+            "usd_estimate_confidence": "medium",
+            "auction_time_utc": "2026-06-07 20:10:25",
+            "settled_time_utc": "2026-06-07 20:10:25",
+            "last_bid_utc": "2026-06-07 20:02:17",
+        })
+        write_json(root / "generated" / "auction_feed.json", feed)
+        stale_unified_row = {
+            "mission": 3,
+            "dog_id": 728,
+            "status": "settled",
+            "winner_or_high_bidder": {"wallet": settled_wallet, "display": "@settled"},
+            "amount": {
+                "native": "0.02662",
+                "native_symbol": "ETH",
+                "usd_estimate": None,
+                "usd_estimate_display": None,
+                "usd_estimate_source": None,
+                "usd_estimate_confidence": "missing",
+            },
+            "activity_time_utc": "2026-06-07T20:10:25Z",
+            "search_text": "dog 728 @settled 0.02662 eth",
+        }
+        for rel in [
+            "archive/data/generated/unified_dog_search_index.json",
+            "public/generated/unified_dog_search_index.json",
+        ]:
+            rows = json.loads((root / rel).read_text(encoding="utf-8"))
+            rows.append(stale_unified_row)
+            write_json(root / rel, rows)
+        assert_raises_contains(lambda: run_validation(root), "recent archive USD estimate")
+
+
 def test_validator_catches_current_bid_history_bad_live_usd_math() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)

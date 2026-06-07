@@ -142,6 +142,50 @@ def test_settled_generated_feed_record_uses_historical_event_price_not_current_f
     assert estimate["price_source"] == "unit_test_event_day_price"
 
 
+def test_settled_generated_feed_record_preserves_event_usd_when_historical_price_missing() -> None:
+    archive_usd = load_module()
+    record = live_feed_record()
+    record["dog_id"] = 736
+    record["status"] = "settled"
+    record["activity_time_utc"] = "2026-06-07T20:10:25Z"
+    record["settlement"] = {"settled": True, "block_time_utc": "2026-06-07T20:10:25Z"}
+    record["amount"].update({
+        "native": "0.02662",
+        "raw": "26620000000000000",
+        "usd_estimate": "48.22",
+        "usd_estimate_display": "$48.22",
+        "usd_estimate_source": "defillama_coin_prices",
+        "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+        "usd_estimate_confidence": "medium",
+        "usd_estimate_price_usd": "1811.346676900944",
+        "usd_estimate_price_date_utc": "2026-06-04",
+        "amount_usd_at_event": "48.22",
+        "eth_usd_price_at_event": "1811.346676900944",
+        "eth_usd_price_date_utc": "2026-06-04",
+        "usd_estimate_time_basis": "settlement_block_time",
+    })
+
+    estimate = archive_usd.update_record(record, {})
+
+    amount = record["amount"]
+    assert amount["usd_estimate"] == "48.22000000"
+    assert amount["usd_estimate_display"] == "$48.22"
+    assert amount["usd_estimate_source"] == "defillama_coin_prices"
+    assert amount["usd_estimate_confidence"] == "medium"
+    assert amount["amount_usd_at_event"] == "48.22"
+    assert amount["eth_usd_price_at_event"] == "1811.346676900944"
+    assert amount["eth_usd_price_date_utc"] == "2026-06-04"
+    assert estimate is not None
+    assert estimate["event_type"] == "settlement"
+    assert estimate["price_status"] == "priced"
+    assert estimate["estimated_usd_display"] == "$48.22"
+    assert estimate["price_source"] == "defillama_coin_prices"
+    assert estimate["price_source_detail"] == "coins.llama.fi/chart/coingecko:ethereum"
+    assert estimate["amount_usd_at_event"] == "48.22"
+    assert estimate["eth_usd_price_at_event"] == "1811.346676900944"
+    assert estimate["eth_usd_price_date_utc"] == "2026-06-04"
+
+
 def test_regular_archive_record_still_uses_historical_price() -> None:
     archive_usd = load_module()
     record = {

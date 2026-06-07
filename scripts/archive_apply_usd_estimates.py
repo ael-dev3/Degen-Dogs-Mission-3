@@ -90,6 +90,10 @@ def should_preserve_source_usd(record: dict[str, Any], amount: dict[str, Any]) -
     return bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
 
 
+def has_event_usd_provenance(amount: dict[str, Any]) -> bool:
+    return all(text_value(amount.get(field)) for field in ["amount_usd_at_event", "eth_usd_price_at_event", "eth_usd_price_date_utc"])
+
+
 def parse_day(value: Any) -> datetime | None:
     text = str(value or "").strip()
     if not text:
@@ -187,24 +191,46 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
     notes: Any = ""
 
     source_estimate = decimal_or_none(amount.get("usd_estimate"))
-    if should_preserve_source_usd(record, amount) and source_estimate is not None and source_estimate >= 0:
+    raw_settlement = record.get("settlement")
+    settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
+    status_text = text_value(record.get("status")).lower()
+    is_settled = bool(settlement.get("settled")) or status_text == "settled"
+    source_has_generated_feed = bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
+    amount_source = text_value(amount.get("usd_estimate_source")).lower()
+    has_historical_event_source = bool(amount_source and amount_source not in LIVE_USD_SOURCES and has_event_usd_provenance(amount))
+    preserve_source = should_preserve_source_usd(record, amount)
+    if (
+        not preserve_source
+        and price_row is None
+        and source_estimate is not None
+        and source_estimate >= 0
+        and ((not is_settled and source_has_generated_feed) or (is_settled and has_historical_event_source))
+    ):
+        preserve_source = True
+
+    if preserve_source and source_estimate is not None and source_estimate >= 0:
         estimate = source_estimate
-        price_usd = (estimate / native) if native != 0 else None
+        existing_event_price = decimal_or_none(amount.get("eth_usd_price_at_event"))
+        price_usd = existing_event_price or ((estimate / native) if native != 0 else None)
         price_source = text_value(amount.get("usd_estimate_source")) or "generated_auction_feed"
-        price_source_detail = "precomputed generated auction-feed USD estimate"
-        price_date_utc = text_value(amount.get("usd_estimate_price_date_utc")) or event_day
+        price_source_detail = text_value(amount.get("usd_estimate_source_detail")) or "precomputed generated auction-feed USD estimate"
+        price_date_utc = text_value(amount.get("eth_usd_price_date_utc")) or text_value(amount.get("usd_estimate_price_date_utc")) or event_day
         price_confidence = text_value(amount.get("usd_estimate_confidence")) or "medium"
         notes = text_value(amount.get("usd_estimate_notes")) or "preserved_source_usd_estimate"
+        event_amount = text_value(amount.get("amount_usd_at_event"))
+        event_price = text_value(amount.get("eth_usd_price_at_event"))
+        event_date = text_value(amount.get("eth_usd_price_date_utc"))
         amount["usd_estimate"] = str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP))
         amount["usd_estimate_display"] = money_display(estimate)
         amount["usd_estimate_source"] = price_source
+        amount["usd_estimate_source_detail"] = price_source_detail
         amount["usd_estimate_confidence"] = price_confidence
         amount["usd_estimate_price_date_utc"] = price_date_utc
         amount["usd_estimate_price_usd"] = str(price_usd) if price_usd is not None else None
         amount["usd_estimate_notes"] = notes
-        amount["amount_usd_at_event"] = None
-        amount["eth_usd_price_at_event"] = None
-        amount["eth_usd_price_date_utc"] = None
+        amount["amount_usd_at_event"] = event_amount or None
+        amount["eth_usd_price_at_event"] = event_price or None
+        amount["eth_usd_price_date_utc"] = event_date or None
     elif price_row:
         price_usd = decimal_or_none(price_row.get("price_usd"))
         if price_usd is not None:

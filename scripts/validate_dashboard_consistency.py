@@ -300,14 +300,18 @@ def find_current_feed_row(feed_rows: list[dict[str, Any]], current_dog_id: int) 
     return matches[0]
 
 
-def find_unified_current(path: Path, current_dog_id: int) -> dict[str, Any]:
+def find_unified_mission3(path: Path, mission3_dog_id: int) -> dict[str, Any]:
     rows = load_json(path)
     if not isinstance(rows, list):
         raise AssertionError(f"{path.relative_to(ROOT)} is not a JSON list")
     for row in rows:
-        if isinstance(row, dict) and row.get("mission") == 3 and row.get("dog_id") == current_dog_id:
+        if isinstance(row, dict) and row.get("mission") == 3 and row.get("dog_id") == mission3_dog_id:
             return row
-    raise AssertionError(f"{path.relative_to(ROOT)} missing Mission 3 Dog #{current_dog_id}")
+    raise AssertionError(f"{path.relative_to(ROOT)} missing Mission 3 Dog #{mission3_dog_id}")
+
+
+def find_unified_current(path: Path, current_dog_id: int) -> dict[str, Any]:
+    return find_unified_mission3(path, current_dog_id)
 
 
 def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[str, str]) -> None:
@@ -745,6 +749,32 @@ def validate_current_surface() -> dict[str, Any]:
             stale_amount_term = f"{stale_amount.normalize()} eth"
             if stale_amount != expected_native and stale_amount_term in search_text:
                 raise AssertionError(f"{path.relative_to(ROOT)} search_text still contains stale archive bid amount {stale_amount_term}")
+
+        for feed_row in feed_rows:
+            feed_status = text(feed_row.get("status")).lower()
+            if "settled" not in feed_status and "ended" not in feed_status:
+                continue
+            row_usd = first_optional_decimal(feed_row.get("amount_usd_at_event"), feed_row.get("amount_usd"))
+            row_native = optional_decimal_value(feed_row.get("amount_eth"))
+            if row_usd is None or row_native is None:
+                continue
+            row_dog_id = dog_id(feed_row)
+            unified_row = find_unified_mission3(path, row_dog_id)
+            unified_amount_raw = unified_row.get("amount")
+            unified_amount: dict[str, Any] = unified_amount_raw if isinstance(unified_amount_raw, dict) else {}
+            actual_usd = optional_decimal_value(unified_amount.get("usd_estimate"))
+            if actual_usd is None or money_display(actual_usd) != money_display(row_usd):
+                raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD estimate differs from auction_feed for Dog #{row_dog_id}")
+            if text(unified_amount.get("usd_estimate_display")) != money_display(row_usd):
+                raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD estimate display differs from auction_feed for Dog #{row_dog_id}")
+            if optional_decimal_value(unified_amount.get("native")) != row_native:
+                raise AssertionError(f"{path.relative_to(ROOT)} recent archive native amount differs from auction_feed for Dog #{row_dog_id}")
+            if text(unified_amount.get("usd_estimate_source")) == "" or text(unified_amount.get("usd_estimate_confidence")).lower() == "missing":
+                raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD provenance missing for Dog #{row_dog_id}")
+            if feed_status == "settled":
+                for field in ["amount_usd_at_event", "eth_usd_price_at_event", "eth_usd_price_date_utc"]:
+                    if text(feed_row.get(field)) and text(unified_amount.get(field)) == "":
+                        raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD event field {field} missing for Dog #{row_dog_id}")
 
     return {
         "current_dog": f"Dog #{current_dog_id}",
