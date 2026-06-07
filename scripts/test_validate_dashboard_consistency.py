@@ -167,6 +167,24 @@ def write_fixture(
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "generated" / "current_latest_bid.json", [{"latest_bid_eth": 0.01, "latest_bid_usd": 19.98, "bidder": "@0xael.eth", "bidder_wallet": wallet, "bid_time_utc": "2026-05-30 18:40:23"}])
+    current_history = [{
+        "token_id": 729,
+        "dog": "Dog #729",
+        "bidder": "@0xael.eth",
+        "bidder_wallet": wallet,
+        "bid": "0.01000 ETH ($20)",
+        "bid_eth": "0.01",
+        "bid_usd": "19.98",
+        "eth_usd_price_live": "1998",
+        "usd_estimate_source": "current_eth_usd_price",
+        "usd_estimate_confidence": "live_current",
+        "bid_time_utc": "2026-05-30 18:40:23",
+        "block_number": 46732183,
+        "log_index": 1,
+        "tx_hash": "0x" + "1" * 64,
+    }]
+    write_json(root / "generated" / "current_auction_bid_history.json", current_history)
+    write_json(root / "public" / "generated" / "current_auction_bid_history.json", current_history)
     write_json(root / "generated" / "auction_feed.json", [{
         "status": "ongoing",
         "dog": "Dog #729",
@@ -392,6 +410,28 @@ def test_validator_catches_auction_feed_bad_live_usd() -> None:
         feed[0]["amount_usd"] = "1.00"
         write_json(root / "generated" / "auction_feed.json", feed)
         assert_raises_contains(lambda: run_validation(root), "auction_feed current row amount_usd differs from current_auction")
+
+
+def test_validator_catches_current_bid_history_bad_live_usd_math() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        history = json.loads((root / "generated" / "current_auction_bid_history.json").read_text(encoding="utf-8"))
+        history[0]["bid_usd"] = "1.00"
+        write_json(root / "generated" / "current_auction_bid_history.json", history)
+        write_json(root / "public" / "generated" / "current_auction_bid_history.json", history)
+        assert_raises_contains(lambda: run_validation(root), "current_auction_bid_history high bid USD differs from current_auction")
+
+
+def test_validator_catches_current_bid_history_wrong_live_eth_price_math() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        history = json.loads((root / "generated" / "current_auction_bid_history.json").read_text(encoding="utf-8"))
+        history[0]["eth_usd_price_live"] = "1"
+        write_json(root / "generated" / "current_auction_bid_history.json", history)
+        write_json(root / "public" / "generated" / "current_auction_bid_history.json", history)
+        assert_raises_contains(lambda: run_validation(root), "current_auction_bid_history bid_usd does not equal bid_eth * live ETH/USD")
 
 
 def test_validator_catches_stale_season6_rendered_projection() -> None:

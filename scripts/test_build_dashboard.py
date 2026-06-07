@@ -271,6 +271,17 @@ def test_historical_auction_usd_uses_event_day_price_while_live_bid_uses_current
     assert high_live["amount_usd"] == 9000.0
     assert low_live["usd_estimate_source"] == "current_eth_usd_price"
 
+    low_current_row = low_current["current_auction"][0]
+    high_current_row = high_current["current_auction"][0]
+    low_history_high_bid = low_current["current_auction_bid_history"][0]
+    high_history_high_bid = high_current["current_auction_bid_history"][0]
+    assert low_current_row["current_bid_usd"] == low_live["amount_usd"] == low_history_high_bid["bid_usd"] == 2000.0
+    assert high_current_row["current_bid_usd"] == high_live["amount_usd"] == high_history_high_bid["bid_usd"] == 9000.0
+    assert low_history_high_bid["eth_usd_price_live"] == "2000"
+    assert high_history_high_bid["eth_usd_price_live"] == "9000"
+    assert low_history_high_bid["usd_estimate_source"] == "current_eth_usd_price"
+    assert low_history_high_bid["usd_estimate_confidence"] == "live_current"
+
 
 def test_current_auction_bid_history_archives_all_current_bids_with_live_usd_and_profiles() -> None:
     dashboard = load_module()
@@ -366,6 +377,15 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
     assert rendered.index("detail-bidder") < rendered.index("bid-history-menu")
     assert 'data-table="current_auction_bid_history"' not in rendered
     assert 'data-name="current_auction_bid_history"' not in rendered
+    css_markers = [
+        ".bid-history-menu{position:relative;align-self:stretch;flex:0 1 172px;min-width:164px;max-width:100%;margin-inline:auto",
+        ".bid-history-menu summary{list-style:none;cursor:pointer;position:relative;display:flex;min-height:48px;height:100%;flex-direction:column;align-items:center;justify-content:center;text-align:center",
+        ".bid-history-list{position:absolute;left:50%;top:calc(100% + 6px);z-index:24;transform:translateX(-50%);width:min(360px,calc(100vw - 32px))",
+        "@media (max-width:640px){.bid-history-menu{flex:1 1 auto;min-width:128px}",
+        "@media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span,.bid-history-menu{width:100%;max-width:100%}",
+    ]
+    for marker in css_markers:
+        assert marker in rendered
 
 
 def write_reward_snapshot(path: Path) -> None:

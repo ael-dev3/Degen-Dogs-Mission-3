@@ -107,11 +107,27 @@ def assert_no_farcaster_channel_panel() -> None:
             raise AssertionError(f"generated index.html still contains reverted Farcaster panel marker: {marker}")
 
 
+def assert_bid_history_card_layout() -> None:
+    html = INDEX_PATH.read_text(encoding="utf-8")
+    required_markers = [
+        '<details class="bid-history-menu">',
+        '.bid-history-menu{position:relative;align-self:stretch;flex:0 1 172px;min-width:164px;max-width:100%;margin-inline:auto',
+        '.bid-history-menu summary{list-style:none;cursor:pointer;position:relative;display:flex;min-height:48px;height:100%;flex-direction:column;align-items:center;justify-content:center;text-align:center',
+        '.bid-history-list{position:absolute;left:50%;top:calc(100% + 6px);z-index:24;transform:translateX(-50%);width:min(360px,calc(100vw - 32px))',
+        '@media (max-width:640px){.bid-history-menu{flex:1 1 auto;min-width:128px}',
+        '@media (max-width:380px){.current-detail{display:grid;grid-template-columns:1fr}.current-detail > span,.bid-history-menu{width:100%;max-width:100%}',
+    ]
+    for marker in required_markers:
+        if marker not in html:
+            raise AssertionError(f"generated index.html missing bid history layout marker: {marker}")
+
+
 def main() -> int:
     assert_trait_links()
     assert_timer_urgency_colors()
     assert_creator_popover()
     assert_no_farcaster_channel_panel()
+    assert_bid_history_card_layout()
     print("dashboard_ui_checks=pass")
     return 0
 
