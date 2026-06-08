@@ -58,7 +58,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 66.84 $66.84 2026-06-05t20:03:17z #532/738 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.6%) mouth none ears: loopearring (27.4%) ears loopearring head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
+    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 0x3516…e347 staraptor.eth 0.0369 eth 36900000000000000 66.84 $66.84 2026-06-05t20:03:17z #532/738 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.6%) mouth none ears: loopearring (27.4%) ears loopearring head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-05T20:03:17Z",
@@ -113,10 +113,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@staraptor.eth",
+      "display": "0x3516…e347",
       "farcaster_fid": null,
       "farcaster_handle": "staraptor.eth",
-      "profile_url": "https://farcaster.xyz/staraptor.eth",
+      "profile_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347",
       "wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
       "wallet_explorer_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347"
     }

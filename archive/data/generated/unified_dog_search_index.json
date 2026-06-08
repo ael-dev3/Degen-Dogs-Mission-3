@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "30000000000000000",
-      "usd_estimate": "50.78000000",
+      "usd_estimate": "50.55000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$50.78",
+      "usd_estimate_display": "$50.55",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-08",
-      "usd_estimate_price_usd": "1692.6666666666666666666666666666666666666666666666666666666666666666666666666667",
+      "usd_estimate_price_usd": "1685",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.03 eth 30000000000000000 50.78 $50.78 2026-06-08t10:47:53z #557/738 generated auction feed 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.6%) neck none mouth: tongue (9.5%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.2%) head none eyes: glasses (12.6%) eyes glasses generated_auction_feed",
+    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.03 eth 30000000000000000 50.55 $50.55 2026-06-08t10:47:53z #557/738 generated auction feed 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.6%) neck none mouth: tongue (9.5%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.2%) head none eyes: glasses (12.6%) eyes glasses generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -184,7 +184,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 736 dog #736 736 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.02662 eth 26620000000000000 48.22 $48.22 2026-06-07t20:10:25z #672/738 generated auction feed 0x5b14503876ca7239a784f9087a4c02793806576d1bbe02897bf759217277e17f 0x3566e8990148d787e80853426bcb40a0619b5f2508296039dcfacdff3e862567 0x2be1ba9c4a18353482498851569eff7433b33b985a79d9e0b06a7b85bf9e239e 0x5875ab25c5a264189622e580d583473d85327fc4749390bad64341dbd396e921 0xa1d2df0d22e2b77506cf4b6220c9e76da329757aebf984c6555f32754c12a787 0x93e577cfd5d85f890a30c1ef50e3a3e242a978ce35931269d639864b360a012c 0x2ec7b494576dbc4c8dc4cf426b2b3b0c310952ba863e2eff190d2d3909d9799a 0x7ccd31d8bd0d186ac61f79ea758e2b5639ee2eb61bcd6370a41dcbfa290953e7 background: none (90.2%) background none body: brown (11.0%) body brown neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
+    "search_text": "dog 736 dog #736 736 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde 0xd29c…1cde thec1 0.02662 eth 26620000000000000 48.22 $48.22 2026-06-07t20:10:25z #672/738 generated auction feed 0x5b14503876ca7239a784f9087a4c02793806576d1bbe02897bf759217277e17f 0x3566e8990148d787e80853426bcb40a0619b5f2508296039dcfacdff3e862567 0x2be1ba9c4a18353482498851569eff7433b33b985a79d9e0b06a7b85bf9e239e 0x5875ab25c5a264189622e580d583473d85327fc4749390bad64341dbd396e921 0xa1d2df0d22e2b77506cf4b6220c9e76da329757aebf984c6555f32754c12a787 0x93e577cfd5d85f890a30c1ef50e3a3e242a978ce35931269d639864b360a012c 0x2ec7b494576dbc4c8dc4cf426b2b3b0c310952ba863e2eff190d2d3909d9799a 0x7ccd31d8bd0d186ac61f79ea758e2b5639ee2eb61bcd6370a41dcbfa290953e7 background: none (90.2%) background none body: brown (11.0%) body brown neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-07T20:10:25Z",
@@ -239,10 +239,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@thec1",
+      "display": "0xd29c…1cde",
       "farcaster_fid": null,
       "farcaster_handle": "thec1",
-      "profile_url": "https://farcaster.xyz/thec1",
+      "profile_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
       "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
       "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
     }
@@ -428,7 +428,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 66.84 $66.84 2026-06-05t20:03:17z #532/738 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.6%) mouth none ears: loopearring (27.4%) ears loopearring head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
+    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 0x3516…e347 staraptor.eth 0.0369 eth 36900000000000000 66.84 $66.84 2026-06-05t20:03:17z #532/738 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.6%) mouth none ears: loopearring (27.4%) ears loopearring head: stripedbeanie (8.8%) head stripedbeanie eyes: none (17.9%) eyes none generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-05T20:03:17Z",
@@ -483,10 +483,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@staraptor.eth",
+      "display": "0x3516…e347",
       "farcaster_fid": null,
       "farcaster_handle": "staraptor.eth",
-      "profile_url": "https://farcaster.xyz/staraptor.eth",
+      "profile_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347",
       "wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
       "wallet_explorer_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347"
     }
@@ -682,7 +682,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 732 dog #732 732 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.05324 eth 53240000000000000 98.92 $98.92 2026-06-03t19:41:49z #222/738 generated auction feed 0x2197f912989dfe6ba63a74d73e12e83040e5bac67215980bc7050410fef54e7d 0xe1944f5dc9024b4f62814a74d2e2702fb817800fdac841afc8701bd3d754e21a 0xfb5c8038a7632aabac3b02896ac6947903410903c409ac61d500269fe8e3a3a0 0x48754454893d88b7c58f9d1883673db6c08fb8bbd7d74dee717ea0dcec76bbcf 0x713daa3848a3d30b20f3d909880e894872501bf6ed6b97ba04cc222eac24036e 0x82e41000fde1ac4387bfe5688ea7a6589e6e4007d4ac5c6e7965d407d06fff04 0x0e96ca133c9f1f88063c7d859335b943be693d071aaececf6616249dc885f654 0xead99c6556939033a853a22913cbe529fa2fde90a992d569075898f96b97b0f5 0xe562291e2a691ef0afa89ca0d9903149dfb59896c5df7f63aac9595e600334eb 0x0ee0cd8998099b3bf31887472da5022082931f70b00b666f3beb107f1f27878f background: none (90.2%) background none body: orange (8.8%) body orange neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: redmohawk (6.9%) head redmohawk eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
+    "search_text": "dog 732 dog #732 732 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 0xdbb8…1922 floam 0.05324 eth 53240000000000000 98.92 $98.92 2026-06-03t19:41:49z #222/738 generated auction feed 0x2197f912989dfe6ba63a74d73e12e83040e5bac67215980bc7050410fef54e7d 0xe1944f5dc9024b4f62814a74d2e2702fb817800fdac841afc8701bd3d754e21a 0xfb5c8038a7632aabac3b02896ac6947903410903c409ac61d500269fe8e3a3a0 0x48754454893d88b7c58f9d1883673db6c08fb8bbd7d74dee717ea0dcec76bbcf 0x713daa3848a3d30b20f3d909880e894872501bf6ed6b97ba04cc222eac24036e 0x82e41000fde1ac4387bfe5688ea7a6589e6e4007d4ac5c6e7965d407d06fff04 0x0e96ca133c9f1f88063c7d859335b943be693d071aaececf6616249dc885f654 0xead99c6556939033a853a22913cbe529fa2fde90a992d569075898f96b97b0f5 0xe562291e2a691ef0afa89ca0d9903149dfb59896c5df7f63aac9595e600334eb 0x0ee0cd8998099b3bf31887472da5022082931f70b00b666f3beb107f1f27878f background: none (90.2%) background none body: orange (8.8%) body orange neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: none (25.2%) ears none head: redmohawk (6.9%) head redmohawk eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-03T19:41:49Z",
@@ -737,10 +737,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@floam",
+      "display": "0xdbb8…1922",
       "farcaster_fid": null,
       "farcaster_handle": "floam",
-      "profile_url": "https://farcaster.xyz/floam",
+      "profile_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922",
       "wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
       "wallet_explorer_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922"
     }
@@ -817,7 +817,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 731 dog #731 731 mission 3 mission 3 base settled 0x412b7153504217b405af821bdcdc5f21c71e3cbc @shalexvivek shalexvivek 0.04311 eth 43110000000000000 86.37 $86.37 2026-06-02t19:37:21z #77/738 generated auction feed 0x7a59b49727c2451fbae2550f2904ed55a9d8c935c9eabf7e043048e8adddd00d 0x2ff84565e9084797035c3713eaac5c9e196d4815536d47fe1abccfb794a5ee35 0x86abe0666227c98feff030de73cbf4ca6ed4590bc8d18ea3a03a3a828f27ed40 0x6ada4861cadb491f29a57ef550bb4f7889eeb54a2689fdffbf1be7d797b38da9 0x6fed2ead69c563e37f1ba8021ec65fb480870c70a283620464a8a3aad5ec00a8 0x32fe85a825f385aa05c326d2caed179963b05a87c29a7069aa1ddef257e99d0e 0x738a87af6d906d0f23711257f5a04c044fa7e1e8d279a75d91773203a44a7706 0x04fba4f9a56ec08d0570dfa4869a0a64cf636b31909e075c2065f70f83f64f67 0x0c56ce9d77c5f8c3ec0111853496bbbfcf3a741a777425fac23ce431dc99eab8 0xce270710ec8811ca6ee3c7a7f6bbf664df1103a8254010b595f9fb71f4ce1cef 0x317acce691ed84f9898c07c3a1ffa75233fec56edf53fe964e8e6cb89485e2af 0x42ea82fd4e0c013291a3278213d1dc48dbcc97b5b1a0f0077ea93218d93fd952 0xafe1bb2ee603af19eadc9fe30f454afd2a8b2846bc301a549de3b6e5087d9722 0xc88ff0bd527b9fd715c38f7efc6b62e61f5a55ce1a90c3dd460c600aa4d548ba 0x7f1e07d97212d5a7fd7db307efd7dfbd8cc8de7f59fa076fe45e12310ac86608 0x2a74ad17c4250361d4ff436ccac714293e1daa0e44945c2dbb15ab443bf04f6c background: halo (9.8%) background halo body: white (11.4%) body white neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.7%) head hoodie eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
+    "search_text": "dog 731 dog #731 731 mission 3 mission 3 base settled 0x412b7153504217b405af821bdcdc5f21c71e3cbc 0x412b…3cbc shalexvivek 0.04311 eth 43110000000000000 86.37 $86.37 2026-06-02t19:37:21z #77/738 generated auction feed 0x7a59b49727c2451fbae2550f2904ed55a9d8c935c9eabf7e043048e8adddd00d 0x2ff84565e9084797035c3713eaac5c9e196d4815536d47fe1abccfb794a5ee35 0x86abe0666227c98feff030de73cbf4ca6ed4590bc8d18ea3a03a3a828f27ed40 0x6ada4861cadb491f29a57ef550bb4f7889eeb54a2689fdffbf1be7d797b38da9 0x6fed2ead69c563e37f1ba8021ec65fb480870c70a283620464a8a3aad5ec00a8 0x32fe85a825f385aa05c326d2caed179963b05a87c29a7069aa1ddef257e99d0e 0x738a87af6d906d0f23711257f5a04c044fa7e1e8d279a75d91773203a44a7706 0x04fba4f9a56ec08d0570dfa4869a0a64cf636b31909e075c2065f70f83f64f67 0x0c56ce9d77c5f8c3ec0111853496bbbfcf3a741a777425fac23ce431dc99eab8 0xce270710ec8811ca6ee3c7a7f6bbf664df1103a8254010b595f9fb71f4ce1cef 0x317acce691ed84f9898c07c3a1ffa75233fec56edf53fe964e8e6cb89485e2af 0x42ea82fd4e0c013291a3278213d1dc48dbcc97b5b1a0f0077ea93218d93fd952 0xafe1bb2ee603af19eadc9fe30f454afd2a8b2846bc301a549de3b6e5087d9722 0xc88ff0bd527b9fd715c38f7efc6b62e61f5a55ce1a90c3dd460c600aa4d548ba 0x7f1e07d97212d5a7fd7db307efd7dfbd8cc8de7f59fa076fe45e12310ac86608 0x2a74ad17c4250361d4ff436ccac714293e1daa0e44945c2dbb15ab443bf04f6c background: halo (9.8%) background halo body: white (11.4%) body white neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.7%) head hoodie eyes: redlasereyes (5.3%) eyes redlasereyes generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-02T19:37:21Z",
@@ -872,10 +872,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@shalexvivek",
+      "display": "0x412b…3cbc",
       "farcaster_fid": null,
       "farcaster_handle": "shalexvivek",
-      "profile_url": "https://farcaster.xyz/shalexvivek",
+      "profile_url": "https://basescan.org/address/0x412b7153504217b405af821bdcdc5f21c71e3cbc",
       "wallet": "0x412b7153504217b405af821bdcdc5f21c71e3cbc",
       "wallet_explorer_url": "https://basescan.org/address/0x412b7153504217b405af821bdcdc5f21c71e3cbc"
     }
@@ -938,7 +938,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.011 eth 11000000000000000 22.05 $22.05 2026-06-01t19:24:33z #93/738 generated auction feed 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.2%) background none body: orange (8.8%) body orange neck: goldnecklace (19.5%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.2%) ears none head: toque (7.0%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 0xa264…08c4 badadan 0.011 eth 11000000000000000 22.05 $22.05 2026-06-01t19:24:33z #93/738 generated auction feed 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.2%) background none body: orange (8.8%) body orange neck: goldnecklace (19.5%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.2%) ears none head: toque (7.0%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-01T19:24:33Z",
@@ -993,10 +993,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@badadan",
+      "display": "0xa264…08c4",
       "farcaster_fid": null,
       "farcaster_handle": "badadan",
-      "profile_url": "https://farcaster.xyz/badadan",
+      "profile_url": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
       "wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
       "wallet_explorer_url": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4"
     }
@@ -1058,7 +1058,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.04 $20.04 2026-05-31t19:12:29z #585/738 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.2%) background none body: brown (11.0%) body brown neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.6%) eyes glasses generated_auction_feed",
+    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 0x76d0…8942 0xael.eth 0.01 eth 10000000000000000 20.04 $20.04 2026-05-31t19:12:29z #585/738 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.2%) background none body: brown (11.0%) body brown neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.6%) eyes glasses generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-31T19:12:29Z",
@@ -1113,10 +1113,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "0x76d0…8942",
       "farcaster_fid": null,
       "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "profile_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
       "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
@@ -1180,7 +1180,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z #707/738 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.2%) background none body: grey (11.1%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.2%) head none eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0xffe1…98ad vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z #707/738 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.2%) background none body: grey (11.1%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.2%) head none eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-30T18:40:09Z",
@@ -1235,10 +1235,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@vaibhavmule",
+      "display": "0xffe1…98ad",
       "farcaster_fid": null,
       "farcaster_handle": "vaibhavmule",
-      "profile_url": "https://farcaster.xyz/vaibhavmule",
+      "profile_url": "https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
       "wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
       "wallet_explorer_url": "https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad"
     }
@@ -1302,7 +1302,7 @@
       "total": 738
     },
     "schema_version": 1,
-    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 22.08 $22.08 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #312/738 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo (9.8%) background halo body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: goldearring (15.4%) ears goldearring head: whitemohawk (6.6%) head whitemohawk eyes: sunglasses (14.6%) eyes sunglasses base_logs archive_indexer generated_auction_feed",
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 0xdbb8…1922 floam 0.011 eth 11000000000000000 22.08 $22.08 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #312/738 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo (9.8%) background halo body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: goldearring (15.4%) ears goldearring head: whitemohawk (6.6%) head whitemohawk eyes: sunglasses (14.6%) eyes sunglasses base_logs archive_indexer generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-29T18:38:33Z",
@@ -1359,10 +1359,10 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@floam",
+      "display": "0xdbb8…1922",
       "farcaster_fid": null,
       "farcaster_handle": "floam",
-      "profile_url": "https://farcaster.xyz/floam",
+      "profile_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922",
       "wallet": "0xdbb811ec62338db94858ec21ef1d56b658111922",
       "wallet_explorer_url": "https://basescan.org/address/0xdbb811ec62338db94858ec21ef1d56b658111922"
     }
