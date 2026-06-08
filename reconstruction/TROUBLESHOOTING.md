@@ -84,11 +84,15 @@ Symptom: `npm run watch:onchain` runs, but the dashboard remains stale after a r
 Fix:
 
 - Inspect `.local/mission3_onchain_tracker_state.json`.
-- Check `last_checked_block` and `last_seen_bid_tx` advanced.
-- Check `pending_refresh` and `next_allowed_refresh_after_utc`; cooldown/backoff may be active.
+- Check `last_checked_block` and `last_observed_bid_tx` advanced.
+- Compare `last_observed_amount_wei` / `last_observed_high_bidder` with `generated/current_auction.json[0]`. A mismatch means the watcher saw a newer onchain state than the generated dashboard.
+- Check `last_seen_bid_tx`; this is the acknowledged refreshed/published cursor and should not advance until the refresh command succeeds.
+- Check `pending_refresh`, `pending_bid_log_id`, `pending_amount_wei`, `pending_high_bidder`, and `next_allowed_refresh_after_utc`; cooldown/backoff may be active.
 - Run `npm run watch:onchain:dry` to see detected reasons without writing state.
-- Run `npm run validate:dashboard` after a local refresh to catch top-card/feed mismatches.
+- Run `npm run validate:dashboard` after a local refresh to catch top-card/feed mismatches and stale generated/public/rendered surfaces versus watcher-observed onchain state.
 - If RPC failed, set a reliable `BASE_RPC_URL` or lower `MISSION3_WATCHER_LOG_CHUNK`.
+
+Root-cause pattern to avoid: a same-token `AuctionBid` was detected, the publish command failed or was refused by dirty tracked files, and the watcher advanced its dedupe cursor anyway. The watcher must keep the event pending and retryable until refresh/publish succeeds.
 
 ## Onchain watcher refresh refused
 
@@ -99,6 +103,7 @@ Fix:
 - Default `MISSION3_REFRESH_COMMAND` should be `npm run data && npm run build`.
 - Publish commands require `MISSION3_WATCHER_AUTO_PUSH=1`.
 - In publish mode, clear tracked worktree changes or set `MISSION3_WATCHER_REQUIRE_CLEAN_TREE=0` only for intentional local operation.
+- After a refusal, verify the pending event stayed in `.local/mission3_onchain_tracker_state.json`; the next successful watcher run should retry instead of logging `reasons=none`.
 
 ## Archive data incomplete
 

@@ -530,6 +530,188 @@ def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
         if fragment and fragment not in surface:
             raise AssertionError(f"Season 6 compact card mismatch: missing {fragment!r}")
 
+def wei_to_eth(value: Any) -> Decimal:
+    raw = text(value)
+    if not raw:
+        return Decimal("0")
+    try:
+        return Decimal(raw) / Decimal(10**18)
+    except (InvalidOperation, ValueError) as exc:
+        raise AssertionError(f"invalid wei value {value!r}") from exc
+
+
+def _first_row_at(root: Path, rel: str) -> dict[str, Any]:
+    data = load_json(root / rel)
+    if not isinstance(data, list) or not data or not isinstance(data[0], dict):
+        raise AssertionError(f"{rel} missing first object row")
+    return data[0]
+
+
+def _current_feed_row_at(root: Path, current_dog_id: int, rel: str = "generated/auction_feed.json") -> dict[str, Any]:
+    data = load_json(root / rel)
+    rows = [row for row in data if isinstance(row, dict) and dog_id(row) == current_dog_id] if isinstance(data, list) else []
+    if len(rows) != 1:
+        raise AssertionError(f"{rel} has {len(rows)} rows for observed onchain current auction Dog #{current_dog_id}, expected exactly 1")
+    return rows[0]
+
+
+def _latest_history_row_at(root: Path, current_dog_id: int, rel: str = "generated/current_auction_bid_history.json") -> dict[str, Any] | None:
+    data = load_json(root / rel)
+    rows = [row for row in data if isinstance(row, dict) and dog_id(row) == current_dog_id] if isinstance(data, list) else []
+    rows.sort(key=lambda row: (text(row.get("bid_time_utc")), int(row.get("block_number") or 0), int(row.get("log_index") or 0)), reverse=True)
+    return rows[0] if rows else None
+
+
+def _assert_observed_current_row(rel: str, row: dict[str, Any], *, observed_token_id: int, observed_wallet: str, observed_bid_eth: Decimal) -> None:
+    has_dog_identity = any(text(row.get(key)) for key in ("token_id", "dog_id", "dog", "dog_name"))
+    if has_dog_identity and dog_id(row) != observed_token_id:
+        raise AssertionError(f"{rel} observed onchain current auction token mismatch: expected Dog #{observed_token_id}, got Dog #{dog_id(row)}")
+    wallet = normalize_address(row.get("bidder_wallet") or row.get("bidder_winner_wallet") or row.get("winner_wallet"))
+    if observed_wallet and observed_wallet != ZERO and wallet != observed_wallet:
+        raise AssertionError(f"{rel} observed onchain current auction high-bidder wallet mismatch: expected {observed_wallet}, got {wallet or 'missing'}")
+    amount = decimal_value(row.get("current_bid_eth") or row.get("amount_eth") or row.get("latest_bid_eth") or row.get("bid_eth"))
+    if amount != observed_bid_eth:
+        raise AssertionError(f"{rel} observed onchain current auction bid amount mismatch: expected {observed_bid_eth.normalize()} ETH, got {amount.normalize()} ETH")
+
+
+def validate_current_surface_against_observed_state(observed_state: dict[str, Any], *, root: Path = ROOT) -> dict[str, Any]:
+    """Compare generated/public/rendered current-auction surfaces to watcher-observed onchain state.
+
+    The regular consistency validator proves generated artifacts agree with each other. This extra
+    guard catches the failure mode where the watcher saw a newer same-token bid but a refresh/publish
+    failure left every generated surface consistently stale.
+    """
+    observed_token_id = int(observed_state.get("last_observed_token_id") or observed_state.get("last_seen_token_id") or 0)
+    observed_wallet = normalize_address(observed_state.get("last_observed_high_bidder") or observed_state.get("last_seen_high_bidder"))
+    observed_bid_eth = wei_to_eth(observed_state.get("last_observed_amount_wei") or observed_state.get("last_seen_amount_wei"))
+    if observed_token_id <= 0 or observed_bid_eth <= 0:
+        return {"observed_check": "skipped", "reason": "missing observed current auction bid"}
+
+    generated_current = _first_row_at(root, "generated/current_auction.json")
+    _assert_observed_current_row(
+        "generated/current_auction.json",
+        generated_current,
+        observed_token_id=observed_token_id,
+        observed_wallet=observed_wallet,
+        observed_bid_eth=observed_bid_eth,
+    )
+    public_current_path = root / "public" / "generated" / "current_auction.json"
+    if public_current_path.exists():
+        public_current = _first_row_at(root, "public/generated/current_auction.json")
+        _assert_observed_current_row(
+            "public/generated/current_auction.json",
+            public_current,
+            observed_token_id=observed_token_id,
+            observed_wallet=observed_wallet,
+            observed_bid_eth=observed_bid_eth,
+        )
+
+    latest = _first_row_at(root, "generated/current_latest_bid.json")
+    _assert_observed_current_row(
+        "generated/current_latest_bid.json",
+        latest,
+        observed_token_id=observed_token_id,
+        observed_wallet=observed_wallet,
+        observed_bid_eth=observed_bid_eth,
+    )
+    public_latest_path = root / "public" / "generated" / "current_latest_bid.json"
+    if public_latest_path.exists():
+        public_latest = _first_row_at(root, "public/generated/current_latest_bid.json")
+        _assert_observed_current_row(
+            "public/generated/current_latest_bid.json",
+            public_latest,
+            observed_token_id=observed_token_id,
+            observed_wallet=observed_wallet,
+            observed_bid_eth=observed_bid_eth,
+        )
+    feed = _current_feed_row_at(root, observed_token_id)
+    _assert_observed_current_row(
+        "generated/auction_feed.json",
+        feed,
+        observed_token_id=observed_token_id,
+        observed_wallet=observed_wallet,
+        observed_bid_eth=observed_bid_eth,
+    )
+    public_feed_path = root / "public" / "generated" / "auction_feed.json"
+    if public_feed_path.exists():
+        public_feed = _current_feed_row_at(root, observed_token_id, "public/generated/auction_feed.json")
+        _assert_observed_current_row(
+            "public/generated/auction_feed.json",
+            public_feed,
+            observed_token_id=observed_token_id,
+            observed_wallet=observed_wallet,
+            observed_bid_eth=observed_bid_eth,
+        )
+    history = _latest_history_row_at(root, observed_token_id)
+    if history is not None:
+        _assert_observed_current_row(
+            "generated/current_auction_bid_history.json",
+            history,
+            observed_token_id=observed_token_id,
+            observed_wallet=observed_wallet,
+            observed_bid_eth=observed_bid_eth,
+        )
+    public_history_path = root / "public" / "generated" / "current_auction_bid_history.json"
+    if public_history_path.exists():
+        public_history = _latest_history_row_at(root, observed_token_id, "public/generated/current_auction_bid_history.json")
+        if public_history is not None:
+            _assert_observed_current_row(
+                "public/generated/current_auction_bid_history.json",
+                public_history,
+                observed_token_id=observed_token_id,
+                observed_wallet=observed_wallet,
+                observed_bid_eth=observed_bid_eth,
+            )
+
+    index_path = root / "index.html"
+    if index_path.exists():
+        index = index_path.read_text(encoding="utf-8")
+        if f"Dog #{observed_token_id}" not in index:
+            raise AssertionError(f"index.html observed onchain current auction Dog #{observed_token_id} missing")
+        rendered_eth_values = [decimal_value(match.group(1)) for match in re.finditer(r"([0-9]+(?:\.[0-9]+)?)\s*ETH", index)]
+        if observed_bid_eth not in rendered_eth_values:
+            raise AssertionError(f"index.html observed onchain current auction bid amount missing: {observed_bid_eth.normalize()} ETH")
+        generated_display = text(generated_current.get("bidder"))
+        if generated_display and generated_display not in index:
+            raise AssertionError(f"index.html observed onchain current auction high-bidder display missing: {generated_display!r}")
+
+    readme_path = root / "README.md"
+    if readme_path.exists():
+        readme = readme_snapshot() if root == ROOT else _readme_snapshot_at(root)
+        if readme.get("Current Dog") and readme.get("Current Dog") != f"Dog #{observed_token_id}":
+            raise AssertionError("README observed onchain current auction Dog mismatch")
+        readme_bid_match = re.search(r"[0-9]+(?:\.[0-9]+)?", readme.get("Current bid", ""))
+        if readme_bid_match and decimal_value(readme_bid_match.group(0)) != observed_bid_eth:
+            raise AssertionError("README observed onchain current auction bid amount mismatch")
+
+    return {
+        "observed_check": "ok",
+        "observed_dog": f"Dog #{observed_token_id}",
+        "observed_bid_eth": str(observed_bid_eth.normalize()),
+        "observed_high_bidder": observed_wallet,
+        "observed_bid_log_id": text(observed_state.get("last_observed_bid_log_id") or observed_state.get("last_seen_bid_log_id")),
+    }
+
+
+def _readme_snapshot_at(root: Path) -> dict[str, str]:
+    path = root / "README.md"
+    values: dict[str, str] = {}
+    if not path.exists():
+        return values
+    in_section = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip() == "## Current snapshot":
+            in_section = True
+            continue
+        if in_section and line.startswith("## "):
+            break
+        if in_section and line.startswith("|") and "---" not in line:
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) >= 2 and cells[0] != "Field":
+                values[cells[0]] = cells[1]
+    return values
+
+
 def validate_current_surface() -> dict[str, Any]:
     current = first_row(ROOT / "generated" / "current_auction.json")
     latest = first_row(ROOT / "generated" / "current_latest_bid.json")
@@ -776,6 +958,13 @@ def validate_current_surface() -> dict[str, Any]:
                     if text(feed_row.get(field)) and text(unified_amount.get(field)) == "":
                         raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD event field {field} missing for Dog #{row_dog_id}")
 
+    observed_state_check: dict[str, Any] = {}
+    observed_state_path = ROOT / ".local" / "mission3_onchain_tracker_state.json"
+    if observed_state_path.exists():
+        observed_state = load_json(observed_state_path, {})
+        if isinstance(observed_state, dict) and observed_state.get("last_observed_token_id"):
+            observed_state_check = validate_current_surface_against_observed_state(observed_state, root=ROOT)
+
     return {
         "current_dog": f"Dog #{current_dog_id}",
         "auction_state": current_state,
@@ -783,6 +972,7 @@ def validate_current_surface() -> dict[str, Any]:
         "bid_eth": str(expected_native.normalize()),
         "feed_rows_for_current_dog": 1,
         "refresh_status_result": text(refresh_status.get("last_refresh_result")),
+        "observed_state_check": observed_state_check,
         "checked": [str(path.relative_to(ROOT)) for path in unified_paths]
         + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
     }

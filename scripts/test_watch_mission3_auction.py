@@ -450,6 +450,215 @@ def test_bid_change_inside_cooldown_is_deferred_not_lost():
     assert "pending_refresh_after_cooldown" in decision2.reasons
 
 
+def test_cooldown_defer_keeps_unpublished_bid_pending_without_advancing_seen_cursor():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        state_path = Path(tmp) / "state.json"
+        original_state = {
+            "last_seen_token_id": 737,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "12900000000000000",
+            "last_seen_bid_log_id": "100:0xoldbid:1",
+            "last_seen_bid_tx": "0xoldbid",
+            "last_seen_auction_created_log_id": "90:0xcreated:1",
+            "last_seen_auction_settled_log_id": "",
+            "last_seen_auction_extended_log_id": "",
+            "last_refresh_at_utc": watcher.utc_now(),
+        }
+        state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        snapshot = {
+            "latest_block": 130,
+            "checked_from_block": 100,
+            "checked_to_block": 130,
+            "token_id": 737,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "30000000000000000",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated", "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0xnewbid:4", "tx_hash": "0xnewbid", "block_number": 130, "log_index": 4, "event_name": "AuctionBid", "token_id": 737, "amount_wei": "30000000000000000", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
+            "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        assert watcher.run_once(config) == 0
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["pending_refresh"] is True
+        assert saved["pending_bid_log_id"] == "130:0xnewbid:4"
+        assert saved["pending_amount_wei"] == "30000000000000000"
+        assert saved["pending_high_bidder"] == "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        assert saved["last_observed_amount_wei"] == "30000000000000000"
+        assert saved["last_observed_high_bidder"] == "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        assert saved["last_seen_amount_wei"] == original_state["last_seen_amount_wei"]
+        assert saved["last_seen_high_bidder"] == original_state["last_seen_high_bidder"]
+        assert saved["last_seen_bid_log_id"] == original_state["last_seen_bid_log_id"]
+
+
+def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cursor():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        state_path = Path(tmp) / "state.json"
+        original_state = {
+            "last_seen_token_id": 737,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "12900000000000000",
+            "last_seen_bid_log_id": "100:0xoldbid:1",
+            "last_seen_bid_tx": "0xoldbid",
+            "last_seen_auction_created_log_id": "90:0xcreated:1",
+            "last_seen_auction_settled_log_id": "",
+            "last_seen_auction_extended_log_id": "",
+            "last_refresh_at_utc": iso(0),
+        }
+        state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        snapshot = {
+            "latest_block": 130,
+            "checked_from_block": 100,
+            "checked_to_block": 130,
+            "token_id": 737,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "30000000000000000",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated", "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0xnewbid:4", "tx_hash": "0xnewbid", "block_number": 130, "log_index": 4, "event_name": "AuctionBid", "token_id": 737, "amount_wei": "30000000000000000", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_COMMAND": "false",
+            "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
+            "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        assert watcher.run_once(config) == 2
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["pending_refresh"] is True
+        assert saved["pending_bid_log_id"] == "130:0xnewbid:4"
+        assert saved["pending_amount_wei"] == "30000000000000000"
+        assert saved["pending_event_tx_hash"] == "0xnewbid"
+        assert saved["last_observed_amount_wei"] == "30000000000000000"
+        assert saved["last_seen_amount_wei"] == original_state["last_seen_amount_wei"]
+        assert saved["last_seen_high_bidder"] == original_state["last_seen_high_bidder"]
+        assert saved["last_seen_bid_log_id"] == original_state["last_seen_bid_log_id"]
+
+
+def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_without_advancing_seen_cursor():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        state_path = Path(tmp) / "state.json"
+        original_state = {
+            "last_seen_token_id": 737,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "12900000000000000",
+            "last_seen_bid_log_id": "100:0xoldbid:1",
+            "last_seen_bid_tx": "0xoldbid",
+            "last_seen_auction_created_log_id": "90:0xcreated:1",
+            "last_seen_auction_settled_log_id": "",
+            "last_seen_auction_extended_log_id": "",
+            "last_refresh_at_utc": iso(0),
+        }
+        state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        snapshot = {
+            "latest_block": 130,
+            "checked_from_block": 100,
+            "checked_to_block": 130,
+            "token_id": 737,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "30000000000000000",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated", "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0xnewbid:4", "tx_hash": "0xnewbid", "block_number": 130, "log_index": 4, "event_name": "AuctionBid", "token_id": 737, "amount_wei": "30000000000000000", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
+            "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
+            "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        setattr(watcher, "git_status_tracked", lambda: " M generated/current_auction.json\n")
+        assert watcher.run_once(config) == 2
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["pending_refresh"] is True
+        assert saved["pending_bid_log_id"] == "130:0xnewbid:4"
+        assert saved["pending_amount_wei"] == "30000000000000000"
+        assert saved["last_refresh_status"] == "failure"
+        assert "tracked working tree changes exist" in saved["last_refresh_error"]
+        assert saved["last_observed_amount_wei"] == "30000000000000000"
+        assert saved["last_seen_amount_wei"] == original_state["last_seen_amount_wei"]
+        assert saved["last_seen_high_bidder"] == original_state["last_seen_high_bidder"]
+        assert saved["last_seen_bid_log_id"] == original_state["last_seen_bid_log_id"]
+
+
+def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        state_path = Path(tmp) / "state.json"
+        state_path.write_text(json.dumps({
+            "last_seen_token_id": 737,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "12900000000000000",
+            "last_seen_bid_log_id": "100:0xoldbid:1",
+            "last_seen_auction_created_log_id": "90:0xcreated:1",
+            "last_seen_auction_settled_log_id": "",
+            "last_seen_auction_extended_log_id": "",
+            "last_refresh_at_utc": iso(0),
+            "pending_refresh": True,
+            "pending_bid_log_id": "130:0xnewbid:4",
+        }, sort_keys=True), encoding="utf-8")
+        snapshot = {
+            "latest_block": 130,
+            "checked_from_block": 100,
+            "checked_to_block": 130,
+            "token_id": 737,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "30000000000000000",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated", "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0xnewbid:4", "tx_hash": "0xnewbid", "block_number": 130, "log_index": 4, "event_name": "AuctionBid", "token_id": 737, "amount_wei": "30000000000000000", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
+            "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        assert watcher.run_once(config) == 0
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["last_seen_amount_wei"] == "30000000000000000"
+        assert saved["last_seen_high_bidder"] == "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        assert saved["last_seen_bid_log_id"] == "130:0xnewbid:4"
+        assert "pending_refresh" not in saved
+        assert "pending_bid_log_id" not in saved
+
+
 def test_new_settlement_bypasses_cooldown():
     watcher = load_module()
     previous = {

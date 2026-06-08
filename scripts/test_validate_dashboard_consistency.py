@@ -600,6 +600,46 @@ def test_validator_catches_refresh_status_block_mismatch() -> None:
         assert_raises_contains(lambda: run_validation(root), "refresh_status latest_generated_block")
 
 
+def test_validator_accepts_generated_rendered_surfaces_that_match_observed_onchain_state() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        current = json.loads((root / "generated" / "current_auction.json").read_text(encoding="utf-8"))
+        write_json(root / "public" / "generated" / "current_auction.json", current)
+        validator = load_module()
+        observed = {
+            "last_observed_token_id": 729,
+            "last_observed_high_bidder": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+            "last_observed_amount_wei": "10000000000000000",
+            "last_observed_bid_log_id": "46732183:0x111:1",
+            "last_observed_bid_tx": "0x" + "1" * 64,
+            "last_observed_block": 46732183,
+        }
+        result = validator.validate_current_surface_against_observed_state(observed, root=root)
+        assert result["observed_bid_eth"] == "0.01"
+
+
+def test_validator_catches_stale_generated_public_and_rendered_current_auction_against_observed_onchain_state() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        current = json.loads((root / "generated" / "current_auction.json").read_text(encoding="utf-8"))
+        write_json(root / "public" / "generated" / "current_auction.json", current)
+        validator = load_module()
+        observed = {
+            "last_observed_token_id": 729,
+            "last_observed_high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "last_observed_amount_wei": "30000000000000000",
+            "last_observed_bid_log_id": "46740000:0x222:2",
+            "last_observed_bid_tx": "0x" + "2" * 64,
+            "last_observed_block": 46740000,
+        }
+        assert_raises_contains(
+            lambda: validator.validate_current_surface_against_observed_state(observed, root=root),
+            "observed onchain current auction",
+        )
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

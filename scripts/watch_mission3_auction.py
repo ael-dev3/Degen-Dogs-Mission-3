@@ -686,7 +686,7 @@ def decide_refresh(
     if int(snapshot.get("end_time_unix") or 0) != int(state.get("last_seen_end_time_unix") or 0):
         reasons.append("auction_end_time_changed")
 
-    if state.get("pending_refresh") and not reasons:
+    if state.get("pending_refresh"):
         pending_age = seconds_since(state.get("pending_refresh_since_utc"), now_utc)
         last_refresh_age = seconds_since(state.get("last_refresh_at_utc"), now_utc)
         pending_reasons = _state_reasons(state.get("pending_refresh_reasons")) or ["pending_refresh_after_cooldown"]
@@ -694,7 +694,11 @@ def decide_refresh(
         if not pending_backoff_active(state, now_utc) and (
             last_refresh_age is None or last_refresh_age >= pending_cooldown or pending_age is None or pending_age >= pending_cooldown
         ):
-            return RefreshDecision(True, ["pending_refresh_after_cooldown"])
+            retry_reasons = ["pending_refresh_after_cooldown"]
+            for reason in reasons:
+                if reason not in retry_reasons:
+                    retry_reasons.append(reason)
+            return RefreshDecision(True, retry_reasons)
 
     if not reasons and force_after_seconds > 0:
         last_refresh_age = seconds_since(state.get("last_refresh_at_utc"), now_utc)
@@ -778,12 +782,64 @@ def record_watcher_telemetry(config: Config, row: dict[str, Any]) -> None:
         log(config, f"warning: unable to record watcher telemetry: {exc}")
 
 
+PENDING_REFRESH_IDENTITY_KEYS = [
+    "pending_token_id",
+    "pending_high_bidder",
+    "pending_bidder",
+    "pending_amount_wei",
+    "pending_settled",
+    "pending_start_time_unix",
+    "pending_end_time_unix",
+    "pending_bid_log_id",
+    "pending_bid_tx",
+    "pending_bid_log_index",
+    "pending_bid_token_id",
+    "pending_event_name",
+    "pending_event_block_number",
+    "pending_event_tx_hash",
+    "pending_event_log_index",
+    "pending_observed_block",
+]
+
+
+def _clear_pending_refresh_fields(state: dict[str, Any]) -> None:
+    for key in ["pending_refresh", "pending_refresh_since_utc", "pending_refresh_reasons", *PENDING_REFRESH_IDENTITY_KEYS]:
+        state.pop(key, None)
+
+
+def _apply_pending_identity(state: dict[str, Any], snapshot: dict[str, Any], *, now_utc: str, reasons: list[str]) -> None:
+    bid_log = get_snapshot_log(snapshot, "bid_log")
+    extended_log = get_snapshot_log(snapshot, "extended_log")
+    event = latest_activity_event(snapshot)
+    state["pending_refresh"] = True
+    state.setdefault("pending_refresh_since_utc", now_utc)
+    state["pending_refresh_reasons"] = reasons
+    state["pending_token_id"] = int(snapshot.get("token_id") or 0)
+    state["pending_high_bidder"] = normalize_address(snapshot.get("high_bidder"))
+    state["pending_bidder"] = normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder"))
+    state["pending_amount_wei"] = str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0")
+    state["pending_settled"] = bool(snapshot.get("settled"))
+    state["pending_start_time_unix"] = int(snapshot.get("start_time_unix") or 0)
+    state["pending_end_time_unix"] = int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0)
+    state["pending_bid_log_id"] = bid_log.get("id", "") or state.get("pending_bid_log_id", "")
+    state["pending_bid_tx"] = bid_log.get("tx_hash", "") or state.get("pending_bid_tx", "")
+    state["pending_bid_log_index"] = int(bid_log.get("log_index") or state.get("pending_bid_log_index") or 0)
+    state["pending_bid_token_id"] = int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("pending_bid_token_id") or 0)
+    if event:
+        state["pending_event_name"] = event.get("event_name", "")
+        state["pending_event_block_number"] = event.get("block_number", "")
+        state["pending_event_tx_hash"] = event.get("tx_hash", "")
+        state["pending_event_log_index"] = event.get("log_index", "")
+    state["pending_observed_block"] = latest_activity_block(snapshot)
+
+
 def state_from_snapshot(
     snapshot: dict[str, Any],
     *,
     now_utc: str,
     previous_state: dict[str, Any],
     decision: RefreshDecision | None = None,
+    acknowledge: bool | None = None,
 ) -> dict[str, Any]:
     state = dict(previous_state)
     created_log = get_snapshot_log(snapshot, "created_log")
@@ -791,6 +847,11 @@ def state_from_snapshot(
     extended_log = get_snapshot_log(snapshot, "extended_log")
     settled_log = get_snapshot_log(snapshot, "settled_log")
     checked_to_block = int(snapshot.get("checked_to_block") or snapshot.get("latest_block") or 0)
+    observed_block = latest_activity_block(snapshot)
+
+    if acknowledge is None:
+        acknowledge = not bool(decision and (decision.should_refresh or decision.pending_refresh))
+
     state.update(
         {
             "schema_version": SCHEMA_VERSION,
@@ -799,37 +860,60 @@ def state_from_snapshot(
             "auction_house": AUCTION_HOUSE,
             "last_checked_at_utc": now_utc,
             "last_checked_block": checked_to_block,
-            "last_seen_block": latest_activity_block(snapshot),
             "last_checked_from_block": int(snapshot.get("checked_from_block") or 0),
-            "last_seen_token_id": int(snapshot.get("token_id") or 0),
-            "last_seen_high_bidder": normalize_address(snapshot.get("high_bidder")),
-            "last_seen_bidder": normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder")),
-            "last_seen_amount_wei": str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0"),
-            "last_seen_settled": bool(snapshot.get("settled")),
-            "last_seen_start_time_unix": int(snapshot.get("start_time_unix") or 0),
-            "last_seen_end_time_unix": int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0),
-            "last_seen_auction_created_log_id": created_log.get("id", "") or state.get("last_seen_auction_created_log_id", ""),
-            "last_seen_auction_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_auction_created_tx", ""),
-            "last_seen_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_created_tx", ""),
-            "last_seen_auction_settled_log_id": settled_log.get("id", "") or state.get("last_seen_auction_settled_log_id", ""),
-            "last_seen_auction_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_auction_settled_tx", ""),
-            "last_seen_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_settled_tx", ""),
-            "last_seen_auction_extended_log_id": extended_log.get("id", "") or state.get("last_seen_auction_extended_log_id", ""),
-            "last_seen_auction_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_auction_extended_tx", ""),
-            "last_seen_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_extended_tx", ""),
-            "last_seen_bid_log_id": bid_log.get("id", "") or state.get("last_seen_bid_log_id", ""),
-            "last_seen_bid_tx": bid_log.get("tx_hash", "") or state.get("last_seen_bid_tx", ""),
-            "last_seen_bid_log_index": int(bid_log.get("log_index") or state.get("last_seen_bid_log_index") or 0),
-            "last_seen_bid_token_id": int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("last_seen_bid_token_id") or 0),
+            "last_observed_block": observed_block,
+            "last_observed_token_id": int(snapshot.get("token_id") or 0),
+            "last_observed_high_bidder": normalize_address(snapshot.get("high_bidder")),
+            "last_observed_bidder": normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder")),
+            "last_observed_amount_wei": str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0"),
+            "last_observed_settled": bool(snapshot.get("settled")),
+            "last_observed_start_time_unix": int(snapshot.get("start_time_unix") or 0),
+            "last_observed_end_time_unix": int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0),
+            "last_observed_auction_created_log_id": created_log.get("id", "") or state.get("last_observed_auction_created_log_id", ""),
+            "last_observed_auction_created_tx": created_log.get("tx_hash", "") or state.get("last_observed_auction_created_tx", ""),
+            "last_observed_auction_settled_log_id": settled_log.get("id", "") or state.get("last_observed_auction_settled_log_id", ""),
+            "last_observed_auction_settled_tx": settled_log.get("tx_hash", "") or state.get("last_observed_auction_settled_tx", ""),
+            "last_observed_auction_extended_log_id": extended_log.get("id", "") or state.get("last_observed_auction_extended_log_id", ""),
+            "last_observed_auction_extended_tx": extended_log.get("tx_hash", "") or state.get("last_observed_auction_extended_tx", ""),
+            "last_observed_bid_log_id": bid_log.get("id", "") or state.get("last_observed_bid_log_id", ""),
+            "last_observed_bid_tx": bid_log.get("tx_hash", "") or state.get("last_observed_bid_tx", ""),
+            "last_observed_bid_log_index": int(bid_log.get("log_index") or state.get("last_observed_bid_log_index") or 0),
+            "last_observed_bid_token_id": int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("last_observed_bid_token_id") or 0),
             "last_rpc_url": snapshot.get("rpc_url", ""),
             "last_log_count": int(snapshot.get("checked_log_count") or 0),
             "last_error": None,
         }
     )
-    if decision and decision.pending_refresh:
-        state["pending_refresh"] = True
-        state.setdefault("pending_refresh_since_utc", now_utc)
-        state["pending_refresh_reasons"] = decision.reasons
+
+    if acknowledge:
+        state.update(
+            {
+                "last_seen_block": observed_block,
+                "last_seen_token_id": int(snapshot.get("token_id") or 0),
+                "last_seen_high_bidder": normalize_address(snapshot.get("high_bidder")),
+                "last_seen_bidder": normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder")),
+                "last_seen_amount_wei": str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0"),
+                "last_seen_settled": bool(snapshot.get("settled")),
+                "last_seen_start_time_unix": int(snapshot.get("start_time_unix") or 0),
+                "last_seen_end_time_unix": int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0),
+                "last_seen_auction_created_log_id": created_log.get("id", "") or state.get("last_seen_auction_created_log_id", ""),
+                "last_seen_auction_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_auction_created_tx", ""),
+                "last_seen_created_tx": created_log.get("tx_hash", "") or state.get("last_seen_created_tx", ""),
+                "last_seen_auction_settled_log_id": settled_log.get("id", "") or state.get("last_seen_auction_settled_log_id", ""),
+                "last_seen_auction_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_auction_settled_tx", ""),
+                "last_seen_settled_tx": settled_log.get("tx_hash", "") or state.get("last_seen_settled_tx", ""),
+                "last_seen_auction_extended_log_id": extended_log.get("id", "") or state.get("last_seen_auction_extended_log_id", ""),
+                "last_seen_auction_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_auction_extended_tx", ""),
+                "last_seen_extended_tx": extended_log.get("tx_hash", "") or state.get("last_seen_extended_tx", ""),
+                "last_seen_bid_log_id": bid_log.get("id", "") or state.get("last_seen_bid_log_id", ""),
+                "last_seen_bid_tx": bid_log.get("tx_hash", "") or state.get("last_seen_bid_tx", ""),
+                "last_seen_bid_log_index": int(bid_log.get("log_index") or state.get("last_seen_bid_log_index") or 0),
+                "last_seen_bid_token_id": int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("last_seen_bid_token_id") or 0),
+            }
+        )
+
+    if decision and (decision.pending_refresh or decision.should_refresh):
+        _apply_pending_identity(state, snapshot, now_utc=now_utc, reasons=decision.reasons)
     return state
 
 
@@ -931,9 +1015,7 @@ def record_refresh_result(state: dict[str, Any], *, status: str, reasons: list[s
     if status == "success":
         state["consecutive_refresh_failures"] = 0
         state.pop("next_allowed_refresh_after_utc", None)
-        state.pop("pending_refresh", None)
-        state.pop("pending_refresh_since_utc", None)
-        state.pop("pending_refresh_reasons", None)
+        _clear_pending_refresh_fields(state)
     else:
         failures = int(state.get("consecutive_refresh_failures") or 0) + 1
         state["consecutive_refresh_failures"] = failures
@@ -1135,6 +1217,7 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
             )
             log(config, f"refresh_error: {exc}; {summary}")
             return 2
+        new_state = state_from_snapshot(snapshot, now_utc=utc_now(), previous_state=new_state, acknowledge=status in {"success", "dry_run"})
         new_state = record_refresh_result(new_state, status=status, reasons=decision.reasons, now_utc=utc_now(), exit_code=exit_code)
         if not dry_run:
             save_state(config.state_path, new_state)

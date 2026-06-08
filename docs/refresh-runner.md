@@ -99,6 +99,7 @@ Rules:
 - New auctions, settlements, and token changes bypass cooldown.
 - Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (60s default) instead of the longer general cooldown, so real new bids publish quickly without commit-spamming every repeated signal.
 - Bid-only and extension-only changes inside their active cooldown are stored as `pending_refresh` and retried after cooldown.
+- Failed, deferred, or lock-blocked refreshes also stay pending. The watcher may advance `last_checked_*` and `last_observed_*` for operator visibility, but `last_seen_*` is the published/acknowledged cursor and only advances after a successful refresh command (or dry-run acknowledgement). This prevents a same-token bid from being observed once, failing to publish, and then being suppressed as already handled.
 - Direct `auction()` end-time changes trigger `auction_end_time_changed` even if the `AuctionExtended` log was missed.
 - The scan starts from `last_checked_block + 1 - safety_overlap`; duplicate logs are ignored via log IDs.
 - Failed refreshes record local state and back off before retrying.
@@ -223,10 +224,12 @@ python3 -m json.tool .local/mission3_onchain_tracker_state.json
 Check:
 
 - `last_checked_block` advances,
-- `last_seen_bid_tx` / `last_seen_bid_log_index` match the newest bid,
-- `last_seen_amount_wei` and `last_seen_high_bidder` match `generated/current_auction.json[0]`,
+- `last_observed_bid_tx` / `last_observed_bid_log_index` match the newest onchain bid,
+- `last_seen_bid_tx` / `last_seen_bid_log_index` match the newest bid that was successfully refreshed/published,
+- `last_observed_amount_wei` and `last_observed_high_bidder` match `generated/current_auction.json[0]`; if they do not, `pending_refresh` should be set until the retry succeeds,
 - `last_refresh_status` is `success` after a triggered refresh,
 - `pending_refresh` clears after cooldown,
+- `pending_bid_log_id`, `pending_amount_wei`, and `pending_high_bidder` identify the unpublished event while a retry/backoff is active,
 - `consecutive_rpc_failures` and `consecutive_refresh_failures` stay low.
 
 Safely reset watcher state if it gets wedged or after moving runners:
@@ -254,5 +257,6 @@ PY
 - RPC/log failures write `last_error` and exit non-zero in one-shot mode.
 - Missing state initializes from current onchain/generated data.
 - Dirty tracked worktrees are refused in auto-push mode.
-- Refresh failures record exit code and backoff; the hourly runner remains the fallback.
+- Refresh failures record exit code/backoff and preserve the pending event identity; they do not acknowledge `last_seen_*` until the retry path succeeds.
+- `npm run validate:dashboard` compares generated/public/rendered current-auction surfaces against `.local/mission3_onchain_tracker_state.json` when that state contains `last_observed_*`, catching consistently stale artifacts after a failed same-token bid refresh.
 - Keep browser-side chain polling out of the static site.
