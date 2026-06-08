@@ -6,6 +6,7 @@ Start here for deeper Degen Dogs Mission 3 dashboard docs.
 
 - [Project overview](project-overview.md)
 - [Architecture](architecture.md)
+- [Local setup architecture](local-setup-architecture.md)
 - [Data pipeline](data-pipeline.md)
 - [Datasets](datasets.md)
 - [Season 6 SUP reward projections](season6-sup-rewards.md) - compact homepage

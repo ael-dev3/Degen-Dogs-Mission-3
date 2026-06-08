@@ -15,9 +15,10 @@ data script, validating outputs, committing generated files, and enabling GitHub
 4. Validate data integrity: [`VALIDATION.md`](VALIDATION.md)
 5. Checklist: [`CHECKLIST.md`](CHECKLIST.md)
 6. Local runner reconstruction: [`LOCAL_RUNNERS.md`](LOCAL_RUNNERS.md)
-7. Future-agent prompt: [`AGENT_RECOVERY_PROMPT.md`](AGENT_RECOVERY_PROMPT.md)
-8. Backup policy: [`BACKUP_POLICY.md`](BACKUP_POLICY.md)
-9. Troubleshooting: [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+7. Local setup architecture: [`../docs/local-setup-architecture.md`](../docs/local-setup-architecture.md)
+8. Future-agent prompt: [`AGENT_RECOVERY_PROMPT.md`](AGENT_RECOVERY_PROMPT.md)
+9. Backup policy: [`BACKUP_POLICY.md`](BACKUP_POLICY.md)
+10. Troubleshooting: [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
 
 ## Source-of-truth files
 

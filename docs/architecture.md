@@ -28,6 +28,9 @@ The runner is a trusted local machine that performs the expensive/reliable work:
 7. Rebuild `index.html` and `README.md`.
 8. Commit/push refreshed artifacts when running the publish script.
 
+For the concrete launchd jobs, locks, local-only state, and current Mac mini runner
+shape, see [`local-setup-architecture.md`](local-setup-architecture.md).
+
 ## GitHub Pages
 
 `.github/workflows/deploy-pages.yml` installs dependencies and runs `npm run build`. It

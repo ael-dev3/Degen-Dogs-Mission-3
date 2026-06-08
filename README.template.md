@@ -70,7 +70,8 @@ Base RPC + contract calls
 Visitors do not run SQL in the browser. The local pipeline fetches public/onchain data,
 executes approved SQL, writes static artifacts, and GitHub Pages serves the built site.
 
-See [`docs/architecture.md`](docs/architecture.md) and
+See [`docs/architecture.md`](docs/architecture.md),
+[`docs/local-setup-architecture.md`](docs/local-setup-architecture.md), and
 [`docs/data-pipeline.md`](docs/data-pipeline.md) for details.
 
 ## Current snapshot
@@ -126,6 +127,8 @@ Start with [`docs/README.md`](docs/README.md). Key pages:
 
 - [`docs/project-overview.md`](docs/project-overview.md) - human-readable overview.
 - [`docs/architecture.md`](docs/architecture.md) - static dashboard and runner model.
+- [`docs/local-setup-architecture.md`](docs/local-setup-architecture.md) - launchd
+  local-runner architecture, locks, state, and repair checks.
 - [`docs/data-pipeline.md`](docs/data-pipeline.md) - fetch, decode, SQL, export, publish
   flow.
 - [`docs/datasets.md`](docs/datasets.md) - generated CSV/JSON exports and where to find
