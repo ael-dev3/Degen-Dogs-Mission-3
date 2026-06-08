@@ -1,9 +1,29 @@
 [
   {
+    "bid_time_utc": "2026-06-08 20:09:45",
+    "token_id": 737,
+    "bidder": "0xa9b0…03e3",
+    "bidder_url": "https://basescan.org/address/0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
+    "bidder_wallet": "0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
+    "bid": "0.03631 ETH",
+    "bid_eth": 0.03631,
+    "bid_usd": null,
+    "bid_usd_at_event": null,
+    "eth_usd_price_at_event": null,
+    "eth_usd_price_date_utc": null,
+    "usd_estimate_source": null,
+    "usd_estimate_source_detail": null,
+    "usd_estimate_confidence": null,
+    "usd_estimate_basis": "missing_event_eth_usd",
+    "extended": 1,
+    "block_number": 47080019,
+    "tx_hash": "0x1554b33ab7a11775fba80370abb35263614d94e11937a8803ac44b36a0c0231b"
+  },
+  {
     "bid_time_utc": "2026-06-08 19:50:09",
     "token_id": 737,
-    "bidder": "@ashish-007",
-    "bidder_url": "https://farcaster.xyz/ashish-007",
+    "bidder": "0x2df0…f457",
+    "bidder_url": "https://basescan.org/address/0x2df06405772f9fe85e1771ff11baaa5d3933f457",
     "bidder_wallet": "0x2df06405772f9fe85e1771ff11baaa5d3933f457",
     "bid": "0.03300 ETH",
     "bid_eth": 0.033,
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46207611,
     "tx_hash": "0xf4456f57650220bab78f6a6ce8d69da2b1a51586cecaf29ffb019cee7fc521c2"
-  },
-  {
-    "bid_time_utc": "2026-05-19 15:02:23",
-    "token_id": 719,
-    "bidder": "0xca0e…3202",
-    "bidder_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-    "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-    "bid": "0.01000 ETH ($21)",
-    "bid_eth": 0.01,
-    "bid_usd": 21.1,
-    "bid_usd_at_event": 21.1,
-    "eth_usd_price_at_event": "2109.7541528236497",
-    "eth_usd_price_date_utc": "2026-05-20",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "nearest_bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 46206798,
-    "tx_hash": "0xfb2d09f052bb5fd2a460603bcc4a2845dcabc1e8fefb4d5d6b9c9c2b6c7f2925"
   }
 ]
