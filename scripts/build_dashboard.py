@@ -1561,6 +1561,17 @@ def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
                 with urllib.request.urlopen(req, timeout=45) as response:
                     data = json.loads(response.read().decode("utf-8"))
                 break
+            except urllib.error.HTTPError as exc:
+                last = exc
+                if exc.code in {401, 403}:
+                    rows.sort(key=lambda row: row["address"])
+                    print(f"warning: Neynar wallet lookup disabled after HTTP {exc.code}; check NEYNAR_API_KEY", file=sys.stderr)
+                    return rows
+                if attempt == 3:
+                    print(f"warning: Neynar wallet lookup failed for {len(chunk)} addresses: HTTP {exc.code}", file=sys.stderr)
+                    data = {}
+                    break
+                time.sleep(1.5 * (attempt + 1))
             except Exception as exc:  # noqa: BLE001
                 last = exc
                 if attempt == 3:

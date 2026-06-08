@@ -29,7 +29,7 @@ Fill only the values you need in `.env.local`.
 | `MISSION3_LOG_CACHE` | Enable the local RPC log cache under `.cache/rpc_logs`; default on. | no |
 | `MISSION3_LOG_CACHE_OVERLAP_BLOCKS` | Re-fetch overlap when extending cached log ranges; default 50 blocks. | no |
 | `MISSION3_BALANCE_CACHE` | Enable the local WOOF holder balance cache under `.cache/woof_balances.json`; default on. | no |
-| `NEYNAR_API_KEY` | Optional Farcaster profile resolution. | yes |
+| `NEYNAR_API_KEY` | Optional Farcaster profile resolution. If Neynar returns HTTP 401/403, the refresh now disables Neynar for that run after the first failed request and keeps wallet/current-miniapp fallbacks instead of spending ~25s retrying every chunk. | yes |
 | `WOOF_USD_PRICE` | Optional manual WOOF/USD override. | no |
 | `SUP_USD_PRICE` | Optional manual SUP/USD override. | no |
 

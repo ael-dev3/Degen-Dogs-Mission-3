@@ -119,6 +119,33 @@ def test_fetch_woof_holders_reuses_cached_balances_until_address_is_touched() ->
         assert [(row["address"], row["balance_raw"]) for row in third] == [(carol, "300"), (bob, "250"), (alice, "100")]
 
 
+def test_fetch_farcaster_profiles_stops_after_neynar_auth_failure() -> None:
+    dashboard = load_module()
+    original_key_loader = dashboard.load_neynar_api_key
+    original_urlopen = dashboard.urllib.request.urlopen
+    original_sleep = dashboard.time.sleep
+    try:
+        for code in (401, 403):
+            calls: list[str] = []
+            sleeps: list[float] = []
+
+            def fake_urlopen(req: Any, timeout: int = 0, *, status_code: int = code) -> Any:
+                calls.append(req.full_url)
+                raise dashboard.urllib.error.HTTPError(req.full_url, status_code, "Auth failed", {}, None)
+
+            dashboard.load_neynar_api_key = lambda: "bad-key"
+            dashboard.urllib.request.urlopen = fake_urlopen
+            dashboard.time.sleep = lambda seconds: sleeps.append(seconds)
+            addresses = [f"0x{i:040x}" for i in range(205)]
+            assert dashboard.fetch_farcaster_profiles(addresses) == []
+            assert len(calls) == 1
+            assert sleeps == []
+    finally:
+        dashboard.load_neynar_api_key = original_key_loader
+        dashboard.urllib.request.urlopen = original_urlopen
+        dashboard.time.sleep = original_sleep
+
+
 def test_current_bid_reward_stats_calculates_payback_daily_roi_and_simple_apr() -> None:
     dashboard = load_module()
     stats = dashboard.current_bid_reward_stats(
