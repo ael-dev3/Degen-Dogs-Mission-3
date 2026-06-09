@@ -1,8 +1,6 @@
 {
   "paths": [
     "archive/dogs/by-id/739.json",
-    "archive/dogs/by-id/727.json",
-    "archive/dogs/by-id/200.json",
     "archive/dogs/by-id/738.json",
     "archive/dogs/by-id/737.json",
     "archive/dogs/by-id/736.json",
@@ -13,6 +11,8 @@
     "archive/dogs/by-id/731.json",
     "archive/dogs/by-id/730.json",
     "archive/dogs/by-id/729.json",
+    "archive/dogs/by-id/728.json",
+    "archive/dogs/by-id/727.json",
     "archive/dogs/by-id/726.json",
     "archive/dogs/by-id/725.json",
     "archive/dogs/by-id/724.json",
@@ -519,6 +519,7 @@
     "archive/dogs/by-id/203.json",
     "archive/dogs/by-id/202.json",
     "archive/dogs/by-id/201.json",
+    "archive/dogs/by-id/200.json",
     "archive/dogs/by-id/199.json",
     "archive/dogs/by-id/198.json",
     "archive/dogs/by-id/197.json",
@@ -720,7 +721,7 @@
     "archive/dogs/by-id/001.json",
     "archive/dogs/by-id/000.json"
   ],
-  "record_count": 719,
+  "record_count": 720,
   "schema_version": 1,
-  "updated_at_utc": "2026-06-09T20:54:05Z"
+  "updated_at_utc": "2026-06-09T22:12:56Z"
 }

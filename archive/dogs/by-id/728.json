@@ -7,7 +7,7 @@
       "amount_usd_at_event": "24.43202508",
       "eth_usd_price_at_event": "2019.175626778262",
       "eth_usd_price_date_utc": "2026-05-30",
-      "native": "0.0121",
+      "native": "0.01210",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
@@ -23,7 +23,7 @@
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-05-30T18:40:09Z",
+      "block_time_utc": "2026-05-29T18:38:33Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#708/739",
-      "rank": 708,
-      "total": 739
+      "display": "#710/740",
+      "rank": 710,
+      "total": 740
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0xffe1…98ad vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z #708/739 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.1%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.5%) mouth none ears: earbuds (32.1%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0xffe1…98ad vaibhavmule 0.01210 eth 12100000000000000 24.43202508 $24.43 2026-05-30t18:40:09z #710/740 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.3%) background none body: grey (11.2%) body grey neck: redcollar (30.8%) neck redcollar mouth: none (68.5%) mouth none ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed base_logs dashboard_builder historical_dog_search_backfill 3 base 8453 728 dog #728 https://api.degendogs.club/images/728.png https://degendogs.club/#dog728 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728 settled 0xffe1…98ad https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0.01210 eth ($24) 3 3 2026-05-29 18:38:33 2026-05-30 18:40:09 #710/740 background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: vrgoggles background: none (90.3%); body: grey (11.2%); neck: redcollar (30.8%); mouth: none (68.5%); ears: earbuds (32.0%); head: none (20.3%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-30T18:40:09Z",
@@ -69,10 +69,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "generated_auction_feed",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
+      "raw_confidence": "verified_live_base_logs",
       "sources": [
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "base_logs",
+        "dashboard_builder",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -83,12 +86,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.1%)",
+        "display": "Body: Grey (11.2%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (30.8%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -98,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

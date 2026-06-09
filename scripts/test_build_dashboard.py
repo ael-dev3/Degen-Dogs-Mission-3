@@ -446,6 +446,8 @@ def test_unified_archive_bid_cell_formats_usd_from_shared_numeric_fallbacks() ->
         "const getUsdSortValue=record=>firstNumeric(usdCandidates(record))",
         "const usdDisplay=record=>",
         "const display=usdDisplay(record)",
+        "const archiveCurrentRank=record=>",
+        "status==='live'||status.includes('ongoing')?1:0",
     ]
     for marker in required_markers:
         assert marker in rendered

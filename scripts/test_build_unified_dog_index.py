@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -58,7 +60,7 @@ def test_ended_pending_settlement_feed_row_stays_in_unified_archive() -> None:
     assert record["activity_time_basis"] == "last_bid_block_time"
     assert record["winner_or_high_bidder"]["wallet"] == "0x412b7153504217b405af821bdcdc5f21c71e3cbc"
     assert record["amount"]["native"] == "0.04311"
-    assert unified.record_sort_key(record)[0] == 1
+    assert unified.record_sort_key(record)[0] == 0
     assert "ended pending settlement" in record["search_text"]
 
 
@@ -81,7 +83,7 @@ def test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing() -> None:
     assert record["status"] == "ended pending settlement"
     assert record["settlement"]["settled"] is False
     assert unified.archive_status_from_feed("ended_unsettled") == "ended pending settlement"
-    assert unified.record_sort_key(record)[0] == 1
+    assert unified.record_sort_key(record)[0] == 0
     assert "ongoing" not in record["search_text"]
 
 
@@ -109,11 +111,186 @@ def test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display() ->
     assert "48.22" in record["search_text"]
 
 
+def test_newest_sort_prioritizes_only_actual_current_before_recent_settled_rows() -> None:
+    unified = load_module()
+    live = {"dog_id": 739, "mission": 3, "status": "ongoing", "activity_time_utc": "2026-06-01T00:00:00Z"}
+    old_pending = {"dog_id": 727, "mission": 3, "status": "ended pending settlement", "activity_time_utc": "2026-05-28T22:09:17Z"}
+    recent_settled = {"dog_id": 738, "mission": 3, "status": "settled", "activity_time_utc": "2026-06-09T20:37:53Z"}
+
+    ordered = sorted([old_pending, recent_settled, live], key=unified.record_sort_key, reverse=True)
+
+    assert [row["dog_id"] for row in ordered] == [739, 738, 727]
+    assert unified.record_sort_key(live)[0] == 1
+    assert unified.record_sort_key(old_pending)[0] == 0
+    assert unified.record_sort_key(recent_settled)[0] == 0
+
+
+def test_historical_mission3_backfill_keeps_settled_row_after_recent_feed_rolloff() -> None:
+    unified = load_module()
+    row = {
+        "mission": 3,
+        "chain": "Base",
+        "chain_id": 8453,
+        "token_id": 728,
+        "dog": "Dog #728",
+        "dog_image_url": "https://api.degendogs.club/images/728.png",
+        "dog_external_url": "https://degendogs.club/#dog728",
+        "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728",
+        "status": "settled",
+        "winner": "@unitwinner",
+        "winner_url": "https://farcaster.xyz/unitwinner",
+        "winner_wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
+        "amount": "0.01210 ETH ($24.44)",
+        "amount_raw": "12100000000000000",
+        "bid_count": 3,
+        "unique_bidder_count": 2,
+        "auction_created_time_utc": "2026-05-29 18:38:33",
+        "settled_time_utc": "2026-05-30 18:40:09",
+        "rarity": "#110/740",
+        "traits": "Background: Green",
+        "trait_rarity": "Background: Green (10%)",
+        "confidence": "verified_live_base_logs",
+        "sources": "base_logs,dashboard_builder",
+    }
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        old_path = unified.HISTORICAL_SEARCH
+        old_archive = unified.DOG_ARCHIVE
+        try:
+            unified.HISTORICAL_SEARCH = tmp_path / "historical_dog_search.json"
+            unified.DOG_ARCHIVE = tmp_path / "archive" / "dogs"
+            unified.HISTORICAL_SEARCH.write_text(json.dumps([row]), encoding="utf-8")
+            records: list[dict[str, Any]] = []
+            added = unified.apply_historical_mission3_backfill(records, {}, {})
+        finally:
+            unified.HISTORICAL_SEARCH = old_path
+            unified.DOG_ARCHIVE = old_archive
+
+    assert added == 1
+    assert len(records) == 1
+    record = records[0]
+    amount = record["amount"]
+    assert record["dog_id"] == 728
+    assert record["status"] == "settled"
+    assert record["settlement"]["settled"] is True
+    assert amount["native"] == "0.01210"
+    assert amount["native_symbol"] == "ETH"
+    assert amount["usd_estimate"] == "24.44"
+    assert amount["usd_estimate_display"] == "$24.44"
+    assert amount["amount_usd_at_event"] == "24.44"
+    assert record["activity_time_utc"] == "2026-05-30T18:40:09Z"
+    assert record["winner_or_high_bidder"]["wallet"] == "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad"
+    assert "dog #728" in record["search_text"]
+
+
+def test_historical_mission3_backfill_preserves_existing_bid_context() -> None:
+    unified = load_module()
+    row = {
+        "mission": 3,
+        "token_id": 728,
+        "status": "settled",
+        "winner_wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
+        "amount": "0.01210 ETH ($24.44)",
+        "bid_count": 3,
+        "unique_bidder_count": 3,
+        "settled_time_utc": "2026-05-30 18:40:09",
+        "sources": "base_logs,dashboard_builder",
+        "confidence": "verified_live_base_logs",
+    }
+    existing = {
+        "mission": 3,
+        "dog_id": 728,
+        "status": "settled",
+        "amount": {
+            "usd_estimate": "24.43202508222839",
+            "usd_estimate_display": "$24.43",
+            "usd_estimate_source": "defillama_coin_prices",
+            "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+            "amount_usd_at_event": "24.43202508222839",
+        },
+        "bid_stats": {
+            "bid_count": 3,
+            "unique_bidder_count": 3,
+            "last_bid_time_utc": "2026-05-30T18:33:17Z",
+        },
+        "bid_tx_hashes": ["0x" + "a" * 64],
+        "source": {"sources": ["generated_auction_feed"], "confidence": "verified"},
+    }
+
+    record = unified.historical_mission3_record(row, {}, {}, existing)
+
+    assert record is not None
+    assert record["bid_stats"]["last_bid_time_utc"] == "2026-05-30T18:33:17Z"
+    assert record["bid_tx_hashes"] == ["0x" + "a" * 64]
+    assert record["amount"]["usd_estimate"] == "24.43202508222839"
+    assert record["amount"]["usd_estimate_display"] == "$24.43"
+    assert record["amount"]["usd_estimate_source"] == "defillama_coin_prices"
+    assert record["amount"]["amount_usd_at_event"] == "24.43202508222839"
+    assert record["amount"]["usd_estimate_source_detail"] == "coins.llama.fi/chart/coingecko:ethereum"
+    assert "generated_auction_feed" in record["source"]["sources"]
+    assert "historical_dog_search_backfill" in record["source"]["sources"]
+    assert "0x" + "a" * 64 in record["search_text"]
+
+
+def test_current_feed_override_drops_historical_backfill_provenance() -> None:
+    unified = load_module()
+    record = {
+        "mission": 3,
+        "dog_id": 739,
+        "status": "settled",
+        "source": {
+            "sources": ["base_logs", "historical_dog_search_backfill"],
+            "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear.",
+        },
+        "amount": {},
+        "winner_or_high_bidder": {},
+        "bid_stats": {},
+        "bid_tx_hashes": [],
+        "links": {},
+        "rarity": {},
+        "traits": [],
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        old_feed, old_current, old_recent, old_historical = unified.AUCTION_FEED, unified.CURRENT_AUCTION, unified.RECENT_BIDS, unified.HISTORICAL_SEARCH
+        try:
+            unified.AUCTION_FEED = tmp_path / "auction_feed.json"
+            unified.CURRENT_AUCTION = tmp_path / "current_auction.json"
+            unified.RECENT_BIDS = tmp_path / "recent_bids.json"
+            unified.HISTORICAL_SEARCH = tmp_path / "historical_dog_search.json"
+            unified.AUCTION_FEED.write_text(json.dumps([{
+                "status": "ongoing",
+                "dog": "Dog #739",
+                "bidder_winner": "@current",
+                "bidder_winner_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
+                "amount_eth": "0.0265",
+                "amount_usd": "43.70",
+                "last_bid_utc": "2026-06-09 20:38:17",
+            }]), encoding="utf-8")
+            unified.CURRENT_AUCTION.write_text(json.dumps([{"token_id": 739}]), encoding="utf-8")
+            unified.RECENT_BIDS.write_text("[]", encoding="utf-8")
+            unified.HISTORICAL_SEARCH.write_text("[]", encoding="utf-8")
+            updated = unified.apply_current_auction_overrides([record], {})
+        finally:
+            unified.AUCTION_FEED, unified.CURRENT_AUCTION, unified.RECENT_BIDS, unified.HISTORICAL_SEARCH = old_feed, old_current, old_recent, old_historical
+
+    assert updated == 1
+    assert record["status"] == "ongoing"
+    assert "historical_dog_search_backfill" not in record["source"]["sources"]
+    assert "historical_dog_search" not in record["source"]["notes"]
+    assert "generated_auction_feed" in record["source"]["sources"]
+
+
 def test() -> None:
     tests = [
         test_ended_pending_settlement_feed_row_stays_in_unified_archive,
         test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing,
         test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display,
+        test_newest_sort_prioritizes_only_actual_current_before_recent_settled_rows,
+        test_historical_mission3_backfill_keeps_settled_row_after_recent_feed_rolloff,
+        test_historical_mission3_backfill_preserves_existing_bid_context,
+        test_current_feed_override_drops_historical_backfill_provenance,
     ]
     for item in tests:
         item()

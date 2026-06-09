@@ -7,6 +7,7 @@ writes static JSON artifacts for the dashboard and repo archive.
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -162,6 +163,22 @@ def usd_display(value: Any) -> str:
     if amount is None:
         return ""
     return f"${amount.quantize(Decimal('0.01')):,.2f}"
+
+
+def parse_historical_amount_display(value: Any, fallback_symbol: str = "ETH") -> tuple[str, str, str]:
+    """Parse historical_dog_search amount strings like `0.01210 ETH ($24.44)`."""
+    text = first_text(value)
+    native = ""
+    symbol = fallback_symbol
+    usd = ""
+    native_match = re.search(r"([0-9][0-9,]*(?:\.[0-9]+)?)\s*([A-Za-z]+)", text)
+    if native_match:
+        native = native_match.group(1).replace(",", "")
+        symbol = native_match.group(2).upper()
+    usd_match = re.search(r"\$\s*([0-9][0-9,]*(?:\.[0-9]+)?)", text)
+    if usd_match:
+        usd = usd_match.group(1).replace(",", "")
+    return native, symbol, usd
 
 
 def as_sources(value: Any) -> list[str]:
@@ -569,9 +586,9 @@ def archive_status_from_feed(status_text: str) -> str:
 
 def record_sort_key(record: dict[str, Any]) -> tuple[int, str, int]:
     status = text_value(record.get("status")).lower()
-    live_rank = 1 if status in {"ongoing", "live"} or "pending settlement" in status or status.startswith("ended") else 0
+    current_rank = 1 if status in {"ongoing", "live"} else 0
     activity = text_value(record.get("activity_time_utc"))
-    return (live_rank, activity, int_value(record.get("dog_id"), 0))
+    return (current_rank, activity, int_value(record.get("dog_id"), 0))
 
 
 def current_overlay_search_text(record: dict[str, Any], dog_id: int) -> str:
@@ -627,6 +644,225 @@ def current_overlay_search_text(record: dict[str, Any], dog_id: int) -> str:
             parts.append(trait)
     parts.extend(as_sources(source.get("sources")))
     return " ".join(str(part) for part in parts if text_value(part)).lower()
+
+
+def load_existing_per_dog_records() -> dict[int, dict[str, Any]]:
+    records: dict[int, dict[str, Any]] = {}
+    by_id = DOG_ARCHIVE / "by-id"
+    if not by_id.exists():
+        return records
+    for path in by_id.glob("*.json"):
+        payload = load_json(path, {})
+        if not isinstance(payload, dict):
+            continue
+        record = payload.get("record")
+        if not isinstance(record, dict):
+            continue
+        dog_id = int_value(record.get("dog_id"), -1)
+        mission = int_value(record.get("mission"), -1)
+        if mission == 3 and dog_id >= 0:
+            records[dog_id] = record
+    return records
+
+
+def fill_missing_fields(target: dict[str, Any], source: dict[str, Any]) -> None:
+    for key, value in source.items():
+        if value in (None, "", [], {}):
+            continue
+        if target.get(key) in (None, "", [], {}):
+            target[key] = value
+
+
+def merge_existing_historical_context(record: dict[str, Any], existing: dict[str, Any] | None) -> None:
+    if not existing:
+        return
+    if int_value(existing.get("mission"), -1) != 3 or int_value(existing.get("dog_id"), -1) != int_value(record.get("dog_id"), -2):
+        return
+    if text_value(existing.get("status")).lower() not in {"settled", "ended pending settlement"}:
+        return
+
+    for key in ("auction_created", "settlement", "links"):
+        target_raw = record.get(key)
+        source_raw = existing.get(key)
+        target: dict[str, Any] = target_raw if isinstance(target_raw, dict) else {}
+        source: dict[str, Any] = source_raw if isinstance(source_raw, dict) else {}
+        fill_missing_fields(target, source)
+        record[key] = target
+
+    amount_raw = record.get("amount")
+    existing_amount_raw = existing.get("amount")
+    amount: dict[str, Any] = amount_raw if isinstance(amount_raw, dict) else {}
+    existing_amount: dict[str, Any] = existing_amount_raw if isinstance(existing_amount_raw, dict) else {}
+    fill_missing_fields(amount, existing_amount)
+    if existing_amount.get("amount_usd_at_event") or existing_amount.get("usd_estimate_source_detail"):
+        for key in (
+            "usd_estimate",
+            "usd_estimate_display",
+            "usd_estimate_source",
+            "usd_estimate_source_detail",
+            "usd_estimate_confidence",
+            "usd_estimate_notes",
+            "usd_estimate_price_usd",
+            "usd_estimate_price_date_utc",
+            "usd_estimate_time_basis",
+            "amount_usd_at_event",
+            "eth_usd_price_at_event",
+            "eth_usd_price_date_utc",
+        ):
+            value = existing_amount.get(key)
+            if value not in (None, "", [], {}):
+                amount[key] = value
+    record["amount"] = amount
+
+    bid_stats_raw = record.get("bid_stats")
+    existing_stats_raw = existing.get("bid_stats")
+    bid_stats: dict[str, Any] = bid_stats_raw if isinstance(bid_stats_raw, dict) else {}
+    existing_stats: dict[str, Any] = existing_stats_raw if isinstance(existing_stats_raw, dict) else {}
+    for count_key in ("bid_count", "unique_bidder_count"):
+        bid_stats[count_key] = max(int_value(bid_stats.get(count_key), 0), int_value(existing_stats.get(count_key), 0))
+    if not bid_stats.get("last_bid_time_utc") and existing_stats.get("last_bid_time_utc"):
+        bid_stats["last_bid_time_utc"] = existing_stats.get("last_bid_time_utc")
+    record["bid_stats"] = bid_stats
+
+    tx_hashes = list(record.get("bid_tx_hashes") or [])
+    for tx_hash in existing.get("bid_tx_hashes") or []:
+        if tx_hash and tx_hash not in tx_hashes:
+            tx_hashes.append(tx_hash)
+    record["bid_tx_hashes"] = tx_hashes
+
+    source_raw = record.get("source")
+    existing_source_raw = existing.get("source")
+    source: dict[str, Any] = source_raw if isinstance(source_raw, dict) else {}
+    existing_source: dict[str, Any] = existing_source_raw if isinstance(existing_source_raw, dict) else {}
+    sources = as_sources(existing_source.get("sources"))
+    for item in as_sources(source.get("sources")):
+        if item not in sources:
+            sources.append(item)
+    source["sources"] = sources
+    fill_missing_fields(source, existing_source)
+    record["source"] = source
+
+
+def historical_mission3_record(row: dict[str, Any], metadata: dict[int, dict[str, Any]], identity: dict[str, dict[str, Any]], existing_record: dict[str, Any] | None = None) -> dict[str, Any] | None:
+    dog_id = int_value(row.get("token_id", row.get("dog_id")), -1)
+    if dog_id < 0:
+        return None
+    status = normalize_status_text(row.get("status"), 3)
+    if status not in {"ongoing", "settled", "ended pending settlement"}:
+        return None
+
+    meta = metadata.get(dog_id, {})
+    native, symbol, usd_value = parse_historical_amount_display(row.get("amount"), MISSION_CONFIG[3]["currency"])
+    wallet = normalize_address(row.get("winner_wallet") or row.get("winner"))
+    profile = identity.get(wallet, {}) if wallet else {}
+    display = first_text(row.get("winner"), profile.get("display"), short_address(wallet))
+    profile_url = first_text(row.get("winner_url"), profile.get("profile_url"))
+    auction_created_time = iso_utc(row.get("auction_created_time_utc"))
+    settlement_time = iso_utc(row.get("settled_time_utc"))
+    activity = settlement_time if status == "settled" else first_text(settlement_time, auction_created_time)
+    amount = {
+        "raw": first_text(row.get("amount_raw"), eth_to_wei(native)) or None,
+        "native": native or None,
+        "native_symbol": symbol or MISSION_CONFIG[3]["currency"],
+        "price_asset_key": MISSION_CONFIG[3]["price_asset_key"],
+        "usd_estimate": str(decimal_value(usd_value) or usd_value) if usd_value else None,
+        "usd_estimate_display": usd_display(usd_value) or None,
+        "usd_estimate_source": "historical_dog_search_amount" if usd_value else None,
+        "usd_estimate_confidence": "medium" if usd_value else "missing",
+        "usd_estimate_time_basis": "settlement_block_time" if status == "settled" and native else ("auction_created_block_time" if native else None),
+        "amount_usd_at_event": str(decimal_value(usd_value) or usd_value) if usd_value and status != "ongoing" else None,
+        "eth_usd_price_at_event": None,
+        "eth_usd_price_date_utc": None,
+    }
+    sources = as_sources(row.get("sources"))
+    if "historical_dog_search_backfill" not in sources:
+        sources.append("historical_dog_search_backfill")
+    record = {
+        "schema_version": 1,
+        "dog_id": dog_id,
+        "mission": 3,
+        "era_label": "Mission 3",
+        "chain": "Base",
+        "chain_id": 8453,
+        "status": status,
+        "dog_image_url": first_text(row.get("dog_image_url"), meta.get("dog_image_url"), f"https://api.degendogs.club/images/{dog_id}.png"),
+        "dog_item_url": first_text(row.get("dog_opensea_url"), meta.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
+        "auction_house": None,
+        "auction_created": {
+            "block_number": None,
+            "block_time_utc": auction_created_time or None,
+            "tx_hash": None,
+            "tx_url": None,
+        },
+        "settlement": {
+            "settled": status == "settled",
+            "block_number": None,
+            "block_time_utc": settlement_time or None,
+            "tx_hash": None,
+            "tx_url": None,
+        },
+        "winner_or_high_bidder": {
+            "wallet": wallet or None,
+            "display": display or None,
+            "farcaster_fid": profile.get("farcaster_fid"),
+            "farcaster_handle": first_text(profile.get("farcaster_handle"), display.lstrip("@") if display.startswith("@") else "") or None,
+            "profile_url": profile_url or None,
+            "wallet_explorer_url": address_url(3, wallet) or None,
+        },
+        "amount": amount,
+        "bid_stats": {
+            "bid_count": int_value(row.get("bid_count"), 0),
+            "unique_bidder_count": int_value(row.get("unique_bidder_count"), 0),
+            "last_bid_time_utc": None,
+        },
+        "bid_tx_hashes": [],
+        "rarity": parse_rarity(first_text(row.get("rarity"), meta.get("rarity"))),
+        "traits": parse_traits(first_text(row.get("trait_rarity"), meta.get("trait_rarity"), row.get("traits"), meta.get("traits"))),
+        "links": {
+            "item": first_text(row.get("dog_opensea_url"), meta.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
+            "dog_page": first_text(row.get("dog_external_url"), meta.get("dog_external_url"), f"https://degendogs.club/#dog{dog_id}"),
+            "auction_tx": None,
+            "settlement_tx": None,
+            "explorer": address_url(3, wallet) or None,
+            "repo_archive": f"archive/dogs/by-id/{dog_id:03d}.json",
+        },
+        "source": {
+            "confidence": confidence_bucket(row.get("confidence")),
+            "raw_confidence": first_text(row.get("confidence")) or None,
+            "sources": sources,
+            "notes": MISSION_CONFIG[3]["source_note"] + " Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
+        },
+        "activity_time_utc": activity or None,
+        "activity_time_basis": "settlement_block_time" if status == "settled" else "auction_created_block_time",
+    }
+    merge_existing_historical_context(record, existing_record)
+    record["search_text"] = current_overlay_search_text(record, dog_id)
+    historical_search = first_text(row.get("search_text"))
+    if historical_search:
+        record["search_text"] = f"{record['search_text']} {historical_search.lower()}"
+    return record
+
+
+def apply_historical_mission3_backfill(records: list[dict[str, Any]], metadata: dict[int, dict[str, Any]], identity: dict[str, dict[str, Any]]) -> int:
+    historical_rows = load_json(HISTORICAL_SEARCH, [])
+    if not isinstance(historical_rows, list):
+        return 0
+    existing_by_id = load_existing_per_dog_records()
+    by_key = {(int_value(record.get("mission")), int_value(record.get("dog_id"))): record for record in records}
+    added = 0
+    for row in historical_rows:
+        if not isinstance(row, dict) or int_value(row.get("mission"), 0) != 3:
+            continue
+        dog_id = int_value(row.get("token_id", row.get("dog_id")), -1)
+        if dog_id < 0 or (3, dog_id) in by_key:
+            continue
+        record = historical_mission3_record(row, metadata, identity, existing_by_id.get(dog_id))
+        if not record:
+            continue
+        records.append(record)
+        by_key[(3, dog_id)] = record
+        added += 1
+    return added
 
 
 def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identity: dict[str, dict[str, Any]]) -> dict[str, Any]:
@@ -875,13 +1111,17 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         links["dog_page"] = first_text(feed.get("dog_external_url"), current.get("dog_external_url"), links.get("dog_page"), f"https://degendogs.club/#dog{dog_id}")
         links["explorer"] = address_url(3, wallet) or links.get("explorer")
         record["links"] = links
-        source = record.get("source") if isinstance(record.get("source"), dict) else {}
-        sources = as_sources(source.get("sources"))
+        source_raw = record.get("source")
+        source: dict[str, Any] = source_raw if isinstance(source_raw, dict) else {}
+        sources = [item for item in as_sources(source.get("sources")) if item != "historical_dog_search_backfill"]
         if "generated_auction_feed" not in sources:
             sources.append("generated_auction_feed")
         source["sources"] = sources
         source["confidence"] = "verified"
-        source["notes"] = first_text(source.get("notes"), MISSION_CONFIG[3]["source_note"])
+        source_note = first_text(source.get("notes"), MISSION_CONFIG[3]["source_note"])
+        if "historical_dog_search" in source_note:
+            source_note = MISSION_CONFIG[3]["source_note"]
+        source["notes"] = source_note
         record["source"] = source
         record["search_text"] = current_overlay_search_text(record, dog_id)
         updates += 1
@@ -940,6 +1180,7 @@ def build_unified_index() -> dict[str, Any]:
             continue
         seen.add(key)
         records.append(record)
+    historical_mission3_backfills = apply_historical_mission3_backfill(records, metadata, identity)
     current_overrides = apply_current_auction_overrides(records, identity)
     records.sort(key=record_sort_key, reverse=True)
 
@@ -952,7 +1193,7 @@ def build_unified_index() -> dict[str, Any]:
         "records_by_mission": {str(mission): counts_by_mission.get(str(mission), 0) for mission in [1, 2, 3]},
         "records_by_confidence": dict(sorted(counts_by_conf.items())),
         "source_files": [str(path.relative_to(ROOT)) for path in MISSION_INDEXES.values() if path.exists()],
-        "notes": notes + [f"current_auction_overrides:{current_overrides}", "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."],
+        "notes": notes + [f"historical_mission3_backfills:{historical_mission3_backfills}", f"current_auction_overrides:{current_overrides}", "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."],
     }
 
     write_json(ARCHIVE_GENERATED / "unified_dog_search_index.json", records)

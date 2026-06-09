@@ -120,6 +120,27 @@ def iso_utc(value: Any) -> str:
     return raw if raw.endswith("Z") else f"{raw}Z"
 
 
+def archive_current_rank(row: dict[str, Any]) -> int:
+    status = text(row.get("status")).lower()
+    return 1 if status == "live" or "ongoing" in status else 0
+
+
+def unified_sort_key(row: dict[str, Any]) -> tuple[int, str, int]:
+    return (archive_current_rank(row), iso_utc(row.get("activity_time_utc")), int(row.get("dog_id") or -1))
+
+
+def historical_mission3_required_ids(rows: list[Any]) -> set[int]:
+    required_statuses = {"settled", "live", "ongoing", "ended_unsettled", "live_or_unsettled", "ended pending settlement"}
+    required: set[int] = set()
+    for row in rows:
+        if not isinstance(row, dict) or int(row.get("mission") or 0) != 3:
+            continue
+        status = text(row.get("status")).lower()
+        if status in required_statuses:
+            required.add(dog_id(row))
+    return required
+
+
 def first_row(path: Path) -> dict[str, Any]:
     data = load_json(path)
     if not isinstance(data, list) or not data or not isinstance(data[0], dict):
@@ -879,6 +900,21 @@ def validate_current_surface() -> dict[str, Any]:
                 raise AssertionError("current_auction_bid_history bid_usd does not equal bid_eth * live ETH/USD")
 
     for path in unified_paths:
+        unified_rows = load_json(path)
+        if not isinstance(unified_rows, list):
+            raise AssertionError(f"{path.relative_to(ROOT)} is not a list")
+        sorted_rows = sorted([row for row in unified_rows if isinstance(row, dict)], key=unified_sort_key, reverse=True)
+        if unified_rows != sorted_rows:
+            raise AssertionError(f"{path.relative_to(ROOT)} is not sorted with only the actual current auction prioritized")
+        ongoing_rows = [row for row in sorted_rows if row.get("mission") == 3 and archive_current_rank(row) == 1]
+        if len(ongoing_rows) != 1 or dog_id(ongoing_rows[0]) != current_dog_id:
+            raise AssertionError(f"{path.relative_to(ROOT)} must contain exactly one Mission 3 ongoing/current row for Dog #{current_dog_id}")
+        required_mission3 = historical_mission3_required_ids(historical_rows if isinstance(historical_rows, list) else [])
+        unified_mission3 = {dog_id(row) for row in sorted_rows if row.get("mission") == 3}
+        missing_mission3 = sorted(required_mission3 - unified_mission3)
+        if missing_mission3:
+            raise AssertionError(f"{path.relative_to(ROOT)} missing Mission 3 historical archive rows: {missing_mission3[:20]}")
+
         unified = find_unified_current(path, current_dog_id)
         raw_who = unified.get("winner_or_high_bidder")
         who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}

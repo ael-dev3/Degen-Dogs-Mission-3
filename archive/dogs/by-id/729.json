@@ -23,7 +23,7 @@
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-05-31T19:12:29Z",
+      "block_time_utc": "2026-05-30T18:40:09Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -57,7 +57,7 @@
       "total": 740
     },
     "schema_version": 1,
-    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 0x76d0…8942 0xael.eth 0.01 eth 10000000000000000 20.04 $20.04 2026-05-31t19:12:29z #586/740 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.7%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.0%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.7%) eyes glasses generated_auction_feed",
+    "search_text": "dog 729 dog #729 729 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 0x76d0…8942 0xael.eth 0.01 eth 10000000000000000 20.04 $20.04 2026-05-31t19:12:29z #586/740 generated auction feed 0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.7%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.0%) ears earbuds head: blackcap (6.8%) head blackcap eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-05-31T19:12:29Z",
@@ -68,8 +68,10 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "generated_auction_feed",
+      "raw_confidence": "verified_live_base_logs",
       "sources": [
+        "base_logs",
+        "dashboard_builder",
         "generated_auction_feed"
       ]
     },

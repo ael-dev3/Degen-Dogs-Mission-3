@@ -274,6 +274,7 @@ def write_fixture(
     unified_row = {
         "mission": 3,
         "dog_id": 729,
+        "status": "ongoing",
         "winner_or_high_bidder": {"wallet": wallet, "display": "@0xael.eth"},
         "amount": {
             "native": "0.01",

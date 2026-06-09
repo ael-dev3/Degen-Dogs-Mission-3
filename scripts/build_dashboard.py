@@ -1982,6 +1982,21 @@ def is_settled_status(value: Any) -> bool:
     return status == "settled" or (status.startswith("settled") and "unsettled" not in status)
 
 
+def normalize_archive_status_label(value: Any, mission: int = 0) -> str:
+    status = text_value(value).lower().strip().replace("-", "_")
+    squashed = " ".join(status.replace("_", " ").split())
+    if not squashed:
+        return ""
+    if mission == 3:
+        if squashed in {"live", "ongoing"}:
+            return "live" if squashed == "live" else "ongoing"
+        if "pending settlement" in squashed or "unsettled" in squashed or squashed in {"ended", "live or unsettled"}:
+            return "ended pending settlement"
+        if "settled" in squashed:
+            return "settled"
+    return text_value(value)
+
+
 def load_json_list(path: Path) -> list[dict[str, Any]]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -2023,15 +2038,15 @@ def archive_amount(row: dict[str, Any], mission: int) -> str:
     return f"{amount} ETH" if amount else ""
 
 
-def archive_status(row: dict[str, Any]) -> str:
+def archive_status(row: dict[str, Any], mission: int = 0) -> str:
     status = first_text(row.get("auction_status"), row.get("auction_state"), row.get("status"))
     if status:
-        return status
+        return normalize_archive_status_label(status, mission)
     settled = row.get("settled")
     if settled is True or text_value(settled).lower() in {"1", "true", "yes"} or row.get("settled_block"):
         return "settled"
     if settled is False or text_value(settled).lower() in {"0", "false", "no"}:
-        return "live_or_unsettled"
+        return "ended pending settlement" if mission == 3 else "live_or_unsettled"
     if row:
         return "recovered"
     return "metadata_only"
@@ -2117,7 +2132,7 @@ def build_historical_dog_tables(
         rarity = first_text(metadata.get("rarity"), timeline.get("rarity"), winner.get("rarity"))
 
         if mission == 3 and (timeline or winner or current):
-            status = first_text(current.get("auction_state"), timeline.get("auction_state"), archive_status(archive))
+            status = normalize_archive_status_label(first_text(current.get("auction_state"), timeline.get("auction_state"), archive_status(archive, mission)), mission)
             amount = first_text(current.get("current_bid"), winner.get("winning_bid"))
             if not amount:
                 settled_eth = first_text(timeline.get("settled_eth"), archive.get("amount_eth"))
@@ -2135,7 +2150,7 @@ def build_historical_dog_tables(
             confidence = first_text(archive.get("confidence"), "verified_live_base_logs")
             sources = source_text(archive.get("sources")) or "base_logs,dashboard_builder"
         else:
-            status = archive_status(archive)
+            status = archive_status(archive, mission)
             amount = archive_amount(archive, mission)
             raw_winner = first_text(archive.get("winner"))
             winner_wallet = normalize_address(raw_winner)
@@ -3174,8 +3189,8 @@ const usdCandidates=record=>{const amount=record.amount||{};return [amount.usd_e
 const getUsdSortValue=record=>firstNumeric(usdCandidates(record));
 const formatUsd=value=>{const n=toNumber(value);return n===null?'':`$${n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`;};
 const usdDisplay=record=>{const amount=record.amount||{};return amount.usd_estimate_display||formatUsd(getUsdSortValue(record));};
-const newestRank=record=>{const status=String(record.status||'').toLowerCase();return status==='live'||status.includes('ongoing')||status.includes('pending settlement')||status.startsWith('ended')?1:0;};
-const compareNewest=(a,b)=>{const live=newestRank(b)-newestRank(a);if(live)return live;const at=Date.parse(a.activity_time_utc||'')||0;const bt=Date.parse(b.activity_time_utc||'')||0;if(bt!==at)return bt-at;return Number(b.dog_id||0)-Number(a.dog_id||0);};
+const archiveCurrentRank=record=>{const status=String(record.status||'').toLowerCase();return status==='live'||status.includes('ongoing')?1:0;};
+const compareNewest=(a,b)=>{const live=archiveCurrentRank(b)-archiveCurrentRank(a);if(live)return live;const at=Date.parse(a.activity_time_utc||'')||0;const bt=Date.parse(b.activity_time_utc||'')||0;if(bt!==at)return bt-at;return Number(b.dog_id||0)-Number(a.dog_id||0);};
 const exactDogQuery=q=>{const dog=q.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/);if(dog)return Number(dog[1]);const bare=q.match(/^#?(\d{1,4})$/);return bare?Number(bare[1]):null;};
 const rowSearchText=record=>{const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};return [record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.amount_usd_at_event,amount.usd_estimate_display,usdDisplay(record),amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...(record.bid_tx_hashes||[])].filter(Boolean).join(' ').toLowerCase();};
 const statusCell=status=>{const text=String(status||'unknown');const lower=text.toLowerCase();const tone=lower.includes('ongoing')||lower==='live'?'ongoing':(lower.includes('settled')?'settled':'neutral');return `<span class="status-pill ${tone}">${escapeHtml(text)}</span>`;};

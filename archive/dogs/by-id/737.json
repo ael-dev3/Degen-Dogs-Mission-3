@@ -23,7 +23,7 @@
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-06-08T20:15:03Z",
+      "block_time_utc": "2026-06-07T20:10:25Z",
       "tx_hash": null,
       "tx_url": null
     },
@@ -60,7 +60,7 @@
       "total": 740
     },
     "schema_version": 1,
-    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base settled 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0…03e3 0.03631 eth 36310000000000000 61.26 $61.26 2026-06-08t20:15:03z #563/740 generated auction feed 0x1554b33ab7a11775fba80370abb35263614d94e11937a8803ac44b36a0c0231b 0xff727a505e5a10b31e151d16f71a9e2b9473a6226a486a8d1ff7b13bc8edaaf7 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.3%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: tongue (9.6%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: glasses (12.7%) eyes glasses generated_auction_feed",
+    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base settled 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0…03e3 0.03631 eth 36310000000000000 61.26 $61.26 2026-06-08t20:15:03z #563/740 generated auction feed 0x1554b33ab7a11775fba80370abb35263614d94e11937a8803ac44b36a0c0231b 0xff727a505e5a10b31e151d16f71a9e2b9473a6226a486a8d1ff7b13bc8edaaf7 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.3%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: tongue (9.6%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.3%) head none eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-08T20:15:03Z",
@@ -71,8 +71,10 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "generated_auction_feed",
+      "raw_confidence": "verified_live_base_logs",
       "sources": [
+        "base_logs",
+        "dashboard_builder",
         "generated_auction_feed"
       ]
     },
