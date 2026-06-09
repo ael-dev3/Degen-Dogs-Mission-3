@@ -104,6 +104,39 @@ def test_live_generated_feed_usd_beats_stale_or_mismatched_historical_price() ->
     assert estimate["price_source"] == "generated_auction_feed"
 
 
+def test_ended_pending_generated_feed_record_preserves_current_surface_usd() -> None:
+    archive_usd = load_module()
+    record = live_feed_record()
+    record["status"] = "ended pending settlement"
+    record["activity_time_utc"] = "2026-06-03T19:41:49Z"
+    record["amount"]["native"] = "0.033"
+    record["amount"]["usd_estimate"] = "54.74"
+    record["amount"]["usd_estimate_display"] = "$54.74"
+    record["settlement"] = {"settled": False}
+    price_map = {
+        ("ETH", "2026-06-03"): {
+            "asset_key": "ETH",
+            "date_utc": "2026-06-03",
+            "price_usd": "1687.0760837926352",
+            "source": "unit_test_event_day_price",
+            "confidence": "high",
+        }
+    }
+
+    estimate = archive_usd.update_record(record, price_map)
+
+    amount = record["amount"]
+    assert amount["usd_estimate"] == "54.74000000"
+    assert amount["usd_estimate_display"] == "$54.74"
+    assert amount["usd_estimate_source"] == "generated_auction_feed"
+    assert amount["amount_usd_at_event"] is None
+    assert amount["eth_usd_price_at_event"] is None
+    assert estimate is not None
+    assert estimate["event_type"] == "auction_record"
+    assert estimate["estimated_usd_display"] == "$54.74"
+    assert estimate["price_source"] == "generated_auction_feed"
+
+
 def test_settled_generated_feed_record_uses_historical_event_price_not_current_feed_usd() -> None:
     archive_usd = load_module()
     record = live_feed_record()
@@ -255,6 +288,60 @@ def test_regular_archive_record_uses_nearest_daily_price_when_exact_day_is_absen
     assert estimate is not None
     assert estimate["price_status"] == "priced"
     assert "nearest available daily price" in estimate["notes"]
+
+
+def test_archive_validator_accepts_ended_pending_current_surface_usd() -> None:
+    validator = load_validator_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        unified = [
+            {
+                "mission": 3,
+                "dog_id": 1,
+                "status": "ended pending settlement",
+                "settlement": {"settled": False},
+                "amount": {
+                    "native": "0.033",
+                    "native_symbol": "ETH",
+                    "price_asset_key": "ETH",
+                    "usd_estimate": "54.67000000",
+                    "usd_estimate_display": "$54.67",
+                    "usd_estimate_source": "current_eth_usd_price",
+                    "usd_estimate_confidence": "live_current",
+                },
+            }
+        ] + [{"mission": 3, "dog_id": dog_id, "status": "created"} for dog_id in range(2, 702)]
+        estimates = [
+            {
+                "mission": 3,
+                "dog_id": 1,
+                "event_type": "auction_record",
+                "native_amount": "0.033",
+                "price_asset_key": "ETH",
+                "price_usd": "1656.6666666666667",
+                "estimated_usd_value": "54.67000000",
+                "estimated_usd_display": "$54.67",
+                "price_date_utc": "2026-06-09",
+                "price_source": "current_eth_usd_price",
+                "price_confidence": "live_current",
+                "price_status": "priced",
+            }
+        ]
+        write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", unified)
+        write_json(root / "public" / "generated" / "unified_dog_search_index.json", unified)
+        write_json(root / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json", [
+            {"asset_key": "ETH", "date_utc": "2026-06-09", "price_usd": "1656.6666666666667"},
+            {"asset_key": "DEGEN", "date_utc": "2026-06-09", "price_usd": "0.01"},
+        ])
+        write_json(root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json", estimates)
+        write_json(root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json", {"estimate_rows": 1})
+        validator.ROOT = root
+        validator.UNIFIED = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+        validator.PUBLIC_UNIFIED = root / "public" / "generated" / "unified_dog_search_index.json"
+        validator.PRICES = root / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json"
+        validator.ESTIMATES = root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json"
+        validator.MANIFEST = root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json"
+        validator.main()
 
 
 def test_archive_validator_rejects_settled_current_price_without_event_provenance() -> None:

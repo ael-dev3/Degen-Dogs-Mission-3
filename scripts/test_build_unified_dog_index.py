@@ -62,9 +62,58 @@ def test_ended_pending_settlement_feed_row_stays_in_unified_archive() -> None:
     assert "ended pending settlement" in record["search_text"]
 
 
+def test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing() -> None:
+    unified = load_module()
+    row = {
+        "_mission": 3,
+        "token_id": 727,
+        "settled": False,
+        "auction_created_time_utc": "2026-05-28T18:36:55Z",
+        "bid_count": 2,
+        "unique_bidder_count": 2,
+        "sources": ["base_logs", "archive_indexer"],
+        "confidence": "verified",
+    }
+
+    record = unified.normalize_record(row, {}, {}, {})
+
+    assert record is not None
+    assert record["status"] == "ended pending settlement"
+    assert record["settlement"]["settled"] is False
+    assert unified.archive_status_from_feed("ended_unsettled") == "ended pending settlement"
+    assert unified.record_sort_key(record)[0] == 1
+    assert "ongoing" not in record["search_text"]
+
+
+def test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display() -> None:
+    unified = load_module()
+    feed = {
+        "status": "settled",
+        "dog": "Dog #736",
+        "bidder_winner": "0xd29c…1cde",
+        "bidder_winner_wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+        "amount_eth": "0.02662",
+        "amount_usd": "48.22",
+        "auction_time_utc": "2026-06-07 20:10:25",
+        "settled_time_utc": "2026-06-07 20:10:25",
+        "eth_usd_price_at_event": "1811.346676900944",
+        "eth_usd_price_date_utc": "2026-06-04",
+    }
+
+    record = unified.generated_feed_record(feed, {}, {})
+    amount = record["amount"]
+
+    assert amount["usd_estimate"] == "48.22"
+    assert amount["usd_estimate_display"] == "$48.22"
+    assert amount["amount_usd_at_event"] == "48.22"
+    assert "48.22" in record["search_text"]
+
+
 def test() -> None:
     tests = [
         test_ended_pending_settlement_feed_row_stays_in_unified_archive,
+        test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing,
+        test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display,
     ]
     for item in tests:
         item()

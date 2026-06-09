@@ -42,7 +42,9 @@ def is_live_or_current(record: dict[str, Any]) -> bool:
     status = text_value(record.get("status")).lower()
     raw_settlement = record.get("settlement")
     settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
-    return status in {"ongoing", "live"} and not settlement.get("settled")
+    if settlement.get("settled"):
+        return False
+    return status in {"ongoing", "live", "ended pending settlement", "ended_unsettled"}
 
 
 def validate_historical_event_provenance(

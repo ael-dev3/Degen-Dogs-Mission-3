@@ -189,6 +189,7 @@ def test_timer_urgency_stays_calm_until_less_than_one_hour_remains() -> None:
 def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, list[dict[str, Any]]]:
     conn = sqlite3.connect(":memory:")
     dashboard.insert_rows(conn, "auction_created", [
+        {"token_id": 8, "start_time_utc": "2026-06-07 00:00:00", "end_time_utc": "2026-06-08 12:00:00", "block_number": 80, "tx_hash": "0xcreated8"},
         {"token_id": 9, "start_time_utc": "2026-05-31 00:00:00", "end_time_utc": "2026-05-31 12:00:00", "block_number": 90, "tx_hash": "0xcreated9"},
         {"token_id": 10, "start_time_utc": "2026-06-01 00:00:00", "end_time_utc": "2026-06-01 12:00:00", "block_number": 100, "tx_hash": "0xcreated10"},
         {"token_id": 11, "start_time_utc": "2026-06-02 00:00:00", "end_time_utc": "2026-06-03 00:00:00", "block_number": 200, "tx_hash": "0xcreated11"},
@@ -413,6 +414,42 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
     ]
     for marker in css_markers:
         assert marker in rendered
+
+
+def test_unified_archive_bid_cell_formats_usd_from_shared_numeric_fallbacks() -> None:
+    dashboard = load_module()
+    tables = {
+        "mission3_metrics": (["metric", "value"], [("site_url", "https://example.test"), ("current_auction_token_id", "11")]),
+        "auction_feed": ([
+            "status", "dog", "dog_image_url", "dog_external_url", "dog_opensea_url", "bidder_winner",
+            "bidder_winner_url", "bidder_winner_wallet", "bid", "amount_eth", "amount_usd", "time_remaining",
+            "auction_end_utc", "rarity", "traits", "trait_rarity",
+        ], [(
+            "ongoing", "Dog #11", "", "", "", "@unitcurrent", "https://farcaster.xyz/unitcurrent",
+            "0x00000000000000000000000000000000000000b2", "1.00000 ETH ($2000)", 1.0, 2000.0,
+            "02:00:00", "2026-06-02 04:00:00", "Rank 1", "", "",
+        )]),
+        "current_auction_bid_history": (["bid_time_utc", "token_id", "dog", "bidder", "bidder_url", "bidder_wallet", "bid", "bid_eth", "bid_usd", "block_number", "log_index", "tx_hash"], []),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    required_markers = [
+        "const usdCandidates=record=>",
+        "amount.amount_usd_at_event",
+        "const getUsdSortValue=record=>firstNumeric(usdCandidates(record))",
+        "const usdDisplay=record=>",
+        "const display=usdDisplay(record)",
+    ]
+    for marker in required_markers:
+        assert marker in rendered
+
 
 
 def write_reward_snapshot(path: Path) -> None:

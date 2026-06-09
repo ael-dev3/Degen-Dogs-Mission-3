@@ -373,15 +373,38 @@ def amount_for_row(row: dict[str, Any], mission: int) -> dict[str, Any]:
     }
 
 
+def normalize_status_text(status_text: Any, mission: int = 0) -> str:
+    """Normalize dashboard/archive status labels without turning unsettled into settled.
+
+    Mission 3 archive rows can be `settled=false` long after their auction timer
+    ended. The live row is overlaid separately from current_auction, so generic
+    Mission 3 archive rows should be treated as pending settlement rather than a
+    second ongoing auction.
+    """
+    lowered = text_value(status_text).lower().strip().replace("-", "_")
+    squashed = " ".join(lowered.replace("_", " ").split())
+    if not squashed:
+        return ""
+    if squashed in {"ongoing", "live"}:
+        return "ongoing"
+    if "pending settlement" in squashed or "unsettled" in squashed:
+        return "ended pending settlement"
+    if mission == 3 and squashed == "ended":
+        return "ended pending settlement"
+    if "settled" in squashed:
+        return "settled"
+    return squashed
+
+
 def status_for_row(row: dict[str, Any], mission: int) -> str:
     status = first_text(row.get("auction_status"), row.get("auction_state"), row.get("status"))
     if status:
-        return status
+        return normalize_status_text(status, mission)
     settled = row.get("settled")
     if settled is True or text_value(settled).lower() in {"true", "1", "yes"} or row.get("settled_block"):
         return "settled"
     if settled is False or text_value(settled).lower() in {"false", "0", "no"}:
-        return "ongoing" if mission == 3 else "unsettled"
+        return "ended pending settlement" if mission == 3 else "unsettled"
     return "recovered"
 
 
@@ -533,13 +556,14 @@ def normalize_record(row: dict[str, Any], metadata: dict[int, dict[str, Any]], i
 
 
 def archive_status_from_feed(status_text: str) -> str:
+    status = normalize_status_text(status_text, 3)
+    if status:
+        return status
     lowered = text_value(status_text).lower()
+    if "ended" in lowered or "pending settlement" in lowered or "unsettled" in lowered:
+        return "ended pending settlement"
     if "settled" in lowered:
         return "settled"
-    if "ended" in lowered or "pending settlement" in lowered:
-        return "ended pending settlement"
-    if lowered in {"ongoing", "live"}:
-        return "ongoing"
     return lowered
 
 
@@ -615,8 +639,12 @@ def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identit
     profile_url = first_text(feed.get("bidder_winner_url"), current.get("bidder_url"), profile.get("profile_url"))
     native = first_text(feed.get("amount_eth"), current.get("current_bid_eth"))
     event_priced = status != "ongoing"
+    event_usd_value = first_text(
+        feed.get("amount_usd_at_event"),
+        feed.get("amount_usd") if event_priced else "",
+    )
     usd_value = first_text(
-        feed.get("amount_usd_at_event") if event_priced else "",
+        event_usd_value,
         feed.get("amount_usd"),
         current.get("current_bid_usd"),
     )
@@ -636,7 +664,7 @@ def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identit
         "usd_estimate_confidence": usd_confidence,
         "usd_estimate_price_usd": price_usd or None,
         "usd_estimate_price_date_utc": price_date or None,
-        "amount_usd_at_event": str(decimal_value(feed.get("amount_usd_at_event")) or feed.get("amount_usd_at_event")) if feed.get("amount_usd_at_event") not in (None, "") else None,
+        "amount_usd_at_event": str(decimal_value(event_usd_value) or event_usd_value) if event_usd_value not in (None, "") else None,
         "eth_usd_price_at_event": first_text(feed.get("eth_usd_price_at_event")) or None,
         "eth_usd_price_date_utc": price_date or None,
         "usd_estimate_time_basis": ("settlement_block_time" if status == "settled" else "last_bid_block_time") if native else None,
@@ -772,8 +800,12 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         amount["price_asset_key"] = "ETH"
         amount["raw"] = eth_to_wei(native) or amount.get("raw")
         event_priced = feed_status != "ongoing"
+        event_usd_value = first_text(
+            feed.get("amount_usd_at_event"),
+            feed.get("amount_usd") if event_priced else "",
+        )
         usd_value = first_text(
-            feed.get("amount_usd_at_event") if event_priced else "",
+            event_usd_value,
             feed.get("amount_usd"),
             current.get("current_bid_usd"),
             amount.get("usd_estimate"),
@@ -788,7 +820,7 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
             price_date = first_text(feed.get("eth_usd_price_date_utc"), current.get("eth_usd_price_date_utc"), amount.get("usd_estimate_price_date_utc"))
             amount["usd_estimate_price_usd"] = price_usd or None
             amount["usd_estimate_price_date_utc"] = price_date or None
-            amount["amount_usd_at_event"] = str(decimal_value(feed.get("amount_usd_at_event")) or feed.get("amount_usd_at_event")) if feed.get("amount_usd_at_event") not in (None, "") else amount.get("amount_usd_at_event")
+            amount["amount_usd_at_event"] = str(decimal_value(event_usd_value) or event_usd_value) if event_usd_value not in (None, "") else amount.get("amount_usd_at_event")
             amount["eth_usd_price_at_event"] = first_text(feed.get("eth_usd_price_at_event"), amount.get("eth_usd_price_at_event")) or None
             amount["eth_usd_price_date_utc"] = price_date or None
             amount["usd_estimate_time_basis"] = "settlement_block_time" if feed_status == "settled" else "last_bid_block_time"

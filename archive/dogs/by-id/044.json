@@ -48,7 +48,7 @@
       "total": 739
     },
     "schema_version": 1,
-    "search_text": "dog 44 dog #44 44 mission 1 mission 1 polygon no_auction_dogmaster_reward weth #123/739 background: halo; body: white; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 44 dog #44 44 mission 1 mission 1 polygon no auction dogmaster reward weth #123/739 background: halo; body: white; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -58,7 +58,7 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing. This is a verified non-auction/special-case record, not a fake auction row.",
+      "notes": "Mission 1 bid currency is verified as Polygon WETH; historical USD uses ETH/WETH pricing.",
       "raw_confidence": "verified_mint_and_receipt_logs",
       "sources": [
         "polygon_receipts",
@@ -67,7 +67,7 @@
         "markcarey_github"
       ]
     },
-    "status": "no_auction_dogmaster_reward",
+    "status": "no auction dogmaster reward",
     "traits": [
       {
         "display": "Background: Halo (9.7%)",

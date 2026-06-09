@@ -83,11 +83,14 @@ def should_preserve_source_usd(record: dict[str, Any], amount: dict[str, Any]) -
     raw_settlement = record.get("settlement")
     settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
     status = text_value(record.get("status")).lower()
-    if settlement.get("settled") or status in {"settled", "ended pending settlement", "ended_unsettled"}:
+    has_live_source = bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
+    if settlement.get("settled") or status == "settled":
         return False
+    if status in {"ended pending settlement", "ended_unsettled"}:
+        return has_live_source and not has_event_usd_provenance(amount)
     if status and status not in {"ongoing", "live"}:
         return False
-    return bool(source_tokens(record, amount) & LIVE_USD_SOURCES)
+    return has_live_source
 
 
 def has_event_usd_provenance(amount: dict[str, Any]) -> bool:
