@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-06-09 20:38:17",
+    "token_id": 739,
+    "bidder": "@stemo.eth",
+    "bidder_url": "https://farcaster.xyz/stemo.eth",
+    "bidder_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
+    "bid": "0.02650 ETH ($45)",
+    "bid_eth": 0.0265,
+    "bid_usd": 44.71,
+    "bid_usd_at_event": 44.71,
+    "eth_usd_price_at_event": "1687.0760837926352",
+    "eth_usd_price_date_utc": "2026-06-08",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "nearest_bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 47124075,
+    "tx_hash": "0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880"
+  },
+  {
     "bid_time_utc": "2026-06-09 20:01:05",
     "token_id": 738,
     "bidder": "0x23d6…9242",
@@ -862,8 +882,8 @@
   {
     "bid_time_utc": "2026-06-02 19:23:01",
     "token_id": 731,
-    "bidder": "0x46e9…f7ef",
-    "bidder_url": "https://basescan.org/address/0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
+    "bidder": "@stemo.eth",
+    "bidder_url": "https://farcaster.xyz/stemo.eth",
     "bidder_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bid": "0.02675 ETH ($54)",
     "bid_eth": 0.02675,
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46238249,
     "tx_hash": "0x313d7380b758e609a4a4e21698c4caff42c741a5cdf3e51570f8af39eb0cb9f3"
-  },
-  {
-    "bid_time_utc": "2026-05-20 08:06:53",
-    "token_id": 719,
-    "bidder": "0xa264…08c4",
-    "bidder_url": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
-    "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
-    "bid": "0.01612 ETH ($34)",
-    "bid_eth": 0.01612,
-    "bid_usd": 34.01,
-    "bid_usd_at_event": 34.01,
-    "eth_usd_price_at_event": "2109.7541528236497",
-    "eth_usd_price_date_utc": "2026-05-20",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 46237533,
-    "tx_hash": "0xe04dde1ea439afb737fcf69ddc1bb627020d5e60fdae89bd1ade2acd28fc2f20"
   }
 ]
