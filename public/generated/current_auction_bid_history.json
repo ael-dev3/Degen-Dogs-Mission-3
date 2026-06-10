@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-06-10 21:16:31",
+    "token_id": 740,
+    "dog": "Dog #740",
+    "bidder": "@stemo.eth",
+    "bidder_url": "https://farcaster.xyz/stemo.eth",
+    "bidder_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
+    "bid": "0.02760 ETH ($45)",
+    "bid_eth": 0.0276,
+    "bid_usd": 44.76,
+    "eth_usd_price_live": "1621.73",
+    "eth_usd_price_date_utc": "2026-06-10",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 47168422,
+    "log_index": 351,
+    "tx_hash": "0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0"
+  }
+]
