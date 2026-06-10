@@ -180,6 +180,15 @@
     "token_ids": "710"
   },
   {
+    "winner": "0x23d6…9242",
+    "winner_url": "https://basescan.org/address/0x23d660548cd61432537592dcea15b059605c9242",
+    "winner_wallet": "0x23d660548cd61432537592dcea15b059605c9242",
+    "auction_wins": 1,
+    "auction_xp": 100,
+    "sup_reward": 14739.130435,
+    "token_ids": "691"
+  },
+  {
     "winner": "0x2df0…f457",
     "winner_url": "https://basescan.org/address/0x2df06405772f9fe85e1771ff11baaa5d3933f457",
     "winner_wallet": "0x2df06405772f9fe85e1771ff11baaa5d3933f457",
@@ -286,14 +295,5 @@
     "auction_xp": 100,
     "sup_reward": 14739.130435,
     "token_ids": "707"
-  },
-  {
-    "winner": "@kenshiking.eth",
-    "winner_url": "https://farcaster.xyz/kenshiking.eth",
-    "winner_wallet": "0x23d660548cd61432537592dcea15b059605c9242",
-    "auction_wins": 1,
-    "auction_xp": 100,
-    "sup_reward": 14739.130435,
-    "token_ids": "691"
   }
 ]
