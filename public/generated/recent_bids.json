@@ -1,9 +1,29 @@
 [
   {
+    "bid_time_utc": "2026-06-10 17:36:29",
+    "token_id": 739,
+    "bidder": "0xd1ab…a7b1",
+    "bidder_url": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
+    "bidder_wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
+    "bid": "0.03000 ETH ($51)",
+    "bid_eth": 0.03,
+    "bid_usd": 50.61,
+    "bid_usd_at_event": 50.61,
+    "eth_usd_price_at_event": "1687.0760837926352",
+    "eth_usd_price_date_utc": "2026-06-08",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "nearest_bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 47161821,
+    "tx_hash": "0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516"
+  },
+  {
     "bid_time_utc": "2026-06-09 20:38:17",
     "token_id": 739,
-    "bidder": "@stemo.eth",
-    "bidder_url": "https://farcaster.xyz/stemo.eth",
+    "bidder": "0x46e9…f7ef",
+    "bidder_url": "https://basescan.org/address/0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bidder_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bid": "0.02650 ETH ($45)",
     "bid_eth": 0.0265,
@@ -882,8 +902,8 @@
   {
     "bid_time_utc": "2026-06-02 19:23:01",
     "token_id": 731,
-    "bidder": "@stemo.eth",
-    "bidder_url": "https://farcaster.xyz/stemo.eth",
+    "bidder": "0x46e9…f7ef",
+    "bidder_url": "https://basescan.org/address/0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bidder_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bid": "0.02675 ETH ($54)",
     "bid_eth": 0.02675,
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46238295,
     "tx_hash": "0x7b3bf5a7f180cc5305de90edababb164d05263cc70cef7644cbbff32c359026c"
-  },
-  {
-    "bid_time_utc": "2026-05-20 08:30:45",
-    "token_id": 719,
-    "bidder": "0x7732…5953",
-    "bidder_url": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953",
-    "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
-    "bid": "0.01774 ETH ($37)",
-    "bid_eth": 0.01774,
-    "bid_usd": 37.43,
-    "bid_usd_at_event": 37.43,
-    "eth_usd_price_at_event": "2109.7541528236497",
-    "eth_usd_price_date_utc": "2026-05-20",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 46238249,
-    "tx_hash": "0x313d7380b758e609a4a4e21698c4caff42c741a5cdf3e51570f8af39eb0cb9f3"
   }
 ]
