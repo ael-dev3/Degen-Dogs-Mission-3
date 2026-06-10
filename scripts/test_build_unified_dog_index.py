@@ -83,8 +83,38 @@ def test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing() -> None:
     assert record["status"] == "ended pending settlement"
     assert record["settlement"]["settled"] is False
     assert unified.archive_status_from_feed("ended_unsettled") == "ended pending settlement"
+    assert unified.archive_status_from_feed("live") == "archive unresolved"
+    assert unified.archive_status_from_feed("live", is_current_auction=True) == "ongoing"
     assert unified.record_sort_key(record)[0] == 0
     assert "ongoing" not in record["search_text"]
+
+
+def test_non_mission3_archive_status_labels_are_preserved() -> None:
+    unified = load_module()
+    row = {
+        "_mission": 1,
+        "token_id": 0,
+        "status": "no auction dogmaster reward",
+        "mint_time_utc": "2022-03-14T14:01:34Z",
+        "sources": ["polygon_receipts"],
+        "confidence": "verified",
+    }
+
+    record = unified.normalize_record(row, {}, {}, {})
+
+    assert record is not None
+    assert record["status"] == "no auction dogmaster reward"
+    assert "no auction dogmaster reward" in record["search_text"]
+
+
+def test_sort_tie_uses_dog_id_not_status_rank() -> None:
+    unified = load_module()
+    settled = {"dog_id": 199, "mission": 1, "status": "settled", "activity_time_utc": "2023-11-11T14:01:42Z"}
+    pending = {"dog_id": 200, "mission": 1, "status": "ended pending settlement", "activity_time_utc": "2023-11-11T14:01:42Z"}
+
+    ordered = sorted([settled, pending], key=unified.record_sort_key, reverse=True)
+
+    assert [row["dog_id"] for row in ordered] == [200, 199]
 
 
 def test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display() -> None:
@@ -243,7 +273,12 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
             "sources": ["base_logs", "historical_dog_search_backfill"],
             "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear.",
         },
-        "amount": {},
+        "amount": {
+            "amount_usd_at_event": "43",
+            "eth_usd_price_at_event": None,
+            "usd_estimate": "43",
+            "usd_estimate_display": "$43",
+        },
         "winner_or_high_bidder": {},
         "bid_stats": {},
         "bid_tx_hashes": [],
@@ -268,7 +303,7 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
                 "amount_usd": "43.70",
                 "last_bid_utc": "2026-06-09 20:38:17",
             }]), encoding="utf-8")
-            unified.CURRENT_AUCTION.write_text(json.dumps([{"token_id": 739}]), encoding="utf-8")
+            unified.CURRENT_AUCTION.write_text(json.dumps([{"token_id": 739, "auction_state": "live"}]), encoding="utf-8")
             unified.RECENT_BIDS.write_text("[]", encoding="utf-8")
             unified.HISTORICAL_SEARCH.write_text("[]", encoding="utf-8")
             updated = unified.apply_current_auction_overrides([record], {})
@@ -277,6 +312,9 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
 
     assert updated == 1
     assert record["status"] == "ongoing"
+    assert record["amount"]["amount_usd_at_event"] is None
+    assert record["amount"]["eth_usd_price_at_event"] is None
+    assert record["amount"]["usd_estimate"] == "43.70"
     assert "historical_dog_search_backfill" not in record["source"]["sources"]
     assert "historical_dog_search" not in record["source"]["notes"]
     assert "generated_auction_feed" in record["source"]["sources"]
@@ -286,6 +324,8 @@ def test() -> None:
     tests = [
         test_ended_pending_settlement_feed_row_stays_in_unified_archive,
         test_stale_mission3_unsettled_archive_row_is_not_marked_ongoing,
+        test_non_mission3_archive_status_labels_are_preserved,
+        test_sort_tie_uses_dog_id_not_status_rank,
         test_settled_feed_amount_usd_is_reused_as_event_usd_for_archive_display,
         test_newest_sort_prioritizes_only_actual_current_before_recent_settled_rows,
         test_historical_mission3_backfill_keeps_settled_row_after_recent_feed_rolloff,

@@ -2238,7 +2238,7 @@ def build_historical_dog_tables(
             "dogs": len(rows),
             "auctions_or_records": sum(1 for row in rows if text_value(row.get("auction_created_time_utc")) or text_value(row.get("settled_time_utc")) or text_value(row.get("amount"))),
             "settled": sum(1 for status in statuses if is_settled_status(status)),
-            "live_or_unsettled": sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "created" in status),
+            "live_or_unsettled": sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "pending settlement" in status or "created" in status),
             "metadata_only": sum(1 for status in statuses if status == "metadata_only"),
             "bid_count": sum(int_value(row.get("bid_count")) for row in rows),
             "unique_winners_or_high_bidders": len(winners),

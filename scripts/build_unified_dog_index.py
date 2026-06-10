@@ -390,39 +390,72 @@ def amount_for_row(row: dict[str, Any], mission: int) -> dict[str, Any]:
     }
 
 
-def normalize_status_text(status_text: Any, mission: int = 0) -> str:
-    """Normalize dashboard/archive status labels without turning unsettled into settled.
+ACTIVE_NORMALIZED_STATUSES = {"current_live"}
+STATUS_LEGACY = {
+    "current_live": "ongoing",
+    "current_ended_unsettled": "ended pending settlement",
+    "ended_pending_settlement": "ended pending settlement",
+    "settled": "settled",
+    "historical_unsettled": "historical unsettled",
+    "archive_unresolved": "archive unresolved",
+    "archive_gap": "settlement unknown",
+    "metadata_only": "metadata only",
+    "unknown": "unknown",
+}
 
-    Mission 3 archive rows can be `settled=false` long after their auction timer
-    ended. The live row is overlaid separately from current_auction, so generic
-    Mission 3 archive rows should be treated as pending settlement rather than a
-    second ongoing auction.
+
+def normalize_status_text(status_text: Any, mission: int = 0, *, is_current_auction: bool = False) -> str:
+    """Return the internal normalized auction/archive status.
+
+    `current_*` labels are reserved for the actual current onchain auction. The
+    public/legacy label for both current-ended and historical pending rows is
+    still `ended pending settlement`, but only `current_live` sorts first.
     """
     lowered = text_value(status_text).lower().strip().replace("-", "_")
     squashed = " ".join(lowered.replace("_", " ").split())
     if not squashed:
         return ""
-    if squashed in {"ongoing", "live"}:
-        return "ongoing"
-    if "pending settlement" in squashed or "unsettled" in squashed:
-        return "ended pending settlement"
-    if mission == 3 and squashed == "ended":
-        return "ended pending settlement"
-    if "settled" in squashed:
+    if lowered in STATUS_LEGACY:
+        return lowered
+    if is_current_auction and squashed in {"ongoing", "live", "current live"}:
+        return "current_live"
+    if is_current_auction and ("pending settlement" in squashed or "unsettled" in squashed or squashed == "ended"):
+        return "current_ended_unsettled"
+    if "metadata" in squashed and "only" in squashed:
+        return "metadata_only"
+    if "settled" in squashed and "unsettled" not in squashed and "pending" not in squashed:
         return "settled"
+    if "pending settlement" in squashed or "unsettled" in squashed or (mission == 3 and squashed in {"ended", "live or unsettled"}):
+        return "ended_pending_settlement"
+    if "created" in squashed:
+        return "historical_unsettled"
+    if squashed in {"ongoing", "live", "scheduled", "ended"}:
+        return "archive_unresolved" if mission in {1, 2, 3} else "unknown"
+    if "gap" in squashed:
+        return "archive_gap"
+    if "unknown" in squashed or "unresolved" in squashed:
+        return "archive_unresolved"
+    if "recovered" in squashed:
+        return "archive_unresolved"
     return squashed
+
+
+def legacy_status_label(normalized_status: str) -> str:
+    if not normalized_status:
+        return "unknown"
+    return STATUS_LEGACY.get(normalized_status, normalized_status.replace("_", " ").strip() or "unknown")
 
 
 def status_for_row(row: dict[str, Any], mission: int) -> str:
     status = first_text(row.get("auction_status"), row.get("auction_state"), row.get("status"))
     if status:
-        return normalize_status_text(status, mission)
+        return legacy_status_label(normalize_status_text(status, mission))
     settled = row.get("settled")
     if settled is True or text_value(settled).lower() in {"true", "1", "yes"} or row.get("settled_block"):
         return "settled"
     if settled is False or text_value(settled).lower() in {"false", "0", "no"}:
-        return "ended pending settlement" if mission == 3 else "unsettled"
-    return "recovered"
+        return "ended pending settlement" if mission == 3 else "historical unsettled"
+    return "archive unresolved" if row else "metadata only"
 
 
 def event_time_for_row(row: dict[str, Any], status: str) -> tuple[str | None, str]:
@@ -572,22 +605,36 @@ def normalize_record(row: dict[str, Any], metadata: dict[int, dict[str, Any]], i
     return record
 
 
-def archive_status_from_feed(status_text: str) -> str:
-    status = normalize_status_text(status_text, 3)
-    if status:
-        return status
-    lowered = text_value(status_text).lower()
-    if "ended" in lowered or "pending settlement" in lowered or "unsettled" in lowered:
+def archive_status_from_feed(status_text: str, *, is_current_auction: bool = False) -> str:
+    lowered = text_value(status_text).lower().strip().replace("-", "_")
+    squashed = " ".join(lowered.replace("_", " ").split())
+    if squashed in {"ongoing", "live", "current live"}:
+        return "ongoing" if is_current_auction else "archive unresolved"
+    if "pending settlement" in squashed or "unsettled" in squashed or squashed in {"ended", "live or unsettled"}:
         return "ended pending settlement"
-    if "settled" in lowered:
-        return "settled"
-    return lowered
+    normalized = normalize_status_text(status_text, 3, is_current_auction=is_current_auction)
+    return legacy_status_label(normalized) if normalized else "unknown"
+
+def epoch_seconds(value: Any) -> int:
+    value = iso_utc(value)
+    if not value:
+        return 0
+    try:
+        return int(datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp())
+    except ValueError:
+        return 0
 
 
-def record_sort_key(record: dict[str, Any]) -> tuple[int, str, int]:
-    status = text_value(record.get("status")).lower()
-    current_rank = 1 if status in {"ongoing", "live"} else 0
-    activity = text_value(record.get("activity_time_utc"))
+def record_sort_key(record: dict[str, Any]) -> tuple[int, int, int]:
+    mission = int_value(record.get("mission"))
+    explicit_normalized = text_value(record.get("auction_status_normalized"))
+    raw_status = text_value(record.get("status")).lower().strip()
+    if explicit_normalized:
+        normalized = normalize_status_text(explicit_normalized, mission)
+    else:
+        normalized = normalize_status_text(raw_status, mission, is_current_auction=raw_status in {"ongoing", "live"})
+    current_rank = 1 if normalized in ACTIVE_NORMALIZED_STATUSES else 0
+    activity = int_value(record.get("activity_sort_epoch"), 0) or epoch_seconds(record.get("activity_sort_utc") or record.get("activity_time_utc"))
     return (current_rank, activity, int_value(record.get("dog_id"), 0))
 
 
@@ -678,7 +725,7 @@ def merge_existing_historical_context(record: dict[str, Any], existing: dict[str
         return
     if int_value(existing.get("mission"), -1) != 3 or int_value(existing.get("dog_id"), -1) != int_value(record.get("dog_id"), -2):
         return
-    if text_value(existing.get("status")).lower() not in {"settled", "ended pending settlement"}:
+    if text_value(existing.get("status")).lower() not in {"settled", "ended pending settlement", "archive unresolved", "historical unsettled", "settlement unknown"}:
         return
 
     for key in ("auction_created", "settlement", "links"):
@@ -747,9 +794,10 @@ def historical_mission3_record(row: dict[str, Any], metadata: dict[int, dict[str
     dog_id = int_value(row.get("token_id", row.get("dog_id")), -1)
     if dog_id < 0:
         return None
-    status = normalize_status_text(row.get("status"), 3)
-    if status not in {"ongoing", "settled", "ended pending settlement"}:
+    normalized_status = normalize_status_text(first_text(row.get("auction_status_normalized"), row.get("status")), 3)
+    if normalized_status not in {"settled", "ended_pending_settlement", "archive_unresolved", "historical_unsettled", "archive_gap", "metadata_only"}:
         return None
+    status = legacy_status_label(normalized_status)
 
     meta = metadata.get(dog_id, {})
     native, symbol, usd_value = parse_historical_amount_display(row.get("amount"), MISSION_CONFIG[3]["currency"])
@@ -760,6 +808,7 @@ def historical_mission3_record(row: dict[str, Any], metadata: dict[int, dict[str
     auction_created_time = iso_utc(row.get("auction_created_time_utc"))
     settlement_time = iso_utc(row.get("settled_time_utc"))
     activity = settlement_time if status == "settled" else first_text(settlement_time, auction_created_time)
+    event_priced_status = status in {"settled", "ended pending settlement", "historical unsettled"}
     amount = {
         "raw": first_text(row.get("amount_raw"), eth_to_wei(native)) or None,
         "native": native or None,
@@ -770,7 +819,7 @@ def historical_mission3_record(row: dict[str, Any], metadata: dict[int, dict[str
         "usd_estimate_source": "historical_dog_search_amount" if usd_value else None,
         "usd_estimate_confidence": "medium" if usd_value else "missing",
         "usd_estimate_time_basis": "settlement_block_time" if status == "settled" and native else ("auction_created_block_time" if native else None),
-        "amount_usd_at_event": str(decimal_value(usd_value) or usd_value) if usd_value and status != "ongoing" else None,
+        "amount_usd_at_event": str(decimal_value(usd_value) or usd_value) if usd_value and event_priced_status else None,
         "eth_usd_price_at_event": None,
         "eth_usd_price_date_utc": None,
     }
@@ -868,7 +917,8 @@ def apply_historical_mission3_backfill(records: list[dict[str, Any]], metadata: 
 def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identity: dict[str, dict[str, Any]]) -> dict[str, Any]:
     dog_id = dog_id_from_row(feed)
     status_text = text_value(feed.get("status")).lower()
-    status = archive_status_from_feed(status_text)
+    is_current_auction = dog_id >= 0 and dog_id == int_value(current.get("token_id"), -1) and text_value(current.get("auction_state")).lower() == "live"
+    status = archive_status_from_feed(status_text, is_current_auction=is_current_auction)
     wallet = normalize_address(feed.get("bidder_winner_wallet") or current.get("bidder_wallet"))
     profile = identity.get(wallet, {}) if wallet else {}
     display = first_text(feed.get("bidder_winner"), current.get("bidder"), profile.get("display"), short_address(wallet))
@@ -999,13 +1049,14 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
     for feed in feed_rows:
         if not isinstance(feed, dict):
             continue
+        dog_id = dog_id_from_row(feed)
+        current = current_by_id.get(dog_id, {})
+        is_current_auction = dog_id >= 0 and text_value(current.get("auction_state")).lower() == "live"
         status_text = text_value(feed.get("status")).lower()
-        feed_status = archive_status_from_feed(status_text)
+        feed_status = archive_status_from_feed(status_text, is_current_auction=is_current_auction)
         if feed_status not in {"ongoing", "settled", "ended pending settlement"}:
             continue
-        dog_id = dog_id_from_row(feed)
         record = by_key.get((3, dog_id))
-        current = current_by_id.get(dog_id, {})
         if not record:
             record = generated_feed_record(feed, current, identity)
             records.append(record)
@@ -1056,8 +1107,12 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
             price_date = first_text(feed.get("eth_usd_price_date_utc"), current.get("eth_usd_price_date_utc"), amount.get("usd_estimate_price_date_utc"))
             amount["usd_estimate_price_usd"] = price_usd or None
             amount["usd_estimate_price_date_utc"] = price_date or None
-            amount["amount_usd_at_event"] = str(decimal_value(event_usd_value) or event_usd_value) if event_usd_value not in (None, "") else amount.get("amount_usd_at_event")
-            amount["eth_usd_price_at_event"] = first_text(feed.get("eth_usd_price_at_event"), amount.get("eth_usd_price_at_event")) or None
+            if event_priced:
+                amount["amount_usd_at_event"] = str(decimal_value(event_usd_value) or event_usd_value) if event_usd_value not in (None, "") else amount.get("amount_usd_at_event")
+                amount["eth_usd_price_at_event"] = first_text(feed.get("eth_usd_price_at_event"), amount.get("eth_usd_price_at_event")) or None
+            else:
+                amount["amount_usd_at_event"] = None
+                amount["eth_usd_price_at_event"] = None
             amount["eth_usd_price_date_utc"] = price_date or None
             amount["usd_estimate_time_basis"] = "settlement_block_time" if feed_status == "settled" else "last_bid_block_time"
         record["amount"] = amount

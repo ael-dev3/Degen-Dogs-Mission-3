@@ -85,7 +85,7 @@ def expected_report_counts(rows: list[dict[str, str]]) -> dict[str, int]:
     return {
         "dogs": len(rows),
         "settled": sum(1 for status in statuses if status == "settled" or (status.startswith("settled") and "unsettled" not in status)),
-        "live_or_unsettled": sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "created" in status),
+        "live_or_unsettled": sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "pending settlement" in status or "created" in status),
         "metadata_only": sum(1 for status in statuses if status == "metadata_only"),
         "bid_count": sum(int_field(row, "bid_count") for row in rows),
     }
