@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,47166633
-latest_block_time_utc,2026-06-10 20:16:53
+latest_block,47166873
+latest_block_time_utc,2026-06-10 20:24:53
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,740
@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.008994
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1624.09
+eth_usd_price,1632.47
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -43,9 +43,9 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.013496
 reward_total_flow_usd_per_day,11.15
 reward_total_per_dog_usd_per_day,0.083808
-reward_current_bid_payback_days,639.44
-reward_current_bid_daily_roi_pct,0.1564
-reward_current_bid_apr_pct,57.08
+reward_current_bid_payback_days,642.78
+reward_current_bid_daily_roi_pct,0.1556
+reward_current_bid_apr_pct,56.78
 reward_current_bid_apr_display,≈57% APR
 woof_holders,402
 top_woof_holder,0x1c45…6637
@@ -54,7 +54,7 @@ farcaster_profiles_resolved,1
 current_auction_token_id,739
 current_auction_status,live
 current_bid_eth,0.033
-current_bid_usd,53.59
+current_bid_usd,53.87
 current_bidder,@kenshiking.eth
 current_bidder_wallet,0x23d660548cd61432537592dcea15b059605c9242
 current_auction_end_utc,2026-06-10 20:37:53
@@ -96,7 +96,7 @@ season6_sup_estimate_status,cap_limited_incremental
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,22171.650702
+season6_sup_raw_allocated_to_date,22186.995024
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
