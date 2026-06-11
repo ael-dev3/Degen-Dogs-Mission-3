@@ -146,6 +146,67 @@ def test_fetch_farcaster_profiles_stops_after_neynar_auth_failure() -> None:
         dashboard.time.sleep = original_sleep
 
 
+def test_degendogs_auction_profiles_include_all_current_bid_history_bidders() -> None:
+    dashboard = load_module()
+    original_urlopen = dashboard.urllib.request.urlopen
+    current_bidder = "0x00000000000000000000000000000000000000b2"
+    early_bidder = "0x00000000000000000000000000000000000000c3"
+
+    class FakeResponse:
+        def __enter__(self) -> "FakeResponse":
+            return self
+
+        def __exit__(self, *_args: Any) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return json.dumps({
+                "nounId": 11,
+                "bidder": current_bidder,
+                "amount": 1.0,
+                "bids": [
+                    {"nounId": 11, "bidder": current_bidder, "username": "unitcurrent", "pfp_url": ""},
+                    {"nounId": 11, "bidder": early_bidder, "username": "unitearly", "pfp_url": ""},
+                ],
+            }).encode("utf-8")
+
+    try:
+        dashboard.urllib.request.urlopen = lambda _req, timeout=0: FakeResponse()
+        rows = dashboard.fetch_degendogs_auction_profiles({"token_id": 11, "bidder": current_bidder, "amount_eth": 1.0})
+    finally:
+        dashboard.urllib.request.urlopen = original_urlopen
+
+    by_address = {row["address"]: row for row in rows}
+    assert by_address[current_bidder]["username"] == "unitcurrent"
+    assert by_address[early_bidder]["username"] == "unitearly"
+
+
+def test_cached_wallet_identity_profiles_can_backfill_dashboard_labels() -> None:
+    dashboard = load_module()
+    wallet = "0x00000000000000000000000000000000000000d4"
+    with tempfile.TemporaryDirectory() as tmp:
+        identity_path = Path(tmp) / "wallet_profiles.json"
+        identity_path.write_text(json.dumps({
+            wallet: {
+                "wallet": wallet,
+                "display": "@cachedbidder",
+                "farcaster_handle": "cachedbidder",
+                "farcaster_fid": 104,
+                "profile_url": "https://farcaster.xyz/cachedbidder",
+            }
+        }), encoding="utf-8")
+        rows = dashboard.load_cached_farcaster_profiles(identity_path)
+
+    assert rows == [{
+        "address": wallet,
+        "fid": 104,
+        "username": "cachedbidder",
+        "display_name": "@cachedbidder",
+        "pfp_url": "",
+    }]
+    assert dashboard.merge_farcaster_profiles([], rows)[0]["username"] == "cachedbidder"
+
+
 def test_current_bid_reward_stats_calculates_payback_daily_roi_and_simple_apr() -> None:
     dashboard = load_module()
     stats = dashboard.current_bid_reward_stats(

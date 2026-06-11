@@ -37,6 +37,7 @@ HISTORICAL_ARCHIVE_INDEXES = {
     2: ROOT / "archive" / "mission2" / "data" / "generated" / "mission2_dog_search_index.json",
     3: ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_dog_search_index.json",
 }
+IDENTITY_PATH = ROOT / "archive" / "data" / "identity" / "wallet_profiles.json"
 HISTORICAL_PRICES_DAILY = ROOT / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json"
 HISTORICAL_PRICE_SCHEMA = [
     ("asset_key", "TEXT"),
@@ -1603,9 +1604,9 @@ def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, 
     """Fallback identity source used by the live Degen Dogs miniapp.
 
     Neynar only resolves addresses that are currently indexed as Farcaster custody
-    or verified addresses. The official auction API also returns the username used
-    by the miniapp for the current bidder, so use it to link the current high-bid
-    wallet when Neynar has no match.
+    or verified addresses. The official auction API also returns the usernames used
+    by the miniapp for current-auction bidders, so use it to link both the current
+    high bidder and every visible bid-history row when Neynar has no match.
     """
     current_token_id = int(current.get("token_id") or 0)
     current_bidder = normalize_address(current.get("bidder"))
@@ -1637,7 +1638,25 @@ def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, 
         except Exception:
             return []
 
-    rows: list[dict[str, Any]] = []
+    rows_by_address: dict[str, dict[str, Any]] = {}
+
+    def add_profile(address: str | None, username: str | None, pfp_url: str | None = "") -> None:
+        bidder = normalize_address(address)
+        handle = str(username or "").strip().lstrip("@")
+        if not bidder or bidder == ZERO or not handle:
+            return
+        rows_by_address.setdefault(
+            bidder.lower(),
+            {
+                "address": bidder.lower(),
+                "fid": 0,
+                "username": handle,
+                "display_name": handle,
+                "pfp_url": str(pfp_url or ""),
+            },
+        )
+
+    add_profile(current_bidder, data.get("username"), data.get("pfp_url"))
     for bid in data.get("bids") or []:
         try:
             bid_token_id = int(bid.get("nounId") or api_token_id)
@@ -1645,17 +1664,48 @@ def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, 
             continue
         if bid_token_id != current_token_id:
             continue
-        bidder = normalize_address(bid.get("bidder"))
-        username = str(bid.get("username") or "").strip().lstrip("@")
-        if bidder != current_bidder or not username:
+        add_profile(bid.get("bidder"), bid.get("username"), bid.get("pfp_url"))
+    return [rows_by_address[key] for key in sorted(rows_by_address)]
+
+
+def load_cached_farcaster_profiles(path: Path = IDENTITY_PATH) -> list[dict[str, Any]]:
+    """Load Farcaster identities previously confirmed by generated archive data.
+
+    This cache lets the dashboard keep wallet→Farcaster labels for current and
+    recent auction rows even when Neynar misses a wallet on the next refresh.
+    """
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+    if not isinstance(data, dict):
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for key, profile in data.items():
+        if not isinstance(profile, dict):
+            continue
+        address = normalize_address(profile.get("wallet") or key)
+        if not address or address == ZERO:
+            continue
+        profile_url = first_text(profile.get("profile_url"))
+        handle = first_text(profile.get("farcaster_handle"))
+        display = first_text(profile.get("display"))
+        if not handle and display.startswith("@"):
+            handle = display.lstrip("@")
+        if not handle and "farcaster.xyz" in profile_url:
+            parsed = urllib.parse.urlparse(profile_url)
+            handle = parsed.path.strip("/").split("/")[0]
+        handle = handle.strip().lstrip("@")
+        if not handle:
             continue
         rows.append(
             {
-                "address": bidder.lower(),
-                "fid": 0,
-                "username": username,
-                "display_name": username,
-                "pfp_url": str(bid.get("pfp_url") or ""),
+                "address": address.lower(),
+                "fid": int(profile.get("farcaster_fid") or 0),
+                "username": handle,
+                "display_name": display or handle,
+                "pfp_url": str(profile.get("pfp_url") or ""),
             }
         )
     rows.sort(key=lambda row: row["address"])
@@ -3295,13 +3345,9 @@ def main() -> None:
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
     identity_addresses = collect_identity_addresses(current, bids, settled, holders)
     neynar_profiles = fetch_farcaster_profiles(identity_addresses)
-    current_bidder = normalize_address(current.get("bidder"))
-    current_has_neynar_profile = any(
-        normalize_address(profile.get("address")) == current_bidder and profile.get("username")
-        for profile in neynar_profiles
-    )
-    auction_profiles = [] if current_has_neynar_profile else fetch_degendogs_auction_profiles(current)
-    farcaster_profiles = merge_farcaster_profiles(neynar_profiles, auction_profiles)
+    auction_profiles = fetch_degendogs_auction_profiles(current)
+    cached_profiles = load_cached_farcaster_profiles()
+    farcaster_profiles = merge_farcaster_profiles(neynar_profiles, auction_profiles, cached_profiles)
 
     conn = sqlite3.connect(":memory:")
     insert_rows(conn, "auction_created", created, [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
