@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#674/741",
+      "display": "#674/742",
       "rank": 674,
-      "total": 741
+      "total": 742
     },
     "schema_version": 1,
-    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 55.67 $55.67 2026-06-09t20:37:53z #674/741 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.2%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 55.67 $55.67 2026-06-09t20:37:53z #674/742 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: none (39.9%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-09T20:37:53Z",
@@ -91,7 +91,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.9%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },

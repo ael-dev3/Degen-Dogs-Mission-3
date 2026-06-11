@@ -1,5 +1,26 @@
 [
   {
+    "dog": "Dog #740",
+    "dog_image_url": "https://api.degendogs.club/images/740.png",
+    "dog_external_url": "https://degendogs.club/#dog740",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/740",
+    "winner": "@stemo.eth",
+    "winner_url": "https://farcaster.xyz/stemo.eth",
+    "winning_bid": "0.02760 ETH ($47)",
+    "winning_bid_eth": 0.0276,
+    "winning_bid_usd": 46.56,
+    "winning_bid_usd_at_settlement": 46.56,
+    "eth_usd_price_at_event": "1687.0760837926352",
+    "eth_usd_price_date_utc": "2026-06-08",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "nearest_settlement_date_eth_usd",
+    "rarity": "#254/742",
+    "last_bid_utc": "2026-06-10 21:16:31",
+    "settled_time_utc": "2026-06-11 21:16:27"
+  },
+  {
     "dog": "Dog #739",
     "dog_image_url": "https://api.degendogs.club/images/739.png",
     "dog_external_url": "https://degendogs.club/#dog739",
@@ -16,7 +37,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "nearest_settlement_date_eth_usd",
-    "rarity": "#350/741",
+    "rarity": "#351/742",
     "last_bid_utc": "2026-06-10 20:15:53",
     "settled_time_utc": "2026-06-10 21:15:59"
   },
@@ -37,7 +58,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "nearest_settlement_date_eth_usd",
-    "rarity": "#674/741",
+    "rarity": "#674/742",
     "last_bid_utc": "2026-06-09 20:01:05",
     "settled_time_utc": "2026-06-09 20:37:53"
   },
@@ -58,7 +79,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#571/741",
+    "rarity": "#570/742",
     "last_bid_utc": "2026-06-08 20:09:45",
     "settled_time_utc": "2026-06-08 20:15:03"
   },
@@ -79,7 +100,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "nearest_settlement_date_eth_usd",
-    "rarity": "#675/741",
+    "rarity": "#675/742",
     "last_bid_utc": "2026-06-07 20:02:17",
     "settled_time_utc": "2026-06-07 20:10:25"
   },
@@ -100,7 +121,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#177/741",
+    "rarity": "#176/742",
     "last_bid_utc": "2026-06-06 15:52:45",
     "settled_time_utc": "2026-06-06 20:03:33"
   },
@@ -121,7 +142,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#531/741",
+    "rarity": "#528/742",
     "last_bid_utc": "2026-06-04 21:20:15",
     "settled_time_utc": "2026-06-05 20:03:17"
   },
@@ -142,7 +163,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#569/741",
+    "rarity": "#566/742",
     "last_bid_utc": "2026-06-04 13:26:01",
     "settled_time_utc": "2026-06-04 19:59:03"
   },
@@ -163,7 +184,7 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#219/741",
+    "rarity": "#221/742",
     "last_bid_utc": "2026-06-03 19:35:43",
     "settled_time_utc": "2026-06-03 19:41:49"
   },
@@ -184,29 +205,8 @@
     "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#78/741",
+    "rarity": "#78/742",
     "last_bid_utc": "2026-06-02 19:29:19",
     "settled_time_utc": "2026-06-02 19:37:21"
-  },
-  {
-    "dog": "Dog #730",
-    "dog_image_url": "https://api.degendogs.club/images/730.png",
-    "dog_external_url": "https://degendogs.club/#dog730",
-    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/730",
-    "winner": "@badadan",
-    "winner_url": "https://farcaster.xyz/badadan",
-    "winning_bid": "0.01100 ETH ($22)",
-    "winning_bid_eth": 0.011,
-    "winning_bid_usd": 22.05,
-    "winning_bid_usd_at_settlement": 22.05,
-    "eth_usd_price_at_event": "2004.2872890970018",
-    "eth_usd_price_date_utc": "2026-06-01",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "settlement_date_eth_usd",
-    "rarity": "#90/741",
-    "last_bid_utc": "2026-06-01 19:11:05",
-    "settled_time_utc": "2026-06-01 19:24:33"
   }
 ]
