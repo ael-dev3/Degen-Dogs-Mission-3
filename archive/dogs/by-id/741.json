@@ -1,25 +1,24 @@
 {
   "generated_at_utc": "2026-06-11T21:17:19Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-12T21:26:07Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-12T21:31:21Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-12",
+      "eth_usd_price_date_utc": null,
       "native": "0.026",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "26000000000000000",
-      "usd_estimate": "43.32000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$43.32",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-12",
-      "usd_estimate_price_usd": "1666.1538461538461538461538461538461538461538461538461538461538461538461538461538",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": null,
+      "usd_estimate_confidence": "missing",
+      "usd_estimate_display": null,
+      "usd_estimate_notes": "missing_price",
+      "usd_estimate_price_date_utc": null,
+      "usd_estimate_price_usd": null,
+      "usd_estimate_source": null,
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -67,16 +66,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#717/742",
-      "rank": 717,
-      "total": 742
+      "display": "#718/743",
+      "rank": 718,
+      "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 741 dog #741 741 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.026 eth 26000000000000000 43.32 $43.32 2026-06-12t21:26:07z #717/742 generated auction feed 0x0a6e861832379a52b1c4bb14785160b95073a9a38def6e032e0c79bfc123a25a 0x79a93395e7eb7301633352382d68bd56588abf5c74c7123181d2d29ac9b8474d 0x0b2b9acef7f753f072c5aeb61063cd0176ceccb6dbaf9390950443a304993ab3 0xe3dc3ed36fec552dadb336037fc6269d4167553160ef65fe03f992a6767f0086 0x740b1f5658b757217bf7695aed67017c36964722bf0869ba7bc73a5f215c7bef 0x4b51c6eb5749887a16937791ac5f5dca34ee4adc32590487a63568e242d5d679 0x0c49612cb00831ea9c671ff85be822940156c4e3f9cfdbaad0ea2f789d677794 0xf39e89a27ed17abbe578224a4c171c21d6750da66a42c77d5a315f3c4465b285 0xadae9781354857bd75cc0d345e8423fabe26c52cee1b36234f76e6527c30f810 0x4ba4de2b6bd4874d4a689a8737e700fb635dc82801934ec8b25797b67c1d91a2 0xbacb121bc5c817c1f43ff11151c49ed17e3bd421751ff809773e736f37624f08 0x9b19e089c52e161d18c51ad508a455b04bb4561255fb8fe9f94159ab0f4e92a4 0xe12947be458620a005f2c85742d3ee19cd308a3376e247ad35804eba19576d70 0x7f32b8ee66b5a1d7f75431b9e77e8fff08d470e38b90a38bc24b8a379aa07f0b 0xad42dd5b4b00cd6bea2e6fe9c79ff889d02d1e9b7872bdb4cc1edef56ccd4999 0x3bf9b4491984b844cfcd55d23a0944e06545493ac98f536172b2582e55d044ba background: none (90.3%) background none body: grey (11.5%) body grey neck: none (39.9%) neck none mouth: none (68.5%) mouth none ears: none (25.3%) ears none head: none (20.4%) head none eyes: bluelasereyes (10.9%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 741 dog #741 741 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.026 eth 26000000000000000 2026-06-12t21:31:21z #718/743 generated auction feed 0x0a6e861832379a52b1c4bb14785160b95073a9a38def6e032e0c79bfc123a25a 0x79a93395e7eb7301633352382d68bd56588abf5c74c7123181d2d29ac9b8474d 0x0b2b9acef7f753f072c5aeb61063cd0176ceccb6dbaf9390950443a304993ab3 0xe3dc3ed36fec552dadb336037fc6269d4167553160ef65fe03f992a6767f0086 0x740b1f5658b757217bf7695aed67017c36964722bf0869ba7bc73a5f215c7bef 0x4b51c6eb5749887a16937791ac5f5dca34ee4adc32590487a63568e242d5d679 0x0c49612cb00831ea9c671ff85be822940156c4e3f9cfdbaad0ea2f789d677794 0xf39e89a27ed17abbe578224a4c171c21d6750da66a42c77d5a315f3c4465b285 0xadae9781354857bd75cc0d345e8423fabe26c52cee1b36234f76e6527c30f810 0x4ba4de2b6bd4874d4a689a8737e700fb635dc82801934ec8b25797b67c1d91a2 0xbacb121bc5c817c1f43ff11151c49ed17e3bd421751ff809773e736f37624f08 0x9b19e089c52e161d18c51ad508a455b04bb4561255fb8fe9f94159ab0f4e92a4 0xe12947be458620a005f2c85742d3ee19cd308a3376e247ad35804eba19576d70 0x7f32b8ee66b5a1d7f75431b9e77e8fff08d470e38b90a38bc24b8a379aa07f0b 0xad42dd5b4b00cd6bea2e6fe9c79ff889d02d1e9b7872bdb4cc1edef56ccd4999 0x3bf9b4491984b844cfcd55d23a0944e06545493ac98f536172b2582e55d044ba background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: bluelasereyes (10.9%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-12T21:31:21Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -90,7 +89,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -98,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.4%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.9%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -113,12 +112,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.3%)",
+        "display": "Ears: None (25.4%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.5%)",
         "trait_type": "Head",
         "value": "None"
       },
