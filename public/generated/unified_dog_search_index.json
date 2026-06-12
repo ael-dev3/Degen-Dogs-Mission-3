@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-12T21:41:53Z",
+    "activity_time_utc": "2026-06-12T22:05:41Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-12",
-      "native": "0.001",
+      "native": "0.0169",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1000000000000000",
-      "usd_estimate": "1.66000000",
+      "raw": "16900000000000000",
+      "usd_estimate": "28.11000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.66",
+      "usd_estimate_display": "$28.11",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-12",
-      "usd_estimate_price_usd": "1.66E+3",
+      "usd_estimate_price_usd": "1663.3136094674556213017751479289940828402366863905325443786982248520710059171598",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-06-12T21:41:53Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-06-12T22:05:41Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
+      "0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0",
       "0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124"
     ],
     "chain": "Base",
@@ -44,7 +45,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog742",
-      "explorer": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323",
+      "explorer": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/742",
       "repo_archive": "archive/dogs/by-id/742.json",
       "settlement_tx": null
@@ -56,7 +57,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base ongoing 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.001 eth 1000000000000000 1.66 $1.66 2026-06-12t21:41:53z #255/743 generated auction feed 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.8%) neck redcollar mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: monocle (6.7%) eyes monocle base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base ongoing 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0169 eth 16900000000000000 28.11 $28.11 2026-06-12t22:05:41z #255/743 generated auction feed 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.8%) neck redcollar mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: monocle (6.7%) eyes monocle base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -113,32 +114,33 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@metasalary",
+      "display": "@staraptor.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "metasalary",
-      "profile_url": "https://farcaster.xyz/metasalary",
-      "wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
-      "wallet_explorer_url": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323"
+      "farcaster_handle": "staraptor.eth",
+      "profile_url": "https://farcaster.xyz/staraptor.eth",
+      "wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
+      "wallet_explorer_url": "https://basescan.org/address/0x3516006709b775e01b48dfb5fad355a4e793e347"
     }
   },
   {
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-06-12T21:31:21Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "43.23969470",
+      "eth_usd_price_at_event": "1663.0651808537223",
+      "eth_usd_price_date_utc": "2026-06-12",
       "native": "0.026",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "26000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "43.23969470",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$43.24",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-06-12",
+      "usd_estimate_price_usd": "1663.0651808537223",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -192,7 +194,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 741 dog #741 741 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.026 eth 26000000000000000 2026-06-12t21:31:21z #718/743 generated auction feed 0x0a6e861832379a52b1c4bb14785160b95073a9a38def6e032e0c79bfc123a25a 0x79a93395e7eb7301633352382d68bd56588abf5c74c7123181d2d29ac9b8474d 0x0b2b9acef7f753f072c5aeb61063cd0176ceccb6dbaf9390950443a304993ab3 0xe3dc3ed36fec552dadb336037fc6269d4167553160ef65fe03f992a6767f0086 0x740b1f5658b757217bf7695aed67017c36964722bf0869ba7bc73a5f215c7bef 0x4b51c6eb5749887a16937791ac5f5dca34ee4adc32590487a63568e242d5d679 0x0c49612cb00831ea9c671ff85be822940156c4e3f9cfdbaad0ea2f789d677794 0xf39e89a27ed17abbe578224a4c171c21d6750da66a42c77d5a315f3c4465b285 0xadae9781354857bd75cc0d345e8423fabe26c52cee1b36234f76e6527c30f810 0x4ba4de2b6bd4874d4a689a8737e700fb635dc82801934ec8b25797b67c1d91a2 0xbacb121bc5c817c1f43ff11151c49ed17e3bd421751ff809773e736f37624f08 0x9b19e089c52e161d18c51ad508a455b04bb4561255fb8fe9f94159ab0f4e92a4 0xe12947be458620a005f2c85742d3ee19cd308a3376e247ad35804eba19576d70 0x7f32b8ee66b5a1d7f75431b9e77e8fff08d470e38b90a38bc24b8a379aa07f0b 0xad42dd5b4b00cd6bea2e6fe9c79ff889d02d1e9b7872bdb4cc1edef56ccd4999 0x3bf9b4491984b844cfcd55d23a0944e06545493ac98f536172b2582e55d044ba background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: bluelasereyes (10.9%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 741 dog #741 741 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.026 eth 26000000000000000 43.24 $43.24 2026-06-12t21:31:21z #718/743 generated auction feed 0x0a6e861832379a52b1c4bb14785160b95073a9a38def6e032e0c79bfc123a25a 0x79a93395e7eb7301633352382d68bd56588abf5c74c7123181d2d29ac9b8474d 0x0b2b9acef7f753f072c5aeb61063cd0176ceccb6dbaf9390950443a304993ab3 0xe3dc3ed36fec552dadb336037fc6269d4167553160ef65fe03f992a6767f0086 0x740b1f5658b757217bf7695aed67017c36964722bf0869ba7bc73a5f215c7bef 0x4b51c6eb5749887a16937791ac5f5dca34ee4adc32590487a63568e242d5d679 0x0c49612cb00831ea9c671ff85be822940156c4e3f9cfdbaad0ea2f789d677794 0xf39e89a27ed17abbe578224a4c171c21d6750da66a42c77d5a315f3c4465b285 0xadae9781354857bd75cc0d345e8423fabe26c52cee1b36234f76e6527c30f810 0x4ba4de2b6bd4874d4a689a8737e700fb635dc82801934ec8b25797b67c1d91a2 0xbacb121bc5c817c1f43ff11151c49ed17e3bd421751ff809773e736f37624f08 0x9b19e089c52e161d18c51ad508a455b04bb4561255fb8fe9f94159ab0f4e92a4 0xe12947be458620a005f2c85742d3ee19cd308a3376e247ad35804eba19576d70 0x7f32b8ee66b5a1d7f75431b9e77e8fff08d470e38b90a38bc24b8a379aa07f0b 0xad42dd5b4b00cd6bea2e6fe9c79ff889d02d1e9b7872bdb4cc1edef56ccd4999 0x3bf9b4491984b844cfcd55d23a0944e06545493ac98f536172b2582e55d044ba background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: bluelasereyes (10.9%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-12T21:31:21Z",
@@ -261,19 +263,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-06-11T21:16:27Z",
     "amount": {
-      "amount_usd_at_event": "46.56",
-      "eth_usd_price_at_event": "1687.0760837926352",
-      "eth_usd_price_date_utc": "2026-06-08",
+      "amount_usd_at_event": "44.72527500",
+      "eth_usd_price_at_event": "1620.4809781316494",
+      "eth_usd_price_date_utc": "2026-06-11",
       "native": "0.0276",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "27600000000000000",
-      "usd_estimate": "46.56000000",
+      "usd_estimate": "44.72527500",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$46.56",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-08",
-      "usd_estimate_price_usd": "1687.0760837926352",
+      "usd_estimate_display": "$44.73",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-06-11",
+      "usd_estimate_price_usd": "1620.4809781316494",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -314,7 +316,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 46.56 $46.56 2026-06-11t21:16:27z #252/743 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.73 $44.73 2026-06-11t21:16:27z #252/743 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-11T21:16:27Z",
@@ -383,19 +385,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-06-10T21:15:59Z",
     "amount": {
-      "amount_usd_at_event": "55.67351077",
-      "eth_usd_price_at_event": "1687.0760837926352",
-      "eth_usd_price_date_utc": "2026-06-08",
+      "amount_usd_at_event": "53.47587228",
+      "eth_usd_price_at_event": "1620.4809781316494",
+      "eth_usd_price_date_utc": "2026-06-11",
       "native": "0.033",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "33000000000000000",
-      "usd_estimate": "55.67351077",
+      "usd_estimate": "53.47587228",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$55.67",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-06-08) 2.89 day(s) from event.",
-      "usd_estimate_price_date_utc": "2026-06-08",
-      "usd_estimate_price_usd": "1687.0760837926352",
+      "usd_estimate_display": "$53.48",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-06-11) 0.11 day(s) from event.",
+      "usd_estimate_price_date_utc": "2026-06-11",
+      "usd_estimate_price_usd": "1620.4809781316494",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -438,7 +440,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 55.67 $55.67 2026-06-10t21:15:59z #350/743 generated auction feed 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: partyhat (4.4%) head partyhat eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 53.48 $53.48 2026-06-10t21:15:59z #350/743 generated auction feed 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 background: none (90.3%) background none body: grey (11.4%) body grey neck: none (39.8%) neck none mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: partyhat (4.4%) head partyhat eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-10T21:15:59Z",
@@ -507,19 +509,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-06-09T20:37:53Z",
     "amount": {
-      "amount_usd_at_event": "55.67351077",
-      "eth_usd_price_at_event": "1687.0760837926352",
-      "eth_usd_price_date_utc": "2026-06-08",
+      "amount_usd_at_event": "54.04855749",
+      "eth_usd_price_at_event": "1637.8350754267938",
+      "eth_usd_price_date_utc": "2026-06-09",
       "native": "0.033",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "33000000000000000",
-      "usd_estimate": "55.67351077",
+      "usd_estimate": "54.04855749",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$55.67",
-      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-06-08) 1.86 day(s) from event.",
-      "usd_estimate_price_date_utc": "2026-06-08",
-      "usd_estimate_price_usd": "1687.0760837926352",
+      "usd_estimate_display": "$54.05",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-06-09",
+      "usd_estimate_price_usd": "1637.8350754267938",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -563,7 +565,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 55.67 $55.67 2026-06-09t20:37:53z #675/743 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.05 $54.05 2026-06-09t20:37:53z #675/743 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-09T20:37:53Z",

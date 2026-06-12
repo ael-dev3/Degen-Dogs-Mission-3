@@ -28,6 +28,10 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def utc_today() -> date:
+    return datetime.now(timezone.utc).date()
+
+
 def load_json(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -76,6 +80,12 @@ def collect_asset_windows() -> dict[str, tuple[date, date]]:
         event_day = parse_event_date(record.get("activity_time_utc"))
         if asset_key and event_day:
             windows[asset_key].append(event_day)
+    # Mission 3 ETH auctions are ongoing. The refresh pipeline needs the current
+    # UTC day's ETH price before rebuilding the SQL/dashboard artifacts, otherwise
+    # a newly settled auction can land before the historical price cache has a row
+    # for its settlement date.
+    if "ETH" in windows:
+        windows["ETH"].append(utc_today())
     return {asset: (min(days), max(days)) for asset, days in windows.items() if days}
 
 
