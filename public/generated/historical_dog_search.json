@@ -19327,13 +19327,13 @@
     "dog_external_url": "https://degendogs.club/#dog743",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/743",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
+    "winner": "@staraptor.eth",
+    "winner_url": "https://farcaster.xyz/staraptor.eth",
+    "winner_wallet": "0x3516006709b775e01b48dfb5fad355a4e793e347",
+    "amount": "0.02222 ETH ($37)",
     "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-06-13 21:37:25",
     "settled_time_utc": "",
     "rarity": "#402/744",
@@ -19341,6 +19341,6 @@
     "trait_rarity": "Background: None (90.3%); Body: White (11.4%); Neck: GoldNecklace (19.5%); Mouth: None (68.5%); Ears: Earbuds (32.1%); Head: BlackCap (6.9%); Eyes: EyePatch (7.9%)",
     "confidence": "verified_live_base_logs",
     "sources": "base_logs,dashboard_builder",
-    "search_text": "3 Base 8453 743 Dog #743 https://api.degendogs.club/images/743.png https://degendogs.club/#dog743 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/743 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-06-13 21:37:25 #402/744 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: BlackCap; Eyes: EyePatch Background: None (90.3%); Body: White (11.4%); Neck: GoldNecklace (19.5%); Mouth: None (68.5%); Ears: Earbuds (32.1%); Head: BlackCap (6.9%); Eyes: EyePatch (7.9%) verified_live_base_logs base_logs,dashboard_builder"
+    "search_text": "3 Base 8453 743 Dog #743 https://api.degendogs.club/images/743.png https://degendogs.club/#dog743 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/743 live @staraptor.eth https://farcaster.xyz/staraptor.eth 0x3516006709b775e01b48dfb5fad355a4e793e347 0.02222 ETH ($37) 1 1 2026-06-13 21:37:25 #402/744 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: BlackCap; Eyes: EyePatch Background: None (90.3%); Body: White (11.4%); Neck: GoldNecklace (19.5%); Mouth: None (68.5%); Ears: Earbuds (32.1%); Head: BlackCap (6.9%); Eyes: EyePatch (7.9%) verified_live_base_logs base_logs,dashboard_builder"
   }
 ]
