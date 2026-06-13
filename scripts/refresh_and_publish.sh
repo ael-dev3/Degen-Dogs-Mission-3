@@ -169,6 +169,7 @@ paths = [
     "archive/data/identity/wallet_profiles.json",
     "archive/dogs",
     "archive/prices/data/generated",
+    "archive/prices/data/raw",
 ]
 status = subprocess.check_output(
     ["git", "status", "--porcelain", "--untracked-files=all", "--", *paths],
@@ -292,10 +293,41 @@ DEGEN_DOGS_REFRESH_RESULT=success_generated python3 scripts/refresh_telemetry.py
 python3 scripts/refresh_telemetry.py validate-status
 
 export DEGEN_DOGS_GIT_STATUS_STARTED_AT_UTC="$(utc_stamp)"
-export DEGEN_DOGS_CHANGED_FILES="$(git diff --name-only -- README.md index.html generated public archive/mission3/data/generated archive/data/generated archive/data/identity/wallet_profiles.json archive/dogs archive/prices/data/generated | python3 -c 'import json,sys; print(json.dumps([line.strip() for line in sys.stdin if line.strip()]))')"
+export DEGEN_DOGS_CHANGED_FILES="$(python3 - <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+
+paths = [
+    "README.md",
+    "index.html",
+    "generated",
+    "public",
+    "archive/mission3/data/generated",
+    "archive/data/generated",
+    "archive/data/identity/wallet_profiles.json",
+    "archive/dogs",
+    "archive/prices/data/generated",
+    "archive/prices/data/raw",
+]
+changed = set(
+    line.strip()
+    for line in subprocess.check_output(["git", "diff", "--name-only", "--", *paths], text=True).splitlines()
+    if line.strip()
+)
+status = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=all", "--", *paths], text=True)
+for line in status.splitlines():
+    if line.startswith("?? "):
+        path = line[3:].strip()
+        if path:
+            changed.add(path)
+print(json.dumps(sorted(changed)))
+PY
+)"
 export DEGEN_DOGS_GIT_STATUS_COMPLETED_AT_UTC="$(utc_stamp)"
 
-if git diff --quiet -- README.md index.html generated public archive/mission3/data/generated archive/data/generated archive/data/identity/wallet_profiles.json archive/dogs archive/prices/data/generated; then
+if [[ "$DEGEN_DOGS_CHANGED_FILES" == "[]" ]]; then
   log "no generated website/archive data changes to publish"
   export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
   exit 0
@@ -323,6 +355,7 @@ unified_public = Path("public/generated")
 identity_path = Path("archive/data/identity/wallet_profiles.json")
 dog_archive = Path("archive/dogs")
 price_generated = Path("archive/prices/data/generated")
+price_raw = Path("archive/prices/data/raw")
 if archive_public.exists():
     paths.extend(str(path) for path in sorted(archive_public.glob("*.json")))
 if archive_generated.exists():
@@ -344,6 +377,8 @@ if dog_archive.exists():
 if price_generated.exists():
     paths.extend(str(path) for path in sorted(price_generated.glob("*.csv")))
     paths.extend(str(path) for path in sorted(price_generated.glob("*.json")))
+if price_raw.exists():
+    paths.extend(str(path) for path in sorted(price_raw.glob("*.json")))
 for path in dict.fromkeys(paths):
     print(path)
 PY
@@ -371,6 +406,7 @@ allowed_public_archive = re.compile(r"^public/generated/mission3/[A-Za-z0-9_]+\.
 allowed_unified_archive = re.compile(r"^archive/data/generated/unified_dog_search_[A-Za-z0-9_]+\.json$")
 allowed_dog_archive = re.compile(r"^archive/dogs/by-id/[0-9]+\.json$")
 allowed_price_archive = re.compile(r"^archive/prices/data/generated/[A-Za-z0-9_]+\.(csv|json)$")
+allowed_price_raw = re.compile(r"^archive/prices/data/raw/[A-Za-z0-9_\-]+\.json$")
 unexpected = [
     path for path in staged
     if path not in allowed_exact
@@ -380,6 +416,7 @@ unexpected = [
     and not allowed_unified_archive.fullmatch(path)
     and not allowed_dog_archive.fullmatch(path)
     and not allowed_price_archive.fullmatch(path)
+    and not allowed_price_raw.fullmatch(path)
 ]
 if unexpected:
     print("refusing to publish unexpected staged paths:", file=sys.stderr)
