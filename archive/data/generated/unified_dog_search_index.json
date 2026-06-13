@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "18590000000000000",
-      "usd_estimate": "31.12000000",
+      "usd_estimate": "31.14000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$31.12",
+      "usd_estimate_display": "$31.14",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-13",
-      "usd_estimate_price_usd": "1674.0182894029047875201721355567509413663259817105970952124798278644432490586337",
+      "usd_estimate_price_usd": "1675.0941366325981710597095212479827864443249058633674018289402904787520172135557",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 743
     },
     "schema_version": 1,
-    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.01859 eth 18590000000000000 31.12 $31.12 2026-06-13t00:18:11z #255/743 generated auction feed 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.8%) neck redcollar mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: monocle (6.7%) eyes monocle base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.01859 eth 18590000000000000 31.14 $31.14 2026-06-13t00:18:11z #255/743 generated auction feed 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.8%) neck redcollar mouth: none (68.5%) mouth none ears: none (25.4%) ears none head: none (20.5%) head none eyes: monocle (6.7%) eyes monocle base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
