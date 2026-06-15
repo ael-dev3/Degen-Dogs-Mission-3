@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-14T23:28:35Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-14T23:54:55Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-15T23:27:09Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "46.18465935",
+      "eth_usd_price_at_event": "1790.1030755658549",
       "eth_usd_price_date_utc": "2026-06-15",
       "native": "0.0258",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "25800000000000000",
-      "usd_estimate": "46.18000000",
-      "usd_estimate_confidence": "live_current",
+      "usd_estimate": "46.18465935",
+      "usd_estimate_confidence": "medium",
       "usd_estimate_display": "$46.18",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-15",
-      "usd_estimate_price_usd": "1789.9224806201550387596899224806201550387596899224806201550387596899224806201550",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1790.1030755658549",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -53,16 +53,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#580/745",
-      "rank": 580,
-      "total": 745
+      "display": "#587/746",
+      "rank": 587,
+      "total": 746
     },
     "schema_version": 1,
-    "search_text": "dog 744 dog #744 744 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.0258 eth 25800000000000000 46.18 $46.18 2026-06-14t23:54:55z #580/745 generated auction feed 0x8d94092230716648f9633b4e84be9acfec8496d69bbbb83053f127da88e21788 0x2a3c196ce324cf6e8c3bb743efb9acd4607dabae5a2fb26c8687d88968f0c9a8 background: none (90.3%) background none body: grey (11.5%) body grey neck: none (39.9%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.2%) ears earbuds head: toque (7.1%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 744 dog #744 744 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.0258 eth 25800000000000000 46.18 $46.18 2026-06-15t23:27:09z #587/746 generated auction feed 0x8d94092230716648f9633b4e84be9acfec8496d69bbbb83053f127da88e21788 0x2a3c196ce324cf6e8c3bb743efb9acd4607dabae5a2fb26c8687d88968f0c9a8 background: none (90.2%) background none body: grey (11.5%) body grey neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.2%) ears earbuds head: toque (7.2%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-15T23:27:09Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -76,10 +76,10 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -89,7 +89,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.9%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -104,7 +104,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque (7.2%)",
         "trait_type": "Head",
         "value": "Toque"
       },

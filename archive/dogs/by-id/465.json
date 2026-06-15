@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#451/745",
-      "rank": 451,
-      "total": 745
+      "display": "#452/746",
+      "rank": 452,
+      "total": 746
     },
     "schema_version": 1,
-    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 #451/745 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters",
+    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 #452/746 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters",
     "settlement": {
       "block_number": 26198561,
       "block_time_utc": "2025-08-21T13:28:05Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,7 +87,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.9%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.9%)",
+        "display": "Eyes: BlueLaserEyes (11.0%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

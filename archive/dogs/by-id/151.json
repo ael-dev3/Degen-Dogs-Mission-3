@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#620/745",
-      "rank": 620,
-      "total": 745
+      "display": "#621/746",
+      "rank": 621,
+      "total": 746
     },
     "schema_version": 1,
-    "search_text": "dog 151 dog #151 151 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c #620/745 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: none; head: blackcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 151 dog #151 151 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c #621/746 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: none; head: blackcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 31407196,
       "block_time_utc": "2022-08-01T20:46:27Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -86,7 +86,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.4%)",
+        "display": "Ears: None (25.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

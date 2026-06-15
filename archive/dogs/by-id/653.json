@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#688/745",
-      "rank": 688,
-      "total": 745
+      "display": "#689/746",
+      "rank": 689,
+      "total": 746
     },
     "schema_version": 1,
-    "search_text": "dog 653 dog #653 653 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0121 eth 0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205 0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b #688/745 background: none; body: redbrown; neck: none; mouth: none; ears: none; head: baseballcap; eyes: bluelasereyes 0xeccd5c48176b74ac98bbd21def1314dfc64301f3cff5fcd6a75abf1258e8b3aa 0x1a8d224e2b07bd3a199a32d58222369fd6546ec60058f51a211e1927916348e3 0x9a62d1c605fe1580c2250639fab59547d5f0f0d073e6cc02e272ff3599b326bc base_logs archive_indexer",
+    "search_text": "dog 653 dog #653 653 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0121 eth 0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205 0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b #689/746 background: none; body: redbrown; neck: none; mouth: none; ears: none; head: baseballcap; eyes: bluelasereyes 0xeccd5c48176b74ac98bbd21def1314dfc64301f3cff5fcd6a75abf1258e8b3aa 0x1a8d224e2b07bd3a199a32d58222369fd6546ec60058f51a211e1927916348e3 0x9a62d1c605fe1580c2250639fab59547d5f0f0d073e6cc02e272ff3599b326bc base_logs archive_indexer",
     "settlement": {
       "block_number": 43352606,
       "block_time_utc": "2026-03-14T13:22:39Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,7 +88,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.9%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.4%)",
+        "display": "Ears: None (25.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.9%)",
+        "display": "Eyes: BlueLaserEyes (11.0%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

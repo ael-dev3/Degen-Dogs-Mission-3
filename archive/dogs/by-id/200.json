@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#370/745",
+      "display": "#370/746",
       "rank": 370,
-      "total": 745
+      "total": 746
     },
     "schema_version": 1,
-    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #370/745 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #370/746 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,7 +70,7 @@
     "status": "ended pending settlement",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -80,7 +80,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
