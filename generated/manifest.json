@@ -27,7 +27,7 @@
   {
     "table": "current_auction_bid_history",
     "file": "generated/current_auction_bid_history.csv",
-    "rows": 0
+    "rows": 1
   },
   {
     "table": "recent_auction_winners",
@@ -47,7 +47,7 @@
   {
     "table": "auction_daily_activity",
     "file": "generated/auction_daily_activity.csv",
-    "rows": 158
+    "rows": 159
   },
   {
     "table": "auction_bidder_leaderboard",
@@ -82,7 +82,7 @@
   {
     "table": "season6_sup_current_bidder_status",
     "file": "generated/season6_sup_current_bidder_status.csv",
-    "rows": 0
+    "rows": 1
   },
   {
     "table": "auction_winners",
