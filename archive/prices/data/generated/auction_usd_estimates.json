@@ -8,7 +8,7 @@
     "estimated_usd_value": "0E-8",
     "eth_usd_price_at_event": null,
     "eth_usd_price_date_utc": "2026-06-15",
-    "event_time_utc": "2026-06-15T23:28:09Z",
+    "event_time_utc": "2026-06-15T23:59:55Z",
     "event_tx_hash": null,
     "event_type": "current_bid",
     "mission": 3,
@@ -25,13 +25,13 @@
     "price_usd": null
   },
   {
-    "amount_usd_at_event": "46.18465935",
+    "amount_usd_at_event": "46.32270834",
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 744,
-    "estimated_usd_display": "$46.18",
-    "estimated_usd_value": "46.18465935",
-    "eth_usd_price_at_event": "1790.1030755658549",
+    "estimated_usd_display": "$46.32",
+    "estimated_usd_value": "46.32270834",
+    "eth_usd_price_at_event": "1795.4538116366468",
     "eth_usd_price_date_utc": "2026-06-15",
     "event_time_utc": "2026-06-15T23:27:09Z",
     "event_tx_hash": null,
@@ -47,7 +47,7 @@
     "price_source": "defillama_coin_prices",
     "price_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "price_status": "priced",
-    "price_usd": "1790.1030755658549"
+    "price_usd": "1795.4538116366468"
   },
   {
     "amount_usd_at_event": "45.19277162",
