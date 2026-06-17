@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-06-17 13:08:21",
+    "token_id": 746,
+    "bidder": "0xdcc7…1e06",
+    "bidder_url": "https://basescan.org/address/0xdcc772fe63958dbc06afba24e0bbffc61bcb1e06",
+    "bidder_wallet": "0xdcc772fe63958dbc06afba24e0bbffc61bcb1e06",
+    "bid": "0.00169 ETH ($3)",
+    "bid_eth": 0.00169,
+    "bid_usd": 3.03,
+    "bid_usd_at_event": 3.03,
+    "eth_usd_price_at_event": "1790.5792080728313",
+    "eth_usd_price_date_utc": "2026-06-17",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 47456177,
+    "tx_hash": "0x9b5eb01c8857e2d420994e09d10d5e44e169840ab81fdca67ecba449fe9d6a58"
+  },
+  {
     "bid_time_utc": "2026-06-17 12:28:25",
     "token_id": 746,
     "bidder": "@xbornid.eth",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46776282,
     "tx_hash": "0x2a74ad17c4250361d4ff436ccac714293e1daa0e44945c2dbb15ab443bf04f6c"
-  },
-  {
-    "bid_time_utc": "2026-06-01 19:11:05",
-    "token_id": 730,
-    "bidder": "@badadan",
-    "bidder_url": "https://farcaster.xyz/badadan",
-    "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
-    "bid": "0.01100 ETH ($22)",
-    "bid_eth": 0.011,
-    "bid_usd": 22.05,
-    "bid_usd_at_event": 22.05,
-    "eth_usd_price_at_event": "2004.2872890970018",
-    "eth_usd_price_date_utc": "2026-06-01",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 1,
-    "block_number": 46775859,
-    "tx_hash": "0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001"
   }
 ]
