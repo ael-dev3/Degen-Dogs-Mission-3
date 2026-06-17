@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "47459643"
+    "value": "47460500"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-06-17 15:03:53"
+    "value": "2026-06-17 15:32:27"
   },
   {
     "metric": "auction_house",
@@ -41,7 +41,7 @@
   },
   {
     "metric": "woof_usd_price",
-    "value": "0.0000005087"
+    "value": "0.0000005107"
   },
   {
     "metric": "woof_usd_source",
@@ -57,7 +57,7 @@
   },
   {
     "metric": "sup_usd_price",
-    "value": "0.01039"
+    "value": "0.0104"
   },
   {
     "metric": "sup_usd_source",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1755.57"
+    "value": "1761.23"
   },
   {
     "metric": "eth_usd_source",
@@ -133,7 +133,7 @@
   },
   {
     "metric": "reward_woof_flow_usd_per_day",
-    "value": "10.43"
+    "value": "10.47"
   },
   {
     "metric": "reward_woof_per_dog_per_day",
@@ -141,7 +141,7 @@
   },
   {
     "metric": "reward_woof_per_dog_usd_per_day",
-    "value": "0.078386"
+    "value": "0.078695"
   },
   {
     "metric": "reward_sup_received",
@@ -157,7 +157,7 @@
   },
   {
     "metric": "reward_sup_flow_usd_per_day",
-    "value": "2.07"
+    "value": "2.08"
   },
   {
     "metric": "reward_sup_per_dog_per_day",
@@ -165,27 +165,27 @@
   },
   {
     "metric": "reward_sup_per_dog_usd_per_day",
-    "value": "0.015591"
+    "value": "0.015606"
   },
   {
     "metric": "reward_total_flow_usd_per_day",
-    "value": "12.5"
+    "value": "12.54"
   },
   {
     "metric": "reward_total_per_dog_usd_per_day",
-    "value": "0.093978"
+    "value": "0.094301"
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "186.85"
+    "value": "186.74"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.5352"
+    "value": "0.5355"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "195.34"
+    "value": "195.46"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -201,7 +201,7 @@
   },
   {
     "metric": "top_woof_holder_balance",
-    "value": "46469585874.687302"
+    "value": "46469633084.638725"
   },
   {
     "metric": "farcaster_profiles_resolved",
@@ -221,7 +221,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "17.56"
+    "value": "17.61"
   },
   {
     "metric": "current_bidder",
@@ -277,7 +277,7 @@
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "129.88"
+    "value": "130"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
@@ -285,7 +285,7 @@
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "144.32"
+    "value": "144.46"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -329,7 +329,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_usd",
-    "value": "34.6"
+    "value": "34.64"
   },
   {
     "metric": "season6_sup_current_bid_estimated_raw_incremental_sup",
@@ -361,7 +361,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "75.37"
+    "value": "75.35"
   },
   {
     "metric": "season6_sup_enabled",
@@ -389,7 +389,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "40905.150244"
+    "value": "40959.942262"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
@@ -437,11 +437,11 @@
   },
   {
     "metric": "season6_sup_usd_price",
-    "value": "0.01039"
+    "value": "0.0104"
   },
   {
     "metric": "season6_sup_usd_price_used",
-    "value": "0.01039"
+    "value": "0.0104"
   },
   {
     "metric": "season6_sup_usd_source_used",
