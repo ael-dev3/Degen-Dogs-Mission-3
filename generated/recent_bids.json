@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-06-17 12:03:21",
+    "token_id": 746,
+    "bidder": "@skunkape",
+    "bidder_url": "https://farcaster.xyz/skunkape",
+    "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+    "bid": "0.00122 ETH ($2)",
+    "bid_eth": 0.00122,
+    "bid_usd": 2.18,
+    "bid_usd_at_event": 2.18,
+    "eth_usd_price_at_event": "1790.5792080728313",
+    "eth_usd_price_date_utc": "2026-06-17",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 47454227,
+    "tx_hash": "0xbb658019a21853fc58b76815e3833e7f6ee7d7842f8df8f043a18e7152448509"
+  },
+  {
     "bid_time_utc": "2026-06-17 06:09:57",
     "token_id": 746,
     "bidder": "@cctv1",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46688538,
     "tx_hash": "0xf4581de13cd2b7fbf9b547da77eff78801a0be299e7055c076f6128424dcab74"
-  },
-  {
-    "bid_time_utc": "2026-05-30 18:33:17",
-    "token_id": 728,
-    "bidder": "@vaibhavmule",
-    "bidder_url": "https://farcaster.xyz/vaibhavmule",
-    "bidder_wallet": "0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
-    "bid": "0.01210 ETH ($24)",
-    "bid_eth": 0.0121,
-    "bid_usd": 24.43,
-    "bid_usd_at_event": 24.43,
-    "eth_usd_price_at_event": "2019.175626778262",
-    "eth_usd_price_date_utc": "2026-05-30",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 46688325,
-    "tx_hash": "0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb"
   }
 ]

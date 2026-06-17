@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-06-16T23:28:43Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-17T06:09:57Z",
+    "activity_time_utc": "2026-06-17T12:03:21Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-17",
-      "native": "0.0011",
+      "native": "0.00122",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1100000000000000",
-      "usd_estimate": "1.94000000",
+      "raw": "1220000000000000",
+      "usd_estimate": "2.15000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.94",
+      "usd_estimate_display": "$2.15",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-17",
-      "usd_estimate_price_usd": "1763.6363636363636363636363636363636363636363636363636363636363636363636363636364",
+      "usd_estimate_price_usd": "1762.2950819672131147540983606557377049180327868852459016393442622950819672131148",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,11 +29,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-06-17T06:09:57Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-06-17T12:03:21Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
+      "0xbb658019a21853fc58b76815e3833e7f6ee7d7842f8df8f043a18e7152448509",
       "0xd57becbe5f7dd741ceb80eb8e3590c4dfa1276adca17a1416b641f8f1cd0f519",
       "0x43c58e576910c51d2f05b26c97dc2667dd94f29eeec6c159395eb37d5b962d92"
     ],
@@ -46,7 +47,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog746",
-      "explorer": "https://basescan.org/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
+      "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/746",
       "repo_archive": "archive/dogs/by-id/746.json",
       "settlement_tx": null
@@ -58,7 +59,7 @@
       "total": 747
     },
     "schema_version": 1,
-    "search_text": "dog 746 dog #746 746 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.0011 eth 1100000000000000 1.94 $1.94 2026-06-17t06:09:57z #237/747 generated auction feed 0xd57becbe5f7dd741ceb80eb8e3590c4dfa1276adca17a1416b641f8f1cd0f519 0x43c58e576910c51d2f05b26c97dc2667dd94f29eeec6c159395eb37d5b962d92 background: none (90.2%) background none body: white (11.5%) body white neck: redcollar (30.8%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.6%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.1%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 746 dog #746 746 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.00122 eth 1220000000000000 2.15 $2.15 2026-06-17t12:03:21z #237/747 generated auction feed 0xbb658019a21853fc58b76815e3833e7f6ee7d7842f8df8f043a18e7152448509 0xd57becbe5f7dd741ceb80eb8e3590c4dfa1276adca17a1416b641f8f1cd0f519 0x43c58e576910c51d2f05b26c97dc2667dd94f29eeec6c159395eb37d5b962d92 background: none (90.2%) background none body: white (11.5%) body white neck: redcollar (30.8%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.6%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.1%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -115,12 +116,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@cctv1",
+      "display": "@skunkape",
       "farcaster_fid": null,
-      "farcaster_handle": "cctv1",
-      "profile_url": "https://farcaster.xyz/cctv1",
-      "wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
-      "wallet_explorer_url": "https://basescan.org/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72"
+      "farcaster_handle": "skunkape",
+      "profile_url": "https://farcaster.xyz/skunkape",
+      "wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "wallet_explorer_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202"
     }
   },
   "schema_version": 1
