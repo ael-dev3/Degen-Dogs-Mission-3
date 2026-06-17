@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-06-17 23:26:07",
+    "token_id": 746,
+    "bidder": "@bitcoinvestor",
+    "bidder_url": "https://farcaster.xyz/bitcoinvestor",
+    "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
+    "bid": "0.01331 ETH ($24)",
+    "bid_eth": 0.01331,
+    "bid_usd": 23.83,
+    "bid_usd_at_event": 23.83,
+    "eth_usd_price_at_event": "1790.5792080728313",
+    "eth_usd_price_date_utc": "2026-06-17",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 1,
+    "block_number": 47474710,
+    "tx_hash": "0xac6875c75b2dcfcff72f114fb06cf960ca7e1a54aab9de65a729205570218930"
+  },
+  {
     "bid_time_utc": "2026-06-17 22:29:35",
     "token_id": 746,
     "bidder": "@staraptor.eth",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 46813269,
     "tx_hash": "0x42ea82fd4e0c013291a3278213d1dc48dbcc97b5b1a0f0077ea93218d93fd952"
-  },
-  {
-    "bid_time_utc": "2026-06-02 14:46:49",
-    "token_id": 731,
-    "bidder": "@markcarey",
-    "bidder_url": "https://farcaster.xyz/markcarey",
-    "bidder_wallet": "0x0c65be17e86bcb6019148be0a4e8f0a4510a70cb",
-    "bid": "0.01210 ETH ($24)",
-    "bid_eth": 0.0121,
-    "bid_usd": 24.24,
-    "bid_usd_at_event": 24.24,
-    "eth_usd_price_at_event": "2003.3651516762716",
-    "eth_usd_price_date_utc": "2026-06-02",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 46811131,
-    "tx_hash": "0xafe1bb2ee603af19eadc9fe30f454afd2a8b2846bc301a549de3b6e5087d9722"
   }
 ]
