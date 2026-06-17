@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-16T23:28:43Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-17T23:26:07Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-17T23:41:57Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "23.83260926",
+      "eth_usd_price_at_event": "1790.5792080728313",
       "eth_usd_price_date_utc": "2026-06-17",
       "native": "0.01331",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "13310000000000000",
-      "usd_estimate": "23.28000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$23.28",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "23.83260926",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$23.83",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-17",
-      "usd_estimate_price_usd": "1749.0608564988730277986476333583771600300525920360631104432757325319308790383171",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1790.5792080728313",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -61,16 +61,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#237/747",
+      "display": "#237/748",
       "rank": 237,
-      "total": 747
+      "total": 748
     },
     "schema_version": 1,
-    "search_text": "dog 746 dog #746 746 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.01331 eth 13310000000000000 23.28 $23.28 2026-06-17t23:26:07z #237/747 generated auction feed 0xac6875c75b2dcfcff72f114fb06cf960ca7e1a54aab9de65a729205570218930 0x74d507e91a9880b10a4d657cb73b6010e040c48f0190908a75f90c8fe2fee8f8 0x5718434dbafa898277e88e54da5b8d99d2fdbabb9c11b3323baaa853e04a2460 0xebddc663491ea225825ce38c2ea04b22f18336bcf280634e50e2a16c4f8167bf 0x9b5eb01c8857e2d420994e09d10d5e44e169840ab81fdca67ecba449fe9d6a58 0x79da241aae9a62847ed9ad287c4bd57a916cde634334920ed98962aa8523333a 0xfed2a6793761645cfd9f2fe14eee4fbeb57f5f3225f727256ba5e5509aa5b925 0xbb658019a21853fc58b76815e3833e7f6ee7d7842f8df8f043a18e7152448509 0xd57becbe5f7dd741ceb80eb8e3590c4dfa1276adca17a1416b641f8f1cd0f519 0x43c58e576910c51d2f05b26c97dc2667dd94f29eeec6c159395eb37d5b962d92 background: none (90.2%) background none body: white (11.5%) body white neck: redcollar (30.8%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.6%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.1%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 746 dog #746 746 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.01331 eth 13310000000000000 23.83 $23.83 2026-06-17t23:41:57z #237/748 generated auction feed 0xac6875c75b2dcfcff72f114fb06cf960ca7e1a54aab9de65a729205570218930 0x74d507e91a9880b10a4d657cb73b6010e040c48f0190908a75f90c8fe2fee8f8 0x5718434dbafa898277e88e54da5b8d99d2fdbabb9c11b3323baaa853e04a2460 0xebddc663491ea225825ce38c2ea04b22f18336bcf280634e50e2a16c4f8167bf 0x9b5eb01c8857e2d420994e09d10d5e44e169840ab81fdca67ecba449fe9d6a58 0x79da241aae9a62847ed9ad287c4bd57a916cde634334920ed98962aa8523333a 0xfed2a6793761645cfd9f2fe14eee4fbeb57f5f3225f727256ba5e5509aa5b925 0xbb658019a21853fc58b76815e3833e7f6ee7d7842f8df8f043a18e7152448509 0xd57becbe5f7dd741ceb80eb8e3590c4dfa1276adca17a1416b641f8f1cd0f519 0x43c58e576910c51d2f05b26c97dc2667dd94f29eeec6c159395eb37d5b962d92 background: none (90.2%) background none body: white (11.5%) body white neck: redcollar (30.7%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.5%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.1%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-17T23:41:57Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -84,7 +84,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.2%)",
@@ -97,7 +97,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (30.8%)",
+        "display": "Neck: RedCollar (30.7%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -107,7 +107,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.5%)",
         "trait_type": "Ears",
         "value": "None"
       },

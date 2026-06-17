@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#316/747",
-      "rank": 316,
-      "total": 747
+      "display": "#319/748",
+      "rank": 319,
+      "total": 748
     },
     "schema_version": 1,
-    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #316/747 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: sunglasses 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 base_logs archive_indexer",
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 #319/748 background: halo; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: sunglasses 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 base_logs archive_indexer",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -82,22 +82,22 @@
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown (15.3%)",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.8%)",
+        "display": "Neck: RedCollar (30.7%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.3%)",
+        "display": "Ears: GoldEarring (15.4%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -107,7 +107,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses (14.7%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
