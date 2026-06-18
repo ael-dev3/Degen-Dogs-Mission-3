@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-18T09:24:45Z",
+    "activity_time_utc": "2026-06-18T12:35:27Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-18",
-      "native": "0.00075",
+      "native": "0.00083",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "750000000000000",
-      "usd_estimate": "1.31000000",
+      "raw": "830000000000000",
+      "usd_estimate": "1.45000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.31",
+      "usd_estimate_display": "$1.45",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-18",
-      "usd_estimate_price_usd": "1746.6666666666666666666666666666666666666666666666666666666666666666666666666667",
+      "usd_estimate_price_usd": "1746.9879518072289156626506024096385542168674698795180722891566265060240963855422",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 5,
-      "last_bid_time_utc": "2026-06-18T09:24:45Z",
-      "unique_bidder_count": 4
+      "bid_count": 6,
+      "last_bid_time_utc": "2026-06-18T12:35:27Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
+      "0xedc68a2d4750c8e1f973a0e90dbac61fcd7f698de4391987189500db4f063530",
       "0xb84fd1235fdedbec5a168d8703725b4bb874d1fef77a4168f2a2abf737bc5286",
       "0x87a5d292f365f45ac52e5cc65255c83847c950ff3700e2c95bfdc3060c925ac5",
       "0x7719b0f3114a0e7d8b873fb7a32452b52f3208bbfad0cd7655aa16c5fe08b7a1",
@@ -48,7 +49,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog747",
-      "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
+      "explorer": "https://basescan.org/address/0xbe061d84c50e156e2faa791228662e3b52c906e2",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/747",
       "repo_archive": "archive/dogs/by-id/747.json",
       "settlement_tx": null
@@ -60,7 +61,7 @@
       "total": 748
     },
     "schema_version": 1,
-    "search_text": "dog 747 dog #747 747 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00075 eth 750000000000000 1.31 $1.31 2026-06-18t09:24:45z #561/748 generated auction feed 0xb84fd1235fdedbec5a168d8703725b4bb874d1fef77a4168f2a2abf737bc5286 0x87a5d292f365f45ac52e5cc65255c83847c950ff3700e2c95bfdc3060c925ac5 0x7719b0f3114a0e7d8b873fb7a32452b52f3208bbfad0cd7655aa16c5fe08b7a1 0xa8b86a4f8830c87db055a484180b2cb3ab13b43f52dad6396209c29f2972c8b4 0x4e3fa7dd2a4cfe5fb0cf1aa61f34f7699410616a1c5baf5842241e1e35eb85d6 background: none (90.2%) background none body: sugarskull (6.6%) body sugarskull neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: goldearring (15.4%) ears goldearring head: none (20.5%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 747 dog #747 747 mission 3 mission 3 base ongoing 0xbe061d84c50e156e2faa791228662e3b52c906e2 @xbornid.eth xbornid.eth 0.00083 eth 830000000000000 1.45 $1.45 2026-06-18t12:35:27z #561/748 generated auction feed 0xedc68a2d4750c8e1f973a0e90dbac61fcd7f698de4391987189500db4f063530 0xb84fd1235fdedbec5a168d8703725b4bb874d1fef77a4168f2a2abf737bc5286 0x87a5d292f365f45ac52e5cc65255c83847c950ff3700e2c95bfdc3060c925ac5 0x7719b0f3114a0e7d8b873fb7a32452b52f3208bbfad0cd7655aa16c5fe08b7a1 0xa8b86a4f8830c87db055a484180b2cb3ab13b43f52dad6396209c29f2972c8b4 0x4e3fa7dd2a4cfe5fb0cf1aa61f34f7699410616a1c5baf5842241e1e35eb85d6 background: none (90.2%) background none body: sugarskull (6.6%) body sugarskull neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: goldearring (15.4%) ears goldearring head: none (20.5%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -117,12 +118,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@thec1",
+      "display": "@xbornid.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "thec1",
-      "profile_url": "https://farcaster.xyz/thec1",
-      "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
-      "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
+      "farcaster_handle": "xbornid.eth",
+      "profile_url": "https://farcaster.xyz/xbornid.eth",
+      "wallet": "0xbe061d84c50e156e2faa791228662e3b52c906e2",
+      "wallet_explorer_url": "https://basescan.org/address/0xbe061d84c50e156e2faa791228662e3b52c906e2"
     }
   },
   {
