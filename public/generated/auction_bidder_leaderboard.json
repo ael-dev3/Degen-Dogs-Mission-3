@@ -403,6 +403,19 @@
     "latest_bid_utc": "2026-06-18 09:20:15"
   },
   {
+    "bidder": "@i-am-rael.eth",
+    "bidder_url": "https://farcaster.xyz/i-am-rael.eth",
+    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
+    "bids": 18,
+    "auctions_bid": 11,
+    "bid_eth": 0.21055,
+    "high_bid_eth": 0.03995,
+    "auction_wins": 5,
+    "winning_eth": 0.10056,
+    "latest_bid_token_id": 747,
+    "latest_bid_utc": "2026-06-18 22:54:35"
+  },
+  {
     "bidder": "@shalexvivek",
     "bidder_url": "https://farcaster.xyz/shalexvivek",
     "bidder_wallet": "0x412b7153504217b405af821bdcdc5f21c71e3cbc",
@@ -414,19 +427,6 @@
     "winning_eth": 0.06576,
     "latest_bid_token_id": 731,
     "latest_bid_utc": "2026-06-02 19:29:19"
-  },
-  {
-    "bidder": "@i-am-rael.eth",
-    "bidder_url": "https://farcaster.xyz/i-am-rael.eth",
-    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
-    "bids": 17,
-    "auctions_bid": 11,
-    "bid_eth": 0.19955,
-    "high_bid_eth": 0.03995,
-    "auction_wins": 5,
-    "winning_eth": 0.10056,
-    "latest_bid_token_id": 747,
-    "latest_bid_utc": "2026-06-18 04:29:25"
   },
   {
     "bidder": "@acion",
