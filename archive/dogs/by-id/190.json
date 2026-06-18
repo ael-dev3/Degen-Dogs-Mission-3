@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#307/748",
-      "rank": 307,
-      "total": 748
+      "display": "#306/749",
+      "rank": 306,
+      "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 190 dog #190 190 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe672a286286fef92ca2ffe2fa5d07b304fd03449c64dca1f58ed474bd7155709 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 #307/748 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 190 dog #190 190 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe672a286286fef92ca2ffe2fa5d07b304fd03449c64dca1f58ed474bd7155709 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 #306/749 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 39994535,
       "block_time_utc": "2023-03-05T13:42:50Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "display": "Eyes: BlueLaserEyes (10.9%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

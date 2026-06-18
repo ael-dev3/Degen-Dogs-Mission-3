@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#718/748",
-      "rank": 718,
-      "total": 748
+      "display": "#720/749",
+      "rank": 720,
+      "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 195 dog #195 195 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xddf8170dd42dbdaad4374096cfaebe5025b6a38b36063355c01fa40d4d9910b0 0x8dd9991b433a0ef4da0f23183a6fa0178e8b88836a593e2e78b43130219aea1b #718/748 background: none; body: brown; neck: none; mouth: none; ears: none; head: none; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 195 dog #195 195 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xddf8170dd42dbdaad4374096cfaebe5025b6a38b36063355c01fa40d4d9910b0 0x8dd9991b433a0ef4da0f23183a6fa0178e8b88836a593e2e78b43130219aea1b #720/749 background: none; body: brown; neck: none; mouth: none; ears: none; head: none; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 49623273,
       "block_time_utc": "2023-11-06T18:45:28Z",
@@ -76,17 +76,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (10.9%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,12 +101,12 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "display": "Eyes: BlueLaserEyes (10.9%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

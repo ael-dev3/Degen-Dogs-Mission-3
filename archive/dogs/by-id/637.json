@@ -51,12 +51,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#298/748",
-      "rank": 298,
-      "total": 748
+      "display": "#295/749",
+      "rank": 295,
+      "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #298/748 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d base_logs archive_indexer",
+    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #295/749 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d base_logs archive_indexer",
     "settlement": {
       "block_number": 42649529,
       "block_time_utc": "2026-02-26T06:46:45Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -86,7 +86,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -96,12 +96,12 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },
