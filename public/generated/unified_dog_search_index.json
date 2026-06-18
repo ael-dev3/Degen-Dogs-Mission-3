@@ -1,7 +1,7 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-18T23:43:03Z",
+    "activity_time_utc": "2026-06-18T23:56:37Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
@@ -29,7 +29,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 0,
-      "last_bid_time_utc": "2026-06-18T23:43:03Z",
+      "last_bid_time_utc": "2026-06-18T23:56:37Z",
       "unique_bidder_count": 0
     },
     "bid_tx_hashes": [],
@@ -54,7 +54,7 @@
       "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-18t23:43:03z #578/749 generated auction feed background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-18t23:56:37z #578/749 generated auction feed background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -123,19 +123,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-06-18T23:42:15Z",
     "amount": {
-      "amount_usd_at_event": "18.76300079",
-      "eth_usd_price_at_event": "1705.7273441847628",
+      "amount_usd_at_event": "18.80972353",
+      "eth_usd_price_at_event": "1709.9748662616566",
       "eth_usd_price_date_utc": "2026-06-18",
       "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "18.76300079",
+      "usd_estimate": "18.80972353",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$18.76",
+      "usd_estimate_display": "$18.81",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-18",
-      "usd_estimate_price_usd": "1705.7273441847628",
+      "usd_estimate_price_usd": "1709.9748662616566",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -188,7 +188,7 @@
       "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 747 dog #747 747 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.011 eth 11000000000000000 18.76 $18.76 2026-06-18t23:42:15z #562/749 generated auction feed 0x50ee80e1d2f4445c5da1981f4e1364086c4d8786f5a811844a0f2f7009ad5001 0x977c5d9eea323fb57a2ae934f18ed7351b44b1b3fe66dee3b6f9186e3854b089 0x8d09a15c183a464affe273d91e544e8dd01063e99971ccdb71401751218ddca6 0x0ff3c5335d601bf9bb2fd3991c49259af6a1cd2961e739b4dfec04d05da3f354 0x7db46edbeb6392d5819d65d00c25846a2d37bb38ea3a4d868b79e336df883d7f 0x97548689848d7e74c95d3dc887d9113bdc912883e76cdd4510747be7570b8878 0x1272a93ab1338bfc41e2127160e1e991422d994f8cb2f09cb592973e3f364dae 0xedc68a2d4750c8e1f973a0e90dbac61fcd7f698de4391987189500db4f063530 0xb84fd1235fdedbec5a168d8703725b4bb874d1fef77a4168f2a2abf737bc5286 0x87a5d292f365f45ac52e5cc65255c83847c950ff3700e2c95bfdc3060c925ac5 0x7719b0f3114a0e7d8b873fb7a32452b52f3208bbfad0cd7655aa16c5fe08b7a1 0xa8b86a4f8830c87db055a484180b2cb3ab13b43f52dad6396209c29f2972c8b4 0x4e3fa7dd2a4cfe5fb0cf1aa61f34f7699410616a1c5baf5842241e1e35eb85d6 background: none (90.3%) background none body: sugarskull (6.5%) body sugarskull neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: none (20.4%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 747 dog #747 747 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.011 eth 11000000000000000 18.81 $18.81 2026-06-18t23:42:15z #562/749 generated auction feed 0x50ee80e1d2f4445c5da1981f4e1364086c4d8786f5a811844a0f2f7009ad5001 0x977c5d9eea323fb57a2ae934f18ed7351b44b1b3fe66dee3b6f9186e3854b089 0x8d09a15c183a464affe273d91e544e8dd01063e99971ccdb71401751218ddca6 0x0ff3c5335d601bf9bb2fd3991c49259af6a1cd2961e739b4dfec04d05da3f354 0x7db46edbeb6392d5819d65d00c25846a2d37bb38ea3a4d868b79e336df883d7f 0x97548689848d7e74c95d3dc887d9113bdc912883e76cdd4510747be7570b8878 0x1272a93ab1338bfc41e2127160e1e991422d994f8cb2f09cb592973e3f364dae 0xedc68a2d4750c8e1f973a0e90dbac61fcd7f698de4391987189500db4f063530 0xb84fd1235fdedbec5a168d8703725b4bb874d1fef77a4168f2a2abf737bc5286 0x87a5d292f365f45ac52e5cc65255c83847c950ff3700e2c95bfdc3060c925ac5 0x7719b0f3114a0e7d8b873fb7a32452b52f3208bbfad0cd7655aa16c5fe08b7a1 0xa8b86a4f8830c87db055a484180b2cb3ab13b43f52dad6396209c29f2972c8b4 0x4e3fa7dd2a4cfe5fb0cf1aa61f34f7699410616a1c5baf5842241e1e35eb85d6 background: none (90.3%) background none body: sugarskull (6.5%) body sugarskull neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: none (20.4%) head none eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-18T23:42:15Z",
