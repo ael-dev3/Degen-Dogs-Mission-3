@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-19T00:38:17Z",
+    "activity_time_utc": "2026-06-19T10:27:09Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-19",
-      "native": "0.0005",
+      "native": "0.01",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "500000000000000",
-      "usd_estimate": "0.84000000",
+      "raw": "10000000000000000",
+      "usd_estimate": "16.88000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$0.84",
+      "usd_estimate_display": "$16.88",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-19",
-      "usd_estimate_price_usd": "1.68E+3",
+      "usd_estimate_price_usd": "1688",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-06-19T00:38:17Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-06-19T10:27:09Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
+      "0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6",
       "0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0"
     ],
     "chain": "Base",
@@ -44,7 +45,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog748",
-      "explorer": "https://basescan.org/address/0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/748",
       "repo_archive": "archive/dogs/by-id/748.json",
       "settlement_tx": null
@@ -56,7 +57,7 @@
       "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0005 eth 500000000000000 0.84 $0.84 2026-06-19t00:38:17z #578/749 generated auction feed 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 16.88 $16.88 2026-06-19t10:27:09z #578/749 generated auction feed 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -113,12 +114,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@i-am-rael.eth",
+      "display": "@0xael.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "i-am-rael.eth",
-      "profile_url": "https://farcaster.xyz/i-am-rael.eth",
-      "wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
-      "wallet_explorer_url": "https://basescan.org/address/0x4119cfa20129f9ea739590ea914cdfbc0c0772cb"
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
   },
   {
