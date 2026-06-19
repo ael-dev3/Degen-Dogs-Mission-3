@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "18.77000000",
+      "usd_estimate": "18.69000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.77",
+      "usd_estimate_display": "$18.69",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-19",
-      "usd_estimate_price_usd": "1706.3636363636363636363636363636363636363636363636363636363636363636363636363636",
+      "usd_estimate_price_usd": "1699.0909090909090909090909090909090909090909090909090909090909090909090909090909",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 749
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 11000000000000000 18.77 $18.77 2026-06-19t13:13:01z #578/749 generated auction feed 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 11000000000000000 18.69 $18.69 2026-06-19t13:13:01z #578/749 generated auction feed 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
