@@ -19483,13 +19483,13 @@
     "dog_external_url": "https://degendogs.club/#dog749",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/749",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
+    "winner": "@cctv1",
+    "winner_url": "https://farcaster.xyz/cctv1",
+    "winner_wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
+    "amount": "0.00100 ETH ($2)",
     "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-06-19 23:46:43",
     "settled_time_utc": "",
     "rarity": "#71/750",
@@ -19497,6 +19497,6 @@
     "trait_rarity": "Background: None (90.3%); Body: SugarSkull (6.7%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.3%); Ears: None (25.6%); Head: Toque (7.3%); Eyes: None (18.0%)",
     "confidence": "verified_live_base_logs",
     "sources": "base_logs,dashboard_builder",
-    "search_text": "3 Base 8453 749 Dog #749 https://api.degendogs.club/images/749.png https://degendogs.club/#dog749 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/749 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-06-19 23:46:43 #71/750 Background: None; Body: SugarSkull; Neck: StuddedCollar; Mouth: Teeth; Ears: None; Head: Toque; Eyes: None Background: None (90.3%); Body: SugarSkull (6.7%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.3%); Ears: None (25.6%); Head: Toque (7.3%); Eyes: None (18.0%) verified_live_base_logs base_logs,dashboard_builder"
+    "search_text": "3 Base 8453 749 Dog #749 https://api.degendogs.club/images/749.png https://degendogs.club/#dog749 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/749 live @cctv1 https://farcaster.xyz/cctv1 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0.00100 ETH ($2) 1 1 2026-06-19 23:46:43 #71/750 Background: None; Body: SugarSkull; Neck: StuddedCollar; Mouth: Teeth; Ears: None; Head: Toque; Eyes: None Background: None (90.3%); Body: SugarSkull (6.7%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.3%); Ears: None (25.6%); Head: Toque (7.3%); Eyes: None (18.0%) verified_live_base_logs base_logs,dashboard_builder"
   }
 ]
