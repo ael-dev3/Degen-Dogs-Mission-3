@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-18T23:43:31Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-19T23:41:07Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-19T23:46:43Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "20.68613420",
+      "eth_usd_price_at_event": "1709.5978673943596",
       "eth_usd_price_date_utc": "2026-06-19",
       "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
-      "usd_estimate": "20.65000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$20.65",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "20.68613420",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$20.69",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-19",
-      "usd_estimate_price_usd": "1706.6115702479338842975206611570247933884297520661157024793388429752066115702479",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1709.5978673943596",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -55,16 +55,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#578/749",
-      "rank": 578,
-      "total": 749
+      "display": "#580/750",
+      "rank": 580,
+      "total": 750
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base ongoing 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0121 eth 12100000000000000 20.65 $20.65 2026-06-19t23:41:07z #578/749 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.8%) neck none mouth: none (68.6%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0121 eth 12100000000000000 20.69 $20.69 2026-06-19t23:46:43z #580/750 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (10.9%) body brown neck: none (39.7%) neck none mouth: none (68.5%) mouth none ears: goldearring (15.5%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-19T23:46:43Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -78,7 +78,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -91,12 +91,12 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -111,7 +111,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (18.0%)",
         "trait_type": "Eyes",
         "value": "None"
       }
