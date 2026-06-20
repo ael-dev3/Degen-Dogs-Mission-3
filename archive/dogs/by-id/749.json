@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-06-20T00:15:35Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-20T22:23:13Z",
+    "activity_time_utc": "2026-06-20T23:24:27Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-20",
-      "native": "0.01",
+      "native": "0.01111",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "10000000000000000",
-      "usd_estimate": "17.43000000",
+      "raw": "11110000000000000",
+      "usd_estimate": "19.32000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.43",
+      "usd_estimate_display": "$19.32",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-20",
-      "usd_estimate_price_usd": "1743",
+      "usd_estimate_price_usd": "1738.9738973897389738973897389738973897389738973897389738973897389738973897389739",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,11 +29,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 9,
-      "last_bid_time_utc": "2026-06-20T22:23:13Z",
-      "unique_bidder_count": 6
+      "bid_count": 10,
+      "last_bid_time_utc": "2026-06-20T23:24:27Z",
+      "unique_bidder_count": 7
     },
     "bid_tx_hashes": [
+      "0xbff41ce6ee3cc9a54ceac57972131df8d7eb9e0de4fd9a03e9e534e46403a1b7",
       "0x892e088aef37daa3feda387277b1da63e640c6ae3a59a72df3e285ba80439b70",
       "0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5",
       "0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505",
@@ -53,7 +54,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog749",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0xea89fa73f8e6283c37a72267290bc7829464893f",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/749",
       "repo_archive": "archive/dogs/by-id/749.json",
       "settlement_tx": null
@@ -65,7 +66,7 @@
       "total": 750
     },
     "schema_version": 1,
-    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.43 $17.43 2026-06-20t22:23:13z #71/750 generated auction feed 0x892e088aef37daa3feda387277b1da63e640c6ae3a59a72df3e285ba80439b70 0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: none (25.6%) ears none head: toque (7.3%) head toque eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base ongoing 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.01111 eth 11110000000000000 19.32 $19.32 2026-06-20t23:24:27z #71/750 generated auction feed 0xbff41ce6ee3cc9a54ceac57972131df8d7eb9e0de4fd9a03e9e534e46403a1b7 0x892e088aef37daa3feda387277b1da63e640c6ae3a59a72df3e285ba80439b70 0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: none (25.6%) ears none head: toque (7.3%) head toque eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -122,12 +123,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@zenonseeker",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "zenonseeker",
+      "profile_url": "https://farcaster.xyz/zenonseeker",
+      "wallet": "0xea89fa73f8e6283c37a72267290bc7829464893f",
+      "wallet_explorer_url": "https://basescan.org/address/0xea89fa73f8e6283c37a72267290bc7829464893f"
     }
   },
   "schema_version": 1

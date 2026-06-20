@@ -637,6 +637,19 @@
     "latest_bid_utc": "2026-02-10 04:16:21"
   },
   {
+    "bidder": "@zenonseeker",
+    "bidder_url": "https://farcaster.xyz/zenonseeker",
+    "bidder_wallet": "0xea89fa73f8e6283c37a72267290bc7829464893f",
+    "bids": 7,
+    "auctions_bid": 5,
+    "bid_eth": 0.10379,
+    "high_bid_eth": 0.03,
+    "auction_wins": 1,
+    "winning_eth": 0.0121,
+    "latest_bid_token_id": 749,
+    "latest_bid_utc": "2026-06-20 23:24:27"
+  },
+  {
     "bidder": "@xiexi",
     "bidder_url": "https://farcaster.xyz/xiexi",
     "bidder_wallet": "0x67c91318b9c38dbeb200e1539b64e5bbc930372f",
@@ -661,19 +674,6 @@
     "winning_eth": 0.033,
     "latest_bid_token_id": 707,
     "latest_bid_utc": "2026-05-08 02:53:37"
-  },
-  {
-    "bidder": "@zenonseeker",
-    "bidder_url": "https://farcaster.xyz/zenonseeker",
-    "bidder_wallet": "0xea89fa73f8e6283c37a72267290bc7829464893f",
-    "bids": 6,
-    "auctions_bid": 4,
-    "bid_eth": 0.09268,
-    "high_bid_eth": 0.03,
-    "auction_wins": 1,
-    "winning_eth": 0.0121,
-    "latest_bid_token_id": 711,
-    "latest_bid_utc": "2026-05-12 00:55:29"
   },
   {
     "bidder": "@melinoe",
