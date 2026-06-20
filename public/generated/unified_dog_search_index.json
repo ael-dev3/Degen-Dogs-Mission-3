@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-20T19:06:39Z",
+    "activity_time_utc": "2026-06-20T22:07:01Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-20",
-      "native": "0.00181",
+      "native": "0.002",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1810000000000000",
-      "usd_estimate": "3.13000000",
+      "raw": "2000000000000000",
+      "usd_estimate": "3.46000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$3.13",
+      "usd_estimate_display": "$3.46",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-20",
-      "usd_estimate_price_usd": "1729.2817679558011049723756906077348066298342541436464088397790055248618784530387",
+      "usd_estimate_price_usd": "1.73E+3",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 7,
-      "last_bid_time_utc": "2026-06-20T19:06:39Z",
-      "unique_bidder_count": 4
+      "bid_count": 8,
+      "last_bid_time_utc": "2026-06-20T22:07:01Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
+      "0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5",
       "0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505",
       "0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed",
       "0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494",
@@ -50,7 +51,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog749",
-      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "explorer": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/749",
       "repo_archive": "archive/dogs/by-id/749.json",
       "settlement_tx": null
@@ -62,7 +63,7 @@
       "total": 750
     },
     "schema_version": 1,
-    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00181 eth 1810000000000000 3.13 $3.13 2026-06-20t19:06:39z #71/750 generated auction feed 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: none (25.6%) ears none head: toque (7.3%) head toque eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base ongoing 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.002 eth 2000000000000000 3.46 $3.46 2026-06-20t22:07:01z #71/750 generated auction feed 0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: none (25.6%) ears none head: toque (7.3%) head toque eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -119,12 +120,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@cryptomill",
+      "display": "@metasalary",
       "farcaster_fid": null,
-      "farcaster_handle": "cryptomill",
-      "profile_url": "https://farcaster.xyz/cryptomill",
-      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
-      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
+      "farcaster_handle": "metasalary",
+      "profile_url": "https://farcaster.xyz/metasalary",
+      "wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
+      "wallet_explorer_url": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323"
     }
   },
   {
