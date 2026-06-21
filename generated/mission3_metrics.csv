@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,47640608
-latest_block_time_utc,2026-06-21 19:36:03
+latest_block,47642346
+latest_block_time_utc,2026-06-21 20:33:59
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,751
@@ -13,9 +13,9 @@ woof_usd_price,0.0000004958
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
-sup_usd_price,0.01003
+sup_usd_price,0.009975
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1732.28
+eth_usd_price,1727.51
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -38,15 +38,15 @@ reward_woof_per_dog_usd_per_day,0.076399
 reward_sup_received,N/A
 reward_sup_received_usd,N/A
 reward_sup_flow_per_day,199.58
-reward_sup_flow_usd_per_day,2
+reward_sup_flow_usd_per_day,1.99
 reward_sup_per_dog_per_day,1.5006015037593985
-reward_sup_per_dog_usd_per_day,0.015051
-reward_total_flow_usd_per_day,12.16
-reward_total_per_dog_usd_per_day,0.09145
-reward_current_bid_payback_days,50.74
-reward_current_bid_daily_roi_pct,1.9709
-reward_current_bid_apr_pct,719.38
-reward_current_bid_apr_display,≈719% APR
+reward_sup_per_dog_usd_per_day,0.014968
+reward_total_flow_usd_per_day,12.15
+reward_total_per_dog_usd_per_day,0.091367
+reward_current_bid_payback_days,50.67
+reward_current_bid_daily_roi_pct,1.9734
+reward_current_bid_apr_pct,720.28
+reward_current_bid_apr_display,≈720% APR
 woof_holders,364
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,46669883276.963066
@@ -54,7 +54,7 @@ farcaster_profiles_resolved,51
 current_auction_token_id,750
 current_auction_status,live
 current_bid_eth,0.00268
-current_bid_usd,4.64
+current_bid_usd,4.63
 current_bidder,@farcy
 current_bidder_wallet,0x84cb3b93f9a918632f05528770b5cf926396b0f4
 current_auction_end_utc,2026-06-21 23:46:57
@@ -68,9 +68,9 @@ season5_rewards_allocated_sup,987521.739145
 season6_current_bidder_cap_remaining_sup,8260.555601
 season6_current_bidder_prior_wins,0
 season6_current_bidder_projected_capped_sup_if_wins,4239.444399
-season6_current_bidder_projected_capped_usd_if_wins,42.52
+season6_current_bidder_projected_capped_usd_if_wins,42.29
 season6_current_bidder_projected_raw_sup_if_wins,4239.444399
-season6_current_bidder_projected_raw_usd_if_wins,42.52
+season6_current_bidder_projected_raw_usd_if_wins,42.29
 season6_sup_campaign_end_utc,2026-09-01T00:00:00Z
 season6_sup_cap_overflow_policy,no_redistribution_assumed
 season6_sup_cap_per_wallet,12500
@@ -81,7 +81,7 @@ season6_sup_confirmed_wins,19
 season6_sup_current_bid_cap_remaining_before_win_sup,12500
 season6_sup_current_bid_estimate_status,estimated
 season6_sup_current_bid_estimated_cap_aware_sup,4239.444399
-season6_sup_current_bid_estimated_cap_aware_usd,42.52
+season6_sup_current_bid_estimated_cap_aware_usd,42.29
 season6_sup_current_bid_estimated_raw_incremental_sup,4239.444399
 season6_sup_current_bid_estimated_win_time_utc,2026-06-21T23:46:57Z
 season6_sup_current_bid_projected_total_with_win_sup,4239.444399
@@ -89,14 +89,14 @@ season6_sup_current_bid_projected_total_without_win_sup,0
 season6_sup_current_bidder_prior_s6_wins,0
 season6_sup_current_bidder_prior_s6_xp,0
 season6_sup_current_bidder_wallet,0x84cb3b93f9a918632f05528770b5cf926396b0f4
-season6_sup_days_remaining,71.18
+season6_sup_days_remaining,71.14
 season6_sup_enabled,true
 season6_sup_end_utc,2026-09-01T00:00:00Z
 season6_sup_estimate_status,estimated
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,52475.088965
+season6_sup_raw_allocated_to_date,52586.207433
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
@@ -108,8 +108,8 @@ season6_sup_total_allocated,251340
 season6_sup_total_allocation,251340
 season6_sup_total_xp_confirmed,1900
 season6_sup_unallocated_due_to_zero_xp,2258.204739
-season6_sup_usd_price,0.01003
-season6_sup_usd_price_used,0.01003
+season6_sup_usd_price,0.009975
+season6_sup_usd_price_used,0.009975
 season6_sup_usd_source_used,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
 season6_sup_wallet_cap,12500
 season6_sup_xp_per_settled_win,100
