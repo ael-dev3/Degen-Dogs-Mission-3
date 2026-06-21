@@ -1,0 +1,126 @@
+{
+  "generated_at_utc": "2026-06-21T00:04:31Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-06-20T23:47:31Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-06-20",
+      "native": "0.002",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "2000000000000000",
+      "usd_estimate": "3.48000000",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$3.48",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-06-20",
+      "usd_estimate_price_usd": "1.74E+3",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-06-20T23:46:57Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-06-20T23:47:31Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 750,
+    "dog_image_url": "https://api.degendogs.club/images/750.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog750",
+      "explorer": "https://basescan.org/address/0xea89fa73f8e6283c37a72267290bc7829464893f",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750",
+      "repo_archive": "archive/dogs/by-id/750.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#636/751",
+      "rank": 636,
+      "total": 751
+    },
+    "schema_version": 1,
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.002 eth 2000000000000000 3.48 $3.48 2026-06-20t23:47:31z #636/751 generated auction feed 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_live_base_logs",
+      "sources": [
+        "base_logs",
+        "dashboard_builder",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: Halo (9.9%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: Brown (11.1%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: RedCollar (30.8%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.6%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.0%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: None (20.5%)",
+        "trait_type": "Head",
+        "value": "None"
+      },
+      {
+        "display": "Eyes: None (18.1%)",
+        "trait_type": "Eyes",
+        "value": "None"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@zenonseeker",
+      "farcaster_fid": null,
+      "farcaster_handle": "zenonseeker",
+      "profile_url": "https://farcaster.xyz/zenonseeker",
+      "wallet": "0xea89fa73f8e6283c37a72267290bc7829464893f",
+      "wallet_explorer_url": "https://basescan.org/address/0xea89fa73f8e6283c37a72267290bc7829464893f"
+    }
+  },
+  "schema_version": 1
+}
