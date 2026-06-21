@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2680000000000000",
-      "usd_estimate": "4.63000000",
+      "usd_estimate": "4.62000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$4.63",
+      "usd_estimate_display": "$4.62",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-21",
-      "usd_estimate_price_usd": "1727.6119402985074626865671641791044776119402985074626865671641791044776119402985",
+      "usd_estimate_price_usd": "1723.8805970149253731343283582089552238805970149253731343283582089552238805970149",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 751
     },
     "schema_version": 1,
-    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.00268 eth 2680000000000000 4.63 $4.63 2026-06-21t09:11:25z #636/751 generated auction feed 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.00268 eth 2680000000000000 4.62 $4.62 2026-06-21t09:11:25z #636/751 generated auction feed 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
