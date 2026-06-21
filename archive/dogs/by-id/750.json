@@ -6,17 +6,17 @@
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-20",
+      "eth_usd_price_date_utc": "2026-06-21",
       "native": "0.002",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2000000000000000",
-      "usd_estimate": "3.48000000",
+      "usd_estimate": "3.47000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$3.48",
+      "usd_estimate_display": "$3.47",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-20",
-      "usd_estimate_price_usd": "1.74E+3",
+      "usd_estimate_price_date_utc": "2026-06-21",
+      "usd_estimate_price_usd": "1735",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 751
     },
     "schema_version": 1,
-    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.002 eth 2000000000000000 3.48 $3.48 2026-06-20t23:47:31z #636/751 generated auction feed 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.002 eth 2000000000000000 3.47 $3.47 2026-06-20t23:47:31z #636/751 generated auction feed 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
