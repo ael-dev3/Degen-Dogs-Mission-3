@@ -559,6 +559,19 @@
     "latest_bid_utc": "2026-04-22 21:21:47"
   },
   {
+    "bidder": "@bitcoinvestor",
+    "bidder_url": "https://farcaster.xyz/bitcoinvestor",
+    "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
+    "bids": 9,
+    "auctions_bid": 5,
+    "bid_eth": 0.12182,
+    "high_bid_eth": 0.01774,
+    "auction_wins": 2,
+    "winning_eth": 0.02981,
+    "latest_bid_token_id": 750,
+    "latest_bid_utc": "2026-06-21 23:18:23"
+  },
+  {
     "bidder": "0xbd26…63b6",
     "bidder_url": "https://basescan.org/address/0xbd26ccb76ddb5d8ccc33081b0a12c3e9bfe763b6",
     "bidder_wallet": "0xbd26ccb76ddb5d8ccc33081b0a12c3e9bfe763b6",
@@ -583,19 +596,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 717,
     "latest_bid_utc": "2026-05-17 04:01:25"
-  },
-  {
-    "bidder": "@bitcoinvestor",
-    "bidder_url": "https://farcaster.xyz/bitcoinvestor",
-    "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
-    "bids": 8,
-    "auctions_bid": 4,
-    "bid_eth": 0.11082,
-    "high_bid_eth": 0.01774,
-    "auction_wins": 2,
-    "winning_eth": 0.02981,
-    "latest_bid_token_id": 746,
-    "latest_bid_utc": "2026-06-17 23:26:07"
   },
   {
     "bidder": "@floam",

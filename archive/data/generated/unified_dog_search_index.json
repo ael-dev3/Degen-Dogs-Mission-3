@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-21T22:08:33Z",
+    "activity_time_utc": "2026-06-21T23:18:23Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-21",
-      "native": "0.01",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "10000000000000000",
-      "usd_estimate": "17.14000000",
+      "raw": "11000000000000000",
+      "usd_estimate": "18.82000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.14",
+      "usd_estimate_display": "$18.82",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-21",
-      "usd_estimate_price_usd": "1714",
+      "usd_estimate_price_usd": "1710.9090909090909090909090909090909090909090909090909090909090909090909090909091",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 7,
-      "last_bid_time_utc": "2026-06-21T22:08:33Z",
-      "unique_bidder_count": 6
+      "bid_count": 8,
+      "last_bid_time_utc": "2026-06-21T23:18:23Z",
+      "unique_bidder_count": 7
     },
     "bid_tx_hashes": [
+      "0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5",
       "0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b",
       "0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5",
       "0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4",
@@ -50,7 +51,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog750",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750",
       "repo_archive": "archive/dogs/by-id/750.json",
       "settlement_tx": null
@@ -62,7 +63,7 @@
       "total": 751
     },
     "schema_version": 1,
-    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.14 $17.14 2026-06-21t22:08:33z #636/751 generated auction feed 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 18.82 $18.82 2026-06-21t23:18:23z #636/751 generated auction feed 0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.9%) background halo body: brown (11.1%) body brown neck: redcollar (30.8%) neck redcollar mouth: none (68.6%) mouth none ears: loopearring (27.0%) ears loopearring head: none (20.5%) head none eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -119,12 +120,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@bitcoinvestor",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "bitcoinvestor",
+      "profile_url": "https://farcaster.xyz/bitcoinvestor",
+      "wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
+      "wallet_explorer_url": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953"
     }
   },
   {
