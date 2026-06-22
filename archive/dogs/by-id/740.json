@@ -7,7 +7,7 @@
       "amount_usd_at_event": "44.72527500",
       "eth_usd_price_at_event": "1620.4809781316494",
       "eth_usd_price_date_utc": "2026-06-11",
-      "native": "0.0276",
+      "native": "0.02760",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "27600000000000000",
@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#259/751",
-      "rank": 259,
-      "total": 751
+      "display": "#268/752",
+      "rank": 268,
+      "total": 752
     },
     "schema_version": 1,
-    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.73 $44.73 2026-06-11t21:16:27z #259/751 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.1%) background none body: grey (11.5%) body grey neck: none (39.7%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.02760 eth 27600000000000000 44.72527500 $44.73 2026-06-11t21:16:27z #268/752 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.2%) background none body: grey (11.4%) body grey neck: none (39.6%) neck none mouth: tongue (9.7%) mouth tongue ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 740 dog #740 https://api.degendogs.club/images/740.png https://degendogs.club/#dog740 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/740 settled @stemo.eth https://farcaster.xyz/stemo.eth 0x46e9beef5dc68dff095eca56dadf90247f1af7ef 0.02760 eth ($45) 1 1 2026-06-10 21:15:59 2026-06-11 21:16:27 #268/752 background: none; body: grey; neck: none; mouth: tongue; ears: earbuds; head: hoodie; eyes: none background: none (90.2%); body: grey (11.4%); neck: none (39.6%); mouth: tongue (9.7%); ears: earbuds (32.0%); head: hoodie (4.9%); eyes: none (18.1%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-11T21:16:27Z",
@@ -67,28 +67,29 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.1%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.4%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,7 +104,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: Hoodie (4.8%)",
+        "display": "Head: Hoodie (4.9%)",
         "trait_type": "Head",
         "value": "Hoodie"
       },

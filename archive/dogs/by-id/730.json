@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#96/751",
-      "rank": 96,
-      "total": 751
+      "display": "#95/752",
+      "rank": 95,
+      "total": 752
     },
     "schema_version": 1,
-    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.01100 eth 11000000000000000 22.04716018 $22.05 2026-06-01t19:24:33z #96/751 generated auction feed 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.1%) background none body: orange (8.7%) body orange neck: goldnecklace (19.4%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.6%) ears none head: toque (7.3%) head toque eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 730 dog #730 https://api.degendogs.club/images/730.png https://degendogs.club/#dog730 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/730 settled @badadan https://farcaster.xyz/badadan 0xa2648350f3566e4f18a9519734928d08d3ea08c4 0.01100 eth ($22) 2 2 2026-05-31 19:12:29 2026-06-01 19:24:33 #96/751 background: none; body: orange; neck: goldnecklace; mouth: teeth; ears: none; head: toque; eyes: vrgoggles background: none (90.1%); body: orange (8.7%); neck: goldnecklace (19.4%); mouth: teeth (5.3%); ears: none (25.6%); head: toque (7.3%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.01100 eth 11000000000000000 22.04716018 $22.05 2026-06-01t19:24:33z #95/752 generated auction feed 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad background: none (90.2%) background none body: orange (8.6%) body orange neck: goldnecklace (19.4%) neck goldnecklace mouth: teeth (5.3%) mouth teeth ears: none (25.5%) ears none head: toque (7.3%) head toque eyes: vrgoggles (10.2%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 730 dog #730 https://api.degendogs.club/images/730.png https://degendogs.club/#dog730 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/730 settled @badadan https://farcaster.xyz/badadan 0xa2648350f3566e4f18a9519734928d08d3ea08c4 0.01100 eth ($22) 2 2 2026-05-31 19:12:29 2026-06-01 19:24:33 #95/752 background: none; body: orange; neck: goldnecklace; mouth: teeth; ears: none; head: toque; eyes: vrgoggles background: none (90.2%); body: orange (8.6%); neck: goldnecklace (19.4%); mouth: teeth (5.3%); ears: none (25.5%); head: toque (7.3%); eyes: vrgoggles (10.2%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-01T19:24:33Z",
@@ -80,12 +80,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.1%)",
+        "display": "Background: None (90.2%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.6%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -100,7 +100,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: VRGoggles (10.3%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }
