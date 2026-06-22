@@ -4,8 +4,8 @@
     "holder": "0x1c45…6637",
     "holder_url": "https://basescan.org/address/0x1c453d1909a0aae2011822de50b40780a0c26637",
     "holder_wallet": "0x1c453d1909a0aae2011822de50b40780a0c26637",
-    "balance_woof": 46672156228.11486,
-    "supply_pct": 46.672156
+    "balance_woof": 46668159246.590996,
+    "supply_pct": 46.668159
   },
   {
     "rank": 2,
@@ -369,6 +369,14 @@
   },
   {
     "rank": 47,
+    "holder": "@oxygen2",
+    "holder_url": "https://farcaster.xyz/oxygen2",
+    "holder_wallet": "0x60fb37f0b204ef8df48793cbb5991a2422c9f205",
+    "balance_woof": 5396854.798082,
+    "supply_pct": 0.005397
+  },
+  {
+    "rank": 48,
     "holder": "0xcfd5…925e",
     "holder_url": "https://basescan.org/address/0xcfd59c0f530db36eea8ccbfe744f01fe3556925e",
     "holder_wallet": "0xcfd59c0f530db36eea8ccbfe744f01fe3556925e",
@@ -376,7 +384,7 @@
     "supply_pct": 0.004064
   },
   {
-    "rank": 48,
+    "rank": 49,
     "holder": "0x120a…0a90",
     "holder_url": "https://basescan.org/address/0x120afebff136ecbedc4a9eb6976a236591ce0a90",
     "holder_wallet": "0x120afebff136ecbedc4a9eb6976a236591ce0a90",
@@ -384,19 +392,11 @@
     "supply_pct": 0.00386
   },
   {
-    "rank": 49,
+    "rank": 50,
     "holder": "0x4b18…b76c",
     "holder_url": "https://basescan.org/address/0x4b1839f4348a6b92755a34ff59850d7ceb73b76c",
     "holder_wallet": "0x4b1839f4348a6b92755a34ff59850d7ceb73b76c",
     "balance_woof": 3665880.333452,
     "supply_pct": 0.003666
-  },
-  {
-    "rank": 50,
-    "holder": "0xebf4…87b0",
-    "holder_url": "https://basescan.org/address/0xebf4a95657f559480e4ee56223b74b8ef57587b0",
-    "holder_wallet": "0xebf4a95657f559480e4ee56223b74b8ef57587b0",
-    "balance_woof": 3502102.984087,
-    "supply_pct": 0.003502
   }
 ]
