@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "8010000000000000",
-      "usd_estimate": "13.85000000",
+      "usd_estimate": "13.75000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$13.85",
+      "usd_estimate_display": "$13.75",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-22",
-      "usd_estimate_price_usd": "1729.0886392009987515605493133583021223470661672908863920099875156054931335830212",
+      "usd_estimate_price_usd": "1716.6042446941323345817727840199750312109862671660424469413233458177278401997503",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 752
     },
     "schema_version": 1,
-    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00801 eth 8010000000000000 13.85 $13.85 2026-06-22t20:11:49z #329/752 generated auction feed 0x21ea89fd236dca7161b01300d115b3986ebbdecd8eadadb80c25a9a7cc4214cb 0x0e9782d5907ce159eef960c111cb92b200cdde19c0f3a333071139a42d0f08e9 0xe270f364d74187a2c0643cbe4418be9905c164408a22dcc9cd18088655f61ee2 0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7 background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00801 eth 8010000000000000 13.75 $13.75 2026-06-22t20:11:49z #329/752 generated auction feed 0x21ea89fd236dca7161b01300d115b3986ebbdecd8eadadb80c25a9a7cc4214cb 0x0e9782d5907ce159eef960c111cb92b200cdde19c0f3a333071139a42d0f08e9 0xe270f364d74187a2c0643cbe4418be9905c164408a22dcc9cd18088655f61ee2 0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7 background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
