@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "6000000000000000",
-      "usd_estimate": "10.41000000",
+      "usd_estimate": "10.36000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$10.41",
+      "usd_estimate_display": "$10.36",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-22",
-      "usd_estimate_price_usd": "1735",
+      "usd_estimate_price_usd": "1726.6666666666666666666666666666666666666666666666666666666666666666666666666667",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -56,7 +56,7 @@
       "total": 752
     },
     "schema_version": 1,
-    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.006 eth 6000000000000000 10.41 $10.41 2026-06-21t23:55:47z #329/752 generated auction feed 0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7 background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.006 eth 6000000000000000 10.36 $10.36 2026-06-21t23:55:47z #329/752 generated auction feed 0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7 background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
