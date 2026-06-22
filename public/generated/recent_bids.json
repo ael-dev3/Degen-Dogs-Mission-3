@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-06-21 23:55:47",
+    "token_id": 751,
+    "bidder": "@bitcoinvestor",
+    "bidder_url": "https://farcaster.xyz/bitcoinvestor",
+    "bidder_wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
+    "bid": "0.00600 ETH ($10)",
+    "bid_eth": 0.006,
+    "bid_usd": 10.44,
+    "bid_usd_at_event": 10.44,
+    "eth_usd_price_at_event": "1739.2623775091597",
+    "eth_usd_price_date_utc": "2026-06-21",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 47648400,
+    "tx_hash": "0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7"
+  },
+  {
     "bid_time_utc": "2026-06-21 23:18:23",
     "token_id": 750,
     "bidder": "@bitcoinvestor",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 47036375,
     "tx_hash": "0x93e577cfd5d85f890a30c1ef50e3a3e242a978ce35931269d639864b360a012c"
-  },
-  {
-    "bid_time_utc": "2026-06-07 19:53:27",
-    "token_id": 736,
-    "bidder": "@0xael.eth",
-    "bidder_url": "https://farcaster.xyz/0xael.eth",
-    "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bid": "0.01500 ETH ($25)",
-    "bid_eth": 0.015,
-    "bid_usd": 25.31,
-    "bid_usd_at_event": 25.31,
-    "eth_usd_price_at_event": "1687.0760837926352",
-    "eth_usd_price_date_utc": "2026-06-08",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "nearest_bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 47036330,
-    "tx_hash": "0x2ec7b494576dbc4c8dc4cf426b2b3b0c310952ba863e2eff190d2d3909d9799a"
   }
 ]

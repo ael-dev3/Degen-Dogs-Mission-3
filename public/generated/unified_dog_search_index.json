@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-21T23:52:39Z",
+    "activity_time_utc": "2026-06-21T23:55:47Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-21",
-      "native": "0.0",
+      "eth_usd_price_date_utc": "2026-06-22",
+      "native": "0.006",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "0",
-      "usd_estimate": "0E-8",
+      "raw": "6000000000000000",
+      "usd_estimate": "10.26000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$0.00",
+      "usd_estimate_display": "$10.26",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-21",
-      "usd_estimate_price_usd": null,
+      "usd_estimate_price_date_utc": "2026-06-22",
+      "usd_estimate_price_usd": "1.71E+3",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 0,
-      "last_bid_time_utc": "2026-06-21T23:52:39Z",
-      "unique_bidder_count": 0
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-06-21T23:55:47Z",
+      "unique_bidder_count": 1
     },
-    "bid_tx_hashes": [],
+    "bid_tx_hashes": [
+      "0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7"
+    ],
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 751,
@@ -42,7 +44,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog751",
-      "explorer": null,
+      "explorer": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/751",
       "repo_archive": "archive/dogs/by-id/751.json",
       "settlement_tx": null
@@ -54,7 +56,7 @@
       "total": 752
     },
     "schema_version": 1,
-    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-21t23:52:39z #329/752 generated auction feed background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 751 dog #751 751 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.006 eth 6000000000000000 10.26 $10.26 2026-06-21t23:55:47z #329/752 generated auction feed 0x6d108489b902c84d5239822f5f44835de2aa8965315a198f73a0df1f4caeaca7 background: none (90.2%) background none body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.6%) mouth none ears: earbuds (32.0%) ears earbuds head: hoodie (4.9%) head hoodie eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -111,12 +113,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "no bids yet",
+      "display": "@bitcoinvestor",
       "farcaster_fid": null,
-      "farcaster_handle": null,
-      "profile_url": null,
-      "wallet": "0x0000000000000000000000000000000000000000",
-      "wallet_explorer_url": null
+      "farcaster_handle": "bitcoinvestor",
+      "profile_url": "https://farcaster.xyz/bitcoinvestor",
+      "wallet": "0x7732f594c38d4940e1076aa9f6f53065b7915953",
+      "wallet_explorer_url": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953"
     }
   },
   {
