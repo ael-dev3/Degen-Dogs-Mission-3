@@ -51,12 +51,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#245/752",
-      "rank": 245,
-      "total": 752
+      "display": "#244/753",
+      "rank": 244,
+      "total": 753
     },
     "schema_version": 1,
-    "search_text": "dog 94 dog #94 94 mission 1 mission 1 polygon settled 0x09a900eb2ff6e9aca12d4d1a396ddc9be0307661 0x09a9…7661 0.05 weth 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c #245/752 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: goldearring; head: hoodie; eyes: none 0x1090e46f5f474fa98c894464e543d7d6d17bdf5ee8b66b18a914e1de200b661c polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 94 dog #94 94 mission 1 mission 1 polygon settled 0x09a900eb2ff6e9aca12d4d1a396ddc9be0307661 0x09a9…7661 0.05 weth 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c #244/753 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: goldearring; head: hoodie; eyes: none 0x1090e46f5f474fa98c894464e543d7d6d17bdf5ee8b66b18a914e1de200b661c polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27995510,
       "block_time_utc": "2022-05-06T15:00:39Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.2%)",
+        "display": "Body: RedBrown (15.1%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },

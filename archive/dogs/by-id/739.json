@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#343/752",
+      "display": "#343/753",
       "rank": 343,
-      "total": 752
+      "total": 753
     },
     "schema_version": 1,
-    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.03300 eth 33000000000000000 53.47587228 $53.48 2026-06-10t21:15:59z #343/752 generated auction feed 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 background: none (90.2%) background none body: grey (11.4%) body grey neck: none (39.6%) neck none mouth: none (68.6%) mouth none ears: none (25.5%) ears none head: partyhat (4.4%) head partyhat eyes: glasses (12.5%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 739 dog #739 https://api.degendogs.club/images/739.png https://degendogs.club/#dog739 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/739 settled @kenshiking.eth https://farcaster.xyz/kenshiking.eth 0x23d660548cd61432537592dcea15b059605c9242 0.03300 eth ($53) 3 3 2026-06-09 20:37:53 2026-06-10 21:15:59 #343/752 background: none; body: grey; neck: none; mouth: none; ears: none; head: partyhat; eyes: glasses background: none (90.2%); body: grey (11.4%); neck: none (39.6%); mouth: none (68.6%); ears: none (25.5%); head: partyhat (4.4%); eyes: glasses (12.5%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.03300 eth 33000000000000000 53.47587228 $53.48 2026-06-10t21:15:59z #343/753 generated auction feed 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 background: none (90.2%) background none body: grey (11.4%) body grey neck: none (39.6%) neck none mouth: none (68.7%) mouth none ears: none (25.5%) ears none head: partyhat (4.4%) head partyhat eyes: glasses (12.6%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 739 dog #739 https://api.degendogs.club/images/739.png https://degendogs.club/#dog739 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/739 settled @kenshiking.eth https://farcaster.xyz/kenshiking.eth 0x23d660548cd61432537592dcea15b059605c9242 0.03300 eth ($53) 3 3 2026-06-09 20:37:53 2026-06-10 21:15:59 #343/753 background: none; body: grey; neck: none; mouth: none; ears: none; head: partyhat; eyes: glasses background: none (90.2%); body: grey (11.4%); neck: none (39.6%); mouth: none (68.7%); ears: none (25.5%); head: partyhat (4.4%); eyes: glasses (12.6%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-10T21:15:59Z",
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -111,7 +111,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }
