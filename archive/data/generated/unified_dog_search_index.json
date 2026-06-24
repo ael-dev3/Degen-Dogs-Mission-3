@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2000000000000000",
-      "usd_estimate": "3.33000000",
+      "usd_estimate": "3.32000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$3.33",
+      "usd_estimate_display": "$3.32",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-24",
-      "usd_estimate_price_usd": "1665",
+      "usd_estimate_price_usd": "1.66E+3",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -56,7 +56,7 @@
       "total": 754
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.002 eth 2000000000000000 3.33 $3.33 2026-06-24t03:57:09z #401/754 generated auction feed 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.002 eth 2000000000000000 3.32 $3.32 2026-06-24t03:57:09z #401/754 generated auction feed 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
