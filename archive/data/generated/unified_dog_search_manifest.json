@@ -3,17 +3,17 @@
     "loaded:archive/mission1/data/generated/mission1_dog_search_index.json:201",
     "loaded:archive/mission2/data/generated/mission2_dog_search_index.json:369",
     "loaded:archive/mission3/data/generated/mission3_dog_search_index.json:138",
-    "historical_mission3_backfills:25",
+    "historical_mission3_backfills:26",
     "current_auction_overrides:11",
     "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."
   ],
   "records_by_confidence": {
-    "verified": 733
+    "verified": 734
   },
   "records_by_mission": {
     "1": 201,
     "2": 369,
-    "3": 163
+    "3": 164
   },
   "schema_version": 1,
   "source_files": [
@@ -21,6 +21,6 @@
     "archive/mission2/data/generated/mission2_dog_search_index.json",
     "archive/mission3/data/generated/mission3_dog_search_index.json"
   ],
-  "total_records": 733,
-  "updated_at_utc": "2026-06-23T23:33:01Z"
+  "total_records": 734,
+  "updated_at_utc": "2026-06-24T00:15:06Z"
 }
