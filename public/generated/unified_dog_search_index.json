@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-24T18:40:13Z",
+    "activity_time_utc": "2026-06-24T20:27:43Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-06-24",
-      "native": "0.011",
+      "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "11000000000000000",
-      "usd_estimate": "17.65000000",
+      "raw": "12100000000000000",
+      "usd_estimate": "19.48000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.65",
+      "usd_estimate_display": "$19.48",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-24",
-      "usd_estimate_price_usd": "1604.5454545454545454545454545454545454545454545454545454545454545454545454545455",
+      "usd_estimate_price_usd": "1609.9173553719008264462809917355371900826446280991735537190082644628099173553719",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 4,
-      "last_bid_time_utc": "2026-06-24T18:40:13Z",
-      "unique_bidder_count": 4
+      "bid_count": 5,
+      "last_bid_time_utc": "2026-06-24T20:27:43Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
+      "0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5",
       "0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804",
       "0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2",
       "0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28",
@@ -47,7 +48,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog753",
-      "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
+      "explorer": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/753",
       "repo_archive": "archive/dogs/by-id/753.json",
       "settlement_tx": null
@@ -59,7 +60,7 @@
       "total": 754
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 11000000000000000 17.65 $17.65 2026-06-24t18:40:13z #401/754 generated auction feed 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0121 eth 12100000000000000 19.48 $19.48 2026-06-24t20:27:43z #401/754 generated auction feed 0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@thec1",
+      "display": "@pare",
       "farcaster_fid": null,
-      "farcaster_handle": "thec1",
-      "profile_url": "https://farcaster.xyz/thec1",
-      "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
-      "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
+      "farcaster_handle": "pare",
+      "profile_url": "https://farcaster.xyz/pare",
+      "wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
+      "wallet_explorer_url": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1"
     }
   },
   {
