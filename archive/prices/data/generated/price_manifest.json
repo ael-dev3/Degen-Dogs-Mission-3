@@ -16,7 +16,7 @@
   "notes": [
     "Missing source/API coverage leaves downstream USD estimates null; no zero fills are used."
   ],
-  "rows": 1630,
+  "rows": 1631,
   "schema_version": 1,
   "source_files": [
     "archive/prices/data/raw/defillama_degen_2024-11-26_2026-01-06.json",
@@ -25,5 +25,5 @@
   "sources": [
     "defillama_coin_prices"
   ],
-  "updated_at_utc": "2026-06-24T20:31:33Z"
+  "updated_at_utc": "2026-06-24T21:46:38Z"
 }
