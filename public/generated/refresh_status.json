@@ -7,11 +7,11 @@
   "current_high_bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
   "kind": "refresh_status",
   "last_refresh_result": "success_generated",
-  "last_successful_refresh_time_utc": "2026-06-24T14:54:45Z",
-  "latest_generated_block": 47761273,
-  "latest_generated_block_time_utc": "2026-06-24T14:38:13Z",
-  "refresh_reason": "force_refresh_after_interval",
+  "last_successful_refresh_time_utc": "2026-06-24T15:48:53Z",
+  "latest_generated_block": 47762755,
+  "latest_generated_block_time_utc": "2026-06-24T15:27:37Z",
+  "refresh_reason": "data_generation",
   "schema_version": 1,
   "site_url": "https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
-  "trigger": "watcher"
+  "trigger": "hourly_refresh"
 }
