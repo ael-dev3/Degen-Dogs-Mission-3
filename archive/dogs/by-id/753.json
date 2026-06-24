@@ -2,11 +2,11 @@
   "generated_at_utc": "2026-06-24T00:15:06Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-23T23:58:21Z",
+    "activity_time_utc": "2026-06-24T01:13:19Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-23",
+      "eth_usd_price_date_utc": "2026-06-24",
       "native": "0.0",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
@@ -15,7 +15,7 @@
       "usd_estimate_confidence": "live_current",
       "usd_estimate_display": "$0.00",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-23",
+      "usd_estimate_price_date_utc": "2026-06-24",
       "usd_estimate_price_usd": null,
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 0,
-      "last_bid_time_utc": "2026-06-23T23:58:21Z",
+      "last_bid_time_utc": "2026-06-24T01:13:19Z",
       "unique_bidder_count": 0
     },
     "bid_tx_hashes": [],
@@ -55,7 +55,7 @@
       "total": 754
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-23t23:58:21z #401/754 generated auction feed background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-06-24t01:13:19z #401/754 generated auction feed background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
