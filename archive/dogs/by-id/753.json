@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "16.57000000",
+      "usd_estimate": "16.46000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.57",
+      "usd_estimate_display": "$16.46",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-24",
-      "usd_estimate_price_usd": "1657",
+      "usd_estimate_price_usd": "1646",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 754
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 16.57 $16.57 2026-06-24t11:52:01z #401/754 generated auction feed 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 16.46 $16.46 2026-06-24t11:52:01z #401/754 generated auction feed 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
