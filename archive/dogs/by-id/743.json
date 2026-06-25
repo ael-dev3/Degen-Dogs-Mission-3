@@ -7,7 +7,7 @@
       "amount_usd_at_event": "45.19277162",
       "eth_usd_price_at_event": "1680.0286846419424",
       "eth_usd_price_date_utc": "2026-06-14",
-      "native": "0.0269",
+      "native": "0.02690",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "26900000000000000",
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#398/754",
-      "rank": 398,
-      "total": 754
+      "display": "#396/755",
+      "rank": 396,
+      "total": 755
     },
     "schema_version": 1,
-    "search_text": "dog 743 dog #743 743 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0269 eth 26900000000000000 45.19 $45.19 2026-06-14t23:26:39z #398/754 generated auction feed 0x6ca3f1f577a7c30e3a0e6120e90a38b6452e7c3822d5238ccb708a95940969dc 0x3c9c51793da5603c87188a0b039f7a66bebe9b69c6adbe3d71d95425d7d8f276 0x27aeb4407cabb6e41b14485dee5e275722aec652ee53aba8236c5ee9adf10c4a background: none (90.2%) background none body: white (11.4%) body white neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: blackcap (6.9%) head blackcap eyes: eyepatch (7.8%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 743 dog #743 743 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.02690 eth 26900000000000000 45.19277162 $45.19 2026-06-14t23:26:39z #396/755 generated auction feed 0x6ca3f1f577a7c30e3a0e6120e90a38b6452e7c3822d5238ccb708a95940969dc 0x3c9c51793da5603c87188a0b039f7a66bebe9b69c6adbe3d71d95425d7d8f276 0x27aeb4407cabb6e41b14485dee5e275722aec652ee53aba8236c5ee9adf10c4a background: none (90.2%) background none body: white (11.4%) body white neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: blackcap (6.9%) head blackcap eyes: eyepatch (7.8%) eyes eyepatch base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 743 dog #743 https://api.degendogs.club/images/743.png https://degendogs.club/#dog743 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/743 settled @cryptomill https://farcaster.xyz/cryptomill 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 0.02690 eth ($45) 3 3 2026-06-13 21:37:25 2026-06-14 23:26:39 #396/755 background: none; body: white; neck: goldnecklace; mouth: none; ears: earbuds; head: blackcap; eyes: eyepatch background: none (90.2%); body: white (11.4%); neck: goldnecklace (19.3%); mouth: none (68.7%); ears: earbuds (32.2%); head: blackcap (6.9%); eyes: eyepatch (7.8%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-14T23:26:39Z",
@@ -69,12 +69,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -90,7 +91,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

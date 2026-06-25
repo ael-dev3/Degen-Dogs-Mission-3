@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-24T00:15:06Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-24T23:44:11Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-24T23:57:01Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-24",
+      "amount_usd_at_event": "21.55943956",
+      "eth_usd_price_at_event": "1619.792603757049",
+      "eth_usd_price_date_utc": "2026-06-25",
       "native": "0.01331",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "13310000000000000",
-      "usd_estimate": "21.54000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$21.54",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-24",
-      "usd_estimate_price_usd": "1618.3320811419984973703981968444778362133734034560480841472577009767092411720511",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": "21.55943956",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$21.56",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-06-25) 0.00 day(s) from event.",
+      "usd_estimate_price_date_utc": "2026-06-25",
+      "usd_estimate_price_usd": "1619.792603757049",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -57,16 +57,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#401/754",
-      "rank": 401,
-      "total": 754
+      "display": "#400/755",
+      "rank": 400,
+      "total": 755
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base ongoing 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01331 eth 13310000000000000 21.54 $21.54 2026-06-24t23:44:11z #401/754 generated auction feed 0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d 0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.2%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01331 eth 13310000000000000 21.56 $21.56 2026-06-24t23:57:01z #400/755 generated auction feed 0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d 0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.2%) ears earbuds head: unicorn (4.8%) head unicorn eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-24T23:57:01Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -80,7 +80,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.2%)",
@@ -88,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.2%)",
+        "display": "Body: Blue (9.1%)",
         "trait_type": "Body",
         "value": "Blue"
       },
