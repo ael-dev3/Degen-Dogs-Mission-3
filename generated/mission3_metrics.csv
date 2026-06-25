@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.008919
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1559.79
+eth_usd_price,1565.56
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -43,9 +43,9 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.013384
 reward_total_flow_usd_per_day,10.91
 reward_total_per_dog_usd_per_day,0.082001
-reward_current_bid_payback_days,209.27
-reward_current_bid_daily_roi_pct,0.4779
-reward_current_bid_apr_pct,174.42
+reward_current_bid_payback_days,210
+reward_current_bid_daily_roi_pct,0.4762
+reward_current_bid_apr_pct,173.81
 reward_current_bid_apr_display,≈174% APR
 woof_holders,365
 top_woof_holder,0x1c45…6637
@@ -54,7 +54,7 @@ farcaster_profiles_resolved,51
 current_auction_token_id,754
 current_auction_status,live
 current_bid_eth,0.011
-current_bid_usd,17.16
+current_bid_usd,17.22
 current_bidder,@skunkape
 current_bidder_wallet,0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202
 current_auction_end_utc,2026-06-25 23:57:01

@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "17.16000000",
+      "usd_estimate": "17.22000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.16",
+      "usd_estimate_display": "$17.22",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-25",
-      "usd_estimate_price_usd": "1.56E+3",
+      "usd_estimate_price_usd": "1565.4545454545454545454545454545454545454545454545454545454545454545454545454545",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 755
     },
     "schema_version": 1,
-    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 17.16 $17.16 2026-06-25t11:49:15z #455/755 generated auction feed 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.2%) background none body: grey (11.5%) body grey neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: goldearring (15.5%) ears goldearring head: beanie (6.4%) head beanie eyes: bluelasereyes (11.0%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 17.22 $17.22 2026-06-25t11:49:15z #455/755 generated auction feed 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.2%) background none body: grey (11.5%) body grey neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: goldearring (15.5%) ears goldearring head: beanie (6.4%) head beanie eyes: bluelasereyes (11.0%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
