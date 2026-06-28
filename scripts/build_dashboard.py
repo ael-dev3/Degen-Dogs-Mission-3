@@ -76,6 +76,8 @@ FROM_BLOCK = int(os.environ.get("BASE_FROM_BLOCK", "40500000"))
 LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "10000")), 10000))
 LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
+RPC_ATTEMPTS = max(1, min(int(os.environ.get("BASE_RPC_ATTEMPTS", "3")), 10))
+LOG_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_LOG_RPC_TIMEOUT", "35")), 120))
 LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "50")), 500))
 DOG_METADATA_FETCH_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FETCH_TIMEOUT", "12")), 45))
 DOG_METADATA_FALLBACK_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FALLBACK_TIMEOUT", "20")), 60))
@@ -409,6 +411,8 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_LOG_CHUNK", "Maximum block range per log request, capped at 10,000 for public Base RPC compatibility."),
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
+    ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
+    ("BASE_LOG_RPC_TIMEOUT", "Per-attempt timeout for eth_getLogs requests."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
     ("DOG_METADATA_FETCH_TIMEOUT", "Primary per-request metadata HTTP timeout in seconds."),
     ("DOG_METADATA_FALLBACK_TIMEOUT", "Fallback tokenURI metadata HTTP timeout in seconds."),
@@ -421,6 +425,11 @@ CONFIGURATION_ENV_VARS = [
     ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
     ("SUP_USD_PRICE", "Optional manual SUP/USD override; otherwise fetched from Dexscreener Base pools."),
 ]
+
+
+def progress(message: str) -> None:
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    print(f"[build_dashboard {stamp}] {message}", file=sys.stderr, flush=True)
 
 
 TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
@@ -462,7 +471,8 @@ def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | Non
     payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
     active_urls = urls or RPC_URLS
     last: Exception | None = None
-    for attempt in range(5):
+    attempts = max(RPC_ATTEMPTS, len(active_urls))
+    for attempt in range(attempts):
         try:
             data = post_json(payload, timeout, active_urls[attempt % len(active_urls)])
             if "error" in data:
@@ -470,9 +480,9 @@ def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | Non
             return data["result"]
         except Exception as exc:  # noqa: BLE001
             last = exc
-            if attempt == 4:
+            if attempt == attempts - 1:
                 raise
-            time.sleep(0.75 * (attempt + 1))
+            time.sleep(min(2.0, 0.5 * (attempt + 1)))
     raise RuntimeError(last)
 
 
@@ -489,7 +499,8 @@ def rpc_batch(calls: list[tuple[str, list[Any]]], timeout: int = 120, urls: list
         {"jsonrpc": "2.0", "id": i, "method": method, "params": params}
         for i, (method, params) in enumerate(calls)
     ]
-    for attempt in range(5):
+    attempts = max(RPC_ATTEMPTS, len(active_urls))
+    for attempt in range(attempts):
         try:
             items = post_json(payload, timeout, active_urls[attempt % len(active_urls)])
             if not isinstance(items, list):
@@ -505,9 +516,9 @@ def rpc_batch(calls: list[tuple[str, list[Any]]], timeout: int = 120, urls: list
                     out.append(item.get("result"))
             return out
         except Exception:
-            if attempt == 4:
+            if attempt == attempts - 1:
                 raise
-            time.sleep(0.75 * (attempt + 1))
+            time.sleep(min(2.0, 0.5 * (attempt + 1)))
     return []
 
 
@@ -612,7 +623,7 @@ def _fetch_logs_uncached(address: str, topics: str | list[str], from_block: int,
 
     def fetch_range(bounds: tuple[int, int]) -> list[dict[str, Any]]:
         a, b = bounds
-        return rpc("eth_getLogs", [log_filter(address, topic_filter, a, b)], timeout=120, urls=LOG_RPC_URLS)
+        return rpc("eth_getLogs", [log_filter(address, topic_filter, a, b)], timeout=LOG_RPC_TIMEOUT, urls=LOG_RPC_URLS)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=LOG_WORKERS) as pool:
         futures = [pool.submit(fetch_range, bounds) for bounds in ranges]
@@ -3350,12 +3361,14 @@ setInterval(updateCountdowns,1000);
     (ROOT / "index.html").write_text(html_doc, encoding="utf-8")
 
 def main() -> None:
+    progress("start")
     GENERATED.mkdir(exist_ok=True)
     PUBLIC_GENERATED.mkdir(parents=True, exist_ok=True)
     latest_block = int(rpc("eth_blockNumber", []), 16)
     snapshot_tag = hex(latest_block)
     latest_block_data = rpc("eth_getBlockByNumber", [snapshot_tag, False])
     latest_time = utc_from_unix(int(latest_block_data["timestamp"], 16))
+    progress(f"snapshot latest_block={latest_block}")
 
     auction_logs = fetch_logs(
         AUCTION_HOUSE,
@@ -3363,25 +3376,33 @@ def main() -> None:
         FROM_BLOCK,
         latest_block,
     )
+    progress(f"auction logs={len(auction_logs)}")
     created_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_CREATED]
     bid_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_BID]
     settled_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_SETTLED]
     transfer_logs = fetch_logs(WOOF, TOPIC_TRANSFER, FROM_BLOCK, latest_block)
+    progress(f"transfer logs={len(transfer_logs)}")
 
     token_stats = fetch_token_stats(snapshot_tag)
     decimals = int(token_stats["woof_decimals"])
     dog_total_supply = fetch_dog_total_supply(snapshot_tag)
     token_stats["dog_total_supply"] = str(dog_total_supply)
+    progress(f"token stats loaded dog_total_supply={dog_total_supply}")
     dog_metadata = fetch_dog_metadata_rows(dog_total_supply, snapshot_tag)
+    progress(f"dog metadata rows={len(dog_metadata)}")
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
     token_stats.update(current_bid_reward_stats(current, token_stats))
+    progress(f"current auction token_id={current.get('token_id')}")
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
+    progress(f"decoded auctions created={len(created)} bids={len(bids)} settled={len(settled)}")
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
+    progress(f"holders={len(holders)}")
     identity_addresses = collect_identity_addresses(current, bids, settled, holders)
     neynar_profiles = fetch_farcaster_profiles(identity_addresses)
     auction_profiles = fetch_degendogs_auction_profiles(current)
     cached_profiles = load_cached_farcaster_profiles()
     farcaster_profiles = merge_farcaster_profiles(neynar_profiles, auction_profiles, cached_profiles)
+    progress(f"profiles={len(farcaster_profiles)}")
 
     conn = sqlite3.connect(":memory:")
     insert_rows(conn, "auction_created", created, [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
