@@ -8,6 +8,7 @@ import hashlib
 import html
 import json
 import os
+import signal
 import sqlite3
 import sys
 import time
@@ -60,7 +61,7 @@ DEFAULT_RPC_URLS = [
     "https://mainnet.base.org",
     "https://developer-access-mainnet.base.org",
 ]
-DEFAULT_LOG_RPC_URLS = ["https://mainnet.base.org"]
+DEFAULT_LOG_RPC_URLS = DEFAULT_RPC_URLS
 RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") else [
     url.strip()
     for url in os.environ.get("BASE_RPC_URLS", ",".join(DEFAULT_RPC_URLS)).split(",")
@@ -76,6 +77,10 @@ LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "10000")), 10000))
 LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
 LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "50")), 500))
+DOG_METADATA_FETCH_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FETCH_TIMEOUT", "12")), 45))
+DOG_METADATA_FALLBACK_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FALLBACK_TIMEOUT", "20")), 60))
+DOG_METADATA_ITEM_TIMEOUT = max(15, min(int(os.environ.get("DOG_METADATA_ITEM_TIMEOUT", "75")), 180))
+DOG_METADATA_SEQUENTIAL_THRESHOLD = max(0, min(int(os.environ.get("DOG_METADATA_SEQUENTIAL_THRESHOLD", "8")), 100))
 
 AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
 DEGEN_DOGS = "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
@@ -405,6 +410,10 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
+    ("DOG_METADATA_FETCH_TIMEOUT", "Primary per-request metadata HTTP timeout in seconds."),
+    ("DOG_METADATA_FALLBACK_TIMEOUT", "Fallback tokenURI metadata HTTP timeout in seconds."),
+    ("DOG_METADATA_ITEM_TIMEOUT", "Hard wall-clock timeout per new Dog metadata row."),
+    ("DOG_METADATA_SEQUENTIAL_THRESHOLD", "Fetch small missing metadata batches sequentially so one hung request cannot trap the runner."),
     ("MISSION3_LOG_CACHE", "Enables local RPC log caching under `.cache/rpc_logs`; defaults on."),
     ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 50 blocks."),
     ("MISSION3_BALANCE_CACHE", "Enables local WOOF holder balance caching under `.cache/woof_balances.json`; defaults on."),
@@ -1355,10 +1364,27 @@ def write_dog_cache(cache: dict[str, Any]) -> None:
 def fetch_one_dog_metadata(token_id: int, block_tag: str) -> dict[str, Any]:
     url = f"https://degendogs.club/meta/{token_id}"
     try:
-        return simplified_dog_metadata(token_id, fetch_url_json(url))
+        return simplified_dog_metadata(token_id, fetch_url_json(url, timeout=DOG_METADATA_FETCH_TIMEOUT))
     except Exception:
         uri = fetch_token_uri(token_id, block_tag)
-        return simplified_dog_metadata(token_id, fetch_url_json(uri))
+        return simplified_dog_metadata(token_id, fetch_url_json(uri, timeout=DOG_METADATA_FALLBACK_TIMEOUT))
+
+
+def fetch_one_dog_metadata_with_deadline(token_id: int, block_tag: str) -> dict[str, Any]:
+    def timeout_handler(signum: int, frame: Any) -> None:  # noqa: ARG001
+        raise TimeoutError(f"dog metadata fetch timed out after {DOG_METADATA_ITEM_TIMEOUT}s")
+
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, 0)
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.setitimer(signal.ITIMER_REAL, DOG_METADATA_ITEM_TIMEOUT)
+    try:
+        return fetch_one_dog_metadata(token_id, block_tag)
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0] > 0:
+            signal.setitimer(signal.ITIMER_REAL, previous_timer[0], previous_timer[1])
 
 
 def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str, Any]]:
@@ -1368,15 +1394,23 @@ def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str,
     if missing:
         workers = max(1, min(int(os.environ.get("DOG_METADATA_WORKERS", "16")), 24))
         print(f"fetching dog metadata: {len(missing)} missing of {total_supply}", file=sys.stderr)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(fetch_one_dog_metadata, token_id, block_tag): token_id for token_id in missing}
-            for future in concurrent.futures.as_completed(futures):
-                token_id = futures[future]
+        if len(missing) <= DOG_METADATA_SEQUENTIAL_THRESHOLD:
+            for token_id in missing:
                 try:
-                    cache[str(token_id)] = future.result()
+                    cache[str(token_id)] = fetch_one_dog_metadata_with_deadline(token_id, block_tag)
                 except Exception as exc:  # noqa: BLE001
                     print(f"warning: metadata failed for dog {token_id}: {exc}", file=sys.stderr)
                     cache[str(token_id)] = simplified_dog_metadata(token_id, {})
+        else:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                futures = {pool.submit(fetch_one_dog_metadata, token_id, block_tag): token_id for token_id in missing}
+                for future in concurrent.futures.as_completed(futures):
+                    token_id = futures[future]
+                    try:
+                        cache[str(token_id)] = future.result()
+                    except Exception as exc:  # noqa: BLE001
+                        print(f"warning: metadata failed for dog {token_id}: {exc}", file=sys.stderr)
+                        cache[str(token_id)] = simplified_dog_metadata(token_id, {})
         write_dog_cache(cache)
 
     metadata = []
