@@ -712,7 +712,13 @@ def load_block_time_cache() -> dict[int, str]:
     except Exception as exc:  # noqa: BLE001
         print(f"warning: block time cache ignored: {exc}", file=sys.stderr)
 
-    for path in (GENERATED / "auction_bids.csv", GENERATED / "auction_settled.csv"):
+    seed_paths = (
+        GENERATED / "auction_bids.csv",
+        GENERATED / "auction_settled.csv",
+        ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_auction_bids.csv",
+        ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_auction_settled.csv",
+    )
+    for path in seed_paths:
         try:
             with path.open(newline="", encoding="utf-8") as handle:
                 for row in csv.DictReader(handle):
