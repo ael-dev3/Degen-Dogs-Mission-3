@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#532/755",
-      "rank": 532,
-      "total": 755
+      "display": "#531/758",
+      "rank": 531,
+      "total": 758
     },
     "schema_version": 1,
-    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.03690 eth 36900000000000000 58.32486909 $58.32 2026-06-05t20:03:17z #532/755 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.4%) body white neck: studdedcollar (10.1%) neck studdedcollar mouth: none (68.7%) mouth none ears: loopearring (26.9%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 734 dog #734 https://api.degendogs.club/images/734.png https://degendogs.club/#dog734 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/734 settled @staraptor.eth https://farcaster.xyz/staraptor.eth 0x3516006709b775e01b48dfb5fad355a4e793e347 0.03690 eth ($58) 2 2 2026-06-04 19:59:03 2026-06-05 20:03:17 #532/755 background: none; body: white; neck: studdedcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none background: none (90.2%); body: white (11.4%); neck: studdedcollar (10.1%); mouth: none (68.7%); ears: loopearring (26.9%); head: stripedbeanie (8.6%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.03690 eth 36900000000000000 58.32486909 $58.32 2026-06-05t20:03:17z #531/758 generated auction feed 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 background: none (90.2%) background none body: white (11.5%) body white neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.7%) mouth none ears: loopearring (26.8%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 734 dog #734 https://api.degendogs.club/images/734.png https://degendogs.club/#dog734 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/734 settled @staraptor.eth https://farcaster.xyz/staraptor.eth 0x3516006709b775e01b48dfb5fad355a4e793e347 0.03690 eth ($58) 2 2 2026-06-04 19:59:03 2026-06-05 20:03:17 #531/758 background: none; body: white; neck: studdedcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none background: none (90.2%); body: white (11.5%); neck: studdedcollar (10.0%); mouth: none (68.7%); ears: loopearring (26.8%); head: stripedbeanie (8.6%); eyes: none (18.1%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-05T20:03:17Z",
@@ -85,12 +85,12 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.4%)",
+        "display": "Body: White (11.5%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: StuddedCollar (10.1%)",
+        "display": "Neck: StuddedCollar (10.0%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (26.9%)",
+        "display": "Ears: LoopEarring (26.8%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -110,7 +110,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (18.1%)",
         "trait_type": "Eyes",
         "value": "None"
       }

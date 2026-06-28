@@ -1,13 +1,43 @@
 [
   {
-    "activity_day": "2026-06-25",
+    "activity_day": "2026-06-28",
+    "created_auctions": 1,
+    "settled_auctions": 1,
+    "bids": 3,
+    "unique_bidders": 3,
+    "bid_eth": 0.0331,
+    "high_bid_eth": 0.0121,
+    "settled_eth": 0.0121
+  },
+  {
+    "activity_day": "2026-06-27",
+    "created_auctions": 1,
+    "settled_auctions": 1,
+    "bids": 3,
+    "unique_bidders": 3,
+    "bid_eth": 0.0331,
+    "high_bid_eth": 0.0121,
+    "settled_eth": 0.01119
+  },
+  {
+    "activity_day": "2026-06-26",
     "created_auctions": 0,
     "settled_auctions": 0,
-    "bids": 2,
-    "unique_bidders": 2,
-    "bid_eth": 0.021,
-    "high_bid_eth": 0.011,
+    "bids": 4,
+    "unique_bidders": 3,
+    "bid_eth": 0.039,
+    "high_bid_eth": 0.01119,
     "settled_eth": 0.0
+  },
+  {
+    "activity_day": "2026-06-25",
+    "created_auctions": 1,
+    "settled_auctions": 1,
+    "bids": 3,
+    "unique_bidders": 3,
+    "bid_eth": 0.0331,
+    "high_bid_eth": 0.0121,
+    "settled_eth": 0.0121
   },
   {
     "activity_day": "2026-06-24",

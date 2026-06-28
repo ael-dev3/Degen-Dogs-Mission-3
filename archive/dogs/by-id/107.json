@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#293/755",
-      "rank": 293,
-      "total": 755
+      "display": "#298/758",
+      "rank": 298,
+      "total": 758
     },
     "schema_version": 1,
-    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d #293/755 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d #298/758 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28503384,
       "block_time_utc": "2022-05-19T09:42:57Z",
@@ -86,7 +86,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: StuddedCollar (10.1%)",
+        "display": "Neck: StuddedCollar (10.0%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
@@ -96,17 +96,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.5%)",
+        "display": "Ears: GoldEarring (15.4%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: Headphones (6.4%)",
+        "display": "Head: Headphones (6.5%)",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (18.1%)",
         "trait_type": "Eyes",
         "value": "None"
       }

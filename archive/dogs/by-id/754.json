@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-25T00:20:11Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-25T11:49:15Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-25T23:57:17Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "19.59949051",
+      "eth_usd_price_at_event": "1619.792603757049",
       "eth_usd_price_date_utc": "2026-06-25",
-      "native": "0.011",
+      "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "11000000000000000",
-      "usd_estimate": "17.22000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.22",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "raw": "12100000000000000",
+      "usd_estimate": "19.59949051",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$19.60",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-25",
-      "usd_estimate_price_usd": "1565.4545454545454545454545454545454545454545454545454545454545454545454545454545",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1619.792603757049",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -29,11 +29,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-06-25T11:49:15Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-06-25T23:16:25Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
+      "0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b",
       "0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf",
       "0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a"
     ],
@@ -46,23 +47,23 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog754",
-      "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "explorer": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/754",
       "repo_archive": "archive/dogs/by-id/754.json",
       "settlement_tx": null
     },
     "mission": 3,
     "rarity": {
-      "display": "#455/755",
-      "rank": 455,
-      "total": 755
+      "display": "#451/758",
+      "rank": 451,
+      "total": 758
     },
     "schema_version": 1,
-    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 17.22 $17.22 2026-06-25t11:49:15z #455/755 generated auction feed 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.2%) background none body: grey (11.5%) body grey neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: goldearring (15.5%) ears goldearring head: beanie (6.4%) head beanie eyes: bluelasereyes (11.0%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.0121 eth 12100000000000000 19.6 $19.60 2026-06-25t23:57:17z #451/758 generated auction feed 0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.2%) background none body: grey (11.5%) body grey neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: goldearring (15.4%) ears goldearring head: beanie (6.3%) head beanie eyes: bluelasereyes (10.9%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-25T23:57:17Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -76,7 +77,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.2%)",
@@ -99,28 +100,28 @@
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.5%)",
+        "display": "Ears: GoldEarring (15.4%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: Beanie (6.4%)",
+        "display": "Head: Beanie (6.3%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.0%)",
+        "display": "Eyes: BlueLaserEyes (10.9%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@skunkape",
+      "display": "@metasalary",
       "farcaster_fid": null,
-      "farcaster_handle": "skunkape",
-      "profile_url": "https://farcaster.xyz/skunkape",
-      "wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-      "wallet_explorer_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202"
+      "farcaster_handle": "metasalary",
+      "profile_url": "https://farcaster.xyz/metasalary",
+      "wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
+      "wallet_explorer_url": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323"
     }
   },
   "schema_version": 1

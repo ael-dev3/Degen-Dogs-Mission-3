@@ -1,0 +1,129 @@
+{
+  "generated_at_utc": "2026-06-28T21:21:09Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-27T00:07:53Z",
+    "amount": {
+      "amount_usd_at_event": "17.64094409",
+      "eth_usd_price_at_event": "1576.4918756458771",
+      "eth_usd_price_date_utc": "2026-06-27",
+      "native": "0.01119",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "11190000000000000",
+      "usd_estimate": "17.64094409",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$17.64",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-06-27",
+      "usd_estimate_price_usd": "1576.4918756458771",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-06-25T23:57:17Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 4,
+      "last_bid_time_utc": "2026-06-26T19:42:27Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad",
+      "0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2",
+      "0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6",
+      "0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 755,
+    "dog_image_url": "https://api.degendogs.club/images/755.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/755",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog755",
+      "explorer": "https://basescan.org/address/0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/755",
+      "repo_archive": "archive/dogs/by-id/755.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#624/758",
+      "rank": 624,
+      "total": 758
+    },
+    "schema_version": 1,
+    "search_text": "dog 755 dog #755 755 mission 3 mission 3 base settled 0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d @oddlyaugmented.eth oddlyaugmented.eth 0.01119 eth 11190000000000000 17.64 $17.64 2026-06-27t00:07:53z #624/758 generated auction feed 0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad 0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2 0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6 0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8 background: none (90.2%) background none body: brown (11.3%) body brown neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.3%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: sunglasses (14.8%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": "2026-06-27T00:07:53Z",
+      "settled": true,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_live_base_logs",
+      "sources": [
+        "base_logs",
+        "dashboard_builder",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (90.2%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Brown (11.3%)",
+        "trait_type": "Body",
+        "value": "Brown"
+      },
+      {
+        "display": "Neck: None (39.7%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: None (68.7%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (32.3%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: CrazyHair (6.6%)",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: Sunglasses (14.8%)",
+        "trait_type": "Eyes",
+        "value": "Sunglasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@oddlyaugmented.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "oddlyaugmented.eth",
+      "profile_url": "https://farcaster.xyz/oddlyaugmented.eth",
+      "wallet": "0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d",
+      "wallet_explorer_url": "https://basescan.org/address/0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d"
+    }
+  },
+  "schema_version": 1
+}
