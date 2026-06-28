@@ -31,6 +31,7 @@ PUBLIC_GENERATED = ROOT / "public" / "generated"
 CACHE_DIR = ROOT / ".cache"
 LOG_CACHE_DIR = CACHE_DIR / "rpc_logs"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
+BLOCK_TIME_CACHE = CACHE_DIR / "block_times.json"
 WOOF_BALANCE_CACHE = CACHE_DIR / "woof_balances.json"
 README_TEMPLATE_PATH = ROOT / "README.template.md"
 HISTORICAL_ARCHIVE_INDEXES = {
@@ -78,6 +79,7 @@ LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
 RPC_ATTEMPTS = max(1, min(int(os.environ.get("BASE_RPC_ATTEMPTS", "3")), 10))
 LOG_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_LOG_RPC_TIMEOUT", "35")), 120))
+BLOCK_TIME_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_BLOCK_TIME_RPC_TIMEOUT", "30")), 120))
 LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "50")), 500))
 DOG_METADATA_FETCH_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FETCH_TIMEOUT", "12")), 45))
 DOG_METADATA_FALLBACK_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FALLBACK_TIMEOUT", "20")), 60))
@@ -413,6 +415,7 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
     ("BASE_LOG_RPC_TIMEOUT", "Per-attempt timeout for eth_getLogs requests."),
+    ("BASE_BLOCK_TIME_RPC_TIMEOUT", "Per-attempt timeout for block timestamp batch lookups."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
     ("DOG_METADATA_FETCH_TIMEOUT", "Primary per-request metadata HTTP timeout in seconds."),
     ("DOG_METADATA_FALLBACK_TIMEOUT", "Fallback tokenURI metadata HTTP timeout in seconds."),
@@ -691,16 +694,64 @@ def decimal_str(value: int, decimals: int, max_places: int = 18) -> str:
     return s if s else "0"
 
 
+def load_block_time_cache() -> dict[int, str]:
+    cache: dict[int, str] = {}
+    try:
+        raw = json.loads(BLOCK_TIME_CACHE.read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            for key, value in raw.items():
+                try:
+                    block = int(key)
+                except (TypeError, ValueError):
+                    continue
+                timestamp = str(value or "").strip()
+                if timestamp:
+                    cache[block] = timestamp
+    except FileNotFoundError:
+        pass
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: block time cache ignored: {exc}", file=sys.stderr)
+
+    for path in (GENERATED / "auction_bids.csv", GENERATED / "auction_settled.csv"):
+        try:
+            with path.open(newline="", encoding="utf-8") as handle:
+                for row in csv.DictReader(handle):
+                    raw_block = str(row.get("block_number") or "").strip()
+                    timestamp = str(row.get("block_time_utc") or "").strip()
+                    if raw_block and timestamp:
+                        cache[int(raw_block)] = timestamp
+        except FileNotFoundError:
+            continue
+        except Exception as exc:  # noqa: BLE001
+            print(f"warning: generated block time seed ignored for {path.name}: {exc}", file=sys.stderr)
+    return cache
+
+
+def save_block_time_cache(cache: dict[int, str]) -> None:
+    CACHE_DIR.mkdir(exist_ok=True)
+    temp = BLOCK_TIME_CACHE.with_suffix(".tmp")
+    temp.write_text(json.dumps({str(k): cache[k] for k in sorted(cache)}, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    temp.replace(BLOCK_TIME_CACHE)
+
+
 def fetch_block_times(blocks: set[int]) -> dict[int, str]:
-    out: dict[int, str] = {}
     ordered = sorted(blocks)
-    for i in range(0, len(ordered), 100):
-        batch = ordered[i : i + 100]
+    cache = load_block_time_cache()
+    out: dict[int, str] = {block: cache[block] for block in ordered if block in cache}
+    missing = [block for block in ordered if block not in out]
+    if missing:
+        progress(f"fetching block times missing={len(missing)} cached={len(out)}")
+    for i in range(0, len(missing), 100):
+        batch = missing[i : i + 100]
         calls = [("eth_getBlockByNumber", [hex(block), False]) for block in batch]
-        results = rpc_batch(calls)
+        results = rpc_batch(calls, timeout=BLOCK_TIME_RPC_TIMEOUT)
         for block, result in zip(batch, results):
             if result:
-                out[block] = utc_from_unix(int(result["timestamp"], 16))
+                timestamp = utc_from_unix(int(result["timestamp"], 16))
+                out[block] = timestamp
+                cache[block] = timestamp
+    if missing:
+        save_block_time_cache(cache)
     return out
 
 
