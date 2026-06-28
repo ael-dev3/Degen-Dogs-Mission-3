@@ -47,6 +47,7 @@ Do not commit these machine-specific paths:
 - watcher one-shot lock: `.local/mission3_onchain_tracker.lock`
 - refresh telemetry: `.local/refresh_runs.jsonl`, `logs/refresh-metrics.jsonl`
 - watcher telemetry: `.local/watcher_checks.jsonl`
+- health alert state: `$HOME/Library/Caches/degen-dogs-mission3/critical-alert-state.json`
 - private `.env` files or credentialed RPC URLs
 
 Both runners share the same `refresh.lock`, so the hourly refresh and event-triggered
@@ -124,6 +125,7 @@ tail -n 80 "$HOME/Library/Logs/degen-dogs-mission3/watcher.launchd.err.log"
 python3 -m json.tool .local/mission3_onchain_tracker_state.json
 npm run refresh:metrics
 npm run refresh:status:validate
+npm run runner:health:dry
 ```
 
 Healthy no-change watcher output looks like:
@@ -138,6 +140,31 @@ refresh command.
 
 Structured rows are written to `.local/watcher_checks.jsonl` and `.local/refresh_runs.jsonl`. The public-safe freshness sidecar is `generated/refresh_status.json` plus `public/generated/refresh_status.json`; it should contain the current generated block, Dog, bid, high bidder, auction status, trigger/reason, and last generation result without local paths or secrets. Final publish outcomes such as no-diff, skip-push, pushed, live-timeout, and failure stay in private JSONL telemetry.
 
+## Critical failure alerting
+
+The local health watchdog source lives in `scripts/degen_dogs_runner_health.py`; the
+current Mac mini cron uses the private wrapper
+`~/.hermes/scripts/degen_dogs_runner_health_alert.sh` so the Discord mention can stay
+out of git. Healthy runs are silent. Critical runs emit one Discord message back to the
+Mission 3 thread, tagging Ael, and create or comment on the GitHub issue titled
+`Local runner critical health alert`.
+
+The GitHub issue/comment includes sanitized historical data useful for debugging:
+
+- classified cause candidates such as `dirty_worktree_preflight_block`,
+  `base_rpc_backend_unhealthy`, `no_successful_refresh_over_threshold`,
+  `latest_refresh_failed`, `launchd_agent_unhealthy_or_drifted`, or
+  `live_site_marker_or_http_failure`
+- tracked dirty paths blocking `refresh_and_publish.sh`
+- recent failure signals from `~/Library/Logs/degen-dogs-mission3/refresh.log`
+- recent rows from `.local/refresh_runs.jsonl`
+- recent rows from `.local/watcher_checks.jsonl`
+
+Alert dedupe state is local-only at
+`~/Library/Caches/degen-dogs-mission3/critical-alert-state.json`. The watchdog alerts
+again only when the failure fingerprint changes or the repeat window elapses, and it
+comments/closes the GitHub issue on recovery.
+
 ## Local validation commands
 
 Run these before calling the runner healthy:
@@ -149,8 +176,9 @@ npm run check:dashboard-ui
 npm run check:historical-dogs
 npm run archive:mission3:health
 npm run archive:prices:validate
+npm run runner:health:dry
 npm run build
-python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py
+python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py scripts/degen_dogs_runner_health.py
 bash -n scripts/refresh_and_publish.sh scripts/install_hourly_refresh_launchd.sh scripts/install_auction_watcher_launchd.sh
 ```
 

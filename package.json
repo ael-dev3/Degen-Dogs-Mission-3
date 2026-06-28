@@ -36,6 +36,8 @@
     "refresh:status": "DEGEN_DOGS_REFRESH_RESULT=success_generated python3 scripts/refresh_telemetry.py write-status --prefer-current-env",
     "refresh:status:validate": "python3 scripts/refresh_telemetry.py validate-status",
     "refresh:metrics": "python3 scripts/refresh_telemetry.py metrics-summary",
+    "runner:health": "python3 scripts/degen_dogs_runner_health.py",
+    "runner:health:dry": "DEGEN_DOGS_HEALTH_DRY_RUN=1 DEGEN_DOGS_HEALTH_ALERT_DRY_RUN=1 python3 scripts/degen_dogs_runner_health.py",
     "watch:auction": "npm run watch:onchain",
     "watch:auction:loop": "npm run watch:onchain:loop",
     "watch:auction:dry": "npm run watch:onchain:dry",

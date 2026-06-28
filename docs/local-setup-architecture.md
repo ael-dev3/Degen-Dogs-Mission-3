@@ -81,9 +81,18 @@ The Hermes-side health watchdog is local operator infrastructure, not part of th
 site. It checks that the launchd jobs, plists, executable bits, logs, and live markers are
 healthy, and stays silent when there is nothing to repair.
 
-- Script: `~/.hermes/scripts/degen_dogs_runner_health.py`
+- Script source: `scripts/degen_dogs_runner_health.py`
+- Hermes wrapper on the current Mac mini: `~/.hermes/scripts/degen_dogs_runner_health_alert.sh`
 - Expected behavior: no output on healthy dry runs
 - Scope: repair local launchd drift, kick stale jobs, and report actionable issues only
+- Critical alert path: if no successful refresh crosses the critical stale threshold,
+  tracked worktree changes block refresh, launchd drifts/misses, or the live site check
+  fails, the watchdog emits a Discord message that tags Ael and creates or comments on
+  the GitHub issue `Local runner critical health alert` with sanitized cause
+  classification, recent `refresh.log` failure signals, dirty paths, refresh history,
+  and watcher history. Repeated failures are deduped by fingerprint and re-alert only
+  when the cause changes or the repeat window elapses. Recovery comments close the open
+  GitHub issue.
 
 ## Shared locks and local-only state
 
@@ -102,6 +111,7 @@ Local/private files are intentionally not committed:
 - watcher lock: `.local/mission3_onchain_tracker.lock`
 - private refresh telemetry: `.local/refresh_runs.jsonl`
 - local watcher telemetry: `.local/watcher_checks.jsonl`
+- local health alert state: `~/Library/Caches/degen-dogs-mission3/critical-alert-state.json`
 - private `.env` files and credentialed RPC/API URLs
 
 Public-safe freshness is exposed only through checked-in generated artifacts such as:
@@ -148,6 +158,7 @@ git status --short --branch
 npm run test:watcher
 npm run validate:dashboard
 npm run refresh:status:validate
+npm run runner:health:dry
 npm run build
 
 launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.refresh"
