@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-06-29 00:25:07",
+    "token_id": 758,
+    "dog": "Dog #758",
+    "bidder": "@badadan",
+    "bidder_url": "https://farcaster.xyz/badadan",
+    "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
+    "bid": "0.00846 ETH ($13)",
+    "bid_eth": 0.00846,
+    "bid_usd": 13.21,
+    "eth_usd_price_live": "1561.56",
+    "eth_usd_price_date_utc": "2026-06-29",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 47951680,
+    "log_index": 481,
+    "tx_hash": "0xf3b2a684a40ea7cff0ce7f159b3025d01e3d5ad17c242730a601345304bd37a4"
+  }
+]
