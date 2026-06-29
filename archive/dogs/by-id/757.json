@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-28T21:21:09Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-29T00:16:29Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-06-29T00:22:15Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "20.90495162",
+      "eth_usd_price_at_event": "1570.6199562201552",
       "eth_usd_price_date_utc": "2026-06-29",
       "native": "0.01331",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "13310000000000000",
-      "usd_estimate": "20.80000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$20.80",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "20.90495162",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$20.90",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-06-29",
-      "usd_estimate_price_usd": "1562.7347858752817430503380916604057099924868519909842223891810668670172802404207",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1570.6199562201552",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -55,16 +55,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#516/758",
-      "rank": 516,
-      "total": 758
+      "display": "#517/759",
+      "rank": 517,
+      "total": 759
     },
     "schema_version": 1,
-    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base ongoing 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.8 $20.80 2026-06-29t00:16:29z #516/758 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.2%) background none body: white (11.5%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: tongue (9.8%) mouth tongue ears: earbuds (32.3%) ears earbuds head: none (20.4%) head none eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.9 $20.90 2026-06-29t00:22:15z #517/759 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.3%) background none body: white (11.5%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: tongue (9.7%) mouth tongue ears: earbuds (32.3%) ears earbuds head: none (20.4%) head none eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-06-29T00:22:15Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -78,10 +78,10 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue (9.7%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },

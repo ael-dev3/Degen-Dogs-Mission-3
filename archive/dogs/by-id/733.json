@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#569/758",
+      "display": "#569/759",
       "rank": 569,
-      "total": 758
+      "total": 759
     },
     "schema_version": 1,
-    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.04400 eth 44000000000000000 79.69925378 $79.70 2026-06-04t19:59:03z #569/758 generated auction feed 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.2%) background none body: blue (9.1%) body blue neck: none (39.7%) neck none mouth: none (68.7%) mouth none ears: loopearring (26.8%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 733 dog #733 https://api.degendogs.club/images/733.png https://degendogs.club/#dog733 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733 settled @pare https://farcaster.xyz/pare 0xd1ab146981d50adcfe18433500e852af396ea7b1 0.04400 eth ($80) 6 6 2026-06-03 19:41:49 2026-06-04 19:59:03 #569/758 background: none; body: blue; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: vrgoggles background: none (90.2%); body: blue (9.1%); neck: none (39.7%); mouth: none (68.7%); ears: loopearring (26.8%); head: stripedbeanie (8.6%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.04400 eth 44000000000000000 79.69925378 $79.70 2026-06-04t19:59:03z #569/759 generated auction feed 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.3%) background none body: blue (9.1%) body blue neck: none (39.7%) neck none mouth: none (68.8%) mouth none ears: loopearring (26.7%) ears loopearring head: stripedbeanie (8.6%) head stripedbeanie eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 733 dog #733 https://api.degendogs.club/images/733.png https://degendogs.club/#dog733 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733 settled @pare https://farcaster.xyz/pare 0xd1ab146981d50adcfe18433500e852af396ea7b1 0.04400 eth ($80) 6 6 2026-06-03 19:41:49 2026-06-04 19:59:03 #569/759 background: none; body: blue; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: vrgoggles background: none (90.3%); body: blue (9.1%); neck: none (39.7%); mouth: none (68.8%); ears: loopearring (26.7%); head: stripedbeanie (8.6%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-04T19:59:03Z",
@@ -84,7 +84,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.2%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -99,12 +99,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (26.8%)",
+        "display": "Ears: LoopEarring (26.7%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
