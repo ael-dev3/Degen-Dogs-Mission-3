@@ -7,7 +7,7 @@
       "amount_usd_at_event": "20.68613420",
       "eth_usd_price_at_event": "1709.5978673943596",
       "eth_usd_price_date_utc": "2026-06-19",
-      "native": "0.0121",
+      "native": "0.01210",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#589/759",
+      "display": "#589/760",
       "rank": 589,
-      "total": 759
+      "total": 760
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0121 eth 12100000000000000 20.69 $20.69 2026-06-19t23:46:43z #589/759 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (11.3%) body brown neck: none (39.7%) neck none mouth: none (68.8%) mouth none ears: goldearring (15.4%) ears goldearring head: blackcap (6.9%) head blackcap eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.01210 eth 12100000000000000 20.68613420 $20.69 2026-06-19t23:46:43z #589/760 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (11.3%) body brown neck: none (39.6%) neck none mouth: none (68.8%) mouth none ears: goldearring (15.4%) ears goldearring head: blackcap (6.8%) head blackcap eyes: none (18.2%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 748 dog #748 https://api.degendogs.club/images/748.png https://degendogs.club/#dog748 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/748 settled @i-am-rael.eth https://farcaster.xyz/i-am-rael.eth 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0.01210 eth ($21) 4 3 2026-06-18 23:42:15 2026-06-19 23:46:43 #589/760 background: none; body: brown; neck: none; mouth: none; ears: goldearring; head: blackcap; eyes: none background: none (90.3%); body: brown (11.3%); neck: none (39.6%); mouth: none (68.8%); ears: goldearring (15.4%); head: blackcap (6.8%); eyes: none (18.2%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-19T23:46:43Z",
@@ -70,12 +70,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -91,7 +92,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -106,12 +107,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (6.9%)",
+        "display": "Head: BlackCap (6.8%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (18.1%)",
+        "display": "Eyes: None (18.2%)",
         "trait_type": "Eyes",
         "value": "None"
       }
