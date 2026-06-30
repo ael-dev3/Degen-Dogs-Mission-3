@@ -1,17 +1,17 @@
 {
   "current_auction_end_time_utc": "2026-07-01T00:23:19Z",
   "current_auction_status": "live",
-  "current_bid_eth": "0.0",
+  "current_bid_eth": "0.00846",
   "current_dog_token_id": 759,
-  "current_high_bidder": "no bids yet",
-  "current_high_bidder_wallet": "0x0000000000000000000000000000000000000000",
+  "current_high_bidder": "@badadan",
+  "current_high_bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
   "kind": "refresh_status",
   "last_refresh_result": "success_generated",
-  "last_successful_refresh_time_utc": "2026-06-30T00:55:26Z",
-  "latest_generated_block": 47995787,
-  "latest_generated_block_time_utc": "2026-06-30T00:55:21Z",
-  "refresh_reason": "data_generation",
+  "last_successful_refresh_time_utc": "2026-06-30T01:25:06Z",
+  "latest_generated_block": 47996676,
+  "latest_generated_block_time_utc": "2026-06-30T01:24:59Z",
+  "refresh_reason": "auction_bid,highest_bidder_changed,highest_bid_amount_changed",
   "schema_version": 1,
   "site_url": "https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
-  "trigger": "hourly_refresh"
+  "trigger": "watcher"
 }
