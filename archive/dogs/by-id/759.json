@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10250000000000000",
-      "usd_estimate": "16.12000000",
+      "usd_estimate": "16.10000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.12",
+      "usd_estimate_display": "$16.10",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-06-30",
-      "usd_estimate_price_usd": "1572.6829268292682926829268292682926829268292682926829268292682926829268292682927",
+      "usd_estimate_price_usd": "1570.7317073170731707317073170731707317073170731707317073170731707317073170731707",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 760
     },
     "schema_version": 1,
-    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.12 $16.12 2026-06-30t15:34:55z #684/760 generated auction feed 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 background: none (90.3%) background none body: orange (8.7%) body orange neck: redcollar (30.9%) neck redcollar mouth: none (68.8%) mouth none ears: earbuds (32.4%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: none (18.2%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.1 $16.10 2026-06-30t15:34:55z #684/760 generated auction feed 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 background: none (90.3%) background none body: orange (8.7%) body orange neck: redcollar (30.9%) neck redcollar mouth: none (68.8%) mouth none ears: earbuds (32.4%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: none (18.2%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
