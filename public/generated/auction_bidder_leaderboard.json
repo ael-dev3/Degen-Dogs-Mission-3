@@ -715,6 +715,19 @@
     "latest_bid_utc": "2026-06-29 00:16:29"
   },
   {
+    "bidder": "0x1621…e3f7",
+    "bidder_url": "https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
+    "bidder_wallet": "0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
+    "bids": 4,
+    "auctions_bid": 3,
+    "bid_eth": 0.05805,
+    "high_bid_eth": 0.02543,
+    "auction_wins": 0,
+    "winning_eth": 0.0,
+    "latest_bid_token_id": 758,
+    "latest_bid_utc": "2026-06-30 00:17:43"
+  },
+  {
     "bidder": "0x9862…f956",
     "bidder_url": "https://basescan.org/address/0x9862478d2795e7e174958b567b010108a803f956",
     "bidder_wallet": "0x9862478d2795e7e174958b567b010108a803f956",
@@ -726,19 +739,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 620,
     "latest_bid_utc": "2026-02-08T22:19:47Z"
-  },
-  {
-    "bidder": "0x1621…e3f7",
-    "bidder_url": "https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
-    "bidder_wallet": "0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
-    "bids": 3,
-    "auctions_bid": 2,
-    "bid_eth": 0.04564,
-    "high_bid_eth": 0.02543,
-    "auction_wins": 0,
-    "winning_eth": 0.0,
-    "latest_bid_token_id": 615,
-    "latest_bid_utc": "2026-02-04T03:24:15Z"
   },
   {
     "bidder": "0x8cbf…89ba",

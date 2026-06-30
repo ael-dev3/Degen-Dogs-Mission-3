@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-29T23:27:19Z",
+    "activity_time_utc": "2026-06-30T00:17:43Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-29",
-      "native": "0.01128",
+      "eth_usd_price_date_utc": "2026-06-30",
+      "native": "0.01241",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "11280000000000000",
-      "usd_estimate": "18.15000000",
+      "raw": "12410000000000000",
+      "usd_estimate": "19.97000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.15",
+      "usd_estimate_display": "$19.97",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-29",
-      "usd_estimate_price_usd": "1609.0425531914893617021276595744680851063829787234042553191489361702127659574468",
+      "usd_estimate_price_date_utc": "2026-06-30",
+      "usd_estimate_price_usd": "1609.1861402095084609186140209508460918614020950846091861402095084609186140209508",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 4,
-      "last_bid_time_utc": "2026-06-29T23:27:19Z",
-      "unique_bidder_count": 4
+      "bid_count": 5,
+      "last_bid_time_utc": "2026-06-30T00:17:43Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
+      "0xe2e2304ccbb6dcc075caa1ab693aea97b0b3730cfed25dc3d1c7b3b3d8148973",
       "0x43c42515356f9b854ea3334306c597aa3df6f590ae8e56c0d189fe88cb32266c",
       "0x0d58f935f4372205cdd7cf5752f4a528e2332a6c75c398e32245caaec1454a8b",
       "0xecc2a910b57e18971591761b0a185b1246832ef39729bf51c61c30cc957f81d1",
@@ -47,7 +48,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog758",
-      "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
+      "explorer": "https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/758",
       "repo_archive": "archive/dogs/by-id/758.json",
       "settlement_tx": null
@@ -59,7 +60,7 @@
       "total": 759
     },
     "schema_version": 1,
-    "search_text": "dog 758 dog #758 758 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01128 eth 11280000000000000 18.15 $18.15 2026-06-29t23:27:19z #338/759 generated auction feed 0x43c42515356f9b854ea3334306c597aa3df6f590ae8e56c0d189fe88cb32266c 0x0d58f935f4372205cdd7cf5752f4a528e2332a6c75c398e32245caaec1454a8b 0xecc2a910b57e18971591761b0a185b1246832ef39729bf51c61c30cc957f81d1 0xf3b2a684a40ea7cff0ce7f159b3025d01e3d5ad17c242730a601345304bd37a4 background: none (90.3%) background none body: black (11.5%) body black neck: redcollar (30.8%) neck redcollar mouth: none (68.8%) mouth none ears: none (25.6%) ears none head: baseballcap (10.1%) head baseballcap eyes: 3dglasses (4.9%) eyes 3dglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 758 dog #758 758 mission 3 mission 3 base ongoing 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x1621…e3f7 0.01241 eth 12410000000000000 19.97 $19.97 2026-06-30t00:17:43z #338/759 generated auction feed 0xe2e2304ccbb6dcc075caa1ab693aea97b0b3730cfed25dc3d1c7b3b3d8148973 0x43c42515356f9b854ea3334306c597aa3df6f590ae8e56c0d189fe88cb32266c 0x0d58f935f4372205cdd7cf5752f4a528e2332a6c75c398e32245caaec1454a8b 0xecc2a910b57e18971591761b0a185b1246832ef39729bf51c61c30cc957f81d1 0xf3b2a684a40ea7cff0ce7f159b3025d01e3d5ad17c242730a601345304bd37a4 background: none (90.3%) background none body: black (11.5%) body black neck: redcollar (30.8%) neck redcollar mouth: none (68.8%) mouth none ears: none (25.6%) ears none head: baseballcap (10.1%) head baseballcap eyes: 3dglasses (4.9%) eyes 3dglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@skunkape",
+      "display": "0x1621…e3f7",
       "farcaster_fid": null,
-      "farcaster_handle": "skunkape",
-      "profile_url": "https://farcaster.xyz/skunkape",
-      "wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-      "wallet_explorer_url": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202"
+      "farcaster_handle": null,
+      "profile_url": "https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
+      "wallet": "0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7",
+      "wallet_explorer_url": "https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7"
     }
   },
   {
