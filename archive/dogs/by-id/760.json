@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "6050000000000000",
-      "usd_estimate": "9.66000000",
+      "usd_estimate": "9.63000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$9.66",
+      "usd_estimate_display": "$9.63",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-01",
-      "usd_estimate_price_usd": "1596.6942148760330578512396694214876033057851239669421487603305785123966942148760",
+      "usd_estimate_price_usd": "1591.7355371900826446280991735537190082644628099173553719008264462809917355371901",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 761
     },
     "schema_version": 1,
-    "search_text": "dog 760 dog #760 760 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00605 eth 6050000000000000 9.66 $9.66 2026-07-01t04:04:15z #434/761 generated auction feed 0x48676983001cb50e3d870a786cfd7c03765e89cb0a8bd0690cf8459d39ab56fb 0x7fb03c25b7f4d349b0f53866b06c4345e0e2558c5d50b6d52dee1cbe61fd9733 0x48494971026f0a6e43b8236241b952f0e75d89f13a4c4b12ebda203b289b4c18 background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.8%) ears loopearring head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 760 dog #760 760 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00605 eth 6050000000000000 9.63 $9.63 2026-07-01t04:04:15z #434/761 generated auction feed 0x48676983001cb50e3d870a786cfd7c03765e89cb0a8bd0690cf8459d39ab56fb 0x7fb03c25b7f4d349b0f53866b06c4345e0e2558c5d50b6d52dee1cbe61fd9733 0x48494971026f0a6e43b8236241b952f0e75d89f13a4c4b12ebda203b289b4c18 background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.8%) ears loopearring head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
