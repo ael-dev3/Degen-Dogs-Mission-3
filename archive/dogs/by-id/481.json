@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#694/760",
-      "rank": 694,
-      "total": 760
+      "display": "#693/761",
+      "rank": 693,
+      "total": 761
     },
     "schema_version": 1,
-    "search_text": "dog 481 dog #481 481 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xff872eb74e44e9d2284614f9080bfea8d593d1680f014424f9a3268a2e6b2a4d 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 #694/760 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: sunglasses 0xf09332b7e15f080f5f637d0d2c7f9b93b3472375f9ea09571f88bf29222022c7 chain_logs contract_getters",
+    "search_text": "dog 481 dog #481 481 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xff872eb74e44e9d2284614f9080bfea8d593d1680f014424f9a3268a2e6b2a4d 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 #693/761 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: sunglasses 0xf09332b7e15f080f5f637d0d2c7f9b93b3472375f9ea09571f88bf29222022c7 chain_logs contract_getters",
     "settlement": {
       "block_number": 26245226,
       "block_time_utc": "2025-09-08T13:34:53Z",
@@ -91,7 +91,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.2%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },

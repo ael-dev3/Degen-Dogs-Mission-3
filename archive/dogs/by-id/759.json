@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-06-30T00:24:40Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-06-30T15:34:55Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-01T00:25:21Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-06-30",
+      "amount_usd_at_event": "16.09192773",
+      "eth_usd_price_at_event": "1569.9441685094844",
+      "eth_usd_price_date_utc": "2026-07-01",
       "native": "0.01025",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10250000000000000",
-      "usd_estimate": "16.08000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.08",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-06-30",
-      "usd_estimate_price_usd": "1568.7804878048780487804878048780487804878048780487804878048780487804878048780488",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": "16.09192773",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.09",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-07-01",
+      "usd_estimate_price_usd": "1569.9441685094844",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -54,16 +54,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#684/760",
-      "rank": 684,
-      "total": 760
+      "display": "#686/761",
+      "rank": 686,
+      "total": 761
     },
     "schema_version": 1,
-    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base ongoing 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.08 $16.08 2026-06-30t15:34:55z #684/760 generated auction feed 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 background: none (90.3%) background none body: orange (8.7%) body orange neck: redcollar (30.9%) neck redcollar mouth: none (68.8%) mouth none ears: earbuds (32.4%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: none (18.2%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.09 $16.09 2026-07-01t00:25:21z #686/761 generated auction feed 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 background: none (90.3%) background none body: orange (8.8%) body orange neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (32.3%) ears earbuds head: baseballcap (10.2%) head baseballcap eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-01T00:25:21Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -77,7 +77,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.7%)",
+        "display": "Body: Orange (8.8%)",
         "trait_type": "Body",
         "value": "Orange"
       },
@@ -95,22 +95,22 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.2%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (18.2%)",
+        "display": "Eyes: None (18.1%)",
         "trait_type": "Eyes",
         "value": "None"
       }
