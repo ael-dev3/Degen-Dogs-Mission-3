@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "17.71000000",
+      "usd_estimate": "17.83000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.71",
+      "usd_estimate_display": "$17.83",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-01",
-      "usd_estimate_price_usd": "1.61E+3",
+      "usd_estimate_price_usd": "1620.9090909090909090909090909090909090909090909090909090909090909090909090909091",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -64,7 +64,7 @@
       "total": 761
     },
     "schema_version": 1,
-    "search_text": "dog 760 dog #760 760 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.011 eth 11000000000000000 17.71 $17.71 2026-07-01t17:02:01z #434/761 generated auction feed 0x9a468473a2e5ee6779fe58313d15ec394efbe6a9ab9196a29281660f6fc4b4d8 0xf0b04aa916395f89b885a42121e9bf5205b0d3059331e50d9bfba87c23c98dec 0xe2901f7e4c24da7048d1c8e4cf50a3f1d0bbde4a0fa7fbecf7bb83677c7d22b2 0x1434bed02dcb4a854750e22dc2ae5c21af83ddcfc6f591ec71f59bec986655bc 0x7e0f57ad329d774a0851ebecc5ad8cf9c5866e8588d9a279bb0237d764c682a5 0x48676983001cb50e3d870a786cfd7c03765e89cb0a8bd0690cf8459d39ab56fb 0x7fb03c25b7f4d349b0f53866b06c4345e0e2558c5d50b6d52dee1cbe61fd9733 0x48494971026f0a6e43b8236241b952f0e75d89f13a4c4b12ebda203b289b4c18 background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.8%) ears loopearring head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 760 dog #760 760 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.011 eth 11000000000000000 17.83 $17.83 2026-07-01t17:02:01z #434/761 generated auction feed 0x9a468473a2e5ee6779fe58313d15ec394efbe6a9ab9196a29281660f6fc4b4d8 0xf0b04aa916395f89b885a42121e9bf5205b0d3059331e50d9bfba87c23c98dec 0xe2901f7e4c24da7048d1c8e4cf50a3f1d0bbde4a0fa7fbecf7bb83677c7d22b2 0x1434bed02dcb4a854750e22dc2ae5c21af83ddcfc6f591ec71f59bec986655bc 0x7e0f57ad329d774a0851ebecc5ad8cf9c5866e8588d9a279bb0237d764c682a5 0x48676983001cb50e3d870a786cfd7c03765e89cb0a8bd0690cf8459d39ab56fb 0x7fb03c25b7f4d349b0f53866b06c4345e0e2558c5d50b6d52dee1cbe61fd9733 0x48494971026f0a6e43b8236241b952f0e75d89f13a4c4b12ebda203b289b4c18 background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.8%) ears loopearring head: whitemohawk (6.7%) head whitemohawk eyes: masksnorkel (9.2%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
