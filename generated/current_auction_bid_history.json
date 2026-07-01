@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-07-01 00:26:07",
+    "token_id": 760,
+    "dog": "Dog #760",
+    "bidder": "@biang-kerok.eth",
+    "bidder_url": "https://farcaster.xyz/biang-kerok.eth",
+    "bidder_wallet": "0x9f080983c678c6639f9a4de8f1feace2b2a1a54c",
+    "bid": "0.00500 ETH ($8)",
+    "bid_eth": 0.005,
+    "bid_usd": 7.83,
+    "eth_usd_price_live": "1565.24",
+    "eth_usd_price_date_utc": "2026-07-01",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 48038110,
+    "log_index": 284,
+    "tx_hash": "0x48494971026f0a6e43b8236241b952f0e75d89f13a4c4b12ebda203b289b4c18"
+  }
+]
