@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,48111522
-latest_block_time_utc,2026-07-02 17:13:11
+latest_block,48111609
+latest_block_time_utc,2026-07-02 17:16:05
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,762
@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.00924
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1695.8
+eth_usd_price,1697.48
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -43,10 +43,10 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.013866
 reward_total_flow_usd_per_day,10.71
 reward_total_per_dog_usd_per_day,0.080495
-reward_current_bid_payback_days,231.69
-reward_current_bid_daily_roi_pct,0.4316
-reward_current_bid_apr_pct,157.54
-reward_current_bid_apr_display,≈158% APR
+reward_current_bid_payback_days,231.94
+reward_current_bid_daily_roi_pct,0.4311
+reward_current_bid_apr_pct,157.37
+reward_current_bid_apr_display,≈157% APR
 woof_holders,365
 top_woof_holder,0x1c45…6637
 top_woof_holder_balance,49426735576.912781
@@ -54,7 +54,7 @@ farcaster_profiles_resolved,54
 current_auction_token_id,761
 current_auction_status,live
 current_bid_eth,0.011
-current_bid_usd,18.65
+current_bid_usd,18.67
 current_bidder,@aliyaindah
 current_bidder_wallet,0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d
 current_auction_end_utc,2026-07-03 01:56:55
@@ -96,7 +96,7 @@ season6_sup_estimate_status,estimated
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,82582.823184
+season6_sup_raw_allocated_to_date,82588.385501
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
