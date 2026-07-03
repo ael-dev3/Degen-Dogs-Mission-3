@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#260/762",
-      "rank": 260,
-      "total": 762
+      "display": "#259/763",
+      "rank": 259,
+      "total": 763
     },
     "schema_version": 1,
-    "search_text": "dog 584 dog #584 584 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 16666 degen 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 0x6939fb55e3ad2476cb7cb44be14b0555fd0a3223538bb5c56afa585cc5ce8edf #260/762 background: halo; body: orange; neck: none; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xa4dd527836b4b733890c19e4604be48b0726eb0308ef161d0ff99a1dfc8745ff chain_logs contract_getters",
+    "search_text": "dog 584 dog #584 584 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 16666 degen 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 0x6939fb55e3ad2476cb7cb44be14b0555fd0a3223538bb5c56afa585cc5ce8edf #259/763 background: halo; body: orange; neck: none; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xa4dd527836b4b733890c19e4604be48b0726eb0308ef161d0ff99a1dfc8745ff chain_logs contract_getters",
     "settlement": {
       "block_number": 26615094,
       "block_time_utc": "2026-01-01T07:59:54Z",
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.5%)",
+        "display": "Ears: None (25.4%)",
         "trait_type": "Ears",
         "value": "None"
       },

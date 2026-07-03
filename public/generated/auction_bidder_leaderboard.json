@@ -566,8 +566,8 @@
     "auctions_bid": 9,
     "bid_eth": 0.12658,
     "high_bid_eth": 0.01659,
-    "auction_wins": 0,
-    "winning_eth": 0.0,
+    "auction_wins": 1,
+    "winning_eth": 0.011,
     "latest_bid_token_id": 761,
     "latest_bid_utc": "2026-07-02 03:53:53"
   },
@@ -705,14 +705,14 @@
     "bidder": "@biang-kerok.eth",
     "bidder_url": "https://farcaster.xyz/biang-kerok.eth",
     "bidder_wallet": "0x9f080983c678c6639f9a4de8f1feace2b2a1a54c",
-    "bids": 8,
-    "auctions_bid": 6,
-    "bid_eth": 0.06805,
+    "bids": 9,
+    "auctions_bid": 7,
+    "bid_eth": 0.07039,
     "high_bid_eth": 0.01952,
     "auction_wins": 1,
     "winning_eth": 0.01331,
-    "latest_bid_token_id": 761,
-    "latest_bid_utc": "2026-07-02 01:58:09"
+    "latest_bid_token_id": 762,
+    "latest_bid_utc": "2026-07-03 02:11:11"
   },
   {
     "bidder": "0x1621…e3f7",
