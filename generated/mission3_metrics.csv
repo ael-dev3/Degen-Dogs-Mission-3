@@ -1,21 +1,21 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,48133591
-latest_block_time_utc,2026-07-03 05:28:49
+latest_block,48133626
+latest_block_time_utc,2026-07-03 05:29:59
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,763
 woof_token,0x3e5c4FA0cAA794516eD0DF77f31daA534918d492
 woof_symbol,WOOF
 woof_total_supply,100000000000
-woof_usd_price,0.0000004361
+woof_usd_price,0.0000004377
 woof_usd_source,dexscreener:aerodrome:0x1C453d1909a0AAe2011822dE50b40780a0c26637
 sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.009352
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1708.47
+eth_usd_price,1708.09
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -32,24 +32,24 @@ reward_basis_note,Observed 133-Dog reward stream snapshot supplied for dashboard
 reward_woof_received,N/A
 reward_woof_received_usd,N/A
 reward_woof_flow_per_day,20494201.3
-reward_woof_flow_usd_per_day,8.94
+reward_woof_flow_usd_per_day,8.97
 reward_woof_per_dog_per_day,154091.739097744361
-reward_woof_per_dog_usd_per_day,0.067199
+reward_woof_per_dog_usd_per_day,0.067446
 reward_sup_received,N/A
 reward_sup_received_usd,N/A
 reward_sup_flow_per_day,199.58
 reward_sup_flow_usd_per_day,1.87
 reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.014034
-reward_total_flow_usd_per_day,10.8
-reward_total_per_dog_usd_per_day,0.081233
-reward_current_bid_payback_days,59.7
-reward_current_bid_daily_roi_pct,1.6749
-reward_current_bid_apr_pct,611.34
-reward_current_bid_apr_display,≈611% APR
+reward_total_flow_usd_per_day,10.84
+reward_total_per_dog_usd_per_day,0.08148
+reward_current_bid_payback_days,59.52
+reward_current_bid_daily_roi_pct,1.68
+reward_current_bid_apr_pct,613.2
+reward_current_bid_apr_display,≈613% APR
 woof_holders,367
 top_woof_holder,0x1c45…6637
-top_woof_holder_balance,49427728794.302628
+top_woof_holder_balance,49431974823.412163
 farcaster_profiles_resolved,54
 current_auction_token_id,762
 current_auction_status,live
@@ -96,7 +96,7 @@ season6_sup_estimate_status,cap_limited_incremental
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,83993.797558
+season6_sup_raw_allocated_to_date,83996.035272
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
