@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#519/763",
+      "display": "#519/764",
       "rank": 519,
-      "total": 763
+      "total": 764
     },
     "schema_version": 1,
-    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.9 $20.90 2026-06-29t00:22:15z #519/763 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.3%) background none body: white (11.4%) body white neck: goldnecklace (19.7%) neck goldnecklace mouth: tongue (9.7%) mouth tongue ears: earbuds (32.4%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.4%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.9 $20.90 2026-06-29t00:22:15z #519/764 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.3%) background none body: white (11.4%) body white neck: goldnecklace (19.6%) neck goldnecklace mouth: tongue (9.7%) mouth tongue ears: earbuds (32.3%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-29T00:22:15Z",
@@ -91,7 +91,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.7%)",
+        "display": "Neck: GoldNecklace (19.6%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -111,7 +111,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.4%)",
+        "display": "Eyes: VRGoggles (10.3%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

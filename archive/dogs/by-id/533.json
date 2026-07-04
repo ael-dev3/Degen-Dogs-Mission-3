@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#600/763",
-      "rank": 600,
-      "total": 763
+      "display": "#601/764",
+      "rank": 601,
+      "total": 764
     },
     "schema_version": 1,
-    "search_text": "dog 533 dog #533 533 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2121 degen 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 0xf4c303c5423f6216fac7f7487c9f5f2ada7786812438cdbc1b46ab6c72e11ea3 #600/763 background: none; body: dalmation; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: vrgoggles 0xd593ee4491f629b68d4205db90b38aba1735d3968a23cde508573348f9842ef1 chain_logs contract_getters",
+    "search_text": "dog 533 dog #533 533 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2121 degen 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 0xf4c303c5423f6216fac7f7487c9f5f2ada7786812438cdbc1b46ab6c72e11ea3 #601/764 background: none; body: dalmation; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: vrgoggles 0xd593ee4491f629b68d4205db90b38aba1735d3968a23cde508573348f9842ef1 chain_logs contract_getters",
     "settlement": {
       "block_number": 26455079,
       "block_time_utc": "2025-11-11T02:08:06Z",
@@ -86,17 +86,17 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (39.6%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -106,7 +106,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.4%)",
+        "display": "Eyes: VRGoggles (10.3%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

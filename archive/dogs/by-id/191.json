@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#26/763",
+      "display": "#26/764",
       "rank": 26,
-      "total": 763
+      "total": 764
     },
     "schema_version": 1,
-    "search_text": "dog 191 dog #191 191 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 #26/763 background: none; body: brown; neck: none; mouth: coin; ears: none; head: stripedbeanie; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 191 dog #191 191 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 #26/764 background: none; body: brown; neck: none; mouth: coin; ears: none; head: stripedbeanie; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 40367897,
       "block_time_utc": "2023-03-15T08:54:46Z",
@@ -86,7 +86,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.6%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
