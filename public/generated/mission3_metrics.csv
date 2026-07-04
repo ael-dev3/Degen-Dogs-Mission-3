@@ -1,8 +1,8 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,48170015
-latest_block_time_utc,2026-07-04 01:42:57
+latest_block,48170358
+latest_block_time_utc,2026-07-04 01:54:23
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
 dog_nft,0x09154248fFDbaF8aA877aE8A4bf8cE1503596428
 dog_total_supply,763
@@ -15,7 +15,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.009623
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1745.71
+eth_usd_price,1745.96
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -43,9 +43,9 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.01444
 reward_total_flow_usd_per_day,11.19
 reward_total_per_dog_usd_per_day,0.084136
-reward_current_bid_payback_days,193.73
-reward_current_bid_daily_roi_pct,0.5162
-reward_current_bid_apr_pct,188.4
+reward_current_bid_payback_days,193.85
+reward_current_bid_daily_roi_pct,0.5159
+reward_current_bid_apr_pct,188.29
 reward_current_bid_apr_display,≈188% APR
 woof_holders,367
 top_woof_holder,0x1c45…6637
@@ -54,7 +54,7 @@ farcaster_profiles_resolved,54
 current_auction_token_id,762
 current_auction_status,live
 current_bid_eth,0.00934
-current_bid_usd,16.3
+current_bid_usd,16.31
 current_bidder,@badadan
 current_bidder_wallet,0xa2648350f3566e4f18a9519734928d08d3ea08c4
 current_auction_end_utc,2026-07-04 02:10:29
@@ -89,14 +89,14 @@ season6_sup_current_bid_projected_total_without_win_sup,11357.549108
 season6_sup_current_bidder_prior_s6_wins,2
 season6_sup_current_bidder_prior_s6_xp,200
 season6_sup_current_bidder_wallet,0xa2648350f3566e4f18a9519734928d08d3ea08c4
-season6_sup_days_remaining,58.93
+season6_sup_days_remaining,58.92
 season6_sup_enabled,true
 season6_sup_end_utc,2026-09-01T00:00:00Z
 season6_sup_estimate_status,cap_limited_incremental
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,86322.554212
+season6_sup_raw_allocated_to_date,86344.483806
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
