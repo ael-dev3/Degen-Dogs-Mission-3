@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#483/764",
+      "display": "#483/765",
       "rank": 483,
-      "total": 764
+      "total": 765
     },
     "schema_version": 1,
-    "search_text": "dog 347 dog #347 347 mission 2 mission 2 degen chain settled 0xf9ce34dfcd3cc92804772f3022af27bcd5e43ff2 0xf9ce…3ff2 7777 degen 0x6cd7b85dce334176bd346ce4deae3f7d7cdbf186827c4a4592cba7124f394d63 0xd1cb59532c4905c87e4f1b0f2cf043e41c2bca2832db0fc05dd599ffb1a28bff #483/764 background: none; body: white; neck: none; mouth: none; ears: earbuds; head: hoodie; eyes: sunglasses 0xdf4e451fca57e0f76711542952b026862a643b6c32aa2a6c85aa1646f00ae3cc 0x9615e35f43bbf585bf5c37b9667f6764e02861ded4bbe5a1b88838aeeccc2860 0xf624eeb1890625290a391025e499dd598a0e99c0a426c1cef0d0521bfca8d7cb chain_logs contract_getters",
+    "search_text": "dog 347 dog #347 347 mission 2 mission 2 degen chain settled 0xf9ce34dfcd3cc92804772f3022af27bcd5e43ff2 0xf9ce…3ff2 7777 degen 0x6cd7b85dce334176bd346ce4deae3f7d7cdbf186827c4a4592cba7124f394d63 0xd1cb59532c4905c87e4f1b0f2cf043e41c2bca2832db0fc05dd599ffb1a28bff #483/765 background: none; body: white; neck: none; mouth: none; ears: earbuds; head: hoodie; eyes: sunglasses 0xdf4e451fca57e0f76711542952b026862a643b6c32aa2a6c85aa1646f00ae3cc 0x9615e35f43bbf585bf5c37b9667f6764e02861ded4bbe5a1b88838aeeccc2860 0xf624eeb1890625290a391025e499dd598a0e99c0a426c1cef0d0521bfca8d7cb chain_logs contract_getters",
     "settlement": {
       "block_number": 25718244,
       "block_time_utc": "2025-04-14T08:32:36Z",
@@ -88,17 +88,17 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: Sunglasses (14.7%)",
+        "display": "Eyes: Sunglasses (14.6%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
