@@ -19873,13 +19873,13 @@
     "dog_external_url": "https://degendogs.club/#dog764",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
+    "winner": "@thec1",
+    "winner_url": "https://farcaster.xyz/thec1",
+    "winner_wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "amount": "0.00100 ETH ($2)",
     "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-07-05 02:20:03",
     "settled_time_utc": "",
     "rarity": "#121/765",
@@ -19887,6 +19887,6 @@
     "trait_rarity": "Background: None (90.3%); Body: Blue (9.2%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.4%); Ears: Earbuds (32.4%); Head: None (20.4%); Eyes: MaskSnorkel (9.3%)",
     "confidence": "verified_live_base_logs",
     "sources": "base_logs,dashboard_builder",
-    "search_text": "3 Base 8453 764 Dog #764 https://api.degendogs.club/images/764.png https://degendogs.club/#dog764 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-07-05 02:20:03 #121/765 Background: None; Body: Blue; Neck: StuddedCollar; Mouth: Teeth; Ears: Earbuds; Head: None; Eyes: MaskSnorkel Background: None (90.3%); Body: Blue (9.2%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.4%); Ears: Earbuds (32.4%); Head: None (20.4%); Eyes: MaskSnorkel (9.3%) verified_live_base_logs base_logs,dashboard_builder"
+    "search_text": "3 Base 8453 764 Dog #764 https://api.degendogs.club/images/764.png https://degendogs.club/#dog764 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764 live @thec1 https://farcaster.xyz/thec1 0xd29c790466675153a50df7860b9efdb689a21cde 0.00100 ETH ($2) 1 1 2026-07-05 02:20:03 #121/765 Background: None; Body: Blue; Neck: StuddedCollar; Mouth: Teeth; Ears: Earbuds; Head: None; Eyes: MaskSnorkel Background: None (90.3%); Body: Blue (9.2%); Neck: StuddedCollar (10.1%); Mouth: Teeth (5.4%); Ears: Earbuds (32.4%); Head: None (20.4%); Eyes: MaskSnorkel (9.3%) verified_live_base_logs base_logs,dashboard_builder"
   }
 ]
