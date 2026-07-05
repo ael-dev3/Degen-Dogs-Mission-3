@@ -9,10 +9,7 @@
       "start_date": "2022-03-17"
     }
   },
-  "errors": [
-    "DEGEN: CoinGecko failed: CoinGecko fetch failed for degen-base: HTTP Error 401: Unauthorized",
-    "ETH: CoinGecko failed: CoinGecko fetch failed for ethereum: HTTP Error 429: Too Many Requests"
-  ],
+  "errors": [],
   "notes": [
     "Missing source/API coverage leaves downstream USD estimates null; no zero fills are used."
   ],
@@ -25,5 +22,5 @@
   "sources": [
     "defillama_coin_prices"
   ],
-  "updated_at_utc": "2026-07-05T18:50:27Z"
+  "updated_at_utc": "2026-07-05T19:06:01Z"
 }

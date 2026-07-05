@@ -54,12 +54,12 @@ The publish script owns the reliable refresh sequence:
 - LaunchAgent label: `com.ael.degendogs.mission3.watch-auction`
 - Installer: `scripts/install_auction_watcher_launchd.sh`
 - NPM helper: `npm run watch:install`
-- Default interval: `60` seconds
+- Default interval: `120` seconds
 - Main command: `python3 scripts/watch_mission3_onchain_activity.py --once`
 - Publish mode command: `MISSION3_REFRESH_COMMAND="npm run refresh:publish"`
 - Publish mode gate: `MISSION3_WATCHER_AUTO_PUSH=1`
 
-The watcher is a one-shot job scheduled every minute, not a long-running public server.
+The watcher is a one-shot job scheduled every two minutes, not a long-running public server.
 It checks recent auction-house logs and direct `auction()` state for meaningful changes:
 
 - `AuctionBid`, including same-token higher bids,

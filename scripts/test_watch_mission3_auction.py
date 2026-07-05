@@ -748,9 +748,10 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     assert config.auto_push is False
     assert config.refresh_command == "npm run data && npm run build"
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
-    assert config.interval_seconds == 60
+    assert config.interval_seconds == 120
     assert config.cooldown_seconds == 180
     assert config.bid_cooldown_seconds == 60
+    assert config.force_after_seconds == 0
     assert config.refresh_lock_path and config.refresh_lock_path.name == "refresh.lock"
 
     env = {"MISSION3_WATCHER_AUTO_PUSH": "1"}

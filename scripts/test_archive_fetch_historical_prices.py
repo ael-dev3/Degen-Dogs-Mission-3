@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 from datetime import date
@@ -62,6 +63,29 @@ def test_no_eth_window_does_not_invent_one() -> None:
 
     assert "ETH" not in windows
     assert windows["DEGEN"] == (date(2026, 1, 6), date(2026, 1, 6))
+
+
+def test_defillama_is_preferred_by_default_to_avoid_coingecko_rate_limits() -> None:
+    prices = load_module()
+    original = os.environ.pop("HISTORICAL_PRICES_PREFER_COINGECKO", None)
+    try:
+        assert prices.price_source_order("ethereum", "coingecko:ethereum") == ["defillama", "coingecko"]
+    finally:
+        if original is not None:
+            os.environ["HISTORICAL_PRICES_PREFER_COINGECKO"] = original
+
+
+def test_coingecko_can_be_explicitly_preferred() -> None:
+    prices = load_module()
+    original = os.environ.get("HISTORICAL_PRICES_PREFER_COINGECKO")
+    os.environ["HISTORICAL_PRICES_PREFER_COINGECKO"] = "1"
+    try:
+        assert prices.price_source_order("ethereum", "coingecko:ethereum") == ["coingecko", "defillama"]
+    finally:
+        if original is None:
+            os.environ.pop("HISTORICAL_PRICES_PREFER_COINGECKO", None)
+        else:
+            os.environ["HISTORICAL_PRICES_PREFER_COINGECKO"] = original
 
 
 if __name__ == "__main__":

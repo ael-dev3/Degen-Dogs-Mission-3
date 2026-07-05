@@ -45,6 +45,7 @@ Fill only the values you need in `.env.local`.
 | `MISSION3_FROM_BLOCK`, `MISSION3_TO_BLOCK`, `MISSION3_LOG_CHUNK`, `MISSION3_LOG_WORKERS` | Mission 3 archive bounds/tuning. | no |
 | `MISSION3_ARCHIVE_DB`, `MISSION3_OUTPUT_DIR` | Mission 3 archive local paths. | can reveal local paths |
 | `COINGECKO_API_KEY` | Optional historical price fetching. | yes |
+| `HISTORICAL_PRICES_PREFER_COINGECKO` | Optional override to try CoinGecko before DefiLlama for historical price refreshes; default off to avoid public API 429s. | no |
 | `DUNE_API_KEY` | Optional Dune discovery/recovery work where query IDs are available. | yes |
 
 ## Onchain watcher variables
@@ -53,10 +54,10 @@ These keep Mission 3 current-auction data fresher than the hourly baseline witho
 
 | Variable | Purpose | Sensitive? |
 | --- | --- | --- |
-| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 60 seconds. | no |
+| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 120 seconds. | no |
 | `MISSION3_WATCHER_COOLDOWN_SECONDS` | Minimum delay between non-bid, non-major refreshes. | no |
 | `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` | Shorter minimum delay for same-token bid amount/high-bidder refreshes; default 60 seconds. | no |
-| `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; hourly refresh remains the baseline. | no |
+| `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; default `0` disables duplicate time-based watcher refreshes because hourly refresh remains the baseline. | no |
 | `MISSION3_WATCHER_LOOKBACK_BLOCKS` | Recent block lookback for missing state. | no |
 | `MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS` | Overlap subtracted from `last_checked_block + 1` to avoid missed logs. | no |
 | `MISSION3_WATCHER_LOG_CHUNK` | Max blocks per `eth_getLogs` request. | no |

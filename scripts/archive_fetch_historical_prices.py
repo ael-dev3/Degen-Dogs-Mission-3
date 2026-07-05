@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections import defaultdict
@@ -22,6 +23,30 @@ GENERATED = ROOT / "archive" / "prices" / "data" / "generated"
 RAW = ROOT / "archive" / "prices" / "data" / "raw"
 UNIFIED = ROOT / "archive" / "data" / "generated" / "unified_dog_search_index.json"
 CG_BASE = "https://api.coingecko.com/api/v3"
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def price_source_order(coingecko_id: Any, defillama_coin: Any) -> list[str]:
+    """Return provider order for historical prices.
+
+    Public CoinGecko frequently rate-limits long market_chart/range calls on the
+    local runner. Prefer DefiLlama's coin chart when available; keep CoinGecko as
+    an explicit opt-in or fallback for assets without DefiLlama coverage.
+    """
+    order: list[str] = []
+    if env_bool("HISTORICAL_PRICES_PREFER_COINGECKO", False) and coingecko_id:
+        order.append("coingecko")
+    if defillama_coin:
+        order.append("defillama")
+    if coingecko_id and "coingecko" not in order:
+        order.append("coingecko")
+    return order
 
 
 def utc_now() -> str:
@@ -107,6 +132,20 @@ def fetch_coingecko_range(coingecko_id: str, start: date, end: date) -> dict[str
             req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=60) as response:
                 return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if attempt == 3:
+                break
+            retry_after = exc.headers.get("Retry-After") if exc.headers else None
+            try:
+                delay = int(str(retry_after).strip()) if retry_after else 0
+            except ValueError:
+                delay = 0
+            if exc.code == 429:
+                delay = max(delay, 30 * (attempt + 1))
+            else:
+                delay = max(delay, 2 * (attempt + 1))
+            time.sleep(min(delay, 180))
         except Exception as exc:  # noqa: BLE001
             last_error = exc
             if attempt == 3:
@@ -239,31 +278,34 @@ def main() -> None:
         coingecko_id = asset_cfg.get("coingecko_id")
         defillama_coin = asset_cfg.get("defillama_coin")
         fetched = False
-        if coingecko_id:
-            try:
-                payload = fetch_coingecko_range(str(coingecko_id), start, end)
-                raw_path = RAW / f"coingecko_{asset_key.lower()}_{start.isoformat()}_{end.isoformat()}.json"
-                write_json(raw_path, {"asset_key": asset_key, "start_date": start.isoformat(), "end_date": end.isoformat(), "payload": payload})
-                source_files.append(str(raw_path.relative_to(ROOT)))
-                rows.extend(daily_rows_from_coingecko(asset_key, asset_cfg, payload))
-                used_sources.add("coingecko_market_chart_range")
-                fetched = True
-            except Exception as exc:  # noqa: BLE001
-                errors.append(f"{asset_key}: CoinGecko failed: {exc}")
-        if not fetched and defillama_coin:
-            try:
-                payload = fetch_defillama_chart(str(defillama_coin), start, end)
-                raw_path = RAW / f"defillama_{asset_key.lower()}_{start.isoformat()}_{end.isoformat()}.json"
-                write_json(raw_path, {"asset_key": asset_key, "start_date": start.isoformat(), "end_date": end.isoformat(), "payload": payload})
-                source_files.append(str(raw_path.relative_to(ROOT)))
-                fallback_rows = daily_rows_from_defillama(asset_key, asset_cfg, payload)
-                if not fallback_rows:
-                    raise RuntimeError("DefiLlama returned no chart rows")
-                rows.extend(fallback_rows)
-                used_sources.add("defillama_coin_prices")
-                fetched = True
-            except Exception as exc:  # noqa: BLE001
-                errors.append(f"{asset_key}: DefiLlama failed: {exc}")
+        for source in price_source_order(coingecko_id, defillama_coin):
+            if source == "coingecko" and coingecko_id:
+                try:
+                    payload = fetch_coingecko_range(str(coingecko_id), start, end)
+                    raw_path = RAW / f"coingecko_{asset_key.lower()}_{start.isoformat()}_{end.isoformat()}.json"
+                    write_json(raw_path, {"asset_key": asset_key, "start_date": start.isoformat(), "end_date": end.isoformat(), "payload": payload})
+                    source_files.append(str(raw_path.relative_to(ROOT)))
+                    rows.extend(daily_rows_from_coingecko(asset_key, asset_cfg, payload))
+                    used_sources.add("coingecko_market_chart_range")
+                    fetched = True
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(f"{asset_key}: CoinGecko failed: {exc}")
+            elif source == "defillama" and defillama_coin:
+                try:
+                    payload = fetch_defillama_chart(str(defillama_coin), start, end)
+                    raw_path = RAW / f"defillama_{asset_key.lower()}_{start.isoformat()}_{end.isoformat()}.json"
+                    write_json(raw_path, {"asset_key": asset_key, "start_date": start.isoformat(), "end_date": end.isoformat(), "payload": payload})
+                    source_files.append(str(raw_path.relative_to(ROOT)))
+                    fallback_rows = daily_rows_from_defillama(asset_key, asset_cfg, payload)
+                    if not fallback_rows:
+                        raise RuntimeError("DefiLlama returned no chart rows")
+                    rows.extend(fallback_rows)
+                    used_sources.add("defillama_coin_prices")
+                    fetched = True
+                except Exception as exc:  # noqa: BLE001
+                    errors.append(f"{asset_key}: DefiLlama failed: {exc}")
+            if fetched:
+                break
         if not fetched:
             errors.append(f"{asset_key}: no price source produced rows")
 

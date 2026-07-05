@@ -26,7 +26,7 @@ There are two local runners. They are intentionally separate:
    - launchd label: `com.ael.degendogs.mission3.watch-auction`
    - installer: `scripts/install_auction_watcher_launchd.sh`
    - npm command: `npm run watch:install`
-   - interval: `MISSION3_WATCHER_INTERVAL_SECONDS`, default `60`
+   - interval: `MISSION3_WATCHER_INTERVAL_SECONDS`, default `120`
    - action: runs `python3 scripts/watch_mission3_onchain_activity.py --once`
    - purpose: cheaply scan Base auction activity and trigger the refresh/publish flow
      soon after new bids or auction-state changes.
@@ -107,7 +107,8 @@ Expected watcher configuration:
 
 - `ProgramArguments` ends with `watch_mission3_onchain_activity.py --once`
 - `WorkingDirectory` is the absolute repo path
-- `StartInterval` is `60` unless intentionally overridden
+- `StartInterval` is `120` unless intentionally overridden
+- `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0` when hourly refresh is installed, so the watcher only triggers full refreshes on auction events instead of duplicating the hourly baseline
 - `MISSION3_WATCHER_AUTO_PUSH=1` for publishing mode
 - `MISSION3_REFRESH_COMMAND=npm run refresh:publish` for publishing mode
 - `MISSION3_REFRESH_LOCK_PATH` points at `$HOME/Library/Caches/degen-dogs-mission3/refresh.lock`

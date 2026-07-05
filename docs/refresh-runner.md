@@ -73,7 +73,7 @@ A refresh is triggered when any of these are new or changed:
 - `AuctionSettled` log or current settled flag,
 - `AuctionExtended` log or end time,
 - contract-read current auction token, bidder, amount, or settled state differs from tracker state,
-- optional force interval via `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS`.
+- optional force interval via `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` when no hourly fallback is installed.
 
 On first run with no state, the tracker initializes a baseline from latest onchain state and `generated/current_auction.csv`. It does not force a full refresh unless `--force-refresh` / `npm run watch:onchain:force` is used, or the detected contract state already differs from the dashboard baseline.
 
@@ -82,10 +82,10 @@ On first run with no state, the tracker initializes a baseline from latest oncha
 Defaults:
 
 ```bash
-MISSION3_WATCHER_INTERVAL_SECONDS=60
+MISSION3_WATCHER_INTERVAL_SECONDS=120
 MISSION3_WATCHER_COOLDOWN_SECONDS=180
 MISSION3_WATCHER_BID_COOLDOWN_SECONDS=60
-MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=3600
+MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0
 MISSION3_WATCHER_LOOKBACK_BLOCKS=2000
 MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS=50
 MISSION3_WATCHER_LOG_CHUNK=2000
@@ -98,6 +98,7 @@ Rules:
 - Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.
 - Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (60s default) instead of the longer general cooldown, so real new bids publish quickly without commit-spamming every repeated signal.
+- Time-based force refresh is disabled by default. Keep the hourly LaunchAgent as the baseline and enable `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` only if the watcher is the sole runner, otherwise the watcher and hourly runner both perform full API-heavy refreshes.
 - Bid-only and extension-only changes inside their active cooldown are stored as `pending_refresh` and retried after cooldown.
 - Failed, deferred, or lock-blocked refreshes also stay pending. The watcher may advance `last_checked_*` and `last_observed_*` for operator visibility, but `last_seen_*` is the published/acknowledged cursor and only advances after a successful refresh command (or dry-run acknowledgement). This prevents a same-token bid from being observed once, failing to publish, and then being suppressed as already handled.
 - Direct `auction()` end-time changes trigger `auction_end_time_changed` even if the `AuctionExtended` log was missed.
@@ -194,7 +195,7 @@ MISSION3_REFRESH_COMMAND="npm run refresh:publish" \
 npm run watch:install
 ```
 
-Both LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs.
+Both LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 120 seconds to reduce public Base RPC pressure while keeping auction changes fresh.
 
 Useful status checks:
 
@@ -212,7 +213,7 @@ Do not commit machine-specific plist files, private RPC URLs, logs, or local sta
 ## Cron watcher example
 
 ```cron
-* * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
+*/2 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
 ```
 
 ## Inspecting local state
