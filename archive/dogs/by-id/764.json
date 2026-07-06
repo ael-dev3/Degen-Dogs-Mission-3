@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-07-05T02:21:10Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-06T02:16:01Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-06T02:22:31Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-07-06",
+      "amount_usd_at_event": "19.61797635",
+      "eth_usd_price_at_event": "1783.452395629129",
+      "eth_usd_price_date_utc": "2026-07-05",
       "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.58000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$19.58",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-07-06",
-      "usd_estimate_price_usd": "1.78E+3",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": "19.61797635",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$19.62",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-07-05) 0.10 day(s) from event.",
+      "usd_estimate_price_date_utc": "2026-07-05",
+      "usd_estimate_price_usd": "1783.452395629129",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -55,16 +55,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#121/765",
+      "display": "#121/766",
       "rank": 121,
-      "total": 765
+      "total": 766
     },
     "schema_version": 1,
-    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base ongoing 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.58 $19.58 2026-07-06t02:16:01z #121/765 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.2%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.62 $19.62 2026-07-06t02:22:31z #121/766 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.1%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-06T02:22:31Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -78,7 +78,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -86,7 +86,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.2%)",
+        "display": "Body: Blue (9.1%)",
         "trait_type": "Body",
         "value": "Blue"
       },
