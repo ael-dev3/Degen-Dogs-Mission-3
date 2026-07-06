@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "18.12000000",
+      "usd_estimate": "18.06000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.12",
+      "usd_estimate_display": "$18.06",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-06",
-      "usd_estimate_price_usd": "1812",
+      "usd_estimate_price_usd": "1806",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 766
     },
     "schema_version": 1,
-    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.12 $18.12 2026-07-06t09:14:41z #343/766 generated auction feed 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c background: none (90.3%) background none body: orange (8.9%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.0%) ears loopearring head: unicorn (4.8%) head unicorn eyes: glasses (12.5%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.06 $18.06 2026-07-06t09:14:41z #343/766 generated auction feed 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c background: none (90.3%) background none body: orange (8.9%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.0%) ears loopearring head: unicorn (4.8%) head unicorn eyes: glasses (12.5%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -127,19 +127,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-06T02:22:31Z",
     "amount": {
-      "amount_usd_at_event": "19.92999223",
-      "eth_usd_price_at_event": "1811.8174752453465",
+      "amount_usd_at_event": "19.87655111",
+      "eth_usd_price_at_event": "1806.959192111338",
       "eth_usd_price_date_utc": "2026-07-06",
       "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.92999223",
+      "usd_estimate": "19.87655111",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$19.93",
+      "usd_estimate_display": "$19.88",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-06",
-      "usd_estimate_price_usd": "1811.8174752453465",
+      "usd_estimate_price_usd": "1806.959192111338",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -183,7 +183,7 @@
       "total": 766
     },
     "schema_version": 1,
-    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.93 $19.93 2026-07-06t02:22:31z #121/766 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.1%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.88 $19.88 2026-07-06t02:22:31z #121/766 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.1%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-06T02:22:31Z",

@@ -4,8 +4,8 @@
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 765,
-    "estimated_usd_display": "$18.12",
-    "estimated_usd_value": "18.12000000",
+    "estimated_usd_display": "$18.06",
+    "estimated_usd_value": "18.06000000",
     "eth_usd_price_at_event": null,
     "eth_usd_price_date_utc": "2026-07-06",
     "event_time_utc": "2026-07-06T09:14:41Z",
@@ -22,16 +22,16 @@
     "price_source": "current_eth_usd_price",
     "price_source_detail": "coinbase",
     "price_status": "priced",
-    "price_usd": "1812"
+    "price_usd": "1806"
   },
   {
-    "amount_usd_at_event": "19.92999223",
+    "amount_usd_at_event": "19.87655111",
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 764,
-    "estimated_usd_display": "$19.93",
-    "estimated_usd_value": "19.92999223",
-    "eth_usd_price_at_event": "1811.8174752453465",
+    "estimated_usd_display": "$19.88",
+    "estimated_usd_value": "19.87655111",
+    "eth_usd_price_at_event": "1806.959192111338",
     "eth_usd_price_date_utc": "2026-07-06",
     "event_time_utc": "2026-07-06T02:22:31Z",
     "event_tx_hash": null,
@@ -47,7 +47,7 @@
     "price_source": "defillama_coin_prices",
     "price_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "price_status": "priced",
-    "price_usd": "1811.8174752453465"
+    "price_usd": "1806.959192111338"
   },
   {
     "amount_usd_at_event": "21.57977399",

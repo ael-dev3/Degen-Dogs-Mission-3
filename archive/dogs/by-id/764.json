@@ -4,19 +4,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-06T02:22:31Z",
     "amount": {
-      "amount_usd_at_event": "19.92999223",
-      "eth_usd_price_at_event": "1811.8174752453465",
+      "amount_usd_at_event": "19.87655111",
+      "eth_usd_price_at_event": "1806.959192111338",
       "eth_usd_price_date_utc": "2026-07-06",
       "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.92999223",
+      "usd_estimate": "19.87655111",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$19.93",
+      "usd_estimate_display": "$19.88",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-06",
-      "usd_estimate_price_usd": "1811.8174752453465",
+      "usd_estimate_price_usd": "1806.959192111338",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -60,7 +60,7 @@
       "total": 766
     },
     "schema_version": 1,
-    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.93 $19.93 2026-07-06t02:22:31z #121/766 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.1%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.88 $19.88 2026-07-06t02:22:31z #121/766 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.3%) background none body: blue (9.1%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.3%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-06T02:22:31Z",
