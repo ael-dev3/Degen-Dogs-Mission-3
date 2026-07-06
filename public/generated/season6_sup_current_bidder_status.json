@@ -1,1 +1,33 @@
-[]
+[
+  {
+    "current_auction_token_id": 765,
+    "current_bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
+    "current_bidder_display": "@badadan",
+    "current_bid_eth": "0.0009",
+    "current_bid_usd": "1.59",
+    "current_auction_end_utc": "2026-07-07T02:22:31Z",
+    "prior_s6_wins_confirmed": 3,
+    "prior_s6_xp_confirmed": 300,
+    "prior_s6_raw_sup_projected_full": "19795.632739",
+    "prior_s6_capped_sup_projected_full": "12500",
+    "prior_s6_cap_remaining_sup": "0",
+    "projected_s6_wins_if_current_bid_wins": 4,
+    "projected_s6_xp_if_current_bid_wins": 400,
+    "projected_raw_sup_if_current_bid_wins": "16814.353539",
+    "projected_capped_sup_if_current_bid_wins": "12500",
+    "projected_cap_remaining_sup_if_current_bid_wins": "0",
+    "projected_raw_usd_if_current_bid_wins": "156.17",
+    "projected_capped_usd_if_current_bid_wins": "116.1",
+    "projected_total_without_current_win_sup": "14305.383604",
+    "projected_total_with_current_win_sup": "16814.353539",
+    "estimated_raw_incremental_sup": "2508.969935",
+    "estimated_cap_aware_incremental_sup": "0",
+    "estimated_cap_aware_incremental_usd": "0",
+    "cap_remaining_before_current_win_sup": "0",
+    "future_dilution_enabled": "true",
+    "expected_future_settlement_interval_seconds": "86400",
+    "current_bidder_cap_status": "wallet_near_cap",
+    "estimate_status": "wallet_near_cap",
+    "projection_note": "cap-aware incremental estimate; future daily dilution projected; cap overflow redistribution not assumed"
+  }
+]
