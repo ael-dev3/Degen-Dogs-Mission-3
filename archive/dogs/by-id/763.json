@@ -4,19 +4,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-05T02:20:03Z",
     "amount": {
-      "amount_usd_at_event": "21.61330001",
-      "eth_usd_price_at_event": "1786.2231414886437",
+      "amount_usd_at_event": "21.57977399",
+      "eth_usd_price_at_event": "1783.452395629129",
       "eth_usd_price_date_utc": "2026-07-05",
       "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
-      "usd_estimate": "21.61330001",
+      "usd_estimate": "21.57977399",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$21.61",
+      "usd_estimate_display": "$21.58",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-05",
-      "usd_estimate_price_usd": "1786.2231414886437",
+      "usd_estimate_price_usd": "1783.452395629129",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -62,7 +62,7 @@
       "total": 765
     },
     "schema_version": 1,
-    "search_text": "dog 763 dog #763 763 mission 3 mission 3 base settled 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x1621…e3f7 0.0121 eth 12100000000000000 21.61 $21.61 2026-07-05t02:20:03z #85/765 generated auction feed 0x785dd33d28df579bbb07212df418429949a836ccb55b065cb5b3d0310139c9db 0x30a5143eeed65b3e194c6d751e2422c8db506a26b62801d8dc84c907714c6b79 0x5e73029b27c4242883d8a263dd98ae5168a9cd373c5e11b40dbfa6f95c22eed5 0xf6093434dab50c94d10835988f4618bcebe61bc20fb101bfec9ab48b206bca37 0xd68455dfb74161b31009ff5cf79979056ea174ffe38b3194cbf1ee446cd60bef 0x29d8d6a1a62cdba76849c58c1a36f3965412153cd770d7e719cf827b00fb16e2 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: none (39.6%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.9%) ears loopearring head: partyhat (4.4%) head partyhat eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 763 dog #763 763 mission 3 mission 3 base settled 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x1621…e3f7 0.0121 eth 12100000000000000 21.58 $21.58 2026-07-05t02:20:03z #85/765 generated auction feed 0x785dd33d28df579bbb07212df418429949a836ccb55b065cb5b3d0310139c9db 0x30a5143eeed65b3e194c6d751e2422c8db506a26b62801d8dc84c907714c6b79 0x5e73029b27c4242883d8a263dd98ae5168a9cd373c5e11b40dbfa6f95c22eed5 0xf6093434dab50c94d10835988f4618bcebe61bc20fb101bfec9ab48b206bca37 0xd68455dfb74161b31009ff5cf79979056ea174ffe38b3194cbf1ee446cd60bef 0x29d8d6a1a62cdba76849c58c1a36f3965412153cd770d7e719cf827b00fb16e2 background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: none (39.6%) neck none mouth: none (68.9%) mouth none ears: loopearring (26.9%) ears loopearring head: partyhat (4.4%) head partyhat eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-05T02:20:03Z",
