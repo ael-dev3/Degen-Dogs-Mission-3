@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-07-07 02:53:47",
+    "token_id": 766,
+    "dog": "Dog #766",
+    "bidder": "@samiam",
+    "bidder_url": "https://farcaster.xyz/samiam",
+    "bidder_wallet": "0xea3ef7d0090872ce5e26fdcbb5507eb97be21843",
+    "bid": "0.00100 ETH ($2)",
+    "bid_eth": 0.001,
+    "bid_usd": 1.78,
+    "eth_usd_price_live": "1777.88",
+    "eth_usd_price_date_utc": "2026-07-07",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 48301740,
+    "log_index": 401,
+    "tx_hash": "0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc"
+  }
+]

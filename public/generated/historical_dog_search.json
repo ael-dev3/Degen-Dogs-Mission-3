@@ -19925,13 +19925,13 @@
     "dog_external_url": "https://degendogs.club/#dog766",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/766",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
+    "winner": "@samiam",
+    "winner_url": "https://farcaster.xyz/samiam",
+    "winner_wallet": "0xea3ef7d0090872ce5e26fdcbb5507eb97be21843",
+    "amount": "0.00100 ETH ($2)",
     "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-07-07 02:32:27",
     "settled_time_utc": "",
     "rarity": "#562/767",
@@ -19939,6 +19939,6 @@
     "trait_rarity": "Background: None (90.4%); Body: Grey (11.7%); Neck: None (39.8%); Mouth: None (69.0%); Ears: None (25.4%); Head: RedMohawk (6.9%); Eyes: VRGoggles (10.4%)",
     "confidence": "verified_live_base_logs",
     "sources": "base_logs,dashboard_builder",
-    "search_text": "3 Base 8453 766 Dog #766 https://api.degendogs.club/images/766.png https://degendogs.club/#dog766 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/766 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-07-07 02:32:27 #562/767 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: RedMohawk; Eyes: VRGoggles Background: None (90.4%); Body: Grey (11.7%); Neck: None (39.8%); Mouth: None (69.0%); Ears: None (25.4%); Head: RedMohawk (6.9%); Eyes: VRGoggles (10.4%) verified_live_base_logs base_logs,dashboard_builder"
+    "search_text": "3 Base 8453 766 Dog #766 https://api.degendogs.club/images/766.png https://degendogs.club/#dog766 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/766 live @samiam https://farcaster.xyz/samiam 0xea3ef7d0090872ce5e26fdcbb5507eb97be21843 0.00100 ETH ($2) 1 1 2026-07-07 02:32:27 #562/767 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: RedMohawk; Eyes: VRGoggles Background: None (90.4%); Body: Grey (11.7%); Neck: None (39.8%); Mouth: None (69.0%); Ears: None (25.4%); Head: RedMohawk (6.9%); Eyes: VRGoggles (10.4%) verified_live_base_logs base_logs,dashboard_builder"
   }
 ]
