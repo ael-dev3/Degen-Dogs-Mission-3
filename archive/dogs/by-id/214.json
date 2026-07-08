@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2024-12-08T17:11:47Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "149.67174951",
+      "eth_usd_price_at_event": "0.02147679",
+      "eth_usd_price_date_utc": "2024-12-09",
       "native": "6969",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "6969000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "149.67174951",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$149.67",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN. Used nearest available daily price (2024-12-09) 0.28 day(s) from event.",
+      "usd_estimate_price_date_utc": "2024-12-09",
+      "usd_estimate_price_usd": "0.02147679",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -57,12 +57,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#455/767",
-      "rank": 455,
-      "total": 767
+      "display": "#453/768",
+      "rank": 453,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 214 dog #214 214 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6969 degen 0x6040dab7c83cf67f9470877610b7fddc05b22759852b05ffaa0bbf3a554e0dbc 0xa7a96a784dc00f9881aa5b6cc8638efbc3b4de3859000a4d051c324acddab678 #455/767 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: redmohawk; eyes: masksnorkel 0x046d73b33fd6bfaea0c3b62d0860a29d72e10374e1e41e94799e94227a6da039 0xccba1e8f349fd393e86b77a66274d5162e1d86cfdcf6674ab188b813d435f441 0x25a364489a6b1e0a88432fe448907add70211549966d1e9b80dfa7ad0e6050e9 0x703f3b1a8fea962c4e1864b74aab3c5a66e656373bbc313ca87e34fc9e726b08 0x36e1f0ed4b0aeedbfb512b020164bb47c891b3b4da30a1fb669c003f68b0c238 0x6d50c0bc93bf87cc19462cfc9e95bcb444f0c23c8e1fbeb9e044adc2595d5edd 0x5e1562601ad0a8de9f039bcf57d00da1f45e842cbc6fae32432444ff301fe76f chain_logs contract_getters",
+    "search_text": "dog 214 dog #214 214 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6969 degen 0x6040dab7c83cf67f9470877610b7fddc05b22759852b05ffaa0bbf3a554e0dbc 0xa7a96a784dc00f9881aa5b6cc8638efbc3b4de3859000a4d051c324acddab678 #453/768 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: redmohawk; eyes: masksnorkel 0x046d73b33fd6bfaea0c3b62d0860a29d72e10374e1e41e94799e94227a6da039 0xccba1e8f349fd393e86b77a66274d5162e1d86cfdcf6674ab188b813d435f441 0x25a364489a6b1e0a88432fe448907add70211549966d1e9b80dfa7ad0e6050e9 0x703f3b1a8fea962c4e1864b74aab3c5a66e656373bbc313ca87e34fc9e726b08 0x36e1f0ed4b0aeedbfb512b020164bb47c891b3b4da30a1fb669c003f68b0c238 0x6d50c0bc93bf87cc19462cfc9e95bcb444f0c23c8e1fbeb9e044adc2595d5edd 0x5e1562601ad0a8de9f039bcf57d00da1f45e842cbc6fae32432444ff301fe76f chain_logs contract_getters",
     "settlement": {
       "block_number": 24854405,
       "block_time_utc": "2024-12-08T17:11:47Z",
@@ -92,7 +92,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.0%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -112,7 +112,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.3%)",
+        "display": "Eyes: MaskSnorkel (9.2%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

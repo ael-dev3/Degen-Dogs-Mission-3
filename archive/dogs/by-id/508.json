@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-10-08T15:10:06Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "6.42684800",
+      "eth_usd_price_at_event": "0.0028923708379516738",
+      "eth_usd_price_date_utc": "2025-10-08",
       "native": "2222",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "2222000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "6.42684800",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$6.43",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2025-10-08",
+      "usd_estimate_price_usd": "0.0028923708379516738",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#444/767",
-      "rank": 444,
-      "total": 767
+      "display": "#445/768",
+      "rank": 445,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 508 dog #508 508 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x606769302b8d10deeda33a4c3e1e901041fddd777445857cabeaab7431655090 0xadfc0c8da3fb08d49f22300a13bf96a33fa8562f4621024e8136d51ff26ac3b5 #444/767 background: none; body: white; neck: goldnecklace; mouth: none; ears: loopearring; head: blackcap; eyes: masksnorkel 0x4707ae5cfaf08f1eafe4c76f01427d4ee34e5df5669b2fe5a03e909f86fe06e4 chain_logs contract_getters",
+    "search_text": "dog 508 dog #508 508 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x606769302b8d10deeda33a4c3e1e901041fddd777445857cabeaab7431655090 0xadfc0c8da3fb08d49f22300a13bf96a33fa8562f4621024e8136d51ff26ac3b5 #445/768 background: none; body: white; neck: goldnecklace; mouth: none; ears: loopearring; head: blackcap; eyes: masksnorkel 0x4707ae5cfaf08f1eafe4c76f01427d4ee34e5df5669b2fe5a03e909f86fe06e4 chain_logs contract_getters",
     "settlement": {
       "block_number": 26296789,
       "block_time_utc": "2025-10-08T15:10:06Z",
@@ -81,12 +81,12 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.5%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.6%)",
+        "display": "Neck: GoldNecklace (19.5%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.0%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -106,7 +106,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.3%)",
+        "display": "Eyes: MaskSnorkel (9.2%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

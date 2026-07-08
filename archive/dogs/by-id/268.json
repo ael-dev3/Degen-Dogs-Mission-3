@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-01-28T13:35:48Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "34.95422000",
+      "eth_usd_price_at_event": "0.0057302",
+      "eth_usd_price_date_utc": "2025-01-29",
       "native": "6100",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "6100000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "34.95422000",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$34.95",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN. Used nearest available daily price (2025-01-29) 0.43 day(s) from event.",
+      "usd_estimate_price_date_utc": "2025-01-29",
+      "usd_estimate_price_usd": "0.0057302",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#316/767",
-      "rank": 316,
-      "total": 767
+      "display": "#321/768",
+      "rank": 321,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 268 dog #268 268 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6100 degen 0x59f75a230f8df6305ad1b19a998609efaf73913c3800cf80e59d24565d44b948 0x0f5d4a1c5dea48a238fc934713aa49d86f371b255474d371b44ff70e7ef64630 #316/767 background: none; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa10bc80e106eb84bda00b4344e53572b8390d465f71b3edee0db481adf5b3160 0x4db5c4b3d2c67fb8bf348d36445a334dafc3815299cb8d374e48ab5cf5075f26 0x2d8fd5747f458d71f7dc0cf41f75bd0881130cff12cf1d3aaf3153c99a02b1a0 chain_logs contract_getters",
+    "search_text": "dog 268 dog #268 268 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6100 degen 0x59f75a230f8df6305ad1b19a998609efaf73913c3800cf80e59d24565d44b948 0x0f5d4a1c5dea48a238fc934713aa49d86f371b255474d371b44ff70e7ef64630 #321/768 background: none; body: black; neck: studdedcollar; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa10bc80e106eb84bda00b4344e53572b8390d465f71b3edee0db481adf5b3160 0x4db5c4b3d2c67fb8bf348d36445a334dafc3815299cb8d374e48ab5cf5075f26 0x2d8fd5747f458d71f7dc0cf41f75bd0881130cff12cf1d3aaf3153c99a02b1a0 chain_logs contract_getters",
     "settlement": {
       "block_number": 25365496,
       "block_time_utc": "2025-01-28T13:35:48Z",
@@ -98,12 +98,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.0%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.4%)",
+        "display": "Head: Headphones (6.5%)",
         "trait_type": "Head",
         "value": "Headphones"
       },

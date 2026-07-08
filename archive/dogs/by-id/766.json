@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-07-07T02:33:51Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-07T05:53:41Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-08T04:45:43Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-07-07",
-      "native": "0.00122",
+      "amount_usd_at_event": "19.44843028",
+      "eth_usd_price_at_event": "1768.0391167276503",
+      "eth_usd_price_date_utc": "2026-07-08",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1220000000000000",
-      "usd_estimate": "2.16000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$2.16",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-07-07",
-      "usd_estimate_price_usd": "1770.4918032786885245901639344262295081967213114754098360655737704918032786885246",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "raw": "11000000000000000",
+      "usd_estimate": "19.44843028",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$19.45",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-07-08",
+      "usd_estimate_price_usd": "1768.0391167276503",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -29,11 +29,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 3,
-      "last_bid_time_utc": "2026-07-07T05:53:41Z",
-      "unique_bidder_count": 3
+      "bid_count": 5,
+      "last_bid_time_utc": "2026-07-07T17:07:23Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
+      "0x0af956e2225256a0c2bf7441befffe121b787da1dfe5036e46a638c158f268f3",
+      "0x394bbfcdf45ca4e3ce2aed9cd0014f54422d0f1c0e7e9448cb7c318909541148",
       "0xc44206baa7b5c760541c45baa0590b5c8093b1c93705b42a799e77bf691f7f56",
       "0x4d8caff2c5dc5a0e1cd59dd3da33d0cbc838135e649d8034c48b9b8e4fbf42a2",
       "0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc"
@@ -47,23 +49,23 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog766",
-      "explorer": "https://basescan.org/address/0xab38785e2e0daf919ec898007562c618ce62a10d",
+      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/766",
       "repo_archive": "archive/dogs/by-id/766.json",
       "settlement_tx": null
     },
     "mission": 3,
     "rarity": {
-      "display": "#562/767",
-      "rank": 562,
-      "total": 767
+      "display": "#560/768",
+      "rank": 560,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 766 dog #766 766 mission 3 mission 3 base ongoing 0xab38785e2e0daf919ec898007562c618ce62a10d @!274293 !274293 0.00122 eth 1220000000000000 2.16 $2.16 2026-07-07t05:53:41z #562/767 generated auction feed 0xc44206baa7b5c760541c45baa0590b5c8093b1c93705b42a799e77bf691f7f56 0x4d8caff2c5dc5a0e1cd59dd3da33d0cbc838135e649d8034c48b9b8e4fbf42a2 0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc background: none (90.4%) background none body: grey (11.7%) body grey neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: none (25.4%) ears none head: redmohawk (6.9%) head redmohawk eyes: vrgoggles (10.4%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 766 dog #766 766 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.45 $19.45 2026-07-08t04:45:43z #560/768 generated auction feed 0x0af956e2225256a0c2bf7441befffe121b787da1dfe5036e46a638c158f268f3 0x394bbfcdf45ca4e3ce2aed9cd0014f54422d0f1c0e7e9448cb7c318909541148 0xc44206baa7b5c760541c45baa0590b5c8093b1c93705b42a799e77bf691f7f56 0x4d8caff2c5dc5a0e1cd59dd3da33d0cbc838135e649d8034c48b9b8e4fbf42a2 0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc background: none (90.4%) background none body: grey (11.7%) body grey neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: none (25.4%) ears none head: redmohawk (6.9%) head redmohawk eyes: vrgoggles (10.4%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-08T04:45:43Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -77,7 +79,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.4%)",
@@ -90,7 +92,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -116,12 +118,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@!274293",
+      "display": "@cryptomill",
       "farcaster_fid": null,
-      "farcaster_handle": "!274293",
-      "profile_url": "https://farcaster.xyz/!274293",
-      "wallet": "0xab38785e2e0daf919ec898007562c618ce62a10d",
-      "wallet_explorer_url": "https://basescan.org/address/0xab38785e2e0daf919ec898007562c618ce62a10d"
+      "farcaster_handle": "cryptomill",
+      "profile_url": "https://farcaster.xyz/cryptomill",
+      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
     }
   },
   "schema_version": 1

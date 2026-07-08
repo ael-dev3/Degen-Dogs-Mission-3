@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-09-22T23:47:16Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "17.11456065",
+      "eth_usd_price_at_event": "0.00314317",
+      "eth_usd_price_date_utc": "2025-09-23",
       "native": "5445",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "5445000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "17.11456065",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$17.11",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN. Used nearest available daily price (2025-09-23) 0.01 day(s) from event.",
+      "usd_estimate_price_date_utc": "2025-09-23",
+      "usd_estimate_price_usd": "0.00314317",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#61/767",
+      "display": "#61/768",
       "rank": 61,
-      "total": 767
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 495 dog #495 495 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 5445 degen 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 0x861c7d1d93cfbc06f143658017290f7e57073e7c67dd27f3163342eb0d37f573 #61/767 background: none; body: rainbow; neck: goldnecklace; mouth: none; ears: none; head: whitemohawk; eyes: 3dglasses 0x4645732e4f57562a108c4cc2a1911a35c2911e9b40bc61b69da9077c842cea9d 0xd71d3844c8fa5d70873f933e56b9fce6f7c8442338971260d956570dc20cfbf9 0x91aef08e0bc0bfcd2075af8b28fd75e8c42ccb0be0645fabca562af009c02098 chain_logs contract_getters",
+    "search_text": "dog 495 dog #495 495 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 5445 degen 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 0x861c7d1d93cfbc06f143658017290f7e57073e7c67dd27f3163342eb0d37f573 #61/768 background: none; body: rainbow; neck: goldnecklace; mouth: none; ears: none; head: whitemohawk; eyes: 3dglasses 0x4645732e4f57562a108c4cc2a1911a35c2911e9b40bc61b69da9077c842cea9d 0xd71d3844c8fa5d70873f933e56b9fce6f7c8442338971260d956570dc20cfbf9 0x91aef08e0bc0bfcd2075af8b28fd75e8c42ccb0be0645fabca562af009c02098 chain_logs contract_getters",
     "settlement": {
       "block_number": 26269831,
       "block_time_utc": "2025-09-22T23:47:16Z",
@@ -88,7 +88,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: GoldNecklace (19.6%)",
+        "display": "Neck: GoldNecklace (19.5%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

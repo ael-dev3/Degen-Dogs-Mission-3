@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-12-17T06:15:43Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "16.04417057",
+      "eth_usd_price_at_event": "0.0012607394756201258",
+      "eth_usd_price_date_utc": "2025-12-17",
       "native": "12726",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "12726000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "16.04417057",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.04",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2025-12-17",
+      "usd_estimate_price_usd": "0.0012607394756201258",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#63/767",
+      "display": "#63/768",
       "rank": 63,
-      "total": 767
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 #63/767 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters",
+    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 #63/768 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters",
     "settlement": {
       "block_number": 26594941,
       "block_time_utc": "2025-12-17T06:15:43Z",
@@ -98,7 +98,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.0%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

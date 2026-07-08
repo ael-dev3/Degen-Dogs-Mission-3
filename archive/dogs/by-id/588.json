@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-01-05T09:00:32Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "21.05240987",
+      "eth_usd_price_at_event": "0.0015037435621384659",
+      "eth_usd_price_date_utc": "2026-01-05",
       "native": "14000",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "14000000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "21.05240987",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$21.05",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2026-01-05",
+      "usd_estimate_price_usd": "0.0015037435621384659",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#261/767",
-      "rank": 261,
-      "total": 767
+      "display": "#259/768",
+      "rank": 259,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 588 dog #588 588 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 14000 degen 0x614773c3d890599b122addc7227f9489578d9759b168ce4f6947999d34fd7b70 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 #261/767 background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: none; head: crazyhair; eyes: none 0x72bde0602d1681b3277cecdc67b5b239e30fd9b7cc0eaf34e7625a35cc0d2db6 chain_logs contract_getters",
+    "search_text": "dog 588 dog #588 588 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 14000 degen 0x614773c3d890599b122addc7227f9489578d9759b168ce4f6947999d34fd7b70 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 #259/768 background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: none; head: crazyhair; eyes: none 0x72bde0602d1681b3277cecdc67b5b239e30fd9b7cc0eaf34e7625a35cc0d2db6 chain_logs contract_getters",
     "settlement": {
       "block_number": 26620723,
       "block_time_utc": "2026-01-05T09:00:32Z",
@@ -81,7 +81,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (14.9%)",
+        "display": "Body: RedBrown (14.8%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },

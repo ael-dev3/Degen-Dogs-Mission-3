@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2025-06-11T12:39:33Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "17.75290042",
+      "eth_usd_price_at_event": "0.00484126",
+      "eth_usd_price_date_utc": "2025-06-11",
       "native": "3667",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "3667000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "17.75290042",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$17.75",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2025-06-11",
+      "usd_estimate_price_usd": "0.00484126",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#126/767",
-      "rank": 126,
-      "total": 767
+      "display": "#125/768",
+      "rank": 125,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 408 dog #408 408 mission 2 mission 2 degen chain settled 0x2cd8cc289e927be809cc396c2075e32fabffd885 0x2cd8…d885 3667 degen 0x3e4c5c12dfb29cf70eb41d9f7a9624e296661bac71f7335a8e9a062da0d74db7 0x221068f83475eaf2041fd72ba05087e70e4e1580ca0764f3b0cbc5f273adbcdf #126/767 background: halo; body: sugarskull; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: redlasereyes 0xbe6a84c640018633b751b68bb77496dc0542038e3d4dbb9bd882dcfb4011fb1e 0x9a2baa993bbf37019f44a3953688ec73c2a1d07be03d0d3cdb73389dd8a5dd00 chain_logs contract_getters",
+    "search_text": "dog 408 dog #408 408 mission 2 mission 2 degen chain settled 0x2cd8cc289e927be809cc396c2075e32fabffd885 0x2cd8…d885 3667 degen 0x3e4c5c12dfb29cf70eb41d9f7a9624e296661bac71f7335a8e9a062da0d74db7 0x221068f83475eaf2041fd72ba05087e70e4e1580ca0764f3b0cbc5f273adbcdf #125/768 background: halo; body: sugarskull; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: redlasereyes 0xbe6a84c640018633b751b68bb77496dc0542038e3d4dbb9bd882dcfb4011fb1e 0x9a2baa993bbf37019f44a3953688ec73c2a1d07be03d0d3cdb73389dd8a5dd00 chain_logs contract_getters",
     "settlement": {
       "block_number": 25969770,
       "block_time_utc": "2025-06-11T12:39:33Z",
@@ -87,7 +87,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: GoldNecklace (19.6%)",
+        "display": "Neck: GoldNecklace (19.5%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

@@ -4,20 +4,20 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2024-12-30T23:58:34Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": null,
+      "amount_usd_at_event": "38.22228000",
+      "eth_usd_price_at_event": "0.00955557",
+      "eth_usd_price_date_utc": "2024-12-30",
       "native": "4000",
       "native_symbol": "DEGEN",
       "price_asset_key": "DEGEN",
       "raw": "4000000000000000000000",
-      "usd_estimate": null,
-      "usd_estimate_confidence": "missing",
-      "usd_estimate_display": null,
-      "usd_estimate_notes": "missing_price",
-      "usd_estimate_price_date_utc": null,
-      "usd_estimate_price_usd": null,
-      "usd_estimate_source": null,
+      "usd_estimate": "38.22228000",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$38.22",
+      "usd_estimate_notes": "CoinGecko coin id degen-base verified via API on this implementation pass. Mission 2 contract token is WDEGEN; USD price uses DEGEN.",
+      "usd_estimate_price_date_utc": "2024-12-30",
+      "usd_estimate_price_usd": "0.00955557",
+      "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#125/767",
-      "rank": 125,
-      "total": 767
+      "display": "#124/768",
+      "rank": 124,
+      "total": 768
     },
     "schema_version": 1,
-    "search_text": "dog 237 dog #237 237 mission 2 mission 2 degen chain settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 4000 degen 0x1d9aae976fa0aeaaa9d226ec5fe07e17be9515df43e607ac20297033325e2f53 0xaf31d1d4a38aeb8eac76229a89457be3a201547584d5cff0861d54cd1119ac47 #125/767 background: none; body: sugarskull; neck: goldnecklace; mouth: none; ears: earbuds; head: partyhat; eyes: masksnorkel 0x6db6629de039cb8e34396f621171acbf442400028f6dad16c93a055ad7fcea5c chain_logs contract_getters",
+    "search_text": "dog 237 dog #237 237 mission 2 mission 2 degen chain settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 4000 degen 0x1d9aae976fa0aeaaa9d226ec5fe07e17be9515df43e607ac20297033325e2f53 0xaf31d1d4a38aeb8eac76229a89457be3a201547584d5cff0861d54cd1119ac47 #124/768 background: none; body: sugarskull; neck: goldnecklace; mouth: none; ears: earbuds; head: partyhat; eyes: masksnorkel 0x6db6629de039cb8e34396f621171acbf442400028f6dad16c93a055ad7fcea5c chain_logs contract_getters",
     "settlement": {
       "block_number": 25078819,
       "block_time_utc": "2024-12-30T23:58:34Z",
@@ -86,7 +86,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: GoldNecklace (19.6%)",
+        "display": "Neck: GoldNecklace (19.5%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -106,7 +106,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.3%)",
+        "display": "Eyes: MaskSnorkel (9.2%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }
