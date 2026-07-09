@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "17.55000000",
+      "usd_estimate": "17.47000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.55",
+      "usd_estimate_display": "$17.47",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-09",
-      "usd_estimate_price_usd": "1755",
+      "usd_estimate_price_usd": "1747",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 769
     },
     "schema_version": 1,
-    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.55 $17.55 2026-07-09t17:27:01z #215/769 generated auction feed 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 background: none (90.4%) background none body: rainbow (4.4%) body rainbow neck: none (39.8%) neck none mouth: none (69.1%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.47 $17.47 2026-07-09t17:27:01z #215/769 generated auction feed 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 background: none (90.4%) background none body: rainbow (4.4%) body rainbow neck: none (39.8%) neck none mouth: none (69.1%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
