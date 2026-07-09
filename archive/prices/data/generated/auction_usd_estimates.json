@@ -25,14 +25,14 @@
     "price_usd": "1748"
   },
   {
-    "amount_usd_at_event": "17.68039117",
+    "amount_usd_at_event": "17.47920505",
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 767,
-    "estimated_usd_display": "$17.68",
-    "estimated_usd_value": "17.68039117",
-    "eth_usd_price_at_event": "1768.0391167276503",
-    "eth_usd_price_date_utc": "2026-07-08",
+    "estimated_usd_display": "$17.48",
+    "estimated_usd_value": "17.47920505",
+    "eth_usd_price_at_event": "1747.9205046018642",
+    "eth_usd_price_date_utc": "2026-07-09",
     "event_time_utc": "2026-07-09T05:07:55Z",
     "event_tx_hash": null,
     "event_type": "settlement",
@@ -40,14 +40,14 @@
     "native_amount": "0.01",
     "native_amount_raw": "10000000000000000",
     "native_symbol": "ETH",
-    "notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-07-08) 1.21 day(s) from event.",
+    "notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
     "price_asset_key": "ETH",
     "price_confidence": "medium",
-    "price_date_utc": "2026-07-08",
+    "price_date_utc": "2026-07-09",
     "price_source": "defillama_coin_prices",
     "price_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
     "price_status": "priced",
-    "price_usd": "1768.0391167276503"
+    "price_usd": "1747.9205046018642"
   },
   {
     "amount_usd_at_event": "19.44843028",
