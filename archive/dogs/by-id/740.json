@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#266/768",
-      "rank": 266,
-      "total": 768
+      "display": "#265/769",
+      "rank": 265,
+      "total": 769
     },
     "schema_version": 1,
-    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.02760 eth 27600000000000000 44.72527500 $44.73 2026-06-11t21:16:27z #266/768 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.4%) background none body: grey (11.7%) body grey neck: none (39.7%) neck none mouth: tongue (9.6%) mouth tongue ears: earbuds (32.3%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 740 dog #740 https://api.degendogs.club/images/740.png https://degendogs.club/#dog740 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/740 settled @stemo.eth https://farcaster.xyz/stemo.eth 0x46e9beef5dc68dff095eca56dadf90247f1af7ef 0.02760 eth ($45) 1 1 2026-06-10 21:15:59 2026-06-11 21:16:27 #266/768 background: none; body: grey; neck: none; mouth: tongue; ears: earbuds; head: hoodie; eyes: none background: none (90.4%); body: grey (11.7%); neck: none (39.7%); mouth: tongue (9.6%); ears: earbuds (32.3%); head: hoodie (4.8%); eyes: none (18.1%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.02760 eth 27600000000000000 44.72527500 $44.73 2026-06-11t21:16:27z #265/769 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.4%) background none body: grey (11.7%) body grey neck: none (39.8%) neck none mouth: tongue (9.6%) mouth tongue ears: earbuds (32.2%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (18.1%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 740 dog #740 https://api.degendogs.club/images/740.png https://degendogs.club/#dog740 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/740 settled @stemo.eth https://farcaster.xyz/stemo.eth 0x46e9beef5dc68dff095eca56dadf90247f1af7ef 0.02760 eth ($45) 1 1 2026-06-10 21:15:59 2026-06-11 21:16:27 #265/769 background: none; body: grey; neck: none; mouth: tongue; ears: earbuds; head: hoodie; eyes: none background: none (90.4%); body: grey (11.7%); neck: none (39.8%); mouth: tongue (9.6%); ears: earbuds (32.2%); head: hoodie (4.8%); eyes: none (18.1%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-11T21:16:27Z",
@@ -89,7 +89,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

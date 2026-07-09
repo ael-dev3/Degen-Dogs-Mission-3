@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#394/768",
-      "rank": 394,
-      "total": 768
+      "display": "#408/769",
+      "rank": 408,
+      "total": 769
     },
     "schema_version": 1,
-    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #394/768 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #408/769 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -85,7 +85,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (69.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -95,7 +95,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: Headphones (6.5%)",
+        "display": "Head: Headphones (6.6%)",
         "trait_type": "Head",
         "value": "Headphones"
       },

@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-07-08T10:48:21Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-08T11:03:53Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-09T05:07:55Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-07-09",
+      "amount_usd_at_event": "17.68039117",
+      "eth_usd_price_at_event": "1768.0391167276503",
+      "eth_usd_price_date_utc": "2026-07-08",
       "native": "0.01",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "17.31000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.31",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-07-09",
-      "usd_estimate_price_usd": "1731",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate": "17.68039117",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$17.68",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD. Used nearest available daily price (2026-07-08) 1.21 day(s) from event.",
+      "usd_estimate_price_date_utc": "2026-07-08",
+      "usd_estimate_price_usd": "1768.0391167276503",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -53,16 +53,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#567/768",
-      "rank": 567,
-      "total": 768
+      "display": "#573/769",
+      "rank": 573,
+      "total": 769
     },
     "schema_version": 1,
-    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.31 $17.31 2026-07-08t11:03:53z #567/768 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.4%) background none body: white (11.5%) body white neck: redcollar (30.7%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: headphones (6.5%) head headphones eyes: glasses (12.6%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.68 $17.68 2026-07-09t05:07:55z #573/769 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.4%) background none body: white (11.4%) body white neck: redcollar (30.7%) neck redcollar mouth: none (69.1%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-09T05:07:55Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -76,7 +76,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.4%)",
@@ -84,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White (11.4%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -94,22 +94,22 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (69.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.5%)",
+        "display": "Head: Headphones (6.6%)",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.6%)",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

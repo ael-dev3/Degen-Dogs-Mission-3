@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#420/768",
-      "rank": 420,
-      "total": 768
+      "display": "#419/769",
+      "rank": 419,
+      "total": 769
     },
     "schema_version": 1,
-    "search_text": "dog 199 dog #199 199 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x044aeaa6a88945c8778897db9f36db09b381f9500bed020f8488a6d77765b6a8 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #420/768 background: none; body: grey; neck: redcollar; mouth: pizza; ears: earbuds; head: toque; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 199 dog #199 199 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x044aeaa6a88945c8778897db9f36db09b381f9500bed020f8488a6d77765b6a8 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #419/769 background: none; body: grey; neck: redcollar; mouth: pizza; ears: earbuds; head: toque; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 49815727,
       "block_time_utc": "2023-11-11T14:01:42Z",
@@ -96,7 +96,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
