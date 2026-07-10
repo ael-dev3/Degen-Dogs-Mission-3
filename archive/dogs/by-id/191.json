@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#26/769",
+      "display": "#26/770",
       "rank": 26,
-      "total": 769
+      "total": 770
     },
     "schema_version": 1,
-    "search_text": "dog 191 dog #191 191 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 #26/769 background: none; body: brown; neck: none; mouth: coin; ears: none; head: stripedbeanie; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 191 dog #191 191 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x7f05b745560fdb9be21ee81e8404fddfc2f2a1894b82e0fb97c5ee37ae4650e2 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 #26/770 background: none; body: brown; neck: none; mouth: coin; ears: none; head: stripedbeanie; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 40367897,
       "block_time_utc": "2023-03-15T08:54:46Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -86,7 +86,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.9%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -96,17 +96,17 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: None (25.4%)",
+        "display": "Ears: None (25.3%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.5%)",
+        "display": "Head: StripedBeanie (8.4%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: 3DGlasses (4.8%)",
+        "display": "Eyes: 3DGlasses (4.9%)",
         "trait_type": "Eyes",
         "value": "3DGlasses"
       }

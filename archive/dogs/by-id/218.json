@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#565/769",
+      "display": "#565/770",
       "rank": 565,
-      "total": 769
+      "total": 770
     },
     "schema_version": 1,
-    "search_text": "dog 218 dog #218 218 mission 2 mission 2 degen chain settled 0x19d8da2674e8a025154153297ea3ab918debf96d 0x19d8…f96d 11000 degen 0x2a1303b9b86215f052c506c2f16f6138f4991edccb2a9d1d9885708e6dd7553b 0x96321b683bad0f0553c3d455cab17425d315c392066013a3b81e7baf1cb8ec54 #565/769 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: crazyhair; eyes: sunglasses 0x5a2e7ca79ecd1dd8e11549963382cd86aa732d3c179cc10cb10025bd5f93b5c2 0x434ff65b7793ce8417ecd72437448b1516f1a3179637178c9985af22b2a1fc03 chain_logs contract_getters",
+    "search_text": "dog 218 dog #218 218 mission 2 mission 2 degen chain settled 0x19d8da2674e8a025154153297ea3ab918debf96d 0x19d8…f96d 11000 degen 0x2a1303b9b86215f052c506c2f16f6138f4991edccb2a9d1d9885708e6dd7553b 0x96321b683bad0f0553c3d455cab17425d315c392066013a3b81e7baf1cb8ec54 #565/770 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: crazyhair; eyes: sunglasses 0x5a2e7ca79ecd1dd8e11549963382cd86aa732d3c179cc10cb10025bd5f93b5c2 0x434ff65b7793ce8417ecd72437448b1516f1a3179637178c9985af22b2a1fc03 chain_logs contract_getters",
     "settlement": {
       "block_number": 24898166,
       "block_time_utc": "2024-12-12T20:03:08Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -92,12 +92,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (69.1%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.2%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -107,7 +107,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses (14.5%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

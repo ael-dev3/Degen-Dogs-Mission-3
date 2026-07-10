@@ -59,12 +59,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#250/769",
-      "rank": 250,
-      "total": 769
+      "display": "#251/770",
+      "rank": 251,
+      "total": 770
     },
     "schema_version": 1,
-    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.02996 eth 29960000000000000 49.88481845 $49.88 2026-06-13t21:37:25z #250/769 generated auction feed 0x8a3d995c3d2cf2b74afa0c3c5a4748d6dd561b29b000239271f106004747ff83 0xd1962fbb06aef5cc1664a86ae630211dca54b4b30a770ca2032c3fdc00395ddd 0x1c638afff00dc7bf4c9259ba56ff9b3410320b5069800dd3d15f90fab58e98fc 0xb7177621400289fc1d8ae7b246d6c4203eab2f8b3c341717133a5c1642edf9cd 0x9c714b1d9b3f46ac51864f11862eb391087fbfb58ec3ef36e53c6e0723562771 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.4%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.7%) neck redcollar mouth: none (69.1%) mouth none ears: none (25.4%) ears none head: none (20.3%) head none eyes: monocle (6.5%) eyes monocle base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 742 dog #742 https://api.degendogs.club/images/742.png https://degendogs.club/#dog742 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/742 settled @i-am-rael.eth https://farcaster.xyz/i-am-rael.eth 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0.02996 eth ($50) 8 6 2026-06-12 21:31:21 2026-06-13 21:37:25 #250/769 background: none; body: rainbow; neck: redcollar; mouth: none; ears: none; head: none; eyes: monocle background: none (90.4%); body: rainbow (4.4%); neck: redcollar (30.7%); mouth: none (69.1%); ears: none (25.4%); head: none (20.3%); eyes: monocle (6.5%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.02996 eth 29960000000000000 49.88481845 $49.88 2026-06-13t21:37:25z #251/770 generated auction feed 0x8a3d995c3d2cf2b74afa0c3c5a4748d6dd561b29b000239271f106004747ff83 0xd1962fbb06aef5cc1664a86ae630211dca54b4b30a770ca2032c3fdc00395ddd 0x1c638afff00dc7bf4c9259ba56ff9b3410320b5069800dd3d15f90fab58e98fc 0xb7177621400289fc1d8ae7b246d6c4203eab2f8b3c341717133a5c1642edf9cd 0x9c714b1d9b3f46ac51864f11862eb391087fbfb58ec3ef36e53c6e0723562771 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: redcollar (30.6%) neck redcollar mouth: none (69.0%) mouth none ears: none (25.3%) ears none head: none (20.3%) head none eyes: monocle (6.5%) eyes monocle base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 742 dog #742 https://api.degendogs.club/images/742.png https://degendogs.club/#dog742 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/742 settled @i-am-rael.eth https://farcaster.xyz/i-am-rael.eth 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0.02996 eth ($50) 8 6 2026-06-12 21:31:21 2026-06-13 21:37:25 #251/770 background: none; body: rainbow; neck: redcollar; mouth: none; ears: none; head: none; eyes: monocle background: none (90.3%); body: rainbow (4.4%); neck: redcollar (30.6%); mouth: none (69.0%); ears: none (25.3%); head: none (20.3%); eyes: monocle (6.5%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-13T21:37:25Z",
@@ -86,7 +86,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,17 +96,17 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: RedCollar (30.7%)",
+        "display": "Neck: RedCollar (30.6%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.1%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.4%)",
+        "display": "Ears: None (25.3%)",
         "trait_type": "Ears",
         "value": "None"
       },
