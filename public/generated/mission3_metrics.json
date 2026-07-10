@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "48446746"
+    "value": "48446891"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-07-10 11:27:19"
+    "value": "2026-07-10 11:32:09"
   },
   {
     "metric": "auction_house",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1795.94"
+    "value": "1794.89"
   },
   {
     "metric": "eth_usd_source",
@@ -177,19 +177,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "22.12"
+    "value": "220.55"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "4.5215"
+    "value": "0.4534"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "1650.35"
+    "value": "165.49"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈1,650% APR"
+    "value": "≈165% APR"
   },
   {
     "metric": "woof_holders",
@@ -217,19 +217,19 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.001"
+    "value": "0.01"
   },
   {
     "metric": "current_bid_usd",
-    "value": "1.8"
+    "value": "17.95"
   },
   {
     "metric": "current_bidder",
-    "value": "@stemo.eth"
+    "value": "@0xael.eth"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef"
+    "value": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "metric": "current_auction_end_utc",
@@ -245,7 +245,7 @@
   },
   {
     "metric": "total_bid_eth",
-    "value": "37.646723"
+    "value": "37.656723"
   },
   {
     "metric": "total_settled_eth",
@@ -265,27 +265,27 @@
   },
   {
     "metric": "season6_current_bidder_cap_remaining_sup",
-    "value": "3884.327673"
+    "value": "2552.359099"
   },
   {
     "metric": "season6_current_bidder_prior_wins",
-    "value": "1"
+    "value": "3"
   },
   {
     "metric": "season6_current_bidder_projected_capped_sup_if_wins",
-    "value": "8615.672327"
+    "value": "9947.640901"
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "75.89"
+    "value": "87.62"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
-    "value": "8615.672327"
+    "value": "9947.640901"
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "75.89"
+    "value": "87.62"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -317,7 +317,7 @@
   },
   {
     "metric": "season6_sup_current_bid_cap_remaining_before_win_sup",
-    "value": "6196.285233"
+    "value": "4780.477214"
   },
   {
     "metric": "season6_sup_current_bid_estimate_status",
@@ -325,15 +325,15 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_sup",
-    "value": "2311.95756"
+    "value": "2228.118115"
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_usd",
-    "value": "20.36"
+    "value": "19.63"
   },
   {
     "metric": "season6_sup_current_bid_estimated_raw_incremental_sup",
-    "value": "2311.95756"
+    "value": "2228.118115"
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
@@ -341,23 +341,23 @@
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
-    "value": "8615.672327"
+    "value": "9947.640901"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_without_win_sup",
-    "value": "6303.714767"
+    "value": "7719.522786"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_wins",
-    "value": "1"
+    "value": "3"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_xp",
-    "value": "100"
+    "value": "300"
   },
   {
     "metric": "season6_sup_current_bidder_wallet",
-    "value": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef"
+    "value": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "metric": "season6_sup_days_remaining",
@@ -389,7 +389,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "104015.261157"
+    "value": "104024.531685"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",

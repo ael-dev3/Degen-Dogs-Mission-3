@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-07-10 11:30:13",
+    "token_id": 769,
+    "bidder": "@0xael.eth",
+    "bidder_url": "https://farcaster.xyz/0xael.eth",
+    "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "bid": "0.01000 ETH ($17)",
+    "bid_eth": 0.01,
+    "bid_usd": 17.45,
+    "bid_usd_at_event": 17.45,
+    "eth_usd_price_at_event": "1744.7927286310846",
+    "eth_usd_price_date_utc": "2026-07-10",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 48446833,
+    "tx_hash": "0xdeecb86c5a20965d885fec3a44a1534f628d0425a011ff9c65561f586ca4a38c"
+  },
+  {
     "bid_time_utc": "2026-07-10 05:42:51",
     "token_id": 769,
     "bidder": "@stemo.eth",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 47520075,
     "tx_hash": "0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0"
-  },
-  {
-    "bid_time_utc": "2026-06-18 22:54:35",
-    "token_id": 747,
-    "bidder": "@i-am-rael.eth",
-    "bidder_url": "https://farcaster.xyz/i-am-rael.eth",
-    "bidder_wallet": "0x4119cfa20129f9ea739590ea914cdfbc0c0772cb",
-    "bid": "0.01100 ETH ($19)",
-    "bid_eth": 0.011,
-    "bid_usd": 18.81,
-    "bid_usd_at_event": 18.81,
-    "eth_usd_price_at_event": "1709.5978673943596",
-    "eth_usd_price_date_utc": "2026-06-19",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "nearest_bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 47516964,
-    "tx_hash": "0x50ee80e1d2f4445c5da1981f4e1364086c4d8786f5a811844a0f2f7009ad5001"
   }
 ]
