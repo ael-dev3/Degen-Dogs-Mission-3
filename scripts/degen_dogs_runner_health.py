@@ -7,6 +7,7 @@ that needs attention. Healthy/no-op runs stay silent.
 from __future__ import annotations
 
 import csv
+import fcntl
 import hashlib
 import json
 import os
@@ -29,6 +30,9 @@ LABEL = "com.ael.degendogs.mission3.refresh"
 PLIST_PATH = HOME / "Library" / "LaunchAgents" / f"{LABEL}.plist"
 LOG_DIR = HOME / "Library" / "Logs" / "degen-dogs-mission3"
 CACHE_DIR = HOME / "Library" / "Caches" / "degen-dogs-mission3"
+REFRESH_LOCK_PATH = Path(
+    os.environ.get("MISSION3_REFRESH_LOCK_PATH", str(CACHE_DIR / "refresh.lock"))
+).expanduser()
 REFRESH_LOG = LOG_DIR / "refresh.log"
 REFRESH_SCRIPT = REPO_DIR / "scripts" / "refresh_and_publish.sh"
 INSTALL_SCRIPT = REPO_DIR / "scripts" / "install_hourly_refresh_launchd.sh"
@@ -733,6 +737,37 @@ def launchctl_print() -> Result:
     return run(["launchctl", "print", launch_target()], cwd=None, timeout=20)
 
 
+def refresh_is_active() -> bool:
+    """Return whether the shared refresh lock is held by another process.
+
+    The refresh intentionally makes tracked generated files dirty while it builds. The
+    watchdog must not classify that expected, in-progress state as a pre-existing dirty
+    worktree that blocks the next refresh. An unlocked/stale lock file is not enough to
+    suppress an alert; only an active flock counts.
+    """
+    if not REFRESH_LOCK_PATH.exists():
+        return False
+    try:
+        fd = os.open(REFRESH_LOCK_PATH, os.O_RDWR)
+    except OSError:
+        return False
+    acquired = False
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            acquired = True
+        except BlockingIOError:
+            return True
+        return False
+    finally:
+        if acquired:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+        os.close(fd)
+
+
 def service_is_running(print_output: str) -> bool:
     return "state = running" in print_output or re.search(r"active count = [1-9]", print_output) is not None
 
@@ -814,6 +849,7 @@ def main() -> int:
     if not os.access(INSTALL_SCRIPT, os.X_OK):
         maybe_run(lines, "make install script executable", ["chmod", "+x", str(INSTALL_SCRIPT)], cwd=None, timeout=20)
 
+    refresh_in_progress = refresh_is_active()
     dirty_blocking = False
     branch = run(["git", "branch", "--show-current"], timeout=20)
     status = run(["git", "status", "--porcelain", "--untracked-files=no"], timeout=30)
@@ -825,7 +861,11 @@ def main() -> int:
             dirty_blocking = True
             append_issue(lines, f"runner repo on {branch.out.strip() or 'unknown'} with tracked changes; not switching")
     if status.code == 0 and status.out.strip():
-        if clean_timestamp_only_price_changes(lines, dirty_paths):
+        if refresh_in_progress and branch.code == 0 and branch.out.strip() == "main":
+            # The refresh lock is acquired before the generator writes tracked output.
+            # Those changes are expected until the active refresh commits or exits.
+            dirty_paths = []
+        elif clean_timestamp_only_price_changes(lines, dirty_paths):
             status = run(["git", "status", "--porcelain", "--untracked-files=no"], timeout=30)
             dirty_paths = tracked_dirty_paths(status.out) if status.code == 0 else dirty_paths
             if status.code == 0 and status.out.strip():
