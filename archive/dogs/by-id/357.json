@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#15/770",
+      "display": "#15/771",
       "rank": 15,
-      "total": 770
+      "total": 771
     },
     "schema_version": 1,
-    "search_text": "dog 357 dog #357 357 mission 2 mission 2 degen chain settled 0x4bf88042de0220647acb314af3c5f310aec3bcc0 0x4bf8…bcc0 10000 degen 0x1c1cd611e0c769182f2a6fb6cbef00600d6042508ce09a0cb0e46dc46d656e7d 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 #15/770 background: none; body: sugarskull; neck: none; mouth: coin; ears: loopearring; head: partyhat; eyes: eyepatch 0xd18c4fe7b91c4ffe2467ee710071d8d7a8658622212da1c482fd5cf1c105c637 chain_logs contract_getters",
+    "search_text": "dog 357 dog #357 357 mission 2 mission 2 degen chain settled 0x4bf88042de0220647acb314af3c5f310aec3bcc0 0x4bf8…bcc0 10000 degen 0x1c1cd611e0c769182f2a6fb6cbef00600d6042508ce09a0cb0e46dc46d656e7d 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 #15/771 background: none; body: sugarskull; neck: none; mouth: coin; ears: loopearring; head: partyhat; eyes: eyepatch 0xd18c4fe7b91c4ffe2467ee710071d8d7a8658622212da1c482fd5cf1c105c637 chain_logs contract_getters",
     "settlement": {
       "block_number": 25786346,
       "block_time_utc": "2025-04-23T20:51:01Z",
@@ -86,7 +86,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.9%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
