@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
-      "usd_estimate": "19.92000000",
+      "usd_estimate": "19.78000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$19.92",
+      "usd_estimate_display": "$19.78",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-12",
-      "usd_estimate_price_usd": "1810.9090909090909090909090909090909090909090909090909090909090909090909090909091",
+      "usd_estimate_price_usd": "1798.1818181818181818181818181818181818181818181818181818181818181818181818181818",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -60,7 +60,7 @@
       "total": 772
     },
     "schema_version": 1,
-    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.92 $19.92 2026-07-12t21:17:05z #339/772 generated auction feed 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd background: none (90.3%) background none body: black (11.4%) body black neck: redcollar (30.8%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.5%) ears none head: redmohawk (7.1%) head redmohawk eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.78 $19.78 2026-07-12t21:17:05z #339/772 generated auction feed 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd background: none (90.3%) background none body: black (11.4%) body black neck: redcollar (30.8%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.5%) ears none head: redmohawk (7.1%) head redmohawk eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
