@@ -477,6 +477,37 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
         assert marker in rendered
 
 
+def test_write_html_includes_browser_favicon_only() -> None:
+    dashboard = load_module()
+    tables = {
+        "mission3_metrics": (
+            ["metric", "value"],
+            [
+                ("site_url", "https://example.test"),
+                ("current_auction_token_id", "11"),
+            ],
+        ),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    assert '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">' in rendered
+    for marker in (
+        '<link rel="icon" href="data:,">',
+        "apple-touch-icon",
+        "site-brand",
+        "site-logo",
+        "degen-dogs-logo.png",
+    ):
+        assert marker not in rendered
+
+
 def test_unified_archive_bid_cell_formats_usd_from_shared_numeric_fallbacks() -> None:
     dashboard = load_module()
     tables = {

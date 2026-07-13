@@ -3385,7 +3385,7 @@ setInterval(updateCountdowns,1000);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#e8ded5">
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <title>Degen Dogs Mission 3 Auctions</title>
 <style>{css}</style>
 </head>

@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import importlib.util
+import struct
 import sys
+import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +70,117 @@ def assert_timer_urgency_colors() -> None:
             raise AssertionError(f"generated index.html missing timer urgency marker: {marker}")
 
 
+def read_rgba_png(path: Path) -> tuple[int, int, list[int]]:
+    data = path.read_bytes()
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise AssertionError(f"{path} is not a PNG")
+
+    width = height = bit_depth = color_type = interlace = None
+    idat = []
+    offset = 8
+    while offset < len(data):
+        length = struct.unpack(">I", data[offset:offset + 4])[0]
+        chunk_type = data[offset + 4:offset + 8]
+        chunk = data[offset + 8:offset + 8 + length]
+        offset += length + 12
+        if chunk_type == b"IHDR":
+            width, height, bit_depth, color_type, _, _, interlace = struct.unpack(">IIBBBBB", chunk)
+        elif chunk_type == b"IDAT":
+            idat.append(chunk)
+        elif chunk_type == b"IEND":
+            break
+
+    if any(value is None for value in (width, height, bit_depth, color_type, interlace)):
+        raise AssertionError(f"{path} is missing a valid PNG header")
+    assert isinstance(width, int)
+    assert isinstance(height, int)
+    assert isinstance(bit_depth, int)
+    assert isinstance(color_type, int)
+    assert isinstance(interlace, int)
+    if bit_depth != 8 or color_type != 6 or interlace != 0:
+        raise AssertionError(f"{path} must be a non-interlaced 8-bit RGBA PNG")
+
+    bytes_per_pixel = 4
+    stride = width * bytes_per_pixel
+    raw = zlib.decompress(b"".join(idat))
+    expected_size = height * (stride + 1)
+    if len(raw) != expected_size:
+        raise AssertionError(f"{path} has unexpected PNG scanline data")
+
+    previous = bytearray(stride)
+    alphas = []
+    cursor = 0
+    for _ in range(height):
+        filter_type = raw[cursor]
+        cursor += 1
+        filtered = raw[cursor:cursor + stride]
+        cursor += stride
+        reconstructed = bytearray(stride)
+        for index, value in enumerate(filtered):
+            left = reconstructed[index - bytes_per_pixel] if index >= bytes_per_pixel else 0
+            above = previous[index]
+            upper_left = previous[index - bytes_per_pixel] if index >= bytes_per_pixel else 0
+            if filter_type == 0:
+                decoded = value
+            elif filter_type == 1:
+                decoded = (value + left) & 0xFF
+            elif filter_type == 2:
+                decoded = (value + above) & 0xFF
+            elif filter_type == 3:
+                decoded = (value + ((left + above) // 2)) & 0xFF
+            elif filter_type == 4:
+                predictor = left + above - upper_left
+                left_distance = abs(predictor - left)
+                above_distance = abs(predictor - above)
+                diagonal_distance = abs(predictor - upper_left)
+                nearest = left if left_distance <= above_distance and left_distance <= diagonal_distance else (
+                    above if above_distance <= diagonal_distance else upper_left
+                )
+                decoded = (value + nearest) & 0xFF
+            else:
+                raise AssertionError(f"{path} uses unsupported PNG filter {filter_type}")
+            reconstructed[index] = decoded
+        alphas.extend(reconstructed[3::4])
+        previous = reconstructed
+
+    return width, height, alphas
+
+
+def assert_browser_favicon_asset() -> None:
+    html = INDEX_PATH.read_text(encoding="utf-8")
+    favicon_marker = '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">'
+    if favicon_marker not in html:
+        raise AssertionError("generated index.html is missing the browser favicon")
+    forbidden_markers = [
+        '<link rel="icon" href="data:,">',
+        "apple-touch-icon",
+        "site-brand",
+        "site-logo",
+        "degen-dogs-logo.png",
+    ]
+    for marker in forbidden_markers:
+        if marker in html:
+            raise AssertionError(f"generated index.html contains non-favicon branding: {marker}")
+
+    path = ROOT / "public" / "favicon-32x32.png"
+    if not path.is_file():
+        raise AssertionError("missing public browser favicon")
+    width, height, alphas = read_rgba_png(path)
+    if (width, height) != (32, 32):
+        raise AssertionError(f"favicon dimensions are {(width, height)}, expected (32, 32)")
+    alpha_values = set(alphas)
+    if not {0, 255}.issubset(alpha_values):
+        raise AssertionError("favicon must contain both transparent and opaque pixels")
+    if alpha_values - {0, 255}:
+        raise AssertionError("favicon contains soft alpha noise instead of crisp pixel transparency")
+    corners = [alphas[0], alphas[width - 1], alphas[(height - 1) * width], alphas[-1]]
+    if any(corners):
+        raise AssertionError("favicon must have transparent outer corners")
+    for filename in ("degen-dogs-logo.png", "apple-touch-icon.png"):
+        if (ROOT / "public" / filename).exists():
+            raise AssertionError(f"non-favicon logo asset must not be published: {filename}")
+
+
 def assert_creator_popover() -> None:
     html = INDEX_PATH.read_text(encoding="utf-8")
     required_markers = [
@@ -125,6 +238,7 @@ def assert_bid_history_card_layout() -> None:
 def main() -> int:
     assert_trait_links()
     assert_timer_urgency_colors()
+    assert_browser_favicon_asset()
     assert_creator_popover()
     assert_no_farcaster_channel_panel()
     assert_bid_history_card_layout()
