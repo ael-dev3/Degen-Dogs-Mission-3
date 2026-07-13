@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#66/772",
+      "display": "#66/773",
       "rank": 66,
-      "total": 772
+      "total": 773
     },
     "schema_version": 1,
-    "search_text": "dog 769 dog #769 769 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.87 $17.87 2026-07-11t06:03:31z #66/772 generated auction feed 0xdeecb86c5a20965d885fec3a44a1534f628d0425a011ff9c65561f586ca4a38c 0x2569d51d1a04b097bf6975661742e0ac2ae91d305539cf20aaae891a98cbe512 background: halo (9.7%) background halo body: white (11.5%) body white neck: none (39.8%) neck none mouth: tongue (9.8%) mouth tongue ears: earbuds (32.3%) ears earbuds head: whitemohawk (6.7%) head whitemohawk eyes: 3dglasses (4.9%) eyes 3dglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 769 dog #769 769 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.87 $17.87 2026-07-11t06:03:31z #66/773 generated auction feed 0xdeecb86c5a20965d885fec3a44a1534f628d0425a011ff9c65561f586ca4a38c 0x2569d51d1a04b097bf6975661742e0ac2ae91d305539cf20aaae891a98cbe512 background: halo (9.7%) background halo body: white (11.5%) body white neck: none (39.7%) neck none mouth: tongue (9.8%) mouth tongue ears: earbuds (32.2%) ears earbuds head: whitemohawk (6.7%) head whitemohawk eyes: 3dglasses (4.9%) eyes 3dglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-11T06:03:31Z",
@@ -89,7 +89,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

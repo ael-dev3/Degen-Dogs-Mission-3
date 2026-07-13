@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#683/772",
+      "display": "#683/773",
       "rank": 683,
-      "total": 772
+      "total": 773
     },
     "schema_version": 1,
-    "search_text": "dog 288 dog #288 288 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a 0xe0bbb886093691caed09f7be280e8b92c328f017e560ee2f580ec122b405bb56 #683/772 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: none; eyes: bluelasereyes 0x70b228b04c60e145a8fb606ac7c266d784b4f621f1c64862272c8e7cc32a5cd0 chain_logs contract_getters",
+    "search_text": "dog 288 dog #288 288 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a 0xe0bbb886093691caed09f7be280e8b92c328f017e560ee2f580ec122b405bb56 #683/773 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: none; eyes: bluelasereyes 0x70b228b04c60e145a8fb606ac7c266d784b4f621f1c64862272c8e7cc32a5cd0 chain_logs contract_getters",
     "settlement": {
       "block_number": 25463368,
       "block_time_utc": "2025-02-17T07:50:42Z",
@@ -91,7 +91,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,12 +101,12 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.8%)",
+        "display": "Eyes: BlueLaserEyes (10.7%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }
