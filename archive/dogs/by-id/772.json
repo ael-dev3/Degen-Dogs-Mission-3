@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "17.85000000",
+      "usd_estimate": "17.79000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.85",
+      "usd_estimate_display": "$17.79",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-14",
-      "usd_estimate_price_usd": "1785",
+      "usd_estimate_price_usd": "1779",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 773
     },
     "schema_version": 1,
-    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.85 $17.85 2026-07-13t14:20:31z #630/773 generated auction feed 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b background: none (90.3%) background none body: redbrown (14.9%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.0%) mouth none ears: goldearring (15.3%) ears goldearring head: none (20.3%) head none eyes: monocle (6.6%) eyes monocle base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.79 $17.79 2026-07-13t14:20:31z #630/773 generated auction feed 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b background: none (90.3%) background none body: redbrown (14.9%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.0%) mouth none ears: goldearring (15.3%) ears goldearring head: none (20.3%) head none eyes: monocle (6.6%) eyes monocle base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
