@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#695/773",
+      "display": "#695/774",
       "rank": 695,
-      "total": 773
+      "total": 774
     },
     "schema_version": 1,
-    "search_text": "dog 150 dog #150 150 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xebaa4ba7e1e318811a4e365806bf88b64f7d312304f056e4a3d5ec5d1ff5114f 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 #695/773 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 150 dog #150 150 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xebaa4ba7e1e318811a4e365806bf88b64f7d312304f056e4a3d5ec5d1ff5114f 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 #695/774 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 31365838,
       "block_time_utc": "2022-07-31T20:02:29Z",
@@ -86,7 +86,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: StuddedCollar (10.0%)",
+        "display": "Neck: StuddedCollar (9.9%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },

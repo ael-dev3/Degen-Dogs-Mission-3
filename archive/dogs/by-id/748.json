@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#589/773",
-      "rank": 589,
-      "total": 773
+      "display": "#585/774",
+      "rank": 585,
+      "total": 774
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.01210 eth 12100000000000000 20.68613420 $20.69 2026-06-19t23:46:43z #589/773 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (11.3%) body brown neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: goldearring (15.3%) ears goldearring head: blackcap (6.7%) head blackcap eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 748 dog #748 https://api.degendogs.club/images/748.png https://degendogs.club/#dog748 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/748 settled @i-am-rael.eth https://farcaster.xyz/i-am-rael.eth 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0.01210 eth ($21) 4 3 2026-06-18 23:42:15 2026-06-19 23:46:43 #589/773 background: none; body: brown; neck: none; mouth: none; ears: goldearring; head: blackcap; eyes: none background: none (90.3%); body: brown (11.3%); neck: none (39.7%); mouth: none (69.0%); ears: goldearring (15.3%); head: blackcap (6.7%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.01210 eth 12100000000000000 20.68613420 $20.69 2026-06-19t23:46:43z #585/774 generated auction feed 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 background: none (90.3%) background none body: brown (11.2%) body brown neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: goldearring (15.2%) ears goldearring head: blackcap (6.7%) head blackcap eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 748 dog #748 https://api.degendogs.club/images/748.png https://degendogs.club/#dog748 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/748 settled @i-am-rael.eth https://farcaster.xyz/i-am-rael.eth 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb 0.01210 eth ($21) 4 3 2026-06-18 23:42:15 2026-06-19 23:46:43 #585/774 background: none; body: brown; neck: none; mouth: none; ears: goldearring; head: blackcap; eyes: none background: none (90.3%); body: brown (11.2%); neck: none (39.7%); mouth: none (69.0%); ears: goldearring (15.2%); head: blackcap (6.7%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-19T23:46:43Z",
@@ -87,7 +87,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.3%)",
+        "display": "Body: Brown (11.2%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.3%)",
+        "display": "Ears: GoldEarring (15.2%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
