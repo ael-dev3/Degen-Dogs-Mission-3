@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "19.25000000",
+      "usd_estimate": "19.20000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$19.25",
+      "usd_estimate_display": "$19.20",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-16",
-      "usd_estimate_price_usd": "1925",
+      "usd_estimate_price_usd": "1.92E+3",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 775
     },
     "schema_version": 1,
-    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.25 $19.25 2026-07-15t10:19:31z #527/775 generated auction feed 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 background: none (90.3%) background none body: white (11.6%) body white neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: none (25.5%) ears none head: blackcap (6.8%) head blackcap eyes: masksnorkel (9.4%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.2 $19.20 2026-07-15t10:19:31z #527/775 generated auction feed 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 background: none (90.3%) background none body: white (11.6%) body white neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: none (25.5%) ears none head: blackcap (6.8%) head blackcap eyes: masksnorkel (9.4%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
