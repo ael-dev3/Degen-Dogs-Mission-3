@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#244/775",
+      "display": "#244/776",
       "rank": 244,
-      "total": 775
+      "total": 776
     },
     "schema_version": 1,
-    "search_text": "dog 487 dog #487 487 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 2445 degen 0x50be61efdc77f2c290ea30922aa5464299b933879ab6252e6dd49d1bcf21c5bb 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 #244/775 background: none; body: orange; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes 0x40af2b8f729d416476d207efd42f2aa24c59ab0f11afef72e6031d61c5408753 0x3911339e7745ff7e1f2f85f958228b776d72142fcfeb8511a7870dec24af9898 chain_logs contract_getters",
+    "search_text": "dog 487 dog #487 487 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 2445 degen 0x50be61efdc77f2c290ea30922aa5464299b933879ab6252e6dd49d1bcf21c5bb 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 #244/776 background: none; body: orange; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes 0x40af2b8f729d416476d207efd42f2aa24c59ab0f11afef72e6031d61c5408753 0x3911339e7745ff7e1f2f85f958228b776d72142fcfeb8511a7870dec24af9898 chain_logs contract_getters",
     "settlement": {
       "block_number": 26255444,
       "block_time_utc": "2025-09-14T15:17:46Z",
@@ -87,12 +87,12 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (31.0%)",
+        "display": "Neck: RedCollar (31.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },

@@ -54,12 +54,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#444/775",
-      "rank": 444,
-      "total": 775
+      "display": "#443/776",
+      "rank": 443,
+      "total": 776
     },
     "schema_version": 1,
-    "search_text": "dog 35 dog #35 35 mission 1 mission 1 polygon settled 0xb8832d516d0f3094b4bdc5400e36a2a6984233ea 0xb883…33ea 0.399 weth 0x81d3d31cd54184d7f5156486f2b31b8500831f18d65319ae59f12c64e75280e1 0x9382ba3d08c2baae1a2ae1f13ae6c9b566d0abfa90ed9088107bd67f4da54a61 #444/775 background: none; body: white; neck: redcollar; mouth: none; ears: goldearring; head: crazyhair; eyes: bluelasereyes 0x9e7713ca1ae904eb38765f516fd5720538ec2112861eec6b8ec1181c6b453b33 0x3a50f92668928dbdc51da112a57165622e87b2f29208cd1f703240b41944880e 0xb34825d9022333fae8c3f6e1f5238e3908394dbef8e2fc7d5f79e87006d1c800 0x2709f5a6037986808ac29e51c90100d48c86005db919fdd508b13cf9c485be48 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 35 dog #35 35 mission 1 mission 1 polygon settled 0xb8832d516d0f3094b4bdc5400e36a2a6984233ea 0xb883…33ea 0.399 weth 0x81d3d31cd54184d7f5156486f2b31b8500831f18d65319ae59f12c64e75280e1 0x9382ba3d08c2baae1a2ae1f13ae6c9b566d0abfa90ed9088107bd67f4da54a61 #443/776 background: none; body: white; neck: redcollar; mouth: none; ears: goldearring; head: crazyhair; eyes: bluelasereyes 0x9e7713ca1ae904eb38765f516fd5720538ec2112861eec6b8ec1181c6b453b33 0x3a50f92668928dbdc51da112a57165622e87b2f29208cd1f703240b41944880e 0xb34825d9022333fae8c3f6e1f5238e3908394dbef8e2fc7d5f79e87006d1c800 0x2709f5a6037986808ac29e51c90100d48c86005db919fdd508b13cf9c485be48 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26164076,
       "block_time_utc": "2022-03-20T21:42:53Z",
@@ -91,12 +91,12 @@
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (31.0%)",
+        "display": "Neck: RedCollar (31.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: CrazyHair (6.5%)",
+        "display": "Head: CrazyHair (6.4%)",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
