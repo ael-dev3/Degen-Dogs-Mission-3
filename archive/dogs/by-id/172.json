@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#722/776",
-      "rank": 722,
-      "total": 776
+      "display": "#726/777",
+      "rank": 726,
+      "total": 777
     },
     "schema_version": 1,
-    "search_text": "dog 172 dog #172 172 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d 0x405f8b80645d5dd42d2d2a92efe9b57d7b8adff2b6e5acdd57da8b031ec72da8 #722/776 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: none; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 172 dog #172 172 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d 0x405f8b80645d5dd42d2d2a92efe9b57d7b8adff2b6e5acdd57da8b031ec72da8 #726/777 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: none; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 34490502,
       "block_time_utc": "2022-10-18T08:29:51Z",
@@ -86,27 +86,27 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (31.1%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.5%)",
+        "display": "Ears: None (25.6%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.5%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.4%)",
+        "display": "Eyes: MaskSnorkel (9.5%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

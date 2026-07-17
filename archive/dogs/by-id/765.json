@@ -7,7 +7,7 @@
       "amount_usd_at_event": "17.97467646",
       "eth_usd_price_at_event": "1797.467645726414",
       "eth_usd_price_date_utc": "2026-07-07",
-      "native": "0.01",
+      "native": "0.01000",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#345/776",
-      "rank": 345,
-      "total": 776
+      "display": "#344/777",
+      "rank": 344,
+      "total": 777
     },
     "schema_version": 1,
-    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.97 $17.97 2026-07-07t02:32:27z #345/776 generated auction feed 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.7%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.2%) ears loopearring head: unicorn (4.8%) head unicorn eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01000 eth 10000000000000000 17.97467646 $17.97 2026-07-07t02:32:27z #344/777 generated auction feed 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c background: none (90.3%) background none body: orange (8.8%) body orange neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: unicorn (4.8%) head unicorn eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 765 dog #765 https://api.degendogs.club/images/765.png https://degendogs.club/#dog765 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/765 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.01000 eth ($18) 3 3 2026-07-06 02:22:31 2026-07-07 02:32:27 #344/777 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: glasses background: none (90.3%); body: orange (8.8%); neck: none (39.8%); mouth: none (69.0%); ears: loopearring (27.2%); head: unicorn (4.8%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-07T02:32:27Z",
@@ -69,12 +69,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -90,12 +91,12 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -110,7 +111,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Glasses (12.8%)",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

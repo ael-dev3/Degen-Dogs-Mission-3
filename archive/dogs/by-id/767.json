@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#580/776",
-      "rank": 580,
-      "total": 776
+      "display": "#579/777",
+      "rank": 579,
+      "total": 777
     },
     "schema_version": 1,
-    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z #580/776 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.3%) background none body: white (11.6%) body white neck: redcollar (31.1%) neck redcollar mouth: none (68.9%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z #579/777 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.3%) background none body: white (11.6%) body white neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-09T05:07:55Z",
@@ -89,12 +89,12 @@
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (31.1%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.8%)",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }
