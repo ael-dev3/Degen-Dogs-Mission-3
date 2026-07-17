@@ -1,6 +1,6 @@
 [
   {
-    "amount_usd_at_event": null,
+    "amount_usd_at_event": "16.45",
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 775,
@@ -10,7 +10,7 @@
     "eth_usd_price_date_utc": "2026-07-17",
     "event_time_utc": "2026-07-16T10:20:51Z",
     "event_tx_hash": null,
-    "event_type": "current_bid",
+    "event_type": "auction_record",
     "mission": 3,
     "native_amount": "0.009",
     "native_amount_raw": "9000000000000000",
