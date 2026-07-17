@@ -19,7 +19,7 @@ Validate: `generated/mission3_metrics.csv` updates and `npm run build` passes.
 
 Symptom: RPC returns range/rate-limit errors.
 
-Fix: lower `BASE_LOG_CHUNK`, for example `5000` or `2000`.
+Fix: keep `BASE_LOG_CHUNK` at or below `1000`; public Base RPC providers commonly reject larger `eth_getLogs` ranges. The builder now caps this value at `1000` even if the environment requests more.
 
 ## Missing Python module
 

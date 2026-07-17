@@ -22,7 +22,7 @@ Fill only the values you need in `.env.local`.
 | `BASE_RPC_URLS` | Comma-separated fallback Base RPC endpoints for contract calls. | yes if provider-specific |
 | `BASE_LOG_RPC_URLS` | Comma-separated endpoints used for `eth_getLogs` scans. | yes if provider-specific |
 | `BASE_FROM_BLOCK` | First Base block scanned for Mission 3 logs. | no |
-| `BASE_LOG_CHUNK` | Maximum block range per log request. | no |
+| `BASE_LOG_CHUNK` | Maximum block range per `eth_getLogs` request; capped at 1,000 for public Base RPC compatibility. | no |
 | `BASE_LOG_WORKERS` | Concurrent log-fetch workers. | no |
 | `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for balance/metadata calls; capped at 10. | no |
 | `DOG_METADATA_WORKERS` | Concurrent Dog metadata fetch workers. | no |
