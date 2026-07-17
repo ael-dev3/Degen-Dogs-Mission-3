@@ -477,6 +477,11 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
         assert marker in rendered
 
 
+def test_log_chunk_is_capped_for_public_base_rpc() -> None:
+    dashboard = load_module()
+    assert dashboard.LOG_CHUNK <= 1000
+
+
 def test_write_html_includes_browser_favicon_only() -> None:
     dashboard = load_module()
     tables = {

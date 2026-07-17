@@ -74,7 +74,9 @@ LOG_RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") el
     if url.strip()
 ]
 FROM_BLOCK = int(os.environ.get("BASE_FROM_BLOCK", "40500000"))
-LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "10000")), 10000))
+# Public Base RPC providers commonly reject eth_getLogs ranges above 1,000 blocks.
+# Keep the env override for tuning lower, but never allow an unsafe larger range.
+LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "1000")), 1000))
 LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
 RPC_ATTEMPTS = max(1, min(int(os.environ.get("BASE_RPC_ATTEMPTS", "3")), 10))
@@ -410,7 +412,7 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_RPC_URLS", "Comma-separated fallback Base RPC endpoints for contract calls."),
     ("BASE_LOG_RPC_URLS", "Comma-separated Base RPC endpoints used for `eth_getLogs` history scans."),
     ("BASE_FROM_BLOCK", "First Base block scanned for Mission 3 logs; defaults to the known Mission 3 start range."),
-    ("BASE_LOG_CHUNK", "Maximum block range per log request, capped at 10,000 for public Base RPC compatibility."),
+    ("BASE_LOG_CHUNK", "Maximum block range per eth_getLogs request, capped at 1,000 for public Base RPC compatibility."),
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
