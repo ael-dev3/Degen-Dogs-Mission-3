@@ -20211,13 +20211,13 @@
     "dog_external_url": "https://degendogs.club/#dog777",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/777",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
+    "winner": "@0xael.eth",
+    "winner_url": "https://farcaster.xyz/0xael.eth",
+    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "amount": "0.00900 ETH ($17)",
     "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-07-18 12:58:15",
     "settled_time_utc": "",
     "rarity": "#605/778",
@@ -20225,6 +20225,6 @@
     "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.4%); Mouth: None (69.0%); Ears: Earbuds (32.1%); Head: CrazyHair (6.6%); Eyes: Glasses (12.9%)",
     "confidence": "verified_live_base_logs",
     "sources": "base_logs,dashboard_builder",
-    "search_text": "3 Base 8453 777 Dog #777 https://api.degendogs.club/images/777.png https://degendogs.club/#dog777 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/777 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-07-18 12:58:15 #605/778 Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: Glasses Background: None (90.4%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.4%); Mouth: None (69.0%); Ears: Earbuds (32.1%); Head: CrazyHair (6.6%); Eyes: Glasses (12.9%) verified_live_base_logs base_logs,dashboard_builder"
+    "search_text": "3 Base 8453 777 Dog #777 https://api.degendogs.club/images/777.png https://degendogs.club/#dog777 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/777 live @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00900 ETH ($17) 1 1 2026-07-18 12:58:15 #605/778 Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: Glasses Background: None (90.4%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.4%); Mouth: None (69.0%); Ears: Earbuds (32.1%); Head: CrazyHair (6.6%); Eyes: Glasses (12.9%) verified_live_base_logs base_logs,dashboard_builder"
   }
 ]
