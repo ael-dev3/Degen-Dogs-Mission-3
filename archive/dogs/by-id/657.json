@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#487/777",
+      "display": "#487/778",
       "rank": 487,
-      "total": 777
+      "total": 778
     },
     "schema_version": 1,
-    "search_text": "dog 657 dog #657 657 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 0x8e1fa54b62e6ff566fe80e76b43970bfaf3502514bd991e18198c07a60c7a4a0 #487/777 background: none; body: brown; neck: goldnecklace; mouth: pizza; ears: goldearring; head: none; eyes: glasses 0x0e15b949dca77982fd377259094bbafd3e19ee7871fa362f4c322bbdc70ce2a9 0xd8d9a71cff5007361c5be76fc5f2336d4157b32eba045789a9d0670ea8ea7019 base_logs archive_indexer",
+    "search_text": "dog 657 dog #657 657 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 0x8e1fa54b62e6ff566fe80e76b43970bfaf3502514bd991e18198c07a60c7a4a0 #487/778 background: none; body: brown; neck: goldnecklace; mouth: pizza; ears: goldearring; head: none; eyes: glasses 0x0e15b949dca77982fd377259094bbafd3e19ee7871fa362f4c322bbdc70ce2a9 0xd8d9a71cff5007361c5be76fc5f2336d4157b32eba045789a9d0670ea8ea7019 base_logs archive_indexer",
     "settlement": {
       "block_number": 43527449,
       "block_time_utc": "2026-03-18T14:30:45Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,7 +87,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -102,12 +102,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.9%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

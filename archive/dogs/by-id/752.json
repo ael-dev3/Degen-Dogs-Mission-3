@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#528/777",
-      "rank": 528,
-      "total": 777
+      "display": "#532/778",
+      "rank": 532,
+      "total": 778
     },
     "schema_version": 1,
-    "search_text": "dog 752 dog #752 752 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01100 eth 11000000000000000 18.32130904 $18.32 2026-06-23t23:56:45z #528/777 generated auction feed 0xb1f05d59b6a2eeb651b3bb78ad06efe22814efdff4751a40c714e0bcc6280ea4 0x875854c385f7f250fe4a37d43bd113b91dc537bebe988dd091ed9ace80d951e3 0xac6f7e4eb2bc749e91c54d98fee77f0e8c0415f70ecc1ef0ac674f805bef503e background: none (90.3%) background none body: dalmation (9.3%) body dalmation neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: earbuds (32.0%) ears earbuds head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 752 dog #752 https://api.degendogs.club/images/752.png https://degendogs.club/#dog752 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/752 settled @skunkape https://farcaster.xyz/skunkape 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 0.01100 eth ($18) 3 3 2026-06-22 23:53:31 2026-06-23 23:56:45 #528/777 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: headphones; eyes: glasses background: none (90.3%); body: dalmation (9.3%); neck: redcollar (31.0%); mouth: none (69.0%); ears: earbuds (32.0%); head: headphones (6.6%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 752 dog #752 752 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01100 eth 11000000000000000 18.32130904 $18.32 2026-06-23t23:56:45z #532/778 generated auction feed 0xb1f05d59b6a2eeb651b3bb78ad06efe22814efdff4751a40c714e0bcc6280ea4 0x875854c385f7f250fe4a37d43bd113b91dc537bebe988dd091ed9ace80d951e3 0xac6f7e4eb2bc749e91c54d98fee77f0e8c0415f70ecc1ef0ac674f805bef503e background: none (90.4%) background none body: dalmation (9.3%) body dalmation neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: earbuds (32.1%) ears earbuds head: headphones (6.6%) head headphones eyes: glasses (12.9%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 752 dog #752 https://api.degendogs.club/images/752.png https://degendogs.club/#dog752 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/752 settled @skunkape https://farcaster.xyz/skunkape 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 0.01100 eth ($18) 3 3 2026-06-22 23:53:31 2026-06-23 23:56:45 #532/778 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: headphones; eyes: glasses background: none (90.4%); body: dalmation (9.3%); neck: redcollar (31.0%); mouth: none (69.0%); ears: earbuds (32.1%); head: headphones (6.6%); eyes: glasses (12.9%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-23T23:56:45Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -111,7 +111,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.9%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

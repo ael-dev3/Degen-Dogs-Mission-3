@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#83/777",
-      "rank": 83,
-      "total": 777
+      "display": "#82/778",
+      "rank": 82,
+      "total": 778
     },
     "schema_version": 1,
-    "search_text": "dog 763 dog #763 763 mission 3 mission 3 base settled 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x1621…e3f7 0.01210 eth 12100000000000000 21.57977399 $21.58 2026-07-05t02:20:03z #83/777 generated auction feed 0x785dd33d28df579bbb07212df418429949a836ccb55b065cb5b3d0310139c9db 0x30a5143eeed65b3e194c6d751e2422c8db506a26b62801d8dc84c907714c6b79 0x5e73029b27c4242883d8a263dd98ae5168a9cd373c5e11b40dbfa6f95c22eed5 0xf6093434dab50c94d10835988f4618bcebe61bc20fb101bfec9ab48b206bca37 0xd68455dfb74161b31009ff5cf79979056ea174ffe38b3194cbf1ee446cd60bef 0x29d8d6a1a62cdba76849c58c1a36f3965412153cd770d7e719cf827b00fb16e2 background: none (90.3%) background none body: sugarskull (6.6%) body sugarskull neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: partyhat (4.4%) head partyhat eyes: redlasereyes (5.1%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 763 dog #763 https://api.degendogs.club/images/763.png https://degendogs.club/#dog763 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/763 settled 0x1621…e3f7 https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0.01210 eth ($22) 6 5 2026-07-04 02:16:27 2026-07-05 02:20:03 #83/777 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: partyhat; eyes: redlasereyes background: none (90.3%); body: sugarskull (6.6%); neck: none (39.8%); mouth: none (69.0%); ears: loopearring (27.2%); head: partyhat (4.4%); eyes: redlasereyes (5.1%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 763 dog #763 763 mission 3 mission 3 base settled 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x1621…e3f7 0.01210 eth 12100000000000000 21.57977399 $21.58 2026-07-05t02:20:03z #82/778 generated auction feed 0x785dd33d28df579bbb07212df418429949a836ccb55b065cb5b3d0310139c9db 0x30a5143eeed65b3e194c6d751e2422c8db506a26b62801d8dc84c907714c6b79 0x5e73029b27c4242883d8a263dd98ae5168a9cd373c5e11b40dbfa6f95c22eed5 0xf6093434dab50c94d10835988f4618bcebe61bc20fb101bfec9ab48b206bca37 0xd68455dfb74161b31009ff5cf79979056ea174ffe38b3194cbf1ee446cd60bef 0x29d8d6a1a62cdba76849c58c1a36f3965412153cd770d7e719cf827b00fb16e2 background: none (90.4%) background none body: sugarskull (6.6%) body sugarskull neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: partyhat (4.4%) head partyhat eyes: redlasereyes (5.1%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 763 dog #763 https://api.degendogs.club/images/763.png https://degendogs.club/#dog763 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/763 settled 0x1621…e3f7 https://basescan.org/address/0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0x16219b2c3a11c5833ace1a8b9ddf64c48ddbe3f7 0.01210 eth ($22) 6 5 2026-07-04 02:16:27 2026-07-05 02:20:03 #82/778 background: none; body: sugarskull; neck: none; mouth: none; ears: loopearring; head: partyhat; eyes: redlasereyes background: none (90.4%); body: sugarskull (6.6%); neck: none (39.7%); mouth: none (69.0%); ears: loopearring (27.1%); head: partyhat (4.4%); eyes: redlasereyes (5.1%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-05T02:20:03Z",
@@ -84,7 +84,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#207/777",
-      "rank": 207,
-      "total": 777
+      "display": "#209/778",
+      "rank": 209,
+      "total": 778
     },
     "schema_version": 1,
-    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-10t05:14:19z #207/777 generated auction feed 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 background: none (90.3%) background none body: rainbow (4.4%) body rainbow neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-10t05:14:19z #209/778 generated auction feed 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 background: none (90.4%) background none body: rainbow (4.4%) body rainbow neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: headphones (6.6%) head headphones eyes: glasses (12.9%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-10T05:14:19Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,7 +90,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -110,7 +110,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.9%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }
