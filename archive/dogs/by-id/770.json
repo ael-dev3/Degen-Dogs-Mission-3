@@ -56,12 +56,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#621/778",
-      "rank": 621,
-      "total": 778
+      "display": "#624/779",
+      "rank": 624,
+      "total": 779
     },
     "schema_version": 1,
-    "search_text": "dog 770 dog #770 770 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.011 eth 11000000000000000 19.66 $19.66 2026-07-12t06:05:59z #621/778 generated auction feed 0xe2e1d683c3667a6f6a143a425c231956a41ff769d99e0eedce9635471c76d768 0x59653cff5cdffcc42bbc402927bd2df1272d5d43124ce4d1f8f86d983d3ebc16 0xc0aafbce7f664dbb4781383c6f25bd4530a4544982b0b74f951b80031f0e3c9b 0x4618173bb55fe6c397c8e3d3676bc9551e03c190b300d26ffded024a00d428fc 0xfc84a708ae6ff545cfe35b23da10d3b1c7a1c865a0285c069ac051a5664db57c background: none (90.4%) background none body: brown (11.2%) body brown neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: none (25.6%) ears none head: redmohawk (7.1%) head redmohawk eyes: sunglasses (14.5%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 770 dog #770 770 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.011 eth 11000000000000000 19.66 $19.66 2026-07-12t06:05:59z #624/779 generated auction feed 0xe2e1d683c3667a6f6a143a425c231956a41ff769d99e0eedce9635471c76d768 0x59653cff5cdffcc42bbc402927bd2df1272d5d43124ce4d1f8f86d983d3ebc16 0xc0aafbce7f664dbb4781383c6f25bd4530a4544982b0b74f951b80031f0e3c9b 0x4618173bb55fe6c397c8e3d3676bc9551e03c190b300d26ffded024a00d428fc 0xfc84a708ae6ff545cfe35b23da10d3b1c7a1c865a0285c069ac051a5664db57c background: none (90.4%) background none body: brown (11.2%) body brown neck: redcollar (31.1%) neck redcollar mouth: none (68.9%) mouth none ears: none (25.5%) ears none head: redmohawk (7.1%) head redmohawk eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-12T06:05:59Z",
@@ -92,17 +92,17 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (31.0%)",
+        "display": "Neck: RedCollar (31.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -112,7 +112,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (14.5%)",
+        "display": "Eyes: Sunglasses (14.6%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
