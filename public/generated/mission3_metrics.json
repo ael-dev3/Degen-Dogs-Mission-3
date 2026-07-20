@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "48881483"
+    "value": "48881615"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-07-20 12:58:33"
+    "value": "2026-07-20 13:02:57"
   },
   {
     "metric": "auction_house",
@@ -65,7 +65,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1871.8"
+    "value": "1870.91"
   },
   {
     "metric": "eth_usd_source",
@@ -177,19 +177,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "221.36"
+    "value": "243.56"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4517"
+    "value": "0.4106"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "164.89"
+    "value": "149.86"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈165% APR"
+    "value": "≈150% APR"
   },
   {
     "metric": "woof_holders",
@@ -217,23 +217,23 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.00991"
+    "value": "0.01091"
   },
   {
     "metric": "current_bid_usd",
-    "value": "18.55"
+    "value": "20.41"
   },
   {
     "metric": "current_bidder",
-    "value": "@metamorpheuz"
+    "value": "@thec1"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0x8cd17616465e2c0de3b1875757adcffeee269865"
+    "value": "0xd29c790466675153a50df7860b9efdb689a21cde"
   },
   {
     "metric": "current_auction_end_utc",
-    "value": "2026-07-20 13:04:07"
+    "value": "2026-07-20 13:06:17"
   },
   {
     "metric": "created_auctions",
@@ -245,7 +245,7 @@
   },
   {
     "metric": "total_bid_eth",
-    "value": "37.826373"
+    "value": "37.837283"
   },
   {
     "metric": "total_settled_eth",
@@ -265,7 +265,7 @@
   },
   {
     "metric": "season6_current_bidder_cap_remaining_sup",
-    "value": "8853.588973"
+    "value": "2939.165765"
   },
   {
     "metric": "season6_current_bidder_prior_wins",
@@ -273,19 +273,19 @@
   },
   {
     "metric": "season6_current_bidder_projected_capped_sup_if_wins",
-    "value": "3646.411027"
+    "value": "9560.834235"
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "27.49"
+    "value": "72.09"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
-    "value": "3646.411027"
+    "value": "9560.834235"
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "27.49"
+    "value": "72.09"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -317,7 +317,7 @@
   },
   {
     "metric": "season6_sup_current_bid_cap_remaining_before_win_sup",
-    "value": "10589.378848"
+    "value": "4674.909984"
   },
   {
     "metric": "season6_sup_current_bid_estimate_status",
@@ -325,7 +325,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_sup",
-    "value": "1735.789875"
+    "value": "1735.744218"
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_usd",
@@ -333,19 +333,19 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_raw_incremental_sup",
-    "value": "1735.789875"
+    "value": "1735.744218"
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-07-20T13:04:07Z"
+    "value": "2026-07-20T13:06:17Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
-    "value": "3646.411027"
+    "value": "9560.834235"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_without_win_sup",
-    "value": "1910.621152"
+    "value": "7825.090016"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_wins",
@@ -357,7 +357,7 @@
   },
   {
     "metric": "season6_sup_current_bidder_wallet",
-    "value": "0x8cd17616465e2c0de3b1875757adcffeee269865"
+    "value": "0xd29c790466675153a50df7860b9efdb689a21cde"
   },
   {
     "metric": "season6_sup_days_remaining",
@@ -389,7 +389,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "131810.030586"
+    "value": "131818.469963"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",

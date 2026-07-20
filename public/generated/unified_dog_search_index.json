@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-20T12:57:15Z",
+    "activity_time_utc": "2026-07-20T13:01:17Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-07-20",
-      "native": "0.00991",
+      "native": "0.01091",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "9910000000000000",
-      "usd_estimate": "18.55000000",
+      "raw": "10910000000000000",
+      "usd_estimate": "20.41000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.55",
+      "usd_estimate_display": "$20.41",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-20",
-      "usd_estimate_price_usd": "1871.8466195761856710393541876892028254288597376387487386478304742684157416750757",
+      "usd_estimate_price_usd": "1870.7607699358386801099908340971585701191567369385884509624197983501374885426214",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-07-20T12:57:15Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-07-20T13:01:17Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
+      "0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631",
       "0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f",
       "0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f"
     ],
@@ -45,7 +46,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog778",
-      "explorer": "https://basescan.org/address/0x8cd17616465e2c0de3b1875757adcffeee269865",
+      "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/778",
       "repo_archive": "archive/dogs/by-id/778.json",
       "settlement_tx": null
@@ -57,7 +58,7 @@
       "total": 779
     },
     "schema_version": 1,
-    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base ongoing 0x8cd17616465e2c0de3b1875757adcffeee269865 @metamorpheuz metamorpheuz 0.00991 eth 9910000000000000 18.55 $18.55 2026-07-20t12:57:15z #494/779 generated auction feed 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.1%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.41 $20.41 2026-07-20t13:01:17z #494/779 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.1%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -114,12 +115,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@metamorpheuz",
+      "display": "@thec1",
       "farcaster_fid": null,
-      "farcaster_handle": "metamorpheuz",
-      "profile_url": "https://farcaster.xyz/metamorpheuz",
-      "wallet": "0x8cd17616465e2c0de3b1875757adcffeee269865",
-      "wallet_explorer_url": "https://basescan.org/address/0x8cd17616465e2c0de3b1875757adcffeee269865"
+      "farcaster_handle": "thec1",
+      "profile_url": "https://farcaster.xyz/thec1",
+      "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+      "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
     }
   },
   {
