@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#197/779",
-      "rank": 197,
-      "total": 779
+      "display": "#195/780",
+      "rank": 195,
+      "total": 780
     },
     "schema_version": 1,
-    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 #197/779 background: halo; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 #195/780 background: halo; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 43820956,
       "block_time_utc": "2023-06-12T08:46:29Z",
@@ -86,12 +86,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (31.1%)",
+        "display": "Neck: RedCollar (31.0%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.7%)",
+        "display": "Eyes: BlueLaserEyes (10.6%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }
