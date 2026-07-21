@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#34/780",
+      "display": "#34/781",
       "rank": 34,
-      "total": 780
+      "total": 781
     },
     "schema_version": 1,
-    "search_text": "dog 155 dog #155 155 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c 0x84d85ef6ef117788b4ab37dc788789c5c786e1f7ee83b4e350be6e3db21961c6 #34/780 background: none; body: black; neck: redcollar; mouth: bone; ears: loopearring; head: crazyhair; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 155 dog #155 155 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c 0x84d85ef6ef117788b4ab37dc788789c5c786e1f7ee83b4e350be6e3db21961c6 #34/781 background: none; body: black; neck: redcollar; mouth: bone; ears: loopearring; head: crazyhair; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 31660882,
       "block_time_utc": "2022-08-08T14:02:16Z",
@@ -76,7 +76,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

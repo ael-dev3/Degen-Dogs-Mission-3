@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#525/780",
+      "display": "#525/781",
       "rank": 525,
-      "total": 780
+      "total": 781
     },
     "schema_version": 1,
-    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.17 $19.17 2026-07-16t08:33:29z #525/780 generated auction feed 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 background: none (90.4%) background none body: white (11.5%) body white neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: none (25.5%) ears none head: blackcap (6.8%) head blackcap eyes: masksnorkel (9.5%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.17 $19.17 2026-07-16t08:33:29z #525/781 generated auction feed 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 background: none (90.3%) background none body: white (11.5%) body white neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: none (25.5%) ears none head: blackcap (6.8%) head blackcap eyes: masksnorkel (9.5%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-16T08:33:29Z",
@@ -79,7 +79,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -89,7 +89,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },

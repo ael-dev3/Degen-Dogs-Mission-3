@@ -51,12 +51,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#263/780",
-      "rank": 263,
-      "total": 780
+      "display": "#265/781",
+      "rank": 265,
+      "total": 781
     },
     "schema_version": 1,
-    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 #263/780 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters",
+    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 #265/781 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters",
     "settlement": {
       "block_number": 25585600,
       "block_time_utc": "2025-03-11T06:17:43Z",
@@ -76,12 +76,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.2%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -96,7 +96,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.2%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#609/780",
-      "rank": 609,
-      "total": 780
+      "display": "#610/781",
+      "rank": 610,
+      "total": 781
     },
     "schema_version": 1,
-    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base settled 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0…03e3 0.03631 eth 36310000000000000 61.25773260 $61.26 2026-06-08t20:15:03z #609/780 generated auction feed 0x1554b33ab7a11775fba80370abb35263614d94e11937a8803ac44b36a0c0231b 0xff727a505e5a10b31e151d16f71a9e2b9473a6226a486a8d1ff7b13bc8edaaf7 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.4%) background none body: blue (9.1%) body blue neck: none (39.7%) neck none mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 737 dog #737 https://api.degendogs.club/images/737.png https://degendogs.club/#dog737 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/737 settled 0xa9b0…03e3 https://basescan.org/address/0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0.03631 eth ($61) 4 4 2026-06-07 20:10:25 2026-06-08 20:15:03 #609/780 background: none; body: blue; neck: none; mouth: tongue; ears: earbuds; head: none; eyes: glasses background: none (90.4%); body: blue (9.1%); neck: none (39.7%); mouth: tongue (10.0%); ears: earbuds (32.2%); head: none (20.5%); eyes: glasses (12.8%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 737 dog #737 737 mission 3 mission 3 base settled 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0…03e3 0.03631 eth 36310000000000000 61.25773260 $61.26 2026-06-08t20:15:03z #610/781 generated auction feed 0x1554b33ab7a11775fba80370abb35263614d94e11937a8803ac44b36a0c0231b 0xff727a505e5a10b31e151d16f71a9e2b9473a6226a486a8d1ff7b13bc8edaaf7 0xde0cbd72f6a29209285ed348cd67603741f7f556d1650b6cd40ccc30ca9fd180 0xdddb19c2deb417d7befcd21e8888f96b60fef761e4c6dc52e53e0dc2ce131408 background: none (90.3%) background none body: blue (9.2%) body blue neck: none (39.8%) neck none mouth: tongue (10.0%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.5%) head none eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 737 dog #737 https://api.degendogs.club/images/737.png https://degendogs.club/#dog737 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/737 settled 0xa9b0…03e3 https://basescan.org/address/0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0xa9b0ff77f30d9876378a94155d2153caa68e03e3 0.03631 eth ($61) 4 4 2026-06-07 20:10:25 2026-06-08 20:15:03 #610/781 background: none; body: blue; neck: none; mouth: tongue; ears: earbuds; head: none; eyes: glasses background: none (90.3%); body: blue (9.2%); neck: none (39.8%); mouth: tongue (10.0%); ears: earbuds (32.1%); head: none (20.5%); eyes: glasses (12.8%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-06-08T20:15:03Z",
@@ -82,17 +82,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.1%)",
+        "display": "Body: Blue (9.2%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.2%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

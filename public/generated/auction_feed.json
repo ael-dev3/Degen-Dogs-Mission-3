@@ -1,6 +1,35 @@
 [
   {
-    "status": "ended pending settlement",
+    "status": "ongoing",
+    "dog": "Dog #780",
+    "dog_image_url": "https://api.degendogs.club/images/780.png",
+    "dog_external_url": "https://degendogs.club/#dog780",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/780",
+    "bidder_winner": "no bids yet",
+    "bidder_winner_url": "",
+    "bidder_winner_wallet": "0x0000000000000000000000000000000000000000",
+    "bid": "0.00000 ETH ($0)",
+    "amount_eth": 0.0,
+    "amount_usd": 0.0,
+    "amount_usd_at_event": null,
+    "eth_usd_price_live": "1925.26",
+    "eth_usd_price_at_event": null,
+    "eth_usd_price_date_utc": "2026-07-21",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_eth_usd_price",
+    "auction_time_utc": "2026-07-21 16:52:07",
+    "time_remaining": "23:59:46",
+    "auction_end_utc": "2026-07-22 16:51:53",
+    "last_bid_utc": "2026-07-21 16:52:07",
+    "settled_time_utc": "",
+    "rarity": "#200/781",
+    "traits": "Background: Halo; Body: Blue; Neck: None; Mouth: None; Ears: GoldEarring; Head: Toque; Eyes: VRGoggles",
+    "trait_rarity": "Background: Halo (9.7%); Body: Blue (9.2%); Neck: None (39.8%); Mouth: None (69.0%); Ears: GoldEarring (15.2%); Head: Toque (7.2%); Eyes: VRGoggles (10.4%)"
+  },
+  {
+    "status": "settled",
     "dog": "Dog #779",
     "dog_image_url": "https://api.degendogs.club/images/779.png",
     "dog_external_url": "https://degendogs.club/#dog779",
@@ -10,23 +39,23 @@
     "bidder_winner_wallet": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
     "bid": "0.00991 ETH ($19)",
     "amount_eth": 0.00991,
-    "amount_usd": 19.07,
-    "amount_usd_at_event": null,
-    "eth_usd_price_live": "1923.98",
-    "eth_usd_price_at_event": null,
-    "eth_usd_price_date_utc": "2026-07-21",
-    "usd_estimate_source": "current_eth_usd_price",
-    "usd_estimate_source_detail": "coinbase",
-    "usd_estimate_confidence": "live_current",
-    "usd_estimate_basis": "current_eth_usd_price",
-    "auction_time_utc": "2026-07-20 17:59:43",
-    "time_remaining": "ended",
-    "auction_end_utc": "2026-07-21 13:12:49",
+    "amount_usd": 18.86,
+    "amount_usd_at_event": 18.86,
+    "eth_usd_price_live": null,
+    "eth_usd_price_at_event": "1902.7601118733778",
+    "eth_usd_price_date_utc": "2026-07-20",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "nearest_settlement_date_eth_usd",
+    "auction_time_utc": "2026-07-21 16:51:53",
+    "time_remaining": "",
+    "auction_end_utc": "",
     "last_bid_utc": "2026-07-20 17:59:43",
-    "settled_time_utc": "",
-    "rarity": "#555/780",
+    "settled_time_utc": "2026-07-21 16:51:53",
+    "rarity": "#552/781",
     "traits": "Background: None; Body: RedBrown; Neck: None; Mouth: None; Ears: LoopEarring; Head: RedMohawk; Eyes: EyePatch",
-    "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.3%); Neck: None (39.7%); Mouth: None (69.0%); Ears: LoopEarring (27.2%); Head: RedMohawk (7.2%); Eyes: EyePatch (7.7%)"
+    "trait_rarity": "Background: None (90.3%); Body: RedBrown (15.2%); Neck: None (39.8%); Mouth: None (69.0%); Ears: LoopEarring (27.1%); Head: RedMohawk (7.2%); Eyes: EyePatch (7.7%)"
   },
   {
     "status": "settled",
@@ -53,9 +82,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-20 13:01:17",
     "settled_time_utc": "2026-07-20 13:12:49",
-    "rarity": "#492/780",
+    "rarity": "#490/781",
     "traits": "Background: None; Body: SugarSkull; Neck: RedCollar; Mouth: Tongue; Ears: Earbuds; Head: None; Eyes: Sunglasses",
-    "trait_rarity": "Background: None (90.4%); Body: SugarSkull (6.7%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: Earbuds (32.2%); Head: None (20.5%); Eyes: Sunglasses (14.6%)"
+    "trait_rarity": "Background: None (90.3%); Body: SugarSkull (6.7%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: Earbuds (32.1%); Head: None (20.5%); Eyes: Sunglasses (14.6%)"
   },
   {
     "status": "settled",
@@ -82,9 +111,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-19 12:54:37",
     "settled_time_utc": "2026-07-19 13:04:07",
-    "rarity": "#605/780",
+    "rarity": "#603/781",
     "traits": "Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: Glasses",
-    "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.3%); Neck: GoldNecklace (19.4%); Mouth: None (69.0%); Ears: Earbuds (32.2%); Head: CrazyHair (6.5%); Eyes: Glasses (12.8%)"
+    "trait_rarity": "Background: None (90.3%); Body: RedBrown (15.2%); Neck: GoldNecklace (19.3%); Mouth: None (69.0%); Ears: Earbuds (32.1%); Head: CrazyHair (6.5%); Eyes: Glasses (12.8%)"
   },
   {
     "status": "settled",
@@ -111,9 +140,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-18 10:30:01",
     "settled_time_utc": "2026-07-18 12:58:15",
-    "rarity": "#705/780",
+    "rarity": "#707/781",
     "traits": "Background: None; Body: Blue; Neck: None; Mouth: None; Ears: None; Head: None; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (90.4%); Body: Blue (9.1%); Neck: None (39.7%); Mouth: None (69.0%); Ears: None (25.5%); Head: None (20.5%); Eyes: MaskSnorkel (9.5%)"
+    "trait_rarity": "Background: None (90.3%); Body: Blue (9.2%); Neck: None (39.8%); Mouth: None (69.0%); Ears: None (25.5%); Head: None (20.5%); Eyes: MaskSnorkel (9.5%)"
   },
   {
     "status": "settled",
@@ -140,9 +169,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-16 10:20:51",
     "settled_time_utc": "2026-07-17 12:36:45",
-    "rarity": "#621/780",
+    "rarity": "#619/781",
     "traits": "Background: None; Body: RedBrown; Neck: RedCollar; Mouth: Tongue; Ears: LoopEarring; Head: BaseballCap; Eyes: None",
-    "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.3%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: LoopEarring (27.2%); Head: BaseballCap (10.3%); Eyes: None (17.9%)"
+    "trait_rarity": "Background: None (90.3%); Body: RedBrown (15.2%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: LoopEarring (27.1%); Head: BaseballCap (10.2%); Eyes: None (17.9%)"
   },
   {
     "status": "settled",
@@ -169,9 +198,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-15 10:19:31",
     "settled_time_utc": "2026-07-16 08:33:29",
-    "rarity": "#525/780",
+    "rarity": "#525/781",
     "traits": "Background: None; Body: White; Neck: None; Mouth: None; Ears: None; Head: BlackCap; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (90.4%); Body: White (11.5%); Neck: None (39.7%); Mouth: None (69.0%); Ears: None (25.5%); Head: BlackCap (6.8%); Eyes: MaskSnorkel (9.5%)"
+    "trait_rarity": "Background: None (90.3%); Body: White (11.5%); Neck: None (39.8%); Mouth: None (69.0%); Ears: None (25.5%); Head: BlackCap (6.8%); Eyes: MaskSnorkel (9.5%)"
   },
   {
     "status": "settled",
@@ -198,9 +227,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-14 10:11:47",
     "settled_time_utc": "2026-07-15 08:24:57",
-    "rarity": "#760/780",
+    "rarity": "#761/781",
     "traits": "Background: None; Body: RedBrown; Neck: RedCollar; Mouth: None; Ears: LoopEarring; Head: None; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.3%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: LoopEarring (27.2%); Head: None (20.5%); Eyes: MaskSnorkel (9.5%)"
+    "trait_rarity": "Background: None (90.3%); Body: RedBrown (15.2%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: LoopEarring (27.1%); Head: None (20.5%); Eyes: MaskSnorkel (9.5%)"
   },
   {
     "status": "settled",
@@ -227,9 +256,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-14 08:01:53",
     "settled_time_utc": "2026-07-14 08:09:49",
-    "rarity": "#635/780",
+    "rarity": "#636/781",
     "traits": "Background: None; Body: RedBrown; Neck: RedCollar; Mouth: None; Ears: GoldEarring; Head: None; Eyes: Monocle",
-    "trait_rarity": "Background: None (90.4%); Body: RedBrown (15.3%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: GoldEarring (15.1%); Head: None (20.5%); Eyes: Monocle (6.5%)"
+    "trait_rarity": "Background: None (90.3%); Body: RedBrown (15.2%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: GoldEarring (15.2%); Head: None (20.5%); Eyes: Monocle (6.5%)"
   },
   {
     "status": "settled",
@@ -256,9 +285,9 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-12 21:17:05",
     "settled_time_utc": "2026-07-13 08:03:57",
-    "rarity": "#347/780",
+    "rarity": "#346/781",
     "traits": "Background: None; Body: Black; Neck: RedCollar; Mouth: Tongue; Ears: None; Head: RedMohawk; Eyes: Glasses",
-    "trait_rarity": "Background: None (90.4%); Body: Black (11.3%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: None (25.5%); Head: RedMohawk (7.2%); Eyes: Glasses (12.8%)"
+    "trait_rarity": "Background: None (90.3%); Body: Black (11.3%); Neck: RedCollar (31.0%); Mouth: Tongue (10.0%); Ears: None (25.5%); Head: RedMohawk (7.2%); Eyes: Glasses (12.8%)"
   },
   {
     "status": "settled",
@@ -285,37 +314,8 @@
     "auction_end_utc": "",
     "last_bid_utc": "2026-07-11 11:36:41",
     "settled_time_utc": "2026-07-12 06:05:59",
-    "rarity": "#627/780",
+    "rarity": "#628/781",
     "traits": "Background: None; Body: Brown; Neck: RedCollar; Mouth: None; Ears: None; Head: RedMohawk; Eyes: Sunglasses",
-    "trait_rarity": "Background: None (90.4%); Body: Brown (11.2%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: None (25.5%); Head: RedMohawk (7.2%); Eyes: Sunglasses (14.6%)"
-  },
-  {
-    "status": "settled",
-    "dog": "Dog #769",
-    "dog_image_url": "https://api.degendogs.club/images/769.png",
-    "dog_external_url": "https://degendogs.club/#dog769",
-    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/769",
-    "bidder_winner": "@0xael.eth",
-    "bidder_winner_url": "https://farcaster.xyz/0xael.eth",
-    "bidder_winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bid": "0.01000 ETH ($18)",
-    "amount_eth": 0.01,
-    "amount_usd": 17.87,
-    "amount_usd_at_event": 17.87,
-    "eth_usd_price_live": null,
-    "eth_usd_price_at_event": "1787.454628968266",
-    "eth_usd_price_date_utc": "2026-07-12",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "nearest_settlement_date_eth_usd",
-    "auction_time_utc": "2026-07-11 06:03:31",
-    "time_remaining": "",
-    "auction_end_utc": "",
-    "last_bid_utc": "2026-07-10 11:30:13",
-    "settled_time_utc": "2026-07-11 06:03:31",
-    "rarity": "#64/780",
-    "traits": "Background: Halo; Body: White; Neck: None; Mouth: Tongue; Ears: Earbuds; Head: WhiteMohawk; Eyes: 3DGlasses",
-    "trait_rarity": "Background: Halo (9.6%); Body: White (11.5%); Neck: None (39.7%); Mouth: Tongue (10.0%); Ears: Earbuds (32.2%); Head: WhiteMohawk (6.7%); Eyes: 3DGlasses (4.9%)"
+    "trait_rarity": "Background: None (90.3%); Body: Brown (11.1%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: None (25.5%); Head: RedMohawk (7.2%); Eyes: Sunglasses (14.6%)"
   }
 ]

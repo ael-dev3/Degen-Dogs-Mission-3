@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#492/780",
-      "rank": 492,
-      "total": 780
+      "display": "#490/781",
+      "rank": 490,
+      "total": 781
     },
     "schema_version": 1,
-    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z #492/780 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.0%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z #490/781 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.3%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.0%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-20T13:12:49Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None (90.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -100,7 +100,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.2%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
