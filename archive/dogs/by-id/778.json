@@ -4,19 +4,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-20T13:12:49Z",
     "amount": {
-      "amount_usd_at_event": "20.74555013",
-      "eth_usd_price_at_event": "1901.5169689129796",
+      "amount_usd_at_event": "20.75911282",
+      "eth_usd_price_at_event": "1902.7601118733778",
       "eth_usd_price_date_utc": "2026-07-20",
       "native": "0.01091",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10910000000000000",
-      "usd_estimate": "20.74555013",
+      "usd_estimate": "20.75911282",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$20.75",
+      "usd_estimate_display": "$20.76",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-20",
-      "usd_estimate_price_usd": "1901.5169689129796",
+      "usd_estimate_price_usd": "1902.7601118733778",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -59,7 +59,7 @@
       "total": 780
     },
     "schema_version": 1,
-    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.75 $20.75 2026-07-20t13:12:49z #492/780 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.0%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z #492/780 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (31.0%) neck redcollar mouth: tongue (10.0%) mouth tongue ears: earbuds (32.2%) ears earbuds head: none (20.5%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-20T13:12:49Z",
