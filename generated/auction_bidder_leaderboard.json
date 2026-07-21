@@ -325,6 +325,19 @@
     "latest_bid_utc": "2026-06-17 22:29:35"
   },
   {
+    "bidder": "@metasalary",
+    "bidder_url": "https://farcaster.xyz/metasalary",
+    "bidder_wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
+    "bids": 23,
+    "auctions_bid": 15,
+    "bid_eth": 0.35585,
+    "high_bid_eth": 0.03027,
+    "auction_wins": 4,
+    "winning_eth": 0.0805,
+    "latest_bid_token_id": 780,
+    "latest_bid_utc": "2026-07-21 20:31:47"
+  },
+  {
     "bidder": "@kenshiking.eth",
     "bidder_url": "https://farcaster.xyz/kenshiking.eth",
     "bidder_wallet": "0x23d660548cd61432537592dcea15b059605c9242",
@@ -336,19 +349,6 @@
     "winning_eth": 0.09079,
     "latest_bid_token_id": 750,
     "latest_bid_utc": "2026-06-21 21:45:43"
-  },
-  {
-    "bidder": "@metasalary",
-    "bidder_url": "https://farcaster.xyz/metasalary",
-    "bidder_wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
-    "bids": 22,
-    "auctions_bid": 14,
-    "bid_eth": 0.34685,
-    "high_bid_eth": 0.03027,
-    "auction_wins": 4,
-    "winning_eth": 0.0805,
-    "latest_bid_token_id": 760,
-    "latest_bid_utc": "2026-07-01 16:32:33"
   },
   {
     "bidder": "0xefbe…6b27",
