@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#78/781",
+      "display": "#78/782",
       "rank": 78,
-      "total": 781
+      "total": 782
     },
     "schema_version": 1,
-    "search_text": "dog 148 dog #148 148 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21c2792480006bc591b1c9267e356fe6160a748cf407853dabdb3687d95bfc08 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 #78/781 background: halo; body: blue; neck: none; mouth: tongue; ears: earbuds; head: partyhat; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 148 dog #148 148 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21c2792480006bc591b1c9267e356fe6160a748cf407853dabdb3687d95bfc08 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 #78/782 background: halo; body: blue; neck: none; mouth: tongue; ears: earbuds; head: partyhat; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 30981510,
       "block_time_utc": "2022-07-21T16:42:42Z",
@@ -101,7 +101,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: PartyHat (4.4%)",
+        "display": "Head: PartyHat (4.3%)",
         "trait_type": "Head",
         "value": "PartyHat"
       },

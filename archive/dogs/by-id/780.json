@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-07-21T16:52:12Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-22T16:50:51Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-22T16:56:19Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "19.10913629",
+      "eth_usd_price_at_event": "1928.2680412026552",
       "eth_usd_price_date_utc": "2026-07-22",
       "native": "0.00991",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9910000000000000",
-      "usd_estimate": "19.31000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$19.31",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "19.10913629",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$19.11",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-22",
-      "usd_estimate_price_usd": "1948.5368314833501513622603430877901109989909182643794147325933400605449041372351",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1928.2680412026552",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -54,16 +54,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#200/781",
-      "rank": 200,
-      "total": 781
+      "display": "#198/782",
+      "rank": 198,
+      "total": 782
     },
     "schema_version": 1,
-    "search_text": "dog 780 dog #780 780 mission 3 mission 3 base ongoing 0xde510683333096b200fd40dd068eb8f86772652c 0xde51…652c 0.00991 eth 9910000000000000 19.31 $19.31 2026-07-22t16:50:51z #200/781 generated auction feed 0xc5f636612713a34642e8ed84c526abd14db4d8eac5fad6f2926efd73efe51baf 0xb217adf49525b66471a3d33201f9b23b85ff163114e1ce0e9c7d1b1b87fc6a32 0xd843f79d8ed9c74c7a5c58fcd25723428f68a186669800288b994a6e0aaf31df background: halo (9.7%) background halo body: blue (9.2%) body blue neck: none (39.8%) neck none mouth: none (69.0%) mouth none ears: goldearring (15.2%) ears goldearring head: toque (7.2%) head toque eyes: vrgoggles (10.4%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 780 dog #780 780 mission 3 mission 3 base settled 0xde510683333096b200fd40dd068eb8f86772652c 0xde51…652c 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-22t16:56:19z #198/782 generated auction feed 0xc5f636612713a34642e8ed84c526abd14db4d8eac5fad6f2926efd73efe51baf 0xb217adf49525b66471a3d33201f9b23b85ff163114e1ce0e9c7d1b1b87fc6a32 0xd843f79d8ed9c74c7a5c58fcd25723428f68a186669800288b994a6e0aaf31df background: halo (9.7%) background halo body: blue (9.2%) body blue neck: none (39.8%) neck none mouth: none (69.1%) mouth none ears: goldearring (15.2%) ears goldearring head: toque (7.2%) head toque eyes: vrgoggles (10.4%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-22T16:56:19Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -77,7 +77,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: Halo (9.7%)",
@@ -95,7 +95,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (69.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
