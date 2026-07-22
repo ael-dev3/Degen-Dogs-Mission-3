@@ -4,7 +4,7 @@ auction_feed,generated/auction_feed.csv,11
 historical_dog_search,generated/historical_dog_search.csv,782
 historical_dog_report,generated/historical_dog_report.csv,4
 current_latest_bid,generated/current_latest_bid.csv,1
-current_auction_bid_history,generated/current_auction_bid_history.csv,0
+current_auction_bid_history,generated/current_auction_bid_history.csv,1
 recent_auction_winners,generated/recent_auction_winners.csv,10
 current_auction,generated/current_auction.csv,1
 auction_timeline,generated/auction_timeline.csv,192
@@ -15,7 +15,7 @@ season5_sup_rewards_by_auction,generated/season5_sup_rewards_by_auction.csv,67
 season6_metrics,generated/season6_metrics.csv,50
 season6_sup_by_winner,generated/season6_sup_by_winner.csv,26
 season6_sup_rewards_by_auction,generated/season6_sup_rewards_by_auction.csv,50
-season6_sup_current_bidder_status,generated/season6_sup_current_bidder_status.csv,0
+season6_sup_current_bidder_status,generated/season6_sup_current_bidder_status.csv,1
 auction_winners,generated/auction_winners.csv,191
 recent_bids,generated/recent_bids.csv,100
 top_woof_holders,generated/top_woof_holders.csv,50

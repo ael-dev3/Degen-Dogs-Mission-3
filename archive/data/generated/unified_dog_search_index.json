@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-22T16:56:31Z",
+    "activity_time_utc": "2026-07-22T16:56:49Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-07-22",
-      "native": "0.0",
+      "native": "0.0005",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "0",
-      "usd_estimate": "0E-8",
+      "raw": "500000000000000",
+      "usd_estimate": "0.97000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$0.00",
+      "usd_estimate_display": "$0.97",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-22",
-      "usd_estimate_price_usd": null,
+      "usd_estimate_price_usd": "1.94E+3",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 0,
-      "last_bid_time_utc": "2026-07-22T16:56:31Z",
-      "unique_bidder_count": 0
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-07-22T16:56:49Z",
+      "unique_bidder_count": 1
     },
-    "bid_tx_hashes": [],
+    "bid_tx_hashes": [
+      "0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69"
+    ],
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 781,
@@ -42,7 +44,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog781",
-      "explorer": null,
+      "explorer": "https://basescan.org/address/0xd559e433718b1f2667fde7c859fc982cf0bc491f",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/781",
       "repo_archive": "archive/dogs/by-id/781.json",
       "settlement_tx": null
@@ -54,7 +56,7 @@
       "total": 782
     },
     "schema_version": 1,
-    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-07-22t16:56:31z #687/782 generated auction feed background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (69.1%) mouth none ears: none (25.6%) ears none head: stripedbeanie (8.4%) head stripedbeanie eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base ongoing 0xd559e433718b1f2667fde7c859fc982cf0bc491f @richieboston richieboston 0.0005 eth 500000000000000 0.97 $0.97 2026-07-22t16:56:49z #687/782 generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (69.1%) mouth none ears: none (25.6%) ears none head: stripedbeanie (8.4%) head stripedbeanie eyes: sunglasses (14.7%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -111,12 +113,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "no bids yet",
+      "display": "@richieboston",
       "farcaster_fid": null,
-      "farcaster_handle": null,
-      "profile_url": null,
-      "wallet": "0x0000000000000000000000000000000000000000",
-      "wallet_explorer_url": null
+      "farcaster_handle": "richieboston",
+      "profile_url": "https://farcaster.xyz/richieboston",
+      "wallet": "0xd559e433718b1f2667fde7c859fc982cf0bc491f",
+      "wallet_explorer_url": "https://basescan.org/address/0xd559e433718b1f2667fde7c859fc982cf0bc491f"
     }
   },
   {
