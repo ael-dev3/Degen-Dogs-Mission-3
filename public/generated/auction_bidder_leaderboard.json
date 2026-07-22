@@ -91,6 +91,19 @@
     "latest_bid_utc": "2026-07-20 13:01:17"
   },
   {
+    "bidder": "@cryptomill",
+    "bidder_url": "https://farcaster.xyz/cryptomill",
+    "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "bids": 86,
+    "auctions_bid": 54,
+    "bid_eth": 1.36353,
+    "high_bid_eth": 0.06064,
+    "auction_wins": 14,
+    "winning_eth": 0.2456,
+    "latest_bid_token_id": 781,
+    "latest_bid_utc": "2026-07-22 21:42:23"
+  },
+  {
     "bidder": "@badadan",
     "bidder_url": "https://farcaster.xyz/badadan",
     "bidder_wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
@@ -102,19 +115,6 @@
     "winning_eth": 0.28929,
     "latest_bid_token_id": 765,
     "latest_bid_utc": "2026-07-06 05:30:07"
-  },
-  {
-    "bidder": "@cryptomill",
-    "bidder_url": "https://farcaster.xyz/cryptomill",
-    "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
-    "bids": 85,
-    "auctions_bid": 53,
-    "bid_eth": 1.35362,
-    "high_bid_eth": 0.06064,
-    "auction_wins": 14,
-    "winning_eth": 0.2456,
-    "latest_bid_token_id": 780,
-    "latest_bid_utc": "2026-07-21 16:52:31"
   },
   {
     "bidder": "@doldole",
