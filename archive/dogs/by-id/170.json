@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#541/782",
-      "rank": 541,
-      "total": 782
+      "display": "#536/783",
+      "rank": 536,
+      "total": 783
     },
     "schema_version": 1,
-    "search_text": "dog 170 dog #170 170 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd74bd28735225fc8c6afdc9b3ab89cbafaa1275e0a0ef076253616002225e50a 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 #541/782 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: blackcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 170 dog #170 170 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd74bd28735225fc8c6afdc9b3ab89cbafaa1275e0a0ef076253616002225e50a 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 #536/783 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: blackcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 33464844,
       "block_time_utc": "2022-09-23T11:46:11Z",
@@ -91,7 +91,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.1%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.4%)",
+        "display": "Eyes: VRGoggles (10.3%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

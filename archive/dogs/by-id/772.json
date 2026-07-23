@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#636/782",
-      "rank": 636,
-      "total": 782
+      "display": "#637/783",
+      "rank": 637,
+      "total": 783
     },
     "schema_version": 1,
-    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51 $19.51 2026-07-14t08:09:49z #636/782 generated auction feed 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.1%) mouth none ears: goldearring (15.2%) ears goldearring head: none (20.5%) head none eyes: monocle (6.5%) eyes monocle base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51 $19.51 2026-07-14t08:09:49z #637/783 generated auction feed 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.0%) mouth none ears: goldearring (15.2%) ears goldearring head: none (20.4%) head none eyes: monocle (6.5%) eyes monocle base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-14T08:09:49Z",
@@ -96,7 +96,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.1%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },

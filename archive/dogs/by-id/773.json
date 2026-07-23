@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#762/782",
-      "rank": 762,
-      "total": 782
+      "display": "#765/783",
+      "rank": 765,
+      "total": 783
     },
     "schema_version": 1,
-    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z #762/782 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.1%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.5%) head none eyes: masksnorkel (9.5%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z #765/783 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (90.3%) background none body: redbrown (15.3%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.4%) head none eyes: masksnorkel (9.6%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-15T08:24:57Z",
@@ -93,7 +93,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.1%)",
+        "display": "Mouth: None (69.0%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.5%)",
+        "display": "Eyes: MaskSnorkel (9.6%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }
