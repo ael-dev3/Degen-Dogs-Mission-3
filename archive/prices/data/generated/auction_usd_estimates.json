@@ -1,16 +1,16 @@
 [
   {
-    "amount_usd_at_event": null,
+    "amount_usd_at_event": "18.69",
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 781,
-    "estimated_usd_display": "$18.71",
-    "estimated_usd_value": "18.71000000",
+    "estimated_usd_display": "$18.69",
+    "estimated_usd_value": "18.69000000",
     "eth_usd_price_at_event": null,
     "eth_usd_price_date_utc": "2026-07-23",
     "event_time_utc": "2026-07-22T21:42:23Z",
     "event_tx_hash": null,
-    "event_type": "current_bid",
+    "event_type": "auction_record",
     "mission": 3,
     "native_amount": "0.00991",
     "native_amount_raw": "9910000000000000",
@@ -22,7 +22,7 @@
     "price_source": "current_eth_usd_price",
     "price_source_detail": "coinbase",
     "price_status": "priced",
-    "price_usd": "1887.9919273461150353178607467204843592330978809283551967709384460141271442986882"
+    "price_usd": "1885.9737638748738647830474268415741675075681130171543895055499495459132189707366"
   },
   {
     "amount_usd_at_event": "19.10913629",

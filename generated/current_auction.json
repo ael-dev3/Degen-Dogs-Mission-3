@@ -11,9 +11,9 @@
     "rarity_score": 36.775685,
     "current_bid": "0.00991 ETH ($19)",
     "current_bid_eth": 0.00991,
-    "current_bid_usd": 18.71,
-    "current_bid_usd_live": 18.71,
-    "eth_usd_price_live": "1887.94",
+    "current_bid_usd": 18.69,
+    "current_bid_usd_live": 18.69,
+    "eth_usd_price_live": "1885.53",
     "eth_usd_price_date_utc": "2026-07-23",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
@@ -24,11 +24,11 @@
     "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
     "start_time_utc": "2026-07-22 16:56:19",
     "end_time_utc": "2026-07-23 16:56:19",
-    "auction_state": "live",
-    "seconds_remaining": 230,
-    "time_remaining": "00:03:50",
+    "auction_state": "ended_unsettled",
+    "seconds_remaining": 0,
+    "time_remaining": "ended",
     "settled": 0,
-    "latest_block": 49018101,
-    "latest_block_time_utc": "2026-07-23 16:52:29"
+    "latest_block": 49019920,
+    "latest_block_time_utc": "2026-07-23 17:53:07"
   }
 ]
