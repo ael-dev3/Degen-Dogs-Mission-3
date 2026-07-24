@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-24T22:53:01Z",
+    "activity_time_utc": "2026-07-24T23:14:41Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-07-24",
-      "native": "0.001",
+      "native": "0.0011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1000000000000000",
-      "usd_estimate": "1.86000000",
+      "raw": "1100000000000000",
+      "usd_estimate": "2.04000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.86",
+      "usd_estimate_display": "$2.04",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-24",
-      "usd_estimate_price_usd": "1.86E+3",
+      "usd_estimate_price_usd": "1854.5454545454545454545454545454545454545454545454545454545454545454545454545455",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,11 +28,12 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-07-24T22:53:01Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-07-24T23:14:41Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
+      "0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56",
       "0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55"
     ],
     "chain": "Base",
@@ -44,7 +45,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog783",
-      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "explorer": "https://basescan.org/address/0xd559e433718b1f2667fde7c859fc982cf0bc491f",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/783",
       "repo_archive": "archive/dogs/by-id/783.json",
       "settlement_tx": null
@@ -56,7 +57,7 @@
       "total": 784
     },
     "schema_version": 1,
-    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.001 eth 1000000000000000 1.86 $1.86 2026-07-24t22:53:01z #565/784 generated auction feed 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base ongoing 0xd559e433718b1f2667fde7c859fc982cf0bc491f @richieboston richieboston 0.0011 eth 1100000000000000 2.04 $2.04 2026-07-24t23:14:41z #565/784 generated auction feed 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -113,12 +114,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@cryptomill",
+      "display": "@richieboston",
       "farcaster_fid": null,
-      "farcaster_handle": "cryptomill",
-      "profile_url": "https://farcaster.xyz/cryptomill",
-      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
-      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
+      "farcaster_handle": "richieboston",
+      "profile_url": "https://farcaster.xyz/richieboston",
+      "wallet": "0xd559e433718b1f2667fde7c859fc982cf0bc491f",
+      "wallet_explorer_url": "https://basescan.org/address/0xd559e433718b1f2667fde7c859fc982cf0bc491f"
     }
   },
   {

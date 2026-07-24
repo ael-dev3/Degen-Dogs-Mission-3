@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-07-24 23:14:41",
+    "token_id": 783,
+    "bidder": "@richieboston",
+    "bidder_url": "https://farcaster.xyz/richieboston",
+    "bidder_wallet": "0xd559e433718b1f2667fde7c859fc982cf0bc491f",
+    "bid": "0.00110 ETH ($2)",
+    "bid_eth": 0.0011,
+    "bid_usd": 2.04,
+    "bid_usd_at_event": 2.04,
+    "eth_usd_price_at_event": "1858.3652395628944",
+    "eth_usd_price_date_utc": "2026-07-24",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 49072767,
+    "tx_hash": "0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56"
+  },
+  {
     "bid_time_utc": "2026-07-24 22:53:01",
     "token_id": 783,
     "bidder": "@cryptomill",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 47821498,
     "tx_hash": "0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8"
-  },
-  {
-    "bid_time_utc": "2026-06-25 23:16:25",
-    "token_id": 754,
-    "bidder": "@metasalary",
-    "bidder_url": "https://farcaster.xyz/metasalary",
-    "bidder_wallet": "0x833c829b5123c7af0b810a03084d5d3f0529d323",
-    "bid": "0.01210 ETH ($20)",
-    "bid_eth": 0.0121,
-    "bid_usd": 19.6,
-    "bid_usd_at_event": 19.6,
-    "eth_usd_price_at_event": "1619.792603757049",
-    "eth_usd_price_date_utc": "2026-06-25",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 47820019,
-    "tx_hash": "0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b"
   }
 ]
