@@ -4,19 +4,19 @@
     "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-24T22:52:45Z",
     "amount": {
-      "amount_usd_at_event": "16.71995825",
-      "eth_usd_price_at_event": "1857.773138646589",
+      "amount_usd_at_event": "16.72528716",
+      "eth_usd_price_at_event": "1858.3652395628944",
       "eth_usd_price_date_utc": "2026-07-24",
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.71995825",
+      "usd_estimate": "16.72528716",
       "usd_estimate_confidence": "medium",
-      "usd_estimate_display": "$16.72",
+      "usd_estimate_display": "$16.73",
       "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-24",
-      "usd_estimate_price_usd": "1857.773138646589",
+      "usd_estimate_price_usd": "1858.3652395628944",
       "usd_estimate_source": "defillama_coin_prices",
       "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
@@ -57,7 +57,7 @@
       "total": 784
     },
     "schema_version": 1,
-    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.72 $16.72 2026-07-24t22:52:45z #326/784 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (90.3%) background none body: blue (9.3%) body blue neck: goldnecklace (19.6%) neck goldnecklace mouth: pizza (10.2%) mouth pizza ears: earbuds (32.1%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.73 $16.73 2026-07-24t22:52:45z #326/784 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (90.3%) background none body: blue (9.3%) body blue neck: goldnecklace (19.6%) neck goldnecklace mouth: pizza (10.2%) mouth pizza ears: earbuds (32.1%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-24T22:52:45Z",
