@@ -6,17 +6,17 @@
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-07-23",
+      "eth_usd_price_date_utc": "2026-07-24",
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.87000000",
+      "usd_estimate": "16.81000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.87",
+      "usd_estimate_display": "$16.81",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-07-23",
-      "usd_estimate_price_usd": "1874.4444444444444444444444444444444444444444444444444444444444444444444444444444",
+      "usd_estimate_price_date_utc": "2026-07-24",
+      "usd_estimate_price_usd": "1867.7777777777777777777777777777777777777777777777777777777777777777777777777778",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 783
     },
     "schema_version": 1,
-    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base ongoing 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.87 $16.87 2026-07-23t20:01:11z #324/783 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (90.3%) background none body: blue (9.3%) body blue neck: goldnecklace (19.5%) neck goldnecklace mouth: pizza (10.2%) mouth pizza ears: earbuds (32.2%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: masksnorkel (9.6%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base ongoing 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.81 $16.81 2026-07-23t20:01:11z #324/783 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (90.3%) background none body: blue (9.3%) body blue neck: goldnecklace (19.5%) neck goldnecklace mouth: pizza (10.2%) mouth pizza ears: earbuds (32.2%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: masksnorkel (9.6%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
