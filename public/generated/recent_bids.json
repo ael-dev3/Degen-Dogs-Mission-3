@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-07-24 22:53:01",
+    "token_id": 783,
+    "bidder": "@cryptomill",
+    "bidder_url": "https://farcaster.xyz/cryptomill",
+    "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "bid": "0.00100 ETH ($2)",
+    "bid_eth": 0.001,
+    "bid_usd": 1.86,
+    "bid_usd_at_event": 1.86,
+    "eth_usd_price_at_event": "1857.773138646589",
+    "eth_usd_price_date_utc": "2026-07-24",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 0,
+    "block_number": 49072117,
+    "tx_hash": "0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55"
+  },
+  {
     "bid_time_utc": "2026-07-23 20:01:11",
     "token_id": 782,
     "bidder": "@metasalary",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 47820019,
     "tx_hash": "0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b"
-  },
-  {
-    "bid_time_utc": "2026-06-25 11:49:15",
-    "token_id": 754,
-    "bidder": "@skunkape",
-    "bidder_url": "https://farcaster.xyz/skunkape",
-    "bidder_wallet": "0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
-    "bid": "0.01100 ETH ($18)",
-    "bid_eth": 0.011,
-    "bid_usd": 17.82,
-    "bid_usd_at_event": 17.82,
-    "eth_usd_price_at_event": "1619.792603757049",
-    "eth_usd_price_date_utc": "2026-06-25",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 47799404,
-    "tx_hash": "0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf"
   }
 ]
