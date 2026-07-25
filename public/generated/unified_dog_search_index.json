@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.84000000",
+      "usd_estimate": "16.82000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.84",
+      "usd_estimate_display": "$16.82",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-25",
-      "usd_estimate_price_usd": "1871.1111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "usd_estimate_price_usd": "1868.8888888888888888888888888888888888888888888888888888888888888888888888888889",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 784
     },
     "schema_version": 1,
-    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.84 $16.84 2026-07-25t00:41:23z #565/784 generated auction feed 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.82 $16.82 2026-07-25t00:41:23z #565/784 generated auction feed 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
