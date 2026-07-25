@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#607/784",
+      "display": "#607/785",
       "rank": 607,
-      "total": 784
+      "total": 785
     },
     "schema_version": 1,
-    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z #607/784 generated auction feed 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: earbuds (32.1%) ears earbuds head: crazyhair (6.5%) head crazyhair eyes: glasses (12.8%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z #607/785 generated auction feed 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: earbuds (32.2%) ears earbuds head: crazyhair (6.5%) head crazyhair eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-19T13:04:07Z",
@@ -99,7 +99,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -109,7 +109,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Glasses (12.8%)",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

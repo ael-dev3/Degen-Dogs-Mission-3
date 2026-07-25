@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-07-24T22:53:53Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-25T22:52:11Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-25T23:05:51Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "18.55434370",
+      "eth_usd_price_at_event": "1872.2849346888622",
       "eth_usd_price_date_utc": "2026-07-25",
       "native": "0.00991",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9910000000000000",
-      "usd_estimate": "18.58000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.58",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "18.55434370",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$18.55",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-07-25",
-      "usd_estimate_price_usd": "1874.8738647830474268415741675075681130171543895055499495459132189707366296670030",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1872.2849346888622",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": null,
@@ -55,16 +55,16 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#565/784",
-      "rank": 565,
-      "total": 784
+      "display": "#563/785",
+      "rank": 563,
+      "total": 785
     },
     "schema_version": 1,
-    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.58 $18.58 2026-07-25t22:52:11z #565/784 generated auction feed 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.55 $18.55 2026-07-25t23:05:51z #563/785 generated auction feed 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.6%) neck goldnecklace mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
+      "block_time_utc": "2026-07-25T23:05:51Z",
+      "settled": true,
       "tx_hash": null,
       "tx_url": null
     },
@@ -78,7 +78,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.3%)",
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

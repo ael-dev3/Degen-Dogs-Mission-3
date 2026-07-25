@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#558/784",
-      "rank": 558,
-      "total": 784
+      "display": "#564/785",
+      "rank": 564,
+      "total": 785
     },
     "schema_version": 1,
-    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-21t16:51:53z #558/784 generated auction feed 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: eyepatch (7.7%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-21t16:51:53z #564/785 generated auction feed 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.3%) head redmohawk eyes: eyepatch (7.8%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-21T16:51:53Z",
@@ -99,7 +99,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -109,7 +109,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: EyePatch (7.7%)",
+        "display": "Eyes: EyePatch (7.8%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

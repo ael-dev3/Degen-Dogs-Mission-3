@@ -7,7 +7,7 @@
       "amount_usd_at_event": "18.89481051",
       "eth_usd_price_at_event": "1889.4810505956982",
       "eth_usd_price_date_utc": "2026-07-15",
-      "native": "0.01",
+      "native": "0.01000",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#766/784",
-      "rank": 766,
-      "total": 784
+      "display": "#767/785",
+      "rank": 767,
+      "total": 785
     },
     "schema_version": 1,
-    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z #766/784 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.2%) ears loopearring head: none (20.4%) head none eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01000 eth 10000000000000000 18.89481051 $18.89 2026-07-15t08:24:57z #767/785 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.8%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.5%) head none eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 773 dog #773 https://api.degendogs.club/images/773.png https://degendogs.club/#dog773 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/773 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.01000 eth ($19) 1 1 2026-07-14 08:09:49 2026-07-15 08:24:57 #767/785 background: none; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: none; eyes: masksnorkel background: none (90.3%); body: redbrown (15.4%); neck: redcollar (30.8%); mouth: none (69.0%); ears: loopearring (27.1%); head: none (20.5%); eyes: masksnorkel (9.7%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-15T08:24:57Z",
@@ -67,12 +67,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -88,7 +89,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar (30.8%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -98,12 +99,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.1%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.5%)",
         "trait_type": "Head",
         "value": "None"
       },
