@@ -1,5 +1,25 @@
 [
   {
+    "bid_time_utc": "2026-07-25 22:52:11",
+    "token_id": 783,
+    "bidder": "@thec1",
+    "bidder_url": "https://farcaster.xyz/thec1",
+    "bidder_wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "bid": "0.00991 ETH ($19)",
+    "bid_eth": 0.00991,
+    "bid_usd": 18.55,
+    "bid_usd_at_event": 18.55,
+    "eth_usd_price_at_event": "1872.2849346888622",
+    "eth_usd_price_date_utc": "2026-07-25",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "bid_date_eth_usd",
+    "extended": 1,
+    "block_number": 49115292,
+    "tx_hash": "0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c"
+  },
+  {
     "bid_time_utc": "2026-07-25 00:41:23",
     "token_id": 783,
     "bidder": "@0xael.eth",
@@ -1978,25 +1998,5 @@
     "extended": 0,
     "block_number": 47840105,
     "tx_hash": "0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2"
-  },
-  {
-    "bid_time_utc": "2026-06-26 01:50:47",
-    "token_id": 755,
-    "bidder": "@oddlyaugmented.eth",
-    "bidder_url": "https://farcaster.xyz/oddlyaugmented.eth",
-    "bidder_wallet": "0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d",
-    "bid": "0.00924 ETH ($15)",
-    "bid_eth": 0.00924,
-    "bid_usd": 14.57,
-    "bid_usd_at_event": 14.57,
-    "eth_usd_price_at_event": "1576.4918756458771",
-    "eth_usd_price_date_utc": "2026-06-27",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "nearest_bid_date_eth_usd",
-    "extended": 0,
-    "block_number": 47824650,
-    "tx_hash": "0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6"
   }
 ]
