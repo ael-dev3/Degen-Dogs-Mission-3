@@ -1,7 +1,7 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-26T23:18:29Z",
+    "activity_time_utc": "2026-07-26T23:30:15Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
@@ -29,7 +29,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 0,
-      "last_bid_time_utc": "2026-07-26T23:18:29Z",
+      "last_bid_time_utc": "2026-07-26T23:30:15Z",
       "unique_bidder_count": 0
     },
     "bid_tx_hashes": [],
@@ -54,7 +54,7 @@
       "total": 786
     },
     "schema_version": 1,
-    "search_text": "dog 785 dog #785 785 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-07-26t23:18:29z #276/786 generated auction feed background: none (90.3%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: none (69.1%) mouth none ears: none (25.6%) ears none head: crazyhair (6.6%) head crazyhair eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 785 dog #785 785 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.0 $0.00 2026-07-26t23:30:15z #276/786 generated auction feed background: none (90.3%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: none (69.1%) mouth none ears: none (25.6%) ears none head: crazyhair (6.6%) head crazyhair eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
