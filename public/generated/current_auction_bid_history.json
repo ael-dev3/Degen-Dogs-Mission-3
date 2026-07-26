@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-07-26 23:35:15",
+    "token_id": 785,
+    "dog": "Dog #785",
+    "bidder": "@legendary1030",
+    "bidder_url": "https://farcaster.xyz/legendary1030",
+    "bidder_wallet": "0xce8e97aa5ffd7e49dac5b660f39f3c4a38c4ca88",
+    "bid": "0.00090 ETH ($2)",
+    "bid_eth": 0.0009,
+    "bid_usd": 1.76,
+    "eth_usd_price_live": "1951.24",
+    "eth_usd_price_date_utc": "2026-07-26",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 49159784,
+    "log_index": 35,
+    "tx_hash": "0x4a133d5414c57b715b4cba05c199e343c89d3d3c5b30acd208e306e213ab73da"
+  }
+]
