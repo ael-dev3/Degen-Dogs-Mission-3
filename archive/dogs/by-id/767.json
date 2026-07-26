@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#571/785",
-      "rank": 571,
-      "total": 785
+      "display": "#570/786",
+      "rank": 570,
+      "total": 786
     },
     "schema_version": 1,
-    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01000 eth 10000000000000000 17.44792729 $17.45 2026-07-09t05:07:55z #571/785 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.3%) background none body: white (11.5%) body white neck: redcollar (30.8%) neck redcollar mouth: none (69.0%) mouth none ears: loopearring (27.1%) ears loopearring head: headphones (6.5%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 767 dog #767 https://api.degendogs.club/images/767.png https://degendogs.club/#dog767 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/767 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.01000 eth ($17) 2 2 2026-07-08 04:45:43 2026-07-09 05:07:55 #571/785 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: headphones; eyes: glasses background: none (90.3%); body: white (11.5%); neck: redcollar (30.8%); mouth: none (69.0%); ears: loopearring (27.1%); head: headphones (6.5%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01000 eth 10000000000000000 17.44792729 $17.45 2026-07-09t05:07:55z #570/786 generated auction feed 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 background: none (90.3%) background none body: white (11.5%) body white neck: redcollar (30.8%) neck redcollar mouth: none (69.1%) mouth none ears: loopearring (27.1%) ears loopearring head: headphones (6.5%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 767 dog #767 https://api.degendogs.club/images/767.png https://degendogs.club/#dog767 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/767 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.01000 eth ($17) 2 2 2026-07-08 04:45:43 2026-07-09 05:07:55 #570/786 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: headphones; eyes: glasses background: none (90.3%); body: white (11.5%); neck: redcollar (30.8%); mouth: none (69.1%); ears: loopearring (27.1%); head: headphones (6.5%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-09T05:07:55Z",
@@ -95,7 +95,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (69.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },

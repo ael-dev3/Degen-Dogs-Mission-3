@@ -49,12 +49,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#29/785",
-      "rank": 29,
-      "total": 785
+      "display": "#30/786",
+      "rank": 30,
+      "total": 786
     },
     "schema_version": 1,
-    "search_text": "dog 164 dog #164 164 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x835822c3be7770584880946f646e7c89b0dbe340056b12a2d8ebec3e87037308 0xdebecc21623b257bd018937de3c35d079df5a72ea4896f5dffee95ec83058ade #29/785 background: none; body: brown; neck: goldnecklace; mouth: bone; ears: earbuds; head: none; eyes: redlasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 164 dog #164 164 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x835822c3be7770584880946f646e7c89b0dbe340056b12a2d8ebec3e87037308 0xdebecc21623b257bd018937de3c35d079df5a72ea4896f5dffee95ec83058ade #30/786 background: none; body: brown; neck: goldnecklace; mouth: bone; ears: earbuds; head: none; eyes: redlasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 32750976,
       "block_time_utc": "2022-09-06T05:28:30Z",
@@ -106,7 +106,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: RedLaserEyes (5.1%)",
+        "display": "Eyes: RedLaserEyes (5.2%)",
         "trait_type": "Eyes",
         "value": "RedLaserEyes"
       }
