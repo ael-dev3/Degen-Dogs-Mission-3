@@ -7,7 +7,7 @@
       "amount_usd_at_event": "16.76774350",
       "eth_usd_price_at_event": "1863.082611565993",
       "eth_usd_price_date_utc": "2026-07-17",
-      "native": "0.009",
+      "native": "0.00900",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#623/786",
-      "rank": 623,
-      "total": 786
+      "display": "#625/787",
+      "rank": 625,
+      "total": 787
     },
     "schema_version": 1,
-    "search_text": "dog 775 dog #775 775 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.77 $16.77 2026-07-17t12:36:45z #623/786 generated auction feed 0xf3d610fb783a897f46885ee7974ac704c4007909fe6c87e7e32ef4c7cec5fe74 0xee3fe1bdf84ea65f3bc31af1e85b5491bb272ec5833c78dbf61c749fd3df4674 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.8%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: loopearring (27.1%) ears loopearring head: baseballcap (10.3%) head baseballcap eyes: none (17.8%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 775 dog #775 775 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.00900 eth 9000000000000000 16.76774350 $16.77 2026-07-17t12:36:45z #625/787 generated auction feed 0xf3d610fb783a897f46885ee7974ac704c4007909fe6c87e7e32ef4c7cec5fe74 0xee3fe1bdf84ea65f3bc31af1e85b5491bb272ec5833c78dbf61c749fd3df4674 background: none (90.3%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: loopearring (27.2%) ears loopearring head: baseballcap (10.3%) head baseballcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 775 dog #775 https://api.degendogs.club/images/775.png https://degendogs.club/#dog775 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/775 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00900 eth ($17) 2 2 2026-07-16 08:33:29 2026-07-17 12:36:45 #625/787 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: loopearring; head: baseballcap; eyes: none background: none (90.3%); body: redbrown (15.4%); neck: redcollar (30.9%); mouth: tongue (9.9%); ears: loopearring (27.2%); head: baseballcap (10.3%); eyes: none (17.9%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-17T12:36:45Z",
@@ -68,12 +68,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -89,7 +90,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.8%)",
+        "display": "Neck: RedCollar (30.9%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -99,7 +100,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -109,7 +110,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }
