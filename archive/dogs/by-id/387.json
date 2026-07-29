@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#10/787",
+      "display": "#10/788",
       "rank": 10,
-      "total": 787
+      "total": 788
     },
     "schema_version": 1,
-    "search_text": "dog 387 dog #387 387 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 11000 degen 0x4b53bd66ee0225846c62f0fc1a02d224688889b765ba44d006455addccd17aed 0x199f5b8cd94f1f8ff357ea1b75d37798c41562157bda422c78dd9baa01c0cf9a #10/787 background: none; body: alien; neck: none; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x7ba45cce6c5f2eec5f544a81a4734bfe4f1e4190b6e1afb91ca3b068439b3d94 0xc7acc093a0a46959e5dcc5f3fe75e3358e6f7c7b3873bbd0287798f60155df01 chain_logs contract_getters",
+    "search_text": "dog 387 dog #387 387 mission 2 mission 2 degen chain settled 0xc876ec039b90718ff7fc3754b3eec8d2e8918f2f 0xc876…8f2f 11000 degen 0x4b53bd66ee0225846c62f0fc1a02d224688889b765ba44d006455addccd17aed 0x199f5b8cd94f1f8ff357ea1b75d37798c41562157bda422c78dd9baa01c0cf9a #10/788 background: none; body: alien; neck: none; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x7ba45cce6c5f2eec5f544a81a4734bfe4f1e4190b6e1afb91ca3b068439b3d94 0xc7acc093a0a46959e5dcc5f3fe75e3358e6f7c7b3873bbd0287798f60155df01 chain_logs contract_getters",
     "settlement": {
       "block_number": 25893690,
       "block_time_utc": "2025-05-21T23:44:49Z",
@@ -77,7 +77,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.3%)",
+        "display": "Background: None (90.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -87,7 +87,7 @@
         "value": "Alien"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None (39.7%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,12 +102,12 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.5%)",
+        "display": "Head: None (20.4%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.7%)",
+        "display": "Eyes: MaskSnorkel (9.6%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }
