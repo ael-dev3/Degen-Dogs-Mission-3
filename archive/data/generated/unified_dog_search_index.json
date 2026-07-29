@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "17.26000000",
+      "usd_estimate": "17.22000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$17.26",
+      "usd_estimate_display": "$17.22",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-07-29",
-      "usd_estimate_price_usd": "1917.7777777777777777777777777777777777777777777777777777777777777777777777777778",
+      "usd_estimate_price_usd": "1913.3333333333333333333333333333333333333333333333333333333333333333333333333333",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 788
     },
     "schema_version": 1,
-    "search_text": "dog 787 dog #787 787 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 17.26 $17.26 2026-07-29t08:54:23z #495/788 generated auction feed 0xf1207bc75ba18840489c27f6ac519420475a4d782cb51ff3cfbd61f2dd2d6f8b 0x0a92391612b12f2c88fb1250bcdaeb8e0799199939c5b0cba397bb892bc03f7f background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: none (25.6%) ears none head: partyhat (4.4%) head partyhat eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 787 dog #787 787 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 17.22 $17.22 2026-07-29t08:54:23z #495/788 generated auction feed 0xf1207bc75ba18840489c27f6ac519420475a4d782cb51ff3cfbd61f2dd2d6f8b 0x0a92391612b12f2c88fb1250bcdaeb8e0799199939c5b0cba397bb892bc03f7f background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: redcollar (31.0%) neck redcollar mouth: none (69.0%) mouth none ears: none (25.6%) ears none head: partyhat (4.4%) head partyhat eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
