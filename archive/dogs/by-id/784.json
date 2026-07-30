@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#695/788",
-      "rank": 695,
-      "total": 788
+      "display": "#698/789",
+      "rank": 698,
+      "total": 789
     },
     "schema_version": 1,
-    "search_text": "dog 784 dog #784 784 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.86 $16.86 2026-07-26t23:16:45z #695/788 generated auction feed 0x878b90f9d2e050b7ae2422f3178e550ba849517e6dedc4f6dbb840e5353e9602 background: none (90.4%) background none body: blue (9.4%) body blue neck: none (39.7%) neck none mouth: none (69.0%) mouth none ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: eyepatch (7.7%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 784 dog #784 784 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.86 $16.86 2026-07-26t23:16:45z #698/789 generated auction feed 0x878b90f9d2e050b7ae2422f3178e550ba849517e6dedc4f6dbb840e5353e9602 background: none (90.4%) background none body: blue (9.4%) body blue neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: eyepatch (7.9%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-26T23:16:45Z",
@@ -88,12 +88,12 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: None (39.7%)",
+        "display": "Neck: None (39.8%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (7.7%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#615/788",
+      "display": "#615/789",
       "rank": 615,
-      "total": 788
+      "total": 789
     },
     "schema_version": 1,
-    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z #615/788 generated auction feed 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.5%) neck goldnecklace mouth: none (69.0%) mouth none ears: earbuds (32.1%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44411181 $18.44 2026-07-19t13:04:07z #615/789 generated auction feed 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.9%) mouth none ears: earbuds (32.1%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 777 dog #777 https://api.degendogs.club/images/777.png https://degendogs.club/#dog777 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/777 settled @anotherplanet https://farcaster.xyz/anotherplanet 0x7e94850ea092dd314c0519ad675885b50564dadb 0.00991 eth ($18) 2 2 2026-07-18 12:58:15 2026-07-19 13:04:07 #615/789 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: earbuds; head: crazyhair; eyes: glasses background: none (90.4%); body: redbrown (15.5%); neck: goldnecklace (19.5%); mouth: none (68.9%); ears: earbuds (32.1%); head: crazyhair (6.6%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-19T13:04:07Z",
@@ -68,12 +68,13 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
       "raw_confidence": "verified_live_base_logs",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill"
       ]
     },
     "status": "settled",
@@ -94,7 +95,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (69.0%)",
+        "display": "Mouth: None (68.9%)",
         "trait_type": "Mouth",
         "value": "None"
       },
