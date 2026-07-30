@@ -50,6 +50,51 @@ fail() {
   exit 1
 }
 
+git_index_lock_is_stale() {
+  local lock_path="$1"
+  local lock_mtime
+  local now
+
+  [[ -e "$lock_path" ]] || return 1
+  if command -v lsof >/dev/null 2>&1 && lsof "$lock_path" >/dev/null 2>&1; then
+    return 1
+  fi
+  lock_mtime="$(stat -f %m "$lock_path" 2>/dev/null || stat -c %Y "$lock_path" 2>/dev/null || printf '0')"
+  now="$(date +%s)"
+  [[ "$lock_mtime" =~ ^[0-9]+$ ]] || return 1
+  (( now - lock_mtime >= 60 ))
+}
+
+commit_refresh_snapshot() {
+  local commit_output
+  local commit_status
+  local index_lock="${REPO_DIR}/.git/index.lock"
+
+  if commit_output="$(git commit \
+    -m "$commit_message" \
+    -m "Snapshot block: ${latest_block}" \
+    -m "Current dog: ${current_dog}" \
+    -m "Automated refresh from the private Mac mini runner." 2>&1)"; then
+    printf '%s\n' "$commit_output"
+    return 0
+  fi
+  commit_status=$?
+  printf '%s\n' "$commit_output"
+  if [[ "$commit_status" != "128" || "$commit_output" != *".git/index.lock"* || "$commit_output" != *"File exists"* ]]; then
+    return "$commit_status"
+  fi
+  if ! git_index_lock_is_stale "$index_lock"; then
+    return "$commit_status"
+  fi
+  rm -f -- "$index_lock"
+  log "removed stale git index lock and retrying commit"
+  git commit \
+    -m "$commit_message" \
+    -m "Snapshot block: ${latest_block}" \
+    -m "Current dog: ${current_dog}" \
+    -m "Automated refresh from the private Mac mini runner."
+}
+
 validate_name() {
   local name="$1"
   local value="$2"
@@ -465,11 +510,7 @@ PY
 commit_message="${COMMIT_PREFIX} refresh Mission 3 data"
 
 export DEGEN_DOGS_COMMIT_STARTED_AT_UTC="$(utc_stamp)"
-git commit \
-  -m "$commit_message" \
-  -m "Snapshot block: ${latest_block}" \
-  -m "Current dog: ${current_dog}" \
-  -m "Automated refresh from the private Mac mini runner."
+commit_refresh_snapshot
 export DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
 
