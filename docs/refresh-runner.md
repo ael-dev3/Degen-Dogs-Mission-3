@@ -6,6 +6,7 @@ The public site is served by GitHub Pages, but fresh data comes from private/loc
 
 ```bash
 npm run refresh:local
+npm run refresh:current
 npm run refresh:publish
 npm run refresh:archive
 npm run refresh:status
@@ -20,6 +21,7 @@ npm run watch:onchain:force
 ```
 
 - `refresh:local` runs `npm run data && npm run build` without committing or pushing.
+- `refresh:current` performs a fast current-surface refresh: it reads the live auction contract and only scans a small recent-block overlap, avoiding a full historical RPC scan when the local cache is missing.
 - `refresh:publish` runs `scripts/refresh_and_publish.sh`.
 - `refresh:archive` runs Mission 3 archive indexing first, then the normal publish flow.
 - `refresh:status` writes the public `generated/refresh_status.json` sidecar and public copy.

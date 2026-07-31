@@ -25,6 +25,7 @@
     "archive:mission3:health": "python3 scripts/check_mission3_archive.py",
     "refresh:archive": "bash scripts/refresh_archive_and_publish.sh",
     "refresh:local": "npm run data && npm run build",
+    "refresh:current": "python3 scripts/refresh_current_surface.py",
     "refresh:publish": "bash scripts/refresh_and_publish.sh",
     "refresh:install": "bash scripts/install_hourly_refresh_launchd.sh",
     "watch:install": "bash scripts/install_auction_watcher_launchd.sh",
