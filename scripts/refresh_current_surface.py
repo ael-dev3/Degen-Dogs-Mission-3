@@ -310,6 +310,14 @@ def main() -> None:
     amount_usd = (amount_eth * eth_usd).quantize(Decimal("0.01"))
     wallet = str(current.get("bidder") or "").lower()
     profiles = profile_map()
+    try:
+        for profile in builder.fetch_degendogs_auction_profiles(current):
+            address = str(profile.get("address") or "").lower()
+            handle = str(profile.get("username") or "").strip().lstrip("@")
+            if address and handle:
+                profiles[address] = (f"@{handle}", f"https://farcaster.xyz/{handle}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: current Farcaster identity lookup failed: {exc}", file=sys.stderr)
     bidder, bidder_url = display_for(wallet, profiles)
     end_dt = parse_utc(current.get("end_time_utc"))
     remaining = max(0, int((end_dt - now_utc()).total_seconds())) if end_dt else 0

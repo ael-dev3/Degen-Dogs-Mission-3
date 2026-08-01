@@ -7,9 +7,9 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "18.68000000",
+      "usd_estimate": "18.33000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$18.68",
+      "usd_estimate_display": "$18.33",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -47,7 +47,7 @@
       "total": 791
     },
     "schema_version": 1,
-    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base ongoing 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d 0x021f…261d 0.01 eth 18.68 $18.68 2026-08-01 13:14:59 #308/791 Background: None; Body: SugarSkull; Neck: RedCollar; Mouth: None; Ears: None; Head: WhiteMohawk; Eyes: EyePatch 0x021f…261d",
+    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base ongoing 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d @monicacline 0.01 eth 18.33 $18.33 2026-08-01 13:14:59 #308/791 Background: None; Body: SugarSkull; Neck: RedCollar; Mouth: None; Ears: None; Head: WhiteMohawk; Eyes: EyePatch @monicacline",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -68,10 +68,10 @@
     "status": "ongoing",
     "traits": [],
     "winner_or_high_bidder": {
-      "display": "0x021f…261d",
+      "display": "@monicacline",
       "farcaster_fid": null,
-      "farcaster_handle": "0x021f…261d",
-      "profile_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
+      "farcaster_handle": "monicacline",
+      "profile_url": "https://farcaster.xyz/monicacline",
       "wallet": "0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
       "wallet_explorer_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d"
     }
@@ -84,9 +84,9 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "13000000000000000",
-      "usd_estimate": "24.28000000",
+      "usd_estimate": "23.83000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$24.28",
+      "usd_estimate_display": "$23.83",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_time_basis": "settlement_block_time",
       "amount_usd_at_event": null,
@@ -94,7 +94,7 @@
       "eth_usd_price_date_utc": "2026-08-01",
       "usd_estimate_notes": "Historical ETH/USD event price unavailable; estimate uses current ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-01",
-      "usd_estimate_price_usd": "1867.685"
+      "usd_estimate_price_usd": "1833.46"
     },
     "auction_created": {
       "block_number": null,
@@ -130,7 +130,7 @@
       "total": 790
     },
     "schema_version": 1,
-    "search_text": "dog 789 dog #789 mission 3 base settled 0xdfbf…73ca 0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca 0.01300000 eth $24.28 2026-08-01t13:14:37z #689/790 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca",
+    "search_text": "dog 789 dog #789 mission 3 base settled 0xdfbf…73ca 0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca 0.01300000 eth $23.83 2026-08-01t13:14:37z #689/790 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-08-01T13:14:37Z",
