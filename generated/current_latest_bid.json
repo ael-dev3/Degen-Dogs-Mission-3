@@ -1,14 +1,14 @@
 [
   {
-    "dog": "Dog #789",
-    "dog_image_url": "https://api.degendogs.club/images/789.png",
-    "dog_external_url": "https://degendogs.club/#dog789",
-    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
-    "latest_bid": "0.01091 ETH ($20)",
-    "latest_bid_eth": 0.01091,
-    "latest_bid_usd": 20.36,
-    "latest_bid_usd_live": 20.36,
-    "eth_usd_price_live": "1865.905",
+    "dog": "Dog #790",
+    "dog_image_url": "https://api.degendogs.club/images/790.png",
+    "dog_external_url": "https://degendogs.club/#dog790",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/790",
+    "latest_bid": "0.01 ETH ($19)",
+    "latest_bid_eth": 0.01,
+    "latest_bid_usd": 18.66,
+    "latest_bid_usd_live": 18.66,
+    "eth_usd_price_live": "1866.275",
     "eth_usd_price_date_utc": "2026-08-01",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
@@ -17,12 +17,12 @@
     "bidder": "0x021f…261d",
     "bidder_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
     "bidder_wallet": "0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
-    "bid_time_utc": "2026-08-01 08:32:17",
+    "bid_time_utc": "2026-08-01 13:14:59",
     "auction_state": "live",
-    "time_remaining": "01:05:15",
-    "auction_end_utc": "2026-08-01 13:08:17",
-    "traits": "Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (90.5%); Body: Grey (11.8%); Neck: None (40.0%); Mouth: None (69.1%); Ears: None (25.8%); Head: BaseballCap (10.5%); Eyes: MaskSnorkel (9.9%)",
-    "rarity": "#689/790"
+    "time_remaining": "23:23:57",
+    "auction_end_utc": "2026-08-02 13:14:37",
+    "traits": "Background: None; Body: SugarSkull; Neck: RedCollar; Mouth: None; Ears: None; Head: WhiteMohawk; Eyes: EyePatch",
+    "trait_rarity": "Background: None (90.4%); Body: SugarSkull (6.8%); Neck: RedCollar (31.0%); Mouth: None (69.0%); Ears: None (25.8%); Head: WhiteMohawk (6.8%); Eyes: EyePatch (8.0%)",
+    "rarity": "#285/791"
   }
 ]

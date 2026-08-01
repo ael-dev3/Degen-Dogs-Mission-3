@@ -1,53 +1,55 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-01T08:32:17Z",
+    "activity_time_utc": "2026-08-01T13:14:59Z",
     "amount": {
-      "native": "0.01091",
+      "native": "0.01",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "10910000000000000",
-      "usd_estimate": "20.36000000",
+      "raw": "10000000000000000",
+      "usd_estimate": "18.66000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$20.36",
+      "usd_estimate_display": "$18.66",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
     "auction_created": {
       "block_number": null,
-      "block_time_utc": "2026-07-31T13:08:17Z",
+      "block_time_utc": "2026-08-01T13:14:37Z",
       "tx_hash": null,
       "tx_url": null
     },
     "auction_house": null,
     "bid_stats": {
       "bid_count": 1,
-      "last_bid_time_utc": "2026-08-01T08:32:17Z",
+      "last_bid_time_utc": "2026-08-01T13:14:59Z",
       "unique_bidder_count": 1
     },
-    "bid_tx_hashes": [],
+    "bid_tx_hashes": [
+      "0x3565e21ecc8fbc1baf37ff0deab1bb4e966558acc3a5e3c8755601f93c1acbf6"
+    ],
     "chain": "Base",
     "chain_id": 8453,
-    "dog_id": 789,
-    "dog_image_url": "https://api.degendogs.club/images/789.png",
-    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
+    "dog_id": 790,
+    "dog_image_url": "https://api.degendogs.club/images/790.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/790",
     "era_label": "Mission 3",
     "links": {
       "auction_tx": null,
-      "dog_page": "https://degendogs.club/#dog789",
+      "dog_page": "https://degendogs.club/#dog790",
       "explorer": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
-      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
-      "repo_archive": "archive/dogs/by-id/789.json",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/790",
+      "repo_archive": "archive/dogs/by-id/790.json",
       "settlement_tx": null
     },
     "mission": 3,
     "rarity": {
-      "display": "#689/790",
-      "rank": 689,
-      "total": 790
+      "display": "#285/791",
+      "rank": 285,
+      "total": 791
     },
     "schema_version": 1,
-    "search_text": "dog 789 dog #789 789 mission 3 mission 3 base ongoing 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d 0x021f…261d 0.01091 eth 20.36 $20.36 2026-08-01 08:32:17 #689/790 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel 0x021f…261d",
+    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base ongoing 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d 0x021f…261d 0.01 eth 18.66 $18.66 2026-08-01 13:14:59 #285/791 Background: None; Body: SugarSkull; Neck: RedCollar; Mouth: None; Ears: None; Head: WhiteMohawk; Eyes: EyePatch 0x021f…261d",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -78,15 +80,100 @@
   },
   {
     "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-01T13:14:37Z",
+    "amount": {
+      "native": "0.013",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "13000000000000000",
+      "usd_estimate": "24.26000000",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$24.26",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_time_basis": "settlement_block_time",
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-01",
+      "usd_estimate_notes": "Historical ETH/USD event price unavailable; estimate uses current ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-08-01",
+      "usd_estimate_price_usd": "1866.275"
+    },
+    "auction_created": {
+      "block_number": null,
+      "block_time_utc": "2026-07-31T13:08:17Z",
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-08-01 13:07:23",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x757b3096d26747c6e706c2a60d545d157e14c4ede65b764edcb0ad94c62ab4b2"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 789,
+    "dog_image_url": "https://api.degendogs.club/images/789.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": null,
+      "dog_page": "https://degendogs.club/#dog789",
+      "explorer": "https://basescan.org/address/0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
+      "repo_archive": "archive/dogs/by-id/789.json",
+      "settlement_tx": "0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#689/790",
+      "rank": 689,
+      "total": 790
+    },
+    "schema_version": 1,
+    "search_text": "dog 789 dog #789 mission 3 base settled 0xdfbf…73ca 0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca 0.01300000 eth $24.26 2026-08-01t13:14:37z #689/790 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca",
+    "settlement": {
+      "block_number": 49400365,
+      "block_time_utc": "2026-08-01T13:14:37Z",
+      "settled": true,
+      "tx_hash": "0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca",
+      "tx_url": "https://basescan.org/tx/0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_live_base_logs",
+      "sources": [
+        "base_logs",
+        "dashboard_builder",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "settled",
+    "traits": [],
+    "winner_or_high_bidder": {
+      "display": "0xdfbf…73ca",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xdfbf…73ca",
+      "profile_url": "https://basescan.org/address/0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca",
+      "wallet": "0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca",
+      "wallet_explorer_url": "https://basescan.org/address/0xdfbff2e5535a24e1c11b4c994f5eab08acd573ca"
+    }
+  },
+  {
+    "activity_time_basis": "settlement_block_time",
     "activity_time_utc": "2026-07-31T13:08:17Z",
     "amount": {
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.79000000",
+      "usd_estimate": "16.80000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.79",
+      "usd_estimate_display": "$16.80",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_time_basis": "settlement_block_time",
       "amount_usd_at_event": null,
@@ -94,7 +181,7 @@
       "eth_usd_price_date_utc": "2026-07-31",
       "usd_estimate_notes": "Historical ETH/USD event price unavailable; estimate uses current ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-01",
-      "usd_estimate_price_usd": "1865.905"
+      "usd_estimate_price_usd": "1866.835"
     },
     "auction_created": {
       "block_number": null,
@@ -130,7 +217,7 @@
       "total": 789
     },
     "schema_version": 1,
-    "search_text": "dog 788 dog #788 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00900000 eth $16.79 2026-07-31t13:08:17z #176/789 background: none (90.4%) body: brown (11.2%) neck: none (39.8%) mouth: pizza (10.4%) ears: goldearring (15.2%) head: whitemohawk (6.7%) eyes: eyepatch (7.9%) 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6",
+    "search_text": "dog 788 dog #788 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00900000 eth $16.80 2026-07-31t13:08:17z #176/789 background: none (90.4%) body: brown (11.2%) neck: none (39.8%) mouth: pizza (10.4%) ears: goldearring (15.2%) head: whitemohawk (6.7%) eyes: eyepatch (7.9%) 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6",
     "settlement": {
       "block_number": null,
       "block_time_utc": "2026-07-31T13:08:17Z",
