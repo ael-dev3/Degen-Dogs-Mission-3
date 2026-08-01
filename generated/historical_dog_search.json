@@ -20523,13 +20523,13 @@
     "dog_external_url": "https://degendogs.club/#dog789",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
     "status": "ongoing",
-    "winner": "@0xael.eth",
-    "winner_url": "https://farcaster.xyz/0xael.eth",
-    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "amount": "0.00900 ETH ($17)",
-    "amount_raw": "9000000000000000",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "0x021f…261d",
+    "winner_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
+    "winner_wallet": "0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
+    "amount": "0.01091 ETH ($20)",
+    "amount_raw": "10910000000000000",
+    "bid_count": 2,
+    "unique_bidder_count": 2,
     "auction_created_time_utc": "2026-07-31 13:08:17",
     "settled_time_utc": "",
     "rarity": "#689/790",
@@ -20537,6 +20537,6 @@
     "trait_rarity": "Background: None (90.5%); Body: Grey (11.8%); Neck: None (40.0%); Mouth: None (69.1%); Ears: None (25.8%); Head: BaseballCap (10.5%); Eyes: MaskSnorkel (9.9%)",
     "confidence": "live_base_contract_call",
     "sources": "base_rpc,dog_metadata_api",
-    "search_text": "3 Base 8453 789 Dog #789 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942"
+    "search_text": "3 Base 8453 789 Dog #789 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel 0x021f…261d 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d"
   }
 ]

@@ -47,11 +47,11 @@ fi
 
 # Safe default: the installed watcher runs local refresh only. To allow publish,
 # install with:
-#   MISSION3_WATCHER_AUTO_PUSH=1 MISSION3_REFRESH_COMMAND="npm run refresh:publish" npm run watch:install
+#   MISSION3_WATCHER_AUTO_PUSH=1 MISSION3_REFRESH_COMMAND="npm run refresh:current" npm run watch:install
 MISSION3_WATCHER_AUTO_PUSH="${MISSION3_WATCHER_AUTO_PUSH:-0}"
 MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
 if [[ -z "$MISSION3_REFRESH_COMMAND" && "$MISSION3_WATCHER_AUTO_PUSH" == "1" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run refresh:publish"
+  MISSION3_REFRESH_COMMAND="npm run refresh:current"
 fi
 if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
   MISSION3_REFRESH_COMMAND="npm run data && npm run build"
@@ -152,5 +152,5 @@ echo "refresh_lock: ${MISSION3_REFRESH_LOCK_PATH:-${LOCK_DIR}/refresh.lock}"
 echo "auto_push: ${MISSION3_WATCHER_AUTO_PUSH}"
 echo "refresh_command: ${MISSION3_REFRESH_COMMAND}"
 if [[ "$MISSION3_WATCHER_AUTO_PUSH" != "1" ]]; then
-  echo "note: auto-push is disabled; set MISSION3_WATCHER_AUTO_PUSH=1 and MISSION3_REFRESH_COMMAND='npm run refresh:publish' to publish event-triggered refreshes."
+  echo "note: auto-push is disabled; set MISSION3_WATCHER_AUTO_PUSH=1 and MISSION3_REFRESH_COMMAND='npm run refresh:current' to publish event-triggered refreshes."
 fi

@@ -1,15 +1,15 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-31T15:36:33Z",
+    "activity_time_utc": "2026-08-01T08:32:17Z",
     "amount": {
-      "native": "0.009",
+      "native": "0.01091",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "9000000000000000",
-      "usd_estimate": "16.75000000",
+      "raw": "10910000000000000",
+      "usd_estimate": "20.32000000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.75",
+      "usd_estimate_display": "$20.32",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_time_basis": "last_bid_block_time"
     },
@@ -21,11 +21,14 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-07-31T15:36:33Z",
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-08-01T08:32:17Z",
       "unique_bidder_count": 1
     },
-    "bid_tx_hashes": [],
+    "bid_tx_hashes": [
+      "0xd118d1e4994989fd9b3b62099c48d27e61b97ed57e5326c7ecb43383672a8d77",
+      "0xd1a58e88a13b510e4ba46988540fee0be1a0095c74f7a45568fe077fddd3b24f"
+    ],
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 789,
@@ -35,7 +38,7 @@
     "links": {
       "auction_tx": null,
       "dog_page": "https://degendogs.club/#dog789",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/789",
       "repo_archive": "archive/dogs/by-id/789.json",
       "settlement_tx": null
@@ -47,7 +50,7 @@
       "total": 790
     },
     "schema_version": 1,
-    "search_text": "dog 789 dog #789 789 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.75 $16.75 2026-07-31 15:36:33 #689/790 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel @0xael.eth",
+    "search_text": "dog 789 dog #789 789 mission 3 mission 3 base ongoing 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d 0x021f…261d 0.01091 eth 20.32 $20.32 2026-08-01 08:32:17 #689/790 Background: None; Body: Grey; Neck: None; Mouth: None; Ears: None; Head: BaseballCap; Eyes: MaskSnorkel 0x021f…261d",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -68,12 +71,12 @@
     "status": "ongoing",
     "traits": [],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "0x021f…261d",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "0x021f…261d",
+      "profile_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
+      "wallet": "0x021f6491c31ee6ecd0a840e8e5c562f5c555261d",
+      "wallet_explorer_url": "https://basescan.org/address/0x021f6491c31ee6ecd0a840e8e5c562f5c555261d"
     }
   },
   {
