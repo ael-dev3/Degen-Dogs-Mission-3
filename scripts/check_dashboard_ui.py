@@ -66,6 +66,8 @@ def assert_timer_urgency_colors() -> None:
         "seconds<=600?'critical':seconds<3600?'urgent':'calm'",
         "const formatNativeAmount=value=>",
         "formatNativeAmount(amount.native)",
+        "const refreshUnifiedArchive=async()=>",
+        "setInterval(refreshUnifiedArchive,60000)",
     ]
     for marker in required_markers:
         if marker not in html:
