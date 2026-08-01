@@ -124,7 +124,7 @@ Default mode is local-only (`npm run refresh:current`), which reconciles the liv
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1
-MISSION3_REFRESH_COMMAND="npm run refresh:publish"
+MISSION3_REFRESH_COMMAND="npm run refresh:current"
 ```
 
 If the watcher looks stuck, inspect:

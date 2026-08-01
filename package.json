@@ -24,7 +24,7 @@
     "archive:mission3:full": "python3 scripts/archive_mission3_index.py --full-refresh --write-public",
     "archive:mission3:health": "python3 scripts/check_mission3_archive.py",
     "refresh:archive": "bash scripts/refresh_archive_and_publish.sh",
-    "refresh:local": "npm run data && npm run build",
+    "refresh:local": "npm run refresh:current",
     "refresh:current": "python3 scripts/refresh_current_surface.py",
     "refresh:publish": "bash scripts/refresh_and_publish.sh",
     "refresh:install": "bash scripts/install_hourly_refresh_launchd.sh",

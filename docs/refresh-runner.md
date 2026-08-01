@@ -20,7 +20,7 @@ npm run watch:onchain:dry
 npm run watch:onchain:force
 ```
 
-- `refresh:local` runs `npm run data && npm run build` without committing or pushing.
+- `refresh:local` runs the bounded `npm run refresh:current` without committing or pushing.
 - `refresh:current` performs a fast current-surface refresh: it reads the live auction contract and only scans a small recent-block overlap, avoiding a full historical RPC scan when the local cache is missing.
 - `refresh:publish` runs `scripts/refresh_and_publish.sh`.
 - `refresh:archive` runs Mission 3 archive indexing first, then the normal publish flow.
@@ -133,7 +133,7 @@ npm run refresh:metrics
 Default behavior is local and safe:
 
 ```bash
-MISSION3_REFRESH_COMMAND="npm run data && npm run build"
+MISSION3_REFRESH_COMMAND="npm run refresh:current"
 MISSION3_WATCHER_AUTO_PUSH=0
 npm run watch:onchain
 ```
@@ -142,7 +142,7 @@ To publish watcher-triggered refreshes, opt in explicitly:
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1
-MISSION3_REFRESH_COMMAND="npm run refresh:publish"
+MISSION3_REFRESH_COMMAND="npm run refresh:current"
 npm run watch:onchain
 ```
 
@@ -193,7 +193,7 @@ Install the event watcher in publish mode on the Mac mini/local runner:
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1 \
-MISSION3_REFRESH_COMMAND="npm run refresh:publish" \
+MISSION3_REFRESH_COMMAND="npm run refresh:current" \
 npm run watch:install
 ```
 

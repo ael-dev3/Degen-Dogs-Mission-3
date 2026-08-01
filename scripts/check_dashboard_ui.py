@@ -64,6 +64,8 @@ def assert_timer_urgency_colors() -> None:
         ".current-detail .timer-card--calm,.current-detail .timer-card--normal{background:var(--paper-calm)",
         ".current-detail .timer-card--urgent{background:var(--paper-urgent)",
         "seconds<=600?'critical':seconds<3600?'urgent':'calm'",
+        "const formatNativeAmount=value=>",
+        "formatNativeAmount(amount.native)",
     ]
     for marker in required_markers:
         if marker not in html:

@@ -60,6 +60,14 @@ def int_value(value: Any, default: int = 0) -> int:
         return default
 
 
+def format_eth_amount(value: Any) -> str:
+    amount = Decimal(str(value or 0))
+    text = format(amount, "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text or "0"
+
+
 def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -306,7 +314,7 @@ def main() -> None:
     end_dt = parse_utc(current.get("end_time_utc"))
     remaining = max(0, int((end_dt - now_utc()).total_seconds())) if end_dt else 0
     state = "live" if not int(current.get("settled") or 0) and remaining > 0 else "settled"
-    bid_text = f"{amount_eth:.5f} ETH (${amount_usd:,.0f})"
+    bid_text = f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
     previous_latest = read_json("current_latest_bid")[0]
     bid_time = current_bids[-1].get("block_time_utc") if current_bids else previous_latest.get("bid_time_utc") or latest_time
     dog_attrs = {
@@ -402,7 +410,7 @@ def main() -> None:
                 "bidder": bid_name,
                 "bidder_url": bid_url,
                 "bidder_wallet": bid_wallet,
-                "bid": f"{bid_eth:.5f} ETH (${bid_usd:,.0f})",
+                "bid": f"{format_eth_amount(bid_eth)} ETH (${bid_usd:,.0f})",
                 "bid_eth": float(bid_eth),
                 "bid_usd": float(bid_usd),
                 "eth_usd_price_live": str(eth_usd),
@@ -480,7 +488,7 @@ def main() -> None:
                     "bidder_winner": previous_bidder,
                     "bidder_winner_url": previous_bidder_url,
                     "bidder_winner_wallet": previous_wallet,
-                    "bid": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
+                    "bid": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
                     "amount_eth": float(previous_amount_eth),
                     "amount_usd": float(previous_amount_usd),
                     "eth_usd_price_live": str(eth_usd),
@@ -546,7 +554,7 @@ def main() -> None:
                     "winner": previous_bidder,
                     "winner_url": previous_bidder_url,
                     "winner_wallet": previous_wallet,
-                    "amount": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
+                    "amount": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
                     "amount_raw": str(previous_settlement.get("amount_wei") or row.get("amount_raw") or ""),
                     "bid_count": len(previous_bids) or int_value(row.get("bid_count")),
                     "unique_bidder_count": len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(row.get("unique_bidder_count")),
@@ -622,7 +630,7 @@ def main() -> None:
                 "auction_state": "settled",
                 "bids": len(previous_bids) or int_value(previous_timeline.get("bids")),
                 "unique_bidders": len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(previous_timeline.get("unique_bidders")),
-                "high_bid_eth": f"{max([Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids] or [previous_amount_eth]):.8f}",
+                "high_bid_eth": format_eth_amount(max([Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids] or [previous_amount_eth])),
                 "total_bid_eth": f"{sum((Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids), Decimal(0)):.8f}" if previous_bids else previous_timeline.get("total_bid_eth", ""),
                 "latest_bidder": display_for(str(previous_latest_bid.get("bidder") or "").lower(), profiles)[0] if previous_latest_bid else previous_timeline.get("latest_bidder", ""),
                 "latest_bidder_url": display_for(str(previous_latest_bid.get("bidder") or "").lower(), profiles)[1] if previous_latest_bid else previous_timeline.get("latest_bidder_url", ""),
@@ -630,7 +638,7 @@ def main() -> None:
                 "latest_bid_utc": previous_latest_bid.get("block_time_utc", previous_timeline.get("latest_bid_utc", "")),
                 "winner": previous_bidder,
                 "winner_url": previous_bidder_url,
-                "settled_eth": f"{previous_amount_eth:.8f}",
+                "settled_eth": format_eth_amount(previous_amount_eth),
                 "settled_time_utc": previous_settlement.get("block_time_utc", ""),
                 "settled_tx_hash": previous_settlement.get("tx_hash", ""),
             }
@@ -685,8 +693,8 @@ def main() -> None:
                 "winner_wallet": previous_wallet,
                 "winner": previous_bidder,
                 "winner_url": previous_bidder_url,
-                "winning_bid": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
-                "winning_bid_eth": f"{previous_amount_eth:.8f}",
+                "winning_bid": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
+                "winning_bid_eth": format_eth_amount(previous_amount_eth),
                 "winning_bid_usd": f"{previous_amount_usd:.8f}",
                 "winning_bid_usd_at_settlement": "",
                 "eth_usd_price_at_event": "",
@@ -753,7 +761,7 @@ def main() -> None:
                 prior_amount = row.get("amount") if isinstance(row.get("amount"), dict) else {}
                 prior_amount.update(
                     {
-                        "native": f"{prior_amount_eth:.8f}",
+                        "native": format_eth_amount(prior_amount_eth),
                         "native_symbol": "ETH",
                         "price_asset_key": "ETH",
                         "raw": str(int(prior_amount_eth * Decimal(10**18))),

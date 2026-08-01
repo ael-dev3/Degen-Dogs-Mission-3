@@ -24,6 +24,7 @@ COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
 SKIP_PUSH="${DEGEN_DOGS_SKIP_PUSH:-0}"
 SKIP_PULL="${DEGEN_DOGS_SKIP_PULL:-0}"
 RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-0}"
+FULL_REFRESH="${DEGEN_DOGS_FULL_REFRESH:-0}"
 LIVE_VERIFY_AFTER_PUSH="${DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH:-0}"
 
 utc_stamp() {
@@ -249,7 +250,13 @@ fi
 
 log "running blockchain data generator"
 export DEGEN_DOGS_DATA_STARTED_AT_UTC="$(utc_stamp)"
-npm run data
+if [[ "$FULL_REFRESH" == "1" ]]; then
+  log "full refresh explicitly enabled"
+  npm run data
+else
+  log "bounded current refresh (set DEGEN_DOGS_FULL_REFRESH=1 for full history)"
+  npm run refresh:current
+fi
 export DEGEN_DOGS_DATA_COMPLETED_AT_UTC="$(utc_stamp)"
 
 log "validating generated artifacts"

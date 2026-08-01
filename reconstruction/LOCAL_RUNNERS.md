@@ -13,14 +13,13 @@ setup.
 
 There are two local runners. They are intentionally separate:
 
-1. **Hourly refresh fallback**
+1. **Hourly refresh fallback (optional)**
    - launchd label: `com.ael.degendogs.mission3.refresh`
    - installer: `scripts/install_hourly_refresh_launchd.sh`
    - npm command: `npm run refresh:install`
    - interval: `DEGEN_DOGS_REFRESH_INTERVAL_SECONDS`, default `3600`
    - action: runs `scripts/refresh_and_publish.sh`
-   - purpose: always refresh from public/onchain data on a predictable cadence and
-     publish generated artifacts when anything changed.
+   - purpose: bounded current-surface refresh and publish on a predictable cadence. Full-history `npm run data` is opt-in with `DEGEN_DOGS_FULL_REFRESH=1`.
 
 2. **Event-aware auction watcher**
    - launchd label: `com.ael.degendogs.mission3.watch-auction`
@@ -110,7 +109,7 @@ Expected watcher configuration:
 - `StartInterval` is `120` unless intentionally overridden
 - `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0` when hourly refresh is installed, so the watcher only triggers full refreshes on auction events instead of duplicating the hourly baseline
 - `MISSION3_WATCHER_AUTO_PUSH=1` for publishing mode
-- `MISSION3_REFRESH_COMMAND=npm run refresh:publish` for publishing mode
+- `MISSION3_REFRESH_COMMAND=npm run refresh:current` for publishing mode
 - `MISSION3_REFRESH_LOCK_PATH` points at `$HOME/Library/Caches/degen-dogs-mission3/refresh.lock`
 
 A healthy one-shot job often shows `state = not running` between intervals. That is
@@ -235,7 +234,7 @@ Tasks:
    MISSION3_WATCHER_AUTO_PUSH=0 MISSION3_REFRESH_COMMAND="npm run refresh:current"
    bash scripts/install_auction_watcher_launchd.sh.
 5. If publish mode is explicitly approved, reinstall the watcher with
-   MISSION3_WATCHER_AUTO_PUSH=1 and MISSION3_REFRESH_COMMAND="npm run refresh:publish".
+   MISSION3_WATCHER_AUTO_PUSH=1 and MISSION3_REFRESH_COMMAND="npm run refresh:current".
 6. Verify launchctl state, plists, logs, shared refresh.lock, and watcher state.
 7. Run a temp-state watcher dry-run and confirm no secrets are written.
 8. If you need to smoke-test launchd without pushing, reinstall with DEGEN_DOGS_SKIP_PUSH=1
