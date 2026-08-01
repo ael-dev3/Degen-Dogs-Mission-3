@@ -207,18 +207,95 @@ def main() -> None:
     total_supply = builder.fetch_dog_total_supply(hex(latest_block))
     metadata = builder.fetch_one_dog_metadata(token_id, hex(latest_block))
 
+    timeline_columns, timeline_rows = read_table("auction_timeline")
+    timeline_by_token = {int_value(row.get("token_id"), -1): dict(row) for row in timeline_rows}
+    previous_token_id = token_id - 1
+    historical_snapshot = next((row for row in read_json("historical_dog_search") if int_value(row.get("token_id"), -1) == previous_token_id), {})
+    previous_timeline = timeline_by_token.get(previous_token_id, {})
+    if not previous_timeline and historical_snapshot:
+        previous_timeline = {
+            "token_id": str(previous_token_id),
+            "dog_image_url": historical_snapshot.get("dog_image_url", ""),
+            "start_time_utc": historical_snapshot.get("auction_created_time_utc", ""),
+            "end_time_utc": "",
+            "auction_state": "live",
+            "bids": historical_snapshot.get("bid_count", ""),
+            "unique_bidders": historical_snapshot.get("unique_bidder_count", ""),
+            "high_bid_eth": "",
+            "total_bid_eth": "",
+            "latest_bidder": historical_snapshot.get("winner", ""),
+            "latest_bidder_url": historical_snapshot.get("winner_url", ""),
+            "latest_bid_eth": "",
+            "latest_bid_utc": "",
+            "winner": "",
+            "winner_url": "",
+            "settled_eth": "",
+            "settled_time_utc": "",
+            "rarity": historical_snapshot.get("rarity", ""),
+            "created_tx_hash": "",
+            "settled_tx_hash": "",
+        }
+    previous_status = str(previous_timeline.get("auction_state") or "").lower()
+    reconcile_previous = bool(previous_timeline) and (
+        previous_status in {"live", "ongoing"} or not previous_timeline.get("settled_time_utc") or not previous_timeline.get("settled_tx_hash")
+    )
+
     logs = builder.fetch_logs(
         builder.AUCTION_HOUSE,
         [builder.TOPIC_AUCTION_CREATED, builder.TOPIC_AUCTION_BID, builder.TOPIC_AUCTION_SETTLED],
         from_block,
         latest_block,
     )
+    if reconcile_previous:
+        # A current-surface refresh may start after the previous auction's
+        # settlement block. Reconcile the complete previous-auction window so
+        # the old high-bid row is replaced by the actual AuctionSettled event.
+        current_start_dt = parse_utc(current.get("start_time_utc"))
+        if current_start_dt:
+            latest_dt = parse_utc(latest_time)
+            if not latest_dt:
+                raise RuntimeError("latest block timestamp could not be parsed for settlement reconciliation")
+            seconds_per_block = 2.0
+            margin_blocks = max(250, int(os.environ.get("MISSION3_SETTLEMENT_RECON_MARGIN_BLOCKS", "500")))
+            estimate = latest_block - int(max(0, (latest_dt - current_start_dt).total_seconds()) / seconds_per_block)
+            reconcile_from = max(0, estimate - margin_blocks)
+            reconcile_to = min(latest_block, estimate + margin_blocks)
+            logs.extend(
+                builder.fetch_logs(
+                    builder.AUCTION_HOUSE,
+                    [builder.TOPIC_AUCTION_CREATED, builder.TOPIC_AUCTION_SETTLED],
+                    reconcile_from,
+                    reconcile_to,
+                )
+            )
+    deduped_logs = {}
+    for row in logs:
+        deduped_logs[(str(row.get("blockNumber")), str(row.get("logIndex")))] = row
+    logs = list(deduped_logs.values())
     created_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_CREATED]
     bid_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_BID]
     settled_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_SETTLED]
     created, bids, settled = builder.decode_auction_logs(created_logs, bid_logs, settled_logs)
     current_bids = [row for row in bids if int(row["token_id"]) == token_id]
     current_bids.sort(key=lambda row: (int(row["block_number"]), int(row["log_index"])))
+    previous_bids = [row for row in bids if int(row["token_id"]) == previous_token_id]
+    previous_bids.sort(key=lambda row: (int(row["block_number"]), int(row["log_index"])))
+    previous_settlements = [row for row in settled if int(row["token_id"]) == previous_token_id]
+    previous_settlement = max(previous_settlements, key=lambda row: (int(row.get("block_number") or 0), int(row.get("log_index") or 0)), default=None)
+    if reconcile_previous and previous_timeline and previous_settlement is None:
+        raise RuntimeError(f"could not reconcile AuctionSettled for previous Dog #{previous_token_id}; refusing partial refresh")
+    if previous_settlement is None and previous_timeline.get("settled_time_utc") and previous_timeline.get("settled_tx_hash"):
+        previous_feed_snapshot = next((row for row in read_json("auction_feed") if str(row.get("dog")) == f"Dog #{previous_token_id}"), {})
+        previous_settlement = {
+            "amount_eth": previous_timeline.get("settled_eth") or previous_feed_snapshot.get("amount_eth") or 0,
+            "amount_wei": previous_feed_snapshot.get("amount_raw") or "",
+            "block_number": "",
+            "block_time_utc": previous_timeline.get("settled_time_utc"),
+            "log_index": "",
+            "token_id": previous_token_id,
+            "tx_hash": previous_timeline.get("settled_tx_hash"),
+            "winner": previous_feed_snapshot.get("bidder_winner_wallet") or "",
+        }
 
     eth_usd, eth_source = builder.fetch_eth_usd_price()
     amount_eth = Decimal(str(current["amount_eth"]))
@@ -365,12 +442,56 @@ def main() -> None:
     feed_columns, feed_rows = read_table("auction_feed")
     old_current = dict(feed_rows[0]) if feed_rows else {}
     previous_dog = int(re.sub(r"\D", "", str(old_current.get("dog") or "-1")) or -1)
+    previous_feed = next((dict(row) for row in feed_rows if int(re.sub(r"\D", "", str(row.get("dog") or "-1")) or -1) == previous_token_id), {})
+    if not previous_feed and historical_snapshot:
+        raw_previous_amount = Decimal(str(historical_snapshot.get("amount_raw") or 0))
+        previous_feed = {
+            "dog": f"Dog #{previous_token_id}",
+            "dog_image_url": historical_snapshot.get("dog_image_url", ""),
+            "dog_external_url": historical_snapshot.get("dog_external_url", ""),
+            "dog_opensea_url": historical_snapshot.get("dog_opensea_url", ""),
+            "bidder_winner": historical_snapshot.get("winner", ""),
+            "bidder_winner_url": historical_snapshot.get("winner_url", ""),
+            "bidder_winner_wallet": historical_snapshot.get("winner_wallet", ""),
+            "bid": historical_snapshot.get("amount", ""),
+            "amount_eth": float(raw_previous_amount / Decimal(10**18)) if raw_previous_amount else 0,
+            "amount_raw": historical_snapshot.get("amount_raw", ""),
+            "last_bid_utc": "",
+            "rarity": historical_snapshot.get("rarity", ""),
+            "traits": historical_snapshot.get("traits", ""),
+            "trait_rarity": historical_snapshot.get("trait_rarity", ""),
+        }
     settled_previous = None
-    if previous_dog != token_id:
-        settled_previous = dict(old_current)
+    if previous_settlement:
+        settled_previous = dict(previous_feed or {"dog": f"Dog #{previous_token_id}"})
+        settlement_time = str(previous_settlement.get("block_time_utc") or current.get("start_time_utc", latest_time))
         settled_previous["status"] = "settled"
-        settled_previous["settled_time_utc"] = current.get("start_time_utc", latest_time)
+        settled_previous["settled_time_utc"] = settlement_time
+        settled_previous["auction_time_utc"] = settlement_time
         settled_previous["time_remaining"] = "settled"
+        if previous_settlement:
+            previous_wallet = str(previous_settlement.get("winner") or "").lower()
+            previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
+            previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
+            previous_amount_usd = (previous_amount_eth * eth_usd).quantize(Decimal("0.01"))
+            previous_last_bid = previous_bids[-1].get("block_time_utc") if previous_bids else settled_previous.get("last_bid_utc", "")
+            settled_previous.update(
+                {
+                    "bidder_winner": previous_bidder,
+                    "bidder_winner_url": previous_bidder_url,
+                    "bidder_winner_wallet": previous_wallet,
+                    "bid": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
+                    "amount_eth": float(previous_amount_eth),
+                    "amount_usd": float(previous_amount_usd),
+                    "eth_usd_price_live": str(eth_usd),
+                    "eth_usd_price_date_utc": latest_time[:10],
+                    "usd_estimate_source": "current_eth_usd_price",
+                    "usd_estimate_source_detail": eth_source,
+                    "usd_estimate_confidence": "live_current",
+                    "usd_estimate_basis": "settlement_block_time",
+                    "last_bid_utc": previous_last_bid,
+                }
+            )
     new_feed = dict(old_current)
     new_feed.update(
         {
@@ -401,7 +522,7 @@ def main() -> None:
             "trait_rarity": trait_rarity,
         }
     )
-    remaining_feed = [row for row in feed_rows[1:] if str(row.get("dog")) != f"Dog #{token_id}"]
+    remaining_feed = [row for row in feed_rows if str(row.get("dog")) not in {f"Dog #{token_id}", f"Dog #{previous_token_id}"}]
     output_feed = [new_feed]
     if settled_previous is not None:
         output_feed.append(settled_previous)
@@ -411,6 +532,30 @@ def main() -> None:
     # Add the newly minted/auctioned Dog to the unified searchable table.
     history_columns, history_rows = read_table("historical_dog_search")
     history_rows = [row for row in history_rows if int_value(row.get("token_id"), -1) != token_id]
+    if previous_settlement:
+        previous_wallet = str(previous_settlement.get("winner") or "").lower()
+        previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
+        previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
+        previous_amount_usd = (previous_amount_eth * eth_usd).quantize(Decimal("0.01"))
+        for row in history_rows:
+            if int_value(row.get("token_id"), -1) != previous_token_id:
+                continue
+            row.update(
+                {
+                    "status": "settled",
+                    "winner": previous_bidder,
+                    "winner_url": previous_bidder_url,
+                    "winner_wallet": previous_wallet,
+                    "amount": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
+                    "amount_raw": str(previous_settlement.get("amount_wei") or row.get("amount_raw") or ""),
+                    "bid_count": len(previous_bids) or int_value(row.get("bid_count")),
+                    "unique_bidder_count": len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(row.get("unique_bidder_count")),
+                    "settled_time_utc": previous_settlement.get("block_time_utc", ""),
+                    "confidence": "verified_live_base_logs",
+                    "sources": "base_logs,dashboard_builder",
+                }
+            )
+            row["search_text"] = " ".join(str(row.get(key, "")) for key in row if key != "search_text")
     template = dict(history_rows[-1] if history_rows else {})
     new_search = dict(template)
     new_search.update(
@@ -462,14 +607,184 @@ def main() -> None:
             report["latest_activity_utc"] = bid_time
     write_table("historical_dog_report", report_columns, report_rows)
 
+    # Reconcile the specialized Mission 3 tables too. These are the source
+    # tables used to build the unified archive rows and must move together with
+    # the homepage feed when a previous auction settles.
+    timeline_rows = [row for row in timeline_rows if int_value(row.get("token_id"), -1) not in {previous_token_id, token_id}]
+    if previous_settlement:
+        previous_wallet = str(previous_settlement.get("winner") or "").lower()
+        previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
+        previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
+        previous_latest_bid = previous_bids[-1] if previous_bids else {}
+        previous_timeline_row = dict(previous_timeline)
+        previous_timeline_row.update(
+            {
+                "auction_state": "settled",
+                "bids": len(previous_bids) or int_value(previous_timeline.get("bids")),
+                "unique_bidders": len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(previous_timeline.get("unique_bidders")),
+                "high_bid_eth": f"{max([Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids] or [previous_amount_eth]):.8f}",
+                "total_bid_eth": f"{sum((Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids), Decimal(0)):.8f}" if previous_bids else previous_timeline.get("total_bid_eth", ""),
+                "latest_bidder": display_for(str(previous_latest_bid.get("bidder") or "").lower(), profiles)[0] if previous_latest_bid else previous_timeline.get("latest_bidder", ""),
+                "latest_bidder_url": display_for(str(previous_latest_bid.get("bidder") or "").lower(), profiles)[1] if previous_latest_bid else previous_timeline.get("latest_bidder_url", ""),
+                "latest_bid_eth": previous_latest_bid.get("bid_eth", previous_timeline.get("latest_bid_eth", "")),
+                "latest_bid_utc": previous_latest_bid.get("block_time_utc", previous_timeline.get("latest_bid_utc", "")),
+                "winner": previous_bidder,
+                "winner_url": previous_bidder_url,
+                "settled_eth": f"{previous_amount_eth:.8f}",
+                "settled_time_utc": previous_settlement.get("block_time_utc", ""),
+                "settled_tx_hash": previous_settlement.get("tx_hash", ""),
+            }
+        )
+        timeline_rows.append(previous_timeline_row)
+    current_created = max((row for row in created if int(row.get("token_id")) == token_id), key=lambda row: (int(row.get("block_number") or 0), str(row.get("tx_hash") or "")), default={})
+    current_timeline_row = dict(timeline_by_token.get(token_id) or previous_timeline or {})
+    current_timeline_row.update(
+        {
+            "token_id": str(token_id),
+            "dog_image_url": current_row["dog_image_url"],
+            "start_time_utc": current.get("start_time_utc", ""),
+            "end_time_utc": current.get("end_time_utc", ""),
+            "auction_state": "live" if state == "live" else "settled",
+            "bids": len(current_bids) or int_value(current_timeline_row.get("bids")),
+            "unique_bidders": len({str(item.get("bidder") or "").lower() for item in current_bids}) or int_value(current_timeline_row.get("unique_bidders")),
+            "high_bid_eth": f"{max((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), default=amount_eth):.8f}",
+            "total_bid_eth": f"{sum((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), Decimal(0)):.8f}",
+            "latest_bidder": bidder,
+            "latest_bidder_url": bidder_url,
+            "latest_bid_eth": f"{amount_eth:.8f}",
+            "latest_bid_utc": bid_time,
+            "winner": "" if state == "live" else bidder,
+            "winner_url": "" if state == "live" else bidder_url,
+            "settled_eth": "" if state == "live" else f"{amount_eth:.8f}",
+            "settled_time_utc": "" if state == "live" else latest_time,
+            "rarity": rarity,
+            "created_tx_hash": current_created.get("tx_hash", current_timeline_row.get("created_tx_hash", "")),
+            "settled_tx_hash": "" if state == "live" else current_timeline_row.get("settled_tx_hash", ""),
+        }
+    )
+    timeline_rows.append(current_timeline_row)
+    timeline_rows.sort(key=lambda row: int_value(row.get("token_id"), -1), reverse=True)
+    write_table("auction_timeline", timeline_columns, timeline_rows)
+
+    winner_columns, winner_rows = read_table("auction_winners")
+    winner_rows = [row for row in winner_rows if int_value(row.get("token_id"), -1) != previous_token_id]
+    if previous_settlement:
+        previous_wallet = str(previous_settlement.get("winner") or "").lower()
+        previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
+        previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
+        previous_amount_usd = (previous_amount_eth * eth_usd).quantize(Decimal("0.01"))
+        winner_row = dict(next((row for row in winner_rows if int_value(row.get("token_id"), -1) == previous_token_id), {}))
+        winner_row.update(
+            {
+                "settled_time_utc": previous_settlement.get("block_time_utc", ""),
+                "token_id": previous_token_id,
+                "dog_name": f"Degen Dog #{previous_token_id}",
+                "dog_image_url": settled_previous.get("dog_image_url", previous_timeline.get("dog_image_url", "")),
+                "dog_external_url": settled_previous.get("dog_external_url", f"https://degendogs.club/#dog{previous_token_id}"),
+                "dog_opensea_url": settled_previous.get("dog_opensea_url", builder.dog_opensea_url(previous_token_id)),
+                "winner_wallet": previous_wallet,
+                "winner": previous_bidder,
+                "winner_url": previous_bidder_url,
+                "winning_bid": f"{previous_amount_eth:.5f} ETH (${previous_amount_usd:,.0f})",
+                "winning_bid_eth": f"{previous_amount_eth:.8f}",
+                "winning_bid_usd": f"{previous_amount_usd:.8f}",
+                "winning_bid_usd_at_settlement": "",
+                "eth_usd_price_at_event": "",
+                "eth_usd_price_date_utc": str(previous_settlement.get("block_time_utc", ""))[:10],
+                "usd_estimate_source": "current_eth_usd_price",
+                "usd_estimate_source_detail": eth_source,
+                "usd_estimate_confidence": "live_current",
+                "usd_estimate_basis": "settlement_block_time",
+                "bid_count": len(previous_bids) or int_value(previous_timeline.get("bids")),
+                "unique_bidders": len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(previous_timeline.get("unique_bidders")),
+                "first_bid_utc": previous_bids[0].get("block_time_utc", "") if previous_bids else "",
+                "last_bid_utc": previous_bids[-1].get("block_time_utc", "") if previous_bids else "",
+                "block_number": previous_settlement.get("block_number", ""),
+                "tx_hash": previous_settlement.get("tx_hash", ""),
+            }
+        )
+        winner_rows.append(winner_row)
+    winner_rows.sort(key=lambda row: str(row.get("settled_time_utc", "")), reverse=True)
+    write_table("auction_winners", winner_columns, winner_rows)
+
+    recent_columns, _ = read_table("recent_auction_winners")
+    recent_rows = []
+    for row in winner_rows[:10]:
+        recent_rows.append({
+            "dog": f"Dog #{int_value(row.get('token_id'), -1)}",
+            "dog_image_url": row.get("dog_image_url", ""),
+            "dog_external_url": row.get("dog_external_url", ""),
+            "dog_opensea_url": row.get("dog_opensea_url", ""),
+            "winner": row.get("winner", ""),
+            "winner_url": row.get("winner_url", ""),
+            "winning_bid": row.get("winning_bid", ""),
+            "winning_bid_eth": row.get("winning_bid_eth", ""),
+            "winning_bid_usd": row.get("winning_bid_usd", ""),
+            "winning_bid_usd_at_settlement": row.get("winning_bid_usd_at_settlement", ""),
+            "eth_usd_price_at_event": row.get("eth_usd_price_at_event", ""),
+            "eth_usd_price_date_utc": row.get("eth_usd_price_date_utc", ""),
+            "usd_estimate_source": row.get("usd_estimate_source", ""),
+            "usd_estimate_source_detail": row.get("usd_estimate_source_detail", ""),
+            "usd_estimate_confidence": row.get("usd_estimate_confidence", ""),
+            "usd_estimate_basis": row.get("usd_estimate_basis", ""),
+            "rarity": row.get("rarity", ""),
+            "last_bid_utc": row.get("last_bid_utc", ""),
+            "settled_time_utc": row.get("settled_time_utc", ""),
+        })
+    write_table("recent_auction_winners", recent_columns, recent_rows)
+
     metrics_rows = read_json("mission3_metrics")
     unified_paths = [ROOT / "archive" / "data" / "generated" / "unified_dog_search_index.json", PUBLIC_GENERATED / "unified_dog_search_index.json"]
     unified_rows = json.loads(unified_paths[0].read_text(encoding="utf-8")) if unified_paths[0].exists() else []
     unified_rows = [row for row in unified_rows if not (int_value(row.get("mission"), -1) == 3 and int_value(row.get("dog_id"), -1) == token_id)]
     for row in unified_rows:
-        if int_value(row.get("mission"), -1) == 3 and (str(row.get("status", "")).lower() == "live" or "ongoing" in str(row.get("status", "")).lower()):
+        if int_value(row.get("mission"), -1) == 3 and (int_value(row.get("dog_id"), -1) == previous_token_id or str(row.get("status", "")).lower() == "live" or "ongoing" in str(row.get("status", "")).lower()):
             row["status"] = "settled"
-            row["settlement"] = {"block_number": None, "block_time_utc": str(current.get("start_time_utc", latest_time)).replace(" ", "T") + "Z", "settled": True, "tx_hash": None, "tx_url": None}
+            settlement_time = str((previous_settlement or {}).get("block_time_utc") or current.get("start_time_utc", latest_time)).replace(" ", "T") + "Z"
+            row["settlement"] = {"block_number": int((previous_settlement or {}).get("block_number") or 0) or None, "block_time_utc": settlement_time, "settled": True, "tx_hash": (previous_settlement or {}).get("tx_hash"), "tx_url": f"https://basescan.org/tx/{(previous_settlement or {}).get('tx_hash')}" if (previous_settlement or {}).get("tx_hash") else None}
+            row["activity_time_basis"] = "settlement_block_time"
+            row["activity_time_utc"] = settlement_time
+            if previous_settlement:
+                prior_wallet = str(previous_settlement.get("winner") or "").lower()
+                prior_display, prior_url = display_for(prior_wallet, profiles)
+                prior_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
+                prior_amount_usd = (prior_amount_eth * eth_usd).quantize(Decimal("0.01"))
+                row["winner_or_high_bidder"] = {"display": prior_display, "farcaster_fid": None, "farcaster_handle": prior_display, "profile_url": prior_url, "wallet": prior_wallet, "wallet_explorer_url": f"https://basescan.org/address/{prior_wallet}" if prior_wallet else ""}
+                prior_amount = row.get("amount") if isinstance(row.get("amount"), dict) else {}
+                prior_amount.update(
+                    {
+                        "native": f"{prior_amount_eth:.8f}",
+                        "native_symbol": "ETH",
+                        "price_asset_key": "ETH",
+                        "raw": str(int(prior_amount_eth * Decimal(10**18))),
+                        "amount_usd_at_event": None,
+                        "eth_usd_price_at_event": None,
+                        "eth_usd_price_date_utc": settlement_time[:10],
+                        "usd_estimate": f"{prior_amount_usd:.8f}",
+                        "usd_estimate_confidence": "live_current",
+                        "usd_estimate_display": f"${prior_amount_usd:.2f}",
+                        "usd_estimate_notes": "Historical ETH/USD event price unavailable; estimate uses current ETH/USD.",
+                        "usd_estimate_price_date_utc": latest_time[:10],
+                        "usd_estimate_price_usd": str(eth_usd),
+                        "usd_estimate_source": "current_eth_usd_price",
+                        "usd_estimate_time_basis": "settlement_block_time",
+                    }
+                )
+                row["amount"] = prior_amount
+                prior_bid_count = len(previous_bids) or int_value(historical_snapshot.get("bid_count")) or int_value(previous_timeline.get("bids"))
+                prior_unique_bidder_count = len({str(item.get("bidder") or "").lower() for item in previous_bids}) or int_value(historical_snapshot.get("unique_bidder_count")) or int_value(previous_timeline.get("unique_bidders"))
+                row["bid_stats"] = {"bid_count": prior_bid_count, "last_bid_time_utc": (previous_bids[-1].get("block_time_utc") if previous_bids else ""), "unique_bidder_count": prior_unique_bidder_count}
+                row["bid_tx_hashes"] = [str(item.get("tx_hash")) for item in previous_bids if item.get("tx_hash")]
+                row["links"] = dict(row.get("links") or {})
+                row["links"]["settlement_tx"] = (previous_settlement or {}).get("tx_hash")
+                trait_text = " ".join(str(item.get("display", "")) for item in (row.get("traits") if isinstance(row.get("traits"), list) else []))
+                rarity_text = str((row.get("rarity") or {}).get("display", "")) if isinstance(row.get("rarity"), dict) else str(row.get("rarity", ""))
+                row["search_text"] = " ".join(str(value) for value in [
+                    "dog", previous_token_id, f"dog #{previous_token_id}", "mission 3", "base", "settled",
+                    prior_display, prior_wallet, f"{prior_amount_eth:.8f} ETH", f"${prior_amount_usd:.2f}", settlement_time,
+                    rarity_text, trait_text, (previous_settlement or {}).get("tx_hash", ""),
+                ] if value).lower()
+
     unified_template = next((row for row in unified_rows if int_value(row.get("mission"), -1) == 3), {})
     trait_items = []
     for item in trait_rarity.split("; "):
@@ -515,6 +830,12 @@ def main() -> None:
     metrics = {str(row.get("metric")): str(row.get("value", "")) for row in metrics_rows}
     metrics["eth_usd_price"] = str(eth_usd)
     metrics.update(builder.current_bid_reward_stats(current, metrics))
+    metrics["created_auctions"] = str(len(timeline_rows))
+    metrics["settled_auctions"] = str(sum(1 for row in timeline_rows if str(row.get("auction_state", "")).lower() == "settled"))
+    settled_amounts = [Decimal(str(row.get("settled_eth"))) for row in timeline_rows if row.get("settled_eth")]
+    if settled_amounts:
+        metrics["total_settled_eth"] = f"{sum(settled_amounts, Decimal(0)):.8f}"
+        metrics["highest_bid_eth"] = f"{max((Decimal(str(row.get('high_bid_eth') or 0)) for row in timeline_rows), default=Decimal(0)):.8f}"
     metrics.update(
         {
             "current_auction_token_id": str(token_id),

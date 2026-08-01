@@ -85,7 +85,7 @@ WATCHED_TOPICS = [TOPIC_BY_EVENT[name] for name in WATCHED_EVENT_NAMES]
 
 DEFAULT_STATE_PATH = ROOT / ".local" / "mission3_onchain_tracker_state.json"
 DEFAULT_LOG_PATH = ROOT / "logs" / "watch-onchain.log"
-DEFAULT_LOCAL_REFRESH_COMMAND = "npm run data && npm run build"
+DEFAULT_LOCAL_REFRESH_COMMAND = "npm run refresh:current"
 DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
 
 try:

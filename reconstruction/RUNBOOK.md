@@ -120,7 +120,7 @@ Triggers:
 
 Cooldown defaults to 180 seconds. New auctions, settlements, and token changes bypass cooldown; bid-only or extension-only churn inside cooldown becomes a pending refresh and is retried after cooldown.
 
-Default mode is local-only (`npm run data && npm run build`). To publish from watcher-triggered refreshes, set both:
+Default mode is local-only (`npm run refresh:current`), which reconciles the live auction and recent event surface without rescanning Mission 3 history. For a deliberate comprehensive publish, set both:
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1

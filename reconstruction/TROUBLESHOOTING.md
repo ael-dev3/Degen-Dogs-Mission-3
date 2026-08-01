@@ -100,8 +100,8 @@ Symptom: watcher logs mention auto-push or dirty worktree refusal.
 
 Fix:
 
-- Default `MISSION3_REFRESH_COMMAND` should be `npm run data && npm run build`.
-- Publish commands require `MISSION3_WATCHER_AUTO_PUSH=1`.
+- Default `MISSION3_REFRESH_COMMAND` should be `npm run refresh:current`.
+- Comprehensive archive publishing remains an explicit operation using `npm run refresh:publish`.
 - In publish mode, clear tracked worktree changes or set `MISSION3_WATCHER_REQUIRE_CLEAN_TREE=0` only for intentional local operation.
 - After a refusal, verify the pending event stayed in `.local/mission3_onchain_tracker_state.json`; the next successful watcher run should retry instead of logging `reasons=none`.
 

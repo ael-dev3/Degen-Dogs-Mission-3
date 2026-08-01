@@ -746,7 +746,7 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     env = {}
     config = watcher.config_from_env(env)
     assert config.auto_push is False
-    assert config.refresh_command == "npm run data && npm run build"
+    assert config.refresh_command == "npm run refresh:current"
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
     assert config.interval_seconds == 120
     assert config.cooldown_seconds == 180

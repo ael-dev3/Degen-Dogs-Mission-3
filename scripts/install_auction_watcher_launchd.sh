@@ -54,7 +54,7 @@ if [[ -z "$MISSION3_REFRESH_COMMAND" && "$MISSION3_WATCHER_AUTO_PUSH" == "1" ]];
   MISSION3_REFRESH_COMMAND="npm run refresh:current"
 fi
 if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run data && npm run build"
+  MISSION3_REFRESH_COMMAND="npm run refresh:current"
 fi
 export MISSION3_WATCHER_AUTO_PUSH MISSION3_REFRESH_COMMAND
 

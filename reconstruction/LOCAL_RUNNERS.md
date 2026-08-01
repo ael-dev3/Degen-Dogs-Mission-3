@@ -78,7 +78,7 @@ Install the event watcher in publish mode:
 ```bash
 DEGEN_DOGS_REPO_DIR="$(pwd)" \
 MISSION3_WATCHER_AUTO_PUSH=1 \
-MISSION3_REFRESH_COMMAND="npm run refresh:publish" \
+MISSION3_REFRESH_COMMAND="npm run refresh:current" \
 DEGEN_DOGS_KICKSTART=1 \
 bash scripts/install_auction_watcher_launchd.sh
 ```
@@ -88,7 +88,7 @@ Use safe local-only mode instead if the new machine should test without pushing:
 ```bash
 DEGEN_DOGS_REPO_DIR="$(pwd)" \
 MISSION3_WATCHER_AUTO_PUSH=0 \
-MISSION3_REFRESH_COMMAND="npm run data && npm run build" \
+MISSION3_REFRESH_COMMAND="npm run refresh:current" \
 DEGEN_DOGS_KICKSTART=1 \
 bash scripts/install_auction_watcher_launchd.sh
 ```
@@ -232,7 +232,7 @@ Tasks:
    bash scripts/install_hourly_refresh_launchd.sh.
 4. Install the event watcher without kickstarting it. Default to local-only mode unless the
    human explicitly wants this machine to publish: DEGEN_DOGS_REPO_DIR="$(pwd)"
-   MISSION3_WATCHER_AUTO_PUSH=0 MISSION3_REFRESH_COMMAND="npm run data && npm run build"
+   MISSION3_WATCHER_AUTO_PUSH=0 MISSION3_REFRESH_COMMAND="npm run refresh:current"
    bash scripts/install_auction_watcher_launchd.sh.
 5. If publish mode is explicitly approved, reinstall the watcher with
    MISSION3_WATCHER_AUTO_PUSH=1 and MISSION3_REFRESH_COMMAND="npm run refresh:publish".

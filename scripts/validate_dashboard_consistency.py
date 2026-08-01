@@ -915,6 +915,16 @@ def validate_current_surface() -> dict[str, Any]:
         if missing_mission3:
             raise AssertionError(f"{path.relative_to(ROOT)} missing Mission 3 historical archive rows: {missing_mission3[:20]}")
 
+        for settled_row in sorted_rows:
+            if settled_row.get("mission") != 3 or str(settled_row.get("status", "")).lower() != "settled":
+                continue
+            settlement = settled_row.get("settlement") if isinstance(settled_row.get("settlement"), dict) else {}
+            settlement_time = settlement.get("block_time_utc")
+            if settlement_time and iso_utc(settled_row.get("activity_time_utc")) != iso_utc(settlement_time):
+                raise AssertionError(f"{path.relative_to(ROOT)} settled Dog #{dog_id(settled_row)} activity time is not the settlement block time")
+            if settlement_time and text(settled_row.get("activity_time_basis")) != "settlement_block_time":
+                raise AssertionError(f"{path.relative_to(ROOT)} settled Dog #{dog_id(settled_row)} activity basis is not settlement_block_time")
+
         unified = find_unified_current(path, current_dog_id)
         raw_who = unified.get("winner_or_high_bidder")
         who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}
