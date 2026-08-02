@@ -11,7 +11,8 @@ setup.
 
 ## Runner model
 
-There are two local runners. They are intentionally separate:
+There are two worker runners plus an independent health watchdog. They are
+intentionally separate:
 
 1. **Hourly refresh fallback (optional)**
    - launchd label: `com.ael.degendogs.mission3.refresh`
@@ -19,16 +20,23 @@ There are two local runners. They are intentionally separate:
    - npm command: `npm run refresh:install`
    - interval: `DEGEN_DOGS_REFRESH_INTERVAL_SECONDS`, default `3600`
    - action: runs `scripts/refresh_and_publish.sh`
-   - purpose: bounded current-surface refresh and publish on a predictable cadence. Full-history `npm run data` is opt-in with `DEGEN_DOGS_FULL_REFRESH=1`.
+   - purpose: full-history reconciliation and publish on a predictable cadence. The installer defaults `DEGEN_DOGS_FULL_REFRESH=1`.
 
 2. **Event-aware auction watcher**
    - launchd label: `com.ael.degendogs.mission3.watch-auction`
    - installer: `scripts/install_auction_watcher_launchd.sh`
    - npm command: `npm run watch:install`
-   - interval: `MISSION3_WATCHER_INTERVAL_SECONDS`, default `120`
+   - interval: `MISSION3_WATCHER_INTERVAL_SECONDS`, default `30`
    - action: runs `python3 scripts/watch_mission3_onchain_activity.py --once`
    - purpose: cheaply scan Base auction activity and trigger the refresh/publish flow
      soon after new bids or auction-state changes.
+
+3. **Runner health watchdog**
+   - launchd label: `com.ael.degendogs.mission3.health`
+   - installer: `scripts/install_runner_health_launchd.sh`
+   - interval: `DEGEN_DOGS_HEALTH_INTERVAL_SECONDS`, default `300`
+   - purpose: validate and repair both worker services, watcher state, refresh
+     freshness, and the deployed cache-busted status sidecar.
 
 The watcher checks both logs and direct contract state from the verified Base auction
 house. It reacts to `AuctionBid`, `AuctionCreated`, `AuctionExtended`, and
@@ -81,6 +89,15 @@ DEGEN_DOGS_KICKSTART=1 \
 bash scripts/install_auction_watcher_launchd.sh
 ```
 
+Install the watchdog after both workers:
+
+```bash
+DEGEN_DOGS_REPO_DIR="$(pwd)" \
+MISSION3_WATCHER_AUTO_PUSH=1 \
+DEGEN_DOGS_KICKSTART=1 \
+bash scripts/install_runner_health_launchd.sh
+```
+
 Use safe local-only mode instead if the new machine should test without pushing:
 
 ```bash
@@ -96,16 +113,19 @@ bash scripts/install_auction_watcher_launchd.sh
 ```bash
 launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.refresh"
 launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.watch-auction"
+launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.health"
 
 plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.refresh.plist"
 plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.watch-auction.plist"
+plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.health.plist"
 ```
 
 Expected watcher configuration:
 
 - `ProgramArguments` ends with `watch_mission3_onchain_activity.py --once`
 - `WorkingDirectory` is the absolute repo path
-- `StartInterval` is `120` unless intentionally overridden
+- `StartInterval` is `30` unless intentionally overridden
+- `RunAtLoad` is `true`
 - `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0` when hourly refresh is installed, so the watcher only triggers full refreshes on auction events instead of duplicating the hourly baseline
 - `MISSION3_WATCHER_AUTO_PUSH=1` for publishing mode
 - `MISSION3_REFRESH_COMMAND=npm run refresh:publish` for publishing mode
@@ -152,8 +172,9 @@ The GitHub issue/comment includes sanitized historical data useful for debugging
 
 - classified cause candidates such as `dirty_worktree_preflight_block`,
   `base_rpc_backend_unhealthy`, `no_successful_refresh_over_threshold`,
-  `latest_refresh_failed`, `launchd_agent_unhealthy_or_drifted`, or
-  `live_site_marker_or_http_failure`
+  `latest_refresh_failed`, `launchd_agent_unhealthy_or_drifted`,
+  `onchain_watcher_unhealthy_or_stale`, or
+  `live_site_or_refresh_status_failure`
 - tracked dirty paths blocking `refresh_and_publish.sh`
 - recent failure signals from `~/Library/Logs/degen-dogs-mission3/refresh.log`
 - recent rows from `.local/refresh_runs.jsonl`
@@ -178,7 +199,9 @@ npm run archive:prices:validate
 npm run runner:health:dry
 npm run build
 python3 -m py_compile scripts/build_dashboard.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py scripts/degen_dogs_runner_health.py
-bash -n scripts/refresh_and_publish.sh scripts/install_hourly_refresh_launchd.sh scripts/install_auction_watcher_launchd.sh
+bash -n scripts/refresh_and_publish.sh scripts/install_hourly_refresh_launchd.sh scripts/install_auction_watcher_launchd.sh scripts/install_runner_health_launchd.sh
+bash scripts/test_refresh_and_publish.sh
+python3 scripts/test_degen_dogs_runner_health.py
 ```
 
 Run a dry watcher check with temporary state:

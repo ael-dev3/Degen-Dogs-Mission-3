@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 47908341,
       "block_time_utc": "2026-06-28T00:20:29Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33",
+      "tx_url": "https://basescan.org/tx/0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33"
     },
     "auction_house": null,
     "bid_stats": {
@@ -46,37 +46,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/757",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33",
       "dog_page": "https://degendogs.club/#dog757",
       "explorer": "https://basescan.org/address/0x9f080983c678c6639f9a4de8f1feace2b2a1a54c",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/757",
       "repo_archive": "archive/dogs/by-id/757.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3"
     },
     "mission": 3,
     "rarity": {
-      "display": "#535/789",
+      "display": "#535/792",
       "rank": 535,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.90495162 $20.90 2026-06-29t00:22:15z #535/789 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.4%) background none body: white (11.4%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: tongue (9.9%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 757 dog #757 https://api.degendogs.club/images/757.png https://degendogs.club/#dog757 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/757 settled @biang-kerok.eth https://farcaster.xyz/biang-kerok.eth 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c 0.01331 eth ($21) 4 4 2026-06-28 00:20:29 2026-06-29 00:22:15 #535/789 background: none; body: white; neck: goldnecklace; mouth: tongue; ears: earbuds; head: none; eyes: vrgoggles background: none (90.4%); body: white (11.4%); neck: goldnecklace (19.5%); mouth: tongue (9.9%); ears: earbuds (32.1%); head: none (20.4%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.90495162 $20.90 2026-06-29t00:22:15z 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3 #535/792 generated auction feed 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 background: none (90.4%) background none body: white (11.5%) body white neck: goldnecklace (19.4%) neck goldnecklace mouth: tongue (9.8%) mouth tongue ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 47951594,
       "block_time_utc": "2026-06-29T00:22:15Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3",
+      "tx_url": "https://basescan.org/tx/0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -87,32 +89,32 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.4%)",
+        "display": "Body: White (11.5%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.3%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

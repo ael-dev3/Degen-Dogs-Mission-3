@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-06-19",
       "usd_estimate_price_usd": "0.00343702",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#687/789",
-      "rank": 687,
-      "total": 789
+      "display": "#693/792",
+      "rank": 693,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 415 dog #415 415 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x27731c9f0fda73c0eb3f4ecb6aa7d46d4d1785b03fe9acea84fe5f971e5373f8 0x0bb317cb27ac38d478002a97d443999806a7fb3024653ec872cf94c15b55f5ef #687/789 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: eyepatch 0x9e35673dc1342dc8ccc01144933a69b09c99c76d1c74ddc35166870bb1d3818e 0xe80f4675d30283ee300d075ab6836f85d8ab6fe38e3d733633b4989697683617 chain_logs contract_getters",
+    "search_text": "dog 415 dog #415 415 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x27731c9f0fda73c0eb3f4ecb6aa7d46d4d1785b03fe9acea84fe5f971e5373f8 0x0bb317cb27ac38d478002a97d443999806a7fb3024653ec872cf94c15b55f5ef #693/792 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: none; eyes: eyepatch 0x9e35673dc1342dc8ccc01144933a69b09c99c76d1c74ddc35166870bb1d3818e 0xe80f4675d30283ee300d075ab6836f85d8ab6fe38e3d733633b4989697683617 chain_logs contract_getters",
     "settlement": {
       "block_number": 25995652,
       "block_time_utc": "2025-06-19T06:03:30Z",
@@ -82,12 +83,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -97,17 +98,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-04-24",
       "usd_estimate_price_usd": "0.00296814",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#464/789",
-      "rank": 464,
-      "total": 789
+      "display": "#467/792",
+      "rank": 467,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 358 dog #358 358 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff #464/789 background: none; body: brown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: eyepatch 0xad5815f6d94f78ca557a6360d463a5ee8d8447faeb072a275368cfd7e045fdfd chain_logs contract_getters",
+    "search_text": "dog 358 dog #358 358 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0x0a220edc99ae70c5532f4dcfb1893518960e633ed77b49bc491fe327084e6b13 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff #467/792 background: none; body: brown; neck: redcollar; mouth: none; ears: loopearring; head: toque; eyes: eyepatch 0xad5815f6d94f78ca557a6360d463a5ee8d8447faeb072a275368cfd7e045fdfd chain_logs contract_getters",
     "settlement": {
       "block_number": 25790678,
       "block_time_utc": "2025-04-24T21:07:59Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.2%)",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -106,7 +107,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

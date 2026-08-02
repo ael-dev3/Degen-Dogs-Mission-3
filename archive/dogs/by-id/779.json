@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48881911,
       "block_time_utc": "2026-07-20T13:12:49Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5",
+      "tx_url": "https://basescan.org/tx/0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5"
     },
     "auction_house": null,
     "bid_stats": {
@@ -44,36 +44,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/779",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5",
       "dog_page": "https://degendogs.club/#dog779",
       "explorer": "https://basescan.org/address/0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/779",
       "repo_archive": "archive/dogs/by-id/779.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4"
     },
     "mission": 3,
     "rarity": {
-      "display": "#569/789",
-      "rank": 569,
-      "total": 789
+      "display": "#572/792",
+      "rank": 572,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-21t16:51:53z #569/789 generated auction feed 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.2%) head redmohawk eyes: eyepatch (7.9%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.10913629 $19.11 2026-07-21t16:51:53z 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4 #572/792 generated auction feed 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.2%) head redmohawk eyes: eyepatch (8.0%) eyes eyepatch base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48931683,
       "block_time_utc": "2026-07-21T16:51:53Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4",
+      "tx_url": "https://basescan.org/tx/0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -84,7 +87,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -109,7 +112,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

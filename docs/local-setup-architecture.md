@@ -19,7 +19,7 @@ flowchart LR
 
   watcher[launchd watcher\ncom.ael.degendogs.mission3.watch-auction] --> data
   hourly[launchd hourly fallback\ncom.ael.degendogs.mission3.refresh] --> publish
-  health[Hermes health watchdog\nlocal operator repair] -. repairs/checks .-> hourly
+  health[launchd health watchdog\ncom.ael.degendogs.mission3.health] -. repairs/checks .-> hourly
   health -. repairs/checks .-> watcher
 ```
 
@@ -49,17 +49,23 @@ The publish script owns the reliable refresh sequence:
 9. commit with the configured prefix when there is a diff,
 10. push `main` so Pages deploys.
 
+The installer enables `RunAtLoad`, full reconciliation, live post-push verification,
+and bounded jittered retries for fetch, pull, and push. If generation fails before a
+commit, the wrapper restores generated publish paths to the pre-run commit so the next
+scheduled run starts clean. A bounded watcher-triggered refresh that exits `75` because
+it cannot prove an exact incremental update falls back immediately to the full builder.
+
 ### 2. Event-aware onchain watcher
 
 - LaunchAgent label: `com.ael.degendogs.mission3.watch-auction`
 - Installer: `scripts/install_auction_watcher_launchd.sh`
 - NPM helper: `npm run watch:install`
-- Default interval: `120` seconds
+- Default interval: `30` seconds
 - Main command: `python3 scripts/watch_mission3_onchain_activity.py --once`
 - Publish mode command: `MISSION3_REFRESH_COMMAND="npm run refresh:publish"`
 - Publish mode gate: `MISSION3_WATCHER_AUTO_PUSH=1`
 
-The watcher is a one-shot job scheduled every two minutes, not a long-running public server.
+The watcher is a one-shot job scheduled every 30 seconds, not a long-running public server.
 It checks recent auction-house logs and direct `auction()` state for meaningful changes:
 
 - `AuctionBid`, including same-token higher bids,
@@ -77,14 +83,22 @@ refresh/publish path succeeds.
 
 ### 3. Health watchdog
 
-The Hermes-side health watchdog is local operator infrastructure, not part of the public
-site. It checks that the launchd jobs, plists, executable bits, logs, and live markers are
-healthy, and stays silent when there is nothing to repair.
+The health watchdog is an independent LaunchAgent, not part of the public site. It
+checks that both worker jobs, plists, executable bits, refresh logs, watcher state and
+failure counters, and the cache-busted live status sidecar are healthy. It stays silent
+when there is nothing to repair.
 
 - Script source: `scripts/degen_dogs_runner_health.py`
+- Installer: `scripts/install_runner_health_launchd.sh`
+- LaunchAgent label: `com.ael.degendogs.mission3.health`
+- Default interval: `300` seconds with `RunAtLoad=true`
 - Hermes wrapper on the current Mac mini: `~/.hermes/scripts/degen_dogs_runner_health_alert.sh`
 - Expected behavior: no output on healthy dry runs
 - Scope: repair local launchd drift, kick stale jobs, and report actionable issues only
+- Disk/retention guard: compact each idle runner/watcher/health log above 8 MiB to a
+  complete-line 2 MiB tail without changing its inode; active logs defer until idle
+  unless they cross the 32 MiB emergency cap. This includes watcher/refresh JSONL
+  telemetry. Alert and defer new repair kickstarts below 5 GiB or 5% free space.
 - Critical alert path: if no successful refresh crosses the critical stale threshold,
   tracked worktree changes block refresh, launchd drifts/misses, or the live site check
   fails, the watchdog emits a Discord message that tags Ael and creates or comments on
@@ -149,6 +163,16 @@ DEGEN_DOGS_KICKSTART=1 \
 bash scripts/install_hourly_refresh_launchd.sh
 ```
 
+Independent health watchdog install (production watcher repair defaults to publish
+mode):
+
+```bash
+DEGEN_DOGS_REPO_DIR="/Users/marko/projects/Degen-Dogs-Mission-3" \
+MISSION3_WATCHER_AUTO_PUSH=1 \
+DEGEN_DOGS_KICKSTART=1 \
+bash scripts/install_runner_health_launchd.sh
+```
+
 ## Verification commands
 
 Use these to prove the local setup is actually installed, not just present in the repo:
@@ -163,8 +187,10 @@ npm run build
 
 launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.refresh"
 launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.watch-auction"
+launchctl print "gui/$(id -u)/com.ael.degendogs.mission3.health"
 plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.refresh.plist"
 plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.watch-auction.plist"
+plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.health.plist"
 ```
 
 A no-change watcher dry run should exit `0` and print a `no_refresh` line. A healthy

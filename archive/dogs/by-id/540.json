@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-11-18",
       "usd_estimate_price_usd": "0.0013209425281840792",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -54,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#318/789",
-      "rank": 318,
-      "total": 789
+      "display": "#323/792",
+      "rank": 323,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 540 dog #540 540 mission 2 mission 2 degen chain settled 0xd5d06cb9ddeeb297a84f33a6b396637ffdbdbccd 0xd5d0…bccd 4438 degen 0x3ab63bf289b60292784398d900b0ae79cb9bec15f2c80acaadd8498a82568396 0xfee9e1e02b4fdafd59e1cca953a12fb08062cf848710aadd740b3a1f40095e92 #318/789 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: none; eyes: 3dglasses 0x3daaaeb4e95a12e2ad3d2c6345dc471433997f8c8d82c1a6374949485cccadd7 0x331735cffb14d6e680032f95bac9beed1fa77fbd3f6fc1af39254621c88e2c11 0x3cf312d48dbdf83880cb1a59dba8a93b9d50f6f6de5b92e8b2bc5e04a8c6b8e0 0x6365e4ec9858fab58d3f1914e42f3ddfaceba13e35c9bde5ff394e4c73ac440d chain_logs contract_getters",
+    "search_text": "dog 540 dog #540 540 mission 2 mission 2 degen chain settled 0xd5d06cb9ddeeb297a84f33a6b396637ffdbdbccd 0xd5d0…bccd 4438 degen 0x3ab63bf289b60292784398d900b0ae79cb9bec15f2c80acaadd8498a82568396 0xfee9e1e02b4fdafd59e1cca953a12fb08062cf848710aadd740b3a1f40095e92 #323/792 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: none; eyes: 3dglasses 0x3daaaeb4e95a12e2ad3d2c6345dc471433997f8c8d82c1a6374949485cccadd7 0x331735cffb14d6e680032f95bac9beed1fa77fbd3f6fc1af39254621c88e2c11 0x3cf312d48dbdf83880cb1a59dba8a93b9d50f6f6de5b92e8b2bc5e04a8c6b8e0 0x6365e4ec9858fab58d3f1914e42f3ddfaceba13e35c9bde5ff394e4c73ac440d chain_logs contract_getters",
     "settlement": {
       "block_number": 26485328,
       "block_time_utc": "2025-11-18T02:49:38Z",
@@ -84,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -99,12 +100,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

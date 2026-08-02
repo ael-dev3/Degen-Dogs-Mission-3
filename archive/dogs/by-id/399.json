@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-06-02",
       "usd_estimate_price_usd": "0.00463554",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#469/789",
-      "rank": 469,
-      "total": 789
+      "display": "#480/792",
+      "rank": 480,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 399 dog #399 399 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d 0x3079eff2ea2b8e872736581314295b78dd44e8dde0cea31467c036d9f8d67005 #469/789 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: bluelasereyes 0x98cf9252b0b6382372836a6a2c9dd7d7bf558531c11b500e37bec6204011bcee chain_logs contract_getters",
+    "search_text": "dog 399 dog #399 399 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d 0x3079eff2ea2b8e872736581314295b78dd44e8dde0cea31467c036d9f8d67005 #480/792 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: bluelasereyes 0x98cf9252b0b6382372836a6a2c9dd7d7bf558531c11b500e37bec6204011bcee chain_logs contract_getters",
     "settlement": {
       "block_number": 25935617,
       "block_time_utc": "2025-06-02T07:31:10Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -101,7 +102,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },

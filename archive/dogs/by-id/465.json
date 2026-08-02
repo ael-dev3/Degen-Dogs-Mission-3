@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-08-21",
       "usd_estimate_price_usd": "0.00344246",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#461/789",
-      "rank": 461,
-      "total": 789
+      "display": "#458/792",
+      "rank": 458,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 #461/789 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters",
+    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 #458/792 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters",
     "settlement": {
       "block_number": 26198561,
       "block_time_utc": "2025-08-21T13:28:05Z",
@@ -102,7 +103,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.5%)",
+        "display": "Head: Headphones (6.4%)",
         "trait_type": "Head",
         "value": "Headphones"
       },

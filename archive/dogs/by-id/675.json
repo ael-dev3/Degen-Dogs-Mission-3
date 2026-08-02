@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-04-05",
       "usd_estimate_price_usd": "2065.5231379113093",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#304/789",
-      "rank": 304,
-      "total": 789
+      "display": "#302/792",
+      "rank": 302,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 675 dog #675 675 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01843 eth 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 #304/789 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: partyhat; eyes: glasses 0x902ce2bf840f605b8301b6ccdbb01cd13f5a0764175e6f11437e1ae4eabd3ce9 0x4bce18fbe25dbb866e69933cb4c2442295154ac3ded9d74db84dcb17fbe36b2c base_logs archive_indexer",
+    "search_text": "dog 675 dog #675 675 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01843 eth 18430000000000000 38.07 $38.07 2026-04-05t17:48:03z 0x3a7f224cb830f070f06c19ddd2fc80e4661cdd7a16dc0cd66e660122ec407ac6 0x206e9182e305750cf2646d99a6bdfd117ca5124760b0e722f25fdfac4f2c2602 #302/792 generated auction feed 0x902ce2bf840f605b8301b6ccdbb01cd13f5a0764175e6f11437e1ae4eabd3ce9 0x4bce18fbe25dbb866e69933cb4c2442295154ac3ded9d74db84dcb17fbe36b2c background: none (90.4%) background none body: orange (8.6%) body orange neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: partyhat (4.4%) head partyhat eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 44310968,
       "block_time_utc": "2026-04-05T17:48:03Z",
@@ -68,10 +69,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -107,7 +110,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

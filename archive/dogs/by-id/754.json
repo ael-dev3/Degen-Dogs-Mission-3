@@ -7,7 +7,7 @@
       "amount_usd_at_event": "19.59949051",
       "eth_usd_price_at_event": "1619.792603757049",
       "eth_usd_price_date_utc": "2026-06-25",
-      "native": "0.01210",
+      "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 47778037,
       "block_time_utc": "2026-06-24T23:57:01Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2",
+      "tx_url": "https://basescan.org/tx/0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2"
     },
     "auction_house": null,
     "bid_stats": {
@@ -45,37 +45,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/754",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2",
       "dog_page": "https://degendogs.club/#dog754",
       "explorer": "https://basescan.org/address/0x833c829b5123c7af0b810a03084d5d3f0529d323",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/754",
       "repo_archive": "archive/dogs/by-id/754.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088"
     },
     "mission": 3,
     "rarity": {
-      "display": "#446/789",
+      "display": "#446/792",
       "rank": 446,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.01210 eth 12100000000000000 19.59949051 $19.60 2026-06-25t23:57:17z #446/789 generated auction feed 0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.4%) background none body: grey (11.5%) body grey neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: goldearring (15.2%) ears goldearring head: beanie (6.2%) head beanie eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 754 dog #754 https://api.degendogs.club/images/754.png https://degendogs.club/#dog754 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/754 settled @metasalary https://farcaster.xyz/metasalary 0x833c829b5123c7af0b810a03084d5d3f0529d323 0.01210 eth ($20) 3 3 2026-06-24 23:57:01 2026-06-25 23:57:17 #446/789 background: none; body: grey; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: bluelasereyes background: none (90.4%); body: grey (11.5%); neck: none (39.8%); mouth: none (68.9%); ears: goldearring (15.2%); head: beanie (6.2%); eyes: bluelasereyes (10.5%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 754 dog #754 754 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.0121 eth 12100000000000000 19.59949051 $19.60 2026-06-25t23:57:17z 0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2 0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088 #446/792 generated auction feed 0xbfd731eb97168aea7305f3b516bcb03e5a1674fae1088bdead5d1e5889d7189b 0x41590b687743ee90687a0f763d6987d4b52034ac21a4e99ddf60de9571fd6ddf 0x6dc7f1f4b72278789200dd12b5093519a2bd30bb9d2f780deb7c52214b85533a background: none (90.4%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: goldearring (15.2%) ears goldearring head: beanie (6.2%) head beanie eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 47821245,
       "block_time_utc": "2026-06-25T23:57:17Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088",
+      "tx_url": "https://basescan.org/tx/0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -86,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-12-20",
       "usd_estimate_price_usd": "1168.7022149270513",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#203/789",
-      "rank": 203,
-      "total": 789
+      "display": "#209/792",
+      "rank": 209,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 184 dog #184 184 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5b486dabf64b77d0a5eb5d884bbc87a67bbcd26178d79a84c5da7c88b4692b0e 0xc7bbcb4d5b6f3c7fcfc187e1584571c2a1766350f35bf1ce07db1493bec4d246 #203/789 background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: loopearring; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 184 dog #184 184 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5b486dabf64b77d0a5eb5d884bbc87a67bbcd26178d79a84c5da7c88b4692b0e 0xc7bbcb4d5b6f3c7fcfc187e1584571c2a1766350f35bf1ce07db1493bec4d246 #209/792 background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: loopearring; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 37054186,
       "block_time_utc": "2022-12-20T10:31:04Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -91,7 +92,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Teeth (5.2%)",
+        "display": "Mouth: Teeth (5.3%)",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
@@ -101,7 +102,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

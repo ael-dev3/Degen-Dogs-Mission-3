@@ -170,6 +170,17 @@ def load_metrics() -> dict[str, str]:
     required = [
         "latest_block",
         "latest_block_time_utc",
+        "onchain_verification_status",
+        "onchain_verification_scope",
+        "onchain_chain_id",
+        "snapshot_block_hash",
+        "snapshot_confirmations",
+        "rpc_quorum_size",
+        "rpc_quorum_agreement",
+        "rpc_quorum_providers",
+        "log_rpc_quorum_providers",
+        "auction_house_code_sha256",
+        "dog_nft_code_sha256",
         "current_auction_token_id",
         "current_auction_status",
         "current_bid_eth",
@@ -500,6 +511,8 @@ def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
         if not isinstance(status_rows, list) or not status_rows or not isinstance(status_rows[0], dict):
             raise AssertionError("generated/season6_sup_current_bidder_status.json missing current bidder row")
         status = status_rows[0]
+        if int(status.get("current_auction_token_id") or -1) != int(metrics.get("current_auction_token_id") or -2):
+            raise AssertionError("Season 6 current bidder status Dog differs from mission3_metrics")
         if normalize_address(status.get("current_bidder_wallet")) != current_bidder:
             raise AssertionError("Season 6 current bidder status wallet differs from mission3_metrics")
         if text(status.get("prior_s6_wins_confirmed")) != text(metrics.get("season6_sup_current_bidder_prior_s6_wins")):
@@ -765,6 +778,32 @@ def validate_current_surface() -> dict[str, Any]:
         raise AssertionError("mission3_metrics latest_block differs from current_auction")
     if iso_utc(metrics["latest_block_time_utc"]) != iso_utc(current.get("latest_block_time_utc")):
         raise AssertionError("mission3_metrics latest_block_time_utc differs from current_auction")
+    if metrics["onchain_verification_status"] != "current_snapshot_cross_provider_verified":
+        raise AssertionError("mission3_metrics current snapshot is not cross-provider verified")
+    required_scope = {"snapshot_hash", "contract_code", "current_auction", "dog_total_supply", "recent_event_logs"}
+    actual_scope = {value.strip() for value in metrics["onchain_verification_scope"].split(",") if value.strip()}
+    if not required_scope.issubset(actual_scope):
+        raise AssertionError("mission3_metrics current snapshot verification scope is incomplete")
+    if metrics["onchain_chain_id"] != "8453":
+        raise AssertionError("mission3_metrics onchain_chain_id is not Base mainnet 8453")
+    if not re.fullmatch(r"0x[a-fA-F0-9]{64}", metrics["snapshot_block_hash"]):
+        raise AssertionError("mission3_metrics snapshot_block_hash is invalid")
+    if int(metrics["rpc_quorum_size"]) < 2:
+        raise AssertionError("mission3_metrics rpc_quorum_size must be at least 2")
+    agreement_match = re.fullmatch(r"(\d+)/(\d+)", metrics["rpc_quorum_agreement"])
+    if not agreement_match or int(agreement_match.group(1)) < int(metrics["rpc_quorum_size"]):
+        raise AssertionError("mission3_metrics rpc_quorum_agreement is below the required quorum")
+    providers = {value.strip() for value in re.split(r"[,|]", metrics["rpc_quorum_providers"]) if value.strip()}
+    if len(providers) < int(metrics["rpc_quorum_size"]):
+        raise AssertionError("mission3_metrics does not name enough independent RPC providers")
+    log_providers = {value.strip() for value in re.split(r"[,|]", metrics["log_rpc_quorum_providers"]) if value.strip()}
+    if len(log_providers) < int(metrics["rpc_quorum_size"]):
+        raise AssertionError("mission3_metrics does not name enough independent log RPC providers")
+    for code_metric in ("auction_house_code_sha256", "dog_nft_code_sha256"):
+        if not re.fullmatch(r"[a-fA-F0-9]{64}", metrics[code_metric]):
+            raise AssertionError(f"mission3_metrics {code_metric} is invalid")
+    if int(metrics["snapshot_confirmations"]) < 0:
+        raise AssertionError("mission3_metrics snapshot_confirmations cannot be negative")
 
     expected_feed_status = {"live": "ongoing", "ended_unsettled": "ended pending settlement"}.get(current_state, current_state)
     if text(feed.get("status")).lower() != expected_feed_status:
@@ -847,7 +886,19 @@ def validate_current_surface() -> dict[str, Any]:
         if text(historical.get("amount")) != text(feed.get("bid")):
             raise AssertionError("historical_dog_search current row amount differs from auction_feed")
 
-    for table_name in ["mission3_metrics", "current_auction", "current_latest_bid", "current_auction_bid_history", "auction_feed", "historical_dog_search", "recent_bids"]:
+    for table_name in [
+        "mission3_metrics",
+        "current_auction",
+        "current_latest_bid",
+        "current_auction_bid_history",
+        "auction_feed",
+        "historical_dog_search",
+        "recent_bids",
+        "auction_timeline",
+        "auction_daily_activity",
+        "auction_bidder_leaderboard",
+        "season6_sup_current_bidder_status",
+    ]:
         generated_path = ROOT / "generated" / f"{table_name}.json"
         public_path = ROOT / "public" / "generated" / f"{table_name}.json"
         if generated_path.exists() and public_path.exists() and generated_path.read_bytes() != public_path.read_bytes():
@@ -873,10 +924,12 @@ def validate_current_surface() -> dict[str, Any]:
     current_history_raw = load_json(ROOT / "generated" / "current_auction_bid_history.json")
     current_history = [row for row in current_history_raw if isinstance(row, dict) and dog_id(row) == current_dog_id] if isinstance(current_history_raw, list) else []
     current_history.sort(key=lambda row: (text(row.get("bid_time_utc")), int(row.get("block_number") or 0), int(row.get("log_index") or 0)), reverse=True)
+    current_live_price = first_optional_decimal(current.get("eth_usd_price_live"))
     if current_state in {"live", "ended_unsettled"} and expected_wallet and expected_wallet != ZERO and expected_native > 0:
         if not current_history:
             raise AssertionError("current_auction_bid_history missing rows for current auction")
         latest_history = current_history[0]
+        current_live_price = first_optional_decimal(current.get("eth_usd_price_live"), latest_history.get("eth_usd_price_live"))
         if normalize_address(latest_history.get("bidder_wallet")) != expected_wallet:
             raise AssertionError("current_auction_bid_history high-bidder wallet differs from current_auction")
         if decimal_value(latest_history.get("bid_eth")) != expected_native:
@@ -898,6 +951,62 @@ def validate_current_surface() -> dict[str, Any]:
             calculated = (bid_eth * eth_usd).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
             if bid_usd != calculated:
                 raise AssertionError("current_auction_bid_history bid_usd does not equal bid_eth * live ETH/USD")
+
+        latest_history = current_history[0]
+        if not recent_rows:
+            raise AssertionError("recent_bids missing current auction bid rows")
+        latest_recent = recent_rows[0]
+        if text(latest_recent.get("tx_hash")) != text(latest_history.get("tx_hash")):
+            raise AssertionError("recent_bids latest transaction differs from current_auction_bid_history")
+        if normalize_address(latest_recent.get("bidder_wallet")) != expected_wallet:
+            raise AssertionError("recent_bids latest bidder differs from current_auction")
+        if decimal_value(latest_recent.get("bid_eth")) != expected_native:
+            raise AssertionError("recent_bids latest amount differs from current_auction")
+
+        timeline_rows = load_json(ROOT / "generated" / "auction_timeline.json")
+        timeline = next(
+            (row for row in timeline_rows if isinstance(row, dict) and dog_id(row) == current_dog_id),
+            None,
+        ) if isinstance(timeline_rows, list) else None
+        if timeline is None:
+            raise AssertionError("auction_timeline missing current auction row")
+        if int(timeline.get("bids") or 0) != len(current_history):
+            raise AssertionError("auction_timeline current bid count differs from current bid history")
+        history_wallets = {normalize_address(row.get("bidder_wallet")) for row in current_history}
+        history_wallets.discard("")
+        if int(timeline.get("unique_bidders") or 0) != len(history_wallets):
+            raise AssertionError("auction_timeline current unique bidder count differs from current bid history")
+        history_total = sum((decimal_value(row.get("bid_eth")) for row in current_history), Decimal(0))
+        if decimal_value(timeline.get("total_bid_eth")) != history_total:
+            raise AssertionError("auction_timeline current total_bid_eth differs from current bid history")
+        if decimal_value(timeline.get("high_bid_eth")) != max(decimal_value(row.get("bid_eth")) for row in current_history):
+            raise AssertionError("auction_timeline current high_bid_eth differs from current bid history")
+
+        bidder_rows = load_json(ROOT / "generated" / "auction_bidder_leaderboard.json")
+        bidder_row = next(
+            (row for row in bidder_rows if isinstance(row, dict) and normalize_address(row.get("bidder_wallet")) == expected_wallet),
+            None,
+        ) if isinstance(bidder_rows, list) else None
+        if bidder_row is None:
+            raise AssertionError("auction_bidder_leaderboard missing current high bidder")
+        if int(bidder_row.get("latest_bid_token_id") or -1) != current_dog_id:
+            raise AssertionError("auction_bidder_leaderboard current bidder latest Dog is stale")
+        if iso_utc(bidder_row.get("latest_bid_utc")) != iso_utc(latest_history.get("bid_time_utc")):
+            raise AssertionError("auction_bidder_leaderboard current bidder latest bid time is stale")
+
+        current_day = text(latest_history.get("bid_time_utc"))[:10]
+        day_history = [row for row in current_history if text(row.get("bid_time_utc"))[:10] == current_day]
+        daily_rows = load_json(ROOT / "generated" / "auction_daily_activity.json")
+        daily = next(
+            (row for row in daily_rows if isinstance(row, dict) and text(row.get("activity_day")) == current_day),
+            None,
+        ) if isinstance(daily_rows, list) else None
+        if daily is None:
+            raise AssertionError("auction_daily_activity missing the current bid day")
+        if int(daily.get("bids") or 0) < len(day_history):
+            raise AssertionError("auction_daily_activity current-day bid count lags current bid history")
+        if decimal_value(daily.get("bid_eth")) < sum((decimal_value(row.get("bid_eth")) for row in day_history), Decimal(0)):
+            raise AssertionError("auction_daily_activity current-day bid volume lags current bid history")
 
     for path in unified_paths:
         unified_rows = load_json(path)
@@ -938,8 +1047,16 @@ def validate_current_surface() -> dict[str, Any]:
             raise AssertionError(f"{path.relative_to(ROOT)} current row native amount differs from auction_feed")
         if expected_usd is not None:
             actual_usd = optional_decimal_value(amount.get("usd_estimate"))
-            if actual_usd != expected_usd:
-                raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate differs from auction_feed")
+            quoted_price = optional_decimal_value(amount.get("usd_estimate_price_usd"))
+            if actual_usd is None or quoted_price is None:
+                raise AssertionError(f"{path.relative_to(ROOT)} current row exact USD quote provenance missing")
+            if current_live_price is None or quoted_price != current_live_price:
+                raise AssertionError(f"{path.relative_to(ROOT)} current row ETH/USD quote differs from current surfaces")
+            exact_usd = (expected_native * quoted_price).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)
+            if actual_usd != exact_usd:
+                raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate is not native amount times exact quote")
+            if actual_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) != expected_usd.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP):
+                raise AssertionError(f"{path.relative_to(ROOT)} current row displayed USD differs from auction_feed")
             if text(amount.get("usd_estimate_display")) != expected_usd_display:
                 raise AssertionError(f"{path.relative_to(ROOT)} current row USD estimate display differs from auction_feed")
             if text(amount.get("usd_estimate_source")) == "" or text(amount.get("usd_estimate_confidence")).lower() == "missing":

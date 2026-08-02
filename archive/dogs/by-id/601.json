@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-01-22",
       "usd_estimate_price_usd": "2978.9845331172573",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -64,12 +65,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#595/789",
+      "display": "#595/792",
       "rank": 595,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 601 dog #601 601 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.23692 eth 0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5 0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f #595/789 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: none; head: blackcap; eyes: glasses 0x8b8ad1d55a3cfd3d6c9d0b317d5a2f965e4295333e954bc04dd278faa16f6269 0x27f85c2314a0c1ba8413eb6128dabc35a6f5378adf3a967b6fc83b13121054b1 0x0672a3d23dc378d4c6a2889621cc643f8dd652568efc6d8df5600c95db91e0b1 0xc596526823eb39dfc4d51f6f8830c12c8f5e52611bbb64b685cc6a9734d43933 0x9d05518680c51bf92bcf07366cdb86f502ee5437e8e1682848dbe860f63d12fb 0x8ad87784fd19632e0401469c15b3b65794fcc75c1cf033099fd53907a1b1f48b 0x9d126c49a98f9951a4d0159caaed3c9cdc8b9466e5428819b2bf8825f906b390 0xa87de4e8215a6556a5a3d75e0ea95bbfabd47a4a1e89c0d50a61ee892f216895 0x274b787be1e02982822e4fc40d68061d5ff339cd07c52ec67e06ff0ac86ca507 0x5386a6a281ecadbb0531e59873c05166f274d96794995c9c2d14ffca7448cda4 0x0f71efbc27b065cd539cff1c963c3fe339efd2d7ecb76a34b48a1e988aeb241e 0x9fbff547d258c221b99e19aa9eb423c4d3ce8fad4148050d6558d29f6ff5c762 0x3e09a8de3987eef930829a4e0ed2b06a4f8f295c24f0fc19757680655efa9c59 0x50684fd0377908e6ee47dc4e78d260fb638929e75d349a4a49713f1d80e32e71 base_logs archive_indexer",
+    "search_text": "dog 601 dog #601 601 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.23692 eth 236920000000000000 705.78 $705.78 2026-01-21t01:47:35z 0x325c8ddef5ae74fb2009c17813bd43b05d5662dfba75a1a5e2ea0dd52c4d33b5 0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f #595/792 generated auction feed 0x8b8ad1d55a3cfd3d6c9d0b317d5a2f965e4295333e954bc04dd278faa16f6269 0x27f85c2314a0c1ba8413eb6128dabc35a6f5378adf3a967b6fc83b13121054b1 0x0672a3d23dc378d4c6a2889621cc643f8dd652568efc6d8df5600c95db91e0b1 0xc596526823eb39dfc4d51f6f8830c12c8f5e52611bbb64b685cc6a9734d43933 0x9d05518680c51bf92bcf07366cdb86f502ee5437e8e1682848dbe860f63d12fb 0x8ad87784fd19632e0401469c15b3b65794fcc75c1cf033099fd53907a1b1f48b 0x9d126c49a98f9951a4d0159caaed3c9cdc8b9466e5428819b2bf8825f906b390 0xa87de4e8215a6556a5a3d75e0ea95bbfabd47a4a1e89c0d50a61ee892f216895 0x274b787be1e02982822e4fc40d68061d5ff339cd07c52ec67e06ff0ac86ca507 0x5386a6a281ecadbb0531e59873c05166f274d96794995c9c2d14ffca7448cda4 0x0f71efbc27b065cd539cff1c963c3fe339efd2d7ecb76a34b48a1e988aeb241e 0x9fbff547d258c221b99e19aa9eb423c4d3ce8fad4148050d6558d29f6ff5c762 0x3e09a8de3987eef930829a4e0ed2b06a4f8f295c24f0fc19757680655efa9c59 0x50684fd0377908e6ee47dc4e78d260fb638929e75d349a4a49713f1d80e32e71 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: blackcap (6.7%) head blackcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41085354,
       "block_time_utc": "2026-01-21T01:47:35Z",
@@ -80,10 +81,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -94,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -109,7 +112,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -119,7 +122,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

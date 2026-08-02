@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-03-17",
       "usd_estimate_price_usd": "2817.401074966818",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -54,12 +55,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#541/789",
-      "rank": 541,
-      "total": 789
+      "display": "#542/792",
+      "rank": 542,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 5 dog #5 5 mission 1 mission 1 polygon settled 0x7bda037dfdf9cd9ad261d27f489924aebbce71ac 0x7bda…71ac 0.7 weth 0xa5550c91485e7fd2efae11ec3b98a65fb720eb0fc0db479d10d78d3ab50ca5ca 0x63a48635d6b50c6d3f9eec934554b989be777055fa219539fa610b9d522cb5c4 #541/789 background: none; body: black; neck: goldnecklace; mouth: none; ears: loopearring; head: stripedbeanie; eyes: masksnorkel 0xca41852030c7ce30c88eb16d0b0c3af6d18548dbe88fe025d6b75cc78b5be312 0x96cafc22b71668bb9a95e1983190216632221d24d28df67b82b06e25951ba343 0x9a5b2cdabfaa99b977e96e3d1feaa9c1e78d8537dd81f4b0f2c26c1ef9f7fa79 0x0bfbd21c2c1865c17ce1868f3e83a7870228635559fb611112c597c09fe32b53 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 5 dog #5 5 mission 1 mission 1 polygon settled 0x7bda037dfdf9cd9ad261d27f489924aebbce71ac 0x7bda…71ac 0.7 weth 0xa5550c91485e7fd2efae11ec3b98a65fb720eb0fc0db479d10d78d3ab50ca5ca 0x63a48635d6b50c6d3f9eec934554b989be777055fa219539fa610b9d522cb5c4 #542/792 background: none; body: black; neck: goldnecklace; mouth: none; ears: loopearring; head: stripedbeanie; eyes: masksnorkel 0xca41852030c7ce30c88eb16d0b0c3af6d18548dbe88fe025d6b75cc78b5be312 0x96cafc22b71668bb9a95e1983190216632221d24d28df67b82b06e25951ba343 0x9a5b2cdabfaa99b977e96e3d1feaa9c1e78d8537dd81f4b0f2c26c1ef9f7fa79 0x0bfbd21c2c1865c17ce1868f3e83a7870228635559fb611112c597c09fe32b53 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26053585,
       "block_time_utc": "2022-03-17T22:32:18Z",
@@ -86,12 +87,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -106,12 +107,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

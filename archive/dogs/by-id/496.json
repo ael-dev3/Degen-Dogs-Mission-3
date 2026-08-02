@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-09-25",
       "usd_estimate_price_usd": "0.00301467",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#126/789",
-      "rank": 126,
-      "total": 789
+      "display": "#122/792",
+      "rank": 122,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 496 dog #496 496 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0x861c7d1d93cfbc06f143658017290f7e57073e7c67dd27f3163342eb0d37f573 0x4bedbc4714dee053444677619455a038df71dd1a08059891be1a05a605e06e4d #126/789 background: none; body: orange; neck: redcollar; mouth: none; ears: loopearring; head: partyhat; eyes: monocle 0x1bd35fb89e2912f8eee352658d4d08baec524ae8e92dcd825de87789bcf6aed8 0x1e4e2905f5c8567050425cd41ea5b941b123463e0c7382006eaf37fb85a13403 chain_logs contract_getters",
+    "search_text": "dog 496 dog #496 496 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0x861c7d1d93cfbc06f143658017290f7e57073e7c67dd27f3163342eb0d37f573 0x4bedbc4714dee053444677619455a038df71dd1a08059891be1a05a605e06e4d #122/792 background: none; body: orange; neck: redcollar; mouth: none; ears: loopearring; head: partyhat; eyes: monocle 0x1bd35fb89e2912f8eee352658d4d08baec524ae8e92dcd825de87789bcf6aed8 0x1e4e2905f5c8567050425cd41ea5b941b123463e0c7382006eaf37fb85a13403 chain_logs contract_getters",
     "settlement": {
       "block_number": 26271596,
       "block_time_utc": "2025-09-24T00:19:54Z",
@@ -107,7 +108,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.4%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-04-19",
       "usd_estimate_price_usd": "2350.9352469799255",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -55,12 +56,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#367/789",
-      "rank": 367,
-      "total": 789
+      "display": "#376/792",
+      "rank": 376,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 689 dog #689 689 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.02874 eth 0x8f9fa9d4df53aaed0e9c51a8c8d684970dfae0ee11bb9eb41812d1ddbab99ab5 0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0 #367/789 background: none; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: beanie; eyes: none 0x704eacac9f7283053c6a6a9b1847f6ebe31e53038090056673d1337b23a02154 0xd6ff188c6baa3714c840cd1bca6852aae07e7e2fe1106e8fd39a1a2bf067b420 0xbeb5de0901b2f06bed4a57ef8dea92ca3a5908c1d655b6e3abe9696fab030f11 0x98ec26f42dca38f1907479a0cd4bc33982e888289fe8614e0f0f7dfdfe9ccb9f 0xe04fe5aa306db64e6798c305b1e247fe01fa5068145b5cbfe1a9d5fa9984c0ca base_logs archive_indexer",
+    "search_text": "dog 689 dog #689 689 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.02874 eth 28740000000000000 67.57 $67.57 2026-04-19t20:57:39z 0x8f9fa9d4df53aaed0e9c51a8c8d684970dfae0ee11bb9eb41812d1ddbab99ab5 0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0 #376/792 generated auction feed 0x704eacac9f7283053c6a6a9b1847f6ebe31e53038090056673d1337b23a02154 0xd6ff188c6baa3714c840cd1bca6852aae07e7e2fe1106e8fd39a1a2bf067b420 0xbeb5de0901b2f06bed4a57ef8dea92ca3a5908c1d655b6e3abe9696fab030f11 0x98ec26f42dca38f1907479a0cd4bc33982e888289fe8614e0f0f7dfdfe9ccb9f 0xe04fe5aa306db64e6798c305b1e247fe01fa5068145b5cbfe1a9d5fa9984c0ca background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: goldearring (15.2%) ears goldearring head: beanie (6.2%) head beanie eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 44921456,
       "block_time_utc": "2026-04-19T20:57:39Z",
@@ -71,10 +72,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -85,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -110,7 +113,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

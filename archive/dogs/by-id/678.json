@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-04-08",
       "usd_estimate_price_usd": "2241.93896849481",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -57,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#505/789",
-      "rank": 505,
-      "total": 789
+      "display": "#510/792",
+      "rank": 510,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 678 dog #678 678 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.02976 eth 0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644 0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9 #505/789 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: redmohawk; eyes: none 0xdb918d55c1b23d313239027d9b876beeb58d9641e71e949d5cf7a9a67d5eabfc 0x37ef9e36363ec47be5f97915c568fa517b738e3a3a68b863bf1571fee1d7b518 0x0a71eafd84e4390410846251dfa2925dd381df6971ec7408eca7f6da51722b79 0x0ec23d5446ddb500c5a976cee32a4dd454516e1d1fc9d19a6da2303037ec0bdb 0xb3203ffaf7f142757c135b1860065e6c22e44fe7eb20d7a5c204b3d79f618004 0x582f30ceb4596778e63677a2181d6233d073d549b803e42339b7f47f77499900 0xf46023d4e0f3fd87da12d66b062aa40e8223a52a6ee5f625a9886e18b1bab6c1 base_logs archive_indexer",
+    "search_text": "dog 678 dog #678 678 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.02976 eth 29760000000000000 66.72 $66.72 2026-04-08t18:18:49z 0x2ed33ef5a3b1fa1a9c83ea896f7523984f586b1bbd1c1da44b19a8ba8ddb5644 0x58af0895de47e30e852342264188a66ddda922c3710cedc64071c93939ce6fa9 #510/792 generated auction feed 0xdb918d55c1b23d313239027d9b876beeb58d9641e71e949d5cf7a9a67d5eabfc 0x37ef9e36363ec47be5f97915c568fa517b738e3a3a68b863bf1571fee1d7b518 0x0a71eafd84e4390410846251dfa2925dd381df6971ec7408eca7f6da51722b79 0x0ec23d5446ddb500c5a976cee32a4dd454516e1d1fc9d19a6da2303037ec0bdb 0xb3203ffaf7f142757c135b1860065e6c22e44fe7eb20d7a5c204b3d79f618004 0x582f30ceb4596778e63677a2181d6233d073d549b803e42339b7f47f77499900 0xf46023d4e0f3fd87da12d66b062aa40e8223a52a6ee5f625a9886e18b1bab6c1 background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.2%) head redmohawk eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 44441491,
       "block_time_utc": "2026-04-08T18:18:49Z",
@@ -73,10 +74,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -87,7 +90,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -112,7 +115,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

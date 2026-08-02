@@ -1,0 +1,65 @@
+name: Dashboard Freshness Watchdog
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: dashboard-freshness-watchdog
+  cancel-in-progress: true
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Check raw-main and Pages freshness
+        id: check
+        continue-on-error: true
+        run: python3 scripts/check_remote_freshness.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Re-dispatch Pages when raw data is newer
+        if: ${{ steps.check.outcome == 'success' && steps.check.outputs.pages_needs_deploy == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+      - name: Create or update freshness incident
+        if: ${{ always() && (steps.check.outcome == 'failure' || steps.check.outputs.incident == 'true') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ steps.check.outputs.report }}
+        run: |
+          title="[uptime] Degen Dogs dashboard freshness incident"
+          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'Degen Dogs dashboard freshness incident in:title' --limit 1 --json number --jq '.[0].number // empty')"
+          detail="${REPORT:-freshness check execution failed before a report was produced}"
+          body="$(printf 'Automated off-host freshness check failed at %s/%s/actions/runs/%s.\n\n`%s`\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$detail")"
+          if [[ -n "$number" ]]; then
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi
+
+      - name: Close recovered freshness incident
+        if: ${{ always() && steps.check.outcome == 'success' && steps.check.outputs.incident == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'Degen Dogs dashboard freshness incident in:title' --limit 1 --json number --jq '.[0].number // empty')"
+          if [[ -n "$number" ]]; then
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Freshness recovered in run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+          fi
+
+      - name: Mark unhealthy run
+        if: ${{ always() && (steps.check.outcome == 'failure' || steps.check.outputs.incident == 'true') }}
+        run: exit 1

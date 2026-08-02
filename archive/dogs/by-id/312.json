@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-03-12",
       "usd_estimate_price_usd": "0.00321167",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#612/789",
-      "rank": 612,
-      "total": 789
+      "display": "#618/792",
+      "rank": 618,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 312 dog #312 312 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 #612/789 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: sunglasses 0x1b064ede8764e34db9b26e26cab1e175b037700c082ee370d05086c8e5a8fbbe chain_logs contract_getters",
+    "search_text": "dog 312 dog #312 312 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 #618/792 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: sunglasses 0x1b064ede8764e34db9b26e26cab1e175b037700c082ee370d05086c8e5a8fbbe chain_logs contract_getters",
     "settlement": {
       "block_number": 25591518,
       "block_time_utc": "2025-03-12T12:16:19Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -96,7 +97,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },

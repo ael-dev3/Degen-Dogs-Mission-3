@@ -7,7 +7,7 @@
       "amount_usd_at_event": "19.13188615",
       "eth_usd_price_at_event": "1739.2623775091597",
       "eth_usd_price_date_utc": "2026-06-21",
-      "native": "0.01100",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 47604935,
       "block_time_utc": "2026-06-20T23:46:57Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86",
+      "tx_url": "https://basescan.org/tx/0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86"
     },
     "auction_house": null,
     "bid_stats": {
@@ -50,37 +50,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86",
       "dog_page": "https://degendogs.club/#dog750",
       "explorer": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750",
       "repo_archive": "archive/dogs/by-id/750.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671"
     },
     "mission": 3,
     "rarity": {
-      "display": "#662/789",
+      "display": "#662/792",
       "rank": 662,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.01100 eth 11000000000000000 19.13188615 $19.13 2026-06-21t23:51:37z #662/789 generated auction feed 0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.6%) background halo body: brown (11.2%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.4%) head none eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 750 dog #750 https://api.degendogs.club/images/750.png https://degendogs.club/#dog750 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/750 settled @bitcoinvestor https://farcaster.xyz/bitcoinvestor 0x7732f594c38d4940e1076aa9f6f53065b7915953 0.01100 eth ($19) 8 7 2026-06-20 23:46:57 2026-06-21 23:51:37 #662/789 background: halo; body: brown; neck: redcollar; mouth: none; ears: loopearring; head: none; eyes: none background: halo (9.6%); body: brown (11.2%); neck: redcollar (30.9%); mouth: none (68.9%); ears: loopearring (27.1%); head: none (20.4%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.13188615 $19.13 2026-06-21t23:51:37z 0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86 0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671 #662/792 generated auction feed 0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 background: halo (9.6%) background halo body: brown (11.1%) body brown neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.3%) head none eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 47648275,
       "block_time_utc": "2026-06-21T23:51:37Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671",
+      "tx_url": "https://basescan.org/tx/0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -91,7 +93,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Brown (11.2%)",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -111,12 +113,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

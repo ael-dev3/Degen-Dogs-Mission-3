@@ -13,6 +13,7 @@
 ```bash
 npm ci
 cp .env.example .env.local 2>/dev/null || true
+chmod 600 .env.local
 ```
 
 If you create `.env.local`, keep it local and never commit it.

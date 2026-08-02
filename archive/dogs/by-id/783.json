@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 49072109,
       "block_time_utc": "2026-07-24T22:52:45Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859",
+      "tx_url": "https://basescan.org/tx/0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859"
     },
     "auction_house": null,
     "bid_stats": {
@@ -46,36 +46,38 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/783",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859",
       "dog_page": "https://degendogs.club/#dog783",
       "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/783",
       "repo_archive": "archive/dogs/by-id/783.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7"
     },
     "mission": 3,
     "rarity": {
-      "display": "#561/789",
-      "rank": 561,
-      "total": 789
+      "display": "#564/792",
+      "rank": 564,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.56 $18.56 2026-07-25t23:05:51z #561/789 generated auction feed 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.2%) head redmohawk eyes: masksnorkel (9.6%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.56 $18.56 2026-07-25t23:05:51z 0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859 0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7 #564/792 generated auction feed 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: redmohawk (7.2%) head redmohawk eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 49115702,
       "block_time_utc": "2026-07-25T23:05:51Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7",
+      "tx_url": "https://basescan.org/tx/0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -86,12 +88,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -111,7 +113,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

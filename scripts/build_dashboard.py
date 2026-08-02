@@ -8,9 +8,12 @@ import hashlib
 import html
 import json
 import os
+import queue
+import random
 import signal
 import sqlite3
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -20,7 +23,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP, getcontext
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 getcontext().prec = 80
 
@@ -60,9 +63,13 @@ MISSION_CHAIN = {
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
     "https://mainnet.base.org",
+    "https://base-mainnet.g.alchemy.com/public",
     "https://developer-access-mainnet.base.org",
 ]
-DEFAULT_LOG_RPC_URLS = DEFAULT_RPC_URLS
+DEFAULT_LOG_RPC_URLS = [
+    "https://mainnet.base.org",
+    "https://developer-access-mainnet.base.org",
+]
 RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") else [
     url.strip()
     for url in os.environ.get("BASE_RPC_URLS", ",".join(DEFAULT_RPC_URLS)).split(",")
@@ -74,15 +81,40 @@ LOG_RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") el
     if url.strip()
 ]
 FROM_BLOCK = int(os.environ.get("BASE_FROM_BLOCK", "40500000"))
-# Public Base RPC providers commonly reject eth_getLogs ranges above 1,000 blocks.
-# Keep the env override for tuning lower, but never allow an unsafe larger range.
-LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "1000")), 1000))
-LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "8")), 16))
+# Base recommends keeping eth_getLogs scans under 2,000 blocks for reliable
+# results. Credentialed providers may safely advertise a larger limit, so keep
+# a bounded override while using the official reliability recommendation by
+# default. The low-latency current refresher overrides this to 100 blocks.
+LOG_CHUNK = max(1, min(int(os.environ.get("BASE_LOG_CHUNK", "2000")), 10000))
+LOG_WORKERS = max(1, min(int(os.environ.get("BASE_LOG_WORKERS", "4")), 16))
 RPC_BATCH_LIMIT = max(1, min(int(os.environ.get("BASE_RPC_BATCH_LIMIT", "10")), 10))
-RPC_ATTEMPTS = max(1, min(int(os.environ.get("BASE_RPC_ATTEMPTS", "3")), 10))
+RPC_ATTEMPTS = max(1, min(int(os.environ.get("BASE_RPC_ATTEMPTS", "6")), 10))
+RPC_QUORUM_DEADLINE_SECONDS = max(
+    5.0,
+    min(float(os.environ.get("BASE_RPC_QUORUM_DEADLINE_SECONDS", "35")), 120.0),
+)
+RPC_HEAD_PROBE_DEADLINE_SECONDS = max(
+    2.0,
+    min(float(os.environ.get("BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS", "12")), 60.0),
+)
+RPC_HEAD_PROBE_GRACE_SECONDS = max(
+    0.0,
+    min(float(os.environ.get("BASE_RPC_HEAD_PROBE_GRACE_SECONDS", "0.35")), 3.0),
+)
+RPC_SLOW_COOLDOWN_SECONDS = max(
+    1.0,
+    min(float(os.environ.get("BASE_RPC_SLOW_COOLDOWN_SECONDS", "60")), 600.0),
+)
 LOG_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_LOG_RPC_TIMEOUT", "35")), 120))
 BLOCK_TIME_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_BLOCK_TIME_RPC_TIMEOUT", "30")), 120))
-LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "50")), 500))
+LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "100")), 500))
+RPC_QUORUM_SIZE = max(2, min(int(os.environ.get("BASE_RPC_QUORUM_SIZE", "2")), 3))
+SNAPSHOT_CONFIRMATIONS = max(0, min(int(os.environ.get("BASE_SNAPSHOT_CONFIRMATIONS", "1")), 64))
+LOG_QUORUM_MAX_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_QUORUM_MAX_BLOCKS", "50")), 10000))
+LOG_QUORUM_WINDOW_BLOCKS = max(
+    LOG_QUORUM_MAX_BLOCKS,
+    min(int(os.environ.get("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "500")), 10000),
+)
 DOG_METADATA_FETCH_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FETCH_TIMEOUT", "12")), 45))
 DOG_METADATA_FALLBACK_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FALLBACK_TIMEOUT", "20")), 60))
 DOG_METADATA_ITEM_TIMEOUT = max(15, min(int(os.environ.get("DOG_METADATA_ITEM_TIMEOUT", "75")), 180))
@@ -95,6 +127,13 @@ SUP = "0xa69f80524381275A7fFdb3AE01c54150644c8792"
 ZERO = "0x0000000000000000000000000000000000000000"
 OPENSEA_ITEM_BASE = "https://opensea.io/item/base"
 OPENSEA_COLLECTION_URL = "https://opensea.io/collection/degen-dogs-club"
+
+# Populated only after verified_snapshot() establishes a canonical block hash.
+# Critical hash-pinned reads and short-range event scans are then required to
+# agree across the same independent RPC quorum before data is publishable.
+VERIFIED_SNAPSHOT_URLS: list[str] = []
+VERIFIED_LOG_URLS: list[str] = []
+RPC_SLOW_UNTIL: dict[tuple[str, str], float] = {}
 
 
 def dog_opensea_url(token_id: int | str) -> str:
@@ -412,10 +451,14 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_RPC_URLS", "Comma-separated fallback Base RPC endpoints for contract calls."),
     ("BASE_LOG_RPC_URLS", "Comma-separated Base RPC endpoints used for `eth_getLogs` history scans."),
     ("BASE_FROM_BLOCK", "First Base block scanned for Mission 3 logs; defaults to the known Mission 3 start range."),
-    ("BASE_LOG_CHUNK", "Maximum block range per eth_getLogs request, capped at 1,000 for public Base RPC compatibility."),
+    ("BASE_LOG_CHUNK", "Maximum block range per eth_getLogs request; defaults to Base's reliable 2,000-block recommendation and is capped at 10,000."),
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
     ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
+    ("BASE_RPC_QUORUM_DEADLINE_SECONDS", "Hard wall-clock deadline for a cross-provider quorum call."),
+    ("BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS", "Hard wall-clock deadline for snapshot endpoint discovery."),
+    ("BASE_RPC_HEAD_PROBE_GRACE_SECONDS", "Small grace window for extra healthy providers after the minimum snapshot quorum responds."),
+    ("BASE_RPC_SLOW_COOLDOWN_SECONDS", "In-process circuit-breaker cooldown for endpoints left pending after quorum."),
     ("BASE_LOG_RPC_TIMEOUT", "Per-attempt timeout for eth_getLogs requests."),
     ("BASE_BLOCK_TIME_RPC_TIMEOUT", "Per-attempt timeout for block timestamp batch lookups."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
@@ -424,7 +467,9 @@ CONFIGURATION_ENV_VARS = [
     ("DOG_METADATA_ITEM_TIMEOUT", "Hard wall-clock timeout per new Dog metadata row."),
     ("DOG_METADATA_SEQUENTIAL_THRESHOLD", "Fetch small missing metadata batches sequentially so one hung request cannot trap the runner."),
     ("MISSION3_LOG_CACHE", "Enables local RPC log caching under `.cache/rpc_logs`; defaults on."),
-    ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 50 blocks."),
+    ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 100 blocks."),
+    ("MISSION3_LOG_QUORUM_MAX_BLOCKS", "Maximum block span per recent cross-provider eth_getLogs request; defaults to 50 for public-fallback compatibility."),
+    ("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "Maximum total recent window split into quorum-checked log requests; defaults to 500."),
     ("MISSION3_BALANCE_CACHE", "Enables local WOOF holder balance caching under `.cache/woof_balances.json`; defaults on."),
     ("NEYNAR_API_KEY", "Optional Neynar API key for identity resolution."),
     ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
@@ -468,8 +513,442 @@ def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url:
             text = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(detail[:500] or f"HTTP {exc.code}") from exc
+        raise RuntimeError(f"HTTP {exc.code}: {detail[:500] or exc.reason}") from exc
     return json.loads(text)
+
+
+def _redact_rpc_url(url: str) -> str:
+    """Return enough endpoint identity for diagnostics without leaking keys."""
+    parsed = urllib.parse.urlsplit(url)
+    host = parsed.hostname or "unknown"
+    port = f":{parsed.port}" if parsed.port else ""
+    return f"{parsed.scheme or 'https'}://{host}{port}"
+
+
+def _rpc_provider_key(url: str) -> str:
+    """Group multiple endpoints run by one operator as one quorum vote."""
+    host = (urllib.parse.urlsplit(url).hostname or url).lower().strip(".")
+    if any(host == suffix or host.endswith(f".{suffix}") for suffix in ("quicknode.pro", "quiknode.pro")):
+        return "quicknode"
+    if any(host == suffix or host.endswith(f".{suffix}") for suffix in ("alchemy.com", "alchemyapi.io", "blastapi.io")):
+        return "alchemy"
+    known_operators = (
+        "base.org",
+        "publicnode.com",
+        "ankr.com",
+        "drpc.org",
+        "infura.io",
+        "1rpc.io",
+    )
+    for suffix in known_operators:
+        if host == suffix or host.endswith(f".{suffix}"):
+            return suffix
+    return host
+
+
+def _configured_rpc_urls() -> list[str]:
+    configured: list[str] = []
+    if os.environ.get("BASE_RPC_URL"):
+        configured.append(os.environ["BASE_RPC_URL"].strip())
+    configured.extend(
+        url.strip()
+        for url in os.environ.get("BASE_RPC_URLS", "").split(",")
+        if url.strip()
+    )
+    configured.extend(RPC_URLS)
+    configured.extend(DEFAULT_RPC_URLS)
+    return [url for url in configured if url]
+
+
+def _independent_rpc_urls(configured: list[str]) -> list[str]:
+    """Use at most one vote per RPC operator, preserving configured priority."""
+    unique: list[str] = []
+    operators: set[str] = set()
+    for url in configured:
+        if not url:
+            continue
+        operator = _rpc_provider_key(url)
+        if operator in operators:
+            continue
+        operators.add(operator)
+        unique.append(url)
+    return unique
+
+
+def _quorum_rpc_urls() -> list[str]:
+    return _independent_rpc_urls(_configured_rpc_urls())
+
+
+def _same_operator_rpc_urls(primary_url: str) -> list[str]:
+    """Retain same-operator endpoints as failovers without extra quorum votes."""
+    operator = _rpc_provider_key(primary_url)
+    candidates = [primary_url, *_configured_rpc_urls(), *LOG_RPC_URLS, *DEFAULT_LOG_RPC_URLS]
+    unique: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        if not candidate or candidate in seen or _rpc_provider_key(candidate) != operator:
+            continue
+        seen.add(candidate)
+        unique.append(candidate)
+    return unique
+
+
+def _responsive_rpc_urls(urls: list[str], required: int, scope: str) -> list[str]:
+    now = time.monotonic()
+    responsive = [url for url in urls if RPC_SLOW_UNTIL.get((scope, url), 0.0) <= now]
+    return responsive if len(responsive) >= required else list(urls)
+
+
+def _mark_rpc_pending_slow(pending_urls: list[str], scope: str) -> None:
+    until = time.monotonic() + RPC_SLOW_COOLDOWN_SECONDS
+    for url in pending_urls:
+        RPC_SLOW_UNTIL[(scope, url)] = until
+
+
+def _rpc_once(url: str, method: str, params: list[Any], *, timeout: int = 30) -> Any:
+    payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
+    data = post_json(payload, timeout, url)
+    if not isinstance(data, dict):
+        raise RuntimeError(f"unexpected JSON-RPC response type for {method}")
+    if "error" in data:
+        raise RuntimeError(json.dumps(data["error"], sort_keys=True))
+    if "result" not in data:
+        raise RuntimeError(f"JSON-RPC response missing result for {method}")
+    return data["result"]
+
+
+def _rpc_once_with_retry(url: str, method: str, params: list[Any], *, timeout: int = 30) -> Any:
+    operator_urls = _same_operator_rpc_urls(url)
+    attempts = max(len(operator_urls), max(1, min(RPC_ATTEMPTS, 4)))
+    for attempt in range(attempts):
+        candidate = operator_urls[attempt % len(operator_urls)]
+        try:
+            return _rpc_once(candidate, method, params, timeout=timeout)
+        except Exception as exc:  # noqa: BLE001
+            message = str(exc)
+            permanent = any(code in message for code in ("HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "-32600", "-32601", "-32602"))
+            # Authentication/parameter failures are endpoint-specific when an
+            # operator exposes more than one configured URL, so try each alias
+            # once before declaring that operator unavailable.
+            if permanent and attempt + 1 >= len(operator_urls):
+                raise
+            if attempt == attempts - 1:
+                raise
+            # Full jitter prevents both providers and overlapping runners from
+            # retrying in lockstep during a transient outage or rate limit.
+            time.sleep(random.uniform(0, min(2.0, 0.25 * (2**attempt))))
+    raise RuntimeError(f"unreachable retry state for {method}")
+
+
+def _canonical_rpc_result(method: str, value: Any) -> str:
+    if method == "eth_getLogs" and isinstance(value, list):
+        normalized = sorted(
+            (
+                {
+                    "address": str(item.get("address") or "").lower(),
+                    "blockHash": str(item.get("blockHash") or "").lower(),
+                    "blockNumber": str(item.get("blockNumber") or "").lower(),
+                    "data": str(item.get("data") or "").lower(),
+                    "logIndex": str(item.get("logIndex") or "").lower(),
+                    "removed": bool(item.get("removed", False)),
+                    "topics": [str(topic).lower() for topic in item.get("topics") or []],
+                    "transactionHash": str(item.get("transactionHash") or "").lower(),
+                }
+                for item in value
+                if isinstance(item, dict)
+            ),
+            key=lambda item: (
+                str(item.get("blockHash") or "").lower(),
+                str(item.get("transactionHash") or "").lower(),
+                int(str(item.get("logIndex") or "0x0"), 16),
+            ),
+        )
+        return json.dumps(normalized, sort_keys=True, separators=(",", ":")).lower()
+    if isinstance(value, str):
+        return value.lower()
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def rpc_quorum(
+    method: str,
+    params: list[Any],
+    *,
+    urls: list[str] | None = None,
+    min_agreement: int | None = None,
+    timeout: int = 30,
+) -> tuple[Any, list[str]]:
+    """Require identical answers from independently operated RPC endpoints."""
+    active_urls = _responsive_rpc_urls(
+        urls or _quorum_rpc_urls(),
+        min_agreement or RPC_QUORUM_SIZE,
+        method,
+    )
+    required = min_agreement or RPC_QUORUM_SIZE
+    if len(active_urls) < required:
+        raise RuntimeError(
+            f"{method} requires {required} independent Base RPC providers; configured={len(active_urls)}"
+        )
+    grouped: dict[str, list[tuple[str, Any]]] = defaultdict(list)
+    errors: list[str] = []
+    responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
+
+    def worker(index: int, url: str) -> None:
+        try:
+            value = _rpc_once_with_retry(url, method, params, timeout=timeout)
+            responses.put((index, url, value, None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(active_urls)))
+    for index, url in enumerate(active_urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"rpc-quorum-{method}-{index}",
+            daemon=True,
+        ).start()
+
+    deadline = time.monotonic() + RPC_QUORUM_DEADLINE_SECONDS
+    while pending_indexes:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            index, url, value, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is None:
+            grouped[_canonical_rpc_result(method, value)].append((url, value))
+        else:
+            errors.append(f"{_redact_rpc_url(url)}: {error}")
+        pending = len(pending_indexes)
+        ordered = sorted(grouped.values(), key=len, reverse=True)
+        winner = ordered[0] if ordered else []
+        runner_up_votes = len(ordered[1]) if len(ordered) > 1 else 0
+        # Return only when no pending result can tie or overtake the winner.
+        if len(winner) >= required and len(winner) > runner_up_votes + pending:
+            _mark_rpc_pending_slow([active_urls[item] for item in pending_indexes], method)
+            return winner[0][1], [winner_url for winner_url, _value in winner]
+
+    if pending_indexes:
+        pending_urls = [active_urls[item] for item in pending_indexes]
+        _mark_rpc_pending_slow(pending_urls, method)
+        errors.append(
+            "deadline exceeded: "
+            + ", ".join(_redact_rpc_url(url) for url in pending_urls[:3])
+        )
+
+    vote_sizes = sorted((len(group) for group in grouped.values()), reverse=True)
+    detail = f" votes={vote_sizes}" if vote_sizes else ""
+    if errors:
+        detail += f" errors={'; '.join(errors[:3])}"
+    raise RuntimeError(f"{method} RPC quorum disagreement: required={required}{detail}")
+
+
+def _collect_rpc_probes(
+    urls: list[str],
+    *,
+    required: int,
+    probe: Callable[[str], Any],
+    label: str,
+) -> tuple[list[Any], list[str]]:
+    """Collect a minimum independent probe set without waiting for stragglers."""
+    scope = f"probe:{label}"
+    active_urls = _responsive_rpc_urls(urls, required, scope)
+    responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
+
+    def worker(index: int, url: str) -> None:
+        try:
+            responses.put((index, url, probe(url), None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(active_urls)))
+    results: list[Any] = []
+    errors: list[str] = []
+    for index, url in enumerate(active_urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"rpc-probe-{label}-{index}",
+            daemon=True,
+        ).start()
+
+    hard_deadline = time.monotonic() + RPC_HEAD_PROBE_DEADLINE_SECONDS
+    quorum_deadline: float | None = None
+    while pending_indexes:
+        now = time.monotonic()
+        if len(results) >= required and quorum_deadline is None:
+            quorum_deadline = now + RPC_HEAD_PROBE_GRACE_SECONDS
+        deadline = min(hard_deadline, quorum_deadline) if quorum_deadline is not None else hard_deadline
+        remaining = deadline - now
+        if remaining <= 0:
+            break
+        try:
+            index, url, value, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is None:
+            results.append(value)
+        else:
+            errors.append(f"{_redact_rpc_url(url)}: {error}")
+
+    if pending_indexes:
+        pending_urls = [active_urls[item] for item in pending_indexes]
+        _mark_rpc_pending_slow(pending_urls, scope)
+        errors.append(
+            f"{label} probe deadline exceeded: "
+            + ", ".join(_redact_rpc_url(url) for url in pending_urls[:3])
+        )
+    return results, errors
+
+
+def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
+    """Choose a hash-agreed Base block and verify critical contract code.
+
+    The snapshot deliberately trails the fastest observed head by a small,
+    configurable confirmation margin. Every published current-auction read is
+    pinned to this block and checked by at least two independent RPC operators.
+    """
+    global VERIFIED_LOG_URLS, VERIFIED_SNAPSHOT_URLS
+
+    urls = _quorum_rpc_urls()
+    required = RPC_QUORUM_SIZE
+    if len(urls) < required:
+        raise RuntimeError(
+            f"production snapshot requires {required} independent Base RPC providers; configured={len(urls)}"
+        )
+
+    def endpoint_head(url: str) -> tuple[str, int]:
+        chain_id = int(str(_rpc_once_with_retry(url, "eth_chainId", [], timeout=20)), 16)
+        if chain_id != 8453:
+            raise RuntimeError(f"wrong chain id {chain_id}; expected 8453")
+        head = int(str(_rpc_once_with_retry(url, "eth_blockNumber", [], timeout=20)), 16)
+        return url, head
+
+    heads, errors = _collect_rpc_probes(
+        urls,
+        required=required,
+        probe=endpoint_head,
+        label="head",
+    )
+    if len(heads) < required:
+        raise RuntimeError(
+            f"Base RPC head quorum unavailable: healthy={len(heads)} required={required}; "
+            + "; ".join(errors[:3])
+        )
+    ordered_heads = sorted((head for _url, head in heads), reverse=True)
+    quorum_head = ordered_heads[required - 1]
+    snapshot_block = max(0, quorum_head - SNAPSHOT_CONFIRMATIONS)
+    eligible_urls = [url for url, head in heads if head >= snapshot_block]
+    block_data, agreeing_urls = rpc_quorum(
+        "eth_getBlockByNumber",
+        [hex(snapshot_block), False],
+        urls=eligible_urls,
+        min_agreement=required,
+        timeout=30,
+    )
+    if not isinstance(block_data, dict) or not block_data.get("hash"):
+        raise RuntimeError(f"Base snapshot block {snapshot_block} missing hash")
+
+    code_hashes: dict[str, str] = {}
+    for label, address in (("auction_house", AUCTION_HOUSE), ("dog_nft", DEGEN_DOGS)):
+        code, code_urls = rpc_quorum(
+            "eth_getCode",
+            [address, hex(snapshot_block)],
+            urls=agreeing_urls,
+            min_agreement=required,
+            timeout=30,
+        )
+        if not isinstance(code, str) or code in {"", "0x", "0x0"}:
+            raise RuntimeError(f"{label} has no contract code at Base block {snapshot_block}")
+        agreeing_urls = [url for url in agreeing_urls if url in code_urls]
+        if len(agreeing_urls) < required:
+            raise RuntimeError(f"{label} contract-code quorum fell below {required}")
+        code_bytes = bytes.fromhex(code.removeprefix("0x"))
+        code_hashes[f"{label}_code_sha256"] = hashlib.sha256(code_bytes).hexdigest()
+
+    VERIFIED_SNAPSHOT_URLS = agreeing_urls
+    expected_block_hash = str(block_data["hash"]).lower()
+
+    def endpoint_log_capability(url: str) -> str:
+        chain_id = int(str(_rpc_once_with_retry(url, "eth_chainId", [], timeout=15)), 16)
+        if chain_id != 8453:
+            raise RuntimeError(f"wrong chain id {chain_id}; expected 8453")
+        candidate_block = _rpc_once_with_retry(
+            url,
+            "eth_getBlockByNumber",
+            [hex(snapshot_block), False],
+            timeout=20,
+        )
+        candidate_hash = str((candidate_block or {}).get("hash") or "").lower() if isinstance(candidate_block, dict) else ""
+        if candidate_hash != expected_block_hash:
+            raise RuntimeError(
+                f"snapshot hash mismatch expected={expected_block_hash} observed={candidate_hash or 'missing'}"
+            )
+        sample_from = max(FROM_BLOCK, snapshot_block - LOG_QUORUM_WINDOW_BLOCKS + 1)
+        sample_to = min(snapshot_block, sample_from + max(1, LOG_QUORUM_MAX_BLOCKS) - 1)
+        sample = _rpc_once_with_retry(
+            url,
+            "eth_getLogs",
+            [log_filter(AUCTION_HOUSE, [TOPIC_AUCTION_CREATED], sample_from, sample_to)],
+            timeout=LOG_RPC_TIMEOUT,
+        )
+        if not isinstance(sample, list):
+            raise RuntimeError("eth_getLogs capability check did not return a list")
+        return url
+
+    log_candidates = _independent_rpc_urls([*LOG_RPC_URLS, *agreeing_urls, *_quorum_rpc_urls()])
+    verified_log_urls, log_errors = _collect_rpc_probes(
+        log_candidates,
+        required=required,
+        probe=endpoint_log_capability,
+        label="log-capability",
+    )
+    if len(verified_log_urls) < required:
+        raise RuntimeError(
+            f"Base RPC log quorum unavailable: healthy={len(verified_log_urls)} required={required}; "
+            + "; ".join(log_errors[:3])
+        )
+    VERIFIED_LOG_URLS = verified_log_urls
+    providers = sorted({_rpc_provider_key(url) for url in agreeing_urls})
+    log_providers = sorted({_rpc_provider_key(url) for url in verified_log_urls})
+    verification = {
+        "onchain_verification_status": "current_snapshot_cross_provider_verified",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_chain_id": "8453",
+        "snapshot_block_hash": str(block_data["hash"]).lower(),
+        "snapshot_confirmations": str(max(ordered_heads) - snapshot_block),
+        "rpc_quorum_size": str(required),
+        "rpc_quorum_agreement": f"{len(agreeing_urls)}/{len(urls)}",
+        "rpc_quorum_providers": ",".join(providers),
+        "log_rpc_quorum_providers": ",".join(log_providers),
+        **code_hashes,
+    }
+    return snapshot_block, block_data, verification
+
+
+def verify_snapshot_unchanged(snapshot_block: int, expected_hash: str) -> None:
+    """Fail closed if the selected block reorganized while data was assembled."""
+    block_data, _agreeing_urls = rpc_quorum(
+        "eth_getBlockByNumber",
+        [hex(snapshot_block), False],
+        urls=VERIFIED_SNAPSHOT_URLS or _quorum_rpc_urls(),
+        min_agreement=RPC_QUORUM_SIZE,
+        timeout=30,
+    )
+    observed_hash = str((block_data or {}).get("hash") or "").lower() if isinstance(block_data, dict) else ""
+    if observed_hash != str(expected_hash or "").lower():
+        raise RuntimeError(
+            f"Base snapshot block {snapshot_block} reorganized during refresh: "
+            f"expected={expected_hash} observed={observed_hash or 'missing'}"
+        )
 
 
 def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | None = None) -> Any:
@@ -487,7 +966,7 @@ def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | Non
             last = exc
             if attempt == attempts - 1:
                 raise
-            time.sleep(min(2.0, 0.5 * (attempt + 1)))
+            time.sleep(random.uniform(0, min(4.0, 0.25 * (2**attempt))))
     raise RuntimeError(last)
 
 
@@ -523,7 +1002,7 @@ def rpc_batch(calls: list[tuple[str, list[Any]]], timeout: int = 120, urls: list
         except Exception:
             if attempt == attempts - 1:
                 raise
-            time.sleep(min(2.0, 0.5 * (attempt + 1)))
+            time.sleep(random.uniform(0, min(4.0, 0.25 * (2**attempt))))
     return []
 
 
@@ -605,8 +1084,13 @@ def _log_sort_key(item: dict[str, Any]) -> tuple[int, str, int]:
     )
 
 
-def _log_identity(item: dict[str, Any]) -> tuple[int, str, int]:
-    return _log_sort_key(item)
+def _log_identity(item: dict[str, Any]) -> tuple[str, str, int]:
+    block_identity = str(item.get("blockHash") or "").lower() or hex(_block_number(item))
+    return (
+        block_identity,
+        str(item.get("transactionHash") or "").lower(),
+        int(str(item.get("logIndex", "0x0")), 16),
+    )
 
 
 def _block_number(item: dict[str, Any]) -> int:
@@ -639,30 +1123,141 @@ def _fetch_logs_uncached(address: str, topics: str | list[str], from_block: int,
     return logs
 
 
+def _fetch_logs_checkpointed(
+    address: str,
+    topics: str | list[str],
+    from_block: int,
+    to_block: int,
+    checkpoint: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Fetch bounded batches so a transient failure cannot erase hours of work."""
+    logs: list[dict[str, Any]] = []
+    # Each inner call retains the normal worker fan-out, while this outer batch
+    # gives the persistent cache a contiguous, resumable checkpoint.
+    batch_span = max(LOG_CHUNK, LOG_CHUNK * LOG_WORKERS)
+    total_batches = max(1, (to_block - from_block + batch_span) // batch_span)
+    completed_batches = 0
+    start = from_block
+    while start <= to_block:
+        end = min(to_block, start + batch_span - 1)
+        logs.extend(_fetch_logs_uncached(address, topics, start, end))
+        logs.sort(key=_log_sort_key)
+        if checkpoint is not None:
+            checkpoint(end, logs)
+        completed_batches += 1
+        if total_batches > 1 and (
+            completed_batches == 1
+            or completed_batches % 25 == 0
+            or completed_batches == total_batches
+        ):
+            progress(
+                f"log scan {address[:10]} batches={completed_batches}/{total_batches} "
+                f"through_block={end} logs={len(logs)}"
+            )
+        start = end + 1
+    return logs
+
+
+def _fetch_logs_verified_or_uncached(
+    address: str,
+    topics: str | list[str],
+    from_block: int,
+    to_block: int,
+    checkpoint: Any | None = None,
+) -> list[dict[str, Any]]:
+    if not VERIFIED_LOG_URLS or not LOG_QUORUM_MAX_BLOCKS or not LOG_QUORUM_WINDOW_BLOCKS:
+        return _fetch_logs_checkpointed(address, topics, from_block, to_block, checkpoint)
+
+    # A cold scan can span millions of blocks, but the reorg-sensitive newest
+    # tail must never silently fall back to one provider merely because the
+    # historical prefix is large. Scan/cache the cold prefix normally, then
+    # require independent agreement for every chunk in the bounded recent tail.
+    quorum_from = max(from_block, to_block - LOG_QUORUM_WINDOW_BLOCKS + 1)
+    logs: list[dict[str, Any]] = []
+    if from_block < quorum_from:
+        logs.extend(
+            _fetch_logs_checkpointed(
+                address,
+                topics,
+                from_block,
+                quorum_from - 1,
+                checkpoint,
+            )
+        )
+    start = quorum_from
+    while start <= to_block:
+        end = min(to_block, start + LOG_QUORUM_MAX_BLOCKS - 1)
+        result, _agreeing_urls = rpc_quorum(
+            "eth_getLogs",
+            [log_filter(address, topics, start, end)],
+            urls=VERIFIED_LOG_URLS,
+            min_agreement=RPC_QUORUM_SIZE,
+            timeout=LOG_RPC_TIMEOUT,
+        )
+        if not isinstance(result, list):
+            raise RuntimeError(f"unexpected quorum eth_getLogs response: {result!r}")
+        logs.extend(
+            item
+            for item in result
+            if isinstance(item, dict) and not bool(item.get("removed", False))
+        )
+        logs.sort(key=_log_sort_key)
+        if checkpoint is not None:
+            checkpoint(end, logs)
+        start = end + 1
+    return logs
+
+
 def fetch_logs(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
     if from_block > to_block:
         return []
     if not _log_cache_enabled():
-        return _fetch_logs_uncached(address, topics, from_block, to_block)
+        return _fetch_logs_verified_or_uncached(address, topics, from_block, to_block)
 
     cache_path = _log_cache_path(address, topics, from_block)
     cached_to_block, cached_logs = _load_log_cache(cache_path, address, topics, from_block)
-    if cached_to_block >= to_block:
+    if cached_to_block >= to_block and LOG_CACHE_OVERLAP_BLOCKS <= 0:
         return sorted(
-            [item for item in cached_logs if from_block <= int(str(item.get("blockNumber", "0x0")), 16) <= to_block],
+            [
+                item
+                for item in cached_logs
+                if from_block <= int(str(item.get("blockNumber", "0x0")), 16) <= to_block
+                and not bool(item.get("removed", False))
+            ],
             key=_log_sort_key,
         )
 
     start_block = from_block
-    if cached_logs and cached_to_block >= from_block:
-        start_block = max(from_block, cached_to_block - LOG_CACHE_OVERLAP_BLOCKS + 1)
-    fresh_logs = _fetch_logs_uncached(address, topics, start_block, to_block)
-    by_id: dict[tuple[int, str, int], dict[str, Any]] = {}
-    for item in [*cached_logs, *fresh_logs]:
+    if cached_to_block >= from_block:
+        overlap_tip = min(cached_to_block, to_block)
+        start_block = max(from_block, overlap_tip - LOG_CACHE_OVERLAP_BLOCKS + 1)
+    def checkpoint(checkpoint_to: int, fresh_so_far: list[dict[str, Any]]) -> None:
+        retained = [item for item in cached_logs if _block_number(item) < start_block]
+        partial_by_id: dict[tuple[str, str, int], dict[str, Any]] = {}
+        for item in [*retained, *fresh_so_far]:
+            block_number = _block_number(item)
+            if from_block <= block_number <= checkpoint_to and not bool(item.get("removed", False)):
+                partial_by_id[_log_identity(item)] = item
+        partial = sorted(partial_by_id.values(), key=_log_sort_key)
+        _save_log_cache(cache_path, address, topics, from_block, checkpoint_to, partial)
+
+    fresh_logs = _fetch_logs_verified_or_uncached(
+        address,
+        topics,
+        start_block,
+        to_block,
+        checkpoint=checkpoint,
+    )
+    # The overlap is authoritative. Drop every cached row from the re-fetched
+    # range before merging so logs removed by a Base reorg cannot survive merely
+    # because they are absent from the new canonical response.
+    retained_logs = [item for item in cached_logs if _block_number(item) < start_block]
+    by_id: dict[tuple[str, str, int], dict[str, Any]] = {}
+    for item in [*retained_logs, *fresh_logs]:
         block_number = _block_number(item)
         if not block_number:
             continue
-        if from_block <= block_number <= to_block:
+        if from_block <= block_number <= to_block and not bool(item.get("removed", False)):
             by_id[_log_identity(item)] = item
     merged = sorted(by_id.values(), key=_log_sort_key)
     _save_log_cache(cache_path, address, topics, from_block, to_block, merged)
@@ -764,6 +1359,19 @@ def fetch_block_times(blocks: set[int]) -> dict[int, str]:
 
 
 def eth_call(to: str, data: str, block_tag: str = "latest") -> str:
+    critical_call = (to.lower(), data.lower()) in {
+        (AUCTION_HOUSE.lower(), SELECTOR_AUCTION.lower()),
+        (DEGEN_DOGS.lower(), SELECTOR_TOTAL_SUPPLY.lower()),
+    }
+    if critical_call and VERIFIED_SNAPSHOT_URLS and block_tag != "latest":
+        result, _agreeing_urls = rpc_quorum(
+            "eth_call",
+            [{"to": to, "data": data}, block_tag],
+            urls=VERIFIED_SNAPSHOT_URLS,
+            min_agreement=RPC_QUORUM_SIZE,
+            timeout=30,
+        )
+        return str(result)
     return rpc("eth_call", [{"to": to, "data": data}, block_tag])
 
 
@@ -1428,7 +2036,7 @@ def load_dog_cache() -> dict[str, Any]:
 
 def write_dog_cache(cache: dict[str, Any]) -> None:
     CACHE_DIR.mkdir(exist_ok=True)
-    DOG_METADATA_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    atomic_write_text(DOG_METADATA_CACHE, json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
 
 def fetch_one_dog_metadata(token_id: int, block_tag: str) -> dict[str, Any]:
@@ -2090,18 +2698,26 @@ def fetch_table(conn: sqlite3.Connection, table: str) -> tuple[list[str], list[t
     return cols, cur.fetchall()
 
 
+def atomic_write_text(path: Path, payload: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temp.write_text(payload, encoding="utf-8")
+    temp.replace(path)
+
+
 def write_csv(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
+    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temp.open("w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, lineterminator="\n")
         writer.writerow(cols)
         writer.writerows(rows)
+    temp.replace(path)
 
 
 def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     data = [dict(zip(cols, row)) for row in rows]
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_text(path, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
 
 
 def table_dicts(cols: list[str], rows: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
@@ -2857,6 +3473,8 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Network", metric_value(metrics, "network", "base")),
         ("Snapshot block", metric_value(metrics, "latest_block")),
         ("Snapshot time UTC", metric_value(metrics, "latest_block_time_utc")),
+        ("Snapshot block hash", metric_value(metrics, "snapshot_block_hash")),
+        ("Onchain verification", metric_value(metrics, "onchain_verification_status")),
         ("Current Dog", format_current_auction(metrics)),
         ("Current status", metric_value(metrics, "current_auction_status")),
         ("Current bid", format_current_bid(metrics)),
@@ -3323,12 +3941,26 @@ const archiveCaveat=document.getElementById('auction-caveat');
 const auctionTable=document.querySelector('table[data-table="auction_feed"]');
 const auctionBody=auctionTable?.tBodies?.[0];
 const auctionTotal=auctionTable?.caption?.querySelector('[data-total]');
+const currentDogHeading=document.querySelector('[data-current-dog]');
+const currentDetail=document.querySelector('[data-current-detail]');
+const currentRewards=document.querySelector('[data-current-rewards]');
+const currentTraits=document.querySelector('[data-current-traits]');
+const currentDogStage=document.querySelector('[data-current-dog-stage]');
 const defaultRows=auctionBody?[...auctionBody.rows].map(row=>row.cloneNode(true)):[];
 const archiveState={query:'',mission:'all',sortMode:'newest',pageSize:10,currentPage:1};
-let unifiedPromise=null;
 let unifiedRecords=[];
 let unifiedReady=false;
 let unifiedSnapshotBlock='';
+let liveSnapshotKey='';
+let liveSnapshotBlock='';
+let liveSnapshotContext=null;
+let liveRefreshPromise=null;
+let archiveSnapshotKey='';
+let archiveRefreshPromise=null;
+let pendingArchiveContext=null;
+const LIVE_REFRESH_MS=10000;
+const CURRENT_FETCH_TIMEOUT_MS=6000;
+const ARCHIVE_FETCH_TIMEOUT_MS=45000;
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const parseUtc=value=>{const raw=String(value||'').trim();if(!raw)return NaN;const iso=raw.includes('T')?raw:raw.replace(' ','T');return Date.parse(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso)?iso:`${iso}Z`);};
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
@@ -3358,8 +3990,29 @@ const rarityCell=record=>escapeHtml(record.rarity?.display||'');
 const unifiedRowHtml=record=>{const statusLabel=`${record.era_label||`Mission ${record.mission}`} · ${record.status||''}`;return `<tr data-search="${attr(rowSearchText(record))}"><td class="state" data-label="status">${statusCell(statusLabel)}</td><td class="dog-col" data-label="dog">${dogCell(record)}</td><td class="identity" data-label="high bidder / winner">${identityCell(record)}</td><td class="" data-label="bid">${bidCell(record)}</td><td class="time" data-label="last bid / settled">${timeCell(record)}</td><td class="num" data-label="rarity">${rarityCell(record)}</td></tr>`;};
 const isDefaultArchiveState=()=>archiveState.query===''&&archiveState.mission==='all'&&archiveState.sortMode==='newest'&&archiveState.pageSize===10&&archiveState.currentPage===1;
 const syncControls=()=>{if(filter&&filter.value!==archiveState.query)filter.value=archiveState.query;missionButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.missionFilter===archiveState.mission)));if(sortSelect)sortSelect.value=archiveState.sortMode;if(pageSizeSelect)pageSizeSelect.value=String(archiveState.pageSize);};
-const loadUnified=()=>unifiedPromise||(unifiedPromise=(async()=>{const cacheBust=`watch=${Date.now()}`;for(const url of [`generated/unified_dog_search_index.json?${cacheBust}`,`/generated/unified_dog_search_index.json?${cacheBust}`]){try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;const type=r.headers.get('content-type')||'';if(!type.includes('json'))continue;return await r.json();}catch(_){}}throw new Error('unified archive index unavailable');})());
-const refreshUnifiedArchive=async()=>{try{const statusResponse=await fetch(`generated/refresh_status.json?watch=${Date.now()}`,{cache:'no-store'});const status=statusResponse.ok?await statusResponse.json():{};const nextBlock=String(status.latest_generated_block||'');if(unifiedReady&&nextBlock&&nextBlock===unifiedSnapshotBlock)return;unifiedPromise=null;const records=await loadUnified();unifiedRecords=Array.isArray(records)?records.filter(record=>record&&typeof record==='object'):[];unifiedSnapshotBlock=nextBlock;unifiedReady=true;renderArchive();}catch(_){if(!unifiedReady)fallbackAuctionRows();}};
+const RAW_GENERATED_BASE='https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/';
+const generatedUrls=(name,version)=>{const suffix=`${name}.json`;const local=new URL(`generated/${suffix}`,document.baseURI);const rootLocal=new URL(`/generated/${suffix}`,location.origin);const raw=new URL(suffix,RAW_GENERATED_BASE);for(const url of [local,rootLocal,raw]){url.searchParams.set('v',String(version||'latest'));url.searchParams.set('watch',String(Date.now()));}return location.hostname.endsWith('github.io')?[raw.href,local.href]:[local.href,rootLocal.href,raw.href];};
+const fetchGenerated=async(name,version)=>{let lastError;const timeoutMs=name==='unified_dog_search_index'?ARCHIVE_FETCH_TIMEOUT_MS:CURRENT_FETCH_TIMEOUT_MS;for(const url of generatedUrls(name,version)){const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{cache:'no-store',headers:{accept:'application/json'},signal:controller.signal});if(!response.ok)throw new Error(`${name} unavailable (${response.status})`);const type=response.headers.get('content-type')||'';if(type&&!type.includes('json')&&!url.includes('raw.githubusercontent.com'))throw new Error(`${name} returned ${type}`);return await response.json();}catch(error){lastError=error;}finally{window.clearTimeout(timeout);}}throw lastError||new Error(`${name} unavailable`);};
+const asRows=value=>Array.isArray(value)?value.filter(row=>row&&typeof row==='object'):[];
+const metricRowsToMap=rows=>Object.fromEntries(asRows(rows).map(row=>[String(row.metric||''),String(row.value??'')]));
+const safeUrl=value=>{try{const url=new URL(String(value||''),document.baseURI);return url.protocol==='http:'||url.protocol==='https:'?url.href:'';}catch(_){return '';}};
+const dogToken=row=>{const match=String(row?.dog||row?.dog_name||'').match(/#(\d+)/);return match?Number(match[1]):Number(row?.token_id);};
+const currentFeedRow=(rows,token)=>asRows(rows).find(row=>dogToken(row)===token)||asRows(rows).find(row=>{const status=String(row.status||'').toLowerCase();return status==='live'||status.includes('ongoing');})||asRows(rows)[0]||{};
+const parseTrait=value=>{const text=String(value||'').trim();const split=text.indexOf(':');if(split<0)return {text,type:'',value:text,rarity:''};const type=text.slice(0,split).trim();let traitValue=text.slice(split+1).trim();let rarity='';const match=traitValue.match(/^(.*?)\s+(\([^)]+%\))$/);if(match){traitValue=match[1].trim();rarity=match[2];}return {text,type,value:traitValue,rarity};};
+const traitUrl=trait=>`https://opensea.io/collection/degen-dogs-club?traits=${encodeURIComponent(JSON.stringify([{traitType:trait.type,values:[trait.value]}]))}`;
+const renderTraits=row=>{if(!currentTraits)return;const source=row.trait_rarity||row.traits||'';currentTraits.innerHTML=String(source).split(';').map(parseTrait).filter(trait=>trait.value).map(trait=>{if(!trait.type)return `<span class="trait-pill">${escapeHtml(trait.text)}</span>`;const label=`View Degen Dogs with ${trait.type}: ${trait.value} on OpenSea`;return `<a class="trait-pill trait-pill-link" href="${attr(traitUrl(trait))}" target="_blank" rel="noopener noreferrer" aria-label="${attr(label)}" title="${attr(label)}"><span class="trait-type">${escapeHtml(trait.type)}</span><span class="trait-value">${escapeHtml(trait.value)}</span>${trait.rarity?`<span class="trait-rarity">${escapeHtml(trait.rarity)}</span>`:''}</a>`;}).join('');};
+const historyMenuHtml=(rows,wasOpen=false)=>{rows=asRows(rows);if(!rows.length)return '';const count=rows.length;const items=rows.map((row,index)=>{const bidder=row.bidder||shortAddress(row.bidder_wallet)||'Unknown bidder';const bidderUrl=safeUrl(row.bidder_url)||safeUrl(row.bidder_wallet?`https://basescan.org/address/${row.bidder_wallet}`:'');const txUrl=safeUrl(row.tx_hash?`https://basescan.org/tx/${row.tx_hash}`:'');const bidderHtml=bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder);const wallet=row.bidder_wallet?`<code class="bid-history-wallet">${escapeHtml(row.bidder_wallet)}</code>`:'';const tx=txUrl?`<a class="bid-history-tx" href="${attr(txUrl)}" target="_blank" rel="noopener noreferrer">Tx</a>`:'';const rank=index===0?'High bid':`Bid ${count-index}`;return `<li class="bid-history-row"><span class="bid-history-rank">${rank}</span><span class="bid-history-main"><strong>${escapeHtml(row.bid||`${row.bid_eth||''} ETH`)}</strong>${bidderHtml}</span><span class="bid-history-meta"><time>${escapeHtml(row.bid_time_utc||'')}</time>${tx}</span>${wallet}</li>`;}).join('');return `<details class="bid-history-menu"${wasOpen?' open':''}><summary><span>Bid history</span><b>${count} bid${count===1?'':'s'}</b></summary><ol class="bid-history-list">${items}</ol></details>`;};
+const metricNumber=(metrics,key)=>toNumber(metrics[key]);
+const metricAmount=(metrics,key,places,suffix)=>{const value=metricNumber(metrics,key);return value===null?'':`${value.toLocaleString(undefined,{minimumFractionDigits:places,maximumFractionDigits:places})}${suffix}`;};
+const rewardTile=(label,value,note,title='')=>value?`<span class="reward-tile"${title?` title="${attr(title)}"`:''}><b>${escapeHtml(label)}</b><strong>${value}</strong><em>${escapeHtml(note)}</em>${title?`<small class="reward-caveat sr-only">${escapeHtml(title)}</small>`:''}</span>`:'';
+const renderRewards=metrics=>{if(!currentRewards)return;const woof=metricAmount(metrics,'reward_woof_per_dog_per_day',2,' WOOF/day');const woofUsd=metricAmount(metrics,'reward_woof_per_dog_usd_per_day',2,'/day');const sup=metricAmount(metrics,'reward_sup_per_dog_per_day',2,' SUP/day');const supUsd=metricAmount(metrics,'reward_sup_per_dog_usd_per_day',2,'/day');const total=metricAmount(metrics,'reward_total_per_dog_usd_per_day',2,'/day');const tiles=[rewardTile('WOOF / Dog',woof?`${escapeHtml(woof)}${woofUsd?` <span>($${escapeHtml(woofUsd)})</span>`:''}`:'','Observed stream'),rewardTile('SUP / Dog',sup?`${escapeHtml(sup)}${supUsd?` <span>($${escapeHtml(supUsd)})</span>`:''}`:'','Observed stream'),rewardTile('Total / Dog',total?`$${escapeHtml(total)}`:'','WOOF + SUP')];const s6Enabled=/^(true|1|yes|live_estimate)$/i.test(metrics.season6_sup_enabled||metrics.season6_sup_status||'');const currentWallet=String(metrics.current_bidder_wallet||'').toLowerCase();const s6Wallet=String(metrics.season6_sup_current_bidder_wallet||'').toLowerCase();const s6Aligned=!s6Wallet||s6Wallet===currentWallet;if(s6Enabled&&s6Aligned){const noBid=metrics.season6_sup_estimate_status==='no_current_bid'||(!metrics.season6_sup_current_bidder_wallet&&!metrics.season6_sup_current_bid_estimated_cap_aware_sup);const supEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_sup');const usdEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_usd');const main=noBid?'Bid to estimate S6 SUP':`≈${(supEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})} SUP`;const secondary=noBid?'Current high bidder needed':`≈$${(usdEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})}`;tiles.push(`<span class="reward-tile season6-sup-estimate"><b>Season 6 if bid wins</b><strong>${escapeHtml(main)}</strong><em>${escapeHtml(secondary)} · Wallet-level estimate</em></span>`);}const days=metricNumber(metrics,'reward_current_bid_payback_days');const apr=metrics.reward_current_bid_apr_display||'';const payback=days&&days>0?(days<1?'&lt;1 day':`≈${days<10?days.toFixed(1):days.toFixed(0)} days`):(metrics.reward_current_bid_payback_days?'N/A':'');if(payback||apr){const caveat='Simple APR estimate from the current bid and observed per-Dog daily reward flow; not guaranteed future return.';tiles.push(rewardTile('Bid payback',`<span class="payback-days">${payback}</span><span class="payback-apr">${escapeHtml(apr)}</span>`,'Current bid / observed per-Dog flow',caveat));}const body=tiles.filter(Boolean).join('');currentRewards.innerHTML=body?`<section class="reward-strip" aria-label="Per-Dog reward estimate">${body}</section>`:'';};
+const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"><b>Rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}const dot=document.querySelector('[data-live-dot]');if(dot){dot.dataset.auctionStatus=String(status).toLowerCase();dot.dataset.liveEnd=end;}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
+const normalizedState=value=>{const state=String(value||'').toLowerCase();return state==='live'||state.includes('ongoing')?'live':state.includes('settled')||state.includes('ended')?'ended':state;};
+const assertSame=(label,values,normalize=value=>String(value))=>{const present=values.filter(value=>value!==null&&value!==undefined&&String(value)!=='').map(normalize);if(new Set(present).size>1)throw new Error(`${label} datasets disagree`);};
+const assertCurrentSnapshot=(status,current,feed,history,metrics)=>{const block=String(status.latest_generated_block||'');if(!block)throw new Error('refresh status has no snapshot block');if(String(current.latest_block||'')!==block||String(metrics.latest_block||'')!==block)throw new Error('generated snapshot is not atomic yet');const token=Number(status.current_dog_token_id??current.token_id);if(!Number.isFinite(token)||Number(current.token_id)!==token||dogToken(feed)!==token||Number(metrics.current_auction_token_id)!==token)throw new Error('current auction datasets disagree');assertSame('auction state',[status.current_auction_status,current.auction_state,feed.status,metrics.current_auction_status],normalizedState);assertSame('high bidder',[status.current_high_bidder_wallet,current.bidder_wallet,feed.bidder_winner_wallet,metrics.current_bidder_wallet],value=>String(value).toLowerCase());assertSame('current bid',[status.current_bid_eth,current.current_bid_eth,feed.amount_eth,metrics.current_bid_eth],value=>Number(value).toFixed(12));const hashes=[status.snapshot_block_hash,metrics.snapshot_block_hash].filter(Boolean);if(hashes.length!==2)throw new Error('verified snapshot hash is missing');assertSame('snapshot hash',hashes,value=>String(value).toLowerCase());const verification=[status.onchain_verification_status,metrics.onchain_verification_status].filter(Boolean);if(verification.length!==2||verification.some(value=>value!=='current_snapshot_cross_provider_verified'))throw new Error('current snapshot is not cross-provider verified');const topBid=asRows(history)[0];if(topBid){if(Number(topBid.token_id)!==token)throw new Error('current bid history token disagrees');assertSame('bid history bidder',[current.bidder_wallet,topBid.bidder_wallet],value=>String(value).toLowerCase());assertSame('bid history amount',[current.current_bid_eth,topBid.bid_eth],value=>Number(value).toFixed(12));}return {block,token};};
+const assertArchiveSnapshot=(context,records)=>{const unified=asRows(records).find(row=>Number(row.mission)===3&&Number(row.dog_id)===context.token);if(!unified)throw new Error('archive index is behind current auction');assertSame('archive state',[context.status.current_auction_status,context.current.auction_state,context.feed.status,context.metrics.current_auction_status,unified.status],normalizedState);assertSame('archive high bidder',[context.status.current_high_bidder_wallet,context.current.bidder_wallet,context.feed.bidder_winner_wallet,context.metrics.current_bidder_wallet,unified.winner_or_high_bidder?.wallet],value=>String(value).toLowerCase());assertSame('archive current bid',[context.status.current_bid_eth,context.current.current_bid_eth,context.feed.amount_eth,context.metrics.current_bid_eth,unified.amount?.native],value=>Number(value).toFixed(12));};
+const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=await fetchGenerated('unified_dog_search_index',target.block);if(target.key!==liveSnapshotKey)continue;assertArchiveSnapshot(target,records);unifiedRecords=asRows(records);unifiedSnapshotBlock=target.block;archiveSnapshotKey=target.key;unifiedReady=true;renderArchive();}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
+const refreshLiveSurface=()=>liveRefreshPromise||(liveRefreshPromise=(async()=>{const status=await fetchGenerated('refresh_status',Date.now());const nextBlock=String(status.latest_generated_block||'');if(!nextBlock)throw new Error('refresh status has no snapshot block');const nextKey=`${nextBlock}:${status.last_successful_refresh_time_utc||''}`;if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))return;let context=liveSnapshotContext;if(nextKey!==liveSnapshotKey){const [currentRows,feedRows,historyRows,metricRows]=await Promise.all([fetchGenerated('current_auction',nextBlock),fetchGenerated('auction_feed',nextBlock),fetchGenerated('current_auction_bid_history',nextBlock),fetchGenerated('mission3_metrics',nextBlock)]);const current=asRows(currentRows)[0];if(!current)throw new Error('current auction unavailable');const metrics=metricRowsToMap(metricRows);const token=Number(status.current_dog_token_id??current.token_id);const feed=currentFeedRow(feedRows,token);const snapshot=assertCurrentSnapshot(status,current,feed,historyRows,metrics);context={...snapshot,key:nextKey,status,current,feed,metrics};hydrateCurrentCard(feed,current,historyRows,metrics);liveSnapshotContext=context;liveSnapshotBlock=snapshot.block;liveSnapshotKey=nextKey;}if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context);})().catch(()=>{if(!unifiedReady)fallbackAuctionRows();}).finally(()=>{liveRefreshPromise=null;}));
 const emptyArchiveMessage=()=>archiveState.mission!=='all'&&!archiveState.query?`No verified Mission ${archiveState.mission} auction rows are available yet.`:'No auctions found for this search.';
 const setAuctionRows=(records,label,total=records.length)=>{if(!auctionBody)return;auctionBody.innerHTML=records.length?records.map(unifiedRowHtml).join(''):`<tr><td colspan="6">${escapeHtml(emptyArchiveMessage())}</td></tr>`;if(auctionTotal){auctionTotal.dataset.total=String(total);auctionTotal.textContent=label||`${total} rows`;}};
 const filteredRows=()=>{let rows=unifiedRecords;if(archiveState.mission!=='all')rows=rows.filter(record=>String(record.mission)===archiveState.mission);const q=archiveState.query;if(q)rows=rows.filter(record=>matchesQuery(record,q));return rows;};
@@ -3378,12 +4031,14 @@ pageNext?.addEventListener('click',()=>{archiveState.currentPage+=1;renderArchiv
 const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{if(!table.tBodies.length)return;const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total&&!table.matches('[data-table="auction_feed"]')){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-refreshUnifiedArchive();
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
 updateCountdowns();
 setInterval(updateCountdowns,1000);
-setInterval(refreshUnifiedArchive,60000);
+const scheduleLiveRefresh=()=>window.setTimeout(async()=>{await refreshLiveSurface();scheduleLiveRefresh();},LIVE_REFRESH_MS);
+refreshLiveSurface().finally(scheduleLiveRefresh);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLiveSurface();});
+window.addEventListener('online',refreshLiveSurface);
 """.strip()
     html_doc = f"""<!doctype html>
 <html lang="en">
@@ -3397,15 +4052,15 @@ setInterval(refreshUnifiedArchive,60000);
 </head>
 <body>
 <div class="shell">
-  <section class="current-card" aria-label="Current auction">
+  <section class="current-card" data-current-card aria-label="Current auction">
     <div class="current-copy">
       <div class="topline"><div class="eyebrow">{live_dot_html}Mission 3 auction feed</div>{top_actions_html}</div>
-      <h1>{current_dog_html}</h1>
-      <div class="current-detail">{current_detail}</div>
-      {reward_strip}
-      <div class="traits" aria-label="Current dog traits and rarity">{chips}</div>
+      <h1 data-current-dog>{current_dog_html}</h1>
+      <div class="current-detail" data-current-detail>{current_detail}</div>
+      <div data-current-rewards>{reward_strip}</div>
+      <div class="traits" data-current-traits aria-label="Current dog traits and rarity">{chips}</div>
     </div>
-    <a class="dog-stage" href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
+    <a class="dog-stage" data-current-dog-stage href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
   </section>
   <div class="toolbar" aria-label="Auction archive controls">
     <div class="toolbar-field search-field"><label for="filter">Search auctions</label><input id="filter" type="search" aria-label="search unified Mission 1, 2, and 3 archive" placeholder="Search all missions: Dog #, wallet, handle, tx, chain, status" autocomplete="off"></div>
@@ -3421,17 +4076,34 @@ setInterval(refreshUnifiedArchive,60000);
 </body>
 </html>
 """
-    (ROOT / "index.html").write_text(html_doc, encoding="utf-8")
+    atomic_write_text(ROOT / "index.html", html_doc)
 
 def main() -> None:
     progress("start")
     GENERATED.mkdir(exist_ok=True)
     PUBLIC_GENERATED.mkdir(parents=True, exist_ok=True)
-    latest_block = int(rpc("eth_blockNumber", []), 16)
+    latest_block, latest_block_data, onchain_verification = verified_snapshot()
     snapshot_tag = hex(latest_block)
-    latest_block_data = rpc("eth_getBlockByNumber", [snapshot_tag, False])
     latest_time = utc_from_unix(int(latest_block_data["timestamp"], 16))
-    progress(f"snapshot latest_block={latest_block}")
+    progress(
+        f"snapshot latest_block={latest_block} hash={onchain_verification['snapshot_block_hash']} "
+        f"quorum={onchain_verification['rpc_quorum_agreement']}"
+    )
+
+    # Read critical state immediately while every fallback provider still
+    # serves the just-selected block from its hot window. Long historical log
+    # scans happen only after the publish-critical calls have quorum agreement.
+    dog_total_supply = fetch_dog_total_supply(snapshot_tag)
+    current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
+    token_stats = fetch_token_stats(snapshot_tag)
+    token_stats.update(onchain_verification)
+    decimals = int(token_stats["woof_decimals"])
+    token_stats["dog_total_supply"] = str(dog_total_supply)
+    token_stats.update(current_bid_reward_stats(current, token_stats))
+    progress(
+        f"critical state loaded dog_total_supply={dog_total_supply} "
+        f"current_token_id={current.get('token_id')}"
+    )
 
     auction_logs = fetch_logs(
         AUCTION_HOUSE,
@@ -3446,16 +4118,8 @@ def main() -> None:
     transfer_logs = fetch_logs(WOOF, TOPIC_TRANSFER, FROM_BLOCK, latest_block)
     progress(f"transfer logs={len(transfer_logs)}")
 
-    token_stats = fetch_token_stats(snapshot_tag)
-    decimals = int(token_stats["woof_decimals"])
-    dog_total_supply = fetch_dog_total_supply(snapshot_tag)
-    token_stats["dog_total_supply"] = str(dog_total_supply)
-    progress(f"token stats loaded dog_total_supply={dog_total_supply}")
     dog_metadata = fetch_dog_metadata_rows(dog_total_supply, snapshot_tag)
     progress(f"dog metadata rows={len(dog_metadata)}")
-    current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
-    token_stats.update(current_bid_reward_stats(current, token_stats))
-    progress(f"current auction token_id={current.get('token_id')}")
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     progress(f"decoded auctions created={len(created)} bids={len(bids)} settled={len(settled)}")
     holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
@@ -3489,6 +4153,9 @@ def main() -> None:
     )
     insert_season6_outputs(conn, season6_outputs)
 
+    verify_snapshot_unchanged(latest_block, onchain_verification["snapshot_block_hash"])
+    progress("snapshot hash re-verified before publish")
+
     tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]] = {}
     manifest_rows = []
     for table in OUTPUT_TABLES:
@@ -3514,7 +4181,7 @@ def main() -> None:
             stale.unlink()
     write_html(tables)
 
-    (ROOT / "README.md").write_text(render_readme(tables, manifest_rows), encoding="utf-8")
+    atomic_write_text(ROOT / "README.md", render_readme(tables, manifest_rows))
 
     print(json.dumps({"latest_block": latest_block, "tables": {k: len(v[1]) for k, v in tables.items()}}, indent=2))
 

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-06-08",
       "usd_estimate_price_usd": "1819.0084952818488",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#365/789",
-      "rank": 365,
-      "total": 789
+      "display": "#368/792",
+      "rank": 368,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 125 dog #125 125 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 #365/789 background: halo; body: grey; neck: goldnecklace; mouth: none; ears: none; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 125 dog #125 125 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 #368/792 background: halo; body: grey; neck: goldnecklace; mouth: none; ears: none; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29279592,
       "block_time_utc": "2022-06-07T15:09:32Z",
@@ -81,12 +82,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -96,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

@@ -25,7 +25,30 @@ SKIP_PUSH="${DEGEN_DOGS_SKIP_PUSH:-0}"
 SKIP_PULL="${DEGEN_DOGS_SKIP_PULL:-0}"
 RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-0}"
 FULL_REFRESH="${DEGEN_DOGS_FULL_REFRESH:-0}"
-LIVE_VERIFY_AFTER_PUSH="${DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH:-0}"
+LIVE_VERIFY_AFTER_PUSH="${DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH:-1}"
+GIT_RETRY_ATTEMPTS="${DEGEN_DOGS_GIT_RETRY_ATTEMPTS:-4}"
+GIT_RETRY_BASE_SECONDS="${DEGEN_DOGS_GIT_RETRY_BASE_SECONDS:-2}"
+GIT_RETRY_MAX_SECONDS="${DEGEN_DOGS_GIT_RETRY_MAX_SECONDS:-30}"
+GIT_RETRY_JITTER_SECONDS="${DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS:-3}"
+
+PUBLISH_PATHS=(
+  "README.md"
+  "index.html"
+  "generated"
+  "public"
+  "archive/mission3/data/generated"
+  "archive/data/generated"
+  "archive/data/identity/wallet_profiles.json"
+  "archive/dogs"
+  "archive/prices/data/generated"
+  "archive/prices/data/raw"
+)
+
+BASELINE_HEAD=""
+MUTATION_STARTED=0
+ARTIFACT_LIST=""
+LIVE_VERIFY_ENV=""
+LOCAL_AHEAD_COUNT=0
 
 utc_stamp() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
@@ -49,6 +72,93 @@ fail() {
   export DEGEN_DOGS_REFRESH_ERROR="$*"
   log "error: $*"
   exit 1
+}
+
+validate_nonnegative_integer() {
+  local name="$1"
+  local value="$2"
+  [[ "$value" =~ ^[0-9]+$ ]] || fail "${name} must be a non-negative integer: ${value}"
+}
+
+retry_delay_seconds() {
+  local attempt="$1"
+  local delay="$GIT_RETRY_BASE_SECONDS"
+  local exponent=1
+  local jitter=0
+  local i
+
+  for ((i = 1; i < attempt; i++)); do
+    exponent=$((exponent * 2))
+  done
+  delay=$((delay * exponent))
+  if (( delay > GIT_RETRY_MAX_SECONDS )); then
+    delay="$GIT_RETRY_MAX_SECONDS"
+  fi
+  if (( GIT_RETRY_JITTER_SECONDS > 0 )); then
+    jitter=$((RANDOM % (GIT_RETRY_JITTER_SECONDS + 1)))
+  fi
+  printf '%s\n' "$((delay + jitter))"
+}
+
+run_with_retry() {
+  local label="$1"
+  shift
+  local attempt=1
+  local status=0
+  local delay=0
+
+  while (( attempt <= GIT_RETRY_ATTEMPTS )); do
+    log "${label} attempt=${attempt}/${GIT_RETRY_ATTEMPTS}"
+    if "$@"; then
+      return 0
+    else
+      status=$?
+    fi
+    if (( attempt == GIT_RETRY_ATTEMPTS )); then
+      log "${label} failed after ${attempt} attempts status=${status}"
+      return "$status"
+    fi
+    delay="$(retry_delay_seconds "$attempt")"
+    log "${label} retrying in ${delay}s after status=${status}"
+    sleep "$delay"
+    attempt=$((attempt + 1))
+  done
+  return "$status"
+}
+
+cleanup_partial_generation() {
+  local tracked_changes=""
+  local path=""
+  if [[ "$MUTATION_STARTED" != "1" || -z "$BASELINE_HEAD" ]]; then
+    return 0
+  fi
+  log "rolling back partial generated artifacts to ${BASELINE_HEAD}"
+  tracked_changes="$(git diff --name-only "$BASELINE_HEAD" -- "${PUBLISH_PATHS[@]}")" || {
+    log "warning: could not enumerate partial tracked generated artifacts"
+    return 1
+  }
+  if [[ -n "$tracked_changes" ]]; then
+    while IFS= read -r path; do
+      [[ -n "$path" ]] || continue
+      git restore --source="$BASELINE_HEAD" --staged --worktree -- "$path" || {
+        log "warning: git restore could not roll back ${path}"
+        return 1
+      }
+    done <<< "$tracked_changes"
+  fi
+  # Preflight rejects untracked files in these paths, so any remaining untracked
+  # entries here were created by this failed runner invocation.
+  git clean -fd -- "${PUBLISH_PATHS[@]}" >/dev/null || {
+    log "warning: git clean could not remove runner-created untracked artifacts"
+    return 1
+  }
+  if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+    log "warning: generated artifact paths remain dirty after rollback"
+    git status --short --untracked-files=all -- "${PUBLISH_PATHS[@]}"
+    return 1
+  fi
+  MUTATION_STARTED=0
+  log "partial generated artifacts rolled back"
 }
 
 git_index_lock_is_stale() {
@@ -96,6 +206,24 @@ commit_refresh_snapshot() {
     -m "Automated refresh from the private Mac mini runner."
 }
 
+verify_live_deployment() {
+  if [[ "$LIVE_VERIFY_AFTER_PUSH" != "1" ]]; then
+    return 0
+  fi
+  LIVE_VERIFY_ENV="$(mktemp -t degen-dogs-live-verify.XXXXXX)"
+  if python3 scripts/refresh_telemetry.py verify-live --env-file "$LIVE_VERIFY_ENV"; then
+    # shellcheck disable=SC1090
+    source "$LIVE_VERIFY_ENV"
+  else
+    # shellcheck disable=SC1090
+    source "$LIVE_VERIFY_ENV" || true
+    export DEGEN_DOGS_REFRESH_RESULT="failed_live_verify"
+    fail "live verification did not complete before timeout"
+  fi
+  rm -f -- "$LIVE_VERIFY_ENV"
+  LIVE_VERIFY_ENV=""
+}
+
 validate_name() {
   local name="$1"
   local value="$2"
@@ -106,6 +234,16 @@ validate_name() {
 
 validate_name "remote" "$REMOTE"
 validate_name "branch" "$BRANCH"
+validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_ATTEMPTS" "$GIT_RETRY_ATTEMPTS"
+validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_BASE_SECONDS" "$GIT_RETRY_BASE_SECONDS"
+validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_MAX_SECONDS" "$GIT_RETRY_MAX_SECONDS"
+validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS" "$GIT_RETRY_JITTER_SECONDS"
+if (( GIT_RETRY_ATTEMPTS < 1 || GIT_RETRY_ATTEMPTS > 10 )); then
+  fail "DEGEN_DOGS_GIT_RETRY_ATTEMPTS must be between 1 and 10"
+fi
+if (( GIT_RETRY_MAX_SECONDS < GIT_RETRY_BASE_SECONDS )); then
+  fail "DEGEN_DOGS_GIT_RETRY_MAX_SECONDS must be >= DEGEN_DOGS_GIT_RETRY_BASE_SECONDS"
+fi
 
 if [[ "${DEGEN_DOGS_LOCK_HELD:-0}" != "1" ]]; then
   export DEGEN_DOGS_LOCK_DIR="$LOCK_DIR"
@@ -154,6 +292,15 @@ export DEGEN_DOGS_REFRESH_STARTED_AT_UTC="${DEGEN_DOGS_REFRESH_STARTED_AT_UTC:-$
 finish() {
   local status=$?
   local result="${DEGEN_DOGS_REFRESH_RESULT:-}"
+  if [[ -n "$ARTIFACT_LIST" ]]; then
+    rm -f -- "$ARTIFACT_LIST"
+  fi
+  if [[ -n "$LIVE_VERIFY_ENV" ]]; then
+    rm -f -- "$LIVE_VERIFY_ENV"
+  fi
+  if [[ "$status" != "0" ]]; then
+    cleanup_partial_generation || true
+  fi
   if [[ -z "$result" ]]; then
     if [[ "$status" == "0" ]]; then
       result="success"
@@ -231,15 +378,22 @@ PY
 
 if [[ "$SKIP_PULL" != "1" ]]; then
   export DEGEN_DOGS_GIT_PULL_STARTED_AT_UTC="$(utc_stamp)"
-  git fetch "$REMOTE" "$BRANCH"
-  git pull --ff-only "$REMOTE" "$BRANCH"
+  run_with_retry "git fetch" git fetch "$REMOTE" "$BRANCH"
+  run_with_retry "git pull --ff-only" git pull --ff-only "$REMOTE" "$BRANCH"
   export DEGEN_DOGS_GIT_PULL_COMPLETED_AT_UTC="$(utc_stamp)"
+fi
+
+BASELINE_HEAD="$(git rev-parse HEAD)"
+if git show-ref --verify --quiet "refs/remotes/${REMOTE}/${BRANCH}"; then
+  LOCAL_AHEAD_COUNT="$(git rev-list --count "${REMOTE}/${BRANCH}..HEAD")"
 fi
 
 if [[ ! -d node_modules || package-lock.json -nt node_modules/.package-lock.json ]]; then
   log "installing npm dependencies"
   npm ci
 fi
+
+MUTATION_STARTED=1
 
 if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
   log "running Mission 3 archive incremental index"
@@ -255,7 +409,17 @@ if [[ "$FULL_REFRESH" == "1" ]]; then
   npm run data
 else
   log "bounded current refresh (set DEGEN_DOGS_FULL_REFRESH=1 for full history)"
-  npm run refresh:current
+  if npm run refresh:current; then
+    :
+  else
+    current_refresh_status=$?
+    if [[ "$current_refresh_status" == "75" ]]; then
+      log "bounded current refresh requires full reconciliation; falling back to npm run data"
+      npm run data
+    else
+      exit "$current_refresh_status"
+    fi
+  fi
 fi
 export DEGEN_DOGS_DATA_COMPLETED_AT_UTC="$(utc_stamp)"
 
@@ -334,6 +498,8 @@ if errors:
 print("artifact validation ok")
 PY
 python3 scripts/refresh_telemetry.py validate-status
+npm run archive:prices:validate
+npm run check:historical-dogs
 export DEGEN_DOGS_VALIDATION_COMPLETED_AT_UTC="$(utc_stamp)"
 
 git diff --check
@@ -381,12 +547,23 @@ export DEGEN_DOGS_GIT_STATUS_COMPLETED_AT_UTC="$(utc_stamp)"
 
 if [[ "$DEGEN_DOGS_CHANGED_FILES" == "[]" ]]; then
   log "no generated website/archive data changes to publish"
-  export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
+  MUTATION_STARTED=0
+  if [[ "$SKIP_PUSH" != "1" && "$LOCAL_AHEAD_COUNT" =~ ^[0-9]+$ && "$LOCAL_AHEAD_COUNT" -gt 0 ]]; then
+    log "retrying publish of ${LOCAL_AHEAD_COUNT} local commit(s) left by an earlier push failure"
+    export DEGEN_DOGS_PUSH_STARTED_AT_UTC="$(utc_stamp)"
+    run_with_retry "git push recovery" git push "$REMOTE" "$BRANCH"
+    export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
+    export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
+    export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
+    verify_live_deployment
+  else
+    export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
+  fi
   exit 0
 fi
 
-artifact_list="$(mktemp -t degen-dogs-artifacts.XXXXXX)"
-python3 - <<'PY' > "$artifact_list"
+ARTIFACT_LIST="$(mktemp -t degen-dogs-artifacts.XXXXXX)"
+python3 - <<'PY' > "$ARTIFACT_LIST"
 from __future__ import annotations
 
 import csv
@@ -437,8 +614,9 @@ PY
 
 while IFS= read -r path; do
   git add -- "$path"
-done < "$artifact_list"
-rm -f "$artifact_list"
+done < "$ARTIFACT_LIST"
+rm -f -- "$ARTIFACT_LIST"
+ARTIFACT_LIST=""
 
 git diff --cached --check
 
@@ -520,6 +698,7 @@ export DEGEN_DOGS_COMMIT_STARTED_AT_UTC="$(utc_stamp)"
 commit_refresh_snapshot
 export DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
+MUTATION_STARTED=0
 
 if [[ "$SKIP_PUSH" == "1" ]]; then
   log "DEGEN_DOGS_SKIP_PUSH=1; leaving commit local"
@@ -529,21 +708,9 @@ fi
 
 log "pushing generated data refresh"
 export DEGEN_DOGS_PUSH_STARTED_AT_UTC="$(utc_stamp)"
-git push "$REMOTE" "$BRANCH"
+run_with_retry "git push" git push "$REMOTE" "$BRANCH"
 export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
 
-if [[ "$LIVE_VERIFY_AFTER_PUSH" == "1" ]]; then
-  live_env="$(mktemp -t degen-dogs-live-verify.XXXXXX)"
-  if python3 scripts/refresh_telemetry.py verify-live --env-file "$live_env"; then
-    # shellcheck disable=SC1090
-    source "$live_env"
-  else
-    # shellcheck disable=SC1090
-    source "$live_env" || true
-    export DEGEN_DOGS_REFRESH_RESULT="success_pushed_live_timeout"
-    log "warning: live verification did not complete before timeout"
-  fi
-  rm -f "$live_env"
-fi
+verify_live_deployment
 log "published snapshot block=${latest_block} current_dog=${current_dog}"

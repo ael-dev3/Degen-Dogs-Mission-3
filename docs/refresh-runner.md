@@ -36,7 +36,14 @@ npm run watch:onchain:force
 
 The older `watch:auction` scripts remain aliases for compatibility.
 
-## Baseline hourly refresh
+The published verification label is intentionally scoped: it certifies the pinned
+current snapshot hash, critical contract code, current auction state, Dog supply, and
+recent auction logs across independent RPC operators. Historical cached chain data is
+reorg-overlapped and cross-table validated; identities, metadata hosting, price feeds,
+and reward projections are source-attributed offchain inputs and are not mislabeled as
+cross-provider onchain facts.
+
+## Baseline hourly full reconcile
 
 Keep the hourly refresh as the safety baseline:
 
@@ -45,6 +52,30 @@ Keep the hourly refresh as the safety baseline:
 ```
 
 The Pages workflow runs `npm ci` and `npm run build`. It does not run `npm run data`; the runner must commit fresh generated data before pushing if live dashboard data should update.
+
+On the deployed page, a cache-busted `refresh_status.json` check runs every 10 seconds.
+When its verified snapshot changes, the browser cross-checks the lightweight current
+auction, feed, bid-history, and metrics payloads before updating the current card. The
+larger unified archive is fetched and validated in a separate phase, so archive loading
+cannot delay the current auction. GitHub Pages clients try the raw `main` artifacts first
+and fall back to the Pages copy while a deployment is still propagating.
+
+The installed hourly LaunchAgent sets `DEGEN_DOGS_FULL_REFRESH=1`, so it rebuilds and
+cross-checks the complete configured dataset once per hour. Event-triggered watcher
+runs set `DEGEN_DOGS_FULL_REFRESH=0` and use the bounded current-surface path for speed.
+If that bounded refresher returns exit code `75` because its cached coverage cannot be
+updated exactly, the publish wrapper immediately falls back to `npm run data` in the
+same locked run.
+Both jobs use `RunAtLoad=true`, so a reboot or user login does not wait for the first
+timer interval.
+
+An independent GitHub Actions freshness watchdog runs at minutes 7, 22, 37, and 52.
+It compares the raw `main` status sidecar with the Pages copy, re-dispatches the Pages
+deployment when raw data is newer, opens or updates one deduplicated uptime issue on a
+stale/invalid snapshot, and closes that issue after recovery. This is an off-host
+backstop for the local Mac runner and Pages propagation; GitHub scheduled workflows
+can be delayed or dropped under load, so the five-minute local health LaunchAgent
+remains the primary supervisor.
 
 ## Event-aware onchain tracker
 
@@ -84,13 +115,13 @@ On first run with no state, the tracker initializes a baseline from latest oncha
 Defaults:
 
 ```bash
-MISSION3_WATCHER_INTERVAL_SECONDS=120
-MISSION3_WATCHER_COOLDOWN_SECONDS=180
-MISSION3_WATCHER_BID_COOLDOWN_SECONDS=60
+MISSION3_WATCHER_INTERVAL_SECONDS=30
+MISSION3_WATCHER_COOLDOWN_SECONDS=30
+MISSION3_WATCHER_BID_COOLDOWN_SECONDS=30
 MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0
-MISSION3_WATCHER_LOOKBACK_BLOCKS=2000
+MISSION3_WATCHER_LOOKBACK_BLOCKS=100
 MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS=50
-MISSION3_WATCHER_LOG_CHUNK=2000
+MISSION3_WATCHER_LOG_CHUNK=50
 MISSION3_REFRESH_LOCK_PATH=~/Library/Caches/degen-dogs-mission3/refresh.lock
 ```
 
@@ -99,7 +130,7 @@ Rules:
 - One-shot runs take a non-blocking watcher lock at `.local/mission3_onchain_tracker.lock` so watcher checks do not overlap.
 - Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.
-- Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (60s default) instead of the longer general cooldown, so real new bids publish quickly without commit-spamming every repeated signal.
+- Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (30s default), so real new bids publish quickly without commit-spamming every repeated signal.
 - Time-based force refresh is disabled by default. Keep the hourly LaunchAgent as the baseline and enable `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` only if the watcher is the sole runner, otherwise the watcher and hourly runner both perform full API-heavy refreshes.
 - Bid-only and extension-only changes inside their active cooldown are stored as `pending_refresh` and retried after cooldown.
 - Failed, deferred, or lock-blocked refreshes also stay pending. The watcher may advance `last_checked_*` and `last_observed_*` for operator visibility, but `last_seen_*` is the published/acknowledged cursor and only advances after a successful refresh command (or dry-run acknowledgement). This prevents a same-token bid from being observed once, failing to publish, and then being suppressed as already handled.
@@ -117,6 +148,15 @@ Rules:
 - `.local/watcher_checks.jsonl` for one-shot watcher checks.
 
 The JSONL rows include trigger, reasons, event metadata, lock wait, data/build/push durations, no-diff/skip-push/failure/live-timeout outcomes, and changed-file lists. The helper redacts private paths and provider/API tokens before writing rows. Publish-specific final outcomes live in the private JSONL rows; the public status sidecar reports the generated snapshot and its generation result, so it does not need to expose local runner/push internals.
+
+Fetch, fast-forward pull, and push use four bounded attempts by default with exponential
+backoff and jitter. A failure after generation but before commit restores tracked
+publish artifacts to the pre-run commit and removes only runner-created untracked
+publish artifacts. This prevents one interrupted generation from blocking every later
+run. After a push, live Pages verification is enabled by default and a timeout is a
+failed run, not a false success. Tune these with
+`DEGEN_DOGS_GIT_RETRY_{ATTEMPTS,BASE_SECONDS,MAX_SECONDS,JITTER_SECONDS}` and
+`DEGEN_DOGS_LIVE_VERIFY_{AFTER_PUSH,TIMEOUT_SECONDS,INTERVAL_SECONDS}`.
 
 The public sidecar is intentionally small and safe:
 
@@ -177,6 +217,16 @@ Prefer scheduler-driven one-shot mode for launchd/cron so crashes do not leave a
 
 ## macOS launchd watcher setup
 
+Create the protected runner configuration once. The three installers source it
+automatically and preserve the same RPC configuration during health self-repair:
+
+```bash
+cp .env.example .env.local
+chmod 600 .env.local
+# Set BASE_RPC_URLS and BASE_LOG_RPC_URLS to at least two independent,
+# credentialed, archive-capable Base providers before production use.
+```
+
 Install the hourly fallback first:
 
 ```bash
@@ -193,21 +243,35 @@ Install the event watcher in publish mode on the Mac mini/local runner:
 
 ```bash
 MISSION3_WATCHER_AUTO_PUSH=1 \
-MISSION3_REFRESH_COMMAND="npm run refresh:current" \
+MISSION3_REFRESH_COMMAND="npm run refresh:publish" \
 npm run watch:install
 ```
 
-Both LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 120 seconds to reduce public Base RPC pressure while keeping auction changes fresh.
+Install the independent health LaunchAgent after both workers:
+
+```bash
+MISSION3_WATCHER_AUTO_PUSH=1 \
+bash scripts/install_runner_health_launchd.sh
+```
+
+Both worker LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 30 seconds. The health LaunchAgent runs every five minutes, repairs plist/service drift, kickstarts stale workers, validates watcher state/failure counters, and checks the live cache-busted refresh-status sidecar.
+
+The health pass also bounds launchd, runner, watcher, and local JSONL telemetry logs.
+It preserves launchd file inodes, retains complete newest lines, and checks free bytes
+and free percentage on each distinct filesystem. Low disk is critical and suppresses
+new repair kickstarts until space is restored.
 
 Useful status checks:
 
 ```bash
 launchctl print gui/$(id -u)/com.ael.degendogs.mission3.refresh
 launchctl print gui/$(id -u)/com.ael.degendogs.mission3.watch-auction
+launchctl print gui/$(id -u)/com.ael.degendogs.mission3.health
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/refresh.log
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/watch-onchain.log
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/watcher.launchd.out.log
 tail -n 80 ~/Library/Logs/degen-dogs-mission3/watcher.launchd.err.log
+tail -n 80 ~/Library/Logs/degen-dogs-mission3/health.launchd.err.log
 ```
 
 Do not commit machine-specific plist files, private RPC URLs, logs, or local state.
@@ -215,7 +279,7 @@ Do not commit machine-specific plist files, private RPC URLs, logs, or local sta
 ## Cron watcher example
 
 ```cron
-*/2 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
+* * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run watch:onchain >> logs/watch-onchain.log 2>&1
 ```
 
 ## Inspecting local state

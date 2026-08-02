@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-11-05",
       "usd_estimate_price_usd": "0.0015593724786005145",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#274/789",
-      "rank": 274,
-      "total": 789
+      "display": "#270/792",
+      "rank": 270,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 528 dog #528 528 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 3333 degen 0x06fb1c1ad097c996085986d91c4a6a131ea62a483b338206a54986674675e060 0x852fb1441b09503a4d4dcce20e1998de85313b9032dd2892de64cf6ce771bae1 #274/789 background: none; body: redbrown; neck: none; mouth: none; ears: loopearring; head: hoodie; eyes: monocle 0xc8aab26b947ef9912cb531f1b274a8f05a7591a4fe3da2b5c565b3aac1bd77ad chain_logs contract_getters",
+    "search_text": "dog 528 dog #528 528 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 3333 degen 0x06fb1c1ad097c996085986d91c4a6a131ea62a483b338206a54986674675e060 0x852fb1441b09503a4d4dcce20e1998de85313b9032dd2892de64cf6ce771bae1 #270/792 background: none; body: redbrown; neck: none; mouth: none; ears: loopearring; head: hoodie; eyes: monocle 0xc8aab26b947ef9912cb531f1b274a8f05a7591a4fe3da2b5c565b3aac1bd77ad chain_logs contract_getters",
     "settlement": {
       "block_number": 26431927,
       "block_time_utc": "2025-11-05T23:56:35Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -106,7 +107,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.4%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-04-28",
       "usd_estimate_price_usd": "2303.324200998658",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -56,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#82/789",
-      "rank": 82,
-      "total": 789
+      "display": "#83/792",
+      "rank": 83,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 698 dog #698 698 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.02398 eth 0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb 0x37ec09dda56b77b119e82289ba3ece931b95677d0ece7099cf3c3b4ef2217acb #82/789 background: none; body: orange; neck: redcollar; mouth: pizza; ears: none; head: unicorn; eyes: monocle 0x66eb7908813c4b043590e275d8cc1c26a57daafff90a15427ede1d1b7b5c1b08 0x6a0f54fb2d9628a61d9d772dfd7e8ad4b9563b502531fbca713e5821b861c904 0x79aebb355e992737eec855a2f98450b6fa2cf65096057ef44e3b52f79f108717 0x0731c967291321e87b4527018a7bb9b9ee1f6616726b693103e525c1c0e77ea4 0x3244c015245c9442c477606c63bff71ed267fcdc2430ef3f90536add6f2bc54c 0x4a78aaf939d038dfe378fc9a41447ba2dea1d94dd1e1519cbe7c8c162c5e65d8 base_logs archive_indexer",
+    "search_text": "dog 698 dog #698 698 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.02398 eth 23980000000000000 55.23 $55.23 2026-04-28t21:39:57z 0x1bf99e1c9fee3abb19c83bd12bb7c2ea2ac398ed81749239f75dfb410d5c58cb 0x37ec09dda56b77b119e82289ba3ece931b95677d0ece7099cf3c3b4ef2217acb #83/792 generated auction feed 0x66eb7908813c4b043590e275d8cc1c26a57daafff90a15427ede1d1b7b5c1b08 0x6a0f54fb2d9628a61d9d772dfd7e8ad4b9563b502531fbca713e5821b861c904 0x79aebb355e992737eec855a2f98450b6fa2cf65096057ef44e3b52f79f108717 0x0731c967291321e87b4527018a7bb9b9ee1f6616726b693103e525c1c0e77ea4 0x3244c015245c9442c477606c63bff71ed267fcdc2430ef3f90536add6f2bc54c 0x4a78aaf939d038dfe378fc9a41447ba2dea1d94dd1e1519cbe7c8c162c5e65d8 background: none (90.4%) background none body: orange (8.6%) body orange neck: redcollar (30.9%) neck redcollar mouth: pizza (10.4%) mouth pizza ears: none (25.8%) ears none head: unicorn (4.7%) head unicorn eyes: monocle (6.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 45311525,
       "block_time_utc": "2026-04-28T21:39:57Z",
@@ -72,10 +73,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -101,7 +104,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -111,7 +114,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.4%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

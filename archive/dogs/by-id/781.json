@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48975016,
       "block_time_utc": "2026-07-22T16:56:19Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d",
+      "tx_url": "https://basescan.org/tx/0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d"
     },
     "auction_house": null,
     "bid_stats": {
@@ -45,36 +45,38 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/781",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d",
       "dog_page": "https://degendogs.club/#dog781",
       "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/781",
       "repo_archive": "archive/dogs/by-id/781.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a"
     },
     "mission": 3,
     "rarity": {
-      "display": "#692/789",
-      "rank": 692,
-      "total": 789
+      "display": "#694/792",
+      "rank": 694,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z #692/789 generated auction feed 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.6%) ears none head: stripedbeanie (8.4%) head stripedbeanie eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a #694/792 generated auction feed 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: stripedbeanie (8.3%) head stripedbeanie eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 49023751,
       "block_time_utc": "2026-07-23T20:00:49Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a",
+      "tx_url": "https://basescan.org/tx/0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -85,12 +87,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -100,12 +102,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

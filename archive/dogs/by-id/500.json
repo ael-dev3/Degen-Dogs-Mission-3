@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-09-27",
       "usd_estimate_price_usd": "0.00287083",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#181/789",
-      "rank": 181,
-      "total": 789
+      "display": "#183/792",
+      "rank": 183,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 500 dog #500 500 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 5555 degen 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 0xae8a363e7f5131ea4a62d94e1fb2eb2020a6e1d1998d8bf25455f869f71eb684 #181/789 background: none; body: dalmation; neck: studdedcollar; mouth: pizza; ears: loopearring; head: blackcap; eyes: none 0x2c242038c3ef17b3bab04d4f13ba92f949bff363fe9ae22bf3998c536dd13156 0xbd447a83e73e77e6369f497517ced8e0a268264adf2f5bb74a6b2d7cfb598616 0x71f282b23189a8b84522b1a66a46a44cc20dc92b372c828c84f7c0c36d299fa2 chain_logs contract_getters",
+    "search_text": "dog 500 dog #500 500 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 5555 degen 0x9bb61c348d5863a1f4d94c01e4bb388134406bd2e527dc61d665b5f8085a4a41 0xae8a363e7f5131ea4a62d94e1fb2eb2020a6e1d1998d8bf25455f869f71eb684 #183/792 background: none; body: dalmation; neck: studdedcollar; mouth: pizza; ears: loopearring; head: blackcap; eyes: none 0x2c242038c3ef17b3bab04d4f13ba92f949bff363fe9ae22bf3998c536dd13156 0xbd447a83e73e77e6369f497517ced8e0a268264adf2f5bb74a6b2d7cfb598616 0x71f282b23189a8b84522b1a66a46a44cc20dc92b372c828c84f7c0c36d299fa2 chain_logs contract_getters",
     "settlement": {
       "block_number": 26278631,
       "block_time_utc": "2025-09-28T00:37:32Z",
@@ -108,7 +109,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -7,6 +7,7 @@ import os
 import sqlite3
 import sys
 import tempfile
+import time
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,18 @@ def load_module() -> Any:
 
 def log(block: int, tx: str, index: int) -> dict[str, Any]:
     return {"blockNumber": hex(block), "transactionHash": tx, "logIndex": hex(index), "data": "0x", "topics": []}
+
+
+def test_quicknode_hostname_variants_share_one_quorum_vote() -> None:
+    dashboard = load_module()
+    assert dashboard._rpc_provider_key("https://alpha.quiknode.pro/key-a") == "quicknode"
+    assert dashboard._rpc_provider_key("https://beta.quiknode.pro/key-b") == "quicknode"
+    assert dashboard._rpc_provider_key("https://legacy.quicknode.pro/key") == "quicknode"
+    assert dashboard._rpc_provider_key("https://base-mainnet.g.alchemy.com/public") == "alchemy"
+    assert dashboard._rpc_provider_key("https://base-mainnet.public.blastapi.io") == "alchemy"
+    base_failovers = dashboard._same_operator_rpc_urls("https://mainnet.base.org")
+    assert "https://mainnet.base.org" in base_failovers
+    assert "https://developer-access-mainnet.base.org" in base_failovers
 
 
 def test_fetch_logs_extends_cached_ranges_with_overlap_and_dedupes() -> None:
@@ -53,8 +66,35 @@ def test_fetch_logs_extends_cached_ranges_with_overlap_and_dedupes() -> None:
         assert [item["transactionHash"] for item in second] == ["0xaaa", "0xbbb", "0xccc"]
 
         third = dashboard.fetch_logs("0x123", dashboard.TOPIC_TRANSFER, 100, 175)
-        assert calls == [(100, 150), (146, 175)]
+        assert calls == [(100, 150), (146, 175), (171, 175)]
         assert [item["transactionHash"] for item in third] == ["0xaaa", "0xbbb", "0xccc"]
+
+
+def test_fetch_logs_replaces_reorged_overlap_instead_of_retaining_orphans() -> None:
+    dashboard = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        setattr(dashboard, "LOG_CACHE_DIR", Path(tmp))
+        setattr(dashboard, "LOG_CACHE_OVERLAP_BLOCKS", 10)
+        calls = 0
+
+        def fake_fetch(_address: str, _topics: str | list[str], _start: int, _end: int) -> list[dict[str, Any]]:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                orphan = log(150, "0xorphan", 0)
+                orphan["blockHash"] = "0xold"
+                return [log(100, "0xstable", 0), orphan]
+            replacement = log(150, "0xcanonical", 0)
+            replacement["blockHash"] = "0xnew"
+            return [replacement]
+
+        setattr(dashboard, "_fetch_logs_uncached", fake_fetch)
+        first = dashboard.fetch_logs("0x123", dashboard.TOPIC_TRANSFER, 100, 150)
+        assert [item["transactionHash"] for item in first] == ["0xstable", "0xorphan"]
+
+        second = dashboard.fetch_logs("0x123", dashboard.TOPIC_TRANSFER, 100, 155)
+        assert [item["transactionHash"] for item in second] == ["0xstable", "0xcanonical"]
+        assert all(item["transactionHash"] != "0xorphan" for item in second)
 
 
 def test_fetch_logs_caches_empty_ranges() -> None:
@@ -70,7 +110,59 @@ def test_fetch_logs_caches_empty_ranges() -> None:
         setattr(dashboard, "_fetch_logs_uncached", fake_fetch)
         assert dashboard.fetch_logs("0xabc", [dashboard.TOPIC_AUCTION_CREATED], 200, 250) == []
         assert dashboard.fetch_logs("0xabc", [dashboard.TOPIC_AUCTION_CREATED], 200, 250) == []
-        assert calls == [(200, 250)]
+        assert calls == [(200, 250), (200, 250)]
+
+
+def test_fetch_logs_checkpoints_completed_batches_before_transient_failure() -> None:
+    dashboard = load_module()
+    calls: list[tuple[int, int]] = []
+    old_cache_dir = dashboard.LOG_CACHE_DIR
+    old_chunk = dashboard.LOG_CHUNK
+    old_workers = dashboard.LOG_WORKERS
+    old_overlap = dashboard.LOG_CACHE_OVERLAP_BLOCKS
+
+    def fake_fetch(_address: str, _topics: str | list[str], start: int, end: int) -> list[dict[str, Any]]:
+        calls.append((start, end))
+        if len(calls) == 2:
+            raise RuntimeError("transient provider failure")
+        return [{
+            "address": "0xabc",
+            "blockHash": f"0x{end:064x}",
+            "blockNumber": hex(end),
+            "data": "0x",
+            "logIndex": "0x0",
+            "removed": False,
+            "topics": [dashboard.TOPIC_AUCTION_CREATED],
+            "transactionHash": f"0x{end + 1:064x}",
+        }]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            dashboard.LOG_CACHE_DIR = Path(tmp)
+            dashboard.LOG_CHUNK = 10
+            dashboard.LOG_WORKERS = 1
+            dashboard.LOG_CACHE_OVERLAP_BLOCKS = 0
+            dashboard._fetch_logs_uncached = fake_fetch
+            try:
+                dashboard.fetch_logs("0xabc", dashboard.TOPIC_AUCTION_CREATED, 100, 200)
+            except RuntimeError as exc:
+                assert "transient provider failure" in str(exc)
+            else:
+                raise AssertionError("expected transient provider failure")
+            cache_path = dashboard._log_cache_path("0xabc", dashboard.TOPIC_AUCTION_CREATED, 100)
+            cached_to, cached_logs = dashboard._load_log_cache(
+                cache_path,
+                "0xabc",
+                dashboard.TOPIC_AUCTION_CREATED,
+                100,
+            )
+            assert cached_to == 109
+            assert [int(row["blockNumber"], 16) for row in cached_logs] == [109]
+        finally:
+            dashboard.LOG_CACHE_DIR = old_cache_dir
+            dashboard.LOG_CHUNK = old_chunk
+            dashboard.LOG_WORKERS = old_workers
+            dashboard.LOG_CACHE_OVERLAP_BLOCKS = old_overlap
 
 
 def address_topic(address: str) -> str:
@@ -479,7 +571,228 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
 
 def test_log_chunk_is_capped_for_public_base_rpc() -> None:
     dashboard = load_module()
-    assert dashboard.LOG_CHUNK <= 1000
+    assert dashboard.LOG_CHUNK <= 10000
+
+
+def test_verified_snapshot_requires_hash_agreement_from_independent_providers() -> None:
+    dashboard = load_module()
+    urls = ["https://one.example", "https://two.example", "https://three.example"]
+    old_quorum_urls = dashboard._quorum_rpc_urls
+    old_rpc_once = dashboard._rpc_once
+    old_quorum_size = dashboard.RPC_QUORUM_SIZE
+    old_confirmations = dashboard.SNAPSHOT_CONFIRMATIONS
+    old_log_urls = list(dashboard.LOG_RPC_URLS)
+
+    def fake_rpc_once(url: str, method: str, params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        if method == "eth_chainId":
+            return "0x2105"
+        if method == "eth_blockNumber":
+            return {urls[0]: "0x64", urls[1]: "0x63", urls[2]: "0x64"}[url]
+        if method == "eth_getBlockByNumber":
+            return {"number": params[0], "hash": "0xcanonical", "timestamp": "0x1"}
+        if method == "eth_getCode":
+            return "0x60016000"
+        if method == "eth_getLogs":
+            return []
+        raise AssertionError(method)
+
+    try:
+        dashboard._quorum_rpc_urls = lambda: urls
+        dashboard._rpc_once = fake_rpc_once
+        dashboard.RPC_QUORUM_SIZE = 2
+        dashboard.SNAPSHOT_CONFIRMATIONS = 1
+        dashboard.LOG_RPC_URLS = urls
+        block, block_data, verification = dashboard.verified_snapshot()
+    finally:
+        dashboard._quorum_rpc_urls = old_quorum_urls
+        dashboard._rpc_once = old_rpc_once
+        dashboard.RPC_QUORUM_SIZE = old_quorum_size
+        dashboard.SNAPSHOT_CONFIRMATIONS = old_confirmations
+        dashboard.LOG_RPC_URLS = old_log_urls
+        dashboard.VERIFIED_SNAPSHOT_URLS = []
+        dashboard.VERIFIED_LOG_URLS = []
+
+    assert block == 99
+    assert block_data["hash"] == "0xcanonical"
+    assert verification["onchain_verification_status"] == "current_snapshot_cross_provider_verified"
+    assert "current_auction" in verification["onchain_verification_scope"]
+    assert verification["onchain_chain_id"] == "8453"
+    assert verification["rpc_quorum_size"] == "2"
+    assert verification["snapshot_block_hash"] == "0xcanonical"
+    assert len(verification["log_rpc_quorum_providers"].split(",")) >= 2
+
+
+def test_rpc_quorum_rejects_disagreement() -> None:
+    dashboard = load_module()
+    old_rpc_once = dashboard._rpc_once
+
+    def fake_rpc_once(url: str, _method: str, _params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        return {"https://one.example": "0x1", "https://two.example": "0x2"}[url]
+
+    try:
+        dashboard._rpc_once = fake_rpc_once
+        try:
+            dashboard.rpc_quorum(
+                "eth_call",
+                [],
+                urls=["https://one.example", "https://two.example"],
+                min_agreement=2,
+            )
+        except RuntimeError as exc:
+            assert "quorum disagreement" in str(exc)
+        else:
+            raise AssertionError("RPC quorum accepted conflicting provider results")
+    finally:
+        dashboard._rpc_once = old_rpc_once
+
+
+def test_rpc_quorum_rejects_two_by_two_tie() -> None:
+    dashboard = load_module()
+    old_rpc_once = dashboard._rpc_once
+    answers = {
+        "https://one.example": "0x1",
+        "https://two.example": "0x1",
+        "https://three.example": "0x2",
+        "https://four.example": "0x2",
+    }
+
+    def fake_rpc_once(url: str, _method: str, _params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        return answers[url]
+
+    try:
+        dashboard._rpc_once = fake_rpc_once
+        try:
+            dashboard.rpc_quorum("eth_call", [], urls=list(answers), min_agreement=2)
+        except RuntimeError as exc:
+            assert "votes=[2, 2]" in str(exc)
+        else:
+            raise AssertionError("RPC quorum accepted a 2-2 provider tie")
+    finally:
+        dashboard._rpc_once = old_rpc_once
+
+
+def test_rpc_quorum_returns_without_waiting_for_decisive_straggler() -> None:
+    dashboard = load_module()
+    old_rpc_once = dashboard._rpc_once
+    old_deadline = dashboard.RPC_QUORUM_DEADLINE_SECONDS
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://slow.example"]
+
+    def fake_rpc_once(url: str, _method: str, _params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        if url == urls[-1]:
+            time.sleep(0.6)
+        return "0xcanonical"
+
+    try:
+        dashboard._rpc_once = fake_rpc_once
+        dashboard.RPC_QUORUM_DEADLINE_SECONDS = 1.0
+        started = time.monotonic()
+        value, agreeing = dashboard.rpc_quorum("eth_call", [], urls=urls, min_agreement=2)
+        elapsed = time.monotonic() - started
+    finally:
+        dashboard._rpc_once = old_rpc_once
+        dashboard.RPC_QUORUM_DEADLINE_SECONDS = old_deadline
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+    assert value == "0xcanonical"
+    assert len(agreeing) == 2
+    assert elapsed < 0.25
+
+
+def test_head_probe_returns_after_minimum_quorum_and_grace() -> None:
+    dashboard = load_module()
+    old_grace = dashboard.RPC_HEAD_PROBE_GRACE_SECONDS
+    old_deadline = dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://slow.example"]
+
+    def probe(url: str) -> tuple[str, int]:
+        if url == urls[-1]:
+            time.sleep(0.6)
+        return url, 100
+
+    try:
+        dashboard.RPC_HEAD_PROBE_GRACE_SECONDS = 0.0
+        dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS = 1.0
+        started = time.monotonic()
+        results, _errors = dashboard._collect_rpc_probes(urls, required=2, probe=probe, label="test-head")
+        elapsed = time.monotonic() - started
+    finally:
+        dashboard.RPC_HEAD_PROBE_GRACE_SECONDS = old_grace
+        dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS = old_deadline
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+    assert len(results) == 2
+    assert elapsed < 0.25
+
+
+def test_long_log_scan_always_quorum_checks_recent_tail() -> None:
+    dashboard = load_module()
+    old_verified = list(dashboard.VERIFIED_LOG_URLS)
+    old_max = dashboard.LOG_QUORUM_MAX_BLOCKS
+    old_window = dashboard.LOG_QUORUM_WINDOW_BLOCKS
+    old_checkpointed = dashboard._fetch_logs_checkpointed
+    old_quorum = dashboard.rpc_quorum
+    prefix_calls: list[tuple[int, int]] = []
+    tail_calls: list[tuple[int, int]] = []
+
+    def fake_checkpointed(
+        _address: str,
+        _topics: str | list[str],
+        start: int,
+        end: int,
+        _checkpoint: Any = None,
+    ) -> list[dict[str, Any]]:
+        prefix_calls.append((start, end))
+        return []
+
+    def fake_quorum(_method: str, params: list[Any], **_kwargs: Any) -> tuple[list[Any], list[str]]:
+        filter_data = params[0]
+        tail_calls.append((int(filter_data["fromBlock"], 16), int(filter_data["toBlock"], 16)))
+        return [], ["https://one.example", "https://two.example"]
+
+    try:
+        dashboard.VERIFIED_LOG_URLS = ["https://one.example", "https://two.example"]
+        dashboard.LOG_QUORUM_MAX_BLOCKS = 50
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = 500
+        dashboard._fetch_logs_checkpointed = fake_checkpointed
+        dashboard.rpc_quorum = fake_quorum
+        assert dashboard._fetch_logs_verified_or_uncached(
+            "0xabc",
+            dashboard.TOPIC_AUCTION_CREATED,
+            0,
+            1000,
+        ) == []
+    finally:
+        dashboard.VERIFIED_LOG_URLS = old_verified
+        dashboard.LOG_QUORUM_MAX_BLOCKS = old_max
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = old_window
+        dashboard._fetch_logs_checkpointed = old_checkpointed
+        dashboard.rpc_quorum = old_quorum
+
+    assert prefix_calls == [(0, 500)]
+    assert tail_calls == [(start, min(1000, start + 49)) for start in range(501, 1001, 50)]
+
+
+def test_snapshot_recheck_rejects_mid_refresh_reorg() -> None:
+    dashboard = load_module()
+    old_rpc_once = dashboard._rpc_once
+    old_urls = list(dashboard.VERIFIED_SNAPSHOT_URLS)
+
+    def fake_rpc_once(_url: str, method: str, _params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        assert method == "eth_getBlockByNumber"
+        return {"hash": "0xchanged"}
+
+    try:
+        dashboard._rpc_once = fake_rpc_once
+        dashboard.VERIFIED_SNAPSHOT_URLS = ["https://one.example", "https://two.example"]
+        try:
+            dashboard.verify_snapshot_unchanged(100, "0xexpected")
+        except RuntimeError as exc:
+            assert "reorganized during refresh" in str(exc)
+        else:
+            raise AssertionError("expected a mid-refresh reorg failure")
+    finally:
+        dashboard._rpc_once = old_rpc_once
+        dashboard.VERIFIED_SNAPSHOT_URLS = old_urls
 
 
 def test_write_html_includes_browser_favicon_only() -> None:
@@ -548,6 +861,59 @@ def test_unified_archive_bid_cell_formats_usd_from_shared_numeric_fallbacks() ->
     ]
     for marker in required_markers:
         assert marker in rendered
+
+
+def test_write_html_hydrates_every_current_surface_without_overlapping_polls() -> None:
+    dashboard = load_module()
+    tables = {
+        "mission3_metrics": (
+            ["metric", "value"],
+            [("site_url", "https://example.test"), ("latest_block", "210"), ("current_auction_token_id", "11")],
+        ),
+        "auction_feed": (["status", "dog", "bid", "auction_end_utc"], [("ongoing", "Dog #11", "1 ETH", "2026-06-02 04:00:00")]),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    for marker in (
+        "data-current-dog",
+        "data-current-detail",
+        "data-current-rewards",
+        "data-current-traits",
+        "data-current-dog-stage",
+        "const LIVE_REFRESH_MS=10000",
+        "const CURRENT_FETCH_TIMEOUT_MS=6000",
+        "const ARCHIVE_FETCH_TIMEOUT_MS=45000",
+        "const controller=new AbortController()",
+        "const refreshLiveSurface=()=>liveRefreshPromise||",
+        "if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))return",
+        "cache:'no-store'",
+        "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/",
+        "const rootLocal=new URL(`/generated/${suffix}`,location.origin)",
+        "location.hostname.endsWith('github.io')?[raw.href,local.href]",
+        "fetchGenerated('current_auction',nextBlock)",
+        "fetchGenerated('auction_feed',nextBlock)",
+        "fetchGenerated('current_auction_bid_history',nextBlock)",
+        "fetchGenerated('mission3_metrics',nextBlock)",
+        "const assertCurrentSnapshot=",
+        "const assertArchiveSnapshot=",
+        "const queueArchiveRefresh=context=>",
+        "if(target.key!==liveSnapshotKey)continue",
+        "generated snapshot is not atomic yet",
+        "hydrateCurrentCard(feed,current,historyRows,metrics)",
+        "if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context)",
+        "refreshLiveSurface().finally(scheduleLiveRefresh)",
+        "window.addEventListener('online',refreshLiveSurface)",
+    ):
+        assert marker in rendered
+    assert "setInterval(refreshLiveSurface" not in rendered
+    assert "fetchGenerated('mission3_metrics',nextBlock),fetchGenerated('unified_dog_search_index'" not in rendered
 
 
 

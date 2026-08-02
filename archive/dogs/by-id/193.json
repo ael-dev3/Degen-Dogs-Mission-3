@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2023-07-26",
       "usd_estimate_price_usd": "1870.82",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#67/789",
-      "rank": 67,
-      "total": 789
+      "display": "#64/792",
+      "rank": 64,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 193 dog #193 193 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 0x9addcf10e22ac8a8571722a29f1bb990bcb3087a6283519de3f3b53b944a8aa2 #67/789 background: none; body: redbrown; neck: none; mouth: bone; ears: earbuds; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 193 dog #193 193 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 0x9addcf10e22ac8a8571722a29f1bb990bcb3087a6283519de3f3b53b944a8aa2 #64/792 background: none; body: redbrown; neck: none; mouth: bone; ears: earbuds; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 45534702,
       "block_time_utc": "2023-07-26T09:17:00Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -96,7 +97,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -106,7 +107,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

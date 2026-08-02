@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-09-23",
       "usd_estimate_price_usd": "1328.7588806846718",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#536/789",
-      "rank": 536,
-      "total": 789
+      "display": "#537/792",
+      "rank": 537,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 170 dog #170 170 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd74bd28735225fc8c6afdc9b3ab89cbafaa1275e0a0ef076253616002225e50a 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 #536/789 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: blackcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 170 dog #170 170 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd74bd28735225fc8c6afdc9b3ab89cbafaa1275e0a0ef076253616002225e50a 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 #537/792 background: none; body: white; neck: redcollar; mouth: none; ears: loopearring; head: blackcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 33464844,
       "block_time_utc": "2022-09-23T11:46:11Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.4%)",
+        "display": "Body: White (11.5%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -106,7 +107,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.3%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

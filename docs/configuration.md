@@ -1,7 +1,9 @@
 # Configuration
 
-The default pipeline can run against public RPC defaults, but a reliable Base RPC
-endpoint is recommended for recovery or scheduled refreshes.
+The default pipeline can run against maintained public RPC fallbacks, but those
+endpoints are rate-limited and have no production SLA. A production runner should
+configure at least two independently operated, credentialed, archive-capable Base
+providers in both state and log lists.
 
 Never commit `.env`, `.env.local`, API keys, RPC secrets, private keys, local cache
 paths, or machine-specific paths.
@@ -10,9 +12,14 @@ paths, or machine-specific paths.
 
 ```bash
 cp .env.example .env.local 2>/dev/null || true
+chmod 600 .env.local
 ```
 
-Fill only the values you need in `.env.local`.
+Fill only the values you need in `.env.local`. All three macOS launchd installers
+automatically source `${DEGEN_DOGS_ENV_FILE:-.env.local}` with export enabled, reject
+files not owned by the current user or writable/readable by group/others, and carry
+the same RPC settings into health-led worker repairs. For direct shell commands, use
+`set -a; source .env.local; set +a`.
 
 ## Mission 3 dashboard variables
 
@@ -22,12 +29,19 @@ Fill only the values you need in `.env.local`.
 | `BASE_RPC_URLS` | Comma-separated fallback Base RPC endpoints for contract calls. | yes if provider-specific |
 | `BASE_LOG_RPC_URLS` | Comma-separated endpoints used for `eth_getLogs` scans. | yes if provider-specific |
 | `BASE_FROM_BLOCK` | First Base block scanned for Mission 3 logs. | no |
-| `BASE_LOG_CHUNK` | Maximum block range per `eth_getLogs` request; capped at 1,000 for public Base RPC compatibility. | no |
+| `BASE_LOG_CHUNK` | Maximum block range per `eth_getLogs` request; defaults to Base's reliable 2,000-block recommendation and is capped at 10,000 for provider-specific tuning. | no |
 | `BASE_LOG_WORKERS` | Concurrent log-fetch workers. | no |
+| `BASE_RPC_ATTEMPTS` | Bounded RPC attempts with provider failover and jitter; default 6 for full scans. | no |
+| `BASE_RPC_QUORUM_DEADLINE_SECONDS` | Hard wall-clock limit for a cross-provider quorum call; default 35 seconds. | no |
+| `BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS` | Hard endpoint-discovery deadline; default 12 seconds. | no |
+| `BASE_RPC_HEAD_PROBE_GRACE_SECONDS` | Short grace for extra healthy endpoints after the minimum quorum responds; default 0.35 seconds. | no |
+| `BASE_RPC_SLOW_COOLDOWN_SECONDS` | In-process circuit-breaker cooldown for a straggling endpoint; default 60 seconds. | no |
 | `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for balance/metadata calls; capped at 10. | no |
 | `DOG_METADATA_WORKERS` | Concurrent Dog metadata fetch workers. | no |
 | `MISSION3_LOG_CACHE` | Enable the local RPC log cache under `.cache/rpc_logs`; default on. | no |
-| `MISSION3_LOG_CACHE_OVERLAP_BLOCKS` | Re-fetch overlap when extending cached log ranges; default 50 blocks. | no |
+| `MISSION3_LOG_CACHE_OVERLAP_BLOCKS` | Re-fetch overlap when extending cached log ranges; default 100 blocks. | no |
+| `MISSION3_LOG_QUORUM_MAX_BLOCKS` | Maximum blocks per recent cross-provider log query; default 50 for the maintained public fallback set. | no |
+| `MISSION3_LOG_QUORUM_WINDOW_BLOCKS` | Maximum recent window split into quorum-checked log queries; default 500. | no |
 | `MISSION3_BALANCE_CACHE` | Enable the local WOOF holder balance cache under `.cache/woof_balances.json`; default on. | no |
 | `NEYNAR_API_KEY` | Optional Farcaster profile resolution. If Neynar returns HTTP 401/403, the refresh now disables Neynar for that run after the first failed request and keeps wallet/current-miniapp fallbacks instead of spending ~25s retrying every chunk. | yes |
 | `WOOF_USD_PRICE` | Optional manual WOOF/USD override. | no |
@@ -50,30 +64,50 @@ Fill only the values you need in `.env.local`.
 
 ## Onchain watcher variables
 
-These keep Mission 3 current-auction data fresher than the hourly baseline without browser-side polling.
+These keep Mission 3 current-auction data fresher than the hourly baseline without browser-side RPC polling.
 
 | Variable | Purpose | Sensitive? |
 | --- | --- | --- |
-| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep; scheduler examples use 120 seconds. | no |
+| `MISSION3_WATCHER_INTERVAL_SECONDS` | Loop-mode sleep and launchd schedule; defaults to 30 seconds. | no |
 | `MISSION3_WATCHER_COOLDOWN_SECONDS` | Minimum delay between non-bid, non-major refreshes. | no |
-| `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` | Shorter minimum delay for same-token bid amount/high-bidder refreshes; default 60 seconds. | no |
+| `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` | Shorter minimum delay for same-token bid amount/high-bidder refreshes; default 30 seconds. | no |
 | `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; default `0` disables duplicate time-based watcher refreshes because hourly refresh remains the baseline. | no |
 | `MISSION3_WATCHER_LOOKBACK_BLOCKS` | Recent block lookback for missing state. | no |
 | `MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS` | Overlap subtracted from `last_checked_block + 1` to avoid missed logs. | no |
-| `MISSION3_WATCHER_LOG_CHUNK` | Max blocks per `eth_getLogs` request. | no |
+| `MISSION3_WATCHER_LOG_CHUNK` | Max blocks per `eth_getLogs` request; defaults to 50 for the independent public fallback quorum. | no |
 | `MISSION3_WATCHER_STATE_PATH` | Local state path, normally `.local/mission3_onchain_tracker_state.json`. | can reveal local paths |
 | `MISSION3_WATCHER_LOCK_PATH` | Local watcher non-overlap lock path. | can reveal local paths |
 | `MISSION3_WATCHER_LOG_PATH` | Local concise watcher log path. | can reveal local paths |
 | `MISSION3_REFRESH_LOCK_PATH` | Shared refresh lock path used to avoid hourly/event refresh overlap. | can reveal local paths |
-| `MISSION3_REFRESH_COMMAND` | Command to run after a real onchain signal; default is `npm run data && npm run build`. | no, unless embedding secrets |
+| `MISSION3_REFRESH_COMMAND` | Command to run after a real onchain signal; defaults to `npm run refresh:current`, or `npm run refresh:publish` when the installer is explicitly put in auto-push mode. | no, unless embedding secrets |
 | `MISSION3_WATCHER_AUTO_PUSH` | Must be `1` before publish-like commands are allowed. | no |
 | `MISSION3_WATCHER_REQUIRE_CLEAN_TREE` | Refuse refresh with tracked changes; defaults on in auto-push mode. | no |
 | `MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS` | Refresh command timeout. | no |
+
+## Runner health and retention variables
+
+| Variable | Purpose | Sensitive? |
+| --- | --- | --- |
+| `DEGEN_DOGS_HEALTH_INTERVAL_SECONDS` | Health LaunchAgent interval; default 300 seconds. | no |
+| `DEGEN_DOGS_HEALTH_LOG_MAX_BYTES` | Idle log compaction threshold per managed file; default 8 MiB. | no |
+| `DEGEN_DOGS_HEALTH_LOG_RETAIN_BYTES` | Newest complete-line tail retained after compaction; default 2 MiB. | no |
+| `DEGEN_DOGS_HEALTH_LOG_EMERGENCY_MAX_BYTES` | Hard threshold that permits inode-preserving compaction even while the owning worker is active; default 32 MiB. | no |
+| `DEGEN_DOGS_HEALTH_MIN_FREE_BYTES` | Minimum runner filesystem free bytes; default 5 GiB. | no |
+| `DEGEN_DOGS_HEALTH_MIN_FREE_PERCENT` | Minimum runner filesystem free percentage; default 5%. | no |
+
+Retention covers launchd stdout/stderr, `refresh.log`, `watch-onchain.log`, and the
+high-frequency local JSONL streams `.local/watcher_checks.jsonl`,
+`.local/refresh_runs.jsonl`, and `logs/refresh-metrics.jsonl`. Launchd-owned files are
+compacted in place so their inode does not change underneath an open descriptor.
 
 ## What works without secrets
 
 - Static build from checked-in generated files.
 - Most public Base refreshes using default RPCs, subject to rate limits.
+
+Public fallback operation is a degraded, best-effort mode. It can preserve dashboard
+availability, but it is not equivalent to a credentialed multi-provider production
+SLA.
 - Unified archive rebuild from checked-in Mission 1/2/3 generated indexes.
 - Historical USD estimate application from checked-in price tables.
 

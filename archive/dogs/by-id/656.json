@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-03-17",
       "usd_estimate_price_usd": "2351.179995729523",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#210/789",
-      "rank": 210,
-      "total": 789
+      "display": "#206/792",
+      "rank": 206,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 656 dog #656 656 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 #210/789 background: halo; body: white; neck: none; mouth: pizza; ears: earbuds; head: blackcap; eyes: none 0x2894b851c3ff64b0e02b181fca55bc8ea7f428c387a1b1df7689fb4b37aba46e 0x80ecda11e75d6c09472a370daecb44191e2f90b5f28145949dfe2c5cdf8c0ab0 0x24b6d81b319f4bd9119e2b9518c84a90e74780c96a2c3fe8e12f177196a9ee6c base_logs archive_indexer",
+    "search_text": "dog 656 dog #656 656 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 25.86 $25.86 2026-03-17t14:30:27z 0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 #206/792 generated auction feed 0x2894b851c3ff64b0e02b181fca55bc8ea7f428c387a1b1df7689fb4b37aba46e 0x80ecda11e75d6c09472a370daecb44191e2f90b5f28145949dfe2c5cdf8c0ab0 0x24b6d81b319f4bd9119e2b9518c84a90e74780c96a2c3fe8e12f177196a9ee6c background: halo (9.6%) background halo body: white (11.5%) body white neck: none (39.8%) neck none mouth: pizza (10.4%) mouth pizza ears: earbuds (31.9%) ears earbuds head: blackcap (6.7%) head blackcap eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 43484240,
       "block_time_utc": "2026-03-17T14:30:27Z",
@@ -69,10 +70,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -83,7 +86,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: White (11.4%)",
+        "display": "Body: White (11.5%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -98,7 +101,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +111,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

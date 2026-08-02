@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, getcontext
 from pathlib import Path
@@ -34,7 +36,19 @@ def load_json(path: Path, default: Any) -> Any:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    payload = json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
 
 
 def decimal_or_none(value: Any) -> Decimal | None:
@@ -52,6 +66,8 @@ LIVE_USD_SOURCES = {
     "generated_current_auction",
     "generated_current_latest_bid",
     "generated_recent_bids",
+    "current_eth_usd_price",
+    "token_stats.eth_usd_price",
 }
 
 
@@ -211,10 +227,21 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
     ):
         preserve_source = True
 
-    if preserve_source and source_estimate is not None and source_estimate >= 0:
-        estimate = source_estimate
-        existing_event_price = decimal_or_none(amount.get("eth_usd_price_at_event"))
-        price_usd = existing_event_price or ((estimate / native) if native != 0 else None)
+    existing_event_price = decimal_or_none(amount.get("eth_usd_price_at_event"))
+    existing_quoted_price = decimal_or_none(amount.get("usd_estimate_price_usd"))
+    explicit_source_price = existing_event_price or existing_quoted_price
+    # A display USD value is currency-rounded and cannot be inverted into the
+    # exact source ETH/USD quote. Without an explicit quote, use a dated price
+    # row (if available) or mark the estimate missing instead of inventing one.
+    if preserve_source and explicit_source_price is None:
+        preserve_source = False
+
+    if preserve_source and explicit_source_price is not None:
+        price_usd = explicit_source_price
+        # Current quotes carry a precise unit price, so compute their USD value
+        # from native amount. Settled historical rows retain their canonical
+        # recorded event amount, which can intentionally be currency-rounded.
+        estimate = source_estimate if is_settled and source_estimate is not None else native * price_usd
         price_source = text_value(amount.get("usd_estimate_source")) or "generated_auction_feed"
         price_source_detail = text_value(amount.get("usd_estimate_source_detail")) or "precomputed generated auction-feed USD estimate"
         price_date_utc = text_value(amount.get("eth_usd_price_date_utc")) or text_value(amount.get("usd_estimate_price_date_utc")) or event_day
@@ -241,6 +268,7 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
             amount["usd_estimate"] = str(estimate.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP))
             amount["usd_estimate_display"] = money_display(estimate)
             amount["usd_estimate_source"] = price_row.get("source")
+            amount["usd_estimate_source_detail"] = price_row.get("source_detail")
             amount["usd_estimate_confidence"] = price_row.get("confidence") or "high"
             amount["usd_estimate_price_date_utc"] = price_row.get("date_utc")
             amount["usd_estimate_price_usd"] = str(price_usd)
@@ -272,14 +300,27 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
     raw_created = record.get("auction_created")
     auction_created: dict[str, Any] = raw_created if isinstance(raw_created, dict) else {}
     event_type = "settlement" if settlement.get("settled") else ("current_bid" if str(record.get("status", "")).lower() in {"ongoing", "live"} else "auction_record")
+    raw_bid_hashes = record.get("bid_tx_hashes")
+    bid_hashes = [text_value(value) for value in raw_bid_hashes if text_value(value)] if isinstance(raw_bid_hashes, list) else []
+    raw_bid_stats = record.get("bid_stats")
+    bid_stats: dict[str, Any] = raw_bid_stats if isinstance(raw_bid_stats, dict) else {}
+    if event_type == "settlement":
+        event_tx_hash = settlement.get("tx_hash")
+        event_time_utc = settlement.get("block_time_utc") or record.get("activity_time_utc")
+    elif event_type == "current_bid":
+        event_tx_hash = bid_hashes[-1] if bid_hashes else None
+        event_time_utc = bid_stats.get("last_bid_time_utc") or record.get("activity_time_utc")
+    else:
+        event_tx_hash = auction_created.get("tx_hash")
+        event_time_utc = record.get("activity_time_utc")
     return {
         "mission": record.get("mission"),
         "dog_id": record.get("dog_id"),
         "chain": record.get("chain"),
         "chain_id": record.get("chain_id"),
         "event_type": event_type,
-        "event_time_utc": record.get("activity_time_utc"),
-        "event_tx_hash": (settlement.get("tx_hash") or auction_created.get("tx_hash")),
+        "event_time_utc": event_time_utc,
+        "event_tx_hash": event_tx_hash,
         "native_amount_raw": amount.get("raw"),
         "native_amount": amount.get("native"),
         "native_symbol": amount.get("native_symbol"),
@@ -308,10 +349,20 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         "price_confidence", "price_status", "notes",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore", lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
+    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(handle, fieldnames=cols, extrasaction="ignore", lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
 
 
 def write_per_dog(records: list[dict[str, Any]]) -> None:
