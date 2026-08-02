@@ -375,6 +375,9 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
     if refresh_command == "":
         refresh_command = DEFAULT_PUBLISH_REFRESH_COMMAND if auto_push else DEFAULT_LOCAL_REFRESH_COMMAND
     resolve_refresh_command_argv(refresh_command, auto_push=auto_push)
+    require_clean_tree = env_bool(env, "MISSION3_WATCHER_REQUIRE_CLEAN_TREE", auto_push)
+    if auto_push and not require_clean_tree:
+        raise SystemExit("MISSION3_WATCHER_REQUIRE_CLEAN_TREE must be 1 when auto-push is enabled")
 
     state_path = optional_path_from_env(env, "MISSION3_WATCHER_STATE_PATH", DEFAULT_STATE_PATH)
     if state_path is None:
@@ -400,7 +403,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 50, minimum=1, maximum=10000),
         refresh_command=refresh_command,
         auto_push=auto_push,
-        require_clean_tree=env_bool(env, "MISSION3_WATCHER_REQUIRE_CLEAN_TREE", auto_push),
+        require_clean_tree=require_clean_tree,
         timeout_seconds=env_int(env, "MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", 1800, minimum=60),
         quorum_size=env_int(env, "BASE_RPC_QUORUM_SIZE", 2, minimum=2, maximum=3),
         confirmations=env_int(env, "BASE_SNAPSHOT_CONFIRMATIONS", 1, minimum=1, maximum=64),

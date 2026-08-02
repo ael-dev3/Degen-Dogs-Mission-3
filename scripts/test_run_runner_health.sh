@@ -20,6 +20,8 @@ cat > "${CONFIGURED_REPO}/scripts/runtime-bin/python3" <<'SH'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 [[ "${MISSION3_WATCHER_AUTO_PUSH:-}" == "1" ]]
+[[ "${MISSION3_WATCHER_REQUIRE_CLEAN_TREE:-}" == "1" ]]
+[[ "${MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS:-}" == "120" ]]
 [[ "${MISSION3_REFRESH_COMMAND:-}" == "npm run refresh:publish" ]]
 [[ "${DEGEN_DOGS_HEALTH_DRY_RUN:-}" == "1" ]]
 [[ "${DEGEN_DOGS_HEALTH_GITHUB_ALERTS:-}" == "0" ]]
@@ -75,6 +77,8 @@ WOOF_USD_PRICE=secret-price
 SUP_USD_PRICE=secret-price
 DEGEN_DOGS_REMOTE=https://secret-user:secret-pass@example.invalid/repo.git
 MISSION3_WATCHER_AUTO_PUSH=1
+MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1
+MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS=120
 MISSION3_REFRESH_COMMAND=npm run refresh:publish
 DEGEN_DOGS_HEALTH_GITHUB_ALERTS=0
 ENV
@@ -87,20 +91,64 @@ from pathlib import Path
 Path(os.environ["RUNNER_HEALTH_TEST_MARKER"]).touch()
 PY
 
+mkdir -p "${TEST_DIR}/hostile-bin"
+cat > "${TEST_DIR}/hostile-bin/bash" <<'SH'
+#!/bin/sh
+: > "${RUNNER_HEALTH_HOSTILE_PATH_MARKER}"
+exit 97
+SH
+chmod 700 "${TEST_DIR}/hostile-bin/bash"
+cat > "${TEST_DIR}/hostile-bash-env.sh" <<'SH'
+: > "${RUNNER_HEALTH_BASH_ENV_MARKER}"
+trap 'if [[ -n "${BASE_RPC_URLS:-}" ]]; then printf "%s\n" "$BASE_RPC_URLS" >>"$RUNNER_HEALTH_BASH_ENV_MARKER"; fi' DEBUG
+SH
+
+grep -Fq '"runner:health": "DEGEN_DOGS_HEALTH_CLEAN_BOOTSTRAP=0 /bin/bash -p scripts/run_runner_health.sh"' \
+  "${ROOT}/package.json"
+grep -Fq '"runner:health:dry": "DEGEN_DOGS_HEALTH_CLEAN_BOOTSTRAP=0 DEGEN_DOGS_HEALTH_DRY_RUN=1 DEGEN_DOGS_HEALTH_ALERT_DRY_RUN=1 /bin/bash -p scripts/run_runner_health.sh"' \
+  "${ROOT}/package.json"
+
+PROBE_STDERR="${TEST_DIR}/probe.stderr"
 probe_output="$(
-  DEGEN_DOGS_HEALTH_DRY_RUN=1 \
-  GH_TOKEN=github-secret \
-  GITHUB_TOKEN=github-secret \
-  GIT_ASKPASS="${TEST_DIR}/askpass" \
-  SSH_AUTH_SOCK="${TEST_DIR}/ssh-agent" \
-  PYTHONPATH="${TEST_DIR}/python-injection" \
-  PYTHONHOME="${TEST_DIR}/python-home" \
-  NODE_OPTIONS='--require=/secret/module.js' \
-  RUNNER_HEALTH_TEST_MARKER="${TEST_DIR}/sitecustomize-executed" \
-    bash "${LAUNCHER_REPO}/scripts/run_runner_health.sh" --probe-argument
+  /usr/bin/env \
+    BASH_ENV="${TEST_DIR}/hostile-bash-env.sh" \
+    SHELLOPTS=xtrace \
+    PATH="${TEST_DIR}/hostile-bin:/usr/bin:/bin" \
+    DEGEN_DOGS_HEALTH_CLEAN_BOOTSTRAP=0 \
+    DEGEN_DOGS_HEALTH_DRY_RUN=1 \
+    GH_TOKEN=github-secret \
+    GITHUB_TOKEN=github-secret \
+    GIT_ASKPASS="${TEST_DIR}/askpass" \
+    SSH_AUTH_SOCK="${TEST_DIR}/ssh-agent" \
+    PYTHONPATH="${TEST_DIR}/python-injection" \
+    PYTHONHOME="${TEST_DIR}/python-home" \
+    NODE_OPTIONS='--require=/secret/module.js' \
+    RUNNER_HEALTH_TEST_MARKER="${TEST_DIR}/sitecustomize-executed" \
+    RUNNER_HEALTH_BASH_ENV_MARKER="${TEST_DIR}/bash-env-executed" \
+    RUNNER_HEALTH_HOSTILE_PATH_MARKER="${TEST_DIR}/hostile-bash-executed" \
+    /bin/bash -p "${LAUNCHER_REPO}/scripts/run_runner_health.sh" --probe-argument \
+    2>"$PROBE_STDERR"
 )"
 [[ "$probe_output" == "manual health environment probe passed" ]]
 [[ ! -e "${TEST_DIR}/sitecustomize-executed" ]]
+[[ ! -e "${TEST_DIR}/bash-env-executed" ]]
+[[ ! -e "${TEST_DIR}/hostile-bash-executed" ]]
+for secret in rpc-secret neynar-secret coingecko-secret dune-secret secret-user secret-pass; do
+  ! grep -Fq "$secret" "$PROBE_STDERR"
+done
+
+cat > "${LAUNCHER_REPO}/.env.local" <<ENV
+DEGEN_DOGS_REPO_DIR=${CONFIGURED_REPO}
+MISSION3_WATCHER_AUTO_PUSH=1
+MISSION3_WATCHER_REQUIRE_CLEAN_TREE=0
+MISSION3_REFRESH_COMMAND=npm run refresh:publish
+ENV
+chmod 600 "${LAUNCHER_REPO}/.env.local"
+if DEGEN_DOGS_HEALTH_CLEAN_BOOTSTRAP=0 /bin/bash -p \
+  "${LAUNCHER_REPO}/scripts/run_runner_health.sh" >/dev/null 2>&1; then
+  printf '%s\n' 'auto-push accepted a disabled clean-tree safety gate' >&2
+  exit 1
+fi
 
 cat > "${LAUNCHER_REPO}/.env.local" <<ENV
 DEGEN_DOGS_REPO_DIR=${CONFIGURED_REPO}
@@ -108,7 +156,8 @@ MISSION3_WATCHER_AUTO_PUSH=1
 MISSION3_REFRESH_COMMAND=npm run refresh:publish; touch ${TEST_DIR}/executed
 ENV
 chmod 600 "${LAUNCHER_REPO}/.env.local"
-if bash "${LAUNCHER_REPO}/scripts/run_runner_health.sh" >/dev/null 2>&1; then
+if DEGEN_DOGS_HEALTH_CLEAN_BOOTSTRAP=0 /bin/bash -p \
+  "${LAUNCHER_REPO}/scripts/run_runner_health.sh" >/dev/null 2>&1; then
   printf '%s\n' 'unsafe refresh command unexpectedly passed validation' >&2
   exit 1
 fi

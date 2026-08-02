@@ -87,7 +87,7 @@ fi
 [[ "$RUN_MISSION3_ARCHIVE" == "0" || "$RUN_MISSION3_ARCHIVE" == "1" ]] || fail "DEGEN_DOGS_RUN_MISSION3_ARCHIVE must be 0 or 1"
 [[ "$LIVE_VERIFY_AFTER_PUSH" == "0" || "$LIVE_VERIFY_AFTER_PUSH" == "1" ]] || fail "DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH must be 0 or 1"
 [[ "$ALLOW_RUNNING_RESTART" == "0" || "$ALLOW_RUNNING_RESTART" == "1" ]] || fail "DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART must be 0 or 1"
-[[ "$REPO_DIR" = /* ]] || fail "repo dir must be absolute: ${REPO_DIR}"
+[[ "$REPO_DIR" = /* && "$REPO_DIR" != *:* && "$REPO_DIR" != *$'\n'* ]] || fail "repo dir must be absolute without a PATH separator or newline: ${REPO_DIR}"
 [[ -f "$SCRIPT_PATH" ]] || fail "refresh script missing: ${SCRIPT_PATH}"
 if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
   python3 - <<'PY' || fail "Mission 3 archive requires the hash-locked Python runtime; create .venv and install requirements.txt"

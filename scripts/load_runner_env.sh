@@ -5,12 +5,16 @@
 
 degen_dogs_load_runner_env() {
   local default_repo_dir="${1:?default repository directory is required}"
+  local export_allowlist="*"
+  if (( $# >= 2 )); then
+    export_allowlist="$2"
+  fi
   local env_file="${DEGEN_DOGS_ENV_FILE:-${default_repo_dir}/.env.local}"
   if [[ ! -e "$env_file" ]]; then
     return 0
   fi
   local parsed_records
-  if ! parsed_records="$(PYTHONNOUSERSITE=1 python3 -I - "$env_file" <<'PY'
+  if ! parsed_records="$(PYTHONNOUSERSITE=1 python3 -I - "$env_file" "$export_allowlist" <<'PY'
 from __future__ import annotations
 
 import os
@@ -21,6 +25,8 @@ import sys
 from pathlib import Path
 
 path = Path(sys.argv[1]).expanduser()
+raw_export_allowlist = sys.argv[2]
+export_allowlist = None if raw_export_allowlist == "*" else set(raw_export_allowlist.split())
 flags = os.O_RDONLY
 if hasattr(os, "O_NOFOLLOW"):
     flags |= os.O_NOFOLLOW
@@ -53,6 +59,10 @@ allowed_key_pattern = re.compile(
     r"|(?:NEYNAR_API_KEY|COINGECKO_API_KEY|DUNE_API_KEY|WOOF_USD_PRICE|SUP_USD_PRICE)\Z"
 )
 seen: set[str] = set()
+if export_allowlist is not None:
+    invalid_exports = sorted(key for key in export_allowlist if not key_pattern.fullmatch(key))
+    if invalid_exports:
+        raise SystemExit("error: invalid runner environment export allowlist")
 for line_number, original in enumerate(lines, 1):
     line = original.strip()
     if not line or line.startswith("#"):
@@ -86,6 +96,8 @@ for line_number, original in enumerate(lines, 1):
         value = raw_value
     if "\x00" in value:
         raise SystemExit(f"error: NUL byte in runner environment value on line {line_number}")
+    if export_allowlist is not None and key not in export_allowlist:
+        continue
     encoded = "".join(f"\\x{byte:02x}" for byte in value.encode("utf-8"))
     print(f"{key}\t{encoded}")
 PY

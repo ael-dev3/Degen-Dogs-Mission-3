@@ -98,8 +98,8 @@ These keep Mission 3 current-auction data fresher than the hourly baseline witho
 | `MISSION3_REFRESH_LOCK_PATH` | Shared refresh lock path used to avoid hourly/event refresh overlap. | can reveal local paths |
 | `MISSION3_REFRESH_COMMAND` | Exact supported action after a real onchain signal: `npm run refresh:current` or `npm run refresh:publish`. The watcher uses a fixed argv with no shell and rejects paths, extra arguments, metacharacters, and whitespace variants. Defaults to current, or publish when the installer is explicitly put in auto-push mode. | no |
 | `MISSION3_WATCHER_AUTO_PUSH` | Must be `1` before publish-like commands are allowed. | no |
-| `MISSION3_WATCHER_REQUIRE_CLEAN_TREE` | Refuse refresh with tracked changes; defaults on in auto-push mode. | no |
-| `MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS` | Refresh command timeout. | no |
+| `MISSION3_WATCHER_REQUIRE_CLEAN_TREE` | Refuse refresh with tracked changes; mandatory in auto-push mode. | no |
+| `MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS` | Refresh command timeout; minimum 60 seconds, default 1800. | no |
 
 ## Runner health and retention variables
 

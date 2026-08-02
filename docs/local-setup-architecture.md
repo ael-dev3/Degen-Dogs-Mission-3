@@ -199,6 +199,11 @@ then start the watchdog with a clean, least-privilege environment. RPC
 endpoints, API credentials, token-price overrides, and Git remotes are never
 inherited by the health process.
 
+Use the `npm run runner:health` and `npm run runner:health:dry` entrypoints for
+manual checks. They start the wrapper with macOS `/bin/bash` privileged mode so
+inherited Bash startup hooks and shell-option variables are ignored before the
+protected configuration is opened.
+
 A no-change watcher dry run should exit `0` and print a `no_refresh` line. A healthy
 one-shot launchd watcher can show `state = not running` between intervals; check `last
 exit code`, run count, logs, and tracker state instead of treating that as failure.

@@ -2179,8 +2179,19 @@ def test_refresh_command_exact_allowlist_and_auto_push_guard(monkeypatch=None):
     env = {"MISSION3_WATCHER_AUTO_PUSH": "1"}
     config = watcher.config_from_env(env)
     assert config.auto_push is True
+    assert config.require_clean_tree is True
     assert config.refresh_command == "npm run refresh:publish"
     assert watcher.validate_refresh_command(config) == ("npm", "run", "refresh:publish")
+
+    try:
+        watcher.config_from_env({
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "0",
+        })
+    except SystemExit as exc:
+        assert "clean_tree" in str(exc).lower()
+    else:
+        raise AssertionError("auto-push accepted a disabled clean-tree safety gate")
 
     try:
         watcher.config_from_env({"MISSION3_REFRESH_COMMAND": "npm run refresh:publish"})
