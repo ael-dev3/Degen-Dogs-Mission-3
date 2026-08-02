@@ -248,10 +248,10 @@ replace_private_file(sys.argv[2], sys.argv[3])
 PY
   then
     failure_stage="install"
-  elif ! launchctl bootstrap "$domain" "$plist_path" >/dev/null 2>&1; then
-    failure_stage="bootstrap"
   elif ! launchctl enable "$target" >/dev/null 2>&1; then
     failure_stage="enable"
+  elif ! launchctl bootstrap "$domain" "$plist_path" >/dev/null 2>&1; then
+    failure_stage="bootstrap"
   elif ! launchctl print "$target" >/dev/null 2>&1; then
     failure_stage="print"
   fi
@@ -297,8 +297,8 @@ PY
       printf 'error: candidate launchd %s failed; prior plist restoration failed\n' "$failure_stage" >&2
       return 1
     fi
-    if launchctl bootstrap "$domain" "$plist_path" >/dev/null 2>&1 && \
-      launchctl enable "$target" >/dev/null 2>&1 && \
+    if launchctl enable "$target" >/dev/null 2>&1 && \
+      launchctl bootstrap "$domain" "$plist_path" >/dev/null 2>&1 && \
       launchctl print "$target" >/dev/null 2>&1; then
       degen_dogs_release_installer_lock
       printf 'error: candidate launchd %s failed; restored and reloaded prior job\n' "$failure_stage" >&2
