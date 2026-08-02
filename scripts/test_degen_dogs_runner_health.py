@@ -1009,6 +1009,17 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
             assert secret_sentinel not in incident
             assert path_secret_sentinel not in incident
 
+            # Installer stderr can be relayed through health repair findings.
+            # Global sanitization must remove the configured path before an
+            # outside-HOME secret filename can enter a GitHub incident body.
+            installer_error = f"runner env file must be mode 600: {configured_env}"
+            sanitized_error = health.sanitize(installer_error)
+            assert "<runner-env>" in sanitized_error
+            assert path_secret_sentinel not in sanitized_error
+            incident = health.build_incident_body({"issues": [installer_error]})
+            assert "<runner-env>" in incident
+            assert path_secret_sentinel not in incident
+
             # Unsafe parent substitution is rejected before the target is opened.
             configured_env.write_text(secret_sentinel, encoding="utf-8")
             configured_env.chmod(0o600)

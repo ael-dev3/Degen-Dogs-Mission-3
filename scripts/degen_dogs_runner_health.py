@@ -599,6 +599,13 @@ def env() -> dict[str, str]:
 
 def sanitize(text: str, limit: int = 1200) -> str:
     cleaned = text or ""
+    configured_env = os.environ.get("DEGEN_DOGS_ENV_FILE")
+    if configured_env:
+        expanded_env = str(Path(configured_env).expanduser())
+        absolute_env = str(_absolute_runner_path(Path(configured_env).expanduser()))
+        for candidate in sorted({configured_env, expanded_env, absolute_env}, key=len, reverse=True):
+            if candidate:
+                cleaned = cleaned.replace(candidate, "<runner-env>")
     cleaned = cleaned.replace(str(REPO_DIR), "<repo>").replace(str(HOME), "<home>")
     cleaned = re.sub(r"https?://[^\s\"'<>]+", "<url>", cleaned)
     for pattern in SECRET_PATTERNS:
