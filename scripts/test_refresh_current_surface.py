@@ -361,6 +361,34 @@ def test_prior_settled_winner_block_and_historical_price_survive_fast_refresh_me
     assert merged["usd_estimate_source"] == "defillama_coin_prices"
 
 
+def test_prior_settled_winner_bid_times_survive_an_empty_rotated_ledger() -> None:
+    surface = load_module()
+    existing = {
+        "first_bid_utc": "2026-08-01 13:14:59",
+        "last_bid_utc": "2026-08-01 13:14:59",
+    }
+    settlement = {
+        "block_number": 49443635,
+        "tx_hash": "0x" + "a" * 64,
+    }
+    historical = {
+        "amount_usd_at_event": "20.00",
+        "eth_usd_price_at_event": "2000",
+        "eth_usd_price_date_utc": "2026-08-01",
+        "usd_estimate_source": "defillama_coin_prices",
+    }
+
+    merged = surface.merge_settled_winner_row(
+        existing,
+        settlement,
+        historical,
+        {"first_bid_utc": "", "last_bid_utc": ""},
+    )
+
+    assert merged["first_bid_utc"] == existing["first_bid_utc"]
+    assert merged["last_bid_utc"] == existing["last_bid_utc"]
+
+
 def test_settled_price_merge_ignores_live_candidate_and_uses_canonical_archive() -> None:
     surface = load_module()
     with tempfile.TemporaryDirectory() as tmp:
