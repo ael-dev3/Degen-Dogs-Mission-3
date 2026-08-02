@@ -54,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#482/792",
-      "rank": 482,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 204 dog #204 204 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9999 degen 0x653f293186f4218ddcdc373be18746d1fdaf2645201102c03ec91a4e22ec99bc 0xb94821084b6195c79e1f8dcbb0775ab7e40764d11709fca1e9307a662e284b0c #482/792 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: blackcap; eyes: none 0x0ac1a79c2461225782bfd9ad98e39221f0a4babcc7844a7a53d6dea51b45f96b 0xd3967203cc2c5997378e806f9bc353eb22b6c91cd9487076c3e3599324295716 0x0e2721c254ac3afd836a2db92b67685806a56e3625be7b212c2f14aa742ac05f chain_logs contract_getters",
+    "search_text": "dog 204 dog #204 204 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 9999 degen 0x653f293186f4218ddcdc373be18746d1fdaf2645201102c03ec91a4e22ec99bc 0xb94821084b6195c79e1f8dcbb0775ab7e40764d11709fca1e9307a662e284b0c unavailable background: none; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: blackcap; eyes: none 0x0ac1a79c2461225782bfd9ad98e39221f0a4babcc7844a7a53d6dea51b45f96b 0xd3967203cc2c5997378e806f9bc353eb22b6c91cd9487076c3e3599324295716 0x0e2721c254ac3afd836a2db92b67685806a56e3625be7b212c2f14aa742ac05f chain_logs contract_getters",
     "settlement": {
       "block_number": 24742846,
       "block_time_utc": "2024-11-29T16:10:50Z",
@@ -79,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.8%)",
+        "display": "Body: SugarSkull",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

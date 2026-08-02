@@ -56,12 +56,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#29/792",
-      "rank": 29,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 550 dog #550 550 mission 2 mission 2 degen chain settled 0x903dd30042ae53844ae83bdf2bcf839c4e80eef8 0x903d…eef8 13446 degen 0x950f739dbeb5895ff5912e36dc7d6e6198abc2de88669418d2c72a0508cff821 0x77b9c4d6fbf6e575f71556a5f14ae4130947969ec7bc630d4906fe5fc4e1f98f #29/792 background: none; body: rainbow; neck: redcollar; mouth: coin; ears: loopearring; head: none; eyes: vrgoggles 0xb4c869c2a101567fe9f01f3efc06c01f334413b6959e9a38c266b2c6ef3d6613 0x5e12c81df2b20fc7e446642b4228c478c929a87851f6fcf4f3e75882c9f8e80e 0x2030defee978300539c18088d6349e6f22daa4cade156117dba7f4a22b66530f 0x979559a07ae3f0d975ed437601076967c49a8a176702114dc3194925228e5159 0xd060fba4344422ea9158c1b5f1bfbda115539365e36ab5ead2f15503e6bd5806 chain_logs contract_getters",
+    "search_text": "dog 550 dog #550 550 mission 2 mission 2 degen chain settled 0x903dd30042ae53844ae83bdf2bcf839c4e80eef8 0x903d…eef8 13446 degen 0x950f739dbeb5895ff5912e36dc7d6e6198abc2de88669418d2c72a0508cff821 0x77b9c4d6fbf6e575f71556a5f14ae4130947969ec7bc630d4906fe5fc4e1f98f unavailable background: none; body: rainbow; neck: redcollar; mouth: coin; ears: loopearring; head: none; eyes: vrgoggles 0xb4c869c2a101567fe9f01f3efc06c01f334413b6959e9a38c266b2c6ef3d6613 0x5e12c81df2b20fc7e446642b4228c478c929a87851f6fcf4f3e75882c9f8e80e 0x2030defee978300539c18088d6349e6f22daa4cade156117dba7f4a22b66530f 0x979559a07ae3f0d975ed437601076967c49a8a176702114dc3194925228e5159 0xd060fba4344422ea9158c1b5f1bfbda115539365e36ab5ead2f15503e6bd5806 chain_logs contract_getters",
     "settlement": {
       "block_number": 26527733,
       "block_time_utc": "2025-11-28T04:20:10Z",
@@ -81,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Rainbow (4.3%)",
+        "display": "Body: Rainbow",
         "trait_type": "Body",
         "value": "Rainbow"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Coin (2.9%)",
+        "display": "Mouth: Coin",
         "trait_type": "Mouth",
         "value": "Coin"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

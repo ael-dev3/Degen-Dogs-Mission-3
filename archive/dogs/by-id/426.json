@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#208/792",
-      "rank": 208,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 426 dog #426 426 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xbf97e8d9b8b6dbfea1029e05a6bee51487303a264c8d8876119fc4f260e269e9 0x3efc1b133edb1f2350d7e5ea376406a2b3fc42dcfe2481043b1aebf355eb0edb #208/792 background: none; body: white; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: redlasereyes 0x78392a639200a0d20544ea5f50adfb7aff33ac706473ea6d79893e34b2c0ef7b 0x828d02f2e6cec06c9efe30d12f2d47490dcbe0cad654a4e63a26a9d5fb3e30da chain_logs contract_getters",
+    "search_text": "dog 426 dog #426 426 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xbf97e8d9b8b6dbfea1029e05a6bee51487303a264c8d8876119fc4f260e269e9 0x3efc1b133edb1f2350d7e5ea376406a2b3fc42dcfe2481043b1aebf355eb0edb unavailable background: none; body: white; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: redlasereyes 0x78392a639200a0d20544ea5f50adfb7aff33ac706473ea6d79893e34b2c0ef7b 0x828d02f2e6cec06c9efe30d12f2d47490dcbe0cad654a4e63a26a9d5fb3e30da chain_logs contract_getters",
     "settlement": {
       "block_number": 26062595,
       "block_time_utc": "2025-07-10T14:54:12Z",
@@ -78,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.2%)",
+        "display": "Ears: GoldEarring",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: RedLaserEyes (5.2%)",
+        "display": "Eyes: RedLaserEyes",
         "trait_type": "Eyes",
         "value": "RedLaserEyes"
       }

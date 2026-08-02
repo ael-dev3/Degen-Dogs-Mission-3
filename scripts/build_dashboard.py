@@ -6,13 +6,16 @@ import csv
 import concurrent.futures
 import hashlib
 import html
+import ipaddress
 import json
 import os
 import queue
 import random
 import signal
 import sqlite3
+import stat
 import sys
+import tempfile
 import threading
 import time
 import urllib.error
@@ -69,17 +72,34 @@ DEFAULT_RPC_URLS = [
 DEFAULT_LOG_RPC_URLS = [
     "https://mainnet.base.org",
     "https://developer-access-mainnet.base.org",
+    "https://base.gateway.tenderly.co",
+    "https://base.lava.build",
 ]
-RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") else [
-    url.strip()
-    for url in os.environ.get("BASE_RPC_URLS", ",".join(DEFAULT_RPC_URLS)).split(",")
-    if url.strip()
-]
-LOG_RPC_URLS = [os.environ["BASE_RPC_URL"]] if os.environ.get("BASE_RPC_URL") else [
-    url.strip()
-    for url in os.environ.get("BASE_LOG_RPC_URLS", ",".join(DEFAULT_LOG_RPC_URLS)).split(",")
-    if url.strip()
-]
+EXPLICIT_RPC_CONFIG = any(
+    os.environ.get(name, "").strip()
+    for name in ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS")
+)
+INCLUDE_PUBLIC_RPC_FALLBACKS = (
+    os.environ.get("BASE_INCLUDE_PUBLIC_FALLBACKS", "").strip().lower() in {"1", "true", "yes", "on"}
+    if "BASE_INCLUDE_PUBLIC_FALLBACKS" in os.environ
+    else not EXPLICIT_RPC_CONFIG
+)
+_SINGLE_RPC_URL = os.environ.get("BASE_RPC_URL", "").strip()
+_MULTI_RPC_URLS = os.environ.get("BASE_RPC_URLS", "").strip()
+if _SINGLE_RPC_URL:
+    RPC_URLS = [_SINGLE_RPC_URL]
+elif _MULTI_RPC_URLS:
+    RPC_URLS = [url.strip() for url in _MULTI_RPC_URLS.split(",") if url.strip()]
+else:
+    RPC_URLS = list(DEFAULT_RPC_URLS)
+if _SINGLE_RPC_URL:
+    LOG_RPC_URLS = [_SINGLE_RPC_URL]
+elif os.environ.get("BASE_LOG_RPC_URLS"):
+    LOG_RPC_URLS = [url.strip() for url in os.environ["BASE_LOG_RPC_URLS"].split(",") if url.strip()]
+elif EXPLICIT_RPC_CONFIG:
+    LOG_RPC_URLS = list(RPC_URLS)
+else:
+    LOG_RPC_URLS = list(DEFAULT_LOG_RPC_URLS)
 FROM_BLOCK = int(os.environ.get("BASE_FROM_BLOCK", "40500000"))
 # Base recommends keeping eth_getLogs scans under 2,000 blocks for reliable
 # results. Credentialed providers may safely advertise a larger limit, so keep
@@ -105,12 +125,20 @@ RPC_SLOW_COOLDOWN_SECONDS = max(
     1.0,
     min(float(os.environ.get("BASE_RPC_SLOW_COOLDOWN_SECONDS", "60")), 600.0),
 )
+RPC_MAX_HEAD_SPREAD_BLOCKS = max(
+    1,
+    min(int(os.environ.get("BASE_RPC_MAX_HEAD_SPREAD_BLOCKS", "20")), 10_000),
+)
+RPC_MAX_BLOCK_AGE_SECONDS = max(
+    30,
+    min(int(os.environ.get("BASE_RPC_MAX_BLOCK_AGE_SECONDS", "600")), 86_400),
+)
 LOG_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_LOG_RPC_TIMEOUT", "35")), 120))
 BLOCK_TIME_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_BLOCK_TIME_RPC_TIMEOUT", "30")), 120))
-LOG_CACHE_OVERLAP_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "100")), 500))
+LOG_CACHE_OVERLAP_BLOCKS = max(1, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "100")), 500))
 RPC_QUORUM_SIZE = max(2, min(int(os.environ.get("BASE_RPC_QUORUM_SIZE", "2")), 3))
-SNAPSHOT_CONFIRMATIONS = max(0, min(int(os.environ.get("BASE_SNAPSHOT_CONFIRMATIONS", "1")), 64))
-LOG_QUORUM_MAX_BLOCKS = max(0, min(int(os.environ.get("MISSION3_LOG_QUORUM_MAX_BLOCKS", "50")), 10000))
+SNAPSHOT_CONFIRMATIONS = max(1, min(int(os.environ.get("BASE_SNAPSHOT_CONFIRMATIONS", "1")), 64))
+LOG_QUORUM_MAX_BLOCKS = max(1, min(int(os.environ.get("MISSION3_LOG_QUORUM_MAX_BLOCKS", "50")), 10000))
 LOG_QUORUM_WINDOW_BLOCKS = max(
     LOG_QUORUM_MAX_BLOCKS,
     min(int(os.environ.get("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "500")), 10000),
@@ -119,14 +147,54 @@ DOG_METADATA_FETCH_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FETCH_T
 DOG_METADATA_FALLBACK_TIMEOUT = max(3, min(int(os.environ.get("DOG_METADATA_FALLBACK_TIMEOUT", "20")), 60))
 DOG_METADATA_ITEM_TIMEOUT = max(15, min(int(os.environ.get("DOG_METADATA_ITEM_TIMEOUT", "75")), 180))
 DOG_METADATA_SEQUENTIAL_THRESHOLD = max(0, min(int(os.environ.get("DOG_METADATA_SEQUENTIAL_THRESHOLD", "8")), 100))
+DOG_METADATA_ALLOWED_HOSTS = frozenset(
+    host.strip().lower().rstrip(".")
+    for host in os.environ.get(
+        "DOG_METADATA_ALLOWED_HOSTS",
+        "degendogs.club,api.degendogs.club,ipfs.io",
+    ).split(",")
+    if host.strip()
+)
+DOG_METADATA_MAX_RESPONSE_BYTES = max(
+    65_536,
+    min(int(os.environ.get("DOG_METADATA_MAX_RESPONSE_BYTES", "2097152")), 10_485_760),
+)
+DOG_METADATA_CACHE_MAX_AGE_SECONDS = max(
+    3_600,
+    min(int(os.environ.get("DOG_METADATA_CACHE_MAX_AGE_SECONDS", "86400")), 2_592_000),
+)
+RPC_MAX_RESPONSE_BYTES = max(
+    1_048_576,
+    min(int(os.environ.get("BASE_RPC_MAX_RESPONSE_BYTES", "33554432")), 67_108_864),
+)
+EXTERNAL_JSON_MAX_RESPONSE_BYTES = 8_388_608
+WOOF_HOLDER_DISCOVERY_MAX_RESPONSE_BYTES = 2_097_152
+WOOF_HOLDER_DISCOVERY_MAX_PAGES = 100
+WOOF_HOLDER_DISCOVERY_MAX_CANDIDATES = 10_000
 
 AUCTION_HOUSE = "0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA"
 DEGEN_DOGS = "0x09154248fFDbaF8aA877aE8A4bf8cE1503596428"
 WOOF = "0x3e5c4FA0cAA794516eD0DF77f31daA534918d492"
 SUP = "0xa69f80524381275A7fFdb3AE01c54150644c8792"
+DEFAULT_WOOF_HOLDER_DISCOVERY_URL = (
+    f"https://base.blockscout.com/api/v2/tokens/{WOOF}/holders"
+)
+WOOF_HOLDER_DISCOVERY_URL = os.environ.get(
+    "WOOF_HOLDER_DISCOVERY_URL",
+    DEFAULT_WOOF_HOLDER_DISCOVERY_URL,
+).strip()
 ZERO = "0x0000000000000000000000000000000000000000"
 OPENSEA_ITEM_BASE = "https://opensea.io/item/base"
 OPENSEA_COLLECTION_URL = "https://opensea.io/collection/degen-dogs-club"
+DASHBOARD_LINK_HOSTS = frozenset({
+    "basescan.org",
+    "degendogs.club",
+    "explorer.degen.tips",
+    "farcaster.xyz",
+    "opensea.io",
+    "polygonscan.com",
+})
+DASHBOARD_IMAGE_HOSTS = frozenset({"api.degendogs.club", "degendogs.club", "ipfs.io"})
 
 # Populated only after verified_snapshot() establishes a canonical block hash.
 # Critical hash-pinned reads and short-range event scans are then required to
@@ -138,6 +206,47 @@ RPC_SLOW_UNTIL: dict[tuple[str, str], float] = {}
 
 def dog_opensea_url(token_id: int | str) -> str:
     return f"{OPENSEA_ITEM_BASE}/{DEGEN_DOGS.lower()}/{int(token_id)}"
+
+
+def safe_http_url(value: Any, *, allowed_hosts: frozenset[str] | None = None) -> str:
+    """Return a browser-safe HTTPS URL, or an empty string when unsafe."""
+    text = str(value or "").strip()
+    if not text or any(character.isspace() or ord(character) < 32 for character in text):
+        return ""
+    try:
+        parsed = urllib.parse.urlsplit(text)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        # Accessing .port validates malformed/out-of-range ports. Dashboard
+        # links are deliberately limited to HTTPS' default port so an
+        # allowlisted hostname cannot tunnel browser traffic to another
+        # service exposed on that host.
+        port = parsed.port
+    except (TypeError, ValueError):
+        return ""
+    if parsed.scheme.lower() != "https" or not host:
+        return ""
+    if port not in {None, 443}:
+        return ""
+    if parsed.username is not None or parsed.password is not None:
+        return ""
+    if host == "localhost" or host.endswith((".localhost", ".local", ".internal", ".home.arpa")):
+        return ""
+    try:
+        if not ipaddress.ip_address(host).is_global:
+            return ""
+    except ValueError:
+        pass
+    if allowed_hosts is not None and host not in allowed_hosts:
+        return ""
+    return text
+
+
+def safe_dashboard_link(value: Any) -> str:
+    return safe_http_url(value, allowed_hosts=DASHBOARD_LINK_HOSTS)
+
+
+def safe_dashboard_image(value: Any) -> str:
+    return safe_http_url(value, allowed_hosts=DASHBOARD_IMAGE_HOSTS)
 
 
 def opensea_trait_url(trait_type: str, trait_value: str) -> str:
@@ -409,6 +518,7 @@ OUTPUT_TABLES = [
     "recent_auction_winners",
     "current_auction",
     "auction_timeline",
+    "auction_extensions",
     "auction_daily_activity",
     "auction_bidder_leaderboard",
     "season5_sup_by_winner",
@@ -432,7 +542,8 @@ DATASET_DESCRIPTIONS = {
     "current_auction_bid_history": "All decoded bid events for the current ongoing auction with Farcaster identity and live USD estimates.",
     "recent_auction_winners": "Recent settled winners formatted for the homepage.",
     "current_auction": "Full current auction state, dog metadata, rarity, and countdown fields.",
-    "auction_timeline": "One row per auction with bid, winner, and settlement summary.",
+    "auction_timeline": "One row per auction with bid, winner, settlement, and effective extended-end-time summary.",
+    "auction_extensions": "Verified AuctionExtended events used to derive canonical auction end times.",
     "auction_daily_activity": "Daily auction counts, settlement counts, and bid/settlement volume.",
     "auction_bidder_leaderboard": "Ranked bidder activity across decoded auction events.",
     "season5_sup_by_winner": "Estimated Season 5 SUP rewards grouped by winning wallet/profile.",
@@ -450,15 +561,21 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_RPC_URL", "Single Base RPC endpoint for contract calls; also overrides log RPC lists when set."),
     ("BASE_RPC_URLS", "Comma-separated fallback Base RPC endpoints for contract calls."),
     ("BASE_LOG_RPC_URLS", "Comma-separated Base RPC endpoints used for `eth_getLogs` history scans."),
+    ("BASE_INCLUDE_PUBLIC_FALLBACKS", "Opt in to public RPC fallbacks when explicit provider URLs are configured; defaults off for explicit production configurations."),
+    ("BASE_RPC_QUORUM_SIZE", "Minimum independently operated RPC providers that must agree; clamped to two or three."),
+    ("BASE_SNAPSHOT_CONFIRMATIONS", "Confirmed blocks subtracted from the agreed provider head before the snapshot is hash-pinned."),
     ("BASE_FROM_BLOCK", "First Base block scanned for Mission 3 logs; defaults to the known Mission 3 start range."),
     ("BASE_LOG_CHUNK", "Maximum block range per eth_getLogs request; defaults to Base's reliable 2,000-block recommendation and is capped at 10,000."),
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
+    ("BASE_RPC_MAX_RESPONSE_BYTES", "Maximum accepted JSON-RPC response size; defaults to 32 MiB and is capped at 64 MiB."),
     ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
     ("BASE_RPC_QUORUM_DEADLINE_SECONDS", "Hard wall-clock deadline for a cross-provider quorum call."),
     ("BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS", "Hard wall-clock deadline for snapshot endpoint discovery."),
     ("BASE_RPC_HEAD_PROBE_GRACE_SECONDS", "Small grace window for extra healthy providers after the minimum snapshot quorum responds."),
     ("BASE_RPC_SLOW_COOLDOWN_SECONDS", "In-process circuit-breaker cooldown for endpoints left pending after quorum."),
+    ("BASE_RPC_MAX_HEAD_SPREAD_BLOCKS", "Maximum block spread allowed inside the independently operated RPC head quorum."),
+    ("BASE_RPC_MAX_BLOCK_AGE_SECONDS", "Maximum age of the hash-agreed snapshot block before publication fails closed."),
     ("BASE_LOG_RPC_TIMEOUT", "Per-attempt timeout for eth_getLogs requests."),
     ("BASE_BLOCK_TIME_RPC_TIMEOUT", "Per-attempt timeout for block timestamp batch lookups."),
     ("DOG_METADATA_WORKERS", "Concurrent Dog metadata fetch workers, capped by the builder."),
@@ -466,11 +583,13 @@ CONFIGURATION_ENV_VARS = [
     ("DOG_METADATA_FALLBACK_TIMEOUT", "Fallback tokenURI metadata HTTP timeout in seconds."),
     ("DOG_METADATA_ITEM_TIMEOUT", "Hard wall-clock timeout per new Dog metadata row."),
     ("DOG_METADATA_SEQUENTIAL_THRESHOLD", "Fetch small missing metadata batches sequentially so one hung request cannot trap the runner."),
+    ("DOG_METADATA_CACHE_MAX_AGE_SECONDS", "Maximum reuse age for offchain metadata whose onchain tokenURI is unchanged; defaults to 24 hours."),
     ("MISSION3_LOG_CACHE", "Enables local RPC log caching under `.cache/rpc_logs`; defaults on."),
     ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 100 blocks."),
     ("MISSION3_LOG_QUORUM_MAX_BLOCKS", "Maximum block span per recent cross-provider eth_getLogs request; defaults to 50 for public-fallback compatibility."),
     ("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "Maximum total recent window split into quorum-checked log requests; defaults to 500."),
     ("MISSION3_BALANCE_CACHE", "Enables local WOOF holder balance caching under `.cache/woof_balances.json`; defaults on."),
+    ("WOOF_HOLDER_DISCOVERY_URL", "Blockscout Base token-holder endpoint used only to discover candidate WOOF addresses; host and path are pinned, while balances and completeness remain quorum-verified onchain."),
     ("NEYNAR_API_KEY", "Optional Neynar API key for identity resolution."),
     ("WOOF_USD_PRICE", "Optional manual WOOF/USD override; otherwise fetched from Dexscreener Base pools."),
     ("SUP_USD_PRICE", "Optional manual SUP/USD override; otherwise fetched from Dexscreener Base pools."),
@@ -484,6 +603,7 @@ def progress(message: str) -> None:
 
 TOPIC_AUCTION_BID = "0x1159164c56f277e6fc99c11731bd380e0347deb969b75523398734c252706ea3"
 TOPIC_AUCTION_CREATED = "0xd6eddd1118d71820909c1197aa966dbc15ed6f508554252169cc3d5ccac756ca"
+TOPIC_AUCTION_EXTENDED = "0x6e912a3a9105bdd2af817ba5adc14e6c127c1035b5b648faa29ca0d58ab8ff4e"
 TOPIC_AUCTION_SETTLED = "0xc9f72b276a388619c6d185d146697036241880c36654b1a3ffdad07c24038d99"
 TOPIC_TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
@@ -494,9 +614,108 @@ SELECTOR_TOTAL_SUPPLY = "0x18160ddd"
 SELECTOR_AUCTION = "0x7d9f6db5"
 SELECTOR_BALANCE_OF = "0x70a08231"
 SELECTOR_TOKEN_URI = "0xc87b56dd"
+# OpenZeppelin ERC721NonexistentToken(uint256). Only this exact revert, with
+# the requested token ID encoded in its data, is accepted as an onchain proof
+# that a sparse/burned token currently has no tokenURI binding.
+ERC721_NONEXISTENT_TOKEN_ERROR = "0x7e273289"
+TOKEN_URI_CHUNK_WORKERS = 1
+
+
+def read_bounded_json_response(response: Any, limit: int, label: str) -> Any:
+    headers = getattr(response, "headers", None)
+    content_type = str(headers.get("Content-Type") or "").split(";", 1)[0].strip().lower() if headers else ""
+    if content_type and content_type != "application/json" and not content_type.endswith("+json"):
+        raise RuntimeError(f"{label} returned unsafe content type {content_type}")
+    content_length = headers.get("Content-Length") if headers else None
+    if content_length is not None:
+        try:
+            parsed_length = int(content_length)
+        except (TypeError, ValueError):
+            raise RuntimeError(f"{label} returned an invalid Content-Length") from None
+        if parsed_length < 0:
+            raise RuntimeError(f"{label} returned an invalid Content-Length")
+        if parsed_length > limit:
+            raise RuntimeError(f"{label} response exceeds {limit} bytes")
+    payload = response.read(limit + 1)
+    if len(payload) > limit:
+        raise RuntimeError(f"{label} response exceeds {limit} bytes")
+    try:
+        return json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"{label} returned invalid JSON") from exc
+
+
+def read_owned_json_file(path: Path, limit: int, label: str) -> Any | None:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise RuntimeError(f"refusing unsafe {label} file {path}: {exc}") from exc
+    try:
+        details = os.fstat(descriptor)
+        if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+            raise RuntimeError(f"refusing {label} file that is not an owned regular file: {path}")
+        if details.st_size > limit:
+            raise RuntimeError(f"{label} file exceeds {limit} bytes: {path}")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read(limit + 1)
+        if len(payload) > limit:
+            raise RuntimeError(f"{label} file exceeds {limit} bytes: {path}")
+        return json.loads(payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"{label} file contains invalid JSON: {path}") from exc
+    finally:
+        os.close(descriptor)
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Fail closed before urllib can forward RPC or API credentials."""
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        raise urllib.error.HTTPError(
+            req.full_url,
+            code,
+            f"redirect to {urllib.parse.urlsplit(newurl).hostname or 'unknown host'} rejected",
+            headers,
+            fp,
+        )
+
+
+def open_no_redirect(req: urllib.request.Request, *, timeout: int) -> Any:
+    return urllib.request.build_opener(NoRedirectHandler()).open(req, timeout=timeout)
+
+
+def validate_rpc_url(url: str) -> None:
+    if not isinstance(url, str) or not url or any(character.isspace() for character in url):
+        raise RuntimeError("RPC endpoint URL is invalid")
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        port = parsed.port
+    except ValueError as exc:
+        raise RuntimeError("RPC endpoint URL is invalid") from exc
+    if (
+        parsed.scheme.lower() != "https"
+        or not parsed.hostname
+        or port not in (None, 443)
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.fragment
+    ):
+        raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
 def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url: str) -> Any:
+    validate_rpc_url(url)
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url,
@@ -509,12 +728,27 @@ def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            text = response.read().decode("utf-8")
+        response = open_no_redirect(req, timeout=timeout)
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {detail[:500] or exc.reason}") from exc
-    return json.loads(text)
+        raise RuntimeError(f"HTTP {exc.code}") from None
+    except Exception as exc:  # noqa: BLE001 - never expose credential-bearing URLs in transport errors
+        raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
+    try:
+        with response:
+            status = response.getcode() if hasattr(response, "getcode") else getattr(response, "status", None)
+            if status != 200:
+                raise RuntimeError("RPC response returned an unexpected HTTP status")
+            if str(response.geturl()) != url:
+                raise RuntimeError("RPC response URL changed unexpectedly")
+            headers = getattr(response, "headers", None)
+            content_type = str(headers.get("Content-Type") or "").split(";", 1)[0].strip().lower() if headers else ""
+            if content_type != "application/json" and not content_type.endswith("+json"):
+                raise RuntimeError("RPC response returned an unexpected content type")
+            return read_bounded_json_response(response, RPC_MAX_RESPONSE_BYTES, "JSON-RPC")
+    except RuntimeError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - keep provider-controlled read details out of logs
+        raise RuntimeError(f"RPC response read failed ({type(exc).__name__})") from None
 
 
 def _redact_rpc_url(url: str) -> str:
@@ -556,8 +790,15 @@ def _configured_rpc_urls() -> list[str]:
         if url.strip()
     )
     configured.extend(RPC_URLS)
-    configured.extend(DEFAULT_RPC_URLS)
-    return [url for url in configured if url]
+    if INCLUDE_PUBLIC_RPC_FALLBACKS:
+        configured.extend(DEFAULT_RPC_URLS)
+    unique: list[str] = []
+    seen: set[str] = set()
+    for url in configured:
+        if url and url not in seen:
+            seen.add(url)
+            unique.append(url)
+    return unique
 
 
 def _independent_rpc_urls(configured: list[str]) -> list[str]:
@@ -582,7 +823,9 @@ def _quorum_rpc_urls() -> list[str]:
 def _same_operator_rpc_urls(primary_url: str) -> list[str]:
     """Retain same-operator endpoints as failovers without extra quorum votes."""
     operator = _rpc_provider_key(primary_url)
-    candidates = [primary_url, *_configured_rpc_urls(), *LOG_RPC_URLS, *DEFAULT_LOG_RPC_URLS]
+    candidates = [primary_url, *_configured_rpc_urls(), *LOG_RPC_URLS]
+    if INCLUDE_PUBLIC_RPC_FALLBACKS:
+        candidates.extend(DEFAULT_LOG_RPC_URLS)
     unique: list[str] = []
     seen: set[str] = set()
     for candidate in candidates:
@@ -596,7 +839,11 @@ def _same_operator_rpc_urls(primary_url: str) -> list[str]:
 def _responsive_rpc_urls(urls: list[str], required: int, scope: str) -> list[str]:
     now = time.monotonic()
     responsive = [url for url in urls if RPC_SLOW_UNTIL.get((scope, url), 0.0) <= now]
-    return responsive if len(responsive) >= required else list(urls)
+    # A fail-closed quorum cannot tolerate a single transient failure when the
+    # circuit breaker trims a healthy qualified pool down to exactly the vote
+    # minimum. Keep at least one spare; otherwise reintroduce cooled endpoints
+    # and let the bounded concurrent quorum decide from fresh evidence.
+    return responsive if len(responsive) >= required + 1 else list(urls)
 
 
 def _mark_rpc_pending_slow(pending_urls: list[str], scope: str) -> None:
@@ -610,10 +857,21 @@ def _rpc_once(url: str, method: str, params: list[Any], *, timeout: int = 30) ->
     data = post_json(payload, timeout, url)
     if not isinstance(data, dict):
         raise RuntimeError(f"unexpected JSON-RPC response type for {method}")
-    if "error" in data:
-        raise RuntimeError(json.dumps(data["error"], sort_keys=True))
-    if "result" not in data:
-        raise RuntimeError(f"JSON-RPC response missing result for {method}")
+    if data.get("jsonrpc") != "2.0" or type(data.get("id")) is not int or data.get("id") != 1:
+        raise RuntimeError(f"mismatched JSON-RPC envelope for {method}")
+    has_result = "result" in data
+    has_error = "error" in data
+    if has_result == has_error:
+        raise RuntimeError(f"JSON-RPC response must contain exactly one of result or error for {method}")
+    if has_error:
+        error = data.get("error")
+        if (
+            not isinstance(error, dict)
+            or type(error.get("code")) is not int
+            or not isinstance(error.get("message"), str)
+        ):
+            raise RuntimeError(f"malformed JSON-RPC error envelope for {method}")
+        raise RuntimeError(f"JSON-RPC error code={error['code']} for {method}")
     return data["result"]
 
 
@@ -641,6 +899,30 @@ def _rpc_once_with_retry(url: str, method: str, params: list[Any], *, timeout: i
 
 
 def _canonical_rpc_result(method: str, value: Any) -> str:
+    if method == "eth_getBlockByNumber" and isinstance(value, dict):
+        # Providers may append nonstandard block fields. Quorum only over the
+        # canonical identity and timestamp that the builder publishes. JSON-
+        # RPC quantities are integers, so harmless leading-zero or hex-case
+        # differences must not split an otherwise exact provider quorum.
+        def canonical_quantity(raw: Any) -> str:
+            quantity = str(raw or "").strip()
+            if (
+                len(quantity) >= 3
+                and quantity[:2].lower() == "0x"
+                and all(character in "0123456789abcdefABCDEF" for character in quantity[2:])
+            ):
+                return str(int(quantity[2:], 16))
+            return "invalid:" + quantity.lower()
+
+        return json.dumps(
+            {
+                "hash": str(value.get("hash") or "").lower(),
+                "number": canonical_quantity(value.get("number")),
+                "timestamp": canonical_quantity(value.get("timestamp")),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
     if method == "eth_getLogs" and isinstance(value, list):
         normalized = sorted(
             (
@@ -843,10 +1125,26 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
             f"Base RPC head quorum unavailable: healthy={len(heads)} required={required}; "
             + "; ".join(errors[:3])
         )
-    ordered_heads = sorted((head for _url, head in heads), reverse=True)
+    ordered_pairs = sorted(heads, key=lambda item: item[1], reverse=True)
+    head_cluster: list[tuple[str, int]] = []
+    for _anchor_url, anchor_head in ordered_pairs:
+        candidate = [
+            (url, head)
+            for url, head in ordered_pairs
+            if anchor_head - RPC_MAX_HEAD_SPREAD_BLOCKS <= head <= anchor_head
+        ]
+        if len(candidate) >= required:
+            head_cluster = candidate
+            break
+    if len(head_cluster) < required:
+        redacted = ", ".join(f"{_redact_rpc_url(url)}={head}" for url, head in ordered_pairs)
+        raise RuntimeError(
+            f"Base RPC heads cannot form a recent quorum within {RPC_MAX_HEAD_SPREAD_BLOCKS} blocks: {redacted}"
+        )
+    ordered_heads = sorted((head for _url, head in head_cluster), reverse=True)
     quorum_head = ordered_heads[required - 1]
     snapshot_block = max(0, quorum_head - SNAPSHOT_CONFIRMATIONS)
-    eligible_urls = [url for url, head in heads if head >= snapshot_block]
+    eligible_urls = [url for url, head in head_cluster if head >= snapshot_block]
     block_data, agreeing_urls = rpc_quorum(
         "eth_getBlockByNumber",
         [hex(snapshot_block), False],
@@ -856,26 +1154,98 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
     )
     if not isinstance(block_data, dict) or not block_data.get("hash"):
         raise RuntimeError(f"Base snapshot block {snapshot_block} missing hash")
+    try:
+        block_number = int(str(block_data.get("number") or ""), 16)
+        block_timestamp = int(str(block_data.get("timestamp") or ""), 16)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(f"Base snapshot block {snapshot_block} has malformed number/timestamp") from exc
+    if block_number != snapshot_block:
+        raise RuntimeError(
+            f"Base snapshot response number mismatch expected={snapshot_block} observed={block_number}"
+        )
+    block_age = time.time() - block_timestamp
+    if block_age < -60 or block_age > RPC_MAX_BLOCK_AGE_SECONDS:
+        raise RuntimeError(
+            f"Base snapshot block {snapshot_block} timestamp is outside the freshness window: age_seconds={block_age:.0f}"
+        )
+
+    expected_block_hash = str(block_data["hash"]).lower()
+    snapshot_state_tag = {"blockHash": expected_block_hash, "requireCanonical": True}
+
+    def contract_code_sha256(raw_code: Any, label: str) -> str:
+        code = str(raw_code or "")
+        encoded = code[2:] if code.startswith("0x") else ""
+        if (
+            not encoded
+            or len(encoded) % 2 != 0
+            or any(character not in "0123456789abcdefABCDEF" for character in encoded)
+        ):
+            raise RuntimeError(f"{label} returned malformed or empty contract code")
+        return hashlib.sha256(bytes.fromhex(encoded)).hexdigest()
 
     code_hashes: dict[str, str] = {}
     for label, address in (("auction_house", AUCTION_HOUSE), ("dog_nft", DEGEN_DOGS)):
-        code, code_urls = rpc_quorum(
+        code, _code_urls = rpc_quorum(
             "eth_getCode",
-            [address, hex(snapshot_block)],
-            urls=agreeing_urls,
+            [address, snapshot_state_tag],
+            # Every endpoint must resolve the already selected block hash, so
+            # do not prematurely restrict code discovery to the two providers
+            # that happened to finish the initial block quorum first.
+            urls=eligible_urls,
             min_agreement=required,
             timeout=30,
         )
-        if not isinstance(code, str) or code in {"", "0x", "0x0"}:
-            raise RuntimeError(f"{label} has no contract code at Base block {snapshot_block}")
-        agreeing_urls = [url for url in agreeing_urls if url in code_urls]
-        if len(agreeing_urls) < required:
-            raise RuntimeError(f"{label} contract-code quorum fell below {required}")
-        code_bytes = bytes.fromhex(code.removeprefix("0x"))
-        code_hashes[f"{label}_code_sha256"] = hashlib.sha256(code_bytes).hexdigest()
+        code_hashes[f"{label}_code_sha256"] = contract_code_sha256(code, label)
 
-    VERIFIED_SNAPSHOT_URLS = agreeing_urls
-    expected_block_hash = str(block_data["hash"]).lower()
+    def endpoint_snapshot_qualification(url: str) -> str:
+        candidate_block = _rpc_once_with_retry(
+            url,
+            "eth_getBlockByNumber",
+            [hex(snapshot_block), False],
+            timeout=20,
+        )
+        if not isinstance(candidate_block, dict):
+            raise RuntimeError("snapshot qualification returned a non-object block")
+        try:
+            candidate_number = int(str(candidate_block.get("number") or ""), 16)
+            candidate_timestamp = int(str(candidate_block.get("timestamp") or ""), 16)
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError("snapshot qualification returned malformed block quantities") from exc
+        candidate_hash = canonical_block_hash(candidate_block.get("hash"))
+        if (
+            candidate_number != snapshot_block
+            or candidate_hash != expected_block_hash
+            or candidate_timestamp != block_timestamp
+        ):
+            raise RuntimeError("snapshot qualification block identity mismatch")
+        for label, address in (("auction_house", AUCTION_HOUSE), ("dog_nft", DEGEN_DOGS)):
+            candidate_code = _rpc_once_with_retry(
+                url,
+                "eth_getCode",
+                [address, snapshot_state_tag],
+                timeout=20,
+            )
+            if contract_code_sha256(candidate_code, label) != code_hashes[f"{label}_code_sha256"]:
+                raise RuntimeError(f"snapshot qualification {label} code mismatch")
+        return url
+
+    # Run every eligible independent endpoint concurrently and retain every
+    # responder that proves the exact selected block identity and both exact
+    # bytecodes. Passing the candidate count as the collector threshold makes
+    # this a bounded all-candidate probe rather than stopping at the first two.
+    qualified_snapshot_urls, qualification_errors = _collect_rpc_probes(
+        eligible_urls,
+        required=len(eligible_urls),
+        probe=endpoint_snapshot_qualification,
+        label="snapshot-qualification",
+    )
+    qualified_snapshot_urls = _independent_rpc_urls(qualified_snapshot_urls)
+    if len(qualified_snapshot_urls) < required:
+        raise RuntimeError(
+            f"Base RPC snapshot qualification unavailable: healthy={len(qualified_snapshot_urls)} "
+            f"required={required}; " + "; ".join(qualification_errors[:3])
+        )
+    VERIFIED_SNAPSHOT_URLS = qualified_snapshot_urls
 
     def endpoint_log_capability(url: str) -> str:
         chain_id = int(str(_rpc_once_with_retry(url, "eth_chainId", [], timeout=15)), 16)
@@ -892,6 +1262,31 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
             raise RuntimeError(
                 f"snapshot hash mismatch expected={expected_block_hash} observed={candidate_hash or 'missing'}"
             )
+        # A provider that serves the hot snapshot and recent logs can still be
+        # a pruned full node. Prove that every log-quorum member can read the
+        # oldest block this dashboard may need before using it for historical
+        # event timestamps.
+        if FROM_BLOCK < snapshot_block:
+            archive_probe_number = FROM_BLOCK
+            archive_block = _rpc_once_with_retry(
+                url,
+                "eth_getBlockByNumber",
+                [hex(archive_probe_number), False],
+                timeout=BLOCK_TIME_RPC_TIMEOUT,
+            )
+            if not isinstance(archive_block, dict):
+                raise RuntimeError("historical block capability check returned a non-object")
+            try:
+                archive_number = int(str(archive_block.get("number") or ""), 16)
+                archive_timestamp = int(str(archive_block.get("timestamp") or ""), 16)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError("historical block capability check returned malformed quantities") from exc
+            if (
+                archive_number != archive_probe_number
+                or not canonical_block_hash(archive_block.get("hash"))
+                or archive_timestamp <= 0
+            ):
+                raise RuntimeError("historical block capability check returned a mismatched block envelope")
         sample_from = max(FROM_BLOCK, snapshot_block - LOG_QUORUM_WINDOW_BLOCKS + 1)
         sample_to = min(snapshot_block, sample_from + max(1, LOG_QUORUM_MAX_BLOCKS) - 1)
         sample = _rpc_once_with_retry(
@@ -904,7 +1299,7 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
             raise RuntimeError("eth_getLogs capability check did not return a list")
         return url
 
-    log_candidates = _independent_rpc_urls([*LOG_RPC_URLS, *agreeing_urls, *_quorum_rpc_urls()])
+    log_candidates = _independent_rpc_urls([*LOG_RPC_URLS, *qualified_snapshot_urls, *_quorum_rpc_urls()])
     verified_log_urls, log_errors = _collect_rpc_probes(
         log_candidates,
         required=required,
@@ -917,16 +1312,19 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
             + "; ".join(log_errors[:3])
         )
     VERIFIED_LOG_URLS = verified_log_urls
-    providers = sorted({_rpc_provider_key(url) for url in agreeing_urls})
+    providers = sorted({_rpc_provider_key(url) for url in qualified_snapshot_urls})
     log_providers = sorted({_rpc_provider_key(url) for url in verified_log_urls})
     verification = {
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
-        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_verification_scope": (
+            "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs,"
+            "event_block_timestamps,dog_token_uri_bindings,woof_token_state,sup_token_state"
+        ),
         "onchain_chain_id": "8453",
         "snapshot_block_hash": str(block_data["hash"]).lower(),
         "snapshot_confirmations": str(max(ordered_heads) - snapshot_block),
         "rpc_quorum_size": str(required),
-        "rpc_quorum_agreement": f"{len(agreeing_urls)}/{len(urls)}",
+        "rpc_quorum_agreement": f"{len(qualified_snapshot_urls)}/{len(eligible_urls)}",
         "rpc_quorum_providers": ",".join(providers),
         "log_rpc_quorum_providers": ",".join(log_providers),
         **code_hashes,
@@ -952,16 +1350,14 @@ def verify_snapshot_unchanged(snapshot_block: int, expected_hash: str) -> None:
 
 
 def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | None = None) -> Any:
-    payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
     active_urls = urls or RPC_URLS
+    if not active_urls:
+        raise RuntimeError(f"no JSON-RPC endpoints configured for {method}")
     last: Exception | None = None
     attempts = max(RPC_ATTEMPTS, len(active_urls))
     for attempt in range(attempts):
         try:
-            data = post_json(payload, timeout, active_urls[attempt % len(active_urls)])
-            if "error" in data:
-                raise RuntimeError(json.dumps(data["error"], sort_keys=True))
-            return data["result"]
+            return _rpc_once(active_urls[attempt % len(active_urls)], method, params, timeout=timeout)
         except Exception as exc:  # noqa: BLE001
             last = exc
             if attempt == attempts - 1:
@@ -970,10 +1366,48 @@ def rpc(method: str, params: list[Any], timeout: int = 60, urls: list[str] | Non
     raise RuntimeError(last)
 
 
+def _validated_batch_items(items: Any, call_count: int) -> dict[int, dict[str, Any]]:
+    if not isinstance(items, list):
+        raise RuntimeError(f"unexpected JSON-RPC batch response type: {type(items).__name__}")
+    by_id: dict[int, dict[str, Any]] = {}
+    for item in items:
+        if not isinstance(item, dict):
+            raise RuntimeError("JSON-RPC batch response contains a non-object item")
+        request_id = item.get("id")
+        if type(request_id) is not int or request_id < 0 or request_id >= call_count:
+            raise RuntimeError(f"JSON-RPC batch response contains an invalid id: {request_id!r}")
+        if request_id in by_id:
+            raise RuntimeError(f"JSON-RPC batch response contains duplicate id {request_id}")
+        if item.get("jsonrpc") != "2.0":
+            raise RuntimeError(f"JSON-RPC batch response has a mismatched envelope for id {request_id}")
+        has_result = "result" in item
+        has_error = "error" in item
+        if has_result == has_error:
+            raise RuntimeError(
+                f"JSON-RPC batch response id {request_id} must contain exactly one of result or error"
+            )
+        if has_error:
+            error = item.get("error")
+            if (
+                not isinstance(error, dict)
+                or type(error.get("code")) is not int
+                or not isinstance(error.get("message"), str)
+            ):
+                raise RuntimeError(f"JSON-RPC batch response id {request_id} has a malformed error")
+        by_id[request_id] = item
+    expected = set(range(call_count))
+    if set(by_id) != expected:
+        missing = sorted(expected.difference(by_id))
+        raise RuntimeError(f"JSON-RPC batch response is incomplete; missing ids={missing}")
+    return by_id
+
+
 def rpc_batch(calls: list[tuple[str, list[Any]]], timeout: int = 120, urls: list[str] | None = None) -> list[Any]:
     if not calls:
         return []
     active_urls = urls or RPC_URLS
+    if not active_urls:
+        raise RuntimeError("no JSON-RPC endpoints configured for batch request")
     if len(calls) > RPC_BATCH_LIMIT:
         out: list[Any] = []
         for i in range(0, len(calls), RPC_BATCH_LIMIT):
@@ -987,23 +1421,115 @@ def rpc_batch(calls: list[tuple[str, list[Any]]], timeout: int = 120, urls: list
     for attempt in range(attempts):
         try:
             items = post_json(payload, timeout, active_urls[attempt % len(active_urls)])
-            if not isinstance(items, list):
-                raise RuntimeError(f"Unexpected batch response: {items!r}")
-            by_id = {item.get("id"): item for item in items if isinstance(item, dict)}
+            by_id = _validated_batch_items(items, len(calls))
             out = []
             for i in range(len(calls)):
-                item = by_id.get(i)
-                if not item or "error" in item:
+                item = by_id[i]
+                if "error" in item:
                     method, params = calls[i]
                     out.append(rpc(method, params, timeout=timeout, urls=active_urls))
                 else:
-                    out.append(item.get("result"))
+                    out.append(item["result"])
             return out
         except Exception:
             if attempt == attempts - 1:
                 raise
             time.sleep(random.uniform(0, min(4.0, 0.25 * (2**attempt))))
     return []
+
+
+def rpc_batch_quorum(
+    calls: list[tuple[str, list[Any]]],
+    *,
+    urls: list[str] | None = None,
+    min_agreement: int | None = None,
+    timeout: int = 60,
+) -> list[Any]:
+    """Require independently operated RPCs to agree on an entire batch."""
+    if not calls:
+        return []
+    required = min_agreement or RPC_QUORUM_SIZE
+    active_urls = _responsive_rpc_urls(
+        _independent_rpc_urls(urls or VERIFIED_SNAPSHOT_URLS or _quorum_rpc_urls()),
+        required,
+        "rpc-batch",
+    )
+    if len(active_urls) < required:
+        raise RuntimeError(
+            f"JSON-RPC batch requires {required} independent Base RPC providers; configured={len(active_urls)}"
+        )
+
+    responses: queue.Queue[tuple[int, str, list[Any] | None, Exception | None]] = queue.Queue()
+
+    def worker(index: int, url: str) -> None:
+        try:
+            responses.put((index, url, rpc_batch(calls, timeout=timeout, urls=[url]), None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(active_urls)))
+    grouped: dict[str, list[tuple[str, list[Any]]]] = defaultdict(list)
+    errors: list[str] = []
+    for index, url in enumerate(active_urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"rpc-batch-quorum-{index}",
+            daemon=True,
+        ).start()
+
+    deadline = time.monotonic() + RPC_QUORUM_DEADLINE_SECONDS
+    while pending_indexes:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            index, url, values, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is not None:
+            errors.append(f"{_redact_rpc_url(url)}: {error}")
+        elif values is not None:
+            canonical = json.dumps(
+                [
+                    _canonical_rpc_result(method, value)
+                    for (method, _params), value in zip(calls, values)
+                ],
+                separators=(",", ":"),
+            )
+            grouped[canonical].append((url, values))
+
+        pending = len(pending_indexes)
+        ordered = sorted(grouped.values(), key=len, reverse=True)
+        winner = ordered[0] if ordered else []
+        runner_up_votes = len(ordered[1]) if len(ordered) > 1 else 0
+        if len(winner) >= required and len(winner) > runner_up_votes + pending:
+            _mark_rpc_pending_slow([active_urls[item] for item in pending_indexes], "rpc-batch")
+            return winner[0][1]
+
+    if pending_indexes:
+        pending_urls = [active_urls[item] for item in pending_indexes]
+        _mark_rpc_pending_slow(pending_urls, "rpc-batch")
+        errors.append(
+            "deadline exceeded: " + ", ".join(_redact_rpc_url(url) for url in pending_urls[:3])
+        )
+    votes = sorted((len(group) for group in grouped.values()), reverse=True)
+    detail = f" votes={votes}" if votes else ""
+    if grouped:
+        provider_groups = sorted(
+            (
+                sorted({_rpc_provider_key(url) for url, _values in group})
+                for group in grouped.values()
+            ),
+            key=lambda providers: (-len(providers), providers),
+        )
+        detail += " provider_groups=" + json.dumps(provider_groups[:3], separators=(",", ":"))
+    if errors:
+        detail += f" errors={'; '.join(errors[:3])}"
+    raise RuntimeError(f"JSON-RPC batch quorum disagreement: required={required}{detail}")
 
 
 def log_filter(address: str, topic_filter: str | list[str], start: int, end: int) -> dict[str, Any]:
@@ -1037,31 +1563,50 @@ def _log_cache_path(address: str, topics: str | list[str], from_block: int) -> P
 
 def _load_log_cache(path: Path, address: str, topics: str | list[str], from_block: int) -> tuple[int, list[dict[str, Any]]]:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+        data = read_owned_json_file(path, 67_108_864, "RPC log cache")
+        if data is None or not isinstance(data, dict):
+            return 0, []
+        expected_topics = _canonical_topics(topics)
+        if data.get("schema_version") != 1:
+            return 0, []
+        if str(data.get("address", "")).lower() != address.lower():
+            return 0, []
+        if data.get("topics") != expected_topics:
+            return 0, []
+        cached_from = data.get("from_block")
+        cached_to = data.get("to_block")
+        if type(cached_from) is not int or type(cached_to) is not int:
+            return 0, []
+        if cached_from != int(from_block) or cached_to < cached_from:
+            return 0, []
+        logs = data.get("logs")
+        if not isinstance(logs, list):
+            return 0, []
+        clean_logs: list[dict[str, Any]] = []
+        for item in logs:
+            if not isinstance(item, dict):
+                return 0, []
+            raw_block = item.get("blockNumber")
+            raw_index = item.get("logIndex", "0x0")
+            if not isinstance(raw_block, str) or not isinstance(raw_index, str):
+                return 0, []
+            block_number = int(raw_block, 16)
+            log_index = int(raw_index, 16)
+            if block_number < cached_from or block_number > cached_to or log_index < 0:
+                return 0, []
+            if not str(item.get("transactionHash") or "") or not isinstance(item.get("topics", []), list):
+                return 0, []
+            # Exercise both cache keys while loading so malformed hex or
+            # identities are treated as a miss instead of crashing a refresh.
+            _log_sort_key(item)
+            _log_identity(item)
+            clean_logs.append(item)
+        return cached_to, clean_logs
+    except (OSError, RuntimeError, TypeError, ValueError):
         return 0, []
-    except json.JSONDecodeError:
-        return 0, []
-    expected_topics = _canonical_topics(topics)
-    if not isinstance(data, dict):
-        return 0, []
-    if data.get("schema_version") != 1:
-        return 0, []
-    if str(data.get("address", "")).lower() != address.lower():
-        return 0, []
-    if data.get("topics") != expected_topics:
-        return 0, []
-    if int(data.get("from_block") or -1) != int(from_block):
-        return 0, []
-    logs = data.get("logs")
-    if not isinstance(logs, list):
-        return 0, []
-    clean_logs = [item for item in logs if isinstance(item, dict) and item.get("blockNumber")]
-    return int(data.get("to_block") or 0), clean_logs
 
 
 def _save_log_cache(path: Path, address: str, topics: str | list[str], from_block: int, to_block: int, logs: list[dict[str, Any]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     data = {
         "schema_version": 1,
         "address": address.lower(),
@@ -1071,9 +1616,7 @@ def _save_log_cache(path: Path, address: str, topics: str | list[str], from_bloc
         "updated_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "logs": logs,
     }
-    temp = path.with_suffix(path.suffix + ".tmp")
-    temp.write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
-    temp.replace(path)
+    atomic_write_text(path, json.dumps(data, separators=(",", ":")) + "\n")
 
 
 def _log_sort_key(item: dict[str, Any]) -> tuple[int, str, int]:
@@ -1165,7 +1708,9 @@ def _fetch_logs_verified_or_uncached(
     to_block: int,
     checkpoint: Any | None = None,
 ) -> list[dict[str, Any]]:
-    if not VERIFIED_LOG_URLS or not LOG_QUORUM_MAX_BLOCKS or not LOG_QUORUM_WINDOW_BLOCKS:
+    if VERIFIED_LOG_URLS and (LOG_QUORUM_MAX_BLOCKS < 1 or LOG_QUORUM_WINDOW_BLOCKS < 1):
+        raise RuntimeError("verified log collection requires positive quorum window and chunk sizes")
+    if not VERIFIED_LOG_URLS:
         return _fetch_logs_checkpointed(address, topics, from_block, to_block, checkpoint)
 
     # A cold scan can span millions of blocks, but the reorg-sensitive newest
@@ -1211,6 +1756,8 @@ def _fetch_logs_verified_or_uncached(
 def fetch_logs(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
     if from_block > to_block:
         return []
+    if VERIFIED_LOG_URLS and LOG_CACHE_OVERLAP_BLOCKS < 1:
+        raise RuntimeError("verified log collection requires a positive cache overlap")
     if not _log_cache_enabled():
         return _fetch_logs_verified_or_uncached(address, topics, from_block, to_block)
 
@@ -1291,79 +1838,146 @@ def decimal_str(value: int, decimals: int, max_places: int = 18) -> str:
     return s if s else "0"
 
 
-def load_block_time_cache() -> dict[int, str]:
-    cache: dict[int, str] = {}
+def canonical_block_hash(value: Any) -> str:
+    block_hash = str(value or "").strip().lower()
+    if len(block_hash) != 66 or not block_hash.startswith("0x"):
+        return ""
+    return block_hash if all(character in "0123456789abcdef" for character in block_hash[2:]) else ""
+
+
+def load_block_time_cache() -> dict[int, dict[str, str]]:
+    """Load only hash-bound block timestamps; legacy timestamp-only rows miss."""
+    cache: dict[int, dict[str, str]] = {}
     try:
-        raw = json.loads(BLOCK_TIME_CACHE.read_text(encoding="utf-8"))
-        if isinstance(raw, dict):
-            for key, value in raw.items():
-                try:
-                    block = int(key)
-                except (TypeError, ValueError):
-                    continue
-                timestamp = str(value or "").strip()
-                if timestamp:
-                    cache[block] = timestamp
-    except FileNotFoundError:
-        pass
+        raw = read_owned_json_file(BLOCK_TIME_CACHE, 16_777_216, "block-time cache")
+        if not isinstance(raw, dict) or raw.get("schema_version") != 2:
+            return {}
+        blocks = raw.get("blocks")
+        if not isinstance(blocks, dict):
+            return {}
+        for key, value in blocks.items():
+            if not isinstance(value, dict):
+                continue
+            try:
+                block = int(key)
+            except (TypeError, ValueError):
+                continue
+            if block < 0 or str(block) != str(key):
+                continue
+            block_hash = canonical_block_hash(value.get("block_hash"))
+            timestamp = str(value.get("timestamp_utc") or "").strip()
+            try:
+                datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+            except (TypeError, ValueError):
+                continue
+            if block_hash:
+                cache[block] = {"block_hash": block_hash, "timestamp_utc": timestamp}
     except Exception as exc:  # noqa: BLE001
         print(f"warning: block time cache ignored: {exc}", file=sys.stderr)
-
-    seed_paths = (
-        GENERATED / "auction_bids.csv",
-        GENERATED / "auction_settled.csv",
-        ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_auction_bids.csv",
-        ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_auction_settled.csv",
-    )
-    for path in seed_paths:
-        try:
-            with path.open(newline="", encoding="utf-8") as handle:
-                for row in csv.DictReader(handle):
-                    raw_block = str(row.get("block_number") or "").strip()
-                    timestamp = str(row.get("block_time_utc") or "").strip()
-                    if raw_block and timestamp:
-                        cache[int(raw_block)] = timestamp
-        except FileNotFoundError:
-            continue
-        except Exception as exc:  # noqa: BLE001
-            print(f"warning: generated block time seed ignored for {path.name}: {exc}", file=sys.stderr)
     return cache
 
 
-def save_block_time_cache(cache: dict[int, str]) -> None:
-    CACHE_DIR.mkdir(exist_ok=True)
-    temp = BLOCK_TIME_CACHE.with_suffix(".tmp")
-    temp.write_text(json.dumps({str(k): cache[k] for k in sorted(cache)}, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
-    temp.replace(BLOCK_TIME_CACHE)
+def save_block_time_cache(cache: dict[int, dict[str, str]]) -> None:
+    atomic_write_text(
+        BLOCK_TIME_CACHE,
+        json.dumps(
+            {
+                "schema_version": 2,
+                "blocks": {str(k): cache[k] for k in sorted(cache)},
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        + "\n",
+    )
 
 
-def fetch_block_times(blocks: set[int]) -> dict[int, str]:
+def fetch_block_times(
+    blocks: set[int],
+    expected_hashes: dict[int, str] | None = None,
+) -> dict[int, str]:
     ordered = sorted(blocks)
+    normalized_hashes: dict[int, str] = {}
+    for block, raw_hash in (expected_hashes or {}).items():
+        block_hash = canonical_block_hash(raw_hash)
+        if not block_hash:
+            raise RuntimeError(f"event log for block {block} has an invalid block hash")
+        normalized_hashes[int(block)] = block_hash
+    if VERIFIED_LOG_URLS:
+        missing_hashes = [block for block in ordered if block not in normalized_hashes]
+        if missing_hashes:
+            raise RuntimeError(
+                "verified historical block-time lookup requires event-log block hashes; "
+                f"missing={missing_hashes[:10]}"
+            )
+        archive_urls = _independent_rpc_urls(VERIFIED_LOG_URLS)
+        if len(archive_urls) < RPC_QUORUM_SIZE:
+            raise RuntimeError(
+                f"historical block-time verification requires {RPC_QUORUM_SIZE} independent "
+                f"archive/log RPC providers; configured={len(archive_urls)}"
+            )
+    elif VERIFIED_SNAPSHOT_URLS:
+        raise RuntimeError("historical block-time verification has no capability-probed archive/log RPC quorum")
+    else:
+        archive_urls = []
     cache = load_block_time_cache()
-    out: dict[int, str] = {block: cache[block] for block in ordered if block in cache}
+    out: dict[int, str] = {
+        block: cache[block]["timestamp_utc"]
+        for block in ordered
+        if block in cache
+        and block in normalized_hashes
+        and cache[block]["block_hash"] == normalized_hashes[block]
+    }
     missing = [block for block in ordered if block not in out]
     if missing:
         progress(f"fetching block times missing={len(missing)} cached={len(out)}")
-    for i in range(0, len(missing), 100):
-        batch = missing[i : i + 100]
+    # Give every small archive batch a fresh quorum deadline. A large outer
+    # batch would otherwise force each provider through many serial HTTP
+    # requests inside one all-or-nothing deadline.
+    for i in range(0, len(missing), RPC_BATCH_LIMIT):
+        batch = missing[i : i + RPC_BATCH_LIMIT]
         calls = [("eth_getBlockByNumber", [hex(block), False]) for block in batch]
-        results = rpc_batch(calls, timeout=BLOCK_TIME_RPC_TIMEOUT)
+        results = (
+            rpc_batch_quorum(
+                calls,
+                urls=archive_urls,
+                min_agreement=RPC_QUORUM_SIZE,
+                timeout=BLOCK_TIME_RPC_TIMEOUT,
+            )
+            if archive_urls
+            else rpc_batch(calls, timeout=BLOCK_TIME_RPC_TIMEOUT)
+        )
         for block, result in zip(batch, results):
-            if result:
-                timestamp = utc_from_unix(int(result["timestamp"], 16))
-                out[block] = timestamp
-                cache[block] = timestamp
-    if missing:
+            if not isinstance(result, dict):
+                raise RuntimeError(f"block-time lookup for {block} returned a non-object result")
+            try:
+                observed_number = int(str(result.get("number") or ""), 16)
+                timestamp_unix = int(str(result.get("timestamp") or ""), 16)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError(f"block-time lookup for {block} returned malformed quantities") from exc
+            block_hash = canonical_block_hash(result.get("hash"))
+            if observed_number != block or not block_hash or timestamp_unix <= 0:
+                raise RuntimeError(f"block-time lookup for {block} returned a mismatched block envelope")
+            expected_hash = normalized_hashes.get(block)
+            if expected_hash and block_hash != expected_hash:
+                raise RuntimeError(
+                    f"block-time lookup hash mismatch for block {block}: "
+                    f"expected={expected_hash} observed={block_hash}"
+                )
+            timestamp = utc_from_unix(timestamp_unix)
+            out[block] = timestamp
+            cache[block] = {"block_hash": block_hash, "timestamp_utc": timestamp}
+        # Checkpoint each verified bounded chunk so a late archive outage does
+        # not discard minutes of completed quorum work. The atomic writer keeps
+        # readers on the previous complete cache until replacement succeeds.
         save_block_time_cache(cache)
+    if set(out) != set(ordered):
+        raise RuntimeError("block-time lookup returned an incomplete result")
     return out
 
 
 def eth_call(to: str, data: str, block_tag: str = "latest") -> str:
-    critical_call = (to.lower(), data.lower()) in {
-        (AUCTION_HOUSE.lower(), SELECTOR_AUCTION.lower()),
-        (DEGEN_DOGS.lower(), SELECTOR_TOTAL_SUPPLY.lower()),
-    }
-    if critical_call and VERIFIED_SNAPSHOT_URLS and block_tag != "latest":
+    if VERIFIED_SNAPSHOT_URLS and block_tag != "latest":
         result, _agreeing_urls = rpc_quorum(
             "eth_call",
             [{"to": to, "data": data}, block_tag],
@@ -1402,8 +2016,8 @@ def fetch_eth_usd_price() -> tuple[Decimal, str]:
     for source, url, picker in endpoints:
         try:
             req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"})
-            with urllib.request.urlopen(req, timeout=30) as response:
-                data = json.loads(response.read().decode("utf-8"))
+            with open_no_redirect(req, timeout=30) as response:
+                data = read_bounded_json_response(response, EXTERNAL_JSON_MAX_RESPONSE_BYTES, source)
             price = Decimal(str(picker(data)))
             if price > 0:
                 return price, source
@@ -1869,8 +2483,8 @@ def fetch_token_usd_price(symbol: str, token_address: str) -> tuple[Decimal, str
     url = f"https://api.dexscreener.com/latest/dex/tokens/{token_address}"
     try:
         req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as response:
-            data = json.loads(response.read().decode("utf-8"))
+        with open_no_redirect(req, timeout=30) as response:
+            data = read_bounded_json_response(response, EXTERNAL_JSON_MAX_RESPONSE_BYTES, "Dexscreener")
         candidates = []
         token_lower = token_address.lower()
         for pair in data.get("pairs") or []:
@@ -1989,18 +2603,104 @@ def fetch_token_uri(token_id: int, block_tag: str) -> str:
 
 
 def normalize_metadata_url(url: str) -> str:
-    if url.startswith("ipfs://"):
-        return "https://ipfs.io/ipfs/" + url.removeprefix("ipfs://")
-    return url
+    normalized = str(url or "").strip()
+    if normalized.lower().startswith("ipfs://"):
+        ipfs_path = normalized[7:].removeprefix("ipfs/").lstrip("/")
+        if not ipfs_path:
+            raise ValueError("empty IPFS metadata URI")
+        return "https://ipfs.io/ipfs/" + ipfs_path
+    return normalized
+
+
+def validate_metadata_url(url: str) -> str:
+    normalized = normalize_metadata_url(url)
+    if normalized.lower().startswith("data:"):
+        return normalized
+    try:
+        parsed = urllib.parse.urlsplit(normalized)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise ValueError("invalid metadata URL") from exc
+    if parsed.scheme.lower() != "https":
+        raise ValueError("metadata URL must use HTTPS, IPFS, or an inline JSON data URI")
+    if parsed.username is not None or parsed.password is not None:
+        raise ValueError("metadata URL must not contain credentials")
+    if not host or host not in DOG_METADATA_ALLOWED_HOSTS:
+        raise ValueError(f"metadata host is not trusted: {host or '<missing>'}")
+    if port not in {None, 443}:
+        raise ValueError("metadata URL must use the default HTTPS port")
+    return urllib.parse.urlunsplit(("https", parsed.netloc, parsed.path or "/", parsed.query, ""))
+
+
+def decode_metadata_json(payload: bytes) -> dict[str, Any]:
+    if len(payload) > DOG_METADATA_MAX_RESPONSE_BYTES:
+        raise ValueError("metadata JSON response exceeds the configured size limit")
+    decoded = json.loads(payload.decode("utf-8"))
+    if not isinstance(decoded, dict):
+        raise ValueError("metadata JSON response must be an object")
+    return decoded
+
+
+def decode_metadata_data_url(url: str) -> dict[str, Any]:
+    header, separator, encoded = url.partition(",")
+    if not separator:
+        raise ValueError("invalid metadata data URI")
+    parameters = header[5:].split(";")
+    media_type = (parameters[0] or "text/plain").lower()
+    if media_type != "application/json":
+        raise ValueError("metadata data URI must contain application/json")
+    is_base64 = any(parameter.lower() == "base64" for parameter in parameters[1:])
+    if len(encoded) > DOG_METADATA_MAX_RESPONSE_BYTES * 2:
+        raise ValueError("encoded metadata data URI exceeds the configured size limit")
+    try:
+        payload = base64.b64decode(encoded, validate=True) if is_base64 else urllib.parse.unquote_to_bytes(encoded)
+    except (ValueError, TypeError) as exc:
+        raise ValueError("invalid metadata data URI payload") from exc
+    return decode_metadata_json(payload)
+
+
+class MetadataRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: Any,
+        code: int,
+        msg: str,
+        headers: Any,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        validated = validate_metadata_url(newurl)
+        if validated.lower().startswith("data:"):
+            raise urllib.error.HTTPError(newurl, code, "metadata redirect to data URI rejected", headers, fp)
+        return super().redirect_request(req, fp, code, msg, headers, validated)
 
 
 def fetch_url_json(url: str, timeout: int = 45) -> dict[str, Any]:
+    validated = validate_metadata_url(url)
+    if validated.lower().startswith("data:"):
+        return decode_metadata_data_url(validated)
     req = urllib.request.Request(
-        normalize_metadata_url(url),
+        validated,
         headers={"Accept": "application/json", "User-Agent": "degen-dogs-mission3-builder/1.0"},
     )
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return json.loads(response.read().decode("utf-8"))
+    opener = urllib.request.build_opener(MetadataRedirectHandler())
+    with opener.open(req, timeout=timeout) as response:
+        content_type = ""
+        if response.headers:
+            content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+        if content_type and content_type != "application/json" and not content_type.endswith("+json"):
+            raise ValueError(f"metadata response has unsafe content type: {content_type}")
+        content_length = response.headers.get("Content-Length") if response.headers else None
+        if content_length:
+            try:
+                if int(content_length) > DOG_METADATA_MAX_RESPONSE_BYTES:
+                    raise ValueError("metadata JSON response exceeds the configured size limit")
+            except ValueError as exc:
+                if "exceeds" in str(exc):
+                    raise
+        payload = response.read(DOG_METADATA_MAX_RESPONSE_BYTES + 1)
+    return decode_metadata_json(payload)
 
 
 def simplified_dog_metadata(token_id: int, data: dict[str, Any]) -> dict[str, Any]:
@@ -2015,37 +2715,323 @@ def simplified_dog_metadata(token_id: int, data: dict[str, Any]) -> dict[str, An
     image = str(data.get("image") or "")
     if image.startswith("ipfs://"):
         image = normalize_metadata_url(image)
+    image = safe_dashboard_image(image)
+    external_url = safe_dashboard_link(data.get("external_url")) or f"https://degendogs.club/#dog{token_id}"
     return {
         "token_id": token_id,
         "name": str(data.get("name") or f"Degen Dog #{token_id}"),
         "image_url": image,
-        "external_url": str(data.get("external_url") or f"https://degendogs.club/#dog{token_id}"),
+        "external_url": external_url,
         "attributes": attrs,
     }
+
+
+def metadata_sha256(value: Any) -> str:
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def load_dog_cache() -> dict[str, Any]:
     if not DOG_METADATA_CACHE.exists():
         return {}
     try:
-        data = json.loads(DOG_METADATA_CACHE.read_text(encoding="utf-8"))
-        return data if isinstance(data, dict) else {}
+        data = read_owned_json_file(DOG_METADATA_CACHE, 16_777_216, "Dog metadata cache")
+        if not isinstance(data, dict) or data.get("schema_version") != 3:
+            return {}
+        tokens = data.get("tokens")
+        if not isinstance(tokens, dict):
+            return {}
+        valid: dict[str, Any] = {}
+        for key, entry in tokens.items():
+            if not isinstance(entry, dict) or not isinstance(entry.get("metadata"), dict):
+                continue
+            uri_hash = str(entry.get("token_uri_sha256") or "")
+            content_hash = str(entry.get("content_sha256") or "")
+            metadata_hash = str(entry.get("metadata_sha256") or "")
+            if not all(len(value) == 64 and all(ch in "0123456789abcdef" for ch in value) for value in (uri_hash, content_hash, metadata_hash)):
+                continue
+            if metadata_sha256(entry["metadata"]) != metadata_hash:
+                continue
+            fetched_at = str(entry.get("fetched_at_utc") or "")
+            try:
+                fetched_time = datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
+                age = (datetime.now(timezone.utc) - fetched_time.astimezone(timezone.utc)).total_seconds()
+            except (TypeError, ValueError):
+                continue
+            if age < -60 or age > DOG_METADATA_CACHE_MAX_AGE_SECONDS:
+                continue
+            valid[str(key)] = entry
+        return valid
     except Exception:
         return {}
 
 
 def write_dog_cache(cache: dict[str, Any]) -> None:
-    CACHE_DIR.mkdir(exist_ok=True)
-    atomic_write_text(DOG_METADATA_CACHE, json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+    payload = {"schema_version": 3, "tokens": cache}
+    atomic_write_text(DOG_METADATA_CACHE, json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+
+
+TokenUriOutcome = tuple[str, str]
+
+
+def _token_uri_state_tag(block_tag: str, block_hash: str | None) -> str | dict[str, Any]:
+    if block_hash is None:
+        return block_tag
+    normalized = str(block_hash).strip().lower()
+    if (
+        len(normalized) != 66
+        or not normalized.startswith("0x")
+        or any(character not in "0123456789abcdef" for character in normalized[2:])
+    ):
+        raise RuntimeError("tokenURI verification requires a canonical 32-byte snapshot block hash")
+    return {"blockHash": normalized, "requireCanonical": True}
+
+
+def _token_uri_nonexistent_outcome(error: dict[str, Any], token_id: int) -> TokenUriOutcome | None:
+    expected_data = ERC721_NONEXISTENT_TOKEN_ERROR + f"{token_id:x}".rjust(64, "0")
+    message = str(error.get("message") or "").strip().lower()
+    data = str(error.get("data") or "").strip().lower()
+    if error.get("code") == 3 and message.startswith("execution reverted") and data == expected_data:
+        return ("unavailable", expected_data)
+    return None
+
+
+def _token_uri_provider_outcomes(
+    url: str,
+    token_ids: list[int],
+    state_tag: str | dict[str, Any],
+    *,
+    timeout: int,
+    deadline: float,
+) -> list[TokenUriOutcome]:
+    calls = [
+        ("eth_call", [{"to": DEGEN_DOGS, "data": token_uri_data(token_id)}, state_tag])
+        for token_id in token_ids
+    ]
+    payload = [
+        {"jsonrpc": "2.0", "id": index, "method": method, "params": params}
+        for index, (method, params) in enumerate(calls)
+    ]
+    operator_urls = _same_operator_rpc_urls(url)
+    attempts = max(len(operator_urls), RPC_ATTEMPTS)
+    last_error: Exception | None = None
+    for attempt in range(attempts):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        candidate = operator_urls[attempt % len(operator_urls)]
+        try:
+            items = post_json(
+                payload,
+                max(1, min(timeout, int(remaining) + 1)),
+                candidate,
+            )
+            by_id = _validated_batch_items(items, len(calls))
+            outcomes: list[TokenUriOutcome] = []
+            for index, token_id in enumerate(token_ids):
+                item = by_id[index]
+                if "error" in item:
+                    outcome = _token_uri_nonexistent_outcome(item["error"], token_id)
+                    if outcome is None:
+                        raise RuntimeError(
+                            f"tokenURI RPC returned an unsupported contract error code={item['error'].get('code')}"
+                        )
+                    outcomes.append(outcome)
+                    continue
+                raw = item.get("result")
+                if not isinstance(raw, str):
+                    raise RuntimeError("tokenURI RPC returned a non-string result")
+                uri = decode_abi_string(raw)
+                if not uri or uri != uri.strip():
+                    raise RuntimeError("tokenURI RPC returned an empty or malformed URI")
+                outcomes.append(("uri", uri))
+            return outcomes
+        except Exception as exc:  # noqa: BLE001
+            last_error = exc
+            message = str(exc)
+            permanent = any(
+                marker in message
+                for marker in (
+                    "HTTP 400",
+                    "HTTP 401",
+                    "HTTP 403",
+                    "HTTP 404",
+                    "unsupported contract error",
+                    "non-string result",
+                    "empty or malformed URI",
+                    "JSON-RPC batch response",
+                )
+            )
+            # Give each same-operator alias one chance, but never retry an
+            # unsupported contract outcome indefinitely. HTTP 429/5xx and
+            # transport failures remain bounded, jittered retries.
+            if permanent and attempt + 1 >= len(operator_urls):
+                raise
+            if attempt == attempts - 1:
+                raise
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            delay = random.uniform(0, min(4.0, 0.25 * (2**attempt)))
+            if delay > 0:
+                time.sleep(min(delay, remaining))
+    if last_error is not None:
+        raise last_error
+    raise TimeoutError("tokenURI provider deadline exceeded")
+
+
+def _token_uri_chunk_quorum(
+    token_ids: list[int],
+    state_tag: str | dict[str, Any],
+    urls: list[str],
+    *,
+    timeout: int = 45,
+) -> list[TokenUriOutcome]:
+    required = RPC_QUORUM_SIZE
+    scope = "token-uri-batch"
+    active_urls = _responsive_rpc_urls(_independent_rpc_urls(urls), required, scope)
+    if len(active_urls) < required:
+        raise RuntimeError(
+            f"tokenURI verification requires {required} independent Base RPC providers; configured={len(active_urls)}"
+        )
+
+    responses: queue.Queue[tuple[int, str, list[TokenUriOutcome] | None, Exception | None]] = queue.Queue()
+    deadline = time.monotonic() + RPC_QUORUM_DEADLINE_SECONDS
+
+    def worker(index: int, url: str) -> None:
+        try:
+            outcomes = _token_uri_provider_outcomes(
+                url,
+                token_ids,
+                state_tag,
+                timeout=timeout,
+                deadline=deadline,
+            )
+            responses.put((index, url, outcomes, None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(active_urls)))
+    grouped: dict[str, list[tuple[str, list[TokenUriOutcome]]]] = defaultdict(list)
+    errors: list[str] = []
+    for index, url in enumerate(active_urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"token-uri-quorum-{index}",
+            daemon=True,
+        ).start()
+
+    while pending_indexes:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            index, url, outcomes, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is not None:
+            _mark_rpc_pending_slow([url], scope)
+            errors.append(f"{_redact_rpc_url(url)}: {error}")
+        elif outcomes is not None:
+            key = json.dumps(outcomes, ensure_ascii=False, separators=(",", ":"))
+            grouped[key].append((url, outcomes))
+
+        pending = len(pending_indexes)
+        ordered = sorted(grouped.values(), key=len, reverse=True)
+        winner = ordered[0] if ordered else []
+        runner_up_votes = len(ordered[1]) if len(ordered) > 1 else 0
+        if len(winner) >= required and len(winner) > runner_up_votes + pending:
+            _mark_rpc_pending_slow([active_urls[item] for item in pending_indexes], scope)
+            return winner[0][1]
+
+    if pending_indexes:
+        pending_urls = [active_urls[item] for item in pending_indexes]
+        _mark_rpc_pending_slow(pending_urls, scope)
+        errors.append(
+            "deadline exceeded: " + ", ".join(_redact_rpc_url(url) for url in pending_urls[:3])
+        )
+    votes = sorted((len(group) for group in grouped.values()), reverse=True)
+    detail = f" votes={votes}" if votes else ""
+    if errors:
+        detail += f" errors={'; '.join(errors[:3])}"
+    raise RuntimeError(f"tokenURI RPC quorum disagreement: required={required}{detail}")
+
+
+def fetch_token_uri_bindings(
+    token_ids: list[int],
+    block_tag: str,
+    *,
+    block_hash: str | None = None,
+) -> dict[int, str | None]:
+    """Verify exact tokenURI values or exact nonexistent-token reverts."""
+    if not token_ids:
+        return {}
+    if not VERIFIED_SNAPSHOT_URLS or block_tag == "latest":
+        return {token_id: fetch_token_uri(token_id, block_tag) for token_id in token_ids}
+
+    urls = _independent_rpc_urls(VERIFIED_SNAPSHOT_URLS)
+    if len(urls) < RPC_QUORUM_SIZE:
+        raise RuntimeError(
+            f"tokenURI verification requires {RPC_QUORUM_SIZE} independent Base RPC providers; configured={len(urls)}"
+        )
+    state_tag = _token_uri_state_tag(block_tag, block_hash)
+    chunks = [token_ids[index : index + RPC_BATCH_LIMIT] for index in range(0, len(token_ids), RPC_BATCH_LIMIT)]
+
+    def fetch_verified_chunk(chunk: list[int]) -> list[tuple[int, str | None]]:
+        # Every chunk creates its own hard monotonic deadline after leaving the
+        # worker queue. Production deliberately uses one chunk at a time to
+        # avoid a public-RPC burst while providers within that chunk run in
+        # parallel and must return an exact matching outcome vector.
+        outcomes = _token_uri_chunk_quorum(chunk, state_tag, urls)
+        values: list[tuple[int, str | None]] = []
+        for token_id, (kind, value) in zip(chunk, outcomes):
+            values.append((token_id, value if kind == "uri" else None))
+        return values
+
+    values_by_token: dict[int, str | None] = {}
+    workers = max(1, min(TOKEN_URI_CHUNK_WORKERS, len(chunks)))
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=workers)
+    futures = [pool.submit(fetch_verified_chunk, chunk) for chunk in chunks]
+    try:
+        for future in concurrent.futures.as_completed(futures):
+            for token_id, value in future.result():
+                values_by_token[token_id] = value
+    except BaseException:
+        for future in futures:
+            future.cancel()
+        pool.shutdown(wait=False, cancel_futures=True)
+        raise
+    else:
+        pool.shutdown(wait=True)
+
+    if set(values_by_token) != set(token_ids):
+        missing = sorted(set(token_ids).difference(values_by_token))
+        raise RuntimeError(f"tokenURI RPC quorum result is incomplete; missing token ids={missing[:10]}")
+    return {token_id: values_by_token[token_id] for token_id in token_ids}
+
+
+def authoritative_metadata_record(token_id: int, block_tag: str, token_uri: str | None = None) -> dict[str, Any]:
+    uri = str(token_uri if token_uri is not None else fetch_token_uri(token_id, block_tag)).strip()
+    if not uri:
+        raise ValueError(f"empty onchain tokenURI for Dog #{token_id}")
+    raw = fetch_url_json(uri, timeout=DOG_METADATA_FALLBACK_TIMEOUT)
+    metadata = simplified_dog_metadata(token_id, raw)
+    return {
+        "token_uri_sha256": hashlib.sha256(uri.encode("utf-8")).hexdigest(),
+        "content_sha256": metadata_sha256(raw),
+        "metadata_sha256": metadata_sha256(metadata),
+        "verified_block": _block_tag_number(block_tag),
+        "fetched_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "metadata": metadata,
+    }
 
 
 def fetch_one_dog_metadata(token_id: int, block_tag: str) -> dict[str, Any]:
-    url = f"https://degendogs.club/meta/{token_id}"
-    try:
-        return simplified_dog_metadata(token_id, fetch_url_json(url, timeout=DOG_METADATA_FETCH_TIMEOUT))
-    except Exception:
-        uri = fetch_token_uri(token_id, block_tag)
-        return simplified_dog_metadata(token_id, fetch_url_json(uri, timeout=DOG_METADATA_FALLBACK_TIMEOUT))
+    return authoritative_metadata_record(token_id, block_tag)["metadata"]
 
 
 def fetch_one_dog_metadata_with_deadline(token_id: int, block_tag: str) -> dict[str, Any]:
@@ -2065,45 +3051,104 @@ def fetch_one_dog_metadata_with_deadline(token_id: int, block_tag: str) -> dict[
             signal.setitimer(signal.ITIMER_REAL, previous_timer[0], previous_timer[1])
 
 
-def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str, Any]]:
+def fetch_dog_metadata_rows(
+    total_supply: int,
+    block_tag: str,
+    *,
+    token_uris: dict[int, str | None] | None = None,
+) -> list[dict[str, Any]]:
     cache = load_dog_cache()
     token_ids = list(range(total_supply))
-    missing = [token_id for token_id in token_ids if str(token_id) not in cache]
+    if token_uris is None:
+        token_uris = fetch_token_uri_bindings(token_ids, block_tag)
+    else:
+        token_uris = dict(token_uris)
+        expected_ids = set(token_ids)
+        if set(token_uris) != expected_ids:
+            missing = sorted(expected_ids.difference(token_uris))
+            unexpected = sorted(set(token_uris).difference(expected_ids))
+            raise RuntimeError(
+                "preverified tokenURI bindings do not match the Dog supply: "
+                f"missing={missing[:10]} unexpected={unexpected[:10]}"
+            )
+    unavailable_ids = {
+        token_id
+        for token_id, uri in token_uris.items()
+        if uri is None
+    }
+    # A current, independently agreed ERC721NonexistentToken revert cannot be
+    # rebound to the legacy mirror cache. Omit that metadata rather than
+    # fabricating current tokenURI provenance for a burned/sparse token.
+    cache_changed = False
+    for token_id in unavailable_ids:
+        if cache.pop(str(token_id), None) is not None:
+            cache_changed = True
+    missing = [
+        token_id
+        for token_id in token_ids
+        if token_id not in unavailable_ids
+        and (
+            str(token_id) not in cache
+            or str(cache[str(token_id)].get("token_uri_sha256") or "")
+            != hashlib.sha256(str(token_uris[token_id]).encode("utf-8")).hexdigest()
+        )
+    ]
     if missing:
+        # Never serve an entry bound to a different onchain tokenURI merely
+        # because the replacement metadata endpoint is temporarily failing.
+        for token_id in missing:
+            cache.pop(str(token_id), None)
         workers = max(1, min(int(os.environ.get("DOG_METADATA_WORKERS", "16")), 24))
         print(f"fetching dog metadata: {len(missing)} missing of {total_supply}", file=sys.stderr)
         if len(missing) <= DOG_METADATA_SEQUENTIAL_THRESHOLD:
             for token_id in missing:
                 try:
-                    cache[str(token_id)] = fetch_one_dog_metadata_with_deadline(token_id, block_tag)
+                    cache[str(token_id)] = authoritative_metadata_record(token_id, block_tag, token_uris[token_id])
                 except Exception as exc:  # noqa: BLE001
                     print(f"warning: metadata failed for dog {token_id}: {exc}", file=sys.stderr)
-                    cache[str(token_id)] = simplified_dog_metadata(token_id, {})
         else:
             with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-                futures = {pool.submit(fetch_one_dog_metadata, token_id, block_tag): token_id for token_id in missing}
+                futures = {
+                    pool.submit(authoritative_metadata_record, token_id, block_tag, token_uris[token_id]): token_id
+                    for token_id in missing
+                }
                 for future in concurrent.futures.as_completed(futures):
                     token_id = futures[future]
                     try:
                         cache[str(token_id)] = future.result()
                     except Exception as exc:  # noqa: BLE001
                         print(f"warning: metadata failed for dog {token_id}: {exc}", file=sys.stderr)
-                        cache[str(token_id)] = simplified_dog_metadata(token_id, {})
+        write_dog_cache(cache)
+    elif cache_changed:
         write_dog_cache(cache)
 
     metadata = []
     for token_id in token_ids:
-        row = cache.get(str(token_id)) or simplified_dog_metadata(token_id, {})
+        entry = cache.get(str(token_id)) or {}
+        verified_metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else None
+        row = dict(verified_metadata or simplified_dog_metadata(token_id, {}))
         row["token_id"] = int(row.get("token_id") or token_id)
+        row["_metadata_verified"] = verified_metadata is not None
+        row["_metadata_verification_status"] = (
+            "onchain_token_uri_unavailable"
+            if token_id in unavailable_ids
+            else "onchain_token_uri_verified" if verified_metadata is not None else "unavailable"
+        )
         metadata.append(row)
+
+    metadata_complete = len(metadata) == total_supply and all(row["_metadata_verified"] for row in metadata)
 
     trait_counts: Counter[tuple[str, str]] = Counter()
     for row in metadata:
+        if not row["_metadata_verified"]:
+            continue
         for attr in row.get("attributes") or []:
             trait_counts[(str(attr.get("trait_type") or ""), str(attr.get("value") or ""))] += 1
 
     score_by_token: dict[int, float] = {}
     for row in metadata:
+        if not row["_metadata_verified"]:
+            continue
         token_id = int(row["token_id"])
         score = 0.0
         for attr in row.get("attributes") or []:
@@ -2111,7 +3156,17 @@ def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str,
             count = max(1, trait_counts.get(key, 1))
             score += total_supply / count
         score_by_token[token_id] = score
-    ranks = {token_id: rank for rank, token_id in enumerate(sorted(score_by_token, key=lambda tid: (-score_by_token[tid], tid)), start=1)}
+    ranks = (
+        {
+            token_id: rank
+            for rank, token_id in enumerate(
+                sorted(score_by_token, key=lambda tid: (-score_by_token[tid], tid)),
+                start=1,
+            )
+        }
+        if metadata_complete
+        else {}
+    )
 
     rows: list[dict[str, Any]] = []
     for row in metadata:
@@ -2124,10 +3179,11 @@ def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str,
             value = str(attr.get("value") or "")
             if not trait_type or not value:
                 continue
-            count = trait_counts[(trait_type, value)]
-            pct = (Decimal(count) * Decimal(100)) / Decimal(total_supply) if total_supply else Decimal(0)
             traits.append(f"{trait_type}: {value}")
-            rarity_items.append(f"{trait_type}: {value} ({pct:.1f}%)")
+            if metadata_complete:
+                count = trait_counts[(trait_type, value)]
+                pct = (Decimal(count) * Decimal(100)) / Decimal(total_supply) if total_supply else Decimal(0)
+                rarity_items.append(f"{trait_type}: {value} ({pct:.1f}%)")
         rows.append(
             {
                 "token_id": token_id,
@@ -2137,8 +3193,9 @@ def fetch_dog_metadata_rows(total_supply: int, block_tag: str) -> list[dict[str,
                 "dog_opensea_url": dog_opensea_url(token_id),
                 "traits": "; ".join(traits),
                 "trait_rarity": "; ".join(rarity_items),
-                "rarity": f"#{ranks.get(token_id, 0)}/{total_supply}",
-                "rarity_score": round(score_by_token.get(token_id, 0.0), 6),
+                "rarity": f"#{ranks[token_id]}/{total_supply}" if token_id in ranks else "Unavailable",
+                "rarity_score": round(score_by_token[token_id], 6) if token_id in ranks else None,
+                "metadata_verification_status": row["_metadata_verification_status"],
             }
         )
     rows.sort(key=lambda item: item["token_id"])
@@ -2156,6 +3213,7 @@ def fetch_current_auction(latest_block: int, latest_time: str, block_tag: str) -
     return {
         "token_id": token_id,
         "amount_eth": float(Decimal(amount) / Decimal(10**18)),
+        "amount_eth_exact": decimal_str(amount, 18),
         "amount_wei": str(amount),
         "start_time_utc": utc_from_unix(start_ts) if start_ts else "",
         "end_time_utc": utc_from_unix(end_ts) if end_ts else "",
@@ -2189,7 +3247,13 @@ def normalize_address(address: str | None) -> str:
     if not address:
         return ""
     text = str(address).strip().lower()
-    return text if text.startswith("0x") and len(text) == 42 else ""
+    return (
+        text
+        if text.startswith("0x")
+        and len(text) == 42
+        and all(character in "0123456789abcdef" for character in text[2:])
+        else ""
+    )
 
 
 def short_address(address: str) -> str:
@@ -2239,21 +3303,33 @@ def collect_identity_addresses(
     return sorted(addresses)
 
 
-def pick_farcaster_user(address: str, users: list[dict[str, Any]]) -> dict[str, Any] | None:
-    if not users:
+def pick_farcaster_user(address: str, users: Any) -> dict[str, Any] | None:
+    if not isinstance(users, list):
+        return None
+    candidates = [user for user in users if isinstance(user, dict)]
+    if not candidates:
         return None
     address_lc = normalize_address(address)
 
     def score(user: dict[str, Any]) -> tuple[int, int, int]:
-        verified = [normalize_address(a) for a in user.get("verifications", [])]
-        primary = normalize_address((user.get("verified_addresses") or {}).get("primary", {}).get("eth_address"))
-        eth_addresses = [normalize_address(a) for a in (user.get("verified_addresses") or {}).get("eth_addresses", [])]
+        raw_verifications = user.get("verifications")
+        verified = [normalize_address(a) for a in raw_verifications] if isinstance(raw_verifications, list) else []
+        verified_addresses = user.get("verified_addresses")
+        verified_addresses = verified_addresses if isinstance(verified_addresses, dict) else {}
+        primary_record = verified_addresses.get("primary")
+        primary_record = primary_record if isinstance(primary_record, dict) else {}
+        primary = normalize_address(primary_record.get("eth_address"))
+        raw_eth_addresses = verified_addresses.get("eth_addresses")
+        eth_addresses = [normalize_address(a) for a in raw_eth_addresses] if isinstance(raw_eth_addresses, list) else []
         is_primary = int(primary == address_lc)
         is_verified = int(address_lc in verified or address_lc in eth_addresses)
-        followers = int(user.get("follower_count") or 0)
+        try:
+            followers = max(0, int(user.get("follower_count") or 0))
+        except (TypeError, ValueError):
+            followers = 0
         return (is_primary, is_verified, followers)
 
-    return max(users, key=score)
+    return max(candidates, key=score)
 
 
 def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
@@ -2271,8 +3347,8 @@ def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
         for attempt in range(4):
             try:
                 req = urllib.request.Request(url, headers={"accept": "application/json", "x-api-key": api_key})
-                with urllib.request.urlopen(req, timeout=45) as response:
-                    data = json.loads(response.read().decode("utf-8"))
+                with open_no_redirect(req, timeout=45) as response:
+                    data = read_bounded_json_response(response, EXTERNAL_JSON_MAX_RESPONSE_BYTES, "Neynar")
                 break
             except urllib.error.HTTPError as exc:
                 last = exc
@@ -2292,17 +3368,21 @@ def fetch_farcaster_profiles(addresses: list[str]) -> list[dict[str, Any]]:
                     data = {}
                     break
                 time.sleep(1.5 * (attempt + 1))
-        if not data:
+        if not isinstance(data, dict) or not data:
             continue
         for address in chunk:
             users = data.get(address) or data.get(address.lower()) or data.get(address.upper()) or []
             user = pick_farcaster_user(address, users)
             if not user:
                 continue
+            try:
+                fid = max(0, int(user.get("fid") or 0))
+            except (TypeError, ValueError):
+                fid = 0
             rows.append(
                 {
                     "address": address.lower(),
-                    "fid": int(user.get("fid") or 0),
+                    "fid": fid,
                     "username": str(user.get("username") or "").lstrip("@"),
                     "display_name": str(user.get("display_name") or ""),
                     "pfp_url": str(user.get("pfp_url") or ""),
@@ -2327,12 +3407,14 @@ def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, 
     url = "https://degendogs.club/api/auctionData"
     try:
         req = urllib.request.Request(url, headers={"accept": "application/json", "user-agent": "degen-dogs-mission3-builder/1.0"})
-        with urllib.request.urlopen(req, timeout=45) as response:
-            data = json.loads(response.read().decode("utf-8"))
+        with open_no_redirect(req, timeout=45) as response:
+            data = read_bounded_json_response(response, EXTERNAL_JSON_MAX_RESPONSE_BYTES, "Degen Dogs auction API")
     except Exception as exc:  # noqa: BLE001
         print(f"warning: Degen Dogs auction identity lookup failed: {exc}", file=sys.stderr)
         return []
 
+    if not isinstance(data, dict):
+        return []
     try:
         api_token_id = int(data.get("nounId") or 0)
     except (TypeError, ValueError):
@@ -2369,7 +3451,10 @@ def fetch_degendogs_auction_profiles(current: dict[str, Any]) -> list[dict[str, 
         )
 
     add_profile(current_bidder, data.get("username"), data.get("pfp_url"))
-    for bid in data.get("bids") or []:
+    raw_bids = data.get("bids")
+    for bid in raw_bids if isinstance(raw_bids, list) else []:
+        if not isinstance(bid, dict):
+            continue
         try:
             bid_token_id = int(bid.get("nounId") or api_token_id)
         except (TypeError, ValueError):
@@ -2450,8 +3535,16 @@ def merge_farcaster_profiles(*sources: list[dict[str, Any]]) -> list[dict[str, A
 
 
 def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[str, Any]], settled_logs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
-    blocks = {int(log["blockNumber"], 16) for log in bid_logs + settled_logs}
-    block_times = fetch_block_times(blocks)
+    block_hashes: dict[int, str] = {}
+    for log in bid_logs + settled_logs:
+        block = int(log["blockNumber"], 16)
+        block_hash = canonical_block_hash(log.get("blockHash"))
+        if not block_hash:
+            raise RuntimeError(f"auction event in block {block} is missing a canonical block hash")
+        previous_hash = block_hashes.setdefault(block, block_hash)
+        if previous_hash != block_hash:
+            raise RuntimeError(f"auction events disagree on the canonical hash for block {block}")
+    block_times = fetch_block_times(set(block_hashes), block_hashes)
 
     created = []
     for log in created_logs:
@@ -2475,6 +3568,7 @@ def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[
                 "token_id": topic_uint(log["topics"][1]),
                 "bidder": word_address(log["data"], 0),
                 "bid_eth": float(Decimal(value) / Decimal(10**18)),
+                "bid_eth_exact": decimal_str(value, 18),
                 "bid_wei": str(value),
                 "extended": int(word(log["data"], 2)),
                 "block_number": block,
@@ -2493,6 +3587,7 @@ def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[
                 "token_id": topic_uint(log["topics"][1]),
                 "winner": word_address(log["data"], 0),
                 "amount_eth": float(Decimal(amount) / Decimal(10**18)),
+                "amount_eth_exact": decimal_str(amount, 18),
                 "amount_wei": str(amount),
                 "block_number": block,
                 "tx_hash": log["transactionHash"],
@@ -2502,6 +3597,86 @@ def decode_auction_logs(created_logs: list[dict[str, Any]], bid_logs: list[dict[
         )
 
     return created, bids, settled
+
+
+def decode_auction_extension_logs(extension_logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Decode the verified AuctionExtended(uint256,uint256) event ABI."""
+    extensions = [
+        {
+            "token_id": topic_uint(log["topics"][1]),
+            "end_time_utc": utc_from_unix(word(log["data"], 0)),
+            "block_number": int(log["blockNumber"], 16),
+            "tx_hash": log["transactionHash"],
+            "log_index": int(log.get("logIndex", "0x0"), 16),
+        }
+        for log in extension_logs
+    ]
+    extensions.sort(key=lambda row: (int(row["block_number"]), int(row["log_index"])))
+    return extensions
+
+
+def validate_auction_schedules(
+    created: list[dict[str, Any]],
+    extensions: list[dict[str, Any]],
+    current: dict[str, Any],
+) -> None:
+    """Fail closed when extension history cannot produce one canonical end time."""
+    created_by_token: dict[int, dict[str, Any]] = {}
+    for row in created:
+        token_id = int(row["token_id"])
+        if token_id in created_by_token:
+            raise RuntimeError(f"duplicate AuctionCreated events for Dog #{token_id}")
+        created_by_token[token_id] = row
+
+    effective_end = {token_id: str(row.get("end_time_utc") or "") for token_id, row in created_by_token.items()}
+    previous_position: dict[int, tuple[int, int]] = {}
+    for row in extensions:
+        token_id = int(row["token_id"])
+        created_row = created_by_token.get(token_id)
+        if created_row is None:
+            raise RuntimeError(f"AuctionExtended for Dog #{token_id} has no matching AuctionCreated event")
+        position = (int(row.get("block_number") or 0), int(row.get("log_index") or 0))
+        if position <= previous_position.get(token_id, (-1, -1)):
+            raise RuntimeError(f"AuctionExtended ordering is ambiguous for Dog #{token_id}")
+        if position[0] < int(created_row.get("block_number") or 0):
+            raise RuntimeError(f"AuctionExtended precedes AuctionCreated for Dog #{token_id}")
+        new_end = str(row.get("end_time_utc") or "")
+        previous_end = effective_end.get(token_id, "")
+        if not new_end or (previous_end and new_end <= previous_end):
+            raise RuntimeError(
+                f"AuctionExtended end time is not strictly later for Dog #{token_id}: "
+                f"previous={previous_end or '<missing>'} observed={new_end or '<missing>'}"
+            )
+        effective_end[token_id] = new_end
+        previous_position[token_id] = position
+
+    current_token = int(current.get("token_id") or -1)
+    current_end = str(current.get("end_time_utc") or "")
+    expected_end = effective_end.get(current_token)
+    if expected_end is not None and current_end != expected_end:
+        raise RuntimeError(
+            f"current auction end time disagrees with AuctionCreated/AuctionExtended logs for Dog #{current_token}: "
+            f"getter={current_end or '<missing>'} logs={expected_end or '<missing>'}"
+        )
+
+
+def validate_exact_wei_rows(
+    rows: list[dict[str, Any]],
+    *,
+    wei_field: str,
+    eth_field: str,
+    label: str,
+) -> None:
+    for row in rows:
+        raw = str(row.get(wei_field) or "").strip()
+        exact = str(row.get(eth_field) or "").strip()
+        if not raw and not exact:
+            continue
+        if not raw.isdigit() or decimal_str(int(raw), 18) != exact:
+            raise RuntimeError(
+                f"{label} exact amount mismatch for Dog #{row.get('token_id', '<unknown>')}: "
+                f"{wei_field}={raw or '<missing>'} {eth_field}={exact or '<missing>'}"
+            )
 
 
 def _balance_cache_enabled() -> bool:
@@ -2516,12 +3691,103 @@ def _block_tag_number(block_tag: str) -> int:
         return 0
 
 
+def validate_woof_holder_discovery_url(value: str) -> str:
+    """Pin candidate discovery to Blockscout Base's exact token route."""
+    try:
+        parsed = urllib.parse.urlsplit(str(value or "").strip())
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("WOOF holder discovery URL is malformed") from exc
+    expected_path = f"/api/v2/tokens/{WOOF}/holders"
+    if (
+        parsed.scheme.lower() != "https"
+        or (parsed.hostname or "").lower().rstrip(".") != "base.blockscout.com"
+        or port not in {None, 443}
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path.lower() != expected_path.lower()
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise RuntimeError("WOOF holder discovery URL must use the pinned Blockscout Base token-holder route")
+    return f"https://base.blockscout.com{expected_path}"
+
+
+def fetch_woof_holder_candidates(url: str = WOOF_HOLDER_DISCOVERY_URL) -> list[str]:
+    """Discover candidates offchain; no balance or completeness value is trusted."""
+    base_url = validate_woof_holder_discovery_url(url)
+    candidates: set[str] = set()
+    next_params: dict[str, Any] | None = None
+    seen_pages: set[str] = set()
+    for _page_number in range(WOOF_HOLDER_DISCOVERY_MAX_PAGES):
+        encoded_params = urllib.parse.urlencode(next_params or {})
+        page_key = encoded_params or "<first>"
+        if page_key in seen_pages:
+            raise RuntimeError("Blockscout WOOF holder pagination repeated a page")
+        seen_pages.add(page_key)
+        page_url = base_url + (f"?{encoded_params}" if encoded_params else "")
+        request = urllib.request.Request(
+            page_url,
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "degen-dogs-mission3-builder/1.0",
+            },
+        )
+        with open_no_redirect(request, timeout=45) as response:
+            payload = read_bounded_json_response(
+                response,
+                WOOF_HOLDER_DISCOVERY_MAX_RESPONSE_BYTES,
+                "Blockscout WOOF holder discovery",
+            )
+        if not isinstance(payload, dict):
+            raise RuntimeError("Blockscout WOOF holder response must be an object")
+        items = payload.get("items")
+        if not isinstance(items, list) or len(items) > 100:
+            raise RuntimeError("Blockscout WOOF holder response has an invalid items list")
+        for item in items:
+            if not isinstance(item, dict) or not isinstance(item.get("address"), dict):
+                raise RuntimeError("Blockscout WOOF holder response contains a malformed item")
+            address = normalize_address(item["address"].get("hash"))
+            raw_value = str(item.get("value") or "").strip()
+            if not address or not raw_value.isdigit():
+                raise RuntimeError("Blockscout WOOF holder response contains an invalid address or value")
+            if int(raw_value) > 0:
+                candidates.add(address)
+            if len(candidates) > WOOF_HOLDER_DISCOVERY_MAX_CANDIDATES:
+                raise RuntimeError("Blockscout WOOF holder candidate cap exceeded")
+
+        raw_next = payload.get("next_page_params")
+        if raw_next is None:
+            if not candidates:
+                raise RuntimeError("Blockscout WOOF holder discovery returned no candidates")
+            return sorted(candidates)
+        if not isinstance(raw_next, dict) or set(raw_next) != {"value", "address_hash", "items_count"}:
+            raise RuntimeError("Blockscout WOOF holder response has invalid pagination parameters")
+        next_value = str(raw_next.get("value") or "").strip()
+        next_address = normalize_address(raw_next.get("address_hash"))
+        items_count = raw_next.get("items_count")
+        if (
+            not next_value.isdigit()
+            or not next_address
+            or type(items_count) is not int
+            or items_count < 1
+            or items_count > WOOF_HOLDER_DISCOVERY_MAX_CANDIDATES
+        ):
+            raise RuntimeError("Blockscout WOOF holder response has malformed pagination values")
+        next_params = {
+            "value": next_value,
+            "address_hash": next_address,
+            "items_count": items_count,
+        }
+    raise RuntimeError("Blockscout WOOF holder pagination cap exceeded")
+
+
 def load_woof_balance_cache() -> dict[str, Any]:
     try:
-        data = json.loads(WOOF_BALANCE_CACHE.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+        data = read_owned_json_file(WOOF_BALANCE_CACHE, 16_777_216, "WOOF balance cache")
+    except RuntimeError:
         return {}
-    except json.JSONDecodeError:
+    if data is None:
         return {}
     if not isinstance(data, dict) or data.get("schema_version") != 1:
         return {}
@@ -2530,14 +3796,29 @@ def load_woof_balance_cache() -> dict[str, Any]:
     balances = data.get("balances")
     if not isinstance(balances, dict):
         return {}
-    return data
+    checked_block = data.get("checked_block")
+    if type(checked_block) is not int or checked_block < 0:
+        return {}
+    normalized_balances: dict[str, str] = {}
+    for raw_address, raw_balance in balances.items():
+        address = str(raw_address or "").strip().lower()
+        if (
+            len(address) != 42
+            or not address.startswith("0x")
+            or not all(character in "0123456789abcdef" for character in address[2:])
+        ):
+            return {}
+        if isinstance(raw_balance, bool):
+            return {}
+        balance = str(raw_balance).strip()
+        if not balance.isdigit():
+            return {}
+        normalized_balances[address] = str(int(balance))
+    return {**data, "checked_block": checked_block, "balances": normalized_balances}
 
 
 def save_woof_balance_cache(cache: dict[str, Any]) -> None:
-    WOOF_BALANCE_CACHE.parent.mkdir(parents=True, exist_ok=True)
-    temp = WOOF_BALANCE_CACHE.with_suffix(WOOF_BALANCE_CACHE.suffix + ".tmp")
-    temp.write_text(json.dumps(cache, separators=(",", ":"), sort_keys=True) + "\n", encoding="utf-8")
-    temp.replace(WOOF_BALANCE_CACHE)
+    atomic_write_text(WOOF_BALANCE_CACHE, json.dumps(cache, separators=(",", ":"), sort_keys=True) + "\n")
 
 
 def transfer_addresses(log: dict[str, Any]) -> list[str]:
@@ -2562,37 +3843,78 @@ def collect_woof_transfer_addresses(transfer_logs: list[dict[str, Any]]) -> tupl
 
 
 def fetch_balances(addresses: list[str], block_tag: str) -> dict[str, int]:
-    balances: dict[str, int] = {}
     sig = SELECTOR_BALANCE_OF
-    for i in range(0, len(addresses), RPC_BATCH_LIMIT):
-        batch = addresses[i : i + RPC_BATCH_LIMIT]
+    batches = [
+        addresses[index : index + RPC_BATCH_LIMIT]
+        for index in range(0, len(addresses), RPC_BATCH_LIMIT)
+    ]
+
+    def fetch_batch(batch: list[str]) -> dict[str, int]:
         calls = []
         for address in batch:
             data = sig + address.lower().replace("0x", "").rjust(64, "0")
             calls.append(("eth_call", [{"to": WOOF, "data": data}, block_tag]))
-        results = rpc_batch(calls)
+        results = (
+            rpc_batch_quorum(
+                calls,
+                urls=VERIFIED_SNAPSHOT_URLS,
+                min_agreement=RPC_QUORUM_SIZE,
+                timeout=60,
+            )
+            if VERIFIED_SNAPSHOT_URLS and block_tag != "latest"
+            else rpc_batch(calls)
+        )
+        batch_balances: dict[str, int] = {}
         for address, raw in zip(batch, results):
-            balances[address.lower()] = int(raw, 16) if raw else 0
+            encoded = str(raw or "").lower()
+            if (
+                not encoded.startswith("0x")
+                or len(encoded) <= 2
+                or not all(character in "0123456789abcdef" for character in encoded[2:])
+            ):
+                raise RuntimeError(f"malformed WOOF balance response for {address}")
+            batch_balances[address.lower()] = int(encoded, 16)
+        if len(batch_balances) != len(batch):
+            raise RuntimeError("WOOF balance batch returned an incomplete result")
+        return batch_balances
+
+    # Keep provider pressure bounded. rpc_batch_quorum already sends each batch
+    # to independent providers concurrently; issuing many batches at once makes
+    # public fallbacks rate-limit and delays fail-closed degradation.
+    balances: dict[str, int] = {}
+    for batch in batches:
+        balances.update(fetch_batch(batch))
     return balances
 
 
-def fetch_woof_holders(transfer_logs: list[dict[str, Any]], decimals: int, block_tag: str) -> list[dict[str, Any]]:
-    ordered, touched_block_by_address = collect_woof_transfer_addresses(transfer_logs)
+def fetch_woof_holders(
+    transfer_logs: list[dict[str, Any]],
+    decimals: int,
+    block_tag: str,
+    expected_total_supply_raw: int | str | None = None,
+    candidate_addresses: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    if candidate_addresses is None:
+        ordered, _touched_block_by_address = collect_woof_transfer_addresses(transfer_logs)
+    else:
+        normalized_candidates = [normalize_address(address) for address in candidate_addresses]
+        if any(not address or address == ZERO for address in normalized_candidates):
+            raise RuntimeError("WOOF holder candidate list contains an invalid address")
+        ordered = sorted(set(normalized_candidates))
     snapshot_block = _block_tag_number(block_tag)
     cache = load_woof_balance_cache() if _balance_cache_enabled() else {}
     raw_cached_balances = cache.get("balances")
     cached_balances: dict[str, Any] = raw_cached_balances if isinstance(raw_cached_balances, dict) else {}
     checked_block = int(cache.get("checked_block") or 0) if cache else 0
 
-    to_fetch: list[str]
-    if not cache or checked_block <= 0 or checked_block > snapshot_block:
-        to_fetch = ordered
-    else:
-        to_fetch = [
-            address
-            for address in ordered
-            if address not in cached_balances or touched_block_by_address.get(address, 0) > checked_block
-        ]
+    # WOOF is a SuperToken: agreement accounting can change balanceOf without
+    # an ERC-20 Transfer event. A cache from any other block is therefore not
+    # authoritative, even when no candidate address appears in new logs.
+    to_fetch = (
+        [address for address in ordered if address not in cached_balances]
+        if cache and checked_block == snapshot_block
+        else ordered
+    )
 
     fresh_balances = fetch_balances(to_fetch, block_tag)
     merged_balances: dict[str, str] = {}
@@ -2603,6 +3925,30 @@ def fetch_woof_holders(transfer_logs: list[dict[str, Any]], decimals: int, block
             merged_balances[address] = str(cached_balances[address])
         else:
             raise RuntimeError(f"Missing WOOF balance for {address} at {block_tag}")
+
+    if expected_total_supply_raw is not None:
+        expected_supply_text = str(expected_total_supply_raw).strip()
+        if not expected_supply_text.isdigit():
+            raise RuntimeError("WOOF holder completeness check received an invalid total supply")
+        expected_supply = int(expected_supply_text)
+        observed_supply = sum(
+            int(balance)
+            for balance in merged_balances.values()
+            if int(balance) != 0
+        )
+        # Transfer discovery intentionally excludes only the ERC-20 zero
+        # address, whose balance is not part of circulating account balances.
+        # Any burn/dead account is a normal nonzero address and remains in the
+        # discovered set. Equality therefore proves no funded holder was lost
+        # from a historical log response.
+        if observed_supply != expected_supply:
+            error = RuntimeError(
+                "WOOF holder completeness mismatch at "
+                f"{block_tag}: holder_balance_sum={observed_supply} total_supply={expected_supply}"
+            )
+            setattr(error, "observed_supply", observed_supply)
+            setattr(error, "expected_supply", expected_supply)
+            raise error
 
     if _balance_cache_enabled():
         save_woof_balance_cache(
@@ -2626,6 +3972,51 @@ def fetch_woof_holders(transfer_logs: list[dict[str, Any]], decimals: int, block
             }
         )
     rows.sort(key=lambda r: (-r["balance_woof"], r["address"].lower()))
+    return rows
+
+
+def fetch_verified_woof_holders(
+    decimals: int,
+    block_tag: str,
+    token_stats: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Publish holder rows only when discovery closes against totalSupply."""
+    candidates: list[str] = []
+    token_stats["woof_holder_discovery_source"] = "base_blockscout_candidates_onchain_authority"
+    try:
+        candidates = fetch_woof_holder_candidates()
+        rows = fetch_woof_holders(
+            [],
+            decimals,
+            block_tag,
+            token_stats["woof_total_supply_raw"],
+            candidate_addresses=candidates,
+        )
+    except Exception as exc:  # noqa: BLE001
+        token_stats["woof_holder_verification_status"] = "unavailable_fail_closed"
+        token_stats["woof_holder_candidate_count"] = str(len(candidates))
+        token_stats["woof_holder_verification_error"] = type(exc).__name__
+        observed = getattr(exc, "observed_supply", None)
+        expected = getattr(exc, "expected_supply", None)
+        token_stats["woof_holder_balance_sum_raw"] = str(observed) if observed is not None else "unavailable"
+        token_stats["woof_holder_expected_supply_raw"] = (
+            str(expected) if expected is not None else token_stats.get("woof_total_supply_raw", "unavailable")
+        )
+        print(f"warning: WOOF holder surface disabled fail-closed: {exc}", file=sys.stderr)
+        return []
+
+    scopes = {
+        scope.strip()
+        for scope in token_stats.get("onchain_verification_scope", "").split(",")
+        if scope.strip()
+    }
+    scopes.add("woof_holder_balances")
+    token_stats["onchain_verification_scope"] = ",".join(sorted(scopes))
+    observed_supply = sum(int(row["balance_raw"]) for row in rows)
+    token_stats["woof_holder_verification_status"] = "candidate_complete_onchain_quorum_verified"
+    token_stats["woof_holder_candidate_count"] = str(len(candidates))
+    token_stats["woof_holder_balance_sum_raw"] = str(observed_supply)
+    token_stats["woof_holder_expected_supply_raw"] = token_stats["woof_total_supply_raw"]
     return rows
 
 
@@ -2698,21 +4089,62 @@ def fetch_table(conn: sqlite3.Connection, table: str) -> tuple[list[str], list[t
     return cols, cur.fetchall()
 
 
+def ensure_owned_directory_tree(directory: Path) -> None:
+    """Create a directory without following a user-controlled ancestor symlink."""
+    missing: list[Path] = []
+    cursor = directory
+    while True:
+        try:
+            details = cursor.lstat()
+        except FileNotFoundError:
+            missing.append(cursor)
+            if cursor.parent == cursor:
+                raise RuntimeError(f"unable to find a trusted ancestor for output directory: {directory}")
+            cursor = cursor.parent
+            continue
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode):
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {cursor}")
+        if details.st_uid != os.getuid() or cursor.parent == cursor:
+            break
+        cursor = cursor.parent
+    for item in reversed(missing):
+        try:
+            item.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        details = item.lstat()
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode) or details.st_uid != os.getuid():
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {item}")
+
+
 def atomic_write_text(path: Path, payload: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    temp.write_text(payload, encoding="utf-8")
-    temp.replace(path)
+    ensure_owned_directory_tree(path.parent)
+    descriptor, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temp = Path(temp_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, path)
+    finally:
+        temp.unlink(missing_ok=True)
 
 
 def write_csv(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    with temp.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f, lineterminator="\n")
-        writer.writerow(cols)
-        writer.writerows(rows)
-    temp.replace(path)
+    ensure_owned_directory_tree(path.parent)
+    descriptor, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temp = Path(temp_name)
+    try:
+        with os.fdopen(descriptor, "w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle, lineterminator="\n")
+            writer.writerow(cols)
+            writer.writerows(rows)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp, path)
+    finally:
+        temp.unlink(missing_ok=True)
 
 
 def write_json(path: Path, cols: list[str], rows: list[tuple[Any, ...]]) -> None:
@@ -2933,7 +4365,14 @@ def build_historical_dog_tables(
             confidence = first_text(archive.get("confidence"), "metadata_only")
             sources = source_text(archive.get("sources")) or "dog_metadata"
 
-        raw_amount = first_text(archive.get("amount_raw"), archive.get("amount_wei"))
+        raw_amount = first_text(
+            current.get("current_bid_wei"),
+            winner.get("winning_bid_wei"),
+            timeline.get("settled_wei"),
+            timeline.get("latest_bid_wei"),
+            archive.get("amount_raw"),
+            archive.get("amount_wei"),
+        )
         row = {
             "mission": mission,
             "chain": chain,
@@ -2956,6 +4395,10 @@ def build_historical_dog_tables(
             "rarity": rarity,
             "traits": traits,
             "trait_rarity": trait_rarity,
+            "metadata_verification_status": first_text(
+                metadata.get("metadata_verification_status"),
+                "unavailable",
+            ),
             "confidence": confidence,
             "sources": sources,
         }
@@ -2984,6 +4427,7 @@ def build_historical_dog_tables(
         ("rarity", "TEXT"),
         ("traits", "TEXT"),
         ("trait_rarity", "TEXT"),
+        ("metadata_verification_status", "TEXT"),
         ("confidence", "TEXT"),
         ("sources", "TEXT"),
         ("search_text", "TEXT"),
@@ -3084,6 +4528,7 @@ HIDDEN_UI_COLUMNS = {
     "settled_time_utc",
     "traits",
     "trait_rarity",
+    "metadata_verification_status",
     "rarity_score",
     "tx_hash",
     "created_tx_hash",
@@ -3133,11 +4578,11 @@ def display_col_name(col: str) -> str:
 
 def cell_url(col: str, row_data: dict[str, Any]) -> str:
     if col == "bidder_winner":
-        return str(row_data.get("bidder_winner_url") or basescan_address_url(row_data.get("bidder_winner_wallet")) or "")
+        return safe_dashboard_link(row_data.get("bidder_winner_url") or basescan_address_url(row_data.get("bidder_winner_wallet")))
     if col in {"bidder", "winner", "holder", "latest_bidder"}:
-        return str(row_data.get(f"{col}_url") or basescan_address_url(row_data.get(f"{col}_wallet")) or "")
+        return safe_dashboard_link(row_data.get(f"{col}_url") or basescan_address_url(row_data.get(f"{col}_wallet")))
     if col == "dog":
-        return str(row_data.get("dog_opensea_url") or row_data.get("dog_external_url") or "")
+        return safe_dashboard_link(row_data.get("dog_opensea_url") or row_data.get("dog_external_url"))
     return ""
 
 
@@ -3146,9 +4591,9 @@ def render_cell(col: str, value: Any, row_data: dict[str, Any]) -> str:
     escaped = html.escape(text)
     lowered = col.lower()
     if col == "dog":
-        image = str(row_data.get("dog_image_url") or "")
+        image = safe_dashboard_image(row_data.get("dog_image_url"))
         text_url = cell_url(col, row_data)
-        image_url = str(row_data.get("dog_opensea_url") or "")
+        image_url = safe_dashboard_link(row_data.get("dog_opensea_url"))
         image_html = ""
         if image:
             image_html = f'<img class="dog-thumb" src="{html.escape(image, quote=True)}" alt="{html.escape(text, quote=True)} image" loading="lazy">'
@@ -3453,6 +4898,13 @@ def season6_readme_estimate_summary(metrics: dict[str, str]) -> str:
     return f"{sup} / {usd}"
 
 
+def woof_holder_summary(metrics: dict[str, str]) -> str:
+    status = metric_value(metrics, "woof_holder_verification_status")
+    if status != "candidate_complete_onchain_quorum_verified":
+        return "Unavailable (onchain verification incomplete)"
+    return metric_value(metrics, "woof_holders")
+
+
 def render_readme_from_template(replacements: dict[str, str]) -> str:
     # README.md is generated because `npm run data` rewrites live snapshot sections.
     # Keep stable human-written copy in README.template.md and replace only explicit placeholders here.
@@ -3482,7 +4934,7 @@ def render_readme(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]], ma
         ("Bid payback / APR", reward_payback_apr_summary(metrics)),
         ("Season 6 SUP estimate if current bid wins", season6_readme_estimate_summary(metrics)),
         ("Created / settled auctions", format_created_settled(metrics)),
-        ("WOOF holders", metric_value(metrics, "woof_holders")),
+        ("WOOF holders", woof_holder_summary(metrics)),
     ]
     snapshot_rows = [(label, value) for label, value in snapshot_rows if value]
 
@@ -3577,7 +5029,7 @@ def render_bid_history_menu(tables: dict[str, tuple[list[str], list[tuple[Any, .
     items = []
     for index, row in enumerate(history):
         bidder = first_text(row.get("bidder"), short_address(row.get("bidder_wallet") or ""), "Unknown bidder")
-        bidder_url = first_text(row.get("bidder_url"), basescan_address_url(row.get("bidder_wallet")))
+        bidder_url = safe_dashboard_link(first_text(row.get("bidder_url"), basescan_address_url(row.get("bidder_wallet"))))
         bidder_html = html.escape(bidder)
         if bidder_url:
             bidder_html = f'<a href="{html.escape(bidder_url, quote=True)}" target="_blank" rel="noopener noreferrer">{bidder_html}</a>'
@@ -3706,7 +5158,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     )
 
     dog = current.get("dog", f"Dog #{metrics.get('current_auction_token_id', '')}").strip() or "Current dog"
-    current_dog_url = current.get("dog_opensea_url") or current.get("dog_external_url") or "#"
+    current_dog_url = safe_dashboard_link(current.get("dog_opensea_url") or current.get("dog_external_url")) or "#"
     current_dog_label = f"Open {dog} on OpenSea" if current.get("dog_opensea_url") else f"Open {dog}"
     current_dog_html = html.escape(dog)
     if current_dog_url and current_dog_url != "#":
@@ -3717,7 +5169,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         )
     bid = current.get("bid") or current.get("latest_bid") or f"{metrics.get('current_bid_eth', '0')} ETH"
     participant = current.get("bidder_winner") or current.get("bidder") or metrics.get("current_bidder", "")
-    participant_url = current.get("bidder_winner_url") or current.get("bidder_url", "")
+    participant_url = safe_dashboard_link(current.get("bidder_winner_url") or current.get("bidder_url", ""))
     participant_html = html.escape(participant)
     if participant_url and participant:
         participant_html = f'<a href="{html.escape(participant_url, quote=True)}" target="_blank" rel="noopener noreferrer">{participant_html}</a>'
@@ -3729,12 +5181,9 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
         time_left_seconds = parse_timer_seconds(time_left)
     timer_state = timer_urgency_state(time_left_seconds, status)
     auction_status_attr = html.escape(status.lower(), quote=True)
-    is_live_auction = ("ongoing" in status.lower() or status.lower() == "live") and timer_state != "ended"
-    live_dot_class = "dot dot--live" if is_live_auction else "dot dot--idle"
-    live_dot_html = (
-        f'<span class="{live_dot_class}" data-live-dot data-auction-status="{auction_status_attr}" '
-        f'data-live-end="{html.escape(time_left_end, quote=True)}" aria-hidden="true"></span>'
-    )
+    # Verification is established asynchronously from the signed/validated
+    # refresh-status payload. Never render a green dot from auction state alone.
+    live_dot_html = '<span class="dot dot--idle" data-live-dot aria-hidden="true"></span>'
     time_left_html = html.escape(time_left)
     if time_left and time_left_end:
         time_left_html = (
@@ -3742,7 +5191,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             f'data-countdown-end="{html.escape(time_left_end, quote=True)}" '
             f'data-auction-status="{auction_status_attr}">{time_left_html}</span>'
         )
-    image = current.get("dog_image_url", "")
+    image = safe_dashboard_image(current.get("dog_image_url", ""))
     image_html = ""
     if image:
         image_html = f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image">'
@@ -3946,6 +5395,7 @@ const currentDetail=document.querySelector('[data-current-detail]');
 const currentRewards=document.querySelector('[data-current-rewards]');
 const currentTraits=document.querySelector('[data-current-traits]');
 const currentDogStage=document.querySelector('[data-current-dog-stage]');
+const liveLabel=document.querySelector('[data-live-label]');
 const defaultRows=auctionBody?[...auctionBody.rows].map(row=>row.cloneNode(true)):[];
 const archiveState={query:'',mission:'all',sortMode:'newest',pageSize:10,currentPage:1};
 let unifiedRecords=[];
@@ -3959,6 +5409,7 @@ let archiveSnapshotKey='';
 let archiveRefreshPromise=null;
 let pendingArchiveContext=null;
 const LIVE_REFRESH_MS=10000;
+const LIVE_STALE_MS=3*60*60*1000;
 const CURRENT_FETCH_TIMEOUT_MS=6000;
 const ARCHIVE_FETCH_TIMEOUT_MS=45000;
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
@@ -3979,10 +5430,14 @@ const usdDisplay=record=>{const amount=record.amount||{};return amount.usd_estim
 const archiveCurrentRank=record=>{const status=String(record.status||'').toLowerCase();return status==='live'||status.includes('ongoing')?1:0;};
 const compareNewest=(a,b)=>{const live=archiveCurrentRank(b)-archiveCurrentRank(a);if(live)return live;const at=Date.parse(a.activity_time_utc||'')||0;const bt=Date.parse(b.activity_time_utc||'')||0;if(bt!==at)return bt-at;return Number(b.dog_id||0)-Number(a.dog_id||0);};
 const exactDogQuery=q=>{const dog=q.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/);if(dog)return Number(dog[1]);const bare=q.match(/^#?(\d{1,4})$/);return bare?Number(bare[1]):null;};
-const rowSearchText=record=>{const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};return [record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.amount_usd_at_event,amount.usd_estimate_display,usdDisplay(record),amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...(record.bid_tx_hashes||[])].filter(Boolean).join(' ').toLowerCase();};
+const SAFE_LINK_HOSTS=new Set(['basescan.org','degendogs.club','explorer.degen.tips','farcaster.xyz','opensea.io','polygonscan.com']);
+const SAFE_IMAGE_HOSTS=new Set(['api.degendogs.club','degendogs.club','ipfs.io']);
+const safeUrl=(value,hosts=SAFE_LINK_HOSTS)=>{try{const raw=String(value||'').trim();if(!raw||/[\u0000-\u0020\u007f]/.test(raw))return '';const url=new URL(raw,document.baseURI);const host=url.hostname.toLowerCase().replace(/\.$/,'');return url.protocol==='https:'&&url.port===''&&!url.username&&!url.password&&hosts.has(host)?url.href:'';}catch(_){return '';}};
+const setVerificationState=(status,retrying=false)=>{const verifiedAt=parseUtc(status?.last_successful_refresh_time_utc);const blockAt=parseUtc(status?.latest_generated_block_time_utc);const now=Date.now();const refreshAge=Number.isFinite(verifiedAt)?now-verifiedAt:Infinity;const blockAge=Number.isFinite(blockAt)?now-blockAt:Infinity;const verified=!retrying&&status?.last_refresh_result==='success_generated'&&refreshAge>=0&&refreshAge<=LIVE_STALE_MS&&blockAge>=-60000&&blockAge<=LIVE_STALE_MS;const dot=document.querySelector('[data-live-dot]');if(dot){dot.classList.toggle('dot--live',verified);dot.classList.toggle('dot--idle',!verified);dot.title=retrying?'Snapshot update retrying':verified?'Onchain snapshot cross-checked':'Snapshot verification is stale';}if(liveLabel){const stamp=Number.isFinite(verifiedAt)?new Date(verifiedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'unavailable';liveLabel.textContent=retrying?`Mission 3 auction feed · update retrying · last verified ${stamp}`:verified?`Mission 3 auction feed · verified ${stamp}`:'Mission 3 auction feed · verification stale';}return verified;};
+const rowSearchText=record=>{const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};const bidHashes=Array.isArray(record.bid_tx_hashes)?record.bid_tx_hashes:[];return [record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.amount_usd_at_event,amount.usd_estimate_display,usdDisplay(record),amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...bidHashes].filter(Boolean).join(' ').toLowerCase();};
 const statusCell=status=>{const text=String(status||'unknown');const lower=text.toLowerCase();const tone=lower.includes('ongoing')||lower==='live'?'ongoing':(lower.includes('settled')?'settled':'neutral');return `<span class="status-pill ${tone}">${escapeHtml(text)}</span>`;};
-const dogCell=record=>{const dog=`Dog #${record.dog_id}`;const img=record.dog_image_url?`<img class="dog-thumb" src="${attr(record.dog_image_url)}" alt="${attr(dog)} image" loading="lazy">`:'';const links=record.links||{};const item=record.dog_item_url||links.item||links.dog_page||'#';const imgHtml=img&&item!=='#'?`<a class="dog-image-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${img}</a>`:img;const label=item&&item!=='#'?`<a class="dog-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer">${escapeHtml(dog)}</a>`:`<span>${escapeHtml(dog)}</span>`;return `<span class="dog-cell">${imgHtml}${label}</span>`;};
-const identityCell=record=>{const who=record.winner_or_high_bidder||{};const label=who.display||shortAddress(who.wallet)||'';if(!label)return '';const url=who.profile_url||who.wallet_explorer_url||record.links?.explorer||'';return url?`<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`:escapeHtml(label);};
+const dogCell=record=>{const dog=`Dog #${record.dog_id}`;const image=safeUrl(record.dog_image_url,SAFE_IMAGE_HOSTS);const img=image?`<img class="dog-thumb" src="${attr(image)}" alt="${attr(dog)} image" loading="lazy">`:'';const links=record.links||{};const item=safeUrl(record.dog_item_url||links.item||links.dog_page);const imgHtml=img&&item?`<a class="dog-image-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${img}</a>`:img;const label=item?`<a class="dog-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer">${escapeHtml(dog)}</a>`:`<span>${escapeHtml(dog)}</span>`;return `<span class="dog-cell">${imgHtml}${label}</span>`;};
+const identityCell=record=>{const who=record.winner_or_high_bidder||{};const label=who.display||shortAddress(who.wallet)||'';if(!label)return '';const url=safeUrl(who.profile_url||who.wallet_explorer_url||record.links?.explorer);return url?`<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`:escapeHtml(label);};
 const formatNativeAmount=value=>{const text=String(value??'').trim();if(!/^[-+]?\d+(?:\.\d+)?$/.test(text))return text;const [whole,fraction='']=text.split('.');const trimmed=fraction.replace(/0+$/,'');return trimmed?`${whole}.${trimmed}`:whole;};
 const bidCell=record=>{const amount=record.amount||{};if(!amount.native)return archiveState.sortMode==='highest_usd'?'USD estimate unavailable':'';const native=`${formatNativeAmount(amount.native)} ${amount.native_symbol||''}`.trim();const display=usdDisplay(record);const usd=display?` (${display} est.)`:(archiveState.sortMode==='highest_usd'?' (USD estimate unavailable)':'');return escapeHtml(`${native}${usd}`);};
 const timeCell=record=>{const status=String(record.status||'').toLowerCase();const label=status.includes('settled')?'Settled':(record.activity_time_basis==='last_bid_block_time'?'Last bid':'Activity');const value=record.activity_time_utc||'';return value?`<span class="time-cell"><b>${label}</b>${escapeHtml(value.replace('T',' ').replace('Z',''))}</span>`:'';};
@@ -3990,12 +5445,10 @@ const rarityCell=record=>escapeHtml(record.rarity?.display||'');
 const unifiedRowHtml=record=>{const statusLabel=`${record.era_label||`Mission ${record.mission}`} · ${record.status||''}`;return `<tr data-search="${attr(rowSearchText(record))}"><td class="state" data-label="status">${statusCell(statusLabel)}</td><td class="dog-col" data-label="dog">${dogCell(record)}</td><td class="identity" data-label="high bidder / winner">${identityCell(record)}</td><td class="" data-label="bid">${bidCell(record)}</td><td class="time" data-label="last bid / settled">${timeCell(record)}</td><td class="num" data-label="rarity">${rarityCell(record)}</td></tr>`;};
 const isDefaultArchiveState=()=>archiveState.query===''&&archiveState.mission==='all'&&archiveState.sortMode==='newest'&&archiveState.pageSize===10&&archiveState.currentPage===1;
 const syncControls=()=>{if(filter&&filter.value!==archiveState.query)filter.value=archiveState.query;missionButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.missionFilter===archiveState.mission)));if(sortSelect)sortSelect.value=archiveState.sortMode;if(pageSizeSelect)pageSizeSelect.value=String(archiveState.pageSize);};
-const RAW_GENERATED_BASE='https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/';
-const generatedUrls=(name,version)=>{const suffix=`${name}.json`;const local=new URL(`generated/${suffix}`,document.baseURI);const rootLocal=new URL(`/generated/${suffix}`,location.origin);const raw=new URL(suffix,RAW_GENERATED_BASE);for(const url of [local,rootLocal,raw]){url.searchParams.set('v',String(version||'latest'));url.searchParams.set('watch',String(Date.now()));}return location.hostname.endsWith('github.io')?[raw.href,local.href]:[local.href,rootLocal.href,raw.href];};
-const fetchGenerated=async(name,version)=>{let lastError;const timeoutMs=name==='unified_dog_search_index'?ARCHIVE_FETCH_TIMEOUT_MS:CURRENT_FETCH_TIMEOUT_MS;for(const url of generatedUrls(name,version)){const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{cache:'no-store',headers:{accept:'application/json'},signal:controller.signal});if(!response.ok)throw new Error(`${name} unavailable (${response.status})`);const type=response.headers.get('content-type')||'';if(type&&!type.includes('json')&&!url.includes('raw.githubusercontent.com'))throw new Error(`${name} returned ${type}`);return await response.json();}catch(error){lastError=error;}finally{window.clearTimeout(timeout);}}throw lastError||new Error(`${name} unavailable`);};
+const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI);url.searchParams.set('v',String(version||'latest'));url.searchParams.set('watch',String(Date.now()));return [url.href];};
+const fetchGenerated=async(name,version)=>{let lastError;const timeoutMs=name==='unified_dog_search_index'?ARCHIVE_FETCH_TIMEOUT_MS:CURRENT_FETCH_TIMEOUT_MS;for(const url of generatedUrls(name,version)){const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{cache:'no-store',headers:{accept:'application/json'},signal:controller.signal});if(!response.ok)throw new Error(`${name} unavailable (${response.status})`);const type=(response.headers.get('content-type')||'').split(';',1)[0].trim().toLowerCase();if(type&&type!=='application/json'&&!type.endsWith('+json'))throw new Error(`${name} returned ${type}`);return await response.json();}catch(error){lastError=error;}finally{window.clearTimeout(timeout);}}throw lastError||new Error(`${name} unavailable`);};
 const asRows=value=>Array.isArray(value)?value.filter(row=>row&&typeof row==='object'):[];
 const metricRowsToMap=rows=>Object.fromEntries(asRows(rows).map(row=>[String(row.metric||''),String(row.value??'')]));
-const safeUrl=value=>{try{const url=new URL(String(value||''),document.baseURI);return url.protocol==='http:'||url.protocol==='https:'?url.href:'';}catch(_){return '';}};
 const dogToken=row=>{const match=String(row?.dog||row?.dog_name||'').match(/#(\d+)/);return match?Number(match[1]):Number(row?.token_id);};
 const currentFeedRow=(rows,token)=>asRows(rows).find(row=>dogToken(row)===token)||asRows(rows).find(row=>{const status=String(row.status||'').toLowerCase();return status==='live'||status.includes('ongoing');})||asRows(rows)[0]||{};
 const parseTrait=value=>{const text=String(value||'').trim();const split=text.indexOf(':');if(split<0)return {text,type:'',value:text,rarity:''};const type=text.slice(0,split).trim();let traitValue=text.slice(split+1).trim();let rarity='';const match=traitValue.match(/^(.*?)\s+(\([^)]+%\))$/);if(match){traitValue=match[1].trim();rarity=match[2];}return {text,type,value:traitValue,rarity};};
@@ -4006,13 +5459,16 @@ const metricNumber=(metrics,key)=>toNumber(metrics[key]);
 const metricAmount=(metrics,key,places,suffix)=>{const value=metricNumber(metrics,key);return value===null?'':`${value.toLocaleString(undefined,{minimumFractionDigits:places,maximumFractionDigits:places})}${suffix}`;};
 const rewardTile=(label,value,note,title='')=>value?`<span class="reward-tile"${title?` title="${attr(title)}"`:''}><b>${escapeHtml(label)}</b><strong>${value}</strong><em>${escapeHtml(note)}</em>${title?`<small class="reward-caveat sr-only">${escapeHtml(title)}</small>`:''}</span>`:'';
 const renderRewards=metrics=>{if(!currentRewards)return;const woof=metricAmount(metrics,'reward_woof_per_dog_per_day',2,' WOOF/day');const woofUsd=metricAmount(metrics,'reward_woof_per_dog_usd_per_day',2,'/day');const sup=metricAmount(metrics,'reward_sup_per_dog_per_day',2,' SUP/day');const supUsd=metricAmount(metrics,'reward_sup_per_dog_usd_per_day',2,'/day');const total=metricAmount(metrics,'reward_total_per_dog_usd_per_day',2,'/day');const tiles=[rewardTile('WOOF / Dog',woof?`${escapeHtml(woof)}${woofUsd?` <span>($${escapeHtml(woofUsd)})</span>`:''}`:'','Observed stream'),rewardTile('SUP / Dog',sup?`${escapeHtml(sup)}${supUsd?` <span>($${escapeHtml(supUsd)})</span>`:''}`:'','Observed stream'),rewardTile('Total / Dog',total?`$${escapeHtml(total)}`:'','WOOF + SUP')];const s6Enabled=/^(true|1|yes|live_estimate)$/i.test(metrics.season6_sup_enabled||metrics.season6_sup_status||'');const currentWallet=String(metrics.current_bidder_wallet||'').toLowerCase();const s6Wallet=String(metrics.season6_sup_current_bidder_wallet||'').toLowerCase();const s6Aligned=!s6Wallet||s6Wallet===currentWallet;if(s6Enabled&&s6Aligned){const noBid=metrics.season6_sup_estimate_status==='no_current_bid'||(!metrics.season6_sup_current_bidder_wallet&&!metrics.season6_sup_current_bid_estimated_cap_aware_sup);const supEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_sup');const usdEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_usd');const main=noBid?'Bid to estimate S6 SUP':`≈${(supEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})} SUP`;const secondary=noBid?'Current high bidder needed':`≈$${(usdEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})}`;tiles.push(`<span class="reward-tile season6-sup-estimate"><b>Season 6 if bid wins</b><strong>${escapeHtml(main)}</strong><em>${escapeHtml(secondary)} · Wallet-level estimate</em></span>`);}const days=metricNumber(metrics,'reward_current_bid_payback_days');const apr=metrics.reward_current_bid_apr_display||'';const payback=days&&days>0?(days<1?'&lt;1 day':`≈${days<10?days.toFixed(1):days.toFixed(0)} days`):(metrics.reward_current_bid_payback_days?'N/A':'');if(payback||apr){const caveat='Simple APR estimate from the current bid and observed per-Dog daily reward flow; not guaranteed future return.';tiles.push(rewardTile('Bid payback',`<span class="payback-days">${payback}</span><span class="payback-apr">${escapeHtml(apr)}</span>`,'Current bid / observed per-Dog flow',caveat));}const body=tiles.filter(Boolean).join('');currentRewards.innerHTML=body?`<section class="reward-strip" aria-label="Per-Dog reward estimate">${body}</section>`:'';};
-const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"><b>Rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}const dot=document.querySelector('[data-live-dot]');if(dot){dot.dataset.auctionStatus=String(status).toLowerCase();dot.dataset.liveEnd=end;}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
+const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"><b>Rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url,SAFE_IMAGE_HOSTS);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
 const normalizedState=value=>{const state=String(value||'').toLowerCase();return state==='live'||state.includes('ongoing')?'live':state.includes('settled')||state.includes('ended')?'ended':state;};
 const assertSame=(label,values,normalize=value=>String(value))=>{const present=values.filter(value=>value!==null&&value!==undefined&&String(value)!=='').map(normalize);if(new Set(present).size>1)throw new Error(`${label} datasets disagree`);};
-const assertCurrentSnapshot=(status,current,feed,history,metrics)=>{const block=String(status.latest_generated_block||'');if(!block)throw new Error('refresh status has no snapshot block');if(String(current.latest_block||'')!==block||String(metrics.latest_block||'')!==block)throw new Error('generated snapshot is not atomic yet');const token=Number(status.current_dog_token_id??current.token_id);if(!Number.isFinite(token)||Number(current.token_id)!==token||dogToken(feed)!==token||Number(metrics.current_auction_token_id)!==token)throw new Error('current auction datasets disagree');assertSame('auction state',[status.current_auction_status,current.auction_state,feed.status,metrics.current_auction_status],normalizedState);assertSame('high bidder',[status.current_high_bidder_wallet,current.bidder_wallet,feed.bidder_winner_wallet,metrics.current_bidder_wallet],value=>String(value).toLowerCase());assertSame('current bid',[status.current_bid_eth,current.current_bid_eth,feed.amount_eth,metrics.current_bid_eth],value=>Number(value).toFixed(12));const hashes=[status.snapshot_block_hash,metrics.snapshot_block_hash].filter(Boolean);if(hashes.length!==2)throw new Error('verified snapshot hash is missing');assertSame('snapshot hash',hashes,value=>String(value).toLowerCase());const verification=[status.onchain_verification_status,metrics.onchain_verification_status].filter(Boolean);if(verification.length!==2||verification.some(value=>value!=='current_snapshot_cross_provider_verified'))throw new Error('current snapshot is not cross-provider verified');const topBid=asRows(history)[0];if(topBid){if(Number(topBid.token_id)!==token)throw new Error('current bid history token disagrees');assertSame('bid history bidder',[current.bidder_wallet,topBid.bidder_wallet],value=>String(value).toLowerCase());assertSame('bid history amount',[current.current_bid_eth,topBid.bid_eth],value=>Number(value).toFixed(12));}return {block,token};};
-const assertArchiveSnapshot=(context,records)=>{const unified=asRows(records).find(row=>Number(row.mission)===3&&Number(row.dog_id)===context.token);if(!unified)throw new Error('archive index is behind current auction');assertSame('archive state',[context.status.current_auction_status,context.current.auction_state,context.feed.status,context.metrics.current_auction_status,unified.status],normalizedState);assertSame('archive high bidder',[context.status.current_high_bidder_wallet,context.current.bidder_wallet,context.feed.bidder_winner_wallet,context.metrics.current_bidder_wallet,unified.winner_or_high_bidder?.wallet],value=>String(value).toLowerCase());assertSame('archive current bid',[context.status.current_bid_eth,context.current.current_bid_eth,context.feed.amount_eth,context.metrics.current_bid_eth,unified.amount?.native],value=>Number(value).toFixed(12));};
-const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=await fetchGenerated('unified_dog_search_index',target.block);if(target.key!==liveSnapshotKey)continue;assertArchiveSnapshot(target,records);unifiedRecords=asRows(records);unifiedSnapshotBlock=target.block;archiveSnapshotKey=target.key;unifiedReady=true;renderArchive();}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
-const refreshLiveSurface=()=>liveRefreshPromise||(liveRefreshPromise=(async()=>{const status=await fetchGenerated('refresh_status',Date.now());const nextBlock=String(status.latest_generated_block||'');if(!nextBlock)throw new Error('refresh status has no snapshot block');const nextKey=`${nextBlock}:${status.last_successful_refresh_time_utc||''}`;if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))return;let context=liveSnapshotContext;if(nextKey!==liveSnapshotKey){const [currentRows,feedRows,historyRows,metricRows]=await Promise.all([fetchGenerated('current_auction',nextBlock),fetchGenerated('auction_feed',nextBlock),fetchGenerated('current_auction_bid_history',nextBlock),fetchGenerated('mission3_metrics',nextBlock)]);const current=asRows(currentRows)[0];if(!current)throw new Error('current auction unavailable');const metrics=metricRowsToMap(metricRows);const token=Number(status.current_dog_token_id??current.token_id);const feed=currentFeedRow(feedRows,token);const snapshot=assertCurrentSnapshot(status,current,feed,historyRows,metrics);context={...snapshot,key:nextKey,status,current,feed,metrics};hydrateCurrentCard(feed,current,historyRows,metrics);liveSnapshotContext=context;liveSnapshotBlock=snapshot.block;liveSnapshotKey=nextKey;}if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context);})().catch(()=>{if(!unifiedReady)fallbackAuctionRows();}).finally(()=>{liveRefreshPromise=null;}));
+const canonicalUint=(value,label,minimum=0)=>{const text=String(value??'').trim();if(!/^(0|[1-9]\d*)$/.test(text))throw new Error(`${label} is not a canonical integer`);const number=Number(text);if(!Number.isSafeInteger(number)||number<minimum)throw new Error(`${label} is out of range`);return number;};
+const normalizedAmount=value=>{const text=String(value??'').trim();const number=Number(text);if(!text||!Number.isFinite(number)||number<0)throw new Error('amount is not finite and nonnegative');return number.toFixed(12);};
+const assertStatusAttestation=status=>{const blockNumber=canonicalUint(status.latest_generated_block,'snapshot block',1);if(status.last_refresh_result!=='success_generated'||!setVerificationState(status))throw new Error('verified snapshot is stale or unsuccessful');if(!/^0x[0-9a-f]{64}$/i.test(String(status.snapshot_block_hash||'')))throw new Error('verified snapshot hash is invalid');for(const key of ['auction_house_code_sha256','dog_nft_code_sha256'])if(!/^[0-9a-f]{64}$/i.test(String(status[key]||'')))throw new Error(`verified ${key} is invalid`);const quorum=canonicalUint(status.rpc_quorum_size,'RPC quorum size',2);const agreement=String(status.rpc_quorum_agreement||'').match(/^(\d+)\/(\d+)$/);if(!agreement||canonicalUint(agreement[1],'RPC agreement',quorum)>canonicalUint(agreement[2],'RPC responders',quorum))throw new Error('verified RPC agreement is invalid');const providers=new Set(String(status.rpc_quorum_providers||'').split(',').map(value=>value.trim()).filter(Boolean));if(providers.size<quorum)throw new Error('verified RPC provider set is incomplete');if(canonicalUint(status.snapshot_confirmations,'snapshot confirmations',1)<1)throw new Error('snapshot is unconfirmed');if(canonicalUint(status.onchain_chain_id,'onchain chain ID',8453)!==8453)throw new Error('snapshot is not Base mainnet');const scope=new Set(String(status.onchain_verification_scope||'').split(',').map(value=>value.trim()).filter(Boolean));for(const required of ['snapshot_hash','contract_code','current_auction','dog_total_supply','recent_event_logs'])if(!scope.has(required))throw new Error(`verified snapshot scope is missing ${required}`);return String(blockNumber);};
+const assertCurrentSnapshot=(status,current,feed,history,metrics)=>{const block=assertStatusAttestation(status);if(String(current.latest_block||'')!==block||String(metrics.latest_block||'')!==block)throw new Error('generated snapshot is not atomic yet');if(canonicalUint(metrics.onchain_chain_id,'metrics chain ID',8453)!==8453)throw new Error('metrics are not Base mainnet');const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');if(canonicalUint(current.token_id,'current auction token')!==token||canonicalUint(dogToken(feed),'auction feed token')!==token||canonicalUint(metrics.current_auction_token_id,'metrics auction token')!==token)throw new Error('current auction datasets disagree');assertSame('auction state',[status.current_auction_status,current.auction_state,feed.status,metrics.current_auction_status],normalizedState);assertSame('high bidder',[status.current_high_bidder_wallet,current.bidder_wallet,feed.bidder_winner_wallet,metrics.current_bidder_wallet],value=>String(value).toLowerCase());assertSame('current bid',[status.current_bid_eth,current.current_bid_eth,feed.amount_eth,metrics.current_bid_eth],normalizedAmount);const hashes=[status.snapshot_block_hash,metrics.snapshot_block_hash].filter(Boolean);if(hashes.length!==2)throw new Error('verified snapshot hash is missing');assertSame('snapshot hash',hashes,value=>String(value).toLowerCase());const verification=[status.onchain_verification_status,metrics.onchain_verification_status].filter(Boolean);if(verification.length!==2||verification.some(value=>value!=='current_snapshot_cross_provider_verified'))throw new Error('current snapshot is not cross-provider verified');const topBid=asRows(history)[0];if(topBid){if(canonicalUint(topBid.token_id,'current bid history token')!==token)throw new Error('current bid history token disagrees');assertSame('bid history bidder',[current.bidder_wallet,topBid.bidder_wallet],value=>String(value).toLowerCase());assertSame('bid history amount',[current.current_bid_eth,topBid.bid_eth],normalizedAmount);}return {block,token};};
+const assertArchiveSnapshot=(context,records)=>{const unified=asRows(records).find(row=>Number(row.mission)===3&&Number(row.dog_id)===context.token);if(!unified)throw new Error('archive index is behind current auction');assertSame('archive state',[context.status.current_auction_status,context.current.auction_state,context.feed.status,context.metrics.current_auction_status,unified.status],normalizedState);assertSame('archive high bidder',[context.status.current_high_bidder_wallet,context.current.bidder_wallet,context.feed.bidder_winner_wallet,context.metrics.current_bidder_wallet,unified.winner_or_high_bidder?.wallet],value=>String(value).toLowerCase());assertSame('archive current bid',[context.status.current_bid_eth,context.current.current_bid_eth,context.feed.amount_eth,context.metrics.current_bid_eth,unified.amount?.native],normalizedAmount);};
+const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=await fetchGenerated('unified_dog_search_index',target.block);if(target.key!==liveSnapshotKey)continue;assertArchiveSnapshot(target,records);const nextRecords=asRows(records);const previousRecords=unifiedRecords;const previousReady=unifiedReady;unifiedRecords=nextRecords;unifiedReady=true;try{renderArchive();}catch(error){unifiedRecords=previousRecords;unifiedReady=previousReady;throw error;}unifiedSnapshotBlock=target.block;archiveSnapshotKey=target.key;}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
+const refreshLiveSurface=()=>liveRefreshPromise||(liveRefreshPromise=(async()=>{const status=await fetchGenerated('refresh_status',Date.now());const nextBlock=assertStatusAttestation(status);const nextKey=`${nextBlock}:${status.last_successful_refresh_time_utc||''}`;if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))throw new Error('verified snapshot block regressed');let context=liveSnapshotContext;if(nextKey!==liveSnapshotKey){const [currentRows,feedRows,historyRows,metricRows]=await Promise.all([fetchGenerated('current_auction',nextBlock),fetchGenerated('auction_feed',nextBlock),fetchGenerated('current_auction_bid_history',nextBlock),fetchGenerated('mission3_metrics',nextBlock)]);const current=asRows(currentRows)[0];if(!current)throw new Error('current auction unavailable');const metrics=metricRowsToMap(metricRows);const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');const feed=currentFeedRow(feedRows,token);const snapshot=assertCurrentSnapshot(status,current,feed,historyRows,metrics);context={...snapshot,key:nextKey,status,current,feed,history:historyRows,metrics};hydrateCurrentCard(feed,current,historyRows,metrics);liveSnapshotContext=context;liveSnapshotBlock=snapshot.block;liveSnapshotKey=nextKey;}else{if(!context)throw new Error('verified snapshot context is unavailable');assertCurrentSnapshot(status,context.current,context.feed,context.history,context.metrics);context={...context,status};liveSnapshotContext=context;}if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context);})().catch(()=>{setVerificationState(liveSnapshotContext?.status,true);if(!unifiedReady)fallbackAuctionRows();}).finally(()=>{liveRefreshPromise=null;}));
 const emptyArchiveMessage=()=>archiveState.mission!=='all'&&!archiveState.query?`No verified Mission ${archiveState.mission} auction rows are available yet.`:'No auctions found for this search.';
 const setAuctionRows=(records,label,total=records.length)=>{if(!auctionBody)return;auctionBody.innerHTML=records.length?records.map(unifiedRowHtml).join(''):`<tr><td colspan="6">${escapeHtml(emptyArchiveMessage())}</td></tr>`;if(auctionTotal){auctionTotal.dataset.total=String(total);auctionTotal.textContent=label||`${total} rows`;}};
 const filteredRows=()=>{let rows=unifiedRecords;if(archiveState.mission!=='all')rows=rows.filter(record=>String(record.mission)===archiveState.mission);const q=archiveState.query;if(q)rows=rows.filter(record=>matchesQuery(record,q));return rows;};
@@ -4028,8 +5484,7 @@ sortSelect?.addEventListener('change',()=>{archiveState.sortMode=sortSelect.valu
 pageSizeSelect?.addEventListener('change',()=>{archiveState.pageSize=Math.min(100,Math.max(10,Number(pageSizeSelect.value)||10));archiveState.currentPage=1;renderArchive();});
 pagePrev?.addEventListener('click',()=>{archiveState.currentPage=Math.max(1,archiveState.currentPage-1);renderArchive();});
 pageNext?.addEventListener('click',()=>{archiveState.currentPage+=1;renderArchive();});
-const updateLiveDots=()=>{const now=Date.now();document.querySelectorAll('[data-live-dot]').forEach(el=>{const status=String(el.dataset.auctionStatus||'').toLowerCase();const end=parseUtc(el.dataset.liveEnd);const ended=status.includes('settled')||status.includes('ended')||(Number.isFinite(end)&&end<=now);const live=(status.includes('ongoing')||status.includes('live'))&&!ended;el.classList.toggle('dot--live',live);el.classList.toggle('dot--idle',!live);});};
-const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});updateLiveDots();};
+const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{if(!table.tBodies.length)return;const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total&&!table.matches('[data-table="auction_feed"]')){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
 document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
@@ -4040,13 +5495,29 @@ refreshLiveSurface().finally(scheduleLiveRefresh);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLiveSurface();});
 window.addEventListener('online',refreshLiveSurface);
 """.strip()
+    style_hash = base64.b64encode(hashlib.sha256(css.encode("utf-8")).digest()).decode("ascii")
+    script_hash = base64.b64encode(hashlib.sha256(script.encode("utf-8")).digest()).decode("ascii")
+    content_security_policy = "; ".join(
+        [
+            "default-src 'none'",
+            "base-uri 'none'",
+            "object-src 'none'",
+            f"script-src 'sha256-{script_hash}'",
+            f"style-src 'sha256-{style_hash}'",
+            "img-src 'self' data: https://api.degendogs.club https://degendogs.club https://ipfs.io",
+            "connect-src 'self'",
+            "form-action 'none'",
+        ]
+    )
     html_doc = f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#e8ded5">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="{html.escape(content_security_policy, quote=True)}">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <title>Degen Dogs Mission 3 Auctions</title>
 <style>{css}</style>
 </head>
@@ -4054,7 +5525,7 @@ window.addEventListener('online',refreshLiveSurface);
 <div class="shell">
   <section class="current-card" data-current-card aria-label="Current auction">
     <div class="current-copy">
-      <div class="topline"><div class="eyebrow">{live_dot_html}Mission 3 auction feed</div>{top_actions_html}</div>
+      <div class="topline"><div class="eyebrow">{live_dot_html}<span data-live-label>Mission 3 auction feed · verification pending</span></div>{top_actions_html}</div>
       <h1 data-current-dog>{current_dog_html}</h1>
       <div class="current-detail" data-current-detail>{current_detail}</div>
       <div data-current-rewards>{reward_strip}</div>
@@ -4080,8 +5551,8 @@ window.addEventListener('online',refreshLiveSurface);
 
 def main() -> None:
     progress("start")
-    GENERATED.mkdir(exist_ok=True)
-    PUBLIC_GENERATED.mkdir(parents=True, exist_ok=True)
+    ensure_owned_directory_tree(GENERATED)
+    ensure_owned_directory_tree(PUBLIC_GENERATED)
     latest_block, latest_block_data, onchain_verification = verified_snapshot()
     snapshot_tag = hex(latest_block)
     latest_time = utc_from_unix(int(latest_block_data["timestamp"], 16))
@@ -4100,30 +5571,79 @@ def main() -> None:
     decimals = int(token_stats["woof_decimals"])
     token_stats["dog_total_supply"] = str(dog_total_supply)
     token_stats.update(current_bid_reward_stats(current, token_stats))
+    snapshot_block_hash = onchain_verification["snapshot_block_hash"]
+    dog_token_uris = fetch_token_uri_bindings(
+        list(range(dog_total_supply)),
+        snapshot_tag,
+        block_hash=snapshot_block_hash,
+    )
+    token_uri_present_count = sum(uri is not None for uri in dog_token_uris.values())
+    token_uri_unavailable_count = dog_total_supply - token_uri_present_count
+    token_stats.update(
+        {
+            "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+            "dog_token_uri_present_count": str(token_uri_present_count),
+            "dog_token_uri_unavailable_count": str(token_uri_unavailable_count),
+        }
+    )
     progress(
         f"critical state loaded dog_total_supply={dog_total_supply} "
-        f"current_token_id={current.get('token_id')}"
+        f"current_token_id={current.get('token_id')} token_uri_present={token_uri_present_count} "
+        f"token_uri_unavailable={token_uri_unavailable_count}"
     )
 
     auction_logs = fetch_logs(
         AUCTION_HOUSE,
-        [TOPIC_AUCTION_CREATED, TOPIC_AUCTION_BID, TOPIC_AUCTION_SETTLED],
+        [TOPIC_AUCTION_CREATED, TOPIC_AUCTION_BID, TOPIC_AUCTION_EXTENDED, TOPIC_AUCTION_SETTLED],
         FROM_BLOCK,
         latest_block,
     )
     progress(f"auction logs={len(auction_logs)}")
     created_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_CREATED]
     bid_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_BID]
+    extension_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_EXTENDED]
     settled_logs = [log for log in auction_logs if log["topics"][0].lower() == TOPIC_AUCTION_SETTLED]
-    transfer_logs = fetch_logs(WOOF, TOPIC_TRANSFER, FROM_BLOCK, latest_block)
-    progress(f"transfer logs={len(transfer_logs)}")
-
-    dog_metadata = fetch_dog_metadata_rows(dog_total_supply, snapshot_tag)
+    dog_metadata = fetch_dog_metadata_rows(
+        dog_total_supply,
+        snapshot_tag,
+        token_uris=dog_token_uris,
+    )
+    metadata_status_counts = Counter(str(row["metadata_verification_status"]) for row in dog_metadata)
+    metadata_unavailable_count = sum(
+        count
+        for status, count in metadata_status_counts.items()
+        if status != "onchain_token_uri_verified"
+    )
+    token_stats.update(
+        {
+            "dog_metadata_verification_status": (
+                "complete_onchain_token_uri_verified"
+                if metadata_unavailable_count == 0
+                else "partial_onchain_token_uri_unavailable"
+                if metadata_status_counts.get("onchain_token_uri_unavailable", 0) == metadata_unavailable_count
+                else "incomplete_metadata_unavailable"
+            ),
+            "dog_metadata_onchain_verified_count": str(
+                metadata_status_counts.get("onchain_token_uri_verified", 0)
+            ),
+            "dog_metadata_unavailable_count": str(metadata_unavailable_count),
+        }
+    )
     progress(f"dog metadata rows={len(dog_metadata)}")
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
-    progress(f"decoded auctions created={len(created)} bids={len(bids)} settled={len(settled)}")
-    holders = fetch_woof_holders(transfer_logs, decimals, snapshot_tag)
-    progress(f"holders={len(holders)}")
+    extensions = decode_auction_extension_logs(extension_logs)
+    validate_auction_schedules(created, extensions, current)
+    validate_exact_wei_rows(bids, wei_field="bid_wei", eth_field="bid_eth_exact", label="AuctionBid")
+    validate_exact_wei_rows(settled, wei_field="amount_wei", eth_field="amount_eth_exact", label="AuctionSettled")
+    validate_exact_wei_rows([current], wei_field="amount_wei", eth_field="amount_eth_exact", label="auction()")
+    progress(
+        f"decoded auctions created={len(created)} bids={len(bids)} "
+        f"extended={len(extensions)} settled={len(settled)}"
+    )
+    holders = fetch_verified_woof_holders(decimals, snapshot_tag, token_stats)
+    progress(
+        f"holders={len(holders)} verification={token_stats['woof_holder_verification_status']}"
+    )
     identity_addresses = collect_identity_addresses(current, bids, settled, holders)
     neynar_profiles = fetch_farcaster_profiles(identity_addresses)
     auction_profiles = fetch_degendogs_auction_profiles(current)
@@ -4133,14 +5653,15 @@ def main() -> None:
 
     conn = sqlite3.connect(":memory:")
     insert_rows(conn, "auction_created", created, [("token_id", "INTEGER"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT")])
-    insert_rows(conn, "auction_bids", bids, [("token_id", "INTEGER"), ("bidder", "TEXT"), ("bid_eth", "REAL"), ("bid_wei", "TEXT"), ("extended", "INTEGER"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
-    insert_rows(conn, "auction_settled", settled, [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
+    insert_rows(conn, "auction_extensions", extensions, [("token_id", "INTEGER"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER")])
+    insert_rows(conn, "auction_bids", bids, [("token_id", "INTEGER"), ("bidder", "TEXT"), ("bid_eth", "REAL"), ("bid_eth_exact", "TEXT"), ("bid_wei", "TEXT"), ("extended", "INTEGER"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
+    insert_rows(conn, "auction_settled", settled, [("token_id", "INTEGER"), ("winner", "TEXT"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER"), ("block_time_utc", "TEXT")])
     insert_rows(conn, "woof_holders", holders, [("address", "TEXT"), ("balance_woof", "REAL"), ("balance_raw", "TEXT")])
     insert_rows(conn, "farcaster_profiles", farcaster_profiles, [("address", "TEXT"), ("fid", "INTEGER"), ("username", "TEXT"), ("display_name", "TEXT"), ("pfp_url", "TEXT")])
-    insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL")])
+    insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL"), ("metadata_verification_status", "TEXT")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
     insert_rows(conn, "historical_prices_daily", load_historical_price_rows(), HISTORICAL_PRICE_SCHEMA)
-    insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
+    insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
     conn.executescript(SQL_PATH.read_text(encoding="utf-8"))
     build_historical_dog_tables(conn, dog_total_supply, dog_metadata)

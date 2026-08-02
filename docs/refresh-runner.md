@@ -43,7 +43,7 @@ reorg-overlapped and cross-table validated; identities, metadata hosting, price 
 and reward projections are source-attributed offchain inputs and are not mislabeled as
 cross-provider onchain facts.
 
-## Baseline hourly full reconcile
+## Baseline hourly reconcile
 
 Keep the hourly refresh as the safety baseline:
 
@@ -51,21 +51,34 @@ Keep the hourly refresh as the safety baseline:
 0 * * * * cd /path/to/Degen-Dogs-Mission-3 && npm run refresh:publish
 ```
 
-The Pages workflow runs `npm ci` and `npm run build`. It does not run `npm run data`; the runner must commit fresh generated data before pushing if live dashboard data should update.
+The Pages workflow runs `npm ci --ignore-scripts`, the full validation suite, and
+`npm run build`. It does not run `npm run data`; the runner must commit fresh generated
+data before pushing if live dashboard data should update.
 
 On the deployed page, a cache-busted `refresh_status.json` check runs every 10 seconds.
 When its verified snapshot changes, the browser cross-checks the lightweight current
 auction, feed, bid-history, and metrics payloads before updating the current card. The
 larger unified archive is fetched and validated in a separate phase, so archive loading
-cannot delay the current auction. GitHub Pages clients try the raw `main` artifacts first
-and fall back to the Pages copy while a deployment is still propagating.
+cannot delay the current auction. Browser clients use only same-origin GitHub Pages
+artifacts; the off-host watchdog independently compares raw `main` with Pages without
+expanding the browser's content trust boundary.
 
-The installed hourly LaunchAgent sets `DEGEN_DOGS_FULL_REFRESH=1`, so it rebuilds and
-cross-checks the complete configured dataset once per hour. Event-triggered watcher
-runs set `DEGEN_DOGS_FULL_REFRESH=0` and use the bounded current-surface path for speed.
-If that bounded refresher returns exit code `75` because its cached coverage cannot be
-updated exactly, the publish wrapper immediately falls back to `npm run data` in the
-same locked run.
+The installed hourly LaunchAgent defaults to `DEGEN_DOGS_FULL_REFRESH=0`, using the
+bounded current-surface reconciler so it does not hold the shared lock through an
+unnecessary full rebuild. If the bounded refresher returns exit code `75` because its
+cached coverage cannot be updated exactly, the publish wrapper immediately falls back
+to `npm run data` in the same locked run. Set `DEGEN_DOGS_FULL_REFRESH=1` when installing
+to require a full rebuild every hour. Persist intentional hourly policy overrides in
+the protected `.env.local` and reinstall the health LaunchAgent as well, so its drift
+check uses the same nonsecret policy.
+
+Hourly installs also default `DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1`, keeping the Mission 3
+archive inside its three-hour freshness guarantee. The 15-second watcher always pins
+both `DEGEN_DOGS_FULL_REFRESH=0` and `DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0`; event-triggered
+publication therefore remains low-latency even when the shared `.env.local` enables
+hourly archive maintenance. An explicit hourly `DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0`
+remains supported and drift-stable, but opts that runner out of the three-hour archive
+freshness guarantee.
 Both jobs use `RunAtLoad=true`, so a reboot or user login does not wait for the first
 timer interval.
 
@@ -115,9 +128,9 @@ On first run with no state, the tracker initializes a baseline from latest oncha
 Defaults:
 
 ```bash
-MISSION3_WATCHER_INTERVAL_SECONDS=30
+MISSION3_WATCHER_INTERVAL_SECONDS=15
 MISSION3_WATCHER_COOLDOWN_SECONDS=30
-MISSION3_WATCHER_BID_COOLDOWN_SECONDS=30
+MISSION3_WATCHER_BID_COOLDOWN_SECONDS=15
 MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0
 MISSION3_WATCHER_LOOKBACK_BLOCKS=100
 MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS=50
@@ -130,7 +143,7 @@ Rules:
 - One-shot runs take a non-blocking watcher lock at `.local/mission3_onchain_tracker.lock` so watcher checks do not overlap.
 - Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.
-- Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (30s default), so real new bids publish quickly without commit-spamming every repeated signal.
+- Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (15s default), so real new bids publish quickly without commit-spamming every repeated signal.
 - Time-based force refresh is disabled by default. Keep the hourly LaunchAgent as the baseline and enable `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` only if the watcher is the sole runner, otherwise the watcher and hourly runner both perform full API-heavy refreshes.
 - Bid-only and extension-only changes inside their active cooldown are stored as `pending_refresh` and retried after cooldown.
 - Failed, deferred, or lock-blocked refreshes also stay pending. The watcher may advance `last_checked_*` and `last_observed_*` for operator visibility, but `last_seen_*` is the published/acknowledged cursor and only advances after a successful refresh command (or dry-run acknowledgement). This prevents a same-token bid from being observed once, failing to publish, and then being suppressed as already handled.
@@ -221,6 +234,8 @@ Create the protected runner configuration once. The three installers source it
 automatically and preserve the same RPC configuration during health self-repair:
 
 ```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements.txt
 cp .env.example .env.local
 chmod 600 .env.local
 # Set BASE_RPC_URLS and BASE_LOG_RPC_URLS to at least two independent,
@@ -254,7 +269,7 @@ MISSION3_WATCHER_AUTO_PUSH=1 \
 bash scripts/install_runner_health_launchd.sh
 ```
 
-Both worker LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 30 seconds. The health LaunchAgent runs every five minutes, repairs plist/service drift, kickstarts stale workers, validates watcher state/failure counters, and checks the live cache-busted refresh-status sidecar.
+Both worker LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 15 seconds. The health LaunchAgent runs every five minutes, repairs plist/service drift, kickstarts stale workers, validates watcher state/failure counters, and checks the live cache-busted refresh-status sidecar.
 
 The health pass also bounds launchd, runner, watcher, and local JSONL telemetry logs.
 It preserves launchd file inodes, retains complete newest lines, and checks free bytes

@@ -34,9 +34,9 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144",
+      "0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5",
       "0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935",
-      "0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5"
+      "0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#184/792",
-      "rank": 184,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.74 $16.74 2026-07-31t13:08:17z 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6 #184/792 generated auction feed 0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 background: none (90.4%) background none body: brown (11.1%) body brown neck: none (39.8%) neck none mouth: pizza (10.4%) mouth pizza ears: goldearring (15.2%) ears goldearring head: whitemohawk (6.8%) head whitemohawk eyes: eyepatch (8.0%) eyes eyepatch base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.74 $16.74 2026-07-31t13:08:17z 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6 unavailable generated auction feed 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144 background: none background none body: brown body brown neck: none neck none mouth: pizza mouth pizza ears: goldearring ears goldearring head: whitemohawk head whitemohawk eyes: eyepatch eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49356975,
       "block_time_utc": "2026-07-31T13:08:17Z",
@@ -73,46 +73,46 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
+        "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.1%)",
+        "display": "Body: Brown",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (10.4%)",
+        "display": "Mouth: Pizza",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: GoldEarring (15.2%)",
+        "display": "Ears: GoldEarring",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.8%)",
+        "display": "Head: WhiteMohawk",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

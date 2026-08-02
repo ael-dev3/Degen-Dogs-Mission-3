@@ -89,7 +89,7 @@ Season 6 SUP projection methodology is documented in
 ## Quick start
 
 ```bash
-npm ci
+npm ci --ignore-scripts
 npm run data
 npm run dev
 npm run build

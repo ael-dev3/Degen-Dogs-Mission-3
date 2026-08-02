@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#110/792",
-      "rank": 110,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 307 dog #307 307 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 0x5f1cd6b14e577123bf9cdaa9810d0a90cd993b02c2255f3d99dc6fa3029370e1 #110/792 background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: eyepatch 0x3698515c49d65ecec73854a150b715797b95e3c47150df599cf6e9a27272a967 chain_logs contract_getters",
+    "search_text": "dog 307 dog #307 307 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x51141e73c8576aca3acdfa731b30a7f2fc5a6d9b8161d05cebb0699310b2f658 0x5f1cd6b14e577123bf9cdaa9810d0a90cd993b02c2255f3d99dc6fa3029370e1 unavailable background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: eyepatch 0x3698515c49d65ecec73854a150b715797b95e3c47150df599cf6e9a27272a967 chain_logs contract_getters",
     "settlement": {
       "block_number": 25569612,
       "block_time_utc": "2025-03-07T23:40:26Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.6%)",
+        "display": "Body: Grey",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Teeth (5.3%)",
+        "display": "Mouth: Teeth",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

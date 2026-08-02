@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 import importlib.util
+import base64
+import hashlib
+import html as html_module
+import re
 import struct
 import sys
 import zlib
@@ -67,13 +71,14 @@ def assert_timer_urgency_colors() -> None:
         "const formatNativeAmount=value=>",
         "formatNativeAmount(amount.native)",
         "const refreshLiveSurface=()=>liveRefreshPromise||",
-        "if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))return",
+        "if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))throw new Error('verified snapshot block regressed')",
         "const LIVE_REFRESH_MS=10000",
         "const CURRENT_FETCH_TIMEOUT_MS=6000",
         "const ARCHIVE_FETCH_TIMEOUT_MS=45000",
         "const controller=new AbortController()",
-        "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/",
-        "const rootLocal=new URL(`/generated/${suffix}`,location.origin)",
+        "const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI)",
+        "const assertStatusAttestation=status=>",
+        "const canonicalUint=(value,label,minimum=0)=>",
         "fetchGenerated('current_auction',nextBlock)",
         "fetchGenerated('auction_feed',nextBlock)",
         "fetchGenerated('current_auction_bid_history',nextBlock)",
@@ -86,6 +91,9 @@ def assert_timer_urgency_colors() -> None:
     for marker in required_markers:
         if marker not in html:
             raise AssertionError(f"generated index.html missing timer urgency marker: {marker}")
+    for forbidden in ("raw.githubusercontent.com", "rootLocal", "const updateLiveDots="):
+        if forbidden in html:
+            raise AssertionError(f"generated index.html contains unsafe/stale live-data marker: {forbidden}")
 
 
 def read_rgba_png(path: Path) -> tuple[int, int, list[int]]:
@@ -166,7 +174,7 @@ def read_rgba_png(path: Path) -> tuple[int, int, list[int]]:
 
 def assert_browser_favicon_asset() -> None:
     html = INDEX_PATH.read_text(encoding="utf-8")
-    favicon_marker = '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">'
+    favicon_marker = '<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">'
     if favicon_marker not in html:
         raise AssertionError("generated index.html is missing the browser favicon")
     forbidden_markers = [
@@ -197,6 +205,28 @@ def assert_browser_favicon_asset() -> None:
     for filename in ("degen-dogs-logo.png", "apple-touch-icon.png"):
         if (ROOT / "public" / filename).exists():
             raise AssertionError(f"non-favicon logo asset must not be published: {filename}")
+
+
+def assert_content_security_policy_hashes() -> None:
+    rendered = INDEX_PATH.read_text(encoding="utf-8")
+    csp_match = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]+)">', rendered)
+    style_match = re.search(r"<style>(.*?)</style>", rendered, re.DOTALL)
+    script_match = re.search(r"<script>(.*?)</script>", rendered, re.DOTALL)
+    if not csp_match or not style_match or not script_match:
+        raise AssertionError("generated index.html is missing CSP or inline assets")
+    csp = html_module.unescape(csp_match.group(1))
+    style_hash = base64.b64encode(hashlib.sha256(style_match.group(1).encode()).digest()).decode()
+    script_hash = base64.b64encode(hashlib.sha256(script_match.group(1).encode()).digest()).decode()
+    for directive in (
+        "default-src 'none'",
+        "connect-src 'self'",
+        f"style-src 'sha256-{style_hash}'",
+        f"script-src 'sha256-{script_hash}'",
+    ):
+        if directive not in csp:
+            raise AssertionError(f"generated index.html CSP missing valid directive: {directive}")
+    if '<meta name="referrer" content="no-referrer">' not in rendered:
+        raise AssertionError("generated index.html is missing no-referrer policy")
 
 
 def assert_creator_popover() -> None:
@@ -257,6 +287,7 @@ def main() -> int:
     assert_trait_links()
     assert_timer_urgency_colors()
     assert_browser_favicon_asset()
+    assert_content_security_policy_hashes()
     assert_creator_popover()
     assert_no_farcaster_channel_panel()
     assert_bid_history_card_layout()

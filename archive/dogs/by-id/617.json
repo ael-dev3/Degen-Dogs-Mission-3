@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#511/792",
-      "rank": 511,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 617 dog #617 617 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0242 eth 24200000000000000 49.92 $49.92 2026-02-06t04:02:23z 0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d 0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61 #511/792 generated auction feed 0x76fee08bc7cf408f7308f5d58a8eee9573fe34ddb87f5c931612e44337cf0bb3 0x1a3ab6adfc37c6b800caabcee448b19f215437087f68a96fd2275c95f751cfdc 0x62cda5730524200175cee97039b02048f2c53705923e32ac01b4a0a09c53966e background: none (90.4%) background none body: black (11.1%) body black neck: goldnecklace (19.4%) neck goldnecklace mouth: tongue (9.8%) mouth tongue ears: loopearring (27.1%) ears loopearring head: none (20.3%) head none eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 617 dog #617 617 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0242 eth 24200000000000000 49.92 $49.92 2026-02-06t04:02:23z 0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d 0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61 unavailable generated auction feed 0x76fee08bc7cf408f7308f5d58a8eee9573fe34ddb87f5c931612e44337cf0bb3 0x1a3ab6adfc37c6b800caabcee448b19f215437087f68a96fd2275c95f751cfdc 0x62cda5730524200175cee97039b02048f2c53705923e32ac01b4a0a09c53966e background: none background none body: black body black neck: goldnecklace neck goldnecklace mouth: tongue mouth tongue ears: loopearring ears loopearring head: none head none eyes: bluelasereyes eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41780598,
       "block_time_utc": "2026-02-06T04:02:23Z",
@@ -81,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
+        "display": "Eyes: BlueLaserEyes",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

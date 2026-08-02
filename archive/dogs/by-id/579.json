@@ -55,12 +55,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#549/792",
-      "rank": 549,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 579 dog #579 579 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 17777 degen 0x983f5faa2680638157ec4fc102c41451e3bedd033559cff620d28b7cec4c9ae6 0xefce2fe73bdd2bb8964614cf918c5f47d8bfbac537642a97061c57c545a1d2a2 #549/792 background: none; body: black; neck: none; mouth: none; ears: none; head: toque; eyes: masksnorkel 0xe13234ea64a756219758b9ba8ce53d042c7b5fd93c250ad85a7860137b878e0f 0x5dc27d3f63ff98b5344336fd631306631abb7ecf264536b7639b2829131ff4a9 0xcd8098afb0f70455c8995dc0a0a2a8b10fc38a2151022caa26bd2bb9bc9b3e51 0x2f6313644104e51e73bc7ec999d7f201987c19efccc91e756a54d5f7eb593a4f chain_logs contract_getters",
+    "search_text": "dog 579 dog #579 579 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 17777 degen 0x983f5faa2680638157ec4fc102c41451e3bedd033559cff620d28b7cec4c9ae6 0xefce2fe73bdd2bb8964614cf918c5f47d8bfbac537642a97061c57c545a1d2a2 unavailable background: none; body: black; neck: none; mouth: none; ears: none; head: toque; eyes: masksnorkel 0xe13234ea64a756219758b9ba8ce53d042c7b5fd93c250ad85a7860137b878e0f 0x5dc27d3f63ff98b5344336fd631306631abb7ecf264536b7639b2829131ff4a9 0xcd8098afb0f70455c8995dc0a0a2a8b10fc38a2151022caa26bd2bb9bc9b3e51 0x2f6313644104e51e73bc7ec999d7f201987c19efccc91e756a54d5f7eb593a4f chain_logs contract_getters",
     "settlement": {
       "block_number": 26609141,
       "block_time_utc": "2025-12-27T07:31:35Z",
@@ -80,37 +80,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.7%)",
+        "display": "Eyes: MaskSnorkel",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

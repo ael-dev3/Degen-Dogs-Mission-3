@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#264/792",
-      "rank": 264,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.72527500 $44.73 2026-06-11t21:16:27z 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 0x76e2dcf7e8e958ec13d559b6c2dd74e49fc7e12a94b0ac2cf5d91c6a2c40c0e6 #264/792 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (90.4%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: tongue (9.8%) mouth tongue ears: earbuds (31.9%) ears earbuds head: hoodie (4.7%) head hoodie eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.73 $44.73 2026-06-11t21:16:27z 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 0x76e2dcf7e8e958ec13d559b6c2dd74e49fc7e12a94b0ac2cf5d91c6a2c40c0e6 unavailable generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none background none body: grey body grey neck: none neck none mouth: tongue mouth tongue ears: earbuds ears earbuds head: hoodie head hoodie eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47211620,
       "block_time_utc": "2026-06-11T21:16:27Z",
@@ -71,9 +71,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -81,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.6%)",
+        "display": "Body: Grey",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Hoodie (4.7%)",
+        "display": "Head: Hoodie",
         "trait_type": "Head",
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

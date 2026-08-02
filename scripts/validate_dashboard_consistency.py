@@ -6,6 +6,7 @@ import csv
 import importlib.util
 import json
 import re
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
@@ -181,6 +182,13 @@ def load_metrics() -> dict[str, str]:
         "log_rpc_quorum_providers",
         "auction_house_code_sha256",
         "dog_nft_code_sha256",
+        "dog_total_supply",
+        "dog_token_uri_verification_status",
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_metadata_verification_status",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
         "current_auction_token_id",
         "current_auction_status",
         "current_bid_eth",
@@ -323,6 +331,485 @@ def archive_top_bid_for_dog(current_dog_id: int) -> dict[str, Any] | None:
             top_amount = amount
             top_time = bid_time
     return top
+
+
+def _parity_int(value: Any, label: str, *, minimum: int = 0) -> int:
+    raw = text(value)
+    if isinstance(value, bool) or not re.fullmatch(r"0|[1-9][0-9]*", raw):
+        raise AssertionError(f"{label} is not a canonical integer")
+    parsed = int(raw)
+    if parsed < minimum:
+        raise AssertionError(f"{label} is below {minimum}")
+    return parsed
+
+
+def _parity_decimal(value: Any, label: str, *, empty_zero: bool = False) -> Decimal:
+    raw = text(value)
+    if not raw and empty_zero:
+        return Decimal(0)
+    if not raw:
+        raise AssertionError(f"{label} is missing")
+    if not re.fullmatch(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?", raw):
+        raise AssertionError(f"{label} is not a canonical decimal")
+    try:
+        parsed = Decimal(raw)
+    except (InvalidOperation, ValueError) as exc:
+        raise AssertionError(f"{label} is not a decimal") from exc
+    if not parsed.is_finite() or parsed < 0:
+        raise AssertionError(f"{label} is not a finite non-negative decimal")
+    return parsed
+
+
+def _parity_timestamp(value: Any, label: str, *, allow_empty: bool = False) -> str:
+    raw = text(value)
+    if not raw:
+        if allow_empty:
+            return ""
+        raise AssertionError(f"{label} is missing")
+    if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}[ T][0-9]{2}:[0-9]{2}:[0-9]{2}(?:Z|[+-][0-9]{2}:[0-9]{2})?", raw):
+        raise AssertionError(f"{label} is not a canonical timestamp")
+    normalized = raw.replace(" ", "T")
+    if normalized.endswith("Z"):
+        normalized = normalized[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(normalized)
+    except ValueError as exc:
+        raise AssertionError(f"{label} is not a valid timestamp") from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _parity_hash(value: Any, label: str, *, allow_empty: bool = False) -> str:
+    normalized = text(value).lower()
+    if not normalized and allow_empty:
+        return ""
+    if not re.fullmatch(r"0x[a-f0-9]{64}", normalized) or int(normalized[2:], 16) == 0:
+        raise AssertionError(f"{label} is not a canonical transaction hash")
+    return normalized
+
+
+def _parity_address(value: Any, label: str) -> str:
+    normalized = text(value).lower()
+    if not re.fullmatch(r"0x[a-f0-9]{40}", normalized) or normalized == ZERO:
+        raise AssertionError(f"{label} is not a canonical nonzero address")
+    return normalized
+
+
+def validate_mission3_archive_parity(*, root: Path = ROOT) -> dict[str, int | bool]:
+    """Cross-check dashboard history against the independently quorum-built archive."""
+
+    archive_root = root / "archive" / "mission3" / "data" / "generated"
+    paths = {
+        "dashboard_timeline": root / "generated" / "auction_timeline.json",
+        "dashboard_winners": root / "generated" / "auction_winners.json",
+        "archive_timeline": archive_root / "mission3_auction_timeline.json",
+        "archive_winners": archive_root / "mission3_auction_winners.json",
+        "archive_bids": archive_root / "mission3_auction_bids.json",
+    }
+    archive_expected = (root / "archive" / "mission3" / "config").is_dir() or archive_root.exists()
+    if not archive_expected:
+        return {"checked": False, "auctions": 0, "settlements": 0, "bids": 0}
+    missing = [str(path.relative_to(root)) for path in paths.values() if not path.is_file()]
+    if missing:
+        raise AssertionError(f"Mission 3 archive parity inputs missing: {missing}")
+
+    loaded = {name: load_json(path) for name, path in paths.items()}
+    for name, rows in loaded.items():
+        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+            raise AssertionError(f"{paths[name].relative_to(root)} is not a list of objects")
+    if not loaded["archive_timeline"]:
+        raise AssertionError("Mission 3 archive timeline cannot be empty")
+
+    def by_token(rows: list[dict[str, Any]], label: str) -> dict[int, dict[str, Any]]:
+        indexed: dict[int, dict[str, Any]] = {}
+        for row_number, row in enumerate(rows, 1):
+            raw_token = row.get("token_id") if row.get("token_id") not in (None, "") else row.get("dog_id")
+            if raw_token in (None, ""):
+                raise AssertionError(f"{label} row {row_number} has no canonical Dog id")
+            token = _parity_int(raw_token, f"{label} row {row_number} token id")
+            if token in indexed:
+                raise AssertionError(f"{label} contains duplicate Dog #{token}")
+            indexed[token] = row
+        return indexed
+
+    dashboard_timeline = by_token(loaded["dashboard_timeline"], "dashboard auction_timeline")
+    archive_timeline = by_token(loaded["archive_timeline"], "Mission 3 archive timeline")
+    if set(dashboard_timeline) != set(archive_timeline):
+        missing_dashboard = sorted(set(archive_timeline) - set(dashboard_timeline))
+        missing_archive = sorted(set(dashboard_timeline) - set(archive_timeline))
+        raise AssertionError(
+            "Mission 3 timeline/archive Dog set differs: "
+            f"missing_dashboard={missing_dashboard[:20]} missing_archive={missing_archive[:20]}"
+        )
+
+    archive_bid_totals: dict[int, Decimal] = {}
+    archive_bid_counts: dict[int, int] = {}
+    archive_bid_bidders: dict[int, set[str]] = {}
+    archive_bid_highs: dict[int, Decimal] = {}
+    archive_bid_time_ranges: dict[int, tuple[str, str]] = {}
+    archive_latest_bids: dict[int, tuple[tuple[int, int], Decimal, str, str]] = {}
+    archive_bid_identities: set[tuple[int, int]] = set()
+    for row_number, row in enumerate(loaded["archive_bids"], 1):
+        token = _parity_int(row.get("token_id"), f"archive bid row {row_number} token id")
+        if token not in archive_timeline:
+            raise AssertionError(f"Mission 3 archive bid references unknown Dog #{token}")
+        amount = _parity_decimal(row.get("amount_eth"), f"Mission 3 Dog #{token} archive bid amount")
+        if amount <= 0:
+            raise AssertionError(f"Mission 3 Dog #{token} archive bid amount must be positive")
+        bidder = _parity_address(row.get("bidder"), f"Mission 3 Dog #{token} archive bid bidder")
+        block = _parity_int(row.get("block_number"), f"Mission 3 Dog #{token} archive bid block", minimum=1)
+        log_index = _parity_int(row.get("log_index"), f"Mission 3 Dog #{token} archive bid log index")
+        tx_hash = _parity_hash(row.get("transaction_hash"), f"Mission 3 Dog #{token} archive bid transaction")
+        bid_time = _parity_timestamp(row.get("block_time_utc"), f"Mission 3 Dog #{token} archive bid time")
+        identity = (block, log_index)
+        if identity in archive_bid_identities:
+            raise AssertionError(f"Mission 3 archive bids contain duplicate log {block}:{log_index}")
+        archive_bid_identities.add(identity)
+        archive_bid_totals[token] = archive_bid_totals.get(token, Decimal(0)) + amount
+        archive_bid_counts[token] = archive_bid_counts.get(token, 0) + 1
+        archive_bid_bidders.setdefault(token, set()).add(bidder)
+        archive_bid_highs[token] = max(archive_bid_highs.get(token, Decimal(0)), amount)
+        previous_range = archive_bid_time_ranges.get(token)
+        archive_bid_time_ranges[token] = (
+            min(previous_range[0], bid_time) if previous_range else bid_time,
+            max(previous_range[1], bid_time) if previous_range else bid_time,
+        )
+        ordering = (block, log_index)
+        previous_latest = archive_latest_bids.get(token)
+        if previous_latest is None or ordering > previous_latest[0]:
+            archive_latest_bids[token] = (ordering, amount, bid_time, bidder)
+
+    for token, archive_row in archive_timeline.items():
+        dashboard_row = dashboard_timeline[token]
+        archive_state = text(archive_row.get("auction_state")).lower()
+        dashboard_state = text(dashboard_row.get("auction_state")).lower()
+        if archive_state not in {"settled", "unsettled_or_live"}:
+            raise AssertionError(f"Mission 3 Dog #{token} archive auction_state is invalid")
+        if dashboard_state not in {"settled", "live", "ended_unsettled"}:
+            raise AssertionError(f"Mission 3 Dog #{token} dashboard auction_state is invalid")
+        if (archive_state == "settled") != (dashboard_state == "settled"):
+            raise AssertionError(f"Mission 3 Dog #{token} settlement state differs from quorum archive")
+
+        created_dashboard = _parity_hash(
+            dashboard_row.get("created_tx_hash"),
+            f"Mission 3 Dog #{token} dashboard created transaction",
+        )
+        created_archive = _parity_hash(
+            archive_row.get("created_tx"),
+            f"Mission 3 Dog #{token} archive created transaction",
+        )
+        if created_dashboard != created_archive:
+            raise AssertionError(f"Mission 3 Dog #{token} created_tx_hash differs from quorum archive")
+        settled = archive_state == "settled"
+        settled_dashboard = _parity_hash(
+            dashboard_row.get("settled_tx_hash"),
+            f"Mission 3 Dog #{token} dashboard settled transaction",
+            allow_empty=not settled,
+        )
+        settled_archive = _parity_hash(
+            archive_row.get("settled_tx"),
+            f"Mission 3 Dog #{token} archive settled transaction",
+            allow_empty=not settled,
+        )
+        if settled_dashboard != settled_archive:
+            raise AssertionError(f"Mission 3 Dog #{token} settled_tx_hash differs from quorum archive")
+        if not settled and (settled_dashboard or settled_archive):
+            raise AssertionError(f"Mission 3 Dog #{token} unsettled auction has a settlement transaction")
+
+        integer_fields = (
+            ("bids", "bids"),
+            ("unique_bidders", "unique_bidder_count"),
+        )
+        for dashboard_key, archive_key in integer_fields:
+            dashboard_value = _parity_int(
+                dashboard_row.get(dashboard_key),
+                f"Mission 3 Dog #{token} dashboard {dashboard_key}",
+            )
+            archive_value = _parity_int(
+                archive_row.get(archive_key),
+                f"Mission 3 Dog #{token} archive {archive_key}",
+            )
+            if dashboard_value != archive_value:
+                raise AssertionError(f"Mission 3 Dog #{token} {dashboard_key} differs from quorum archive")
+        bid_count = _parity_int(dashboard_row.get("bids"), f"Mission 3 Dog #{token} dashboard bids")
+        raw_bid_count = archive_bid_counts.get(token, 0)
+        if bid_count != raw_bid_count:
+            raise AssertionError(f"Mission 3 Dog #{token} bid count differs from archive raw logs")
+        dashboard_unique_bidders = _parity_int(
+            dashboard_row.get("unique_bidders"),
+            f"Mission 3 Dog #{token} dashboard unique bidders",
+        )
+        raw_unique_bidders = len(archive_bid_bidders.get(token, set()))
+        if dashboard_unique_bidders != raw_unique_bidders:
+            raise AssertionError(f"Mission 3 Dog #{token} unique bidder count differs from archive raw logs")
+        total_bid_eth = _parity_decimal(
+            dashboard_row.get("total_bid_eth"),
+            f"Mission 3 Dog #{token} dashboard total bid ETH",
+            empty_zero=True,
+        )
+        if total_bid_eth != archive_bid_totals.get(token, Decimal(0)):
+            raise AssertionError(f"Mission 3 Dog #{token} total_bid_eth differs from archive raw logs")
+        decimal_fields = (
+            ("high_bid_eth", "high_bid_eth"),
+            ("latest_bid_eth", "latest_bid_eth"),
+            ("settled_eth", "settled_amount_eth"),
+        )
+        for dashboard_key, archive_key in decimal_fields:
+            dashboard_value = _parity_decimal(
+                dashboard_row.get(dashboard_key),
+                f"Mission 3 Dog #{token} dashboard {dashboard_key}",
+                empty_zero=True,
+            )
+            archive_value = _parity_decimal(
+                archive_row.get(archive_key),
+                f"Mission 3 Dog #{token} archive {archive_key}",
+                empty_zero=True,
+            )
+            if dashboard_value != archive_value:
+                raise AssertionError(f"Mission 3 Dog #{token} {dashboard_key} differs from quorum archive")
+        raw_high_bid = archive_bid_highs.get(token, Decimal(0))
+        if _parity_decimal(
+            dashboard_row.get("high_bid_eth"),
+            f"Mission 3 Dog #{token} dashboard high bid ETH",
+            empty_zero=True,
+        ) != raw_high_bid:
+            raise AssertionError(f"Mission 3 Dog #{token} high bid differs from archive raw logs")
+        raw_latest = archive_latest_bids.get(token)
+        raw_latest_amount = raw_latest[1] if raw_latest else Decimal(0)
+        raw_latest_time = raw_latest[2] if raw_latest else ""
+        if _parity_decimal(
+            dashboard_row.get("latest_bid_eth"),
+            f"Mission 3 Dog #{token} dashboard latest bid ETH",
+            empty_zero=True,
+        ) != raw_latest_amount:
+            raise AssertionError(f"Mission 3 Dog #{token} latest bid differs from archive raw logs")
+        dashboard_latest_time = _parity_timestamp(
+            dashboard_row.get("latest_bid_utc"),
+            f"Mission 3 Dog #{token} dashboard latest bid time",
+            allow_empty=raw_latest is None,
+        )
+        if dashboard_latest_time != raw_latest_time:
+            raise AssertionError(f"Mission 3 Dog #{token} latest bid time differs from archive raw logs")
+        dashboard_latest_bidder = text(dashboard_row.get("latest_bidder"))
+        if (raw_latest is None and dashboard_latest_bidder) or (raw_latest is not None and not dashboard_latest_bidder):
+            raise AssertionError(f"Mission 3 Dog #{token} dashboard latest bidder presence differs from raw logs")
+        archive_latest_bidder_raw = text(archive_row.get("latest_bidder"))
+        if raw_latest is None:
+            if archive_latest_bidder_raw:
+                raise AssertionError(f"Mission 3 Dog #{token} archive latest bidder exists without a raw bid")
+        elif _parity_address(
+            archive_latest_bidder_raw,
+            f"Mission 3 Dog #{token} archive latest bidder",
+        ) != raw_latest[3]:
+            raise AssertionError(f"Mission 3 Dog #{token} latest bidder differs from archive raw logs")
+        timestamp_fields = (
+            ("start_time_utc", "start_time_utc"),
+            ("end_time_utc", "end_time_utc"),
+            ("latest_bid_utc", "latest_bid_time_utc"),
+            ("settled_time_utc", "settled_time_utc"),
+        )
+        for dashboard_key, archive_key in timestamp_fields:
+            allow_empty = archive_key in {"latest_bid_time_utc", "settled_time_utc"} and not text(archive_row.get(archive_key))
+            dashboard_value = _parity_timestamp(
+                dashboard_row.get(dashboard_key),
+                f"Mission 3 Dog #{token} dashboard {dashboard_key}",
+                allow_empty=allow_empty,
+            )
+            archive_value = _parity_timestamp(
+                archive_row.get(archive_key),
+                f"Mission 3 Dog #{token} archive {archive_key}",
+                allow_empty=allow_empty,
+            )
+            if dashboard_value != archive_value:
+                raise AssertionError(f"Mission 3 Dog #{token} {dashboard_key} differs from quorum archive")
+        start_time = _parity_timestamp(
+            archive_row.get("start_time_utc"),
+            f"Mission 3 Dog #{token} archive start time",
+        )
+        end_time = _parity_timestamp(
+            archive_row.get("end_time_utc"),
+            f"Mission 3 Dog #{token} archive end time",
+        )
+        if start_time >= end_time:
+            raise AssertionError(f"Mission 3 Dog #{token} archive auction time range is invalid")
+        bid_time_range = archive_bid_time_ranges.get(token)
+        if bid_time_range and (bid_time_range[0] < start_time or bid_time_range[1] > end_time):
+            raise AssertionError(f"Mission 3 Dog #{token} archive raw bid falls outside the auction window")
+        if settled:
+            settled_time = _parity_timestamp(
+                archive_row.get("settled_time_utc"),
+                f"Mission 3 Dog #{token} archive settled time",
+            )
+            if settled_time < end_time:
+                raise AssertionError(f"Mission 3 Dog #{token} settled before its auction ended")
+        else:
+            unsettled_metadata = any(
+                text(archive_row.get(key))
+                for key in ("settled_block", "settled_time_utc", "winner")
+            )
+            settled_amount = _parity_decimal(
+                archive_row.get("settled_amount_eth"),
+                f"Mission 3 Dog #{token} archive settled amount",
+                empty_zero=True,
+            )
+            if unsettled_metadata or settled_amount != 0:
+                raise AssertionError(f"Mission 3 Dog #{token} unsettled auction has settlement data")
+
+    dashboard_winners = by_token(loaded["dashboard_winners"], "dashboard auction_winners")
+    archive_winners = by_token(loaded["archive_winners"], "Mission 3 archive winners")
+    if set(dashboard_winners) != set(archive_winners):
+        raise AssertionError("Mission 3 dashboard/archive settlement Dog sets differ")
+    settled_timeline_tokens = {
+        token
+        for token, row in archive_timeline.items()
+        if text(row.get("auction_state")).lower() == "settled"
+    }
+    if set(archive_winners) != settled_timeline_tokens:
+        raise AssertionError("Mission 3 archive winner set differs from settled timeline Dogs")
+    for token, archive_row in archive_winners.items():
+        dashboard_row = dashboard_winners[token]
+        dashboard_winner = _parity_address(
+            dashboard_row.get("winner_wallet"),
+            f"Mission 3 Dog #{token} dashboard winner",
+        )
+        archive_winner = _parity_address(
+            archive_row.get("winner"),
+            f"Mission 3 Dog #{token} archive winner",
+        )
+        dashboard_amount = _parity_decimal(
+            dashboard_row.get("winning_bid_eth"),
+            f"Mission 3 Dog #{token} dashboard winning bid",
+        )
+        archive_amount = _parity_decimal(
+            archive_row.get("amount_eth"),
+            f"Mission 3 Dog #{token} archive winning bid",
+        )
+        if dashboard_amount <= 0 or archive_amount <= 0:
+            raise AssertionError(f"Mission 3 Dog #{token} winning bid must be positive")
+        dashboard_block = _parity_int(
+            dashboard_row.get("block_number"),
+            f"Mission 3 Dog #{token} dashboard settled block",
+            minimum=1,
+        )
+        archive_block = _parity_int(
+            archive_row.get("settled_block"),
+            f"Mission 3 Dog #{token} archive settled block",
+            minimum=1,
+        )
+        dashboard_tx = _parity_hash(
+            dashboard_row.get("tx_hash"),
+            f"Mission 3 Dog #{token} dashboard settled transaction",
+        )
+        archive_tx = _parity_hash(
+            archive_row.get("settled_tx"),
+            f"Mission 3 Dog #{token} archive settled transaction",
+        )
+        dashboard_bid_count = _parity_int(
+            dashboard_row.get("bid_count"),
+            f"Mission 3 Dog #{token} dashboard winner bid count",
+            minimum=1,
+        )
+        archive_bid_count = _parity_int(
+            archive_row.get("bid_count"),
+            f"Mission 3 Dog #{token} archive winner bid count",
+            minimum=1,
+        )
+        dashboard_unique = _parity_int(
+            dashboard_row.get("unique_bidders"),
+            f"Mission 3 Dog #{token} dashboard winner unique bidder count",
+            minimum=1,
+        )
+        archive_unique = _parity_int(
+            archive_row.get("unique_bidder_count"),
+            f"Mission 3 Dog #{token} archive winner unique bidder count",
+            minimum=1,
+        )
+        dashboard_first = _parity_timestamp(
+            dashboard_row.get("first_bid_utc"),
+            f"Mission 3 Dog #{token} dashboard first bid time",
+        )
+        archive_first = _parity_timestamp(
+            archive_row.get("first_bid_time_utc"),
+            f"Mission 3 Dog #{token} archive first bid time",
+        )
+        dashboard_last = _parity_timestamp(
+            dashboard_row.get("last_bid_utc"),
+            f"Mission 3 Dog #{token} dashboard last bid time",
+        )
+        archive_last = _parity_timestamp(
+            archive_row.get("last_bid_time_utc"),
+            f"Mission 3 Dog #{token} archive last bid time",
+        )
+        dashboard_settled = _parity_timestamp(
+            dashboard_row.get("settled_time_utc"),
+            f"Mission 3 Dog #{token} dashboard settled time",
+        )
+        archive_settled = _parity_timestamp(
+            archive_row.get("settled_time_utc"),
+            f"Mission 3 Dog #{token} archive settled time",
+        )
+        comparisons = (
+            (dashboard_winner, archive_winner, "winner"),
+            (dashboard_amount, archive_amount, "winning bid"),
+            (dashboard_block, archive_block, "settled block"),
+            (dashboard_tx, archive_tx, "settled transaction"),
+            (dashboard_bid_count, archive_bid_count, "bid count"),
+            (dashboard_unique, archive_unique, "unique bidder count"),
+            (dashboard_first, archive_first, "first bid time"),
+            (dashboard_last, archive_last, "last bid time"),
+            (dashboard_settled, archive_settled, "settled time"),
+        )
+        for dashboard_value, archive_value, label in comparisons:
+            if dashboard_value != archive_value:
+                raise AssertionError(f"Mission 3 Dog #{token} {label} differs from quorum archive")
+        timeline_row = archive_timeline[token]
+        timeline_winner = _parity_address(
+            timeline_row.get("winner"),
+            f"Mission 3 Dog #{token} archive timeline winner",
+        )
+        timeline_amount = _parity_decimal(
+            timeline_row.get("settled_amount_eth"),
+            f"Mission 3 Dog #{token} archive timeline settled amount",
+        )
+        timeline_block = _parity_int(
+            timeline_row.get("settled_block"),
+            f"Mission 3 Dog #{token} archive timeline settled block",
+            minimum=1,
+        )
+        timeline_tx = _parity_hash(
+            timeline_row.get("settled_tx"),
+            f"Mission 3 Dog #{token} archive timeline settled transaction",
+        )
+        timeline_settled = _parity_timestamp(
+            timeline_row.get("settled_time_utc"),
+            f"Mission 3 Dog #{token} archive timeline settled time",
+        )
+        if (timeline_winner, timeline_amount, timeline_block, timeline_tx, timeline_settled) != (
+            archive_winner,
+            archive_amount,
+            archive_block,
+            archive_tx,
+            archive_settled,
+        ):
+            raise AssertionError(f"Mission 3 Dog #{token} archive winner differs from its timeline settlement")
+        if dashboard_bid_count != archive_bid_counts.get(token, 0):
+            raise AssertionError(f"Mission 3 Dog #{token} winner bid count differs from archive raw logs")
+        if dashboard_unique != len(archive_bid_bidders.get(token, set())):
+            raise AssertionError(f"Mission 3 Dog #{token} winner unique bidder count differs from archive raw logs")
+        raw_latest = archive_latest_bids.get(token)
+        if raw_latest is None or raw_latest[1] != dashboard_amount or raw_latest[3] != dashboard_winner:
+            raise AssertionError(f"Mission 3 Dog #{token} winner differs from latest archive raw bid")
+        raw_time_range = archive_bid_time_ranges.get(token)
+        if not raw_time_range or (dashboard_first, dashboard_last) != raw_time_range:
+            raise AssertionError(f"Mission 3 Dog #{token} winner bid time range differs from archive raw logs")
+
+    return {
+        "checked": True,
+        "auctions": len(archive_timeline),
+        "settlements": len(archive_winners),
+        "bids": len(loaded["archive_bids"]),
+    }
 
 
 def find_current_feed_row(feed_rows: list[dict[str, Any]], current_dog_id: int) -> dict[str, Any]:
@@ -761,6 +1248,7 @@ def validate_current_surface() -> dict[str, Any]:
     refresh_status = load_refresh_telemetry().validate_refresh_status(root=ROOT)
     index = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
     readme = readme_snapshot()
+    archive_parity = validate_mission3_archive_parity(root=ROOT)
 
     if int(metrics["current_auction_token_id"]) != current_dog_id:
         raise AssertionError("mission3_metrics current_auction_token_id differs from current_auction")
@@ -780,7 +1268,14 @@ def validate_current_surface() -> dict[str, Any]:
         raise AssertionError("mission3_metrics latest_block_time_utc differs from current_auction")
     if metrics["onchain_verification_status"] != "current_snapshot_cross_provider_verified":
         raise AssertionError("mission3_metrics current snapshot is not cross-provider verified")
-    required_scope = {"snapshot_hash", "contract_code", "current_auction", "dog_total_supply", "recent_event_logs"}
+    required_scope = {
+        "snapshot_hash",
+        "contract_code",
+        "current_auction",
+        "dog_total_supply",
+        "dog_token_uri_bindings",
+        "recent_event_logs",
+    }
     actual_scope = {value.strip() for value in metrics["onchain_verification_scope"].split(",") if value.strip()}
     if not required_scope.issubset(actual_scope):
         raise AssertionError("mission3_metrics current snapshot verification scope is incomplete")
@@ -802,8 +1297,32 @@ def validate_current_surface() -> dict[str, Any]:
     for code_metric in ("auction_house_code_sha256", "dog_nft_code_sha256"):
         if not re.fullmatch(r"[a-fA-F0-9]{64}", metrics[code_metric]):
             raise AssertionError(f"mission3_metrics {code_metric} is invalid")
-    if int(metrics["snapshot_confirmations"]) < 0:
-        raise AssertionError("mission3_metrics snapshot_confirmations cannot be negative")
+    if metrics["dog_token_uri_verification_status"] != "hash_pinned_cross_provider_exact_outcome_quorum":
+        raise AssertionError("mission3_metrics tokenURI outcomes are not hash-pinned and cross-provider verified")
+    dog_total_supply = int(metrics["dog_total_supply"])
+    token_uri_present = int(metrics["dog_token_uri_present_count"])
+    token_uri_unavailable = int(metrics["dog_token_uri_unavailable_count"])
+    metadata_verified = int(metrics["dog_metadata_onchain_verified_count"])
+    metadata_unavailable = int(metrics["dog_metadata_unavailable_count"])
+    if min(dog_total_supply, token_uri_present, token_uri_unavailable, metadata_verified, metadata_unavailable) < 0:
+        raise AssertionError("mission3_metrics tokenURI/metadata aggregate counts cannot be negative")
+    if token_uri_present + token_uri_unavailable != dog_total_supply:
+        raise AssertionError("mission3_metrics tokenURI aggregate counts do not equal Dog total supply")
+    if metadata_verified + metadata_unavailable != dog_total_supply:
+        raise AssertionError("mission3_metrics metadata aggregate counts do not equal Dog total supply")
+    if metadata_unavailable < token_uri_unavailable:
+        raise AssertionError("mission3_metrics hides tokenURI-unavailable Dogs from metadata unavailability")
+    expected_metadata_status = (
+        "complete_onchain_token_uri_verified"
+        if metadata_unavailable == 0
+        else "partial_onchain_token_uri_unavailable"
+        if metadata_unavailable == token_uri_unavailable
+        else "incomplete_metadata_unavailable"
+    )
+    if metrics["dog_metadata_verification_status"] != expected_metadata_status:
+        raise AssertionError("mission3_metrics dog metadata aggregate status contradicts its counts")
+    if int(metrics["snapshot_confirmations"]) < 1:
+        raise AssertionError("mission3_metrics snapshot_confirmations must be at least one")
 
     expected_feed_status = {"live": "ongoing", "ended_unsettled": "ended pending settlement"}.get(current_state, current_state)
     if text(feed.get("status")).lower() != expected_feed_status:
@@ -1136,6 +1655,7 @@ def validate_current_surface() -> dict[str, Any]:
         "feed_rows_for_current_dog": 1,
         "refresh_status_result": text(refresh_status.get("last_refresh_result")),
         "observed_state_check": observed_state_check,
+        "mission3_archive_parity": archive_parity,
         "checked": [str(path.relative_to(ROOT)) for path in unified_paths]
         + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
     }

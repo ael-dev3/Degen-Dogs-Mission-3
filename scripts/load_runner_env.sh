@@ -9,43 +9,106 @@ degen_dogs_load_runner_env() {
   if [[ ! -e "$env_file" ]]; then
     return 0
   fi
-  if ! python3 - "$env_file" <<'PY'
+  local parsed_records
+  if ! parsed_records="$(python3 - "$env_file" <<'PY'
 from __future__ import annotations
 
 import os
+import re
+import shlex
 import stat
 import sys
 from pathlib import Path
 
 path = Path(sys.argv[1]).expanduser()
-if not path.is_file():
+flags = os.O_RDONLY
+if hasattr(os, "O_NOFOLLOW"):
+    flags |= os.O_NOFOLLOW
+try:
+    descriptor = os.open(path, flags)
+except OSError as exc:
+    raise SystemExit(f"error: unable to securely open runner environment file {path}: {exc}") from exc
+
+details = os.fstat(descriptor)
+if not stat.S_ISREG(details.st_mode):
+    os.close(descriptor)
     raise SystemExit(f"error: runner environment path is not a regular file: {path}")
-details = path.stat()
 if details.st_uid != os.getuid():
+    os.close(descriptor)
     raise SystemExit(f"error: runner environment file is not owned by the current user: {path}")
 if stat.S_IMODE(details.st_mode) & 0o077:
+    os.close(descriptor)
     raise SystemExit(f"error: runner environment file must be mode 600 (chmod 600 {path})")
+if details.st_size > 131_072:
+    os.close(descriptor)
+    raise SystemExit(f"error: runner environment file is unexpectedly large: {path}")
+
+with os.fdopen(descriptor, "r", encoding="utf-8", errors="strict") as handle:
+    lines = handle.read().splitlines()
+
+key_pattern = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+allowed_key_pattern = re.compile(
+    r"(?:BASE_|MISSION[123]_|DEGEN_DOGS_|DOG_METADATA_|HISTORICAL_)"
+    r"[A-Za-z0-9_]*\Z"
+    r"|(?:NEYNAR_API_KEY|COINGECKO_API_KEY|DUNE_API_KEY|WOOF_USD_PRICE|SUP_USD_PRICE)\Z"
+)
+seen: set[str] = set()
+for line_number, original in enumerate(lines, 1):
+    line = original.strip()
+    if not line or line.startswith("#"):
+        continue
+    if line.startswith("export "):
+        line = line[7:].lstrip()
+    if "=" not in line:
+        raise SystemExit(f"error: invalid runner environment entry on line {line_number}: expected KEY=value")
+    key, raw_value = line.split("=", 1)
+    key = key.strip()
+    if not key_pattern.fullmatch(key):
+        raise SystemExit(f"error: invalid runner environment key on line {line_number}: {key!r}")
+    if not allowed_key_pattern.fullmatch(key):
+        raise SystemExit(f"error: unsupported runner environment key on line {line_number}: {key}")
+    if key in seen:
+        raise SystemExit(f"error: duplicate runner environment key on line {line_number}: {key}")
+    seen.add(key)
+
+    raw_value = raw_value.strip()
+    if raw_value.startswith(("'", '"')):
+        try:
+            values = shlex.split(raw_value, comments=False, posix=True)
+        except ValueError as exc:
+            raise SystemExit(f"error: invalid quoted value on line {line_number}: {exc}") from exc
+        if len(values) != 1:
+            raise SystemExit(f"error: quoted runner environment value on line {line_number} must be one value")
+        value = values[0]
+    else:
+        # Unquoted text is data, never shell syntax. In particular, command
+        # substitutions and backticks remain literal strings.
+        value = raw_value
+    if "\x00" in value:
+        raise SystemExit(f"error: NUL byte in runner environment value on line {line_number}")
+    encoded = "".join(f"\\x{byte:02x}" for byte in value.encode("utf-8"))
+    print(f"{key}\t{encoded}")
 PY
+  )"
   then
     return 1
   fi
+
   # Preserve explicitly exported process settings so conventional precedence
   # remains: installer/launch environment > .env.local > script defaults.
-  local prior_exports
-  prior_exports="$(export -p)"
-  local restore_allexport=0
-  if [[ $- != *a* ]]; then
-    restore_allexport=1
-    set -a
-  fi
-  # shellcheck disable=SC1090
-  source "$env_file"
-  # Bash emits safely quoted `declare -x` statements from `export -p`. Reapply
-  # them as exports so this function does not turn them into function locals.
-  eval "${prior_exports//declare -x/export}"
-  if (( restore_allexport == 1 )); then
-    set +a
-  fi
+  # Decode inert byte escapes without source/eval so the config file can never
+  # execute shell code and secrets never need to be copied into a temp file.
+  local key encoded_value value declaration
+  while IFS=$'\t' read -r key encoded_value; do
+    [[ -n "$key" ]] || continue
+    declaration="$(declare -p "$key" 2>/dev/null || true)"
+    if [[ "$declaration" == "declare -x "* ]]; then
+      continue
+    fi
+    printf -v value '%b' "$encoded_value"
+    printf -v "$key" '%s' "$value"
+    export "$key"
+  done <<<"$parsed_records"
   DEGEN_DOGS_ENV_FILE="$(cd "$(dirname "$env_file")" && pwd)/$(basename "$env_file")"
   export DEGEN_DOGS_ENV_FILE
 }
@@ -65,17 +128,21 @@ degen_dogs_export_runner_env_allowlist() {
 BASE_RPC_URL
 BASE_RPC_URLS
 BASE_LOG_RPC_URLS
+BASE_INCLUDE_PUBLIC_FALLBACKS
 BASE_RPC_QUORUM_SIZE
 BASE_SNAPSHOT_CONFIRMATIONS
 BASE_RPC_QUORUM_DEADLINE_SECONDS
 BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS
 BASE_RPC_HEAD_PROBE_GRACE_SECONDS
 BASE_RPC_SLOW_COOLDOWN_SECONDS
+BASE_RPC_MAX_HEAD_SPREAD_BLOCKS
+BASE_RPC_MAX_BLOCK_AGE_SECONDS
 BASE_FROM_BLOCK
 BASE_LOG_CHUNK
 BASE_LOG_WORKERS
 BASE_RPC_ATTEMPTS
 BASE_RPC_BATCH_LIMIT
+BASE_RPC_MAX_RESPONSE_BYTES
 BASE_LOG_RPC_TIMEOUT
 BASE_BLOCK_TIME_RPC_TIMEOUT
 DOG_METADATA_WORKERS
@@ -83,6 +150,9 @@ DOG_METADATA_FETCH_TIMEOUT
 DOG_METADATA_FALLBACK_TIMEOUT
 DOG_METADATA_ITEM_TIMEOUT
 DOG_METADATA_SEQUENTIAL_THRESHOLD
+DOG_METADATA_ALLOWED_HOSTS
+DOG_METADATA_MAX_RESPONSE_BYTES
+DOG_METADATA_CACHE_MAX_AGE_SECONDS
 MISSION3_LOG_CACHE
 MISSION3_LOG_CACHE_OVERLAP_BLOCKS
 MISSION3_LOG_QUORUM_MAX_BLOCKS
@@ -96,6 +166,7 @@ SUP_USD_PRICE
 COINGECKO_API_KEY
 HISTORICAL_PRICES_PREFER_COINGECKO
 DEGEN_DOGS_ENV_FILE
+DEGEN_DOGS_REFRESH_LOCK_PATH
 DEGEN_DOGS_REMOTE
 DEGEN_DOGS_BRANCH
 DEGEN_DOGS_COMMIT_PREFIX
@@ -120,6 +191,9 @@ MISSION3_ARCHIVE_DB
 MISSION3_OUTPUT_DIR
 MISSION3_LOG_CHUNK
 MISSION3_LOG_WORKERS
+MISSION3_ARCHIVE_OVERLAP_BLOCKS
+MISSION3_ARCHIVE_MAX_AGE_SECONDS
+MISSION3_ARCHIVE_MAX_HEAD_LAG_BLOCKS
 '
   DEGEN_DOGS_RUNNER_WATCHER_ENV_ALLOWLIST='
 MISSION3_WATCHER_TELEMETRY_PATH

@@ -15,6 +15,9 @@ jobs:
   monitor:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      FRESHNESS_INCIDENT_MARKER: "<!-- degen-dogs-freshness-watchdog:v1 -->"
+      FRESHNESS_INCIDENT_TITLE: "[uptime] Degen Dogs dashboard freshness incident"
     permissions:
       actions: write
       contents: read
@@ -22,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Check raw-main and Pages freshness
         id: check
@@ -40,14 +45,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPORT: ${{ steps.check.outputs.report }}
         run: |
-          title="[uptime] Degen Dogs dashboard freshness incident"
-          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'Degen Dogs dashboard freshness incident in:title' --limit 1 --json number --jq '.[0].number // empty')"
+          number="$(
+            gh api --paginate --slurp \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" \
+            | jq -r \
+                --arg title "$FRESHNESS_INCIDENT_TITLE" \
+                --arg marker "$FRESHNESS_INCIDENT_MARKER" \
+                '[.[][] | select(has("pull_request") | not) | select(.title == $title) | select(.user.login == "github-actions[bot]") | select((.body // "") | contains($marker))][0].number // empty'
+          )"
           detail="${REPORT:-freshness check execution failed before a report was produced}"
-          body="$(printf 'Automated off-host freshness check failed at %s/%s/actions/runs/%s.\n\n`%s`\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$detail")"
+          body="$(printf '%s\n\nAutomated off-host freshness check failed at %s/%s/actions/runs/%s.\n\n`%s`\n' "$FRESHNESS_INCIDENT_MARKER" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$detail")"
           if [[ -n "$number" ]]; then
             gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
           else
-            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$FRESHNESS_INCIDENT_TITLE" --body "$body"
           fi
 
       - name: Close recovered freshness incident
@@ -55,7 +67,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'Degen Dogs dashboard freshness incident in:title' --limit 1 --json number --jq '.[0].number // empty')"
+          number="$(
+            gh api --paginate --slurp \
+              -H 'Accept: application/vnd.github+json' \
+              "/repos/${GITHUB_REPOSITORY}/issues?state=open&per_page=100" \
+            | jq -r \
+                --arg title "$FRESHNESS_INCIDENT_TITLE" \
+                --arg marker "$FRESHNESS_INCIDENT_MARKER" \
+                '[.[][] | select(has("pull_request") | not) | select(.title == $title) | select(.user.login == "github-actions[bot]") | select((.body // "") | contains($marker))][0].number // empty'
+          )"
           if [[ -n "$number" ]]; then
             gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "Freshness recovered in run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
           fi

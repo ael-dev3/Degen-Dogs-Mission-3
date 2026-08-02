@@ -95,13 +95,41 @@ latest_bid AS (
     FROM mission3_auction_bids
   )
   WHERE rn = 1
+),
+ranked_extensions AS (
+  SELECT
+    token_id,
+    end_time,
+    block_number,
+    transaction_hash,
+    log_index,
+    block_time_utc,
+    ROW_NUMBER() OVER (
+      PARTITION BY token_id
+      ORDER BY block_number DESC, log_index DESC
+    ) AS extension_rank,
+    COUNT(*) OVER (PARTITION BY token_id) AS extension_count
+  FROM mission3_auction_extended
+),
+latest_extension AS (
+  SELECT *
+  FROM ranked_extensions
+  WHERE extension_rank = 1
 )
 SELECT
   c.token_id,
   c.start_time,
   datetime(c.start_time, 'unixepoch') AS start_time_utc,
-  c.end_time,
-  datetime(c.end_time, 'unixepoch') AS end_time_utc,
+  c.end_time AS initial_end_time,
+  datetime(c.end_time, 'unixepoch') AS initial_end_time_utc,
+  COALESCE(e.end_time, c.end_time) AS end_time,
+  datetime(COALESCE(e.end_time, c.end_time), 'unixepoch') AS end_time_utc,
+  COALESCE(e.extension_count, 0) AS extension_count,
+  e.end_time AS latest_extension_end_time,
+  datetime(e.end_time, 'unixepoch') AS latest_extension_end_time_utc,
+  e.block_number AS latest_extension_block,
+  e.transaction_hash AS latest_extension_tx,
+  e.log_index AS latest_extension_log_index,
   c.block_number AS created_block,
   c.transaction_hash AS created_tx,
   c.block_time_utc AS created_block_time_utc,
@@ -122,6 +150,7 @@ SELECT
 FROM mission3_auction_created c
 LEFT JOIN bid_stats b USING (token_id)
 LEFT JOIN latest_bid lb USING (token_id)
+LEFT JOIN latest_extension e USING (token_id)
 LEFT JOIN mission3_auction_settled s USING (token_id)
 ORDER BY c.token_id DESC;
 

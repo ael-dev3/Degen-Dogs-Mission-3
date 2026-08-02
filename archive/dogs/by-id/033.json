@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#200/792",
-      "rank": 200,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 33 dog #33 33 mission 1 mission 1 polygon no auction dogmaster reward weth #200/792 background: none; body: black; neck: goldnecklace; mouth: tongue; ears: earbuds; head: toque; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 33 dog #33 33 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: black; neck: goldnecklace; mouth: tongue; ears: earbuds; head: toque; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

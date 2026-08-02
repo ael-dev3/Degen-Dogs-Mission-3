@@ -9,8 +9,10 @@ import math
 import os
 import platform
 import re
+import stat
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -61,6 +63,21 @@ SUCCESS_RESULTS = {
     "success_pushed",
     "success_pushed_live_timeout",
 }
+LIVE_STATUS_MAX_BYTES = 2 * 1024 * 1024
+LIVE_STATUS_TARGETS = {
+    ("raw.githubusercontent.com", "/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json"): "text/plain",
+    ("ael-dev3.github.io", "/Degen-Dogs-Mission-3/generated/refresh_status.json"): "application/json",
+}
+
+
+class RejectRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Never forward a live-verification request to a different origin."""
+
+    def redirect_request(self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> Any:
+        return None
+
+
+LIVE_STATUS_OPENER = urllib.request.build_opener(RejectRedirectHandler())
 
 
 def utc_now() -> str:
@@ -180,10 +197,45 @@ def assert_public_safe(data: Any) -> None:
             raise AssertionError(f"public refresh status contains forbidden token: {token}")
 
 
+def ensure_owned_directory_tree(directory: Path) -> None:
+    missing: list[Path] = []
+    cursor = directory
+    while True:
+        try:
+            details = cursor.lstat()
+        except FileNotFoundError:
+            missing.append(cursor)
+            if cursor.parent == cursor:
+                raise RuntimeError(f"unable to find a trusted ancestor for private directory: {directory}")
+            cursor = cursor.parent
+            continue
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode):
+            raise RuntimeError(f"refusing unsafe private directory ancestor: {cursor}")
+        if details.st_uid != os.getuid() or cursor.parent == cursor:
+            break
+        cursor = cursor.parent
+    for item in reversed(missing):
+        try:
+            item.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        details = item.lstat()
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode) or details.st_uid != os.getuid():
+            raise RuntimeError(f"refusing unsafe private directory ancestor: {item}")
+
+
 def append_jsonl(path: Path, row: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_owned_directory_tree(path.parent)
+    path.parent.chmod(0o700)
     safe_row = redact_value(row)
-    with path.open("a", encoding="utf-8") as handle:
+    flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    details = os.fstat(descriptor)
+    if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+        os.close(descriptor)
+        raise RuntimeError(f"refusing telemetry path that is not an owned regular file: {path}")
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "a", encoding="utf-8") as handle:
         # Cooperates with the health watchdog's inode-preserving JSONL
         # compaction so a 30-second watcher append cannot race retention.
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
@@ -192,10 +244,17 @@ def append_jsonl(path: Path, row: dict[str, Any]) -> None:
 
 
 def read_jsonl(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
-    if not path.exists():
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except FileNotFoundError:
         return []
+    details = os.fstat(descriptor)
+    if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid() or stat.S_IMODE(details.st_mode) & 0o077:
+        os.close(descriptor)
+        raise RuntimeError(f"refusing unsafe telemetry file: {path}")
     rows: list[dict[str, Any]] = []
-    with path.open(encoding="utf-8") as handle:
+    with os.fdopen(descriptor, encoding="utf-8") as handle:
         lines = handle.readlines()
     if limit is not None:
         lines = lines[-limit:]
@@ -213,10 +272,18 @@ def read_jsonl(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
 
 
 def write_json(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    temporary.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    temporary.replace(path)
+    ensure_owned_directory_tree(path.parent)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(data, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -271,6 +338,13 @@ def generated_state(root: Path = ROOT) -> dict[str, Any]:
         "log_rpc_quorum_providers": str(metrics.get("log_rpc_quorum_providers") or ""),
         "auction_house_code_sha256": str(metrics.get("auction_house_code_sha256") or ""),
         "dog_nft_code_sha256": str(metrics.get("dog_nft_code_sha256") or ""),
+        "dog_total_supply": int_or_none(metrics.get("dog_total_supply")),
+        "dog_token_uri_verification_status": str(metrics.get("dog_token_uri_verification_status") or ""),
+        "dog_token_uri_present_count": int_or_none(metrics.get("dog_token_uri_present_count")),
+        "dog_token_uri_unavailable_count": int_or_none(metrics.get("dog_token_uri_unavailable_count")),
+        "dog_metadata_verification_status": str(metrics.get("dog_metadata_verification_status") or ""),
+        "dog_metadata_onchain_verified_count": int_or_none(metrics.get("dog_metadata_onchain_verified_count")),
+        "dog_metadata_unavailable_count": int_or_none(metrics.get("dog_metadata_unavailable_count")),
     }
 
 
@@ -451,6 +525,13 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "log_rpc_quorum_providers": state.get("log_rpc_quorum_providers"),
         "auction_house_code_sha256": state.get("auction_house_code_sha256"),
         "dog_nft_code_sha256": state.get("dog_nft_code_sha256"),
+        "dog_total_supply": state.get("dog_total_supply"),
+        "dog_token_uri_verification_status": state.get("dog_token_uri_verification_status"),
+        "dog_token_uri_present_count": state.get("dog_token_uri_present_count"),
+        "dog_token_uri_unavailable_count": state.get("dog_token_uri_unavailable_count"),
+        "dog_metadata_verification_status": state.get("dog_metadata_verification_status"),
+        "dog_metadata_onchain_verified_count": state.get("dog_metadata_onchain_verified_count"),
+        "dog_metadata_unavailable_count": state.get("dog_metadata_unavailable_count"),
     }
     clean = {key: value for key, value in status.items() if value not in (None, "", [])}
     assert_public_safe(clean)
@@ -504,6 +585,13 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "log_rpc_quorum_providers",
         "auction_house_code_sha256",
         "dog_nft_code_sha256",
+        "dog_total_supply",
+        "dog_token_uri_verification_status",
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_metadata_verification_status",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
     }
     missing = sorted(key for key in required if status.get(key) in (None, "", []))
     if missing:
@@ -518,7 +606,16 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         raise AssertionError("refresh_status last_refresh_result is not a public generation result")
     if status.get("onchain_verification_status") != "current_snapshot_cross_provider_verified":
         raise AssertionError("refresh_status onchain_verification_status is not cross-provider verified")
-    if "current_auction" not in str(status.get("onchain_verification_scope") or "").split(","):
+    required_scope = {
+        "snapshot_hash",
+        "contract_code",
+        "current_auction",
+        "dog_total_supply",
+        "dog_token_uri_bindings",
+        "recent_event_logs",
+    }
+    actual_scope = {item.strip() for item in str(status.get("onchain_verification_scope") or "").split(",") if item.strip()}
+    if not required_scope.issubset(actual_scope):
         raise AssertionError("refresh_status onchain_verification_scope is incomplete")
     if int_or_none(status.get("onchain_chain_id")) != 8453:
         raise AssertionError("refresh_status onchain_chain_id is not Base mainnet")
@@ -526,6 +623,56 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         raise AssertionError("refresh_status snapshot_block_hash is invalid")
     if int_or_none(status.get("rpc_quorum_size")) is None or int(status["rpc_quorum_size"]) < 2:
         raise AssertionError("refresh_status rpc_quorum_size is invalid")
+    quorum_size = int(status["rpc_quorum_size"])
+    agreement = re.fullmatch(r"(\d+)/(\d+)", str(status.get("rpc_quorum_agreement") or ""))
+    if not agreement or int(agreement.group(1)) < quorum_size or int(agreement.group(1)) > int(agreement.group(2)):
+        raise AssertionError("refresh_status rpc_quorum_agreement is invalid")
+    for key in ("rpc_quorum_providers", "log_rpc_quorum_providers"):
+        providers = {item.strip() for item in re.split(r"[,|]", str(status.get(key) or "")) if item.strip()}
+        if len(providers) < quorum_size:
+            raise AssertionError(f"refresh_status {key} is below quorum")
+    if int_or_none(status.get("snapshot_confirmations")) is None or int(status["snapshot_confirmations"]) < 1:
+        raise AssertionError("refresh_status snapshot_confirmations must be at least one")
+    for key in ("auction_house_code_sha256", "dog_nft_code_sha256"):
+        if not re.fullmatch(r"[a-fA-F0-9]{64}", str(status.get(key) or "")):
+            raise AssertionError(f"refresh_status {key} is invalid")
+    if status.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+        raise AssertionError("refresh_status tokenURI outcomes are not hash-pinned and cross-provider verified")
+    dog_total_supply = int_or_none(status.get("dog_total_supply"))
+    token_uri_present = int_or_none(status.get("dog_token_uri_present_count"))
+    token_uri_unavailable = int_or_none(status.get("dog_token_uri_unavailable_count"))
+    metadata_verified = int_or_none(status.get("dog_metadata_onchain_verified_count"))
+    metadata_unavailable = int_or_none(status.get("dog_metadata_unavailable_count"))
+    if None in {
+        dog_total_supply,
+        token_uri_present,
+        token_uri_unavailable,
+        metadata_verified,
+        metadata_unavailable,
+    }:
+        raise AssertionError("refresh_status tokenURI/metadata aggregate counts are invalid")
+    assert dog_total_supply is not None
+    assert token_uri_present is not None
+    assert token_uri_unavailable is not None
+    assert metadata_verified is not None
+    assert metadata_unavailable is not None
+    if min(token_uri_present, token_uri_unavailable, metadata_verified, metadata_unavailable) < 0:
+        raise AssertionError("refresh_status tokenURI/metadata aggregate counts cannot be negative")
+    if token_uri_present + token_uri_unavailable != dog_total_supply:
+        raise AssertionError("refresh_status tokenURI aggregate counts do not equal Dog total supply")
+    if metadata_verified + metadata_unavailable != dog_total_supply:
+        raise AssertionError("refresh_status metadata aggregate counts do not equal Dog total supply")
+    if metadata_unavailable < token_uri_unavailable:
+        raise AssertionError("refresh_status hides tokenURI-unavailable Dogs from metadata unavailability")
+    expected_metadata_status = (
+        "complete_onchain_token_uri_verified"
+        if metadata_unavailable == 0
+        else "partial_onchain_token_uri_unavailable"
+        if metadata_unavailable == token_uri_unavailable
+        else "incomplete_metadata_unavailable"
+    )
+    if status.get("dog_metadata_verification_status") != expected_metadata_status:
+        raise AssertionError("refresh_status dog metadata aggregate status contradicts its counts")
     if not iso_utc(status.get("last_successful_refresh_time_utc")):
         raise AssertionError("refresh_status last_successful_refresh_time_utc is invalid")
     state = generated_state(root)
@@ -557,6 +704,13 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "log_rpc_quorum_providers",
         "auction_house_code_sha256",
         "dog_nft_code_sha256",
+        "dog_total_supply",
+        "dog_token_uri_verification_status",
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_metadata_verification_status",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
     ):
         if str(status.get(key, "")) != str(state.get(key, "")):
             raise AssertionError(f"refresh_status {key} differs from mission3_metrics")
@@ -677,9 +831,57 @@ def print_summary(summary: dict[str, Any]) -> None:
 
 
 def fetch_json(url: str, timeout: int = 15) -> Any:
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        port = parsed.port
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("invalid live verification URL") from exc
+    target = ((parsed.hostname or "").lower().rstrip("."), parsed.path)
+    if (
+        parsed.scheme.lower() != "https"
+        or port not in (None, 443)
+        or parsed.username is not None
+        or parsed.password is not None
+        or target not in LIVE_STATUS_TARGETS
+    ):
+        raise RuntimeError("live verification URL is outside the fixed GitHub publication allowlist")
+    expected_content_type = LIVE_STATUS_TARGETS[target]
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-refresh-verify/0.1"})
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        response = LIVE_STATUS_OPENER.open(req, timeout=timeout)
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"live verification HTTP {exc.code}") from None
+    except Exception as exc:  # noqa: BLE001 - keep transport details out of public telemetry
+        raise RuntimeError(f"live verification transport failed ({type(exc).__name__})") from None
+    try:
+        with response:
+            if response.getcode() != 200:
+                raise RuntimeError("live verification returned an unexpected HTTP status")
+            if str(response.geturl()) != url:
+                raise RuntimeError("live verification response URL changed unexpectedly")
+            headers = getattr(response, "headers", None)
+            content_type = str(headers.get("Content-Type") or "").split(";", 1)[0].strip().lower() if headers else ""
+            if content_type != expected_content_type:
+                raise RuntimeError("live verification returned an unexpected content type")
+            content_length = headers.get("Content-Length") if headers else None
+            if content_length is not None:
+                try:
+                    parsed_length = int(content_length)
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError("live verification returned an invalid Content-Length") from exc
+                if parsed_length < 0 or parsed_length > LIVE_STATUS_MAX_BYTES:
+                    raise RuntimeError("live verification response is too large")
+            payload = response.read(LIVE_STATUS_MAX_BYTES + 1)
+            if len(payload) > LIVE_STATUS_MAX_BYTES:
+                raise RuntimeError("live verification response is too large")
+    except RuntimeError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - keep response read details out of public telemetry
+        raise RuntimeError(f"live verification response read failed ({type(exc).__name__})") from None
+    try:
+        return json.loads(payload.decode("utf-8", errors="strict"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError("live verification response is not valid UTF-8 JSON") from exc
 
 
 def snapshot_mismatch(expected: Any, actual: Any) -> str:
@@ -729,7 +931,7 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
                         pages_verified = True
                 else:
                     last_error = f"{source} refresh_status mismatch {mismatch}"
-            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError, OSError, RuntimeError) as exc:
                 last_error = f"{source}: {str(exc)[:260]}"
         # Raw main proves the pushed artifact landed; Pages proves the actual
         # user-facing deployment completed. Neither alone is production-live.
@@ -772,7 +974,21 @@ def write_env_file(path: Path, values: dict[str, Any]) -> None:
             continue
         escaped = str(value).replace("'", "'\\''")
         lines.append(f"export {env_key}='{escaped}'")
-    path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
+    payload = "\n".join(lines) + ("\n" if lines else "")
+    flags = os.O_WRONLY | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except FileNotFoundError:
+        descriptor = os.open(path, flags | os.O_CREAT | os.O_EXCL, 0o600)
+    details = os.fstat(descriptor)
+    if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+        os.close(descriptor)
+        raise RuntimeError(f"refusing unsafe live-verification environment file: {path}")
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
 
 
 def build_parser() -> argparse.ArgumentParser:

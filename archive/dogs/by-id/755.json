@@ -34,10 +34,10 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad",
-      "0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2",
+      "0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8",
       "0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6",
-      "0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8"
+      "0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2",
+      "0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#643/792",
-      "rank": 643,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 755 dog #755 755 mission 3 mission 3 base settled 0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d @oddlyaugmented.eth oddlyaugmented.eth 0.01119 eth 11190000000000000 17.64094409 $17.64 2026-06-27t00:07:53z 0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb #643/792 generated auction feed 0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad 0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2 0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6 0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8 background: none (90.4%) background none body: brown (11.1%) body brown neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 755 dog #755 755 mission 3 mission 3 base settled 0x75a5e92a54336141f7a4d3e87eebf57e0cf4239d @oddlyaugmented.eth oddlyaugmented.eth 0.01119 eth 11190000000000000 17.64 $17.64 2026-06-27t00:07:53z 0xd6a59a3e7ddc61ef44ecd1844636fe7feb78422132d25208828cba832496c088 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb unavailable generated auction feed 0xb94dd23fdff4ee9251ee9a3b7e708a91522be78c540278cd1c18d74b8f0c31f8 0x082cefd7275ebd5f163377b603fe0957c2a707197c58d39ff37619d2755833f6 0xfe54216a4c3b901401092102ee01fbc9b00aad749c2f403b4dfeaa8a9abe31c2 0x8ed84b9273f14ef73e95afdfe7657c280666b22c1a63e1aecf22c40a578021ad background: none background none body: brown body brown neck: none neck none mouth: none mouth none ears: earbuds ears earbuds head: crazyhair head crazyhair eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47864763,
       "block_time_utc": "2026-06-27T00:07:53Z",
@@ -74,9 +74,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -84,37 +82,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.1%)",
+        "display": "Body: Brown",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

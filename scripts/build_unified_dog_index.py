@@ -7,7 +7,11 @@ writes static JSON artifacts for the dashboard and repo archive.
 from __future__ import annotations
 
 import json
+import os
 import re
+import stat
+import tempfile
+import urllib.parse
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -83,9 +87,46 @@ def load_json(path: Path, default: Any) -> Any:
         return default
 
 
+def ensure_owned_directory_tree(directory: Path) -> None:
+    missing: list[Path] = []
+    cursor = directory
+    while True:
+        try:
+            details = cursor.lstat()
+        except FileNotFoundError:
+            missing.append(cursor)
+            if cursor.parent == cursor:
+                raise RuntimeError(f"unable to find a trusted ancestor for output directory: {directory}")
+            cursor = cursor.parent
+            continue
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode):
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {cursor}")
+        if details.st_uid != os.getuid() or cursor.parent == cursor:
+            break
+        cursor = cursor.parent
+    for item in reversed(missing):
+        try:
+            item.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        details = item.lstat()
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode) or details.st_uid != os.getuid():
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {item}")
+
+
 def write_json(path: Path, data: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    ensure_owned_directory_tree(path.parent)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(data, handle, ensure_ascii=False, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def normalize_address(value: Any) -> str:
@@ -249,17 +290,41 @@ def build_identity_cache() -> dict[str, dict[str, Any]]:
             url = first_text(row.get("bidder_winner_url"), row.get("winner_url"))
             if not wallet or not display or not display.startswith("@"):
                 continue
+            handle = display.lstrip("@").strip().lower()
+            if not re.fullmatch(r"[a-z0-9][a-z0-9_.-]{0,63}", handle):
+                continue
+            profile_url = canonical_farcaster_profile_url(url, handle)
             profiles.setdefault(wallet, {
                 "wallet": wallet,
                 "display": display,
-                "farcaster_handle": display.lstrip("@"),
+                "farcaster_handle": handle,
                 "farcaster_fid": None,
-                "profile_url": url if "farcaster.xyz" in url else f"https://farcaster.xyz/{display.lstrip('@')}",
+                "profile_url": profile_url,
                 "sources": ["generated_dashboard_identity"],
                 "updated_at_utc": utc_now(),
             })
     write_json(IDENTITY_PATH, profiles)
     return profiles
+
+
+def canonical_farcaster_profile_url(value: Any, handle: str) -> str:
+    candidate = first_text(value)
+    try:
+        parsed = urllib.parse.urlsplit(candidate)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        _ = parsed.port
+    except (TypeError, ValueError):
+        host = ""
+        parsed = urllib.parse.SplitResult("", "", "", "", "")
+    if (
+        parsed.scheme.lower() == "https"
+        and host == "farcaster.xyz"
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.port in {None, 443}
+    ):
+        return candidate
+    return "https://farcaster.xyz/" + urllib.parse.quote(handle, safe="")
 
 
 def load_bid_lookup() -> dict[tuple[int, int], list[dict[str, Any]]]:
@@ -1592,7 +1657,7 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
 
 def write_per_dog_records(records: list[dict[str, Any]]) -> None:
     by_id = DOG_ARCHIVE / "by-id"
-    by_id.mkdir(parents=True, exist_ok=True)
+    ensure_owned_directory_tree(by_id)
     current_files = set()
     now = utc_now()
     for record in records:

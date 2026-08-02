@@ -34,10 +34,10 @@
       "unique_bidder_count": 4
     },
     "bid_tx_hashes": [
-      "0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919",
-      "0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3",
+      "0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff",
       "0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203",
-      "0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff"
+      "0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3",
+      "0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#719/792",
-      "rank": 719,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.04855749 $54.05 2026-06-09t20:37:53z 0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e #719/792 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.8%) mouth tongue ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.05 $54.05 2026-06-09t20:37:53z 0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e unavailable generated auction feed 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 background: none background none body: redbrown body redbrown neck: none neck none mouth: tongue mouth tongue ears: earbuds ears earbuds head: none head none eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47124063,
       "block_time_utc": "2026-06-09T20:37:53Z",
@@ -74,9 +74,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -84,37 +82,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

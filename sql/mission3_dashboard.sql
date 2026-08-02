@@ -128,6 +128,7 @@ SELECT
   COALESCE(d.trait_rarity, '') AS trait_rarity,
   COALESCE(d.rarity, '') AS rarity,
   COALESCE(d.rarity_score, 0) AS rarity_score,
+  COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   s.winner AS winner_wallet,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
   COALESCE(NULLIF(l.url, ''), 'https://basescan.org/address/' || LOWER(s.winner)) AS winner_url,
@@ -180,6 +181,7 @@ SELECT
   usd_estimate_source_detail,
   usd_estimate_confidence,
   usd_estimate_basis,
+  metadata_verification_status,
   rarity,
   last_bid_utc,
   settled_time_utc
@@ -192,6 +194,34 @@ CREATE TABLE auction_winners AS
 SELECT *
 FROM auction_winners_base
 ORDER BY token_id DESC;
+
+DROP TABLE IF EXISTS effective_auction_schedule;
+CREATE TEMP TABLE effective_auction_schedule AS
+WITH ranked_extensions AS (
+  SELECT
+    e.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY e.token_id
+      ORDER BY e.block_number DESC, e.log_index DESC
+    ) AS extension_rank,
+    COUNT(*) OVER (PARTITION BY e.token_id) AS extension_count
+  FROM auction_extensions e
+)
+SELECT
+  c.token_id,
+  c.start_time_utc,
+  c.end_time_utc AS initial_end_time_utc,
+  COALESCE(NULLIF(e.end_time_utc, ''), c.end_time_utc) AS end_time_utc,
+  COALESCE(e.extension_count, 0) AS extension_count,
+  e.end_time_utc AS latest_extension_end_time_utc,
+  e.block_number AS latest_extension_block,
+  e.tx_hash AS latest_extension_tx_hash,
+  e.log_index AS latest_extension_log_index,
+  c.block_number,
+  c.tx_hash
+FROM auction_created c
+LEFT JOIN ranked_extensions e
+  ON e.token_id = c.token_id AND e.extension_rank = 1;
 
 DROP TABLE IF EXISTS auction_timeline;
 CREATE TABLE auction_timeline AS
@@ -237,7 +267,13 @@ SELECT
   c.token_id,
   COALESCE(d.dog_image_url, '') AS dog_image_url,
   c.start_time_utc,
+  c.initial_end_time_utc,
   c.end_time_utc,
+  c.extension_count,
+  c.latest_extension_end_time_utc,
+  c.latest_extension_block,
+  c.latest_extension_tx_hash,
+  c.latest_extension_log_index,
   CASE
     WHEN s.token_id IS NOT NULL THEN 'settled'
     WHEN CAST(strftime('%s', c.end_time_utc) AS INTEGER) <= CAST(strftime('%s', snapshot.latest_block_time_utc) AS INTEGER) THEN 'ended_unsettled'
@@ -257,9 +293,10 @@ SELECT
   ROUND(COALESCE(s.amount_eth, 0), 8) AS settled_eth,
   s.block_time_utc AS settled_time_utc,
   COALESCE(d.rarity, '') AS rarity,
+  COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   c.tx_hash AS created_tx_hash,
   s.tx_hash AS settled_tx_hash
-FROM auction_created c
+FROM effective_auction_schedule c
 CROSS JOIN snapshot
 LEFT JOIN bid_stats b USING (token_id)
 LEFT JOIN latest_bid l USING (token_id)
@@ -478,6 +515,7 @@ SELECT
   COALESCE(d.trait_rarity, '') AS trait_rarity,
   COALESCE(d.rarity, '') AS rarity,
   COALESCE(d.rarity_score, 0) AS rarity_score,
+  COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
   ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd,
@@ -593,7 +631,8 @@ SELECT
   c.end_time_utc AS auction_end_utc,
   c.traits,
   c.trait_rarity,
-  c.rarity
+  c.rarity,
+  c.metadata_verification_status
 FROM current_row c;
 
 DROP TABLE IF EXISTS auction_feed;
@@ -646,7 +685,8 @@ combined AS (
     c.traits,
     c.trait_rarity,
     c.rarity,
-    c.rarity_score
+    c.rarity_score,
+    c.metadata_verification_status
   FROM current_row c
   UNION ALL
   SELECT
@@ -678,7 +718,8 @@ combined AS (
     traits,
     trait_rarity,
     rarity,
-    rarity_score
+    rarity_score,
+    metadata_verification_status
   FROM recent_settled
 )
 SELECT
@@ -709,6 +750,7 @@ SELECT
   auction_end_utc,
   last_bid_utc,
   settled_time_utc,
+  metadata_verification_status,
   rarity,
   traits,
   trait_rarity
@@ -765,9 +807,20 @@ UNION ALL SELECT 'dog_nft_code_sha256', (SELECT value FROM token_stats WHERE met
 UNION ALL SELECT 'auction_house', (SELECT value FROM token_stats WHERE metric = 'auction_house')
 UNION ALL SELECT 'dog_nft', (SELECT value FROM token_stats WHERE metric = 'dog_nft')
 UNION ALL SELECT 'dog_total_supply', (SELECT value FROM token_stats WHERE metric = 'dog_total_supply')
+UNION ALL SELECT 'dog_token_uri_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_verification_status')
+UNION ALL SELECT 'dog_token_uri_present_count', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_present_count')
+UNION ALL SELECT 'dog_token_uri_unavailable_count', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_unavailable_count')
+UNION ALL SELECT 'dog_metadata_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_verification_status')
+UNION ALL SELECT 'dog_metadata_onchain_verified_count', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_onchain_verified_count')
+UNION ALL SELECT 'dog_metadata_unavailable_count', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_unavailable_count')
 UNION ALL SELECT 'woof_token', (SELECT value FROM token_stats WHERE metric = 'woof_token')
 UNION ALL SELECT 'woof_symbol', (SELECT value FROM token_stats WHERE metric = 'woof_symbol')
 UNION ALL SELECT 'woof_total_supply', (SELECT value FROM token_stats WHERE metric = 'woof_total_supply')
+UNION ALL SELECT 'woof_holder_verification_status', (SELECT value FROM token_stats WHERE metric = 'woof_holder_verification_status')
+UNION ALL SELECT 'woof_holder_discovery_source', (SELECT value FROM token_stats WHERE metric = 'woof_holder_discovery_source')
+UNION ALL SELECT 'woof_holder_candidate_count', (SELECT value FROM token_stats WHERE metric = 'woof_holder_candidate_count')
+UNION ALL SELECT 'woof_holder_balance_sum_raw', (SELECT value FROM token_stats WHERE metric = 'woof_holder_balance_sum_raw')
+UNION ALL SELECT 'woof_holder_expected_supply_raw', (SELECT value FROM token_stats WHERE metric = 'woof_holder_expected_supply_raw')
 UNION ALL SELECT 'woof_usd_price', (SELECT value FROM token_stats WHERE metric = 'woof_usd_price')
 UNION ALL SELECT 'woof_usd_source', (SELECT value FROM token_stats WHERE metric = 'woof_usd_source')
 UNION ALL SELECT 'sup_token', (SELECT value FROM token_stats WHERE metric = 'sup_token')
@@ -806,9 +859,17 @@ UNION ALL SELECT 'reward_current_bid_payback_days', COALESCE((SELECT value FROM 
 UNION ALL SELECT 'reward_current_bid_daily_roi_pct', COALESCE((SELECT value FROM token_stats WHERE metric = 'reward_current_bid_daily_roi_pct'), 'N/A')
 UNION ALL SELECT 'reward_current_bid_apr_pct', COALESCE((SELECT value FROM token_stats WHERE metric = 'reward_current_bid_apr_pct'), 'N/A')
 UNION ALL SELECT 'reward_current_bid_apr_display', COALESCE((SELECT value FROM token_stats WHERE metric = 'reward_current_bid_apr_display'), 'N/A')
-UNION ALL SELECT 'woof_holders', CAST((SELECT woof_holders FROM holder_stats) AS TEXT)
+UNION ALL SELECT 'woof_holders', CASE
+  WHEN (SELECT value FROM token_stats WHERE metric = 'woof_holder_verification_status') = 'candidate_complete_onchain_quorum_verified'
+  THEN CAST((SELECT woof_holders FROM holder_stats) AS TEXT)
+  ELSE 'unavailable'
+END
 UNION ALL SELECT 'top_woof_holder', COALESCE((SELECT holder FROM top_holder), '')
-UNION ALL SELECT 'top_woof_holder_balance', CAST(ROUND(COALESCE((SELECT balance_woof FROM top_holder), 0), 6) AS TEXT)
+UNION ALL SELECT 'top_woof_holder_balance', CASE
+  WHEN (SELECT value FROM token_stats WHERE metric = 'woof_holder_verification_status') = 'candidate_complete_onchain_quorum_verified'
+  THEN CAST(ROUND(COALESCE((SELECT balance_woof FROM top_holder), 0), 6) AS TEXT)
+  ELSE 'unavailable'
+END
 UNION ALL SELECT 'farcaster_profiles_resolved', CAST((SELECT farcaster_profiles FROM profile_stats) AS TEXT)
 UNION ALL SELECT 'current_auction_token_id', CAST((SELECT token_id FROM current_auction_source LIMIT 1) AS TEXT)
 UNION ALL SELECT 'current_auction_status', (SELECT auction_state FROM current_auction LIMIT 1)

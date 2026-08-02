@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#618/792",
-      "rank": 618,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 312 dog #312 312 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 #618/792 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: sunglasses 0x1b064ede8764e34db9b26e26cab1e175b037700c082ee370d05086c8e5a8fbbe chain_logs contract_getters",
+    "search_text": "dog 312 dog #312 312 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 unavailable background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: crazyhair; eyes: sunglasses 0x1b064ede8764e34db9b26e26cab1e175b037700c082ee370d05086c8e5a8fbbe chain_logs contract_getters",
     "settlement": {
       "block_number": 25591518,
       "block_time_utc": "2025-03-12T12:16:19Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.6%)",
+        "display": "Body: Grey",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

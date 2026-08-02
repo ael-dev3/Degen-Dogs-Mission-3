@@ -14,7 +14,9 @@ import io
 import json
 import os
 import re
+import stat
 import sys
+import tempfile
 from collections import Counter
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -418,12 +420,43 @@ def load_json_file(path: Path, default: Any) -> Any:
         return default
 
 
+def ensure_owned_directory_tree(directory: Path) -> None:
+    missing: list[Path] = []
+    cursor = directory
+    while True:
+        try:
+            details = cursor.lstat()
+        except FileNotFoundError:
+            missing.append(cursor)
+            if cursor.parent == cursor:
+                raise RuntimeError(f"unable to find a trusted ancestor for output directory: {directory}")
+            cursor = cursor.parent
+            continue
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode):
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {cursor}")
+        if details.st_uid != os.getuid() or cursor.parent == cursor:
+            break
+        cursor = cursor.parent
+    for item in reversed(missing):
+        try:
+            item.mkdir(mode=0o700)
+        except FileExistsError:
+            pass
+        details = item.lstat()
+        if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode) or details.st_uid != os.getuid():
+            raise RuntimeError(f"refusing unsafe output directory ancestor: {item}")
+
+
 def atomic_write_text(path: Path, payload: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    ensure_owned_directory_tree(path.parent)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
     try:
-        temporary.write_text(payload, encoding="utf-8")
-        temporary.replace(path)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -510,6 +543,19 @@ def format_eth_amount(value: Any) -> str:
     if "." in text:
         text = text.rstrip("0").rstrip(".")
     return text or "0"
+
+
+def historical_settlement_amount_display(
+    token_id: int,
+    amount_eth: Decimal,
+    historical_usd: dict[str, Any] | None,
+) -> str:
+    if historical_usd is None:
+        raise FullRefreshRequired(f"Dog #{token_id} settlement lost historical USD provenance")
+    amount_usd = decimal_or_none(historical_usd.get("amount_usd_at_event"))
+    if amount_usd is None or amount_usd < 0:
+        raise FullRefreshRequired(f"Dog #{token_id} settlement has invalid historical USD provenance")
+    return f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
 
 
 def now_utc() -> datetime:
@@ -787,9 +833,10 @@ def decimal_or_none(value: Any) -> Decimal | None:
     if not raw:
         return None
     try:
-        return Decimal(raw)
+        parsed = Decimal(raw)
     except Exception:  # noqa: BLE001
         return None
+    return parsed if parsed.is_finite() else None
 
 
 def historical_usd_candidate(row: Any) -> dict[str, Any] | None:
@@ -897,10 +944,25 @@ def local_historical_usd(
 
 
 def canonical_historical_usd(token_id: int, native_amount: Decimal, event_time: Any) -> dict[str, Any]:
+    event_dt = parse_utc(event_time)
+    if not native_amount.is_finite() or native_amount < 0 or event_dt is None:
+        raise FullRefreshRequired(f"Dog #{token_id} settlement has invalid onchain amount or timestamp")
     for candidate in archive_candidates(token_id):
         normalized = historical_usd_candidate(candidate)
-        if normalized is not None:
-            return normalized
+        if normalized is None:
+            continue
+        event_amount = decimal_or_none(normalized.get("amount_usd_at_event"))
+        event_price = decimal_or_none(normalized.get("eth_usd_price_at_event"))
+        price_dt = parse_utc(normalized.get("eth_usd_price_date_utc"))
+        if event_amount is None or event_amount < 0 or event_price is None or event_price <= 0 or price_dt is None:
+            continue
+        expected_amount = native_amount * event_price
+        tolerance = max(Decimal("0.011"), abs(expected_amount) * Decimal("0.000001"))
+        if abs(event_amount - expected_amount) > tolerance:
+            continue
+        if abs((price_dt - event_dt).total_seconds()) > 3 * 86400:
+            continue
+        return normalized
     local_quote = local_historical_usd(native_amount, event_time)
     if local_quote is not None:
         return local_quote
@@ -1011,7 +1073,7 @@ def update_readme_snapshot(current_row: dict[str, Any], metrics: dict[str, str],
         "Bid payback / APR": f"{payback_display} / {metrics.get('reward_current_bid_apr_display', 'N/A')}",
         "Season 6 SUP estimate if current bid wins": builder.season6_readme_estimate_summary(metrics),
         "Created / settled auctions": f"{metrics.get('created_auctions', '')} / {metrics.get('settled_auctions', '')}",
-        "WOOF holders": str(metrics.get("woof_holders", "")),
+        "WOOF holders": builder.woof_holder_summary(metrics),
         "Onchain verification": str(metrics.get("onchain_verification_status", "N/A")),
         "Snapshot block hash": str(metrics.get("snapshot_block_hash", "N/A")),
     }
@@ -1616,7 +1678,11 @@ def main() -> None:
         previous_wallet = str(previous_settlement.get("winner") or "").lower()
         previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
         previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
-        previous_amount_usd = (previous_amount_eth * eth_usd).quantize(Decimal("0.01"))
+        previous_amount_display = historical_settlement_amount_display(
+            previous_token_id,
+            previous_amount_eth,
+            previous_historical_usd,
+        )
         for row in history_rows:
             if int_value(row.get("token_id"), -1) != previous_token_id:
                 continue
@@ -1626,7 +1692,7 @@ def main() -> None:
                     "winner": previous_bidder,
                     "winner_url": previous_bidder_url,
                     "winner_wallet": previous_wallet,
-                    "amount": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
+                    "amount": previous_amount_display,
                     "amount_raw": str(previous_settlement.get("amount_wei") or row.get("amount_raw") or ""),
                     "bid_count": len(previous_bids) or int_value(row.get("bid_count")),
                     "unique_bidder_count": len({bid_wallet(item) for item in previous_bids if bid_wallet(item)}) or int_value(row.get("unique_bidder_count")),
@@ -2081,7 +2147,6 @@ def main() -> None:
     unified_rows.sort(key=lambda row: (1 if str(row.get("status", "")).lower() == "live" or "ongoing" in str(row.get("status", "")).lower() else 0, str(row.get("activity_time_utc", "")), int_value(row.get("dog_id"), -1)), reverse=True)
     unified_payload = json.dumps(unified_rows, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
     for unified_path in unified_paths:
-        unified_path.parent.mkdir(parents=True, exist_ok=True)
         atomic_write_text(unified_path, unified_payload)
     unified_record_ids = {
         int_value(row.get("dog_id"), -1)

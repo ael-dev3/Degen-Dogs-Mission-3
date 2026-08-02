@@ -34,10 +34,10 @@
       "unique_bidder_count": 4
     },
     "bid_tx_hashes": [
-      "0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c",
-      "0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1",
+      "0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b",
       "0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1",
-      "0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b"
+      "0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1",
+      "0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#641/792",
-      "rank": 641,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51050483 $19.51 2026-07-14t08:09:49z 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a #641/792 generated auction feed 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: goldearring (15.2%) ears goldearring head: none (20.3%) head none eyes: monocle (6.4%) eyes monocle base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51 $19.51 2026-07-14t08:09:49z 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a unavailable generated auction feed 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c background: none background none body: redbrown body redbrown neck: redcollar neck redcollar mouth: none mouth none ears: goldearring ears goldearring head: none head none eyes: monocle eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48613621,
       "block_time_utc": "2026-07-14T08:09:49Z",
@@ -74,9 +74,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -84,37 +82,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.2%)",
+        "display": "Ears: GoldEarring",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: Monocle (6.4%)",
+        "display": "Eyes: Monocle",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

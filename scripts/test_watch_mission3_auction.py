@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import sqlite3
 import tempfile
 import time
 from datetime import datetime, timedelta, timezone
@@ -11,6 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "watch_mission3_auction.py"
+ARCHIVE_MODULE_PATH = ROOT / "scripts" / "archive_mission3_index.py"
+ARCHIVE_HEALTH_MODULE_PATH = ROOT / "scripts" / "check_mission3_archive.py"
 TELEMETRY_MODULE_PATH = ROOT / "scripts" / "refresh_telemetry.py"
 
 
@@ -25,6 +28,49 @@ def load_module():
     return module
 
 
+def load_archive_module():
+    spec = importlib.util.spec_from_file_location("archive_mission3_index", ARCHIVE_MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_archive_health_module():
+    spec = importlib.util.spec_from_file_location("check_mission3_archive", ARCHIVE_HEALTH_MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_watcher_state_reader_rejects_symlinks_and_broad_permissions():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        broad = root / "broad.json"
+        broad.write_text("{}", encoding="utf-8")
+        broad.chmod(0o644)
+        try:
+            watcher.load_state(broad)
+        except SystemExit as exc:
+            assert "mode 600" in str(exc)
+        else:
+            raise AssertionError("broad watcher state permissions were accepted")
+
+        target = root / "target.json"
+        target.write_text("{}", encoding="utf-8")
+        target.chmod(0o600)
+        linked = root / "linked.json"
+        linked.symlink_to(target)
+        try:
+            watcher.load_state(linked)
+        except SystemExit as exc:
+            assert "securely open watcher state" in str(exc)
+        else:
+            raise AssertionError("symlinked watcher state was accepted")
+
+
 def load_telemetry_module():
     spec = importlib.util.spec_from_file_location("refresh_telemetry", TELEMETRY_MODULE_PATH)
     assert spec and spec.loader
@@ -35,6 +81,174 @@ def load_telemetry_module():
 
 def word(value: int) -> str:
     return f"{value:064x}"
+
+
+class FakeRpcResponse:
+    def __init__(
+        self,
+        body: bytes,
+        *,
+        content_type: str = "application/json",
+        status_code: int = 200,
+        final_url: str = "",
+    ) -> None:
+        self.body = body
+        self.headers = {"Content-Type": content_type, "Content-Length": str(len(body))}
+        self.status_code = status_code
+        self.final_url = final_url
+        self.read_limit = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def getcode(self) -> int:
+        return self.status_code
+
+    def geturl(self) -> str:
+        return self.final_url
+
+    def read(self, limit: int) -> bytes:
+        self.read_limit = limit
+        return self.body[:limit]
+
+
+def install_fake_rpc_response(watcher, response: FakeRpcResponse) -> None:
+    def fake_open(request, timeout):  # noqa: ANN001, ANN202, ARG001
+        if not response.final_url:
+            response.final_url = request.full_url
+        return response
+
+    watcher.open_rpc_request = fake_open
+
+
+def test_watcher_rpc_transport_accepts_exact_bounded_json_response():
+    watcher = load_module()
+    url = "https://provider.example/v2/provider-key?network=base"
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+    response = FakeRpcResponse(body, content_type="application/json; charset=utf-8")
+    install_fake_rpc_response(watcher, response)
+
+    assert watcher.post_json(url, {"jsonrpc": "2.0"})["result"] == "0x1"
+    assert response.read_limit == watcher.RPC_MAX_RESPONSE_BYTES + 1
+
+
+def test_watcher_rpc_transport_rejects_unsafe_urls_before_network():
+    watcher = load_module()
+
+    def should_not_open(*_args, **_kwargs):
+        raise AssertionError("unsafe RPC URL reached the network")
+
+    watcher.open_rpc_request = should_not_open
+    urls = (
+        "http://provider.example/rpc",
+        "https://user:super-secret@provider.example/rpc",
+        "https://provider.example:8443/rpc",
+        "https://provider.example/rpc#fragment",
+    )
+    for url in urls:
+        try:
+            watcher.post_json(url, {})
+        except RuntimeError as exc:
+            assert "super-secret" not in str(exc)
+        else:
+            raise AssertionError(f"unsafe RPC URL was accepted: {url}")
+
+
+def test_watcher_rpc_transport_rejects_redirect_status_mime_and_oversize():
+    watcher = load_module()
+    url = "https://provider.example/rpc"
+    assert watcher.NoRedirectHandler().redirect_request(None, None, 302, "", {}, "https://attacker.example") is None
+    cases = [
+        (FakeRpcResponse(b"{}", final_url="https://attacker.example/rpc"), "URL changed"),
+        (FakeRpcResponse(b"{}", status_code=206), "HTTP status"),
+        (FakeRpcResponse(b"{}", content_type="text/html"), "Content-Type"),
+    ]
+    for response, expected_error in cases:
+        install_fake_rpc_response(watcher, response)
+        try:
+            watcher.post_json(url, {})
+        except RuntimeError as exc:
+            assert expected_error in str(exc)
+        else:
+            raise AssertionError(f"unsafe RPC response was accepted: {expected_error}")
+
+    declared = FakeRpcResponse(b"{}")
+    declared.headers["Content-Length"] = str(watcher.RPC_MAX_RESPONSE_BYTES + 1)
+    install_fake_rpc_response(watcher, declared)
+    try:
+        watcher.post_json(url, {})
+    except RuntimeError as exc:
+        assert "byte limit" in str(exc)
+    else:
+        raise AssertionError("oversize declared RPC response was accepted")
+    assert declared.read_limit is None
+
+    streamed = FakeRpcResponse(b" " * (watcher.RPC_MAX_RESPONSE_BYTES + 1))
+    streamed.headers.pop("Content-Length")
+    install_fake_rpc_response(watcher, streamed)
+    try:
+        watcher.post_json(url, {})
+    except RuntimeError as exc:
+        assert "byte limit" in str(exc)
+    else:
+        raise AssertionError("oversize streamed RPC response was accepted")
+
+
+def test_watcher_rpc_transport_and_envelope_errors_do_not_leak_provider_secrets():
+    watcher = load_module()
+    secret_url = "https://provider.example/v2/path-secret?api_key=query-secret"
+
+    def fail_open(_request, _timeout):
+        raise watcher.urllib.error.HTTPError(secret_url, 401, "reason-secret", {}, None)
+
+    watcher.open_rpc_request = fail_open
+    try:
+        watcher.post_json(secret_url, {})
+    except RuntimeError as exc:
+        message = str(exc)
+        assert message == "RPC HTTP 401"
+        assert "secret" not in message
+    else:
+        raise AssertionError("RPC HTTP failure was accepted")
+
+    original = watcher.post_json
+    try:
+        watcher.post_json = lambda *_args, **_kwargs: {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {"code": -32601, "message": "body-secret", "data": "data-secret"},
+        }
+        try:
+            watcher.rpc_call("eth_test", [], urls=[secret_url])
+        except RuntimeError as exc:
+            message = str(exc)
+            assert "code=-32601" in message
+            assert "body-secret" not in message
+            assert "data-secret" not in message
+            assert "path-secret" not in message
+            assert "query-secret" not in message
+        else:
+            raise AssertionError("JSON-RPC error response was accepted")
+
+        malformed_envelopes = (
+            [],
+            {"jsonrpc": "2.0", "id": True, "result": "0x1"},
+            {"jsonrpc": "2.0", "id": 1},
+            {"jsonrpc": "2.0", "id": 1, "result": "0x1", "error": None},
+        )
+        for envelope in malformed_envelopes:
+            watcher.post_json = lambda *_args, _envelope=envelope, **_kwargs: _envelope
+            try:
+                watcher.rpc_call("eth_test", [], urls=["https://provider.example/rpc"])
+            except RuntimeError as exc:
+                assert "envelope" in str(exc)
+            else:
+                raise AssertionError(f"malformed JSON-RPC envelope was accepted: {envelope!r}")
+    finally:
+        watcher.post_json = original
 
 
 def test_rpc_quorum_rejects_two_by_two_tie():
@@ -548,6 +762,7 @@ def test_cooldown_defer_keeps_unpublished_bid_pending_without_advancing_seen_cur
             "last_refresh_at_utc": watcher.utc_now(),
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         snapshot = {
             "latest_block": 130,
             "checked_from_block": 100,
@@ -602,6 +817,7 @@ def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cu
             "last_refresh_at_utc": iso(0),
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         snapshot = {
             "latest_block": 130,
             "checked_from_block": 100,
@@ -656,6 +872,7 @@ def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_withou
             "last_refresh_at_utc": iso(0),
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         snapshot = {
             "latest_block": 130,
             "checked_from_block": 100,
@@ -716,6 +933,7 @@ def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
             "pending_refresh": True,
             "pending_bid_log_id": "130:0xnewbid:4",
         }, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         snapshot = {
             "latest_block": 130,
             "checked_from_block": 100,
@@ -826,6 +1044,1031 @@ def test_redact_url_masks_path_based_rpc_keys():
     assert public == "https://mainnet.base.org"
 
 
+def test_archive_redact_url_masks_path_based_rpc_keys():
+    archive = load_archive_module()
+    redacted = archive.redact_url(
+        "https://base-mainnet.g.alchemy.com/v2/archive-super-secret?apikey=query-secret"
+    )
+    assert "archive-super-secret" not in redacted
+    assert "query-secret" not in redacted
+    assert redacted.startswith("https://rpc-host-")
+    assert redacted.endswith("/<redacted-path>?redacted=1")
+
+    public = archive.redact_url("https://mainnet.base.org")
+    assert "mainnet.base.org" not in public
+    assert public.startswith("https://rpc-host-")
+
+    custom = archive.redact_url("https://host-secret.rpc.custom.example/key-secret?token=query-secret")
+    assert "host-secret" not in custom
+    assert "key-secret" not in custom
+    assert "query-secret" not in custom
+
+
+def test_archive_overlap_purge_removes_orphaned_raw_and_decoded_events():
+    archive = load_archive_module()
+    conn = sqlite3.connect(":memory:")
+    conn.executescript((ROOT / "archive" / "mission3" / "sql" / "schema.sql").read_text(encoding="utf-8"))
+    for block in (99, 100, 101):
+        tx_hash = "0x" + f"{block:064x}"
+        conn.execute(
+            """INSERT INTO mission3_raw_logs
+            (chain_id,address,block_number,block_hash,transaction_hash,transaction_index,log_index,removed,topic0,data,fetched_at_utc,source_rpc)
+            VALUES (8453,'0xabc',?,'0xhash',?,0,0,0,'0xtopic','0x','2026-01-01T00:00:00Z','unit')""",
+            (block, tx_hash),
+        )
+        conn.execute(
+            """INSERT INTO mission3_auction_created
+            (token_id,start_time,end_time,block_number,transaction_hash,log_index,block_time_utc)
+            VALUES (?,1,2,?,?,0,'2026-01-01T00:00:00Z')""",
+            (block, block, tx_hash),
+        )
+        conn.execute(
+            """INSERT INTO mission3_current_auction_snapshots
+            (snapshot_at_utc,latest_block,token_id,start_time,end_time,highest_bidder,amount_raw,amount_eth,settled,source,confidence)
+            VALUES (?,?,?,?,?,'0x0000000000000000000000000000000000000000','0','0',0,'unit','unit')""",
+            (f"2026-01-01T00:00:{block - 90:02d}Z", block, block, 1, 2),
+        )
+    archive.purge_indexed_range(conn, 8453, 100, 101)
+    assert [row[0] for row in conn.execute("SELECT block_number FROM mission3_raw_logs ORDER BY block_number")] == [99]
+    assert [row[0] for row in conn.execute("SELECT block_number FROM mission3_auction_created ORDER BY block_number")] == [99]
+    assert [row[0] for row in conn.execute("SELECT latest_block FROM mission3_current_auction_snapshots ORDER BY latest_block")] == [99]
+    conn.close()
+
+
+def test_archive_log_reads_require_independent_canonical_agreement():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example", "https://three.example"]
+    canonical = [{
+        "address": "0x" + "a" * 40,
+        "blockHash": "0x" + "b" * 64,
+        "blockNumber": "0x64",
+        "data": "0x",
+        "logIndex": "0x0",
+        "removed": False,
+        "topics": ["0x" + "c" * 64],
+        "transactionHash": "0x" + "d" * 64,
+        "transactionIndex": "0x0",
+    }]
+    differing = [{**canonical[0], "transactionHash": "0x" + "e" * 64}]
+    responses = {urls[0]: canonical, urls[1]: canonical, urls[2]: differing}
+    original = archive.rpc_call
+    archive.rpc_call = lambda _method, _params, *, urls, timeout=60: (responses[urls[0]], urls[0])
+    try:
+        result, agreeing = archive.rpc_consensus(
+            "eth_getLogs", [{}], urls=urls, normalizer=archive.canonical_logs
+        )
+        assert result == canonical
+        assert set(agreeing) == set(urls[:2])
+        responses[urls[1]] = [{**canonical[0], "transactionHash": "0x" + "f" * 64}]
+        try:
+            archive.rpc_consensus("eth_getLogs", [{}], urls=urls, normalizer=archive.canonical_logs)
+        except RuntimeError as exc:
+            assert "failed independent quorum" in str(exc)
+        else:
+            raise AssertionError("archive accepted three disagreeing log responses")
+    finally:
+        archive.rpc_call = original
+
+
+def test_archive_safe_head_ignores_a_stale_outlier_and_pins_hash_quorum():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example", "https://stale.example"]
+    heads = {urls[0]: 1000, urls[1]: 999, urls[2]: 100}
+    original_urls = archive.rpc_urls
+    original_call = archive.rpc_call
+    original_consensus = archive.rpc_consensus
+    old_confirmations = os.environ.get("BASE_SNAPSHOT_CONFIRMATIONS")
+    old_spread = os.environ.get("BASE_RPC_MAX_HEAD_SPREAD_BLOCKS")
+    os.environ["BASE_SNAPSHOT_CONFIRMATIONS"] = "1"
+    os.environ["BASE_RPC_MAX_HEAD_SPREAD_BLOCKS"] = "20"
+    archive.rpc_urls = lambda: urls
+    archive.rpc_call = lambda _method, _params, *, urls, timeout=30: (hex(heads[urls[0]]), urls[0])
+    block = {
+        "number": hex(998),
+        "hash": "0x" + "a" * 64,
+        "parentHash": "0x" + "b" * 64,
+        "timestamp": hex(int(datetime.now(timezone.utc).timestamp())),
+    }
+    consensus_urls: list[list[str]] = []
+
+    def fake_consensus(*_args, **kwargs):
+        consensus_urls.append(list(kwargs["urls"]))
+        return block, list(kwargs["urls"])
+
+    archive.rpc_consensus = fake_consensus
+    try:
+        assert archive.verified_safe_head() == 998
+        assert len(consensus_urls) == 1
+        assert set(consensus_urls[0]) == set(urls[:2])
+    finally:
+        archive.rpc_urls = original_urls
+        archive.rpc_call = original_call
+        archive.rpc_consensus = original_consensus
+        if old_confirmations is None:
+            os.environ.pop("BASE_SNAPSHOT_CONFIRMATIONS", None)
+        else:
+            os.environ["BASE_SNAPSHOT_CONFIRMATIONS"] = old_confirmations
+        if old_spread is None:
+            os.environ.pop("BASE_RPC_MAX_HEAD_SPREAD_BLOCKS", None)
+        else:
+            os.environ["BASE_RPC_MAX_HEAD_SPREAD_BLOCKS"] = old_spread
+
+
+def test_archive_explicit_rpc_lists_only_add_public_fallbacks_when_opted_in():
+    archive = load_archive_module()
+    keys = ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS", "BASE_INCLUDE_PUBLIC_FALLBACKS")
+    previous = {key: os.environ.get(key) for key in keys}
+    try:
+        os.environ.pop("BASE_RPC_URL", None)
+        os.environ["BASE_RPC_URLS"] = "https://paid-one.example,https://paid-two.example"
+        os.environ["BASE_LOG_RPC_URLS"] = "https://logs-one.example,https://logs-two.example"
+        os.environ["BASE_INCLUDE_PUBLIC_FALLBACKS"] = "0"
+        assert archive.rpc_urls() == ["https://paid-one.example", "https://paid-two.example"]
+        assert archive.log_rpc_urls() == ["https://logs-one.example", "https://logs-two.example"]
+
+        os.environ["BASE_INCLUDE_PUBLIC_FALLBACKS"] = "1"
+        assert archive.rpc_urls()[:2] == ["https://paid-one.example", "https://paid-two.example"]
+        assert archive.rpc_urls()[2:] == archive.DEFAULT_RPC_URLS
+        assert archive.log_rpc_urls()[:2] == ["https://logs-one.example", "https://logs-two.example"]
+        assert archive.log_rpc_urls()[2:] == archive.DEFAULT_LOG_RPC_URLS
+    finally:
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def test_archive_provider_aliases_cannot_double_vote():
+    archive = load_archive_module()
+    selected = archive.independent_rpc_urls([
+        "https://base.gateway.tenderly.co",
+        "https://alternate.tenderly.co/key",
+        "https://base.lava.build",
+        "https://backup.lava.build/key",
+        "https://mainnet.base.org",
+        "https://developer-access-mainnet.base.org",
+    ])
+    assert selected == [
+        "https://base.gateway.tenderly.co",
+        "https://base.lava.build",
+        "https://mainnet.base.org",
+    ]
+
+
+def test_archive_rpc_quorum_rejects_two_by_two_tie():
+    archive = load_archive_module()
+    urls = [f"https://provider-{index}.example" for index in range(4)]
+    responses = {urls[0]: "A", urls[1]: "A", urls[2]: "B", urls[3]: "B"}
+    original = archive.rpc_call
+    old_attempts = os.environ.get("BASE_RPC_ATTEMPTS")
+    os.environ["BASE_RPC_ATTEMPTS"] = "1"
+    archive.rpc_call = lambda _method, _params, *, urls, timeout=60: (responses[urls[0]], urls[0])
+    try:
+        try:
+            archive.rpc_consensus("unit", [], urls=urls)
+        except RuntimeError as exc:
+            assert "ambiguous_or_incomplete_top_vote" in str(exc)
+        else:
+            raise AssertionError("archive accepted an ambiguous two-by-two provider split")
+    finally:
+        archive.rpc_call = original
+        if old_attempts is None:
+            os.environ.pop("BASE_RPC_ATTEMPTS", None)
+        else:
+            os.environ["BASE_RPC_ATTEMPTS"] = old_attempts
+
+
+def test_archive_rpc_quorum_returns_before_non_decisive_straggler():
+    archive = load_archive_module()
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://slow.example"]
+    original = archive.rpc_call
+    old_attempts = os.environ.get("BASE_RPC_ATTEMPTS")
+    old_deadline = os.environ.get("BASE_RPC_QUORUM_DEADLINE_SECONDS")
+    os.environ["BASE_RPC_ATTEMPTS"] = "1"
+    os.environ["BASE_RPC_QUORUM_DEADLINE_SECONDS"] = "2"
+
+    def fake_call(_method, _params, *, urls, timeout=60):  # noqa: ARG001
+        if urls[0] == "https://slow.example":
+            time.sleep(0.6)
+            return "different", urls[0]
+        return "canonical", urls[0]
+
+    archive.rpc_call = fake_call
+    started = time.monotonic()
+    try:
+        result, agreeing = archive.rpc_consensus("unit", [], urls=urls)
+        elapsed = time.monotonic() - started
+        assert result == "canonical"
+        assert set(agreeing) == set(urls[:2])
+        assert elapsed < 0.4, elapsed
+    finally:
+        archive.rpc_call = original
+        if old_attempts is None:
+            os.environ.pop("BASE_RPC_ATTEMPTS", None)
+        else:
+            os.environ["BASE_RPC_ATTEMPTS"] = old_attempts
+        if old_deadline is None:
+            os.environ.pop("BASE_RPC_QUORUM_DEADLINE_SECONDS", None)
+        else:
+            os.environ["BASE_RPC_QUORUM_DEADLINE_SECONDS"] = old_deadline
+
+
+def test_archive_log_scheduler_cancels_pending_ranges_on_first_failure():
+    archive = load_archive_module()
+    original = archive.fetch_log_range
+    started: list[int] = []
+
+    def fake_fetch(_address, _topics, lo, hi, _urls):
+        started.append(lo)
+        if lo == 0:
+            raise RuntimeError("forced chunk failure")
+        time.sleep(0.25)
+        return (lo, hi), [], "unit"
+
+    archive.fetch_log_range = fake_fetch
+    try:
+        try:
+            archive.fetch_logs(
+                "0x" + "a" * 40,
+                ["0x" + "b" * 64],
+                0,
+                99,
+                chunk_size=10,
+                workers=2,
+                urls=["https://one.example", "https://two.example"],
+            )
+        except RuntimeError as exc:
+            assert "forced chunk failure" in str(exc)
+        else:
+            raise AssertionError("archive continued after a failed log chunk")
+        assert set(started).issubset({0, 10})
+    finally:
+        archive.fetch_log_range = original
+
+
+def test_archive_log_normalizer_requires_complete_transaction_identity():
+    archive = load_archive_module()
+    row = {
+        "address": "0x" + "a" * 40,
+        "blockHash": "0x" + "b" * 64,
+        "blockNumber": "0x64",
+        "data": "0x",
+        "logIndex": "0x0",
+        "removed": False,
+        "topics": ["0x" + "c" * 64],
+        "transactionHash": "0x" + "d" * 64,
+    }
+    try:
+        archive.canonical_logs([row])
+    except RuntimeError as exc:
+        assert "transaction index" in str(exc)
+    else:
+        raise AssertionError("archive accepted a log without transactionIndex")
+
+
+def test_archive_decoder_rejects_log_hash_from_another_fork():
+    archive = load_archive_module()
+    conn = sqlite3.connect(":memory:")
+    conn.executescript((ROOT / "archive" / "mission3" / "sql" / "schema.sql").read_text(encoding="utf-8"))
+    original_fetch = archive.fetch_canonical_blocks
+    archive.fetch_canonical_blocks = lambda _blocks, **_kwargs: {
+        100: {
+            "number": "0x64",
+            "hash": "0x" + "a" * 64,
+            "parentHash": "0x" + "b" * 64,
+            "timestamp": "0x1",
+        }
+    }
+    logs = [{
+        "blockNumber": "0x64",
+        "blockHash": "0x" + "c" * 64,
+        "transactionHash": "0x" + "d" * 64,
+        "logIndex": "0x0",
+        "topics": ["0x" + "e" * 64, "0x" + "0" * 63 + "1"],
+        "data": "0x" + "0" * 128,
+    }]
+    try:
+        try:
+            archive.decode_and_insert(conn, logs, {"AuctionCreated": logs[0]["topics"][0]})
+        except RuntimeError as exc:
+            assert "block hash disagrees" in str(exc)
+        else:
+            raise AssertionError("archive decoded a log from a non-canonical block hash")
+    finally:
+        archive.fetch_canonical_blocks = original_fetch
+        conn.close()
+
+
+def test_archive_incremental_window_purges_tail_after_safe_head_regression():
+    archive = load_archive_module()
+    assert archive.incremental_reorg_window(400, 1000, 950, 100) == (851, 1000)
+    assert archive.incremental_reorg_window(400, 1000, 1100, 100) == (901, 1100)
+    assert archive.incremental_reorg_window(400, None, 950, 100) == (400, 950)
+
+
+def test_archive_log_chunk_honors_documented_bounded_override():
+    archive = load_archive_module()
+    original = os.environ.get("MISSION3_LOG_CHUNK")
+    try:
+        os.environ.pop("MISSION3_LOG_CHUNK", None)
+        assert archive.configured_log_chunk_size() == 2000
+        os.environ["MISSION3_LOG_CHUNK"] = "10000"
+        assert archive.configured_log_chunk_size() == 10000
+        os.environ["MISSION3_LOG_CHUNK"] = "999999"
+        assert archive.configured_log_chunk_size() == 10000
+        os.environ["MISSION3_LOG_CHUNK"] = "0"
+        assert archive.configured_log_chunk_size() == 1
+    finally:
+        if original is None:
+            os.environ.pop("MISSION3_LOG_CHUNK", None)
+        else:
+            os.environ["MISSION3_LOG_CHUNK"] = original
+
+
+def test_archive_full_refresh_failure_preserves_last_known_good_database():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        db_path = tmp_path / "archive.sqlite"
+        original_db = sqlite3.connect(db_path)
+        original_db.execute("CREATE TABLE last_known_good (value TEXT NOT NULL)")
+        original_db.execute("INSERT INTO last_known_good VALUES ('preserved')")
+        original_db.commit()
+        original_db.close()
+
+        block_number = int(archive.load_configs()["blocks"]["indexing"]["verified_from_block"])
+        snapshot = {
+            "number": hex(block_number),
+            "hash": "0x" + "a" * 64,
+            "parentHash": "0x" + "b" * 64,
+            "timestamp": hex(int(datetime.now(timezone.utc).timestamp())),
+        }
+        originals = {
+            "verify_config": archive.verify_config,
+            "verified_block_snapshot": archive.verified_block_snapshot,
+            "fetch_logs": archive.fetch_logs,
+        }
+        archive.verify_config = lambda **_kwargs: {"status": "ok"}
+        archive.verified_block_snapshot = lambda _block, **_kwargs: (
+            snapshot,
+            ["https://one.example", "https://two.example"],
+        )
+        archive.fetch_logs = lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError("forced fetch failure"))
+        args = archive.argparse.Namespace(
+            verify_only=False,
+            full_refresh=True,
+            incremental=False,
+            from_block=block_number,
+            to_block=str(block_number),
+            db_path=str(db_path),
+            output_dir=str(tmp_path / "generated"),
+            write_public=False,
+            skip_rpc_check=False,
+        )
+        try:
+            try:
+                archive.run_index(args)
+            except RuntimeError as exc:
+                assert "forced fetch failure" in str(exc)
+            else:
+                raise AssertionError("forced archive full refresh unexpectedly succeeded")
+        finally:
+            for name, value in originals.items():
+                setattr(archive, name, value)
+
+        preserved = sqlite3.connect(db_path)
+        try:
+            assert preserved.execute("SELECT value FROM last_known_good").fetchone()[0] == "preserved"
+        finally:
+            preserved.close()
+        assert not list(tmp_path.glob(".archive.sqlite.refresh-*.tmp"))
+
+
+def test_archive_full_refresh_atomically_installs_validated_database():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        db_path = tmp_path / "archive.sqlite"
+        old_db = sqlite3.connect(db_path)
+        old_db.execute("CREATE TABLE obsolete (value TEXT)")
+        old_db.commit()
+        old_db.close()
+
+        block_number = int(archive.load_configs()["blocks"]["indexing"]["verified_from_block"])
+        snapshot = {
+            "number": hex(block_number),
+            "hash": "0x" + "a" * 64,
+            "parentHash": "0x" + "b" * 64,
+            "timestamp": hex(int(datetime.now(timezone.utc).timestamp())),
+        }
+        names = (
+            "verify_config",
+            "verified_block_snapshot",
+            "fetch_logs",
+            "fetch_current_auction",
+            "assert_snapshot_unchanged",
+        )
+        originals = {name: getattr(archive, name) for name in names}
+        archive.verify_config = lambda **_kwargs: {"status": "ok"}
+        archive.verified_block_snapshot = lambda _block, **_kwargs: (
+            snapshot,
+            ["https://one.example", "https://two.example"],
+        )
+        archive.fetch_logs = lambda *_args, **_kwargs: []
+        archive.fetch_current_auction = lambda *_args, **_kwargs: None
+        archive.assert_snapshot_unchanged = lambda *_args, **_kwargs: None
+        args = archive.argparse.Namespace(
+            verify_only=False,
+            full_refresh=True,
+            incremental=False,
+            from_block=block_number,
+            to_block=str(block_number),
+            db_path=str(db_path),
+            output_dir=str(tmp_path / "generated"),
+            write_public=False,
+            skip_rpc_check=False,
+        )
+        try:
+            archive.run_index(args)
+        finally:
+            for name, value in originals.items():
+                setattr(archive, name, value)
+
+        installed = sqlite3.connect(db_path)
+        try:
+            assert installed.execute(
+                "SELECT status FROM mission3_index_state WHERE id='mission3'"
+            ).fetchone()[0] == "success"
+            assert installed.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='obsolete'"
+            ).fetchone()[0] == 0
+            assert installed.execute("PRAGMA quick_check").fetchone()[0] == "ok"
+        finally:
+            installed.close()
+        assert (db_path.stat().st_mode & 0o777) == 0o600
+        assert (tmp_path / "generated" / "manifest.json").is_file()
+        assert (tmp_path / "raw" / "mission3_raw_logs.ndjson").is_file()
+        assert not list(tmp_path.glob(".archive.sqlite.refresh-*.tmp"))
+
+
+def _tree_bytes(path: Path) -> dict[str, bytes]:
+    return {
+        str(item.relative_to(path)): item.read_bytes()
+        for item in path.rglob("*")
+        if item.is_file()
+    }
+
+
+def _assert_failed_archive_run_preserves_last_known_good(*, full_refresh: bool, failure: str) -> None:
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        db_path = tmp_path / "archive.sqlite"
+        generated = tmp_path / "generated"
+        raw = tmp_path / "raw"
+        public = tmp_path / "public"
+        for directory in (generated, raw, public):
+            directory.mkdir()
+        raw.chmod(0o700)
+        (generated / "manifest.json").write_text('{"generation":"old"}\n', encoding="utf-8")
+        (generated / "artifact.json").write_text('{"value":"old"}\n', encoding="utf-8")
+        (raw / ".gitkeep").write_text("", encoding="utf-8")
+        (raw / "mission3_raw_logs.ndjson").write_text('{"old":true}\n', encoding="utf-8")
+        (public / "archive_manifest.json").write_text('{"generation":"old"}\n', encoding="utf-8")
+        (public / "mission3_dog_search_index.json").write_text("[]\n", encoding="utf-8")
+        (public / "mission3_archive_metrics.json").write_text('{"old":true}\n', encoding="utf-8")
+
+        block_number = int(archive.load_configs()["blocks"]["indexing"]["verified_from_block"])
+        old_conn = archive.init_db(db_path, full_refresh=False)
+        old_conn.execute("CREATE TABLE last_known_good (value TEXT NOT NULL)")
+        old_conn.execute("INSERT INTO last_known_good VALUES ('preserved')")
+        archive.record_state(
+            old_conn,
+            chain_id=8453,
+            auction_house="0x" + "1" * 40,
+            from_block=block_number,
+            latest_indexed_block=block_number - 1,
+            latest_indexed_block_time_utc="2026-08-02T00:00:00Z",
+            status="success",
+        )
+        archive.apply_marts(old_conn)
+        old_conn.close()
+
+        old_db = db_path.read_bytes()
+        old_generated = _tree_bytes(generated)
+        old_raw = _tree_bytes(raw)
+        old_public = _tree_bytes(public)
+        snapshot = {
+            "number": hex(block_number),
+            "hash": "0x" + "a" * 64,
+            "parentHash": "0x" + "b" * 64,
+            "timestamp": hex(int(datetime.now(timezone.utc).timestamp())),
+        }
+        names = (
+            "verify_config",
+            "verified_block_snapshot",
+            "fetch_logs",
+            "fetch_current_auction",
+            "assert_snapshot_unchanged",
+            "PUBLIC_OUTPUT_DIR",
+        )
+        originals = {name: getattr(archive, name) for name in names}
+        original_copyfile = archive.shutil.copyfile
+        copy_count = 0
+
+        def fail_during_public_copy(source, target):
+            nonlocal copy_count
+            copy_count += 1
+            if copy_count == 2:
+                raise RuntimeError("forced staged public export failure")
+            return original_copyfile(source, target)
+
+        archive.verify_config = lambda **_kwargs: {"status": "ok"}
+        archive.verified_block_snapshot = lambda _block, **_kwargs: (
+            snapshot,
+            ["https://one.example", "https://two.example"],
+        )
+        archive.fetch_logs = lambda *_args, **_kwargs: []
+        archive.fetch_current_auction = lambda *_args, **_kwargs: None
+        if failure == "canonical_recheck":
+            archive.assert_snapshot_unchanged = lambda *_args, **_kwargs: (
+                _ for _ in ()
+            ).throw(RuntimeError("forced post-insert canonical recheck failure"))
+        else:
+            archive.assert_snapshot_unchanged = lambda *_args, **_kwargs: None
+        archive.PUBLIC_OUTPUT_DIR = public
+        if failure == "export":
+            archive.shutil.copyfile = fail_during_public_copy
+        args = archive.argparse.Namespace(
+            verify_only=False,
+            full_refresh=full_refresh,
+            incremental=not full_refresh,
+            from_block=block_number,
+            to_block=str(block_number),
+            db_path=str(db_path),
+            output_dir=str(generated),
+            write_public=True,
+            skip_rpc_check=False,
+        )
+        try:
+            try:
+                archive.run_index(args)
+            except RuntimeError as exc:
+                expected = (
+                    "forced staged public export failure"
+                    if failure == "export"
+                    else "forced post-insert canonical recheck failure"
+                )
+                assert expected in str(exc)
+            else:
+                raise AssertionError("failed staged archive export unexpectedly committed")
+        finally:
+            archive.shutil.copyfile = original_copyfile
+            for name, value in originals.items():
+                setattr(archive, name, value)
+
+        assert db_path.read_bytes() == old_db
+        assert _tree_bytes(generated) == old_generated
+        assert _tree_bytes(raw) == old_raw
+        assert _tree_bytes(public) == old_public
+        preserved = sqlite3.connect(db_path)
+        try:
+            assert preserved.execute("SELECT value FROM last_known_good").fetchone()[0] == "preserved"
+            assert preserved.execute(
+                "SELECT status FROM mission3_index_state WHERE id='mission3'"
+            ).fetchone()[0] == "success"
+        finally:
+            preserved.close()
+        assert not list(tmp_path.glob(".*.refresh-*.tmp"))
+        assert not list(tmp_path.glob(".*.publish-*"))
+
+
+def test_archive_full_refresh_export_failure_preserves_old_database_and_artifacts():
+    _assert_failed_archive_run_preserves_last_known_good(full_refresh=True, failure="export")
+
+
+def test_archive_incremental_export_failure_preserves_old_database_and_artifacts():
+    _assert_failed_archive_run_preserves_last_known_good(full_refresh=False, failure="export")
+
+
+def test_archive_incremental_canonical_recheck_failure_preserves_last_known_good():
+    _assert_failed_archive_run_preserves_last_known_good(
+        full_refresh=False,
+        failure="canonical_recheck",
+    )
+
+
+def test_archive_atomic_publication_rolls_back_all_targets_after_replace_failure():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        generated = root / "generated"
+        raw = root / "raw"
+        public = root / "public"
+        database = root / "archive.sqlite"
+        for directory in (generated, raw, public):
+            directory.mkdir()
+        raw.chmod(0o700)
+        (generated / "manifest.json").write_text("old-generated\n", encoding="utf-8")
+        (generated / "artifact.json").write_text("old-artifact\n", encoding="utf-8")
+        (raw / "mission3_raw_logs.ndjson").write_text("old-raw\n", encoding="utf-8")
+        (public / "archive_manifest.json").write_text("old-public\n", encoding="utf-8")
+        (public / "artifact.json").write_text("old-public-artifact\n", encoding="utf-8")
+        database.write_bytes(b"old-database")
+        database.chmod(0o600)
+        before = {
+            "generated": _tree_bytes(generated),
+            "raw": _tree_bytes(raw),
+            "public": _tree_bytes(public),
+            "database": database.read_bytes(),
+        }
+
+        generated_stage = archive.create_staging_directory(generated)
+        raw_stage = archive.create_staging_directory(raw)
+        public_stage = archive.create_staging_directory(public)
+        database_stage = root / ".archive.sqlite.refresh-test.tmp"
+        database_stage.write_bytes(b"new-database")
+        database_stage.chmod(0o600)
+        (generated_stage / "manifest.json").write_text("new-generated\n", encoding="utf-8")
+        (generated_stage / "artifact.json").write_text("new-artifact\n", encoding="utf-8")
+        (raw_stage / "mission3_raw_logs.ndjson").write_text("new-raw\n", encoding="utf-8")
+        (public_stage / "archive_manifest.json").write_text("new-public\n", encoding="utf-8")
+        (public_stage / "artifact.json").write_text("new-public-artifact\n", encoding="utf-8")
+        archive.sync_publication_tree(generated_stage, private=False)
+        archive.sync_publication_tree(raw_stage, private=True)
+        archive.sync_publication_tree(public_stage, private=False)
+        entries = [
+            archive.PublicationEntry(raw_stage, raw, directory=True, private=True),
+            archive.PublicationEntry(database_stage, database, directory=False, private=True),
+            archive.PublicationEntry(generated_stage, generated, directory=True, private=False),
+            archive.PublicationEntry(public_stage, public, directory=True, private=False),
+        ]
+        original_replace = archive.os.replace
+        replace_count = 0
+
+        def fail_once(source, target):
+            nonlocal replace_count
+            replace_count += 1
+            if replace_count == 8:
+                raise OSError("forced atomic publication replace failure")
+            return original_replace(source, target)
+
+        archive.os.replace = fail_once
+        try:
+            try:
+                archive.atomic_publish(entries)
+            except OSError as exc:
+                assert "forced atomic publication replace failure" in str(exc)
+            else:
+                raise AssertionError("injected publication failure unexpectedly committed")
+        finally:
+            archive.os.replace = original_replace
+
+        assert _tree_bytes(generated) == before["generated"]
+        assert _tree_bytes(raw) == before["raw"]
+        assert _tree_bytes(public) == before["public"]
+        assert database.read_bytes() == before["database"]
+        assert not list(root.glob(".*.backup-*"))
+        for entry in entries:
+            archive.remove_owned_path(entry.source)
+
+
+def test_archive_publication_keeps_public_manifest_and_artifacts_coherent():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        db_path = root / "archive.sqlite"
+        generated = root / "generated"
+        public = root / "public"
+        old_public_dir = archive.PUBLIC_OUTPUT_DIR
+        archive.PUBLIC_OUTPUT_DIR = public
+        conn = archive.init_db(db_path, full_refresh=False)
+        try:
+            archive.record_state(
+                conn,
+                chain_id=8453,
+                auction_house="0x" + "1" * 40,
+                from_block=40500000,
+                latest_indexed_block=40500000,
+                latest_indexed_block_time_utc="2026-08-02T00:00:00Z",
+                status="success",
+            )
+            archive.apply_marts(conn)
+            stage = archive.stage_outputs(conn, generated, db_path=db_path, write_public=True)
+            try:
+                archive.atomic_publish([stage.entries[1], stage.entries[0], *stage.entries[2:]])
+            finally:
+                stage.cleanup()
+        finally:
+            conn.close()
+            archive.PUBLIC_OUTPUT_DIR = old_public_dir
+
+        private_manifest = json.loads((generated / "manifest.json").read_text(encoding="utf-8"))
+        public_manifest = json.loads((public / "archive_manifest.json").read_text(encoding="utf-8"))
+        assert public_manifest["generated_at_utc"] == private_manifest["generated_at_utc"]
+        assert public_manifest["index_state"] == private_manifest["index_state"]
+        for item in public_manifest["files"]:
+            filename = Path(item["path"]).name
+            assert archive.sha256_file(public / filename) == item["sha256"]
+            assert archive.sha256_file(generated / filename) == item["sha256"]
+        assert (db_path.stat().st_mode & 0o777) == 0o600
+        assert ((root / "raw").stat().st_mode & 0o777) == 0o700
+        assert ((root / "raw" / "mission3_raw_logs.ndjson").stat().st_mode & 0o777) == 0o600
+
+
+def test_archive_publication_rejects_symlinked_targets():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        real_directory = root / "real-generated"
+        real_directory.mkdir()
+        linked_directory = root / "generated"
+        linked_directory.symlink_to(real_directory, target_is_directory=True)
+        try:
+            archive.validate_publication_target(linked_directory, directory=True)
+        except RuntimeError as exc:
+            assert "symlinked publication target" in str(exc)
+        else:
+            raise AssertionError("archive accepted a symlinked output directory")
+
+        database = root / "real.sqlite"
+        database.write_bytes(b"database")
+        linked_database = root / "archive.sqlite"
+        linked_database.symlink_to(database)
+        try:
+            archive.validate_publication_target(linked_database, directory=False, private=True)
+        except RuntimeError as exc:
+            assert "symlinked publication target" in str(exc)
+        else:
+            raise AssertionError("archive accepted a symlinked database target")
+
+
+def test_archive_directory_creation_rejects_nested_ancestor_symlink():
+    archive = load_archive_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        safe_parent = root / "safe-parent"
+        outside = root / "outside"
+        safe_parent.mkdir()
+        outside.mkdir()
+        linked_ancestor = safe_parent / "linked-ancestor"
+        linked_ancestor.symlink_to(outside, target_is_directory=True)
+        requested = linked_ancestor / "nested" / "generated"
+        try:
+            archive.secure_directory(requested, create=True)
+        except RuntimeError as exc:
+            assert "symlink ancestor" in str(exc)
+        else:
+            raise AssertionError("archive created directories through a nested ancestor symlink")
+        assert not (outside / "nested").exists()
+
+
+def test_archive_mart_uses_latest_extension_as_effective_end_time():
+    archive = load_archive_module()
+    conn = sqlite3.connect(":memory:")
+    conn.executescript((ROOT / "archive" / "mission3" / "sql" / "schema.sql").read_text(encoding="utf-8"))
+    conn.execute(
+        """INSERT INTO mission3_auction_created
+        (token_id,start_time,end_time,block_number,transaction_hash,log_index,block_time_utc)
+        VALUES (590,50,100,10,'0xcreated',1,'2026-01-01T00:00:00Z')"""
+    )
+    conn.executemany(
+        """INSERT INTO mission3_auction_extended
+        (token_id,end_time,block_number,transaction_hash,log_index,block_time_utc)
+        VALUES (590,?,?,?,?,?)""",
+        [
+            (120, 11, "0xextension1", 2, "2026-01-01T00:00:01Z"),
+            (140, 12, "0xextension2", 3, "2026-01-01T00:00:02Z"),
+        ],
+    )
+    archive.apply_marts(conn)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute("SELECT * FROM mission3_auction_timeline WHERE token_id = 590").fetchone()
+    assert row is not None
+    assert row["initial_end_time"] == 100
+    assert row["end_time"] == 140
+    assert row["extension_count"] == 2
+    assert row["latest_extension_tx"] == "0xextension2"
+    conn.close()
+
+
+def test_archive_health_uses_configured_paths_and_rejects_stale_state():
+    health = load_archive_health_module()
+    db_path, generated_dir, public_dir = health.configured_paths({
+        "MISSION3_ARCHIVE_DB": "/tmp/custom-archive.sqlite",
+        "MISSION3_OUTPUT_DIR": "/tmp/custom-generated",
+    })
+    assert db_path == Path("/tmp/custom-archive.sqlite")
+    assert generated_dir == Path("/tmp/custom-generated")
+    assert public_dir == ROOT / "public" / "generated" / "mission3"
+
+    errors: list[str] = []
+    now = datetime(2026, 8, 2, tzinfo=timezone.utc)
+    health.check_timestamp_freshness(
+        errors,
+        "archive test timestamp",
+        "2026-05-28T00:00:00Z",
+        max_age_seconds=10_800,
+        now=now,
+    )
+    assert errors and "stale" in errors[0]
+    lag_errors: list[str] = []
+    health.check_head_lag(lag_errors, 1000, 8000, max_lag_blocks=6000)
+    assert lag_errors and "lag_blocks=7000" in lag_errors[0]
+
+
+def test_archive_response_reader_rejects_oversized_body_before_reading():
+    archive = load_archive_module()
+    original = archive.open_rpc_request
+    old_limit = os.environ.get("BASE_RPC_MAX_RESPONSE_BYTES")
+    os.environ["BASE_RPC_MAX_RESPONSE_BYTES"] = str(1024 * 1024)
+
+    class OversizedResponse:
+        status = 200
+        headers = {
+            "Content-Length": str(1024 * 1024 + 1),
+            "Content-Type": "application/json",
+        }
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self, *_args):
+            raise AssertionError("oversized response body should not be read")
+
+        def geturl(self):
+            return "https://one.example"
+
+    archive.open_rpc_request = lambda *_args, **_kwargs: OversizedResponse()
+    try:
+        try:
+            archive.post_json("https://one.example", {"jsonrpc": "2.0"})
+        except RuntimeError as exc:
+            assert "exceeds" in str(exc)
+        else:
+            raise AssertionError("archive accepted an oversized RPC response")
+    finally:
+        archive.open_rpc_request = original
+        if old_limit is None:
+            os.environ.pop("BASE_RPC_MAX_RESPONSE_BYTES", None)
+        else:
+            os.environ["BASE_RPC_MAX_RESPONSE_BYTES"] = old_limit
+
+
+def test_archive_rpc_response_rejects_redirected_or_non_json_responses():
+    archive = load_archive_module()
+    original = archive.open_rpc_request
+
+    class Response:
+        status = 200
+
+        def __init__(self, url, content_type):
+            self.url = url
+            self.headers = {"Content-Type": content_type}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def geturl(self):
+            return self.url
+
+        def read(self, *_args):
+            return b'{"jsonrpc":"2.0","id":1,"result":"0x1"}'
+
+    try:
+        archive.open_rpc_request = lambda *_args, **_kwargs: Response(
+            "https://redirected.example",
+            "application/json",
+        )
+        try:
+            archive.post_json("https://one.example", {"jsonrpc": "2.0"})
+        except RuntimeError as exc:
+            assert "URL changed" in str(exc)
+        else:
+            raise AssertionError("archive accepted a response from a redirected URL")
+
+        archive.open_rpc_request = lambda *_args, **_kwargs: Response(
+            "https://one.example",
+            "text/html",
+        )
+        try:
+            archive.post_json("https://one.example", {"jsonrpc": "2.0"})
+        except RuntimeError as exc:
+            assert "non-JSON" in str(exc)
+        else:
+            raise AssertionError("archive accepted a non-JSON RPC response")
+    finally:
+        archive.open_rpc_request = original
+
+
+def test_archive_rpc_transport_rejects_unsafe_urls_and_sanitizes_http_errors():
+    archive = load_archive_module()
+    original = archive.open_rpc_request
+    secret_url = "https://host-secret.rpc.custom.example/v2/path-secret?api_key=query-secret"
+    try:
+        archive.open_rpc_request = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("unsafe RPC URL reached the network")
+        )
+        for unsafe in (
+            "http://provider.example/rpc",
+            "https://user:password-secret@provider.example/rpc",
+            "https://provider.example:8443/rpc",
+            "https://provider.example/rpc#fragment",
+        ):
+            try:
+                archive.post_json(unsafe, {})
+            except RuntimeError as exc:
+                assert "password-secret" not in str(exc)
+            else:
+                raise AssertionError(f"archive accepted unsafe RPC URL: {unsafe}")
+
+        error = archive.urllib.error.HTTPError(secret_url, 401, "body-secret", {}, None)
+        archive.open_rpc_request = lambda *_args, **_kwargs: (_ for _ in ()).throw(error)
+        try:
+            archive.post_json(secret_url, {})
+        except RuntimeError as exc:
+            assert str(exc) == "HTTP 401"
+            assert "secret" not in str(exc)
+        else:
+            raise AssertionError("archive accepted an RPC HTTP failure")
+    finally:
+        archive.open_rpc_request = original
+
+
+def test_archive_rpc_single_and_batch_envelopes_are_exact_and_secret_safe():
+    archive = load_archive_module()
+    original = archive.post_json
+    url = "https://host-secret.rpc.custom.example/v2/path-secret?api_key=query-secret"
+    try:
+        archive.post_json = lambda *_args, **_kwargs: {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {"code": -32601, "message": "body-secret", "data": "data-secret"},
+        }
+        try:
+            archive.rpc_call("eth_test", [], urls=[url])
+        except RuntimeError as exc:
+            message = str(exc)
+            assert "code=-32601" in message
+            assert "host-secret" not in message
+            assert "path-secret" not in message
+            assert "query-secret" not in message
+            assert "body-secret" not in message
+            assert "data-secret" not in message
+        else:
+            raise AssertionError("archive accepted JSON-RPC error response")
+
+        malformed_single = (
+            {"jsonrpc": "2.0", "id": True, "result": "0x1"},
+            {"jsonrpc": "1.0", "id": 1, "result": "0x1"},
+            {"jsonrpc": "2.0", "id": 1},
+            {"jsonrpc": "2.0", "id": 1, "result": "0x1", "error": None},
+            {"jsonrpc": "2.0", "id": 1, "error": {"code": True, "message": "bad"}},
+        )
+        for envelope in malformed_single:
+            archive.post_json = lambda *_args, _envelope=envelope, **_kwargs: _envelope
+            try:
+                archive.rpc_call("eth_test", [], urls=["https://provider.example/rpc"])
+            except RuntimeError as exc:
+                assert "envelope" in str(exc)
+            else:
+                raise AssertionError(f"archive accepted malformed JSON-RPC envelope: {envelope!r}")
+    finally:
+        archive.post_json = original
+
+    valid = [
+        {"jsonrpc": "2.0", "id": 1, "result": "second"},
+        {"jsonrpc": "2.0", "id": 0, "result": "first"},
+    ]
+    assert sorted(archive.validated_rpc_batch_items(valid, 2)) == [0, 1]
+    malformed_batches = (
+        [{"jsonrpc": "2.0", "id": True, "result": "first"}],
+        [
+            {"jsonrpc": "2.0", "id": 0, "result": "first"},
+            {"jsonrpc": "2.0", "id": 0, "result": "duplicate"},
+        ],
+        [{"jsonrpc": "1.0", "id": 0, "result": "first"}],
+        [{"jsonrpc": "2.0", "id": 0, "result": "first", "error": None}],
+        [{"jsonrpc": "2.0", "id": 0, "error": {"code": True, "message": "bad"}}],
+        [{"jsonrpc": "2.0", "id": 0, "result": "first"}],
+    )
+    call_counts = (1, 2, 1, 1, 1, 2)
+    for envelope, call_count in zip(malformed_batches, call_counts):
+        try:
+            archive.validated_rpc_batch_items(envelope, call_count)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError(f"archive accepted malformed JSON-RPC batch envelope: {envelope!r}")
+
+
 def test_config_uses_shared_log_dir_for_watcher_log():
     watcher = load_module()
     with tempfile.TemporaryDirectory() as tmp:
@@ -854,9 +2097,9 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     assert config.auto_push is False
     assert config.refresh_command == "npm run refresh:current"
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
-    assert config.interval_seconds == 30
+    assert config.interval_seconds == 15
     assert config.cooldown_seconds == 30
-    assert config.bid_cooldown_seconds == 30
+    assert config.bid_cooldown_seconds == 15
     assert config.quorum_size == 2
     assert len(config.rpc_urls) >= 2
     assert len({watcher.rpc_provider_key(url) for url in config.rpc_urls}) == len(config.rpc_urls)
@@ -899,6 +2142,99 @@ def test_run_lock_prevents_overlapping_one_shot_runs():
         third = watcher.acquire_run_lock(config)
         assert third is not None
         watcher.release_run_lock(third)
+
+
+def test_explicit_rpc_quorum_does_not_append_public_fallbacks_unless_opted_in():
+    watcher = load_module()
+    explicit = {
+        "BASE_RPC_URLS": "https://paid-a.example/rpc,https://paid-b.example/rpc",
+        "BASE_LOG_RPC_URLS": "https://paid-a.example/logs,https://paid-b.example/logs",
+    }
+    config = watcher.config_from_env(explicit)
+    assert config.rpc_urls == ["https://paid-a.example/rpc", "https://paid-b.example/rpc"]
+    assert config.log_rpc_urls == ["https://paid-a.example/logs", "https://paid-b.example/logs"]
+    opted_in = watcher.config_from_env({**explicit, "BASE_INCLUDE_PUBLIC_FALLBACKS": "1"})
+    assert any("base.org" in url or "publicnode.com" in url for url in opted_in.rpc_urls)
+
+
+def test_blank_rpc_values_keep_working_public_defaults_even_when_fallback_flag_is_zero():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URL": "",
+        "BASE_RPC_URLS": "",
+        "BASE_LOG_RPC_URLS": "",
+        "BASE_INCLUDE_PUBLIC_FALLBACKS": "0",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    assert len(config.rpc_urls) >= 2
+    assert len({watcher.rpc_provider_key(url) for url in config.rpc_urls}) >= 2
+
+
+def test_watcher_snapshot_rejects_split_fresh_and_stale_heads():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": "https://fresh.example,https://stale.example",
+        "BASE_LOG_RPC_URLS": "https://fresh.example,https://stale.example",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    old_collect = watcher.collect_rpc_probes
+    old_spread = watcher.RPC_MAX_HEAD_SPREAD_BLOCKS
+    old_quorum = watcher.rpc_quorum_call
+    try:
+        watcher.collect_rpc_probes = lambda *_args, **_kwargs: (
+            [("https://fresh.example", 1000), ("https://stale.example", 100)],
+            [],
+        )
+        watcher.RPC_MAX_HEAD_SPREAD_BLOCKS = 20
+        watcher.rpc_quorum_call = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("block quorum must not run for split heads")
+        )
+        try:
+            watcher.verified_snapshot_head(config)
+        except RuntimeError as exc:
+            assert "cannot form a recent quorum" in str(exc)
+        else:
+            raise AssertionError("watcher accepted a split fresh/stale head pair")
+    finally:
+        watcher.collect_rpc_probes = old_collect
+        watcher.RPC_MAX_HEAD_SPREAD_BLOCKS = old_spread
+        watcher.rpc_quorum_call = old_quorum
+
+
+def test_watcher_snapshot_rejects_old_hash_agreed_block_timestamp():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": "https://one.example,https://two.example",
+        "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    old_collect = watcher.collect_rpc_probes
+    old_quorum = watcher.rpc_quorum_call
+    old_max_age = watcher.RPC_MAX_BLOCK_AGE_SECONDS
+    try:
+        watcher.collect_rpc_probes = lambda *_args, **_kwargs: (
+            [("https://one.example", 100), ("https://two.example", 100)],
+            [],
+        )
+        watcher.rpc_quorum_call = lambda *_args, **_kwargs: (
+            {
+                "number": "0x63",
+                "hash": "0x" + "a" * 64,
+                "timestamp": hex(int(time.time()) - 3600),
+            },
+            ["https://one.example", "https://two.example"],
+        )
+        watcher.RPC_MAX_BLOCK_AGE_SECONDS = 600
+        try:
+            watcher.verified_snapshot_head(config)
+        except RuntimeError as exc:
+            assert "outside the freshness window" in str(exc)
+        else:
+            raise AssertionError("watcher accepted an old hash-agreed block")
+    finally:
+        watcher.collect_rpc_probes = old_collect
+        watcher.rpc_quorum_call = old_quorum
+        watcher.RPC_MAX_BLOCK_AGE_SECONDS = old_max_age
 
 
 def test_refresh_lock_defers_overlapping_refresh_commands():
@@ -957,6 +2293,7 @@ def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
             ),
             encoding="utf-8",
         )
+        state_path.chmod(0o600)
         snapshot = {
             "latest_block": 101,
             "checked_from_block": 100,
@@ -1008,6 +2345,7 @@ def test_log_scan_start_uses_last_checked_block_safety_overlap_or_recent_lookbac
     assert watcher.choose_log_from_block({"last_checked_block": 9_900}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_851
     assert watcher.choose_log_from_block({"last_checked_block": 1}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 4_000
     assert watcher.choose_log_from_block({"last_seen_block": 9_900}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_851
+    assert watcher.choose_log_from_block({"last_checked_block": 10_100}, latest_block=10_000, default_from_block=4_000, lookback_blocks=500, safety_overlap_blocks=50) == 9_501
 
 
 def test_generated_dashboard_baseline_prevents_false_initial_refresh_but_detects_stale_bid():
@@ -1060,6 +2398,7 @@ def test_dry_run_does_not_write_state_and_reports_refresh_intent():
             "last_seen_auction_settled_log_id": "",
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
@@ -1098,8 +2437,13 @@ def test_run_refresh_exports_structured_event_environment():
         capture_script.write_text(
             "import json, os\n"
             "from pathlib import Path\n"
-            "keys = ['DEGEN_DOGS_REFRESH_TRIGGER', 'DEGEN_DOGS_REFRESH_REASONS', 'DEGEN_DOGS_DETECTED_AT_UTC', 'DEGEN_DOGS_EVENT_NAME', 'DEGEN_DOGS_EVENT_BLOCK_NUMBER', 'DEGEN_DOGS_EVENT_TX_HASH', 'DEGEN_DOGS_EVENT_LOG_INDEX']\n"
-            "Path(os.environ['WATCH_TEST_OUT']).write_text(json.dumps({key: os.environ.get(key) for key in keys}, sort_keys=True), encoding='utf-8')\n",
+            "keys = ['DEGEN_DOGS_REFRESH_TRIGGER', 'DEGEN_DOGS_REFRESH_REASONS', 'DEGEN_DOGS_DETECTED_AT_UTC', 'DEGEN_DOGS_EVENT_NAME', 'DEGEN_DOGS_EVENT_BLOCK_NUMBER', 'DEGEN_DOGS_EVENT_TX_HASH', 'DEGEN_DOGS_EVENT_LOG_INDEX', 'DEGEN_DOGS_LOCK_HELD', 'DEGEN_DOGS_LOCK_FD', 'DEGEN_DOGS_REFRESH_LOCK_PATH']\n"
+            "captured = {key: os.environ.get(key) for key in keys}\n"
+            "lock_fd = int(captured['DEGEN_DOGS_LOCK_FD'])\n"
+            "lock_stat = os.fstat(lock_fd)\n"
+            "path_stat = Path(captured['DEGEN_DOGS_REFRESH_LOCK_PATH']).stat()\n"
+            "captured['lock_fd_matches_path'] = (lock_stat.st_dev, lock_stat.st_ino) == (path_stat.st_dev, path_stat.st_ino)\n"
+            "Path(os.environ['WATCH_TEST_OUT']).write_text(json.dumps(captured, sort_keys=True), encoding='utf-8')\n",
             encoding="utf-8",
         )
         old_out = os.environ.get("WATCH_TEST_OUT")
@@ -1130,6 +2474,9 @@ def test_run_refresh_exports_structured_event_environment():
         assert captured["DEGEN_DOGS_EVENT_BLOCK_NUMBER"] == "123"
         assert captured["DEGEN_DOGS_EVENT_TX_HASH"] == "0xabc"
         assert captured["DEGEN_DOGS_EVENT_LOG_INDEX"] == "7"
+        assert captured["DEGEN_DOGS_LOCK_HELD"] == "1"
+        assert captured["DEGEN_DOGS_REFRESH_LOCK_PATH"].endswith("/refresh.lock")
+        assert captured["lock_fd_matches_path"] is True
 
 
 def test_run_once_writes_structured_watcher_telemetry():
@@ -1159,6 +2506,7 @@ def test_run_once_writes_structured_watcher_telemetry():
         state = watcher.state_from_snapshot(snapshot, now_utc=now, previous_state={})
         state["last_refresh_at_utc"] = now
         state_path.write_text(json.dumps(state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
         old_path = os.environ.get("MISSION3_WATCHER_TELEMETRY_PATH")
         os.environ["MISSION3_WATCHER_TELEMETRY_PATH"] = str(telemetry_path)
         try:

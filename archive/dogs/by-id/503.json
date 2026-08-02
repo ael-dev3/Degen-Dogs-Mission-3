@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#318/792",
-      "rank": 318,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 503 dog #503 503 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x1d96512835220e65c339385008e4887b3b10e3da71ed224039a55c56177ed921 0x5463177960b113c344b5060aa991ce9bf6284e87681167600ca6fec8f32f5fe7 #318/792 background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: whitemohawk; eyes: bluelasereyes 0xcd4af778676bccc517fa1c881503b8bbc8735c6c4b423e765e968e713e012a94 chain_logs contract_getters",
+    "search_text": "dog 503 dog #503 503 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x1d96512835220e65c339385008e4887b3b10e3da71ed224039a55c56177ed921 0x5463177960b113c344b5060aa991ce9bf6284e87681167600ca6fec8f32f5fe7 unavailable background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: whitemohawk; eyes: bluelasereyes 0xcd4af778676bccc517fa1c881503b8bbc8735c6c4b423e765e968e713e012a94 chain_logs contract_getters",
     "settlement": {
       "block_number": 26286452,
       "block_time_utc": "2025-10-02T13:32:02Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Pizza (10.4%)",
+        "display": "Mouth: Pizza",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.8%)",
+        "display": "Head: WhiteMohawk",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
+        "display": "Eyes: BlueLaserEyes",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

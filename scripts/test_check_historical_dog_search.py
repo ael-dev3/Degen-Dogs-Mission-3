@@ -52,6 +52,64 @@ def test_exact_rarity_permutation_rejects_duplicate_and_missing_rank() -> None:
     )
 
 
+def rarity_metrics(*, present: int, unavailable: int, metadata_verified: int, metadata_unavailable: int) -> dict[str, str]:
+    metadata_status = (
+        "complete_onchain_token_uri_verified"
+        if metadata_unavailable == 0
+        else "partial_onchain_token_uri_unavailable"
+        if metadata_unavailable == unavailable
+        else "incomplete_metadata_unavailable"
+    )
+    return {
+        "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_token_uri_present_count": str(present),
+        "dog_token_uri_unavailable_count": str(unavailable),
+        "dog_metadata_verification_status": metadata_status,
+        "dog_metadata_onchain_verified_count": str(metadata_verified),
+        "dog_metadata_unavailable_count": str(metadata_unavailable),
+    }
+
+
+def test_incomplete_metadata_requires_every_rarity_and_score_withheld() -> None:
+    checker = load_module()
+    rows = [
+        {"token_id": "0", "rarity": "Unavailable", "rarity_score": "", "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": "1", "rarity": "Unavailable", "rarity_score": 0, "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": "2", "rarity": "Unavailable", "rarity_score": None, "metadata_verification_status": "onchain_token_uri_unavailable"},
+    ]
+    metrics = rarity_metrics(present=2, unavailable=1, metadata_verified=2, metadata_unavailable=1)
+
+    assert checker.assert_metadata_rarity_state(rows, 3, metrics) == "unavailable"
+
+    partial_rank = copy.deepcopy(rows)
+    partial_rank[0]["rarity"] = "#1/3"
+    assert_raises_contains(
+        lambda: checker.assert_metadata_rarity_state(partial_rank, 3, metrics),
+        "partial rarity display",
+    )
+
+    partial_score = copy.deepcopy(rows)
+    partial_score[1]["rarity_score"] = "1.5"
+    assert_raises_contains(
+        lambda: checker.assert_metadata_rarity_state(partial_score, 3, metrics),
+        "partial rarity score",
+    )
+
+
+def test_complete_metadata_never_accepts_unavailable_or_missing_ranks() -> None:
+    checker = load_module()
+    rows = [
+        {"token_id": str(token_id), "rarity": "Unavailable", "metadata_verification_status": "onchain_token_uri_verified"}
+        for token_id in range(3)
+    ]
+    metrics = rarity_metrics(present=3, unavailable=0, metadata_verified=3, metadata_unavailable=0)
+
+    assert_raises_contains(
+        lambda: checker.assert_metadata_rarity_state(rows, 3, metrics),
+        "invalid rarity display",
+    )
+
+
 def test_dashboard_wiring_accepts_generated_loader_abstraction() -> None:
     checker = load_module()
     html = "\n".join(checker.DASHBOARD_ARCHIVE_MARKERS)

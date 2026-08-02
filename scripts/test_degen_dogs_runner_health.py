@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import fcntl
 import importlib.util
+import io
 import json
 import os
 import plistlib
+import shlex
 import sys
 import tempfile
+import time
 from collections import namedtuple
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,6 +25,179 @@ if spec is None or spec.loader is None:
 health = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = health
 spec.loader.exec_module(health)
+
+
+def test_cli_arguments_are_side_effect_free() -> None:
+    original_main = health.main
+    health.main = lambda: (_ for _ in ()).throw(AssertionError("health main unexpectedly ran"))
+    try:
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            assert health.cli_main(["--help"]) == 0
+        assert "usage:" in stdout.getvalue()
+
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            assert health.cli_main(["--unknown"]) == 2
+        assert "unsupported argument" in stderr.getvalue()
+    finally:
+        health.main = original_main
+
+
+class FakeLiveResponse:
+    def __init__(
+        self,
+        body: bytes,
+        *,
+        content_type: str,
+        status_code: int = 200,
+        final_url: str = "",
+    ) -> None:
+        self.body = body
+        self.headers = {"Content-Type": content_type, "Content-Length": str(len(body))}
+        self.status_code = status_code
+        self.final_url = final_url
+        self.read_limit = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def getcode(self) -> int:
+        return self.status_code
+
+    def geturl(self) -> str:
+        return self.final_url
+
+    def read(self, limit: int) -> bytes:
+        self.read_limit = limit
+        return self.body[:limit]
+
+
+class FakeLiveOpener:
+    def __init__(self, *responses) -> None:
+        self.responses = list(responses)
+        self.requests = []
+
+    def open(self, request, *, timeout):  # noqa: ANN001, ANN201, ARG002
+        self.requests.append(request)
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        if not response.final_url:
+            response.final_url = request.full_url
+        return response
+
+
+def test_live_site_transport_accepts_only_exact_bounded_targets() -> None:
+    original_opener = health.LIVE_OPENER
+    html = f"<html>auction_feed {health.LIVE_URL.rstrip('/')}</html>".encode()
+    status = json.dumps(
+        {
+            "kind": "refresh_status",
+            "site_url": health.LIVE_URL,
+            "latest_generated_block": 123,
+            "last_successful_refresh_time_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        }
+    ).encode()
+    html_response = FakeLiveResponse(html, content_type="text/html; charset=utf-8")
+    status_response = FakeLiveResponse(status, content_type="application/json; charset=utf-8")
+    opener = FakeLiveOpener(html_response, status_response)
+    try:
+        health.LIVE_OPENER = opener
+        ok, message = health.live_site_ok()
+        assert ok is True
+        assert message == "live site/status ok at block 123"
+    finally:
+        health.LIVE_OPENER = original_opener
+
+    assert len(opener.requests) == 2
+    assert html_response.read_limit == health.LIVE_HTML_MAX_BYTES + 1
+    assert status_response.read_limit == health.LIVE_STATUS_MAX_BYTES + 1
+    assert health.NoLiveRedirectHandler().redirect_request(None, None, 302, "", {}, "https://attacker.example") is None
+
+
+def test_live_site_transport_rejects_unapproved_redirect_status_mime_and_oversize() -> None:
+    original_opener = health.LIVE_OPENER
+    never_called = FakeLiveOpener()
+    try:
+        health.LIVE_OPENER = never_called
+        try:
+            health.fetch_fixed_live_text("https://attacker.example/", cache_buster=1)
+        except RuntimeError as exc:
+            assert "approved fixed target" in str(exc)
+        else:
+            raise AssertionError("unapproved live-health endpoint was fetched")
+        assert never_called.requests == []
+
+        cases = [
+            (FakeLiveResponse(b"ok", content_type="text/html", final_url="https://attacker.example/"), "URL changed"),
+            (FakeLiveResponse(b"ok", content_type="text/html", status_code=206), "HTTP status"),
+            (FakeLiveResponse(b"ok", content_type="application/json"), "content type"),
+        ]
+        for response, expected_error in cases:
+            health.LIVE_OPENER = FakeLiveOpener(response)
+            try:
+                health.fetch_fixed_live_text(health.LIVE_URL, cache_buster=1)
+            except RuntimeError as exc:
+                assert expected_error in str(exc)
+            else:
+                raise AssertionError(f"unsafe live-health response was accepted: {expected_error}")
+
+        declared = FakeLiveResponse(b"ok", content_type="text/html")
+        declared.headers["Content-Length"] = str(health.LIVE_HTML_MAX_BYTES + 1)
+        health.LIVE_OPENER = FakeLiveOpener(declared)
+        try:
+            health.fetch_fixed_live_text(health.LIVE_URL, cache_buster=1)
+        except RuntimeError as exc:
+            assert "size limit" in str(exc)
+        else:
+            raise AssertionError("oversize declared live-health response was accepted")
+        assert declared.read_limit is None
+
+        streamed = FakeLiveResponse(b"x" * (health.LIVE_HTML_MAX_BYTES + 1), content_type="text/html")
+        streamed.headers.pop("Content-Length")
+        health.LIVE_OPENER = FakeLiveOpener(streamed)
+        try:
+            health.fetch_fixed_live_text(health.LIVE_URL, cache_buster=1)
+        except RuntimeError as exc:
+            assert "size limit" in str(exc)
+        else:
+            raise AssertionError("oversize streamed live-health response was accepted")
+
+        invalid_utf8 = FakeLiveResponse(b"\xff", content_type="text/html")
+        health.LIVE_OPENER = FakeLiveOpener(invalid_utf8)
+        try:
+            health.fetch_fixed_live_text(health.LIVE_URL, cache_buster=1)
+        except RuntimeError as exc:
+            assert "valid UTF-8" in str(exc)
+        else:
+            raise AssertionError("invalid UTF-8 live-health response was accepted")
+    finally:
+        health.LIVE_OPENER = original_opener
+
+
+def test_live_site_transport_sanitizes_http_errors_and_rejects_invalid_json() -> None:
+    original_opener = health.LIVE_OPENER
+    secret_url = "https://provider.example/path-secret?api_key=query-secret"
+    http_error = health.urllib.error.HTTPError(secret_url, 401, "reason-secret", {}, None)
+    try:
+        health.LIVE_OPENER = FakeLiveOpener(http_error)
+        ok, message = health.live_site_ok()
+        assert ok is False
+        assert message == "live HTTP check failed: live endpoint HTTP 401"
+        assert "secret" not in message
+
+        html = f"<html>auction_feed {health.LIVE_URL.rstrip('/')}</html>".encode()
+        health.LIVE_OPENER = FakeLiveOpener(
+            FakeLiveResponse(html, content_type="text/html"),
+            FakeLiveResponse(b"not-json", content_type="application/json"),
+        )
+        assert health.live_site_ok() == (False, "live refresh status check failed: invalid JSON")
+    finally:
+        health.LIVE_OPENER = original_opener
 
 
 def test_refresh_lock_detection() -> None:
@@ -106,6 +283,243 @@ def test_fresh_active_attempt_requires_new_held_bounded_run() -> None:
     ) is False
 
 
+def test_alert_state_is_atomic_private_and_rejects_untrusted_files() -> None:
+    originals = {
+        "ALERT_STATE_PATH": health.ALERT_STATE_PATH,
+        "ALERT_DRY_RUN": health.ALERT_DRY_RUN,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        state_path = root / "state" / "alert.json"
+        try:
+            health.ALERT_STATE_PATH = state_path
+            health.ALERT_DRY_RUN = False
+            health.save_alert_state(
+                {
+                    "active": True,
+                    "issue_number": 42,
+                    health.TRUSTED_STATE_KEY: True,
+                }
+            )
+
+            assert state_path.stat().st_mode & 0o777 == 0o600
+            persisted = json.loads(state_path.read_text(encoding="utf-8"))
+            assert health.TRUSTED_STATE_KEY not in persisted
+            loaded = health.load_alert_state()
+            assert loaded["issue_number"] == 42
+            assert loaded[health.TRUSTED_STATE_KEY] is True
+
+            state_path.chmod(0o666)
+            assert health.load_alert_state() == {}
+
+            state_path.unlink()
+            target = root / "outsider.json"
+            target.write_text('{"active": true, "issue_number": 666}\n', encoding="utf-8")
+            target.chmod(0o600)
+            state_path.symlink_to(target)
+            assert health.load_alert_state() == {}
+
+            nested_parent = root / "nested-parent"
+            nested_target = root / "nested-target"
+            nested_parent.mkdir()
+            nested_target.mkdir()
+            (nested_parent / "redirect").symlink_to(nested_target, target_is_directory=True)
+            health.ALERT_STATE_PATH = nested_parent / "redirect" / "created" / "alert.json"
+            try:
+                health.save_alert_state({"active": True})
+            except (OSError, PermissionError, health.SecurePathError):
+                pass
+            else:
+                raise AssertionError("nested symlink alert-state ancestor was accepted")
+            assert not (nested_target / "created").exists()
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
+def test_issue_discovery_requires_marker_and_authenticated_author() -> None:
+    original_run_gh = health.run_gh
+    calls: list[list[str]] = []
+
+    def fake_run_gh(args: list[str], *, body: str | None = None, timeout: int = 45) -> object:
+        del body, timeout
+        calls.append(args)
+        if args[:2] == ["api", "user"]:
+            return health.Result(0, "watchdog-bot\n", "")
+        issues = [
+            {
+                "number": 10,
+                "url": "https://github.com/example/repo/issues/10",
+                "title": health.RUNNER_ISSUE_TITLE,
+                "body": health.RUNNER_ISSUE_MARKER,
+                "author": {"login": "outsider"},
+            },
+            {
+                "number": 11,
+                "url": "https://github.com/example/repo/issues/11",
+                "title": health.RUNNER_ISSUE_TITLE,
+                "body": "same title but no watchdog marker",
+                "author": {"login": "watchdog-bot"},
+            },
+            {
+                "number": 12,
+                "url": "https://github.com/example/repo/issues/12",
+                "title": health.RUNNER_ISSUE_TITLE,
+                "body": f"{health.RUNNER_ISSUE_MARKER}\nowned incident",
+                "author": {"login": "watchdog-bot"},
+            },
+        ]
+        return health.Result(0, json.dumps(issues), "")
+
+    try:
+        health.run_gh = fake_run_gh
+        number, url = health.find_open_runner_issue()
+        assert number == 12
+        assert url == health.canonical_issue_url(12)
+        list_call = calls[-1]
+        assert list_call[list_call.index("--author") + 1] == "watchdog-bot"
+        assert "body" in list_call[list_call.index("--json") + 1]
+    finally:
+        health.run_gh = original_run_gh
+
+
+def test_issue_update_and_close_ignore_untrusted_state_ids() -> None:
+    assert health.trusted_state_issue_number({"issue_number": 99}) is None
+    trusted = {health.TRUSTED_STATE_KEY: True, "issue_number": 99}
+    assert health.trusted_state_issue_number(trusted) == 99
+
+    original_run_gh = health.run_gh
+    original_enabled = health.GITHUB_ALERTS_ENABLED
+    original_dry_run = health.ALERT_DRY_RUN
+    calls: list[list[str]] = []
+
+    def fake_run_gh(args: list[str], *, body: str | None = None, timeout: int = 45) -> object:
+        del body, timeout
+        calls.append(args)
+        return health.Result(0, "", "")
+
+    try:
+        health.run_gh = fake_run_gh
+        health.GITHUB_ALERTS_ENABLED = True
+        health.ALERT_DRY_RUN = False
+        assert health.close_github_issue({"issue_number": 99}, "recovered") is None
+        assert calls == []
+        message = health.close_github_issue(trusted, "recovered")
+        assert message == f"GitHub issue closed: {health.canonical_issue_url(99)}"
+        assert [call[:2] for call in calls] == [["issue", "comment"], ["issue", "close"]]
+    finally:
+        health.run_gh = original_run_gh
+        health.GITHUB_ALERTS_ENABLED = original_enabled
+        health.ALERT_DRY_RUN = original_dry_run
+
+
+def test_failed_issue_recovery_remains_active_for_retry() -> None:
+    originals = {
+        "load_alert_state": health.load_alert_state,
+        "save_alert_state": health.save_alert_state,
+        "close_github_issue": health.close_github_issue,
+    }
+    state = {
+        health.TRUSTED_STATE_KEY: True,
+        "active": True,
+        "issue_number": 99,
+    }
+    saved: list[dict[str, object]] = []
+    try:
+        health.load_alert_state = lambda: dict(state)
+        health.save_alert_state = lambda value: saved.append(dict(value))
+        health.close_github_issue = lambda _state, _body: "GitHub recovery update failed: transient outage"
+
+        message = health.handle_recovery_alert(
+            {
+                "detected_at_utc": "2026-08-02T20:00:00Z",
+                "last_success_at_utc": "2026-08-02T19:59:00Z",
+                "live_ok": True,
+            }
+        )
+
+        assert message is not None and "closure will retry" in message
+        assert saved[-1]["active"] is True
+        assert saved[-1]["issue_number"] == 99
+        assert "recovered_at_utc" not in saved[-1]
+        assert saved[-1]["github_recovery_update"] == "GitHub recovery update failed: transient outage"
+    finally:
+        for name, value in originals.items():
+            setattr(health, name, value)
+
+
+def test_mutation_guard_rechecks_refresh_lock_and_running_service() -> None:
+    originals = {
+        "REFRESH_LOCK_PATH": health.REFRESH_LOCK_PATH,
+        "DRY_RUN": health.DRY_RUN,
+        "maybe_run": health.maybe_run,
+        "launchctl_print": health.launchctl_print,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        lock_path = Path(directory) / "locks" / "refresh.lock"
+        lock_path.parent.mkdir(mode=0o700)
+        lock_path.touch(mode=0o600)
+        calls: list[list[str]] = []
+
+        def fake_maybe_run(
+            lines: list[str],
+            description: str,
+            cmd: list[str],
+            *,
+            cwd: Path | None = health.REPO_DIR,
+            timeout: int = 90,
+        ) -> object:
+            del lines, description, cwd, timeout
+            calls.append(cmd)
+            return health.Result(0, "", "")
+
+        try:
+            health.REFRESH_LOCK_PATH = lock_path
+            health.DRY_RUN = False
+            health.maybe_run = fake_maybe_run
+            health.launchctl_print = lambda _label: health.Result(0, "state = not running", "")
+
+            fd = os.open(lock_path, os.O_RDWR)
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            try:
+                lines: list[str] = []
+                result = health.maybe_run_with_refresh_guard(lines, "mutate git", ["git", "switch", "main"])
+                assert result.code == 75
+                assert calls == []
+                assert any("refresh lock is active" in line for line in lines)
+            finally:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+                os.close(fd)
+
+            health.launchctl_print = lambda _label: health.Result(0, "state = running", "")
+            lines = []
+            result = health.maybe_run_with_refresh_guard(
+                lines,
+                "reinstall worker",
+                ["bash", "installer.sh"],
+                require_idle_label="worker.label",
+            )
+            assert result.code == 75
+            assert calls == []
+            assert any("currently running" in line for line in lines)
+
+            health.launchctl_print = lambda _label: health.Result(0, "state = not running", "")
+            lines = []
+            result = health.maybe_run_with_refresh_guard(
+                lines,
+                "kickstart worker",
+                ["launchctl", "kickstart", "worker.label"],
+                require_idle_label="worker.label",
+                release_before_run=True,
+            )
+            assert result.code == 0
+            assert calls == [["launchctl", "kickstart", "worker.label"]]
+            assert health.refresh_is_active() is False
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
 def test_active_watcher_filters_only_completion_lag_issues() -> None:
     issues = [
         "watcher state missing: /tmp/state.json",
@@ -169,8 +583,37 @@ def valid_plist(spec: object) -> dict[str, object]:
         "WorkingDirectory": str(health.REPO_DIR),
         "StartInterval": getattr(spec, "interval_seconds"),
         "RunAtLoad": True,
+        "ProcessType": "Background",
+        "ThrottleInterval": getattr(spec, "throttle_interval"),
+        "Umask": 0o077,
+        "StandardOutPath": str(getattr(spec, "standard_out_path")),
+        "StandardErrorPath": str(getattr(spec, "standard_error_path")),
         "EnvironmentVariables": required_environment,
     }
+
+
+def test_runner_path_prefers_executable_repo_virtualenv() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        python_path = root / ".venv" / "bin" / "python3"
+        python_path.parent.mkdir(parents=True)
+        python_path.write_text(
+            f"#!/bin/sh\nexec {shlex.quote(sys.executable)} \"$@\"\n",
+            encoding="utf-8",
+        )
+        python_path.chmod(0o700)
+        shim_path = root / "scripts" / "runtime-bin" / "python3"
+        shim_path.parent.mkdir(parents=True)
+        shim_path.write_text("#!/bin/sh\n", encoding="utf-8")
+        shim_path.chmod(0o700)
+        assert health.runner_python_ready(root) is True
+        assert health.runner_path_value(root).startswith(f"{root}/scripts/runtime-bin:")
+        python_path.unlink()
+        python_path.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        python_path.chmod(0o700)
+        assert health.runner_python_ready(root) is False
+        assert health.runner_path_value(root) == health.BASE_PATH_VALUE
+        assert health.runner_path_value(Path(f"{root}:unsafe")) == health.BASE_PATH_VALUE
 
 
 def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
@@ -193,12 +636,40 @@ def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
             health.WATCHER_INSTALL_SCRIPT = health.REPO_DIR / "scripts" / "install_auction_watcher_launchd.sh"
             plist_dir = health.HOME / "Library" / "LaunchAgents"
             plist_dir.mkdir(parents=True)
+            python_path = health.REPO_DIR / ".venv" / "bin" / "python3"
+            python_path.parent.mkdir(parents=True)
+            python_path.write_text(
+                f"#!/bin/sh\nexec {shlex.quote(sys.executable)} \"$@\"\n",
+                encoding="utf-8",
+            )
+            python_path.chmod(0o700)
+            shim_path = health.REPO_DIR / "scripts" / "runtime-bin" / "python3"
+            shim_path.parent.mkdir(parents=True)
+            shim_path.write_text("#!/bin/sh\n", encoding="utf-8")
+            shim_path.chmod(0o700)
 
-            for service in health.launchd_specs():
+            hourly, watcher = health.launchd_specs()
+            hourly_environment = dict(hourly.required_environment)
+            watcher_environment = dict(watcher.required_environment)
+            assert hourly.name == "hourly reconcile refresh"
+            assert hourly_environment["PATH"] == f"{health.REPO_DIR}/scripts/runtime-bin:{health.BASE_PATH_VALUE}"
+            assert hourly_environment["DEGEN_DOGS_FULL_REFRESH"] == health.HOURLY_FULL_REFRESH
+            assert hourly_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == health.HOURLY_RUN_MISSION3_ARCHIVE
+            assert watcher_environment["DEGEN_DOGS_FULL_REFRESH"] == "0"
+            assert watcher_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "0"
+
+            for service in (hourly, watcher):
                 service.plist_path.write_bytes(plistlib.dumps(valid_plist(service)))
                 issues: list[str] = []
                 assert health.plist_needs_reinstall(issues, service) is False
                 assert issues == []
+
+                drifted = valid_plist(service)
+                drifted["EnvironmentVariables"]["PATH"] = health.BASE_PATH_VALUE  # type: ignore[index]
+                service.plist_path.write_bytes(plistlib.dumps(drifted))
+                issues = []
+                assert health.plist_needs_reinstall(issues, service) is True
+                assert "EnvironmentVariables.PATH" in issues[0]
 
                 drifted = valid_plist(service)
                 drifted["RunAtLoad"] = False
@@ -206,9 +677,96 @@ def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
                 issues = []
                 assert health.plist_needs_reinstall(issues, service) is True
                 assert "RunAtLoad" in issues[0]
+
+                drifted = valid_plist(service)
+                drifted["Umask"] = 0o022
+                drifted["StandardOutPath"] = "/tmp/public-runner.log"
+                drifted["EnvironmentVariables"]["DEGEN_DOGS_LOCK_DIR"] = "/tmp/wrong-locks"  # type: ignore[index]
+                drifted["EnvironmentVariables"]["DYLD_INSERT_LIBRARIES"] = "/tmp/inject.dylib"  # type: ignore[index]
+                service.plist_path.write_bytes(plistlib.dumps(drifted))
+                issues = []
+                assert health.plist_needs_reinstall(issues, service) is True
+                assert "Umask" in issues[0]
+                assert "StandardOutPath" in issues[0]
+                assert "EnvironmentVariables.DEGEN_DOGS_LOCK_DIR" in issues[0]
+                assert "EnvironmentVariables.DYLD_INSERT_LIBRARIES" in issues[0]
         finally:
             for name, value in original.items():
                 setattr(health, name, value)
+
+
+def test_launchd_hourly_policy_override_is_dynamic_but_watcher_is_fixed() -> None:
+    original_full = health.HOURLY_FULL_REFRESH
+    original_archive = health.HOURLY_RUN_MISSION3_ARCHIVE
+    try:
+        health.HOURLY_FULL_REFRESH = "1"
+        health.HOURLY_RUN_MISSION3_ARCHIVE = "0"
+        hourly, watcher = health.launchd_specs()
+        hourly_environment = dict(hourly.required_environment)
+        watcher_environment = dict(watcher.required_environment)
+        assert hourly_environment["DEGEN_DOGS_FULL_REFRESH"] == "1"
+        assert hourly_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "0"
+        assert watcher_environment["DEGEN_DOGS_FULL_REFRESH"] == "0"
+        assert watcher_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "0"
+    finally:
+        health.HOURLY_FULL_REFRESH = original_full
+        health.HOURLY_RUN_MISSION3_ARCHIVE = original_archive
+
+
+def test_timestamp_only_cleanup_revalidates_after_lock_acquisition() -> None:
+    originals = {
+        "DRY_RUN": health.DRY_RUN,
+        "acquire_refresh_mutation_lock": health.acquire_refresh_mutation_lock,
+        "release_refresh_mutation_lock": health.release_refresh_mutation_lock,
+        "generated_price_change_is_timestamp_only": health.generated_price_change_is_timestamp_only,
+        "maybe_run": health.maybe_run,
+    }
+    lock_owned = False
+    calls: list[list[str]] = []
+
+    def fake_acquire() -> tuple[int | None, str | None]:
+        nonlocal lock_owned
+        assert lock_owned is False
+        lock_owned = True
+        return 123, None
+
+    def fake_release(descriptor: int | None) -> None:
+        nonlocal lock_owned
+        assert descriptor == 123
+        assert lock_owned is True
+        lock_owned = False
+
+    def fake_compare(_path: str) -> bool:
+        assert lock_owned is True
+        return True
+
+    def fake_run(
+        lines: list[str],
+        description: str,
+        cmd: list[str],
+        *,
+        cwd: Path | None = health.REPO_DIR,
+        timeout: int = 90,
+    ) -> object:
+        del lines, description, cwd, timeout
+        assert lock_owned is True
+        calls.append(cmd)
+        return health.Result(0, "", "")
+
+    try:
+        health.DRY_RUN = False
+        health.acquire_refresh_mutation_lock = fake_acquire
+        health.release_refresh_mutation_lock = fake_release
+        health.generated_price_change_is_timestamp_only = fake_compare
+        health.maybe_run = fake_run
+        path = sorted(health.PRICE_TIMESTAMP_ONLY_PATHS)[0]
+        lines: list[str] = []
+        assert health.clean_timestamp_only_price_changes(lines, [path]) is True
+        assert calls == [["git", "checkout", "--", path]]
+        assert lock_owned is False
+    finally:
+        for name, value in originals.items():
+            setattr(health, name, value)
 
 
 def test_watcher_state_health() -> None:
@@ -253,6 +811,24 @@ def test_watcher_state_health() -> None:
         assert summary["pending_refresh"] is True
 
 
+def test_watcher_state_health_rejects_broad_files_and_symlinks() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        state_path = root / "watcher-state.json"
+        state_path.write_text("{}", encoding="utf-8")
+        state_path.chmod(0o644)
+        issues, _summary = health.inspect_watcher_state(time.time(), state_path)
+        assert any("unsafe/unreadable" in issue or "not a protected owned regular file" in issue for issue in issues)
+
+        target = root / "target.json"
+        target.write_text("{}", encoding="utf-8")
+        target.chmod(0o600)
+        linked = root / "linked.json"
+        linked.symlink_to(target)
+        issues, _summary = health.inspect_watcher_state(time.time(), linked)
+        assert any("unsafe/unreadable" in issue for issue in issues)
+
+
 def test_log_compaction_is_bounded_and_preserves_launchd_inode() -> None:
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "launchd.out.log"
@@ -278,6 +854,64 @@ def test_managed_log_inventory_includes_all_high_growth_jsonl_files() -> None:
     assert health.REPO_DIR / "logs" / "refresh-metrics.jsonl" in paths
 
 
+def test_runner_permission_hardening_repairs_modes_and_refuses_symlinks() -> None:
+    originals = {
+        "DRY_RUN": health.DRY_RUN,
+        "private_runner_directories": health.private_runner_directories,
+        "private_runner_files": health.private_runner_files,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        private_dir = root / "state"
+        private_dir.mkdir(mode=0o755)
+        private_dir.chmod(0o755)
+        private_file = private_dir / "telemetry.jsonl"
+        private_file.write_text('{"result":"healthy"}\n', encoding="utf-8")
+        private_file.chmod(0o644)
+        inode = private_file.stat().st_ino
+        try:
+            health.DRY_RUN = False
+            health.private_runner_directories = lambda: (private_dir,)
+            health.private_runner_files = lambda: (private_file,)
+            lines: list[str] = []
+
+            assert health.harden_runner_permissions(lines) is False
+            assert private_dir.stat().st_mode & 0o777 == 0o700
+            assert private_file.stat().st_mode & 0o777 == 0o600
+            assert private_file.stat().st_ino == inode
+            assert json.loads(private_file.read_text(encoding="utf-8"))["result"] == "healthy"
+
+            target = root / "unrelated.json"
+            target.write_text('{"secret":true}\n', encoding="utf-8")
+            target.chmod(0o644)
+            linked = private_dir / "linked-state.json"
+            linked.symlink_to(target)
+            health.private_runner_files = lambda: (linked,)
+            lines = []
+            assert health.harden_runner_permissions(lines) is True
+            assert target.stat().st_mode & 0o777 == 0o644
+            assert any("permission hardening failed" in line for line in lines)
+
+            nested_parent = root / "nested-permission-parent"
+            nested_target = root / "nested-permission-target"
+            nested_parent.mkdir()
+            nested_target.mkdir()
+            nested_file = nested_target / "private.json"
+            nested_file.write_text('{"keep":true}\n', encoding="utf-8")
+            nested_file.chmod(0o644)
+            (nested_parent / "redirect").symlink_to(nested_target, target_is_directory=True)
+            health.private_runner_directories = lambda: (nested_parent / "redirect" / "created",)
+            health.private_runner_files = lambda: (nested_parent / "redirect" / "private.json",)
+            lines = []
+            assert health.harden_runner_permissions(lines) is True
+            assert not (nested_target / "created").exists()
+            assert nested_file.stat().st_mode & 0o777 == 0o644
+            assert json.loads(nested_file.read_text(encoding="utf-8"))["keep"] is True
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
 def test_log_compaction_refuses_symlinks() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -292,6 +926,26 @@ def test_log_compaction_refuses_symlinks() -> None:
         else:
             raise AssertionError("expected symlink log compaction to be refused")
         assert target.read_bytes() == b"sensitive" * 100
+
+        nested_parent = root / "nested-log-parent"
+        nested_target = root / "nested-log-target"
+        nested_parent.mkdir()
+        nested_target.mkdir()
+        nested_log = nested_target / "health.log"
+        nested_log.write_bytes(b"keep" * 100)
+        nested_log.chmod(0o600)
+        (nested_parent / "redirect").symlink_to(nested_target, target_is_directory=True)
+        try:
+            health.compact_log_in_place(
+                nested_parent / "redirect" / "health.log",
+                max_bytes=100,
+                retain_bytes=20,
+            )
+        except ValueError as exc:
+            assert "unsafe/non-regular" in str(exc)
+        else:
+            raise AssertionError("expected nested symlink log ancestor to be refused")
+        assert nested_log.read_bytes() == b"keep" * 100
 
 
 def test_jsonl_compaction_retains_complete_latest_rows() -> None:
@@ -372,16 +1026,27 @@ def test_disk_free_thresholds() -> None:
 
 
 if __name__ == "__main__":
+    test_live_site_transport_accepts_only_exact_bounded_targets()
+    test_live_site_transport_rejects_unapproved_redirect_status_mime_and_oversize()
+    test_live_site_transport_sanitizes_http_errors_and_rejects_invalid_json()
     test_refresh_lock_detection()
     test_active_lock_metadata_requires_a_held_flock()
     test_fresh_active_attempt_requires_new_held_bounded_run()
+    test_alert_state_is_atomic_private_and_rejects_untrusted_files()
+    test_issue_discovery_requires_marker_and_authenticated_author()
+    test_issue_update_and_close_ignore_untrusted_state_ids()
+    test_failed_issue_recovery_remains_active_for_retry()
+    test_mutation_guard_rechecks_refresh_lock_and_running_service()
     test_active_watcher_filters_only_completion_lag_issues()
     test_launchd_cause_requires_an_explicit_launchd_fault()
     test_expected_live_publish_lag_is_narrow()
     test_launchd_plist_validation_covers_hourly_and_watcher()
+    test_launchd_hourly_policy_override_is_dynamic_but_watcher_is_fixed()
+    test_timestamp_only_cleanup_revalidates_after_lock_acquisition()
     test_watcher_state_health()
     test_log_compaction_is_bounded_and_preserves_launchd_inode()
     test_managed_log_inventory_includes_all_high_growth_jsonl_files()
+    test_runner_permission_hardening_repairs_modes_and_refuses_symlinks()
     test_log_compaction_refuses_symlinks()
     test_jsonl_compaction_retains_complete_latest_rows()
     test_active_log_defers_until_emergency_cap()

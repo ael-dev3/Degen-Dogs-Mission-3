@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#360/792",
-      "rank": 360,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 132 dog #132 132 mission 1 mission 1 polygon no auction dogmaster reward weth #360/792 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 132 dog #132 132 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: white; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.4%)",
+        "display": "Head: Headphones",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Monocle (6.4%)",
+        "display": "Eyes: Monocle",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

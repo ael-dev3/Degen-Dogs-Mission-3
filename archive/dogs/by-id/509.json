@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#543/792",
-      "rank": 543,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 509 dog #509 509 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xadfc0c8da3fb08d49f22300a13bf96a33fa8562f4621024e8136d51ff26ac3b5 0x98f56e14a9bd74de0390d97b25c33d85da98524d72815943a37509d97ebbe103 #543/792 background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: blackcap; eyes: vrgoggles 0x7921dae8bdb1b226785ed8b88dcfcad241a09527229183e419910281dcd32ae8 chain_logs contract_getters",
+    "search_text": "dog 509 dog #509 509 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xadfc0c8da3fb08d49f22300a13bf96a33fa8562f4621024e8136d51ff26ac3b5 0x98f56e14a9bd74de0390d97b25c33d85da98524d72815943a37509d97ebbe103 unavailable background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: blackcap; eyes: vrgoggles 0x7921dae8bdb1b226785ed8b88dcfcad241a09527229183e419910281dcd32ae8 chain_logs contract_getters",
     "settlement": {
       "block_number": 26316520,
       "block_time_utc": "2025-10-13T12:05:09Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.1%)",
+        "display": "Body: Brown",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

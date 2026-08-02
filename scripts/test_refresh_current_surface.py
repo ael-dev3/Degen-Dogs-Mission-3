@@ -402,6 +402,72 @@ def test_settled_price_merge_ignores_live_candidate_and_uses_canonical_archive()
     assert historical["usd_estimate_source"] == "defillama_coin_prices"
 
 
+def test_settled_search_amount_uses_event_time_usd_not_live_eth_price() -> None:
+    surface = load_module()
+    historical = {
+        "amount_usd_at_event": "20.12345678",
+        "eth_usd_price_at_event": "2012.345678",
+        "eth_usd_price_date_utc": "2026-08-01",
+        "usd_estimate_source": "defillama_coin_prices",
+    }
+
+    display = surface.historical_settlement_amount_display(
+        7,
+        surface.Decimal("0.01"),
+        historical,
+    )
+
+    assert display == "0.01 ETH ($20)"
+    assert "previous_amount_eth * eth_usd" not in MODULE_PATH.read_text(encoding="utf-8")
+    try:
+        surface.historical_settlement_amount_display(7, surface.Decimal("0.01"), None)
+    except surface.FullRefreshRequired as exc:
+        assert "historical USD provenance" in str(exc)
+    else:
+        raise AssertionError("settled search amount accepted missing historical USD provenance")
+
+    assert surface.decimal_or_none("NaN") is None
+    assert surface.decimal_or_none("Infinity") is None
+
+
+def test_canonical_historical_usd_rejects_stale_amount_and_event_date() -> None:
+    surface = load_module()
+    original_candidates = surface.archive_candidates
+    original_local = surface.local_historical_usd
+    fallback = {
+        "amount_usd_at_event": "40.00000000",
+        "eth_usd_price_at_event": "2000",
+        "eth_usd_price_date_utc": "2026-08-01",
+        "usd_estimate_source": "defillama_coin_prices",
+    }
+    base_candidate = {
+        "amount_usd_at_event": "20.00",
+        "eth_usd_price_at_event": "2000",
+        "eth_usd_price_date_utc": "2026-08-01",
+        "usd_estimate_source": "defillama_coin_prices",
+    }
+    try:
+        surface.local_historical_usd = lambda *_args, **_kwargs: fallback
+        surface.archive_candidates = lambda _token_id: [base_candidate]
+        assert surface.canonical_historical_usd(
+            7,
+            surface.Decimal("0.02"),
+            "2026-08-01T12:00:00Z",
+        ) == fallback
+
+        wrong_date = dict(fallback)
+        wrong_date["eth_usd_price_date_utc"] = "2026-07-01"
+        surface.archive_candidates = lambda _token_id: [wrong_date]
+        assert surface.canonical_historical_usd(
+            7,
+            surface.Decimal("0.02"),
+            "2026-08-01T12:00:00Z",
+        ) == fallback
+    finally:
+        surface.archive_candidates = original_candidates
+        surface.local_historical_usd = original_local
+
+
 def test_current_creation_recovers_verified_block_from_preceding_settlement() -> None:
     surface = load_module()
     tx_hash = "0x" + "a" * 64

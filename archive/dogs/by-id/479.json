@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#295/792",
-      "rank": 295,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 479 dog #479 479 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xc61b1e82a329e7a48b08081f5b826e758b837c398b603c0a8693bdb76a7d5ae1 0xabf2e1dc172536376be4f69088324f623c60dbc32821db5b39f162aa7bea4074 #295/792 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: toque; eyes: bluelasereyes 0x60abcbc779e157157e0c70a7de609ffe414404f10ed0a24c8441aedf22d6d333 0x3b7a9055db00b64170ad92941c8e649b69bb22874aace8f1ee945c0fb411e3ae chain_logs contract_getters",
+    "search_text": "dog 479 dog #479 479 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xc61b1e82a329e7a48b08081f5b826e758b837c398b603c0a8693bdb76a7d5ae1 0xabf2e1dc172536376be4f69088324f623c60dbc32821db5b39f162aa7bea4074 unavailable background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: toque; eyes: bluelasereyes 0x60abcbc779e157157e0c70a7de609ffe414404f10ed0a24c8441aedf22d6d333 0x3b7a9055db00b64170ad92941c8e649b69bb22874aace8f1ee945c0fb411e3ae chain_logs contract_getters",
     "settlement": {
       "block_number": 26241528,
       "block_time_utc": "2025-09-06T13:18:23Z",
@@ -78,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.1%)",
+        "display": "Body: Dalmation",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: StuddedCollar (9.8%)",
+        "display": "Neck: StuddedCollar",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
+        "display": "Eyes: BlueLaserEyes",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

@@ -53,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#513/792",
-      "rank": 513,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 527 dog #527 527 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x0802791e1dd621a68c4ef34cb8b90b76e184a4b192466dd3448607b3bb1ff893 0x06fb1c1ad097c996085986d91c4a6a131ea62a483b338206a54986674675e060 #513/792 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: blackcap; eyes: masksnorkel 0x3fa456826b73a93a69e3de2c1a2584da1632192dd8c0103698654a02b3154a99 0xb55b6da53cdd5aadc94987c070b1ca8087dba6184a448fde0b5ec5d5c1317eb4 chain_logs contract_getters",
+    "search_text": "dog 527 dog #527 527 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x0802791e1dd621a68c4ef34cb8b90b76e184a4b192466dd3448607b3bb1ff893 0x06fb1c1ad097c996085986d91c4a6a131ea62a483b338206a54986674675e060 unavailable background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: blackcap; eyes: masksnorkel 0x3fa456826b73a93a69e3de2c1a2584da1632192dd8c0103698654a02b3154a99 0xb55b6da53cdd5aadc94987c070b1ca8087dba6184a448fde0b5ec5d5c1317eb4 chain_logs contract_getters",
     "settlement": {
       "block_number": 26425741,
       "block_time_utc": "2025-11-04T11:18:07Z",
@@ -78,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.6%)",
+        "display": "Body: Grey",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.7%)",
+        "display": "Eyes: MaskSnorkel",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

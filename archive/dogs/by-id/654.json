@@ -58,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#753/792",
-      "rank": 753,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 654 dog #654 654 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.015 eth 15000000000000000 31.45 $31.45 2026-03-15t13:40:21z 0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b 0xa752e820fbcf6768af149440e5d5e89e28f3372d4325e345ecc29f8bfc3cefcd #753/792 generated auction feed 0x0c3a53a67b2a4169a02567f1ff1a22bf87de9523d3dc44071be1255b27417316 0x9ca5a35eb751759205c6d71d013bec877a3ba9893a54007484d1fdb2820fa3f1 0x4fe2c0b62196f2d04763f9fbcd7f0999b4e244d99cb1a5325a77c6f191497e97 0x215fdf0b0f6aa099f02b6964841440f08bd45160335b15ebafe92f2164b2030d 0xe6fd5b1dcd5f4a0ae61c6104765f2f8861eac897b9308eac07312bfb2e5aaec3 0xc4f97ce766331a0052ae14a48e86d98dfa278021e2601c4c5c3391bd4e00a8e4 0x36116ab49263b86ae9e954a898b187b2ee40928cfb49148d1f0a0361c01f6113 background: none (90.4%) background none body: black (11.1%) body black neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: baseballcap (10.5%) head baseballcap eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 654 dog #654 654 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.015 eth 15000000000000000 31.45 $31.45 2026-03-15t13:40:21z 0x3fa6a05c09ea415f7606574b81786bb7cad7f0a314ae1d528180f9e497c0a95b 0xa752e820fbcf6768af149440e5d5e89e28f3372d4325e345ecc29f8bfc3cefcd unavailable generated auction feed 0x0c3a53a67b2a4169a02567f1ff1a22bf87de9523d3dc44071be1255b27417316 0x9ca5a35eb751759205c6d71d013bec877a3ba9893a54007484d1fdb2820fa3f1 0x4fe2c0b62196f2d04763f9fbcd7f0999b4e244d99cb1a5325a77c6f191497e97 0x215fdf0b0f6aa099f02b6964841440f08bd45160335b15ebafe92f2164b2030d 0xe6fd5b1dcd5f4a0ae61c6104765f2f8861eac897b9308eac07312bfb2e5aaec3 0xc4f97ce766331a0052ae14a48e86d98dfa278021e2601c4c5c3391bd4e00a8e4 0x36116ab49263b86ae9e954a898b187b2ee40928cfb49148d1f0a0361c01f6113 background: none background none body: black body black neck: none neck none mouth: none mouth none ears: loopearring ears loopearring head: baseballcap head baseballcap eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 43396337,
       "block_time_utc": "2026-03-15T13:40:21Z",
@@ -85,37 +85,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BaseballCap (10.5%)",
+        "display": "Head: BaseballCap",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

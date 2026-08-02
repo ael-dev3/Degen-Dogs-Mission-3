@@ -34,9 +34,9 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb",
+      "0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651",
       "0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847",
-      "0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651"
+      "0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#762/792",
-      "rank": 762,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43202508 $24.43 2026-05-30t18:40:09z 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f 0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0 #762/792 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.4%) background none body: grey (11.6%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles generated_auction_feed base_logs dashboard_builder historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f 0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0 unavailable generated auction feed 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb background: none background none body: grey body grey neck: redcollar neck redcollar mouth: none mouth none ears: earbuds ears earbuds head: none head none eyes: vrgoggles eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46688531,
       "block_time_utc": "2026-05-30T18:40:09Z",
@@ -72,10 +72,8 @@
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
-        "generated_auction_feed",
         "base_logs",
-        "dashboard_builder",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -83,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.6%)",
+        "display": "Body: Grey",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }
