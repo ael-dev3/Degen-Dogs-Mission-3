@@ -665,6 +665,14 @@ def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
             assert hourly_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == health.HOURLY_RUN_MISSION3_ARCHIVE
             assert watcher_environment["DEGEN_DOGS_FULL_REFRESH"] == "0"
             assert watcher_environment["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "0"
+            assert (
+                watcher_environment["MISSION3_WATCHER_REQUIRE_CLEAN_TREE"]
+                == health.WATCHER_REQUIRE_CLEAN_TREE
+            )
+            assert (
+                watcher_environment["MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS"]
+                == health.WATCHER_REFRESH_TIMEOUT_SECONDS
+            )
 
             for service in (hourly, watcher):
                 service.plist_path.write_bytes(plistlib.dumps(valid_plist(service)))
@@ -698,6 +706,15 @@ def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
                 assert "StandardOutPath" in issues[0]
                 assert "EnvironmentVariables.DEGEN_DOGS_LOCK_DIR" in issues[0]
                 assert "EnvironmentVariables.DYLD_INSERT_LIBRARIES" in issues[0]
+
+            drifted = valid_plist(watcher)
+            drifted["EnvironmentVariables"]["MISSION3_WATCHER_REQUIRE_CLEAN_TREE"] = (  # type: ignore[index]
+                "0" if health.WATCHER_REQUIRE_CLEAN_TREE == "1" else "1"
+            )
+            watcher.plist_path.write_bytes(plistlib.dumps(drifted))
+            issues = []
+            assert health.plist_needs_reinstall(issues, watcher) is True
+            assert "EnvironmentVariables.MISSION3_WATCHER_REQUIRE_CLEAN_TREE" in issues[0]
         finally:
             for name, value in original.items():
                 setattr(health, name, value)

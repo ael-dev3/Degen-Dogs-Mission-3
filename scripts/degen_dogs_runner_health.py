@@ -85,6 +85,19 @@ ALERT_STATE_PATH = Path(
 EXPECTED_INTERVAL_SECONDS = int(os.environ.get("DEGEN_DOGS_REFRESH_INTERVAL_SECONDS", "3600"))
 WATCHER_INTERVAL_SECONDS = int(os.environ.get("MISSION3_WATCHER_INTERVAL_SECONDS", "15"))
 WATCHER_AUTO_PUSH = os.environ.get("MISSION3_WATCHER_AUTO_PUSH", "0")
+WATCHER_REQUIRE_CLEAN_TREE = os.environ.get(
+    "MISSION3_WATCHER_REQUIRE_CLEAN_TREE", "1" if WATCHER_AUTO_PUSH == "1" else "0"
+)
+WATCHER_REFRESH_TIMEOUT_SECONDS = os.environ.get("MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", "1800")
+if WATCHER_REQUIRE_CLEAN_TREE not in {"0", "1"} or (
+    WATCHER_AUTO_PUSH == "1" and WATCHER_REQUIRE_CLEAN_TREE != "1"
+):
+    raise RuntimeError("invalid watcher clean-tree safety policy")
+try:
+    if int(WATCHER_REFRESH_TIMEOUT_SECONDS) < 60:
+        raise ValueError
+except ValueError as exc:
+    raise RuntimeError("invalid watcher refresh-timeout policy") from exc
 LIVE_VERIFY_AFTER_PUSH = os.environ.get("DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH", "1")
 HOURLY_FULL_REFRESH = "1" if os.environ.get("DEGEN_DOGS_FULL_REFRESH", "0") == "1" else "0"
 HOURLY_RUN_MISSION3_ARCHIVE = "0" if os.environ.get("DEGEN_DOGS_RUN_MISSION3_ARCHIVE", "1") == "0" else "1"
@@ -252,6 +265,8 @@ def launchd_specs() -> tuple[LaunchdSpec, LaunchdSpec]:
                 ("DEGEN_DOGS_RUN_MISSION3_ARCHIVE", "0"),
                 ("MISSION3_REFRESH_LOCK_PATH", str(REFRESH_LOCK_PATH)),
                 ("MISSION3_WATCHER_AUTO_PUSH", WATCHER_AUTO_PUSH),
+                ("MISSION3_WATCHER_REQUIRE_CLEAN_TREE", WATCHER_REQUIRE_CLEAN_TREE),
+                ("MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", WATCHER_REFRESH_TIMEOUT_SECONDS),
                 ("MISSION3_REFRESH_COMMAND", WATCHER_REFRESH_COMMAND),
             ),
         ),

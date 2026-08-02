@@ -52,6 +52,27 @@ for unsafe_command in \
     exit 1
   fi
 done
+
+# Least-privilege callers can validate the whole file while exporting only an
+# explicit subset. Secret provider values must never enter the caller shell.
+(
+  unset \
+    BASE_RPC_URLS \
+    DEGEN_DOGS_LITERAL_COMMAND \
+    DEGEN_DOGS_LITERAL_BACKTICKS \
+    MISSION3_WATCHER_AUTO_PUSH \
+    MISSION3_REFRESH_COMMAND
+  DEGEN_DOGS_ENV_FILE="$ENV_FILE"
+  degen_dogs_load_runner_env \
+    "$ROOT" \
+    'MISSION3_WATCHER_AUTO_PUSH MISSION3_REFRESH_COMMAND'
+  [[ "$MISSION3_WATCHER_AUTO_PUSH" == "0" ]]
+  [[ "$MISSION3_REFRESH_COMMAND" == "npm run refresh:current" ]]
+  [[ -z "$(declare -p BASE_RPC_URLS 2>/dev/null || true)" ]]
+  [[ -z "$(declare -p DEGEN_DOGS_LITERAL_COMMAND 2>/dev/null || true)" ]]
+  [[ -z "$(declare -p DEGEN_DOGS_LITERAL_BACKTICKS 2>/dev/null || true)" ]]
+)
+
 degen_dogs_export_runner_env_allowlist
 for required in BASE_RPC_BATCH_LIMIT DOG_METADATA_WORKERS MISSION3_LOG_CACHE MISSION3_CURRENT_SURFACE_OVERLAP NEYNAR_API_KEY COINGECKO_API_KEY; do
   [[ " ${DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
@@ -59,7 +80,7 @@ done
 for required in MISSION3_FROM_BLOCK MISSION3_ARCHIVE_DB; do
   [[ " ${DEGEN_DOGS_RUNNER_ARCHIVE_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
 done
-for required in MISSION3_WATCHER_TELEMETRY_PATH MISSION3_WATCHER_AUTO_PUSH; do
+for required in MISSION3_WATCHER_TELEMETRY_PATH MISSION3_WATCHER_AUTO_PUSH MISSION3_WATCHER_REQUIRE_CLEAN_TREE MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS; do
   [[ " ${DEGEN_DOGS_RUNNER_WATCHER_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
 done
 [[ " ${DEGEN_DOGS_RUNNER_HEALTH_ENV_ALLOWLIST//$'\n'/ } " == *" DEGEN_DOGS_HEALTH_GITHUB_ALERTS "* ]]
@@ -124,4 +145,4 @@ if (
   exit 1
 fi
 
-printf '%s\n' 'runner_env_tests=pass count=9'
+printf '%s\n' 'runner_env_tests=pass count=10'
