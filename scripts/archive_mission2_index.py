@@ -67,15 +67,34 @@ def redact_url(value: str) -> str:
         netloc += f":{port}"
     path = "/<redacted-path>" if parts.path and parts.path != "/" else ("/" if parts.path == "/" else "")
     query = "redacted=1" if parts.query else ""
-    scheme = parts.scheme.lower() if parts.scheme else "https"
-    return urllib.parse.urlunsplit((scheme, netloc, path, query, ""))
+    return urllib.parse.urlunsplit(("https", netloc, path, query, ""))
 
 
 def redact_text(value: Any) -> str:
     text = json.dumps(value, sort_keys=True) if isinstance(value, (dict, list)) else str(value)
-    for url in re.findall(r"https?://[^\s\"'<>]+", text, flags=re.IGNORECASE):
+    for url in re.findall(r"[A-Za-z][A-Za-z0-9+.-]*://[^\s\"'<>]+", text):
         text = text.replace(url, redact_url(url))
     return text
+
+
+def validate_rpc_url(url: str) -> None:
+    """Reject unsafe endpoints before urllib can echo credential-bearing schemes."""
+    if not isinstance(url, str) or not url or any(character.isspace() for character in url):
+        raise RuntimeError("RPC endpoint URL is invalid")
+    try:
+        parts = urllib.parse.urlsplit(url)
+        port = parts.port
+    except ValueError as exc:
+        raise RuntimeError("RPC endpoint URL is invalid") from exc
+    if (
+        parts.scheme.lower() != "https"
+        or not parts.hostname
+        or port not in (None, 443)
+        or parts.username is not None
+        or parts.password is not None
+        or parts.fragment
+    ):
+        raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
 def utc_now() -> str:
@@ -198,6 +217,7 @@ def keccak256_text(text: str) -> str:
 
 
 def rpc_call(rpc_url: str, method: str, params: list[Any], *, timeout: int = 45) -> Any:
+    validate_rpc_url(rpc_url)
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode("utf-8")
     req = urllib.request.Request(
         rpc_url,
@@ -207,22 +227,38 @@ def rpc_call(rpc_url: str, method: str, params: list[Any], *, timeout: int = 45)
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    if "error" in data:
-        raise RuntimeError(f"RPC {method} error: {redact_text(data['error'])}")
-    return data.get("result")
+    if (
+        not isinstance(data, dict)
+        or data.get("jsonrpc") != "2.0"
+        or type(data.get("id")) is not int
+        or data.get("id") != 1
+    ):
+        raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC response envelope")
+    has_result = "result" in data
+    has_error = "error" in data
+    if has_result == has_error:
+        raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC response envelope")
+    if has_error:
+        error = data.get("error")
+        if not isinstance(error, dict) or type(error.get("code")) is not int:
+            raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC error envelope")
+        raise RuntimeError(f"RPC {method} error code={error['code']}")
+    return data["result"]
 
 
 def rpc_call_retry(rpc_url: str, method: str, params: list[Any], *, attempts: int = 4) -> Any:
-    last: Exception | None = None
+    last_type = "RuntimeError"
     for idx in range(attempts):
         try:
             return rpc_call(rpc_url, method, params)
-        except Exception as exc:  # noqa: BLE001 - sanitize every transport/parse failure before output
-            last = exc
+        except Exception as exc:  # noqa: BLE001 - exception details can contain credential fragments
+            last_type = type(exc).__name__
             if idx == attempts - 1:
                 break
             time.sleep(min(2 ** idx, 8))
-    raise RuntimeError(f"RPC {method} failed after {attempts} attempts: {redact_text(last)}")
+    raise RuntimeError(
+        f"RPC {method} failed after {attempts} attempts at {redact_url(rpc_url)} ({last_type})"
+    )
 
 
 def hex_int(value: str | None) -> int | None:

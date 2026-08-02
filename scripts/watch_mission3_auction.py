@@ -428,13 +428,12 @@ def redact_url(value: str) -> str:
     elif parts.path == "/":
         path = "/"
     query = "redacted=1" if parts.query else ""
-    scheme = parts.scheme.lower() if parts.scheme else "https"
-    return urllib.parse.urlunsplit((scheme, host, path, query, ""))
+    return urllib.parse.urlunsplit(("https", host, path, query, ""))
 
 
 def redact_rpc_text(value: Any) -> str:
     text = str(value)
-    for url in re.findall(r"https?://[^\s\"'<>]+", text, flags=re.IGNORECASE):
+    for url in re.findall(r"[A-Za-z][A-Za-z0-9+.-]*://[^\s\"'<>]+", text):
         text = text.replace(url, redact_url(url))
     return text
 

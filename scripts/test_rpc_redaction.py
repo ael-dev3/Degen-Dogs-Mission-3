@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 import tempfile
 import urllib.error
 from pathlib import Path
@@ -14,7 +15,9 @@ CUSTOM_RPC_URL = (
     "path-secret?token=query-secret#fragment-secret"
 )
 UPPERCASE_CUSTOM_RPC_URL = CUSTOM_RPC_URL.replace("https://", "HTTPS://")
+SCHEME_SECRET_RPC_URL = CUSTOM_RPC_URL.replace("https://", "api-key-secret://")
 SECRETS = (
+    "api-key-secret",
     "user-secret",
     "password-secret",
     "host-secret",
@@ -30,6 +33,7 @@ def load_module(name: str) -> Any:
     spec = importlib.util.spec_from_file_location(name, path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -46,6 +50,8 @@ def test_mission1_custom_rpc_redaction_covers_url_text_and_errors() -> None:
     assert_custom_url_redacted(mission1.redact_url(CUSTOM_RPC_URL))
     assert_custom_url_redacted(mission1.redact_text(f"provider={CUSTOM_RPC_URL}"))
     assert_custom_url_redacted(mission1.redact_text(f"provider={UPPERCASE_CUSTOM_RPC_URL}"))
+    assert_custom_url_redacted(mission1.redact_url(SCHEME_SECRET_RPC_URL))
+    assert_custom_url_redacted(mission1.redact_text(f"provider={SCHEME_SECRET_RPC_URL}"))
     assert mission1.redact_url("https://polygon.drpc.org") == "https://polygon.drpc.org"
 
     original_urlopen = mission1.urlopen
@@ -63,12 +69,47 @@ def test_mission1_custom_rpc_redaction_covers_url_text_and_errors() -> None:
     finally:
         mission1.urlopen = original_urlopen
 
+    try:
+        mission1.rpc_call([SCHEME_SECRET_RPC_URL], "eth_chainId", [], timeout=1)
+    except RuntimeError as exc:
+        assert_custom_url_redacted(str(exc))
+    else:
+        raise AssertionError("Mission 1 accepted a non-HTTPS secret-bearing RPC URL")
+
+    original_urlopen = mission1.urlopen
+    mission1.urlopen = lambda *_args, **_kwargs: type(  # noqa: ARG005
+        "Response",
+        (),
+        {
+            "read": lambda self: json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {"code": -32000, "message": "invalid path-secret query-secret"},
+                }
+            ).encode("utf-8")
+        },
+    )()
+    try:
+        try:
+            mission1.rpc_call(["https://polygon.drpc.org"], "eth_chainId", [], timeout=1)
+        except RuntimeError as exc:
+            assert "code=-32000" in str(exc)
+            for secret in SECRETS:
+                assert secret not in str(exc)
+        else:
+            raise AssertionError("Mission 1 provider error unexpectedly succeeded")
+    finally:
+        mission1.urlopen = original_urlopen
+
 
 def test_mission2_custom_rpc_redaction_covers_manifests_and_retry_errors() -> None:
     mission2 = load_module("archive_mission2_index")
     assert_custom_url_redacted(mission2.redact_url(CUSTOM_RPC_URL))
     assert_custom_url_redacted(mission2.redact_text(f"provider={CUSTOM_RPC_URL}"))
     assert_custom_url_redacted(mission2.redact_text(f"provider={UPPERCASE_CUSTOM_RPC_URL}"))
+    assert_custom_url_redacted(mission2.redact_url(SCHEME_SECRET_RPC_URL))
+    assert_custom_url_redacted(mission2.redact_text(f"provider={SCHEME_SECRET_RPC_URL}"))
     assert mission2.redact_url("https://rpc.degen.tips") == "https://rpc.degen.tips"
 
     original_rpc_call = mission2.rpc_call
@@ -86,6 +127,43 @@ def test_mission2_custom_rpc_redaction_covers_manifests_and_retry_errors() -> No
     finally:
         mission2.rpc_call = original_rpc_call
 
+    try:
+        mission2.rpc_call_retry(SCHEME_SECRET_RPC_URL, "eth_chainId", [], attempts=1)
+    except RuntimeError as exc:
+        assert_custom_url_redacted(str(exc))
+    else:
+        raise AssertionError("Mission 2 accepted a non-HTTPS secret-bearing RPC URL")
+
+    class Mission2Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {"code": -32000, "message": "invalid path-secret query-secret"},
+                }
+            ).encode("utf-8")
+
+    original_urlopen = mission2.urllib.request.urlopen
+    mission2.urllib.request.urlopen = lambda *_args, **_kwargs: Mission2Response()  # noqa: ARG005
+    try:
+        try:
+            mission2.rpc_call("https://rpc.degen.tips", "eth_chainId", [], timeout=1)
+        except RuntimeError as exc:
+            assert "code=-32000" in str(exc)
+            for secret in SECRETS:
+                assert secret not in str(exc)
+        else:
+            raise AssertionError("Mission 2 provider error unexpectedly succeeded")
+    finally:
+        mission2.urllib.request.urlopen = original_urlopen
+
 
 def test_refresh_telemetry_custom_rpc_redaction_covers_returned_and_logged_rows() -> None:
     telemetry = load_module("refresh_telemetry")
@@ -93,6 +171,10 @@ def test_refresh_telemetry_custom_rpc_redaction_covers_returned_and_logged_rows(
     assert_custom_url_redacted(telemetry.redact_value({"error": f"provider={CUSTOM_RPC_URL}"}))
     assert_custom_url_redacted(
         telemetry.redact_value({UPPERCASE_CUSTOM_RPC_URL: UPPERCASE_CUSTOM_RPC_URL})
+    )
+    assert_custom_url_redacted(telemetry.redact_url(SCHEME_SECRET_RPC_URL))
+    assert_custom_url_redacted(
+        telemetry.redact_value({"error": f"provider={SCHEME_SECRET_RPC_URL}"})
     )
     assert telemetry.redact_url("https://ael-dev3.github.io") == "https://ael-dev3.github.io"
 
@@ -148,6 +230,13 @@ def test_refresh_telemetry_custom_rpc_redaction_covers_returned_and_logged_rows(
             telemetry.fetch_json = original_fetch_json
         assert result["live_verify_result"] == "timeout"
         assert_custom_url_redacted(result["error"])
+
+
+def test_dashboard_and_mission3_archive_never_preserve_secret_uri_schemes() -> None:
+    dashboard = load_module("build_dashboard")
+    mission3 = load_module("archive_mission3_index")
+    assert_custom_url_redacted(dashboard._redact_rpc_url(SCHEME_SECRET_RPC_URL))
+    assert_custom_url_redacted(mission3.redact_url(SCHEME_SECRET_RPC_URL))
 
 
 if __name__ == "__main__":

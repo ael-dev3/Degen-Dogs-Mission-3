@@ -768,7 +768,7 @@ def _redact_rpc_url(url: str) -> str:
     if host not in PUBLIC_RPC_HOSTNAMES:
         host = f"rpc-host-{hashlib.sha256(host.encode('utf-8')).hexdigest()[:12]}"
     port = f":{port_number}" if port_number else ""
-    return f"{parsed.scheme or 'https'}://{host}{port}"
+    return f"https://{host}{port}"
 
 
 def _rpc_provider_key(url: str) -> str:

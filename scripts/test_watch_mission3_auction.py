@@ -1068,6 +1068,12 @@ def test_watcher_custom_rpc_credentials_never_enter_errors_logs_or_state():
     uppercase_text = watcher.redact_rpc_text(custom_url.replace("https://", "HTTPS://"))
     assert "host-secret" not in uppercase_text
     assert "path-secret" not in uppercase_text
+    scheme_secret_url = custom_url.replace("https://", "api-key-secret://")
+    scheme_redacted = watcher.redact_url(scheme_secret_url)
+    assert scheme_redacted.startswith("https://rpc-host-")
+    scheme_error = watcher.redact_rpc_text(f"provider failure at {scheme_secret_url}")
+    assert "api-key-secret" not in scheme_error
+    assert "host-secret" not in scheme_error
 
     original_post_json = watcher.post_json
     watcher.post_json = lambda _url, _payload, timeout=30: (_ for _ in ()).throw(  # noqa: ARG005

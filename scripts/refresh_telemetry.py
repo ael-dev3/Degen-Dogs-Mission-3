@@ -176,8 +176,7 @@ def redact_url(value: str) -> str:
     elif parts.path == "/":
         path = "/"
     query = "redacted=1" if parts.query else ""
-    scheme = parts.scheme.lower() if parts.scheme else "https"
-    return urllib.parse.urlunsplit((scheme, host, path, query, ""))
+    return urllib.parse.urlunsplit(("https", host, path, query, ""))
 
 
 def redact_value(value: Any) -> Any:
@@ -188,7 +187,7 @@ def redact_value(value: Any) -> Any:
     if not isinstance(value, str):
         return value
     text = value
-    for url in re.findall(r"https?://[^\s\"'<>]+", text, flags=re.IGNORECASE):
+    for url in re.findall(r"[A-Za-z][A-Za-z0-9+.-]*://[^\s\"'<>]+", text):
         text = text.replace(url, redact_url(url))
     for pattern in SECRET_PATTERNS:
         text = pattern.sub(lambda m: f"{m.group(1)}=<redacted>" if m.groups() else "<redacted-secret>", text)
