@@ -17,6 +17,8 @@ from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
 
+import runner_path_security as path_security
+
 
 SCRIPT = Path(__file__).with_name("degen_dogs_runner_health.py")
 REPO_VENV_PYTHON = SCRIPT.parent.parent / ".venv" / "bin" / "python3"
@@ -119,6 +121,10 @@ def test_live_site_transport_accepts_only_exact_bounded_targets() -> None:
     assert html_response.read_limit == health.LIVE_HTML_MAX_BYTES + 1
     assert status_response.read_limit == health.LIVE_STATUS_MAX_BYTES + 1
     assert health.NoLiveRedirectHandler().redirect_request(None, None, 302, "", {}, "https://attacker.example") is None
+
+
+def test_default_live_status_freshness_window_is_ninety_minutes() -> None:
+    assert health.DEFAULT_LIVE_STALE_SECONDS == 90 * 60
 
 
 def test_live_site_transport_rejects_unapproved_redirect_status_mime_and_oversize() -> None:
@@ -914,6 +920,169 @@ def test_runner_permission_hardening_repairs_modes_and_refuses_symlinks() -> Non
                 setattr(health, name, value)
 
 
+def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_default() -> None:
+    original_repo = health.REPO_DIR
+    original_dry_run = health.DRY_RUN
+    original_env_file = os.environ.get("DEGEN_DOGS_ENV_FILE")
+    secret_sentinel = "ENV_FILE_SECRET_MUST_NOT_APPEAR"
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        repo = root / "repo"
+        repo.mkdir()
+        default_env = repo / ".env.local"
+        try:
+            health.REPO_DIR = repo
+            health.DRY_RUN = False
+            os.environ.pop("DEGEN_DOGS_ENV_FILE", None)
+
+            # The default file is optional when it has never been created.
+            lines: list[str] = []
+            assert health.harden_runner_environment_file(lines) is False
+            assert lines == []
+
+            # Mode drift is diagnosed without mutation in dry-run mode, then
+            # repaired in place through the descriptor-safe private-file helper.
+            default_env.write_text(f"BASE_RPC_URL={secret_sentinel}\n", encoding="utf-8")
+            default_env.chmod(0o644)
+            inode = default_env.stat().st_ino
+            health.DRY_RUN = True
+            lines = []
+            assert health.harden_runner_environment_file(lines) is False
+            assert default_env.stat().st_mode & 0o777 == 0o644
+            assert any("DRY-RUN would set default runner environment file" in line for line in lines)
+            assert secret_sentinel not in "\n".join(lines)
+
+            health.DRY_RUN = False
+            lines = []
+            assert health.harden_runner_environment_file(lines) is False
+            assert default_env.stat().st_mode & 0o777 == 0o600
+            assert default_env.stat().st_ino == inode
+            assert secret_sentinel not in "\n".join(lines)
+
+            # A final-component symlink must never chmod or disclose its target.
+            default_env.unlink()
+            symlink_target = root / "symlink-target.env"
+            symlink_target.write_text(secret_sentinel, encoding="utf-8")
+            symlink_target.chmod(0o640)
+            default_env.symlink_to(symlink_target)
+            lines = []
+            assert health.harden_runner_environment_file(lines) is True
+            assert symlink_target.stat().st_mode & 0o777 == 0o640
+            assert symlink_target.read_text(encoding="utf-8") == secret_sentinel
+            assert secret_sentinel not in "\n".join(lines)
+
+            # A hard-linked file has ambiguous identity and is not repairable.
+            default_env.unlink()
+            hardlink_source = root / "hardlink-source.env"
+            hardlink_source.write_text(secret_sentinel, encoding="utf-8")
+            hardlink_source.chmod(0o600)
+            os.link(hardlink_source, default_env)
+            lines = []
+            assert health.harden_runner_environment_file(lines) is True
+            assert hardlink_source.stat().st_nlink == 2
+            assert secret_sentinel not in "\n".join(lines)
+            default_env.unlink()
+            hardlink_source.unlink()
+
+            # An explicit path is monitored and repaired; unlike the default,
+            # its later absence is actionable configuration drift.
+            configured_dir = repo / "configured"
+            configured_dir.mkdir()
+            path_secret_sentinel = "PATH_SECRET_MUST_NOT_APPEAR"
+            configured_env = configured_dir / f"{path_secret_sentinel}.env"
+            configured_env.write_text(f"BASE_LOG_RPC_URLS={secret_sentinel}\n", encoding="utf-8")
+            configured_env.chmod(0o640)
+            os.environ["DEGEN_DOGS_ENV_FILE"] = str(configured_env)
+            lines = []
+            assert health.harden_runner_environment_file(lines) is False
+            assert configured_env.stat().st_mode & 0o777 == 0o600
+            assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
+
+            configured_env.unlink()
+            lines = []
+            assert health.harden_runner_environment_file(lines) is True
+            assert any("configured runner environment file is missing" in line for line in lines)
+            assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
+            incident = health.build_incident_body({"issues": lines})
+            assert secret_sentinel not in incident
+            assert path_secret_sentinel not in incident
+
+            # Installer stderr can be relayed through health repair findings.
+            # Global sanitization must remove the configured path before an
+            # outside-HOME secret filename can enter a GitHub incident body.
+            installer_error = f"runner env file must be mode 600: {configured_env}"
+            sanitized_error = health.sanitize(installer_error)
+            assert "<runner-env>" in sanitized_error
+            assert path_secret_sentinel not in sanitized_error
+            incident = health.build_incident_body({"issues": [installer_error]})
+            assert "<runner-env>" in incident
+            assert path_secret_sentinel not in incident
+
+            os.environ["DEGEN_DOGS_ENV_FILE"] = "e"
+            ordinary_alert = "service remains healthy despite an unrelated retry"
+            assert health.sanitize(ordinary_alert) == ordinary_alert
+            assert health.sanitize(f"installer rejected path: {health.REPO_DIR / 'e'}").endswith(
+                "<runner-env>"
+            )
+            assert health.sanitize("installer rejected path: e").endswith("<runner-env>")
+            os.environ["DEGEN_DOGS_ENV_FILE"] = os.sep
+            root_path_alert = "root path / must not erase ordinary slash-delimited output"
+            assert health.sanitize(root_path_alert) == root_path_alert
+            os.environ["DEGEN_DOGS_ENV_FILE"] = "~missing-runner-user/secret.env"
+            assert health.sanitize(ordinary_alert) == ordinary_alert
+            os.environ["DEGEN_DOGS_ENV_FILE"] = str(configured_env)
+
+            # Unsafe parent substitution is rejected before the target is opened.
+            configured_env.write_text(secret_sentinel, encoding="utf-8")
+            configured_env.chmod(0o600)
+            redirected_parent = repo / "redirected-config"
+            redirected_parent.symlink_to(configured_dir, target_is_directory=True)
+            os.environ["DEGEN_DOGS_ENV_FILE"] = str(redirected_parent / f"{path_secret_sentinel}.env")
+            lines = []
+            assert health.harden_runner_environment_file(lines) is True
+            assert configured_env.read_text(encoding="utf-8") == secret_sentinel
+            assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
+            incident = health.build_incident_body({"issues": lines})
+            assert secret_sentinel not in incident
+            assert path_secret_sentinel not in incident
+
+            # Exercise the unexpected-owner branch without requiring privileged
+            # chown: /tmp is root-owned, so changing the helper's expected uid
+            # reaches the final-file ownership check rather than an ancestor.
+            owner_fd, owner_name = tempfile.mkstemp(prefix="degen-dogs-env-owner-", dir="/tmp")
+            owner_path = Path(owner_name)
+            try:
+                os.write(owner_fd, secret_sentinel.encode("utf-8"))
+            finally:
+                os.close(owner_fd)
+            owner_path.chmod(0o600)
+            original_expected_uid = path_security._CURRENT_UID
+            try:
+                path_security._CURRENT_UID = os.getuid() + 1
+                os.environ["DEGEN_DOGS_ENV_FILE"] = str(owner_path)
+                lines = []
+                assert health.harden_runner_environment_file(lines) is True
+                assert any(
+                    "configured runner environment file: SecurePathError" in line
+                    for line in lines
+                )
+                assert owner_path.read_text(encoding="utf-8") == secret_sentinel
+                assert secret_sentinel not in "\n".join(lines)
+            finally:
+                path_security._CURRENT_UID = original_expected_uid
+                owner_path.unlink(missing_ok=True)
+        finally:
+            health.REPO_DIR = original_repo
+            health.DRY_RUN = original_dry_run
+            if original_env_file is None:
+                os.environ.pop("DEGEN_DOGS_ENV_FILE", None)
+            else:
+                os.environ["DEGEN_DOGS_ENV_FILE"] = original_env_file
+
+
 def test_log_compaction_refuses_symlinks() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -1029,6 +1198,7 @@ def test_disk_free_thresholds() -> None:
 
 if __name__ == "__main__":
     test_live_site_transport_accepts_only_exact_bounded_targets()
+    test_default_live_status_freshness_window_is_ninety_minutes()
     test_live_site_transport_rejects_unapproved_redirect_status_mime_and_oversize()
     test_live_site_transport_sanitizes_http_errors_and_rejects_invalid_json()
     test_refresh_lock_detection()
@@ -1049,6 +1219,7 @@ if __name__ == "__main__":
     test_log_compaction_is_bounded_and_preserves_launchd_inode()
     test_managed_log_inventory_includes_all_high_growth_jsonl_files()
     test_runner_permission_hardening_repairs_modes_and_refuses_symlinks()
+    test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_default()
     test_log_compaction_refuses_symlinks()
     test_jsonl_compaction_retains_complete_latest_rows()
     test_active_log_defers_until_emergency_cap()
