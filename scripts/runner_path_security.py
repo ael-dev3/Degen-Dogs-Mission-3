@@ -347,6 +347,50 @@ def open_existing_private_file(path: os.PathLike[str] | str, *, writable: bool =
         os.close(parent_fd)
 
 
+def inspect_existing_private_file(
+    path: os.PathLike[str] | str,
+    *,
+    require_private_mode: bool = True,
+) -> os.stat_result | None:
+    """Descriptor-safely inspect an existing owned, single-link regular file.
+
+    ``None`` means the lexical path is absent. Unsafe ancestors, symlinks,
+    non-regular files, unexpected ownership, and hard links raise
+    :class:`SecurePathError`. Callers that only need to diagnose permission
+    drift may disable the mode check without weakening the other guarantees.
+    """
+
+    try:
+        parent_fd, name, display_path = _open_parent(
+            path,
+            create=False,
+            private_parent=False,
+        )
+    except FileNotFoundError:
+        return None
+    try:
+        try:
+            descriptor = os.open(
+                name,
+                os.O_RDONLY | _NOFOLLOW | _CLOEXEC | _NONBLOCK,
+                dir_fd=parent_fd,
+            )
+        except FileNotFoundError:
+            return None
+        except OSError as exc:
+            raise SecurePathError(f"refusing unsafe private file {display_path}: {exc}") from exc
+        try:
+            return _validate_regular(
+                descriptor,
+                display_path,
+                require_private_mode=require_private_mode,
+            )
+        finally:
+            os.close(descriptor)
+    finally:
+        os.close(parent_fd)
+
+
 def create_private_temp(prefix: os.PathLike[str] | str) -> str:
     """Create a mode-0600 sibling using *prefix* and return its lexical path."""
 

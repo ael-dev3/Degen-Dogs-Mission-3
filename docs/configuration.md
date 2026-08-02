@@ -22,6 +22,12 @@ group/others, and carry the least-privilege RPC settings into worker repairs. Th
 is deliberately never sourced as shell code. For direct commands, load it through
 `scripts/load_runner_env.sh` and `degen_dogs_load_runner_env`.
 
+The runner health job continuously validates this file without reading or logging its
+contents. It repairs mode drift to `0600` only for an otherwise safe, current-user-owned
+regular file, and refuses symlinks, hard links, unexpected ownership, or unsafe parent
+components. The default `.env.local` remains optional when absent; a missing explicitly
+configured `DEGEN_DOGS_ENV_FILE` is reported as configuration drift.
+
 ## Mission 3 dashboard variables
 
 | Variable | Purpose | Sensitive? |
@@ -100,6 +106,7 @@ These keep Mission 3 current-auction data fresher than the hourly baseline witho
 | Variable | Purpose | Sensitive? |
 | --- | --- | --- |
 | `DEGEN_DOGS_HEALTH_INTERVAL_SECONDS` | Health LaunchAgent interval; default 300 seconds. | no |
+| `DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS` | Maximum accepted age of the deployed refresh-status sidecar; default 90 minutes (one hourly cycle plus deployment/cache buffer). | no |
 | `DEGEN_DOGS_HEALTH_LOG_MAX_BYTES` | Idle log compaction threshold per managed file; default 8 MiB. | no |
 | `DEGEN_DOGS_HEALTH_LOG_RETAIN_BYTES` | Newest complete-line tail retained after compaction; default 2 MiB. | no |
 | `DEGEN_DOGS_HEALTH_LOG_EMERGENCY_MAX_BYTES` | Hard threshold that permits inode-preserving compaction even while the owning worker is active; default 32 MiB. | no |

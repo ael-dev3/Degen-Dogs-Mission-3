@@ -33,6 +33,7 @@ from runner_path_security import (
     create_private_temp,
     ensure_private_directory as secure_private_directory,
     ensure_private_file as secure_private_file,
+    inspect_existing_private_file,
     open_existing_private_file,
     open_private_lock,
     replace_private_file,
@@ -94,7 +95,10 @@ WATCHER_STALE_SECONDS = int(
     os.environ.get("DEGEN_DOGS_HEALTH_WATCHER_STALE_SECONDS", str(max(300, WATCHER_INTERVAL_SECONDS * 5)))
 )
 PENDING_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_PENDING_STALE_SECONDS", "900"))
-LIVE_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS", str(3 * 3600)))
+DEFAULT_LIVE_STALE_SECONDS = 90 * 60
+LIVE_STALE_SECONDS = int(
+    os.environ.get("DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS", str(DEFAULT_LIVE_STALE_SECONDS))
+)
 STALE_SUCCESS_SECONDS = max(2 * EXPECTED_INTERVAL_SECONDS, 2 * 3600)
 CRITICAL_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_CRITICAL_STALE_SECONDS", str(2 * 3600)))
 REPEAT_ALERT_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_REPEAT_ALERT_SECONDS", str(6 * 3600)))
@@ -330,6 +334,14 @@ def private_runner_files() -> tuple[Path, ...]:
     return tuple(dict.fromkeys(paths))
 
 
+def runner_environment_file() -> tuple[Path, bool]:
+    """Return the monitored env path and whether the operator configured it."""
+    configured = os.environ.get("DEGEN_DOGS_ENV_FILE")
+    if configured:
+        return _absolute_runner_path(Path(configured).expanduser()), True
+    return REPO_DIR / ".env.local", False
+
+
 def harden_private_directory(path: Path) -> bool:
     """Create or repair a directory without following any path component."""
     try:
@@ -346,9 +358,57 @@ def harden_private_file(path: Path) -> bool:
         raise PermissionError(f"runner private file is unsafe: {path}: {exc}") from exc
 
 
+def harden_runner_environment_file(lines: list[str]) -> bool:
+    """Continuously validate the protected data-only runner configuration.
+
+    The default ``.env.local`` is optional. Once an operator explicitly sets
+    ``DEGEN_DOGS_ENV_FILE``, a missing path is configuration drift. Only mode
+    drift on an otherwise owned, single-link regular file is repaired; unsafe
+    identity or path topology is reported without mutation.
+    """
+    path, configured = runner_environment_file()
+    try:
+        details = inspect_existing_private_file(path, require_private_mode=False)
+    except (OSError, SecurePathError) as exc:
+        append_issue(
+            lines,
+            f"runner permission hardening failed for environment file {path}: "
+            f"{type(exc).__name__}: {exc}",
+        )
+        return True
+
+    if details is None:
+        if configured:
+            append_issue(lines, f"runner permission hardening failed: configured environment file is missing: {path}")
+            return True
+        return False
+
+    if stat.S_IMODE(details.st_mode) == 0o600:
+        return False
+    if DRY_RUN:
+        append_fix(lines, f"DRY-RUN would set runner environment file {path} to mode 0600")
+        return False
+
+    try:
+        changed = harden_private_file(path)
+        verified = inspect_existing_private_file(path, require_private_mode=True)
+        if verified is None or stat.S_IMODE(verified.st_mode) != 0o600:
+            raise PermissionError(f"runner environment file disappeared or remained insecure: {path}")
+    except (OSError, PermissionError, SecurePathError) as exc:
+        append_issue(
+            lines,
+            f"runner permission hardening failed for environment file {path}: "
+            f"{type(exc).__name__}: {exc}",
+        )
+        return True
+    if changed:
+        append_fix(lines, f"set runner environment file {path} to mode 0600")
+    return False
+
+
 def harden_runner_permissions(lines: list[str]) -> bool:
     """Keep private runner state unreadable to other local accounts."""
-    had_error = False
+    had_error = harden_runner_environment_file(lines)
     for path in private_runner_directories():
         if DRY_RUN:
             try:
