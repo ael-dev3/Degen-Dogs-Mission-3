@@ -194,6 +194,11 @@ plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.watch-auction.p
 plutil -p "$HOME/Library/LaunchAgents/com.ael.degendogs.mission3.health.plist"
 ```
 
+The manual health commands securely load the protected local runner policy,
+then start the watchdog with a clean, least-privilege environment. RPC
+endpoints, API credentials, token-price overrides, and Git remotes are never
+inherited by the health process.
+
 A no-change watcher dry run should exit `0` and print a `no_refresh` line. A healthy
 one-shot launchd watcher can show `state = not running` between intervals; check `last
 exit code`, run count, logs, and tracker state instead of treating that as failure.

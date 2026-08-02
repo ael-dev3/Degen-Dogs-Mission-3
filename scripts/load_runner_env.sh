@@ -10,7 +10,7 @@ degen_dogs_load_runner_env() {
     return 0
   fi
   local parsed_records
-  if ! parsed_records="$(python3 - "$env_file" <<'PY'
+  if ! parsed_records="$(PYTHONNOUSERSITE=1 python3 -I - "$env_file" <<'PY'
 from __future__ import annotations
 
 import os
