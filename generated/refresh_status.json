@@ -16,9 +16,9 @@
   "dog_total_supply": 792,
   "kind": "refresh_status",
   "last_refresh_result": "success_generated",
-  "last_successful_refresh_time_utc": "2026-08-02T18:52:25Z",
-  "latest_generated_block": 49453681,
-  "latest_generated_block_time_utc": "2026-08-02T18:51:49Z",
+  "last_successful_refresh_time_utc": "2026-08-02T19:29:12Z",
+  "latest_generated_block": 49454798,
+  "latest_generated_block_time_utc": "2026-08-02T19:29:03Z",
   "log_rpc_quorum_providers": "base.gateway.tenderly.co,base.lava.build",
   "onchain_chain_id": 8453,
   "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs,event_block_timestamps,dog_token_uri_bindings,woof_token_state,sup_token_state",
@@ -29,7 +29,7 @@
   "rpc_quorum_size": 2,
   "schema_version": 1,
   "site_url": "https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
-  "snapshot_block_hash": "0xb663e5380ec5afeba4720bac05e6433ab4d3bde26b104660aced666bbd36e0a2",
-  "snapshot_confirmations": 2,
-  "trigger": "manual"
+  "snapshot_block_hash": "0xcc56a4dfc588c55364e1018be5dbcafa404bf2ede58deea0e1a47d9c6bfb13c5",
+  "snapshot_confirmations": 1,
+  "trigger": "hourly_refresh"
 }
