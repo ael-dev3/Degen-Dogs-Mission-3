@@ -1025,6 +1025,13 @@ def merge_settled_winner_row(
     """Apply settlement facts without erasing canonical price or block provenance."""
     row = dict(existing)
     row.update(updates)
+    # The fast path may revisit an already-settled previous auction after its
+    # complete bid ledger has rotated out of current_auction_bid_history. Empty
+    # incremental values must not erase timestamps already established by the
+    # full onchain build.
+    for key in ("first_bid_utc", "last_bid_utc"):
+        if row.get(key) in (None, "") and existing.get(key) not in (None, ""):
+            row[key] = existing[key]
     event_amount = decimal_or_none(historical_usd.get("amount_usd_at_event"))
     if event_amount is None:
         raise FullRefreshRequired("settled winner is missing canonical event USD")
