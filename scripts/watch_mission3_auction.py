@@ -1442,25 +1442,30 @@ def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: 
 
 def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dict[str, Any] | None = None) -> tuple[str, int]:
     validate_refresh_command(config)
-    if config.require_clean_tree:
-        tracked = git_status_tracked().strip()
-        if tracked:
-            raise RuntimeError("tracked working tree changes exist; refusing guarded refresh:\n" + tracked)
-    else:
-        tracked = git_status_tracked().strip()
-        if tracked:
-            log(config, "warning: tracked working tree changes exist before local refresh")
-
-    command_for_log = redact_command(config.refresh_command)
-    if dry_run:
-        log(config, f"dry-run: would run refresh command: {command_for_log}; reasons={','.join(reasons)}")
-        return "dry_run", 0
-
-    refresh_lock = acquire_refresh_lock(config)
-    if config.refresh_lock_path and refresh_lock is None:
-        raise RefreshAlreadyRunning(f"another refresh is already running at {config.refresh_lock_path}")
+    refresh_lock = None
+    if not dry_run:
+        refresh_lock = acquire_refresh_lock(config)
+        if config.refresh_lock_path and refresh_lock is None:
+            raise RefreshAlreadyRunning(f"another refresh is already running at {config.refresh_lock_path}")
 
     try:
+        # Inspect the worktree only after owning the shared publisher lock. The
+        # hourly publisher legitimately dirties generated files while it runs;
+        # lock contention must be treated as a healthy deferral, not corruption.
+        if config.require_clean_tree:
+            tracked = git_status_tracked().strip()
+            if tracked:
+                raise RuntimeError("tracked working tree changes exist; refusing guarded refresh:\n" + tracked)
+        else:
+            tracked = git_status_tracked().strip()
+            if tracked:
+                log(config, "warning: tracked working tree changes exist before local refresh")
+
+        command_for_log = redact_command(config.refresh_command)
+        if dry_run:
+            log(config, f"dry-run: would run refresh command: {command_for_log}; reasons={','.join(reasons)}")
+            return "dry_run", 0
+
         child_env = {
             **os.environ,
             "GIT_TERMINAL_PROMPT": "0",

@@ -39,6 +39,9 @@ CACHE_DIR = Path(
 REFRESH_LOCK_PATH = Path(
     os.environ.get("MISSION3_REFRESH_LOCK_PATH", str(CACHE_DIR / "refresh.lock"))
 ).expanduser()
+WATCHER_LOCK_PATH = Path(
+    os.environ.get("MISSION3_WATCHER_LOCK_PATH", str(REPO_DIR / ".local" / "mission3_onchain_tracker.lock"))
+).expanduser()
 REFRESH_LOG = LOG_DIR / "refresh.log"
 REFRESH_SCRIPT = REPO_DIR / "scripts" / "refresh_and_publish.sh"
 WATCHER_SCRIPT = REPO_DIR / "scripts" / "watch_mission3_onchain_activity.py"
@@ -84,6 +87,14 @@ LOG_EMERGENCY_MAX_BYTES = max(
 )
 MIN_FREE_BYTES = max(0, int(os.environ.get("DEGEN_DOGS_HEALTH_MIN_FREE_BYTES", str(5 * 1024 * 1024 * 1024))))
 MIN_FREE_PERCENT = max(0.0, float(os.environ.get("DEGEN_DOGS_HEALTH_MIN_FREE_PERCENT", "5")))
+REFRESH_ACTIVE_GRACE_SECONDS = min(
+    45 * 60,
+    max(60, int(os.environ.get("DEGEN_DOGS_HEALTH_REFRESH_ACTIVE_GRACE_SECONDS", str(45 * 60)))),
+)
+WATCHER_ACTIVE_GRACE_SECONDS = max(
+    30,
+    int(os.environ.get("DEGEN_DOGS_HEALTH_WATCHER_ACTIVE_GRACE_SECONDS", "90")),
+)
 
 SECRET_PATTERNS = [
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{20,}"),
@@ -645,7 +656,7 @@ def derive_causes(
         causes.append("no_successful_refresh_over_threshold")
     if failed_last:
         causes.append("latest_refresh_failed")
-    if any("launchd" in item.lower() for item in issues) or "could not inspect disabled launchd" in combined:
+    if launchd_fault_present(issues):
         causes.append("launchd_agent_unhealthy_or_drifted")
     if "watcher" in combined:
         causes.append("onchain_watcher_unhealthy_or_stale")
@@ -1153,6 +1164,47 @@ def launchctl_print(label: str = HOURLY_LABEL) -> Result:
     return run(["launchctl", "print", launch_target(label)], cwd=None, timeout=20)
 
 
+def inspect_active_lock(path: Path) -> tuple[bool, float | None]:
+    """Return whether a lock is held and its trustworthy in-file start time.
+
+    A leftover file is not an active attempt. Only flock contention counts as active;
+    metadata is then read through the already-open descriptor to avoid a path swap.
+    """
+    if not path.exists():
+        return False, None
+    try:
+        fd = os.open(path, os.O_RDWR)
+    except OSError:
+        return False, None
+    acquired = False
+    active = False
+    payload = ""
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            acquired = True
+        except BlockingIOError:
+            active = True
+        if active:
+            os.lseek(fd, 0, os.SEEK_SET)
+            payload = os.read(fd, 4096).decode("utf-8", errors="replace")
+    finally:
+        if acquired:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+        os.close(fd)
+    if not active:
+        return False, None
+    started_at = None
+    for line in payload.splitlines():
+        if line.startswith("started_at_utc="):
+            started_at = parse_iso_timestamp(line.partition("=")[2].strip())
+            break
+    return True, started_at
+
+
 def refresh_is_active() -> bool:
     """Return whether the shared refresh lock is held by another process.
 
@@ -1161,27 +1213,64 @@ def refresh_is_active() -> bool:
     worktree that blocks the next refresh. An unlocked/stale lock file is not enough to
     suppress an alert; only an active flock counts.
     """
-    if not REFRESH_LOCK_PATH.exists():
+    return inspect_active_lock(REFRESH_LOCK_PATH)[0]
+
+
+def fresh_active_attempt(
+    *,
+    lock_held: bool,
+    started_ts: float | None,
+    completed_ts: float | None,
+    now: float,
+    grace_seconds: int,
+) -> bool:
+    """Identify a newer, bounded in-flight attempt without trusting launchd state alone."""
+    if not lock_held or started_ts is None:
         return False
-    try:
-        fd = os.open(REFRESH_LOCK_PATH, os.O_RDWR)
-    except OSError:
+    if completed_ts is not None and started_ts <= completed_ts:
         return False
-    acquired = False
-    try:
-        try:
-            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            acquired = True
-        except BlockingIOError:
-            return True
-        return False
-    finally:
-        if acquired:
-            try:
-                fcntl.flock(fd, fcntl.LOCK_UN)
-            except OSError:
-                pass
-        os.close(fd)
+    age = now - started_ts
+    return 0 <= age < grace_seconds
+
+
+def watcher_completion_lag_issue(issue: str) -> bool:
+    """Return true only for state signals a newly started watcher can repair."""
+    lowered = issue.lower()
+    return (
+        lowered.startswith("watcher state missing:")
+        or lowered == "watcher state has no valid last_checked_at_utc"
+        or lowered.startswith("watcher state age=")
+    )
+
+
+def filter_watcher_issues_for_active_attempt(issues: list[str], active_attempt: bool) -> list[str]:
+    if not active_attempt:
+        return list(issues)
+    return [issue for issue in issues if not watcher_completion_lag_issue(issue)]
+
+
+def expected_live_publish_lag(message: str) -> bool:
+    """Recognize only local-ahead parity lag while an active publisher deploys."""
+    lowered = message.lower()
+    return (
+        lowered.startswith("live refresh status block ") and " trails local generated block " in lowered
+    ) or (
+        lowered.startswith("live refresh status ") and " differs from local validated status at block " in lowered
+    )
+
+
+def launchd_fault_present(issues: Iterable[str]) -> bool:
+    markers = (
+        "launchd plist missing",
+        "launchd plist unreadable",
+        "launchd plist drift",
+        "launchctl cannot see",
+        "could not inspect disabled launchd",
+        "failed to reinstall launchd",
+        "failed to enable launchd",
+        "deferred launchd",
+    )
+    return any(any(marker in issue.lower() for marker in markers) for issue in issues)
 
 
 def service_is_running(print_output: str) -> bool:
@@ -1337,7 +1426,36 @@ def main() -> int:
     print_output = launch_outputs.get(HOURLY_LABEL, "")
     watcher_output = launch_outputs.get(WATCHER_LABEL, "")
 
-    watcher_issues, watcher_state = inspect_watcher_state()
+    log_details = parse_refresh_log_details()
+    last_success_ts = log_details.get("last_success_ts")
+    last_finished_status = log_details.get("last_finished_status")
+    last_error = log_details.get("last_error")
+    now = time.time()
+    refresh_attempt_active = fresh_active_attempt(
+        lock_held=refresh_in_progress,
+        started_ts=log_details.get("last_started_ts"),
+        completed_ts=log_details.get("last_finished_ts"),
+        now=now,
+        grace_seconds=REFRESH_ACTIVE_GRACE_SECONDS,
+    )
+
+    all_watcher_issues, watcher_state = inspect_watcher_state(now)
+    watcher_lock_held, watcher_started_ts = inspect_active_lock(WATCHER_LOCK_PATH)
+    watcher_checked_ts = parse_iso_timestamp(watcher_state.get("last_checked_at_utc"))
+    watcher_attempt_active = fresh_active_attempt(
+        lock_held=watcher_lock_held,
+        started_ts=watcher_started_ts,
+        completed_ts=watcher_checked_ts,
+        now=now,
+        grace_seconds=WATCHER_ACTIVE_GRACE_SECONDS,
+    ) or (watcher_lock_held and refresh_attempt_active)
+    watcher_issues = filter_watcher_issues_for_active_attempt(all_watcher_issues, watcher_attempt_active)
+    suppressed_watcher_issues = [issue for issue in all_watcher_issues if issue not in watcher_issues]
+    if suppressed_watcher_issues:
+        append_fix(
+            lines,
+            f"deferred {len(suppressed_watcher_issues)} watcher completion-lag check(s) while a newer locked run is active",
+        )
     for issue in watcher_issues:
         append_issue(lines, issue)
     if watcher_issues:
@@ -1354,26 +1472,25 @@ def main() -> int:
                 timeout=30,
             )
 
-    log_details = parse_refresh_log_details()
-    last_success_ts = log_details.get("last_success_ts")
-    last_finished_status = log_details.get("last_finished_status")
-    last_error = log_details.get("last_error")
-    now = time.time()
     stale = last_success_ts is None or (now - last_success_ts) > STALE_SUCCESS_SECONDS
     critical_stale = last_success_ts is None or (now - last_success_ts) > CRITICAL_STALE_SECONDS
     failed_last = last_finished_status is not None and last_finished_status != 0
-    if critical_stale:
+    effective_critical_stale = critical_stale and not refresh_attempt_active
+    effective_failed_last = failed_last and not refresh_attempt_active
+    if effective_critical_stale:
         if last_success_ts is None:
             append_issue(lines, "no successful refresh found; critical local-runner alert threshold crossed")
         else:
             append_issue(lines, f"last successful refresh age={int((now - last_success_ts) / 60)}m exceeds critical threshold={int(CRITICAL_STALE_SECONDS / 60)}m")
-    if failed_last:
+    if effective_failed_last:
         append_issue(lines, f"latest refresh finished with nonzero status={last_finished_status}")
-    if last_error:
+    if last_error and not refresh_attempt_active:
         append_issue(lines, f"latest refresh log error: {sanitize(str(last_error), 300)}")
 
     if stale or failed_last:
-        if disk_low:
+        if refresh_attempt_active:
+            append_fix(lines, "deferred prior refresh staleness/failure while a newer locked refresh is active")
+        elif disk_low:
             append_issue(lines, "hourly refresh kickstart deferred while runner disk space is low")
         elif dirty_blocking:
             append_issue(lines, "refresh appears stale/failed, but tracked worktree changes still block safe kickstart")
@@ -1393,7 +1510,11 @@ def main() -> int:
 
     metrics = load_metrics()
     ok, live_msg = live_site_ok(load_local_refresh_status())
-    if not ok:
+    live_publish_pending = not ok and refresh_attempt_active and expected_live_publish_lag(live_msg)
+    effective_live_ok = ok or live_publish_pending
+    if live_publish_pending:
+        append_fix(lines, "deferred live parity check while the newer locked snapshot is publishing")
+    elif not ok:
         append_issue(lines, live_msg)
     latest_block = metrics.get("latest_block")
     current_dog = metrics.get("current_auction_token_id")
@@ -1403,9 +1524,9 @@ def main() -> int:
         issues=issue_lines,
         dirty_paths=dirty_paths if dirty_blocking else [],
         log_details=log_details,
-        stale=critical_stale,
-        failed_last=failed_last,
-        live_ok=ok,
+        stale=effective_critical_stale,
+        failed_last=effective_failed_last,
+        live_ok=effective_live_ok,
         launch_output=print_output,
         now=now,
     )
@@ -1425,19 +1546,21 @@ def main() -> int:
         "watcher_history": compact_watcher_history(),
         "watcher_state": watcher_state,
         "disk": disk_summary,
-        "live_ok": ok,
+        "live_ok": effective_live_ok,
+        "live_actual_ok": ok,
+        "live_publish_pending": live_publish_pending,
         "latest_block": latest_block,
         "current_dog": current_dog,
     }
     critical = bool(issue_lines) and (
-        critical_stale
-        or failed_last
+        effective_critical_stale
+        or effective_failed_last
         or dirty_blocking
-        or not ok
+        or not effective_live_ok
         or bool(watcher_issues)
         or bool(disk_issues)
         or rotation_failed
-        or any("launchd" in line.lower() for line in issue_lines)
+        or launchd_fault_present(issue_lines)
         or any("required script missing" in line.lower() for line in issue_lines)
     )
 
@@ -1447,10 +1570,14 @@ def main() -> int:
             print(alert_message)
         return 1
 
-    alert_message = handle_recovery_alert(snapshot)
-    if alert_message:
-        print(alert_message)
-        return 0
+    recovery_pending = (
+        refresh_attempt_active and (critical_stale or failed_last or live_publish_pending)
+    ) or (watcher_attempt_active and bool(suppressed_watcher_issues))
+    if not recovery_pending:
+        alert_message = handle_recovery_alert(snapshot)
+        if alert_message:
+            print(alert_message)
+            return 0
 
     if lines:
         suffix = []

@@ -19,6 +19,9 @@ def load_module():
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
+    # Individual watcher tests should never append to the repository's live
+    # telemetry stream. The dedicated telemetry test enables a temporary sink.
+    module.refresh_telemetry = None
     return module
 
 
@@ -564,6 +567,7 @@ def test_cooldown_defer_keeps_unpublished_bid_pending_without_advancing_seen_cur
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
             "MISSION3_REFRESH_COMMAND": "true",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
@@ -617,6 +621,8 @@ def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cu
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
+            "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
             "MISSION3_REFRESH_COMMAND": "false",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
@@ -669,6 +675,8 @@ def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_withou
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
+            "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
             "MISSION3_REFRESH_COMMAND": "true",
             "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
@@ -687,6 +695,9 @@ def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_withou
         assert saved["last_seen_amount_wei"] == original_state["last_seen_amount_wei"]
         assert saved["last_seen_high_bidder"] == original_state["last_seen_high_bidder"]
         assert saved["last_seen_bid_log_id"] == original_state["last_seen_bid_log_id"]
+        reacquired = watcher.acquire_refresh_lock(config)
+        assert reacquired is not None
+        watcher.release_run_lock(reacquired)
 
 
 def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
@@ -724,6 +735,8 @@ def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
+            "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
             "MISSION3_REFRESH_COMMAND": "true",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
@@ -892,13 +905,23 @@ def test_refresh_lock_defers_overlapping_refresh_commands():
     watcher = load_module()
     with tempfile.TemporaryDirectory() as tmp:
         refresh_lock_path = Path(tmp) / "refresh.lock"
+        git_status_calls = 0
+
+        def fail_if_git_status_runs():
+            nonlocal git_status_calls
+            git_status_calls += 1
+            raise AssertionError("git status must not run while another publisher owns the refresh lock")
+
         config = watcher.config_from_env({
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
             "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
         })
         held = watcher.acquire_refresh_lock(config)
         assert held is not None
+        original_git_status = watcher.git_status_tracked
+        watcher.git_status_tracked = fail_if_git_status_runs
         try:
             try:
                 watcher.run_refresh(config, ["auction_bid"], dry_run=False)
@@ -907,7 +930,76 @@ def test_refresh_lock_defers_overlapping_refresh_commands():
             else:
                 raise AssertionError("overlapping refresh should be deferred")
         finally:
+            watcher.git_status_tracked = original_git_status
             watcher.release_run_lock(held)
+        assert git_status_calls == 0
+
+
+def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        refresh_lock_path = tmp_path / "refresh.lock"
+        state_path.write_text(
+            json.dumps(
+                {
+                    "last_seen_token_id": 727,
+                    "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "last_seen_amount_wei": "100",
+                    "last_refresh_at_utc": iso(0),
+                    "last_seen_auction_created_log_id": "90:0xcreated:1",
+                    "last_seen_bid_log_id": "100:0xoldbid:1",
+                    "last_seen_auction_settled_log_id": "",
+                    "last_seen_auction_extended_log_id": "",
+                },
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
+        snapshot = {
+            "latest_block": 101,
+            "checked_from_block": 100,
+            "checked_to_block": 101,
+            "token_id": 727,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "200",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+            "bid_log": {"id": "101:0xnewbid:4", "tx_hash": "0xnewbid"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
+            "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
+            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
+        })
+        held = watcher.acquire_refresh_lock(config)
+        assert held is not None
+        original_git_status = watcher.git_status_tracked
+        watcher.git_status_tracked = lambda: (_ for _ in ()).throw(
+            AssertionError("git status must not run while another publisher owns the refresh lock")
+        )
+        watcher.fetch_snapshot = lambda _config, _state: snapshot
+        try:
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.git_status_tracked = original_git_status
+            watcher.release_run_lock(held)
+
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["last_refresh_status"] == "deferred_refresh_lock"
+        assert saved["pending_refresh"] is True
+        assert saved["pending_bid_log_id"] == "101:0xnewbid:4"
+        assert saved.get("consecutive_refresh_failures", 0) == 0
+        assert saved["last_seen_bid_log_id"] == "100:0xoldbid:1"
 
 
 def test_log_scan_start_uses_last_checked_block_safety_overlap_or_recent_lookback():
@@ -971,6 +1063,7 @@ def test_dry_run_does_not_write_state_and_reports_refresh_intent():
         config = watcher.config_from_env({
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
             "MISSION3_REFRESH_COMMAND": "false",
         })
         snapshot = {
