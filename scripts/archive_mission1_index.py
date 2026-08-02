@@ -70,6 +70,10 @@ DEFAULT_RPC_URLS = [
     "https://1rpc.io/matic",
     "https://polygon-bor-rpc.publicnode.com",
 ]
+PUBLIC_RPC_HOSTNAMES = frozenset(
+    (urlsplit(url).hostname or "").lower().rstrip(".")
+    for url in DEFAULT_RPC_URLS
+)
 
 EVENT_SIGNATURES = {
     "AuctionCreated": "AuctionCreated(uint256,uint256,uint256)",
@@ -122,27 +126,30 @@ def function_selector(signature: str) -> str:
 
 def redact_url(url: str) -> str:
     """Return a log-safe RPC URL without embedded credentials or API keys."""
-    if url in DEFAULT_RPC_URLS:
-        return url
     try:
         parts = urlsplit(url)
-    except Exception:
-        return "[redacted-rpc-url]"
-    netloc = parts.hostname or ""
-    try:
         port = parts.port
-    except ValueError:
-        port = None
+    except (TypeError, ValueError):
+        return "[redacted-rpc-url]"
+    hostname = (parts.hostname or "").lower().rstrip(".")
+    if not hostname:
+        return "[redacted-rpc-url]"
+    if hostname in PUBLIC_RPC_HOSTNAMES:
+        netloc = hostname
+    else:
+        host_label = hashlib.sha256(hostname.encode("utf-8")).hexdigest()[:12]
+        netloc = f"rpc-host-{host_label}"
     if port:
         netloc = f"{netloc}:{port}"
-    if not parts.scheme or not netloc:
-        return "[redacted-rpc-url]"
-    return urlunsplit((parts.scheme, netloc, "/[redacted]", "", ""))
+    path = "/<redacted-path>" if parts.path and parts.path != "/" else ("/" if parts.path == "/" else "")
+    query = "redacted=1" if parts.query else ""
+    scheme = parts.scheme.lower() if parts.scheme else "https"
+    return urlunsplit((scheme, netloc, path, query, ""))
 
 
 def redact_text(text: Any) -> str:
-    raw = text if isinstance(text, str) else json.dumps(text, sort_keys=True)
-    return re.sub(r"https?://[^\s'\"<>]+", lambda m: redact_url(m.group(0)), raw)
+    raw = json.dumps(text, sort_keys=True) if isinstance(text, (dict, list)) else str(text)
+    return re.sub(r"https?://[^\s'\"<>]+", lambda m: redact_url(m.group(0)), raw, flags=re.IGNORECASE)
 
 
 def redact_urls(urls: Iterable[str]) -> List[str]:
@@ -173,7 +180,7 @@ def rpc_call(urls: List[str], method: str, params: list, timeout: int = 45) -> T
                 last_error = f"{redact_url(url)}: {redact_text(data['error'])}"
                 continue
             return data.get("result"), url
-        except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        except Exception as exc:  # noqa: BLE001 - sanitize every transport/parse failure before output
             last_error = f"{redact_url(url)}: {type(exc).__name__}: {redact_text(str(exc))[:220]}"
             continue
     raise RuntimeError(last_error or f"all RPCs failed for {method}")

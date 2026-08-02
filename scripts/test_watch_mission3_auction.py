@@ -783,7 +783,7 @@ def test_cooldown_defer_keeps_unpublished_bid_pending_without_advancing_seen_cur
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
-            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
         })
@@ -839,12 +839,17 @@ def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cu
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
             "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
-            "MISSION3_REFRESH_COMMAND": "false",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
         })
         setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
-        assert watcher.run_once(config) == 2
+        original_run_refresh = watcher.run_refresh
+        watcher.run_refresh = lambda _config, _reasons, dry_run, event=None: ("failure", 1)
+        try:
+            assert watcher.run_once(config) == 2
+        finally:
+            watcher.run_refresh = original_run_refresh
         saved = json.loads(state_path.read_text(encoding="utf-8"))
         assert saved["pending_refresh"] is True
         assert saved["pending_bid_log_id"] == "130:0xnewbid:4"
@@ -894,7 +899,7 @@ def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_withou
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
             "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
-            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
@@ -955,12 +960,17 @@ def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
             "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
-            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_COOLDOWN_SECONDS": "300",
             "MISSION3_WATCHER_BID_COOLDOWN_SECONDS": "60",
         })
         setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
-        assert watcher.run_once(config) == 0
+        original_run_refresh = watcher.run_refresh
+        watcher.run_refresh = lambda _config, _reasons, dry_run, event=None: ("success", 0)
+        try:
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.run_refresh = original_run_refresh
         saved = json.loads(state_path.read_text(encoding="utf-8"))
         assert saved["last_seen_amount_wei"] == "30000000000000000"
         assert saved["last_seen_high_bidder"] == "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
@@ -1034,14 +1044,67 @@ def test_redact_url_masks_path_based_rpc_keys():
     redacted = watcher.redact_url("https://base-mainnet.g.alchemy.com/v2/super-secret-key?apikey=also-secret")
     assert "super-secret-key" not in redacted
     assert "also-secret" not in redacted
-    assert redacted == "https://***.alchemy.com/<redacted-path>?redacted=1"
+    assert redacted == "https://base-mainnet.g.alchemy.com/<redacted-path>?redacted=1"
 
     infura = watcher.redact_url("https://mainnet.infura.io/v3/infura-secret")
     assert "infura-secret" not in infura
-    assert infura == "https://***.infura.io/<redacted-path>"
+    assert infura.startswith("https://rpc-host-")
+    assert infura.endswith("/<redacted-path>")
 
     public = watcher.redact_url("https://mainnet.base.org")
     assert public == "https://mainnet.base.org"
+
+
+def test_watcher_custom_rpc_credentials_never_enter_errors_logs_or_state():
+    watcher = load_module()
+    custom_url = (
+        "https://user-secret:password-secret@host-secret.rpc.custom.example/"
+        "path-secret?token=query-secret#fragment-secret"
+    )
+    redacted = watcher.redact_url(custom_url)
+    provider = watcher.rpc_provider_key(custom_url)
+    assert redacted.startswith("https://rpc-host-")
+    assert provider.startswith("rpc-host-")
+    uppercase_text = watcher.redact_rpc_text(custom_url.replace("https://", "HTTPS://"))
+    assert "host-secret" not in uppercase_text
+    assert "path-secret" not in uppercase_text
+
+    original_post_json = watcher.post_json
+    watcher.post_json = lambda _url, _payload, timeout=30: (_ for _ in ()).throw(  # noqa: ARG005
+        RuntimeError(f"provider failure at {custom_url}")
+    )
+    try:
+        try:
+            watcher.rpc_call("eth_chainId", [], urls=[custom_url])
+        except RuntimeError as exc:
+            error = exc
+        else:
+            raise AssertionError("custom RPC failure unexpectedly succeeded")
+    finally:
+        watcher.post_json = original_post_json
+
+    with tempfile.TemporaryDirectory() as tmp:
+        state_path = Path(tmp) / "state.json"
+        log_path = Path(tmp) / "watcher.log"
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": str(log_path),
+        })
+        watcher.record_rpc_error(state_path, {}, error, watcher.utc_now())
+        watcher.log(config, f"rpc_error: {watcher.redact_rpc_text(error)}")
+        output = "\n".join(
+            [str(error), log_path.read_text(encoding="utf-8"), state_path.read_text(encoding="utf-8")]
+        )
+    for secret in (
+        "user-secret",
+        "password-secret",
+        "host-secret",
+        "path-secret",
+        "query-secret",
+        "fragment-secret",
+        "rpc.custom.example",
+    ):
+        assert secret not in output
 
 
 def test_archive_redact_url_masks_path_based_rpc_keys():
@@ -2090,12 +2153,13 @@ def test_quicknode_hostname_variants_cannot_double_vote():
     assert watcher.rpc_provider_key("https://base-mainnet.public.blastapi.io") == "alchemy"
 
 
-def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
+def test_refresh_command_exact_allowlist_and_auto_push_guard(monkeypatch=None):
     watcher = load_module()
     env = {}
     config = watcher.config_from_env(env)
     assert config.auto_push is False
     assert config.refresh_command == "npm run refresh:current"
+    assert watcher.validate_refresh_command(config) == ("npm", "run", "refresh:current")
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
     assert config.interval_seconds == 15
     assert config.cooldown_seconds == 30
@@ -2110,23 +2174,98 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     config = watcher.config_from_env(env)
     assert config.auto_push is True
     assert config.refresh_command == "npm run refresh:publish"
+    assert watcher.validate_refresh_command(config) == ("npm", "run", "refresh:publish")
 
-    unsafe = watcher.config_from_env({"MISSION3_REFRESH_COMMAND": "git push origin main"})
     try:
-        watcher.validate_refresh_command(unsafe)
+        watcher.config_from_env({"MISSION3_REFRESH_COMMAND": "npm run refresh:publish"})
     except SystemExit as exc:
-        assert "auto-push" in str(exc).lower()
+        assert "auto_push=1" in str(exc).lower()
     else:
-        raise AssertionError("unsafe publish command should require MISSION3_WATCHER_AUTO_PUSH=1")
+        raise AssertionError("publish command should require MISSION3_WATCHER_AUTO_PUSH=1")
 
-    for command in ("npm run refresh:publish", "npm run refresh:archive", "bash scripts/refresh_archive_and_publish.sh"):
-        unsafe = watcher.config_from_env({"MISSION3_REFRESH_COMMAND": command})
+    unsupported = (
+        "true",
+        "git push origin main",
+        "npm run refresh:archive",
+        "npm run refresh:local",
+        "bash scripts/refresh_and_publish.sh",
+        "/usr/local/bin/npm run refresh:current",
+        "npm run refresh:current -- --force",
+        "npm run refresh:current; touch /tmp/watcher-injection",
+        "npm run refresh:current && id",
+        "npm run refresh:current $(id)",
+        " npm run refresh:current",
+        "npm run refresh:current ",
+        "npm\trun refresh:current",
+        "npm run refresh:current\nid",
+    )
+    for command in unsupported:
         try:
-            watcher.validate_refresh_command(unsafe)
+            watcher.config_from_env({
+                "MISSION3_WATCHER_AUTO_PUSH": "1",
+                "MISSION3_REFRESH_COMMAND": command,
+            })
         except SystemExit as exc:
-            assert "auto-push" in str(exc).lower()
+            assert "exactly match" in str(exc).lower()
         else:
-            raise AssertionError(f"unsafe publish command should require MISSION3_WATCHER_AUTO_PUSH=1: {command}")
+            raise AssertionError(f"unsupported refresh command was accepted: {command!r}")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        sentinel = Path(tmp) / "must-not-exist"
+        injected = f"npm run refresh:current; touch {sentinel}"
+        try:
+            watcher.config_from_env({"MISSION3_REFRESH_COMMAND": injected})
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError("command injection payload was accepted")
+        assert not sentinel.exists()
+
+
+def test_run_refresh_executes_fixed_argv_without_a_shell():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        captured: dict[str, object] = {}
+
+        class FakeProcess:
+            pid = 12345
+            returncode = 0
+
+            def __init__(self, args):
+                self.args = args
+
+            def communicate(self, timeout=None):  # noqa: ANN001, ANN201
+                captured["timeout"] = timeout
+                return "", ""
+
+        def fake_popen(args, **kwargs):  # noqa: ANN001, ANN202
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            return FakeProcess(args)
+
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
+        })
+        original_popen = watcher.subprocess.Popen
+        original_git_status = watcher.git_status_tracked
+        watcher.subprocess.Popen = fake_popen
+        watcher.git_status_tracked = lambda: ""
+        try:
+            assert watcher.run_refresh(config, ["auction_bid"], dry_run=False) == ("success", 0)
+        finally:
+            watcher.subprocess.Popen = original_popen
+            watcher.git_status_tracked = original_git_status
+
+        assert captured["args"] == ["npm", "run", "refresh:current"]
+        kwargs = captured["kwargs"]
+        assert isinstance(kwargs, dict)
+        assert kwargs["shell"] is False
+        assert kwargs["start_new_session"] is True
+        assert len(kwargs["pass_fds"]) == 1
+        assert captured["timeout"] == config.timeout_seconds
 
 
 def test_run_lock_prevents_overlapping_one_shot_runs():
@@ -2251,7 +2390,7 @@ def test_refresh_lock_defers_overlapping_refresh_commands():
         config = watcher.config_from_env({
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
-            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
         })
         held = watcher.acquire_refresh_lock(config)
@@ -2315,7 +2454,7 @@ def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
             "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
-            "MISSION3_REFRESH_COMMAND": "true",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
         })
         held = watcher.acquire_refresh_lock(config)
@@ -2403,7 +2542,7 @@ def test_dry_run_does_not_write_state_and_reports_refresh_intent():
             "MISSION3_WATCHER_STATE_PATH": str(state_path),
             "MISSION3_WATCHER_LOG_PATH": "-",
             "MISSION3_WATCHER_LOCK_PATH": str(Path(tmp) / "watcher.lock"),
-            "MISSION3_REFRESH_COMMAND": "false",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
         })
         snapshot = {
             "latest_block": 101,
@@ -2433,9 +2572,10 @@ def test_run_refresh_exports_structured_event_environment():
     watcher = load_module()
     with tempfile.TemporaryDirectory() as tmp:
         out_path = Path(tmp) / "env.json"
-        capture_script = Path(tmp) / "capture_env.py"
+        capture_script = Path(tmp) / "npm"
         capture_script.write_text(
-            "import json, os\n"
+            "#!/usr/bin/env python3\n"
+            "import json, os, sys\n"
             "from pathlib import Path\n"
             "keys = ['DEGEN_DOGS_REFRESH_TRIGGER', 'DEGEN_DOGS_REFRESH_REASONS', 'DEGEN_DOGS_DETECTED_AT_UTC', 'DEGEN_DOGS_EVENT_NAME', 'DEGEN_DOGS_EVENT_BLOCK_NUMBER', 'DEGEN_DOGS_EVENT_TX_HASH', 'DEGEN_DOGS_EVENT_LOG_INDEX', 'DEGEN_DOGS_LOCK_HELD', 'DEGEN_DOGS_LOCK_FD', 'DEGEN_DOGS_REFRESH_LOCK_PATH']\n"
             "captured = {key: os.environ.get(key) for key in keys}\n"
@@ -2443,16 +2583,20 @@ def test_run_refresh_exports_structured_event_environment():
             "lock_stat = os.fstat(lock_fd)\n"
             "path_stat = Path(captured['DEGEN_DOGS_REFRESH_LOCK_PATH']).stat()\n"
             "captured['lock_fd_matches_path'] = (lock_stat.st_dev, lock_stat.st_ino) == (path_stat.st_dev, path_stat.st_ino)\n"
+            "captured['argv'] = sys.argv[1:]\n"
             "Path(os.environ['WATCH_TEST_OUT']).write_text(json.dumps(captured, sort_keys=True), encoding='utf-8')\n",
             encoding="utf-8",
         )
+        capture_script.chmod(0o700)
         old_out = os.environ.get("WATCH_TEST_OUT")
+        old_path = os.environ.get("PATH", "")
         os.environ["WATCH_TEST_OUT"] = str(out_path)
+        os.environ["PATH"] = f"{tmp}:{old_path}"
         try:
             config = watcher.config_from_env({
                 "MISSION3_WATCHER_LOG_PATH": "-",
                 "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
-                "MISSION3_REFRESH_COMMAND": f"python3 {capture_script}",
+                "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             })
             status, exit_code = watcher.run_refresh(
                 config,
@@ -2465,6 +2609,7 @@ def test_run_refresh_exports_structured_event_environment():
                 os.environ.pop("WATCH_TEST_OUT", None)
             else:
                 os.environ["WATCH_TEST_OUT"] = old_out
+            os.environ["PATH"] = old_path
         assert (status, exit_code) == ("success", 0)
         captured = json.loads(out_path.read_text(encoding="utf-8"))
         assert captured["DEGEN_DOGS_REFRESH_TRIGGER"] == "watcher"
@@ -2477,6 +2622,7 @@ def test_run_refresh_exports_structured_event_environment():
         assert captured["DEGEN_DOGS_LOCK_HELD"] == "1"
         assert captured["DEGEN_DOGS_REFRESH_LOCK_PATH"].endswith("/refresh.lock")
         assert captured["lock_fd_matches_path"] is True
+        assert captured["argv"] == ["run", "refresh:current"]
 
 
 def test_run_once_writes_structured_watcher_telemetry():
@@ -2514,7 +2660,7 @@ def test_run_once_writes_structured_watcher_telemetry():
                 "MISSION3_WATCHER_STATE_PATH": str(state_path),
                 "MISSION3_WATCHER_LOG_PATH": "-",
                 "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
-                "MISSION3_REFRESH_COMMAND": "true",
+                "MISSION3_REFRESH_COMMAND": "npm run refresh:current",
             })
             setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
             assert watcher.run_once(config) == 0

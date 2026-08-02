@@ -120,6 +120,29 @@ degen_dogs_warn_public_rpc_fallback() {
   fi
 }
 
+degen_dogs_validate_watcher_refresh_command() {
+  local refresh_command="${1-}"
+  local auto_push="${2-0}"
+  case "$refresh_command" in
+    'npm run refresh:current')
+      return 0
+      ;;
+    'npm run refresh:publish')
+      if [[ "$auto_push" != "1" ]]; then
+        printf '%s\n' \
+          'error: npm run refresh:publish requires MISSION3_WATCHER_AUTO_PUSH=1' >&2
+        return 1
+      fi
+      return 0
+      ;;
+    *)
+      printf '%s\n' \
+        "error: MISSION3_REFRESH_COMMAND must exactly match 'npm run refresh:current' or 'npm run refresh:publish'; shell syntax, paths, extra arguments, and whitespace variants are forbidden" >&2
+      return 1
+      ;;
+  esac
+}
+
 degen_dogs_export_runner_env_allowlist() {
   # Single source of truth for protected configuration that launchd jobs may
   # inherit. Installers copy only non-empty values into mode-600 plists and

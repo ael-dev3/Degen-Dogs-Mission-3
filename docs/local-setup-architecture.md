@@ -64,6 +64,7 @@ it cannot prove an exact incremental update falls back immediately to the full b
 - Main command: `python3 scripts/watch_mission3_onchain_activity.py --once`
 - Publish mode command: `MISSION3_REFRESH_COMMAND="npm run refresh:publish"`
 - Publish mode gate: `MISSION3_WATCHER_AUTO_PUSH=1`
+- Execution policy: only the exact current/publish commands are accepted and each is executed as a fixed argv without a shell.
 
 The watcher is a one-shot job scheduled every 15 seconds, not a long-running public server.
 It checks recent auction-house logs and direct `auction()` state for meaningful changes:

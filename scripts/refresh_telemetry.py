@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import hashlib
 import json
 import math
 import os
@@ -42,18 +43,15 @@ PRIVATE_PATH_PATTERNS = [
     re.compile(r"/var/folders/[^\s\"']+"),
     re.compile(r"/tmp/[^\s\"']+"),
 ]
-SENSITIVE_RPC_DOMAINS = (
-    "alchemy.com",
-    "infura.io",
-    "quicknode.pro",
-    "quiknode.pro",
-    "ankr.com",
-    "blastapi.io",
-    "drpc.org",
-    "nodereal.io",
-    "chainstack.com",
-    "thirdweb.com",
-    "getblock.io",
+PUBLIC_URL_HOSTNAMES = frozenset(
+    {
+        "ael-dev3.github.io",
+        "raw.githubusercontent.com",
+        "base-rpc.publicnode.com",
+        "mainnet.base.org",
+        "base-mainnet.g.alchemy.com",
+        "developer-access-mainnet.base.org",
+    }
 )
 SUCCESS_RESULTS = {
     "success",
@@ -155,41 +153,42 @@ def int_or_none(value: Any) -> int | None:
 
 
 def redact_url(value: str) -> str:
+    if value == SITE_URL:
+        return SITE_URL
     try:
         parts = urllib.parse.urlsplit(value)
-    except Exception:
+        port = parts.port
+    except (TypeError, ValueError):
         return "<redacted-url>"
-    if not parts.scheme or not parts.netloc:
-        return value
-    hostname = parts.hostname or ""
-    lower_host = hostname.lower()
-    if any(lower_host.endswith(domain) for domain in SENSITIVE_RPC_DOMAINS):
-        domain = next(domain for domain in SENSITIVE_RPC_DOMAINS if lower_host.endswith(domain))
-        host = f"***.{domain}"
-    else:
+    hostname = (parts.hostname or "").lower().rstrip(".")
+    if not hostname:
+        return "<redacted-url>"
+    if hostname in PUBLIC_URL_HOSTNAMES:
         host = hostname
-    if parts.port:
-        host += f":{parts.port}"
-    if parts.username or parts.password:
-        host = "***@" + host
+    else:
+        host_label = hashlib.sha256(hostname.encode("utf-8")).hexdigest()[:12]
+        host = f"rpc-host-{host_label}"
+    if port:
+        host += f":{port}"
     path = ""
     if parts.path and parts.path != "/":
         path = "/<redacted-path>"
     elif parts.path == "/":
         path = "/"
     query = "redacted=1" if parts.query else ""
-    return urllib.parse.urlunsplit((parts.scheme, host, path, query, ""))
+    scheme = parts.scheme.lower() if parts.scheme else "https"
+    return urllib.parse.urlunsplit((scheme, host, path, query, ""))
 
 
 def redact_value(value: Any) -> Any:
     if isinstance(value, dict):
-        return {str(k): redact_value(v) for k, v in value.items()}
+        return {str(redact_value(str(k))): redact_value(v) for k, v in value.items()}
     if isinstance(value, list):
         return [redact_value(item) for item in value]
     if not isinstance(value, str):
         return value
     text = value
-    for url in re.findall(r"https?://[^\s\"'<>]+", text):
+    for url in re.findall(r"https?://[^\s\"'<>]+", text, flags=re.IGNORECASE):
         text = text.replace(url, redact_url(url))
     for pattern in SECRET_PATTERNS:
         text = pattern.sub(lambda m: f"{m.group(1)}=<redacted>" if m.groups() else "<redacted-secret>", text)
@@ -447,7 +446,7 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "error": redact_value(error or env.get("DEGEN_DOGS_REFRESH_ERROR") or "") or None,
     }
     row.update(generated_state(root))
-    return {key: value for key, value in row.items() if value not in (None, [], "")}
+    return redact_value({key: value for key, value in row.items() if value not in (None, [], "")})
 
 
 def refresh_paths_from_env(env: dict[str, str], root: Path = ROOT) -> tuple[Path, Path]:
@@ -547,7 +546,7 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "dog_metadata_onchain_verified_count": state.get("dog_metadata_onchain_verified_count"),
         "dog_metadata_unavailable_count": state.get("dog_metadata_unavailable_count"),
     }
-    clean = {key: value for key, value in status.items() if value not in (None, "", [])}
+    clean = redact_value({key: value for key, value in status.items() if value not in (None, "", [])})
     assert_public_safe(clean)
     return clean
 
@@ -763,7 +762,8 @@ def detect_launchd(label: str) -> dict[str, Any]:
     try:
         output = subprocess.check_output(["launchctl", "print", target], text=True, stderr=subprocess.STDOUT, timeout=5)
     except Exception as exc:  # noqa: BLE001
-        return {"label": label, "available": False, "reason": str(exc).splitlines()[0][:160]}
+        reason = str(redact_value(str(exc))).splitlines()[0][:160]
+        return {"label": label, "available": False, "reason": reason}
     interval_match = re.search(r"StartInterval\s*=>\s*(\d+)", output)
     state_match = re.search(r"state\s*=\s*([^\n]+)", output)
     return {
@@ -958,7 +958,7 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
                 else:
                     last_error = f"{source} refresh_status mismatch {mismatch}"
             except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError, OSError, RuntimeError) as exc:
-                last_error = f"{source}: {str(exc)[:260]}"
+                last_error = f"{source}: {str(redact_value(str(exc)))[:260]}"
         # The immutable raw URL proves the exact pushed artifact landed; Pages
         # proves the user-facing deployment completed. Neither alone is live.
         if raw_commit_verified and pages_verified:

@@ -54,6 +54,13 @@ PLIST_PATH="${PLIST_DIR}/${LABEL}.plist"
 SCRIPT_PATH="${REPO_DIR}/scripts/degen_dogs_runner_health.py"
 ALERT_STATE_PATH="$(degen_dogs_resolve_runner_path "$REPO_DIR" "${DEGEN_DOGS_HEALTH_ALERT_STATE_PATH:-${LOCK_DIR}/critical-alert-state.json}")"
 ALLOW_RUNNING_RESTART="${DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART:-0}"
+MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
+if [[ -z "$MISSION3_REFRESH_COMMAND" && "$WATCHER_AUTO_PUSH" == "1" ]]; then
+  MISSION3_REFRESH_COMMAND="npm run refresh:publish"
+fi
+if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
+  MISSION3_REFRESH_COMMAND="npm run refresh:current"
+fi
 
 fail() {
   printf 'error: %s\n' "$*" >&2
@@ -78,6 +85,7 @@ fi
 [[ "$HOURLY_FULL_REFRESH" == "0" || "$HOURLY_FULL_REFRESH" == "1" ]] || fail "DEGEN_DOGS_FULL_REFRESH must be 0 or 1"
 [[ "$HOURLY_RUN_MISSION3_ARCHIVE" == "0" || "$HOURLY_RUN_MISSION3_ARCHIVE" == "1" ]] || fail "DEGEN_DOGS_RUN_MISSION3_ARCHIVE must be 0 or 1"
 [[ "$ALLOW_RUNNING_RESTART" == "0" || "$ALLOW_RUNNING_RESTART" == "1" ]] || fail "DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART must be 0 or 1"
+degen_dogs_validate_watcher_refresh_command "$MISSION3_REFRESH_COMMAND" "$WATCHER_AUTO_PUSH"
 [[ "$REPO_DIR" = /* ]] || fail "repo dir must be absolute: ${REPO_DIR}"
 [[ -f "$SCRIPT_PATH" ]] || fail "health script missing: ${SCRIPT_PATH}"
 
@@ -133,14 +141,6 @@ cleanup_plist_candidate() {
   fi
 }
 trap cleanup_plist_candidate EXIT
-
-MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
-if [[ -z "$MISSION3_REFRESH_COMMAND" && "$WATCHER_AUTO_PUSH" == "1" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run refresh:publish"
-fi
-if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run refresh:current"
-fi
 
 PLIST_PATH="$PLIST_PATH" \
 PLIST_CANDIDATE_PATH="$PLIST_CANDIDATE_PATH" \

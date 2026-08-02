@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import fcntl
+import hashlib
 import json
 import os
 import queue
@@ -123,6 +124,14 @@ DEFAULT_STATE_PATH = ROOT / ".local" / "mission3_onchain_tracker_state.json"
 DEFAULT_LOG_PATH = ROOT / "logs" / "watch-onchain.log"
 DEFAULT_LOCAL_REFRESH_COMMAND = "npm run refresh:current"
 DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
+SUPPORTED_REFRESH_COMMANDS: dict[str, tuple[str, ...]] = {
+    DEFAULT_LOCAL_REFRESH_COMMAND: ("npm", "run", "refresh:current"),
+    DEFAULT_PUBLISH_REFRESH_COMMAND: ("npm", "run", "refresh:publish"),
+}
+PUBLIC_RPC_HOSTNAMES = frozenset(
+    urllib.parse.urlsplit(url).hostname or ""
+    for url in (*DEFAULT_RPC_URLS, *DEFAULT_LOG_RPC_URLS)
+)
 
 try:
     import refresh_telemetry
@@ -257,7 +266,7 @@ def rpc_provider_key(url: str) -> str:
     ):
         if host == suffix or host.endswith(f".{suffix}"):
             return suffix
-    return host
+    return f"rpc-host-{hashlib.sha256(host.encode('utf-8')).hexdigest()[:12]}"
 
 
 def independent_rpc_urls(urls: list[str]) -> list[str]:
@@ -362,9 +371,10 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
     log_rpc_urls = independent_rpc_urls([*log_candidates, *rpc_urls])
 
     auto_push = env_bool(env, "MISSION3_WATCHER_AUTO_PUSH", False)
-    refresh_command = env.get("MISSION3_REFRESH_COMMAND", "").strip()
-    if not refresh_command:
+    refresh_command = env.get("MISSION3_REFRESH_COMMAND", "")
+    if refresh_command == "":
         refresh_command = DEFAULT_PUBLISH_REFRESH_COMMAND if auto_push else DEFAULT_LOCAL_REFRESH_COMMAND
+    resolve_refresh_command_argv(refresh_command, auto_push=auto_push)
 
     state_path = optional_path_from_env(env, "MISSION3_WATCHER_STATE_PATH", DEFAULT_STATE_PATH)
     if state_path is None:
@@ -400,39 +410,33 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
 def redact_url(value: str) -> str:
     try:
         parts = urllib.parse.urlsplit(value)
-    except Exception:
+        port = parts.port
+    except (TypeError, ValueError):
         return "<redacted-url>"
-    hostname = parts.hostname or ""
-    lower_host = hostname.lower()
-    sensitive_domains = (
-        "alchemy.com",
-        "infura.io",
-        "quicknode.pro",
-        "quiknode.pro",
-        "ankr.com",
-        "blastapi.io",
-        "drpc.org",
-        "nodereal.io",
-        "chainstack.com",
-        "thirdweb.com",
-        "getblock.io",
-    )
-    if any(lower_host.endswith(domain) for domain in sensitive_domains):
-        domain = next(domain for domain in sensitive_domains if lower_host.endswith(domain))
-        host = f"***.{domain}"
-    else:
+    hostname = (parts.hostname or "").lower().rstrip(".")
+    if not hostname:
+        return "<redacted-url>"
+    if hostname in PUBLIC_RPC_HOSTNAMES:
         host = hostname
-    if parts.port:
-        host += f":{parts.port}"
-    if parts.username or parts.password:
-        host = "***@" + host
+    else:
+        host = f"rpc-host-{hashlib.sha256(hostname.encode('utf-8')).hexdigest()[:12]}"
+    if port:
+        host += f":{port}"
     path = ""
     if parts.path and parts.path != "/":
         path = "/<redacted-path>"
     elif parts.path == "/":
         path = "/"
     query = "redacted=1" if parts.query else ""
-    return urllib.parse.urlunsplit((parts.scheme, host, path, query, ""))
+    scheme = parts.scheme.lower() if parts.scheme else "https"
+    return urllib.parse.urlunsplit((scheme, host, path, query, ""))
+
+
+def redact_rpc_text(value: Any) -> str:
+    text = str(value)
+    for url in re.findall(r"https?://[^\s\"'<>]+", text, flags=re.IGNORECASE):
+        text = text.replace(url, redact_url(url))
+    return text
 
 
 def redact_command(command: str) -> str:
@@ -570,7 +574,7 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 
                 raise RuntimeError(f"JSON-RPC error code={error['code']}")
             return data["result"], url
         except Exception as exc:  # noqa: BLE001
-            errors.append(f"{redact_url(url)}: {exc}")
+            errors.append(f"{redact_url(url)}: {redact_rpc_text(exc)}")
     raise RuntimeError("; ".join(errors))
 
 
@@ -667,7 +671,7 @@ def rpc_quorum_call(
         if error is None:
             grouped[canonical_rpc_result(method, value)].append((url, value))
         else:
-            errors.append(f"{redact_url(url)}: {error}")
+            errors.append(f"{redact_url(url)}: {redact_rpc_text(error)}")
         pending = len(pending_indexes)
         ordered = sorted(grouped.values(), key=len, reverse=True)
         winner = ordered[0] if ordered else []
@@ -737,7 +741,7 @@ def collect_rpc_probes(
         if error is None:
             results.append(value)
         else:
-            errors.append(f"{redact_url(url)}: {error}")
+            errors.append(f"{redact_url(url)}: {redact_rpc_text(error)}")
 
     if pending_indexes:
         pending_urls = [active_urls[item] for item in pending_indexes]
@@ -1580,7 +1584,7 @@ def record_rpc_error(path: Path, state: dict[str, Any], error: Exception, now_ut
             "updated_at_utc": now_utc,
             "last_checked_at_utc": now_utc,
             "last_error_at_utc": now_utc,
-            "last_error": str(error)[:500],
+            "last_error": redact_rpc_text(error)[:500],
             "consecutive_rpc_failures": failures,
         }
     )
@@ -1609,21 +1613,23 @@ def record_refresh_result(state: dict[str, Any], *, status: str, reasons: list[s
     return state
 
 
-def command_implies_push(command: str) -> bool:
-    lowered = command.lower()
-    publish_markers = [
-        "git push",
-        "refresh:publish",
-        "refresh:archive",
-        "refresh_and_publish",
-        "refresh_archive_and_publish",
-    ]
-    return any(marker in lowered for marker in publish_markers)
+def resolve_refresh_command_argv(command: str, *, auto_push: bool) -> tuple[str, ...]:
+    argv = SUPPORTED_REFRESH_COMMANDS.get(command)
+    if argv is None:
+        supported = ", ".join(repr(item) for item in SUPPORTED_REFRESH_COMMANDS)
+        raise SystemExit(
+            "MISSION3_REFRESH_COMMAND must exactly match a supported command "
+            f"({supported}); shell syntax, paths, extra arguments, and whitespace variants are forbidden"
+        )
+    if command == DEFAULT_PUBLISH_REFRESH_COMMAND and not auto_push:
+        raise SystemExit(
+            "npm run refresh:publish requires MISSION3_WATCHER_AUTO_PUSH=1"
+        )
+    return argv
 
 
-def validate_refresh_command(config: Config) -> None:
-    if command_implies_push(config.refresh_command) and not config.auto_push:
-        raise SystemExit("refresh command appears to auto-push; set MISSION3_WATCHER_AUTO_PUSH=1 to allow auto-push")
+def validate_refresh_command(config: Config) -> tuple[str, ...]:
+    return resolve_refresh_command_argv(config.refresh_command, auto_push=config.auto_push)
 
 
 def git_status_tracked() -> str:
@@ -1646,7 +1652,7 @@ def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: 
 
 
 def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dict[str, Any] | None = None) -> tuple[str, int]:
-    validate_refresh_command(config)
+    refresh_argv = validate_refresh_command(config)
     refresh_lock = None
     if not dry_run:
         refresh_lock = acquire_refresh_lock(config)
@@ -1666,7 +1672,7 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
             if tracked:
                 log(config, "warning: tracked working tree changes exist before local refresh")
 
-        command_for_log = redact_command(config.refresh_command)
+        command_for_log = " ".join(refresh_argv)
         if dry_run:
             log(config, f"dry-run: would run refresh command: {command_for_log}; reasons={','.join(reasons)}")
             return "dry_run", 0
@@ -1695,13 +1701,14 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
         log(config, f"running refresh command: {command_for_log}; reasons={','.join(reasons)}")
         pass_fds = (refresh_lock.fileno(),) if refresh_lock else ()
         process = subprocess.Popen(
-            ["/bin/bash", "-lc", config.refresh_command],
+            list(refresh_argv),
             cwd=ROOT,
             text=True,
             env=child_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             pass_fds=pass_fds,
+            shell=False,
             start_new_session=True,
         )
         try:
@@ -1722,7 +1729,7 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
                 except ProcessLookupError:
                     pass
                 stdout, stderr = process.communicate()
-            raise subprocess.TimeoutExpired(config.refresh_command, config.timeout_seconds, output=stdout, stderr=stderr)
+            raise subprocess.TimeoutExpired(list(refresh_argv), config.timeout_seconds, output=stdout, stderr=stderr)
         result = subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
     finally:
         release_run_lock(refresh_lock)
@@ -1752,12 +1759,12 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
             {
                 **telemetry_base_row(check_started, completed),
                 "result": "failed",
-                "error": str(exc)[:500],
+                "error": redact_rpc_text(exc)[:500],
                 "dry_run": dry_run,
                 "force_refresh": force_refresh,
             },
         )
-        log(config, f"rpc_error: {exc}")
+        log(config, f"rpc_error: {redact_rpc_text(exc)}")
         return 1
 
     if not state or state.get("last_seen_token_id") in {None, ""}:
@@ -1893,7 +1900,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dry-run", action="store_true", help="Detect changes and log the intended refresh without running it or writing watcher state.")
     parser.add_argument("--force-refresh", action="store_true", help="Run the configured refresh command even if this check only initializes or sees no new signal.")
     parser.add_argument("--state-path", help="Override MISSION3_WATCHER_STATE_PATH for this run.")
-    parser.add_argument("--refresh-command", help="Override MISSION3_REFRESH_COMMAND for this run.")
+    parser.add_argument(
+        "--refresh-command",
+        help="Select exactly 'npm run refresh:current' or 'npm run refresh:publish' for this run.",
+    )
     return parser
 
 

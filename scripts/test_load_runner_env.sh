@@ -35,6 +35,23 @@ python3 -c 'import os; assert os.environ["BASE_RPC_URLS"].endswith("two.example"
 [[ "$DEGEN_DOGS_LITERAL_BACKTICKS" == "\`touch ${BACKTICK_SENTINEL}\`" ]]
 [[ ! -e "$SENTINEL" ]]
 [[ ! -e "$BACKTICK_SENTINEL" ]]
+degen_dogs_validate_watcher_refresh_command 'npm run refresh:current' 0
+degen_dogs_validate_watcher_refresh_command 'npm run refresh:publish' 1
+if degen_dogs_validate_watcher_refresh_command 'npm run refresh:publish' 0 >/dev/null 2>&1; then
+  printf '%s\n' 'publish refresh command bypassed the auto-push gate' >&2
+  exit 1
+fi
+for unsafe_command in \
+  'npm run refresh:local' \
+  'npm run refresh:current -- --force' \
+  'npm run refresh:current; id' \
+  ' npm run refresh:current' \
+  $'npm\trun refresh:current'; do
+  if degen_dogs_validate_watcher_refresh_command "$unsafe_command" 1 >/dev/null 2>&1; then
+    printf 'unsafe watcher refresh command was accepted: %q\n' "$unsafe_command" >&2
+    exit 1
+  fi
+done
 degen_dogs_export_runner_env_allowlist
 for required in BASE_RPC_BATCH_LIMIT DOG_METADATA_WORKERS MISSION3_LOG_CACHE MISSION3_CURRENT_SURFACE_OVERLAP NEYNAR_API_KEY COINGECKO_API_KEY; do
   [[ " ${DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
@@ -107,4 +124,4 @@ if (
   exit 1
 fi
 
-printf '%s\n' 'runner_env_tests=pass count=8'
+printf '%s\n' 'runner_env_tests=pass count=9'
