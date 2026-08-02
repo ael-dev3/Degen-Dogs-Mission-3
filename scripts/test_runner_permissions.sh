@@ -212,6 +212,7 @@ mock_bin="${PRIVATE_TEST_ROOT}/mock-bin"
 mkdir "$mock_bin"
 mock_launchctl_log="${PRIVATE_TEST_ROOT}/mock-launchctl.log"
 mock_job_state="${PRIVATE_TEST_ROOT}/mock-job-state"
+mock_enabled_state="${PRIVATE_TEST_ROOT}/mock-enabled-state"
 cat >"${mock_bin}/launchctl" <<'SH'
 #!/usr/bin/env bash
 set -Eeuo pipefail
@@ -242,6 +243,7 @@ case "$operation" in
     rm -f -- "${MOCK_JOB_STATE:?}"
     ;;
   bootstrap)
+    [[ -f "${MOCK_ENABLED_STATE:?}" ]] || exit 47
     plist_path="${!#}"
     definition="$(<"$plist_path")"
     if [[ "$definition" == candidate-definition* && "${MOCK_FAIL_OPERATION:-}" == "bootstrap" ]]; then
@@ -250,10 +252,11 @@ case "$operation" in
     printf '%s\n' "$definition" >"${MOCK_JOB_STATE:?}"
     ;;
   enable)
-    definition="$(<"${MOCK_JOB_STATE:?}")"
-    if [[ "$definition" == candidate-definition* && "${MOCK_FAIL_OPERATION:-}" == "enable" ]]; then
+    enable_attempts="$(grep -c '^enable ' "${MOCK_LAUNCHCTL_LOG:?}" || true)"
+    if [[ "$enable_attempts" == "1" && "${MOCK_FAIL_OPERATION:-}" == "enable" ]]; then
       exit 43
     fi
+    : >"${MOCK_ENABLED_STATE:?}"
     ;;
   print)
     [[ -f "${MOCK_JOB_STATE:?}" ]] || exit 44
@@ -291,7 +294,7 @@ mkdir "$transaction_dir"
 chmod 700 "$transaction_dir"
 transaction_plist="${transaction_dir}/com.example.runner.plist"
 transaction_lock="${PRIVATE_TEST_ROOT}/transaction-locks/refresh.lock"
-export MOCK_LAUNCHCTL_LOG="$mock_launchctl_log" MOCK_JOB_STATE="$mock_job_state"
+export MOCK_LAUNCHCTL_LOG="$mock_launchctl_log" MOCK_JOB_STATE="$mock_job_state" MOCK_ENABLED_STATE="$mock_enabled_state"
 
 for failure in bootstrap enable print; do
   candidate="${transaction_dir}/candidate-${failure}.plist"
@@ -299,6 +302,7 @@ for failure in bootstrap enable print; do
   printf 'candidate-definition provider-secret-do-not-log\n' >"$candidate"
   chmod 600 "$transaction_plist" "$candidate"
   printf 'prior-definition\n' >"$mock_job_state"
+  rm -f "$mock_enabled_state"
   : >"$mock_launchctl_log"
   export MOCK_FAIL_OPERATION="$failure"
   set +e
@@ -319,9 +323,14 @@ for failure in bootstrap enable print; do
     echo "transaction rollback leaked candidate provider data" >&2
     exit 1
   fi
-  [[ "$(grep -c '^bootstrap ' "$mock_launchctl_log")" == "2" ]]
+  expected_bootstraps=2
+  [[ "$failure" != "enable" ]] || expected_bootstraps=1
+  [[ "$(grep -c '^bootstrap ' "$mock_launchctl_log")" == "$expected_bootstraps" ]]
   [[ "$(grep -c '^enable ' "$mock_launchctl_log")" -ge "1" ]]
   [[ "$(grep -c '^print ' "$mock_launchctl_log")" -ge "1" ]]
+  first_enable_line="$(grep -n '^enable ' "$mock_launchctl_log" | head -1 | cut -d: -f1)"
+  first_bootstrap_line="$(grep -n '^bootstrap ' "$mock_launchctl_log" | head -1 | cut -d: -f1)"
+  [[ "$first_enable_line" -lt "$first_bootstrap_line" ]]
   if compgen -G "${transaction_plist}.previous.*" >/dev/null; then
     echo "transaction left a prior-plist backup behind" >&2
     exit 1
@@ -334,6 +343,7 @@ printf 'prior-definition\n' >"$transaction_plist"
 printf 'candidate-definition\n' >"$candidate"
 chmod 600 "$transaction_plist" "$candidate"
 printf 'prior-definition\n' >"$mock_job_state"
+rm -f "$mock_enabled_state"
 : >"$mock_launchctl_log"
 PATH="${mock_bin}:$PATH" "$transaction_fixture" \
   "${ROOT}/scripts/runner_permissions.sh" "$transaction_lock" "$candidate" \
@@ -341,6 +351,7 @@ PATH="${mock_bin}:$PATH" "$transaction_fixture" \
 [[ "$(<"$transaction_plist")" == "candidate-definition" ]]
 [[ "$(<"$mock_job_state")" == "candidate-definition" ]]
 [[ ! -e "$candidate" ]]
+[[ -f "$mock_enabled_state" ]]
 python3 - "$transaction_lock" <<'PY'
 import fcntl
 import os
@@ -354,7 +365,7 @@ finally:
     os.close(descriptor)
 PY
 
-unset MOCK_LAUNCHCTL_LOG MOCK_JOB_STATE
+unset MOCK_LAUNCHCTL_LOG MOCK_JOB_STATE MOCK_ENABLED_STATE
 
 bash -n "${ROOT}/scripts/refresh_archive_and_publish.sh"
 grep -q '^umask 077$' "${ROOT}/scripts/refresh_archive_and_publish.sh"
