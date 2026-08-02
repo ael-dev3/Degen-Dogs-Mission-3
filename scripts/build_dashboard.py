@@ -5409,7 +5409,7 @@ let archiveSnapshotKey='';
 let archiveRefreshPromise=null;
 let pendingArchiveContext=null;
 const LIVE_REFRESH_MS=10000;
-const LIVE_STALE_MS=3*60*60*1000;
+const LIVE_STALE_MS=90*60*1000;
 const CURRENT_FETCH_TIMEOUT_MS=6000;
 const ARCHIVE_FETCH_TIMEOUT_MS=45000;
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
