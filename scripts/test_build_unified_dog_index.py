@@ -603,6 +603,20 @@ def test_required_canonical_loader_rejects_empty_and_duplicate_token_tables() ->
         assert_runtime_error_contains(lambda: unified.rows_by_dog(path, required=True), "duplicate Dog #590")
 
 
+def test_farcaster_identity_url_requires_exact_https_host() -> None:
+    unified = load_module()
+    canonical = "https://farcaster.xyz/unitwinner"
+    assert unified.canonical_farcaster_profile_url(canonical, "unitwinner") == canonical
+    for unsafe in (
+        "javascript:alert(1)",
+        "http://farcaster.xyz/unitwinner",
+        "https://evil.example/?next=farcaster.xyz/unitwinner",
+        "https://farcaster.xyz.evil.example/unitwinner",
+        "https://farcaster.xyz@evil.example/unitwinner",
+    ):
+        assert unified.canonical_farcaster_profile_url(unsafe, "unitwinner") == canonical
+
+
 def test() -> None:
     tests = [
         test_ended_pending_settlement_feed_row_stays_in_unified_archive,
@@ -617,6 +631,7 @@ def test() -> None:
         test_all_mission3_onchain_tables_override_stale_archive_and_preserve_transactions,
         test_created_block_is_derived_from_matching_predecessor_settlement_transaction,
         test_required_canonical_loader_rejects_empty_and_duplicate_token_tables,
+        test_farcaster_identity_url_requires_exact_https_host,
     ]
     for item in tests:
         item()

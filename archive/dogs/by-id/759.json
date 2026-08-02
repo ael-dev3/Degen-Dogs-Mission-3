@@ -34,9 +34,9 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420",
+      "0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921",
       "0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e",
-      "0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921"
+      "0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#710/792",
-      "rank": 710,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.09192773 $16.09 2026-07-01t00:25:21z 0xd793116fb85654f7005c236ea9f6cb26b309dfcc10ed6c2c9742a878ad4d0b2b 0x48ac70df96f6399d8dccc0fe67905e04741693df3c54b1c4b7e52f35fb7c980a #710/792 generated auction feed 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 background: none (90.4%) background none body: orange (8.6%) body orange neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: baseballcap (10.5%) head baseballcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 759 dog #759 759 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01025 eth 10250000000000000 16.09 $16.09 2026-07-01t00:25:21z 0xd793116fb85654f7005c236ea9f6cb26b309dfcc10ed6c2c9742a878ad4d0b2b 0x48ac70df96f6399d8dccc0fe67905e04741693df3c54b1c4b7e52f35fb7c980a unavailable generated auction feed 0xd8426de5553e871405088f35db0c48a3527bb049a9d260ae7fccda9ae74b1921 0xa9ea89b468cfc08179350268305e8ac311c1e5fc5c08bda198ddd67a72f7d24e 0x74f602ae33e77d6f89a54f049254272551200b1b135979ad02a30c8ad5bd0420 background: none background none body: orange body orange neck: redcollar neck redcollar mouth: none mouth none ears: earbuds ears earbuds head: baseballcap head baseballcap eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48038087,
       "block_time_utc": "2026-07-01T00:25:21Z",
@@ -73,9 +73,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -83,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.6%)",
+        "display": "Body: Orange",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BaseballCap (10.5%)",
+        "display": "Head: BaseballCap",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

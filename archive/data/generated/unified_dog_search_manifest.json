@@ -2,8 +2,8 @@
   "notes": [
     "loaded:archive/mission1/data/generated/mission1_dog_search_index.json:201",
     "loaded:archive/mission2/data/generated/mission2_dog_search_index.json:369",
-    "loaded:archive/mission3/data/generated/mission3_dog_search_index.json:138",
-    "historical_mission3_backfills:64",
+    "loaded:archive/mission3/data/generated/mission3_dog_search_index.json:202",
+    "historical_mission3_backfills:0",
     "mission3_onchain_overrides:202",
     "current_auction_overrides:11",
     "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."
@@ -28,5 +28,5 @@
     "generated/auction_feed.json"
   ],
   "total_records": 772,
-  "updated_at_utc": "2026-08-02T17:17:11Z"
+  "updated_at_utc": "2026-08-02T18:52:25Z"
 }

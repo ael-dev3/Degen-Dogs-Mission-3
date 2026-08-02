@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#774/792",
-      "rank": 774,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89481051 $18.89 2026-07-15t08:24:57z 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 #774/792 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.3%) head none eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 unavailable generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none background none body: redbrown body redbrown neck: redcollar neck redcollar mouth: none mouth none ears: loopearring ears loopearring head: none head none eyes: masksnorkel eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48657275,
       "block_time_utc": "2026-07-15T08:24:57Z",
@@ -71,9 +71,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -81,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.7%)",
+        "display": "Eyes: MaskSnorkel",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

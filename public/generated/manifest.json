@@ -2,7 +2,7 @@
   {
     "table": "mission3_metrics",
     "file": "generated/mission3_metrics.csv",
-    "rows": 127
+    "rows": 138
   },
   {
     "table": "auction_feed",
@@ -43,6 +43,11 @@
     "table": "auction_timeline",
     "file": "generated/auction_timeline.csv",
     "rows": 202
+  },
+  {
+    "table": "auction_extensions",
+    "file": "generated/auction_extensions.csv",
+    "rows": 342
   },
   {
     "table": "auction_daily_activity",
@@ -97,6 +102,6 @@
   {
     "table": "top_woof_holders",
     "file": "generated/top_woof_holders.csv",
-    "rows": 50
+    "rows": 0
   }
 ]

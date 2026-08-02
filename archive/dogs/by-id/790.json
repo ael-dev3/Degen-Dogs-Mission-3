@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#285/792",
-      "rank": 285,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base settled 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d @monicacline monicacline 0.01 eth 10000000000000000 18.43 $18.43 2026-08-02t13:16:57z 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f #285/792 generated auction feed 0x3565e21ecc8fbc1baf37ff0deab1bb4e966558acc3a5e3c8755601f93c1acbf6 background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: whitemohawk (6.8%) head whitemohawk eyes: eyepatch (8.0%) eyes eyepatch base_rpc dog_metadata_api generated_auction_timeline generated_auction_feed base_logs dashboard_builder generated_auction_winners",
+    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base settled 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d @monicacline monicacline 0.01 eth 10000000000000000 18.43 $18.43 2026-08-02t13:16:57z 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f unavailable generated auction feed 0x3565e21ecc8fbc1baf37ff0deab1bb4e966558acc3a5e3c8755601f93c1acbf6 background: none background none body: sugarskull body sugarskull neck: redcollar neck redcollar mouth: none mouth none ears: none ears none head: whitemohawk head whitemohawk eyes: eyepatch eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49443635,
       "block_time_utc": "2026-08-02T13:16:57Z",
@@ -70,49 +70,47 @@
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
-        "base_rpc",
-        "dog_metadata_api",
-        "generated_auction_timeline",
-        "generated_auction_feed",
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.8%)",
+        "display": "Body: SugarSkull",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: WhiteMohawk (6.8%)",
+        "display": "Head: WhiteMohawk",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

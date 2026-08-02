@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#14/792",
-      "rank": 14,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 521 dog #521 521 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x4a1fa18fed571136b227cf6d27150977bb98241e2100ddee5f29c6a981bc2d97 0x5437af9c573f5fedb5fc6648ab65278a9be0dd1ff138debd072d3a81de85c2fc #14/792 background: none; body: sugarskull; neck: goldnecklace; mouth: bone; ears: loopearring; head: headphones; eyes: monocle 0x1f93b2b1f87fa0820aaaa125e0624b5595a43c5d5e908f6f5e9dad0b39ac3f03 chain_logs contract_getters",
+    "search_text": "dog 521 dog #521 521 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x4a1fa18fed571136b227cf6d27150977bb98241e2100ddee5f29c6a981bc2d97 0x5437af9c573f5fedb5fc6648ab65278a9be0dd1ff138debd072d3a81de85c2fc unavailable background: none; body: sugarskull; neck: goldnecklace; mouth: bone; ears: loopearring; head: headphones; eyes: monocle 0x1f93b2b1f87fa0820aaaa125e0624b5595a43c5d5e908f6f5e9dad0b39ac3f03 chain_logs contract_getters",
     "settlement": {
       "block_number": 26391336,
       "block_time_utc": "2025-10-27T03:11:01Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.8%)",
+        "display": "Body: SugarSkull",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Bone (2.7%)",
+        "display": "Mouth: Bone",
         "trait_type": "Mouth",
         "value": "Bone"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.4%)",
+        "display": "Head: Headphones",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Monocle (6.4%)",
+        "display": "Eyes: Monocle",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

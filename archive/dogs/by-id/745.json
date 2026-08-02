@@ -34,13 +34,13 @@
       "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
-      "0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5",
-      "0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6",
-      "0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf",
-      "0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b",
-      "0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b",
+      "0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79",
       "0xb062007cef59c2b552db4c52f5064c08a269dc7772f3f394dd56bb9e0961497b",
-      "0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79"
+      "0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b",
+      "0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b",
+      "0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf",
+      "0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6",
+      "0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -58,12 +58,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#137/792",
-      "rank": 137,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 745 dog #745 745 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.01774 eth 17740000000000000 31.84887837 $31.85 2026-06-16t23:27:35z 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 0xf27d50bf338277785b52bd065e9fc05ecaa19e12a83856ada4503222527d8c8a #137/792 generated auction feed 0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5 0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6 0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf 0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b 0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b 0xb062007cef59c2b552db4c52f5064c08a269dc7772f3f394dd56bb9e0961497b 0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79 background: halo (9.6%) background halo body: black (11.1%) body black neck: studdedcollar (9.8%) neck studdedcollar mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: toque (7.1%) head toque eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 745 dog #745 745 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.01774 eth 17740000000000000 31.85 $31.85 2026-06-16t23:27:35z 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 0xf27d50bf338277785b52bd065e9fc05ecaa19e12a83856ada4503222527d8c8a unavailable generated auction feed 0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79 0xb062007cef59c2b552db4c52f5064c08a269dc7772f3f394dd56bb9e0961497b 0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b 0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b 0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf 0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6 0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5 background: halo background halo body: black body black neck: studdedcollar neck studdedcollar mouth: none mouth none ears: none ears none head: toque head toque eyes: bluelasereyes eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47431554,
       "block_time_utc": "2026-06-16T23:27:35Z",
@@ -77,9 +77,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -87,37 +85,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.6%)",
+        "display": "Background: Halo",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: StuddedCollar (9.8%)",
+        "display": "Neck: StuddedCollar",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Toque (7.1%)",
+        "display": "Head: Toque",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
+        "display": "Eyes: BlueLaserEyes",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

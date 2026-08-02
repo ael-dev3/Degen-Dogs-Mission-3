@@ -1,5 +1,5 @@
 table,file,rows
-mission3_metrics,generated/mission3_metrics.csv,127
+mission3_metrics,generated/mission3_metrics.csv,138
 auction_feed,generated/auction_feed.csv,11
 historical_dog_search,generated/historical_dog_search.csv,792
 historical_dog_report,generated/historical_dog_report.csv,4
@@ -8,6 +8,7 @@ current_auction_bid_history,generated/current_auction_bid_history.csv,1
 recent_auction_winners,generated/recent_auction_winners.csv,10
 current_auction,generated/current_auction.csv,1
 auction_timeline,generated/auction_timeline.csv,202
+auction_extensions,generated/auction_extensions.csv,342
 auction_daily_activity,generated/auction_daily_activity.csv,206
 auction_bidder_leaderboard,generated/auction_bidder_leaderboard.csv,100
 season5_sup_by_winner,generated/season5_sup_by_winner.csv,33
@@ -18,4 +19,4 @@ season6_sup_rewards_by_auction,generated/season6_sup_rewards_by_auction.csv,60
 season6_sup_current_bidder_status,generated/season6_sup_current_bidder_status.csv,1
 auction_winners,generated/auction_winners.csv,201
 recent_bids,generated/recent_bids.csv,100
-top_woof_holders,generated/top_woof_holders.csv,50
+top_woof_holders,generated/top_woof_holders.csv,0

@@ -5,13 +5,16 @@
 - Git
 - Node.js 22 or compatible modern Node
 - npm
-- Python 3
+- Python 3.10 or newer
 - Internet access to Base RPC endpoints
 
 ## Setup
 
 ```bash
-npm ci
+npm ci --ignore-scripts
+python3 -m venv .venv
+.venv/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements.txt
+export PATH="$PWD/.venv/bin:$PATH"
 cp .env.example .env.local 2>/dev/null || true
 chmod 600 .env.local
 ```
@@ -21,9 +24,8 @@ If you create `.env.local`, keep it local and never commit it.
 ## Run data and preview
 
 ```bash
-set -a
-source .env.local 2>/dev/null || true
-set +a
+source scripts/load_runner_env.sh
+degen_dogs_load_runner_env "$PWD"
 npm run data
 npm run dev
 ```

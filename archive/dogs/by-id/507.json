@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#118/792",
-      "rank": 118,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 507 dog #507 507 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec 0x606769302b8d10deeda33a4c3e1e901041fddd777445857cabeaab7431655090 #118/792 background: none; body: redbrown; neck: none; mouth: teeth; ears: earbuds; head: crazyhair; eyes: eyepatch 0x28cd24bc0b809e61775f5bd707690aab272d84229d22675219fe08e19b9f21e3 chain_logs contract_getters",
+    "search_text": "dog 507 dog #507 507 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec 0x606769302b8d10deeda33a4c3e1e901041fddd777445857cabeaab7431655090 unavailable background: none; body: redbrown; neck: none; mouth: teeth; ears: earbuds; head: crazyhair; eyes: eyepatch 0x28cd24bc0b809e61775f5bd707690aab272d84229d22675219fe08e19b9f21e3 chain_logs contract_getters",
     "settlement": {
       "block_number": 26293484,
       "block_time_utc": "2025-10-06T15:41:48Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Teeth (5.3%)",
+        "display": "Mouth: Teeth",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

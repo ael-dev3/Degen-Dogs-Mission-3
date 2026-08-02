@@ -50,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#634/792",
-      "rank": 634,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 171 dog #171 171 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d #634/792 background: none; body: blue; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 171 dog #171 171 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d unavailable background: none; body: blue; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 34382779,
       "block_time_utc": "2022-10-15T17:00:39Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.3%)",
+        "display": "Body: Blue",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BaseballCap (10.5%)",
+        "display": "Head: BaseballCap",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.2%)",
+        "display": "Eyes: VRGoggles",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

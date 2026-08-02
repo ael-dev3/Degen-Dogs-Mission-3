@@ -34,9 +34,9 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132",
+      "0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69",
       "0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020",
-      "0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69"
+      "0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#694/792",
-      "rank": 694,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a #694/792 generated auction feed 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: stripedbeanie (8.3%) head stripedbeanie eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a unavailable generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 background: none background none body: redbrown body redbrown neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: stripedbeanie head stripedbeanie eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49023751,
       "block_time_utc": "2026-07-23T20:00:49Z",
@@ -73,46 +73,46 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
+        "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.3%)",
+        "display": "Head: StripedBeanie",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

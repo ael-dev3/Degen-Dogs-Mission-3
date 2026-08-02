@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#379/792",
-      "rank": 379,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 718 dog #718 718 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.005 eth 5000000000000000 10.55 $10.55 2026-05-19t14:54:47z 0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e 0xf72b90f7c188775bce13f7b9c577d3d9aae5869e16f76e9d771ea65f62f5c0d4 #379/792 generated auction feed 0xfefe1d9ee8d14ca419003b128b21a6ae51df0da9b3a020c1275870e3ac5fb3bc background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: beanie (6.2%) head beanie eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 718 dog #718 718 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.005 eth 5000000000000000 10.55 $10.55 2026-05-19t14:54:47z 0x08d1de16badbcae190e13c02c64818c5ebbed8d8c0477f2e25884c2d5163c76e 0xf72b90f7c188775bce13f7b9c577d3d9aae5869e16f76e9d771ea65f62f5c0d4 unavailable generated auction feed 0xfefe1d9ee8d14ca419003b128b21a6ae51df0da9b3a020c1275870e3ac5fb3bc background: none background none body: sugarskull body sugarskull neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: beanie head beanie eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46206570,
       "block_time_utc": "2026-05-19T14:54:47Z",
@@ -79,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.8%)",
+        "display": "Body: SugarSkull",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Beanie (6.2%)",
+        "display": "Head: Beanie",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

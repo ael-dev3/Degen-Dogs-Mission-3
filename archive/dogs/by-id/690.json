@@ -55,12 +55,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#393/792",
-      "rank": 393,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 690 dog #690 690 mission 3 mission 3 base settled 0xffa73032fc023cbc21334d15d19854294f8e64db @keldon keldon 0.03255 eth 32550000000000000 75.35 $75.35 2026-04-20t20:57:53z 0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0 0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1 #393/792 generated auction feed 0x7beab854d7e7334e4eb278280234a9f92c2f5e33941606a251000476686b4121 0xbb7c39a7361ef7cee2bb481773b445f7cdec2ef06195c62ee8997d40635aa76b 0x11a20df3305d22c8beffa7019a322e97eee7f0fb1f518b76e838adf8abca1073 0x7451e3656ab0ab0e68c23512bd0cee0a5e2835998801070ca45cf47fef27ad1c background: none (90.4%) background none body: black (11.1%) body black neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: redmohawk (7.2%) head redmohawk eyes: monocle (6.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 690 dog #690 690 mission 3 mission 3 base settled 0xffa73032fc023cbc21334d15d19854294f8e64db @keldon keldon 0.03255 eth 32550000000000000 75.35 $75.35 2026-04-20t20:57:53z 0x7885961e48b4af70b01fc46cdad31afafa9b3f0ebe8fa3e7bd8bee1005f44fe0 0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1 unavailable generated auction feed 0x7beab854d7e7334e4eb278280234a9f92c2f5e33941606a251000476686b4121 0xbb7c39a7361ef7cee2bb481773b445f7cdec2ef06195c62ee8997d40635aa76b 0x11a20df3305d22c8beffa7019a322e97eee7f0fb1f518b76e838adf8abca1073 0x7451e3656ab0ab0e68c23512bd0cee0a5e2835998801070ca45cf47fef27ad1c background: none background none body: black body black neck: redcollar neck redcollar mouth: none mouth none ears: earbuds ears earbuds head: redmohawk head redmohawk eyes: monocle eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 44964663,
       "block_time_utc": "2026-04-20T20:57:53Z",
@@ -82,37 +82,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: RedMohawk (7.2%)",
+        "display": "Head: RedMohawk",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Monocle (6.4%)",
+        "display": "Eyes: Monocle",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

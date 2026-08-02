@@ -35,7 +35,8 @@
     },
     "bid_tx_hashes": [
       "0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d",
-      "0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572"
+      "0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572",
+      "0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -53,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#332/792",
-      "rank": 332,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 22.08 $22.08 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f #332/792 generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 background: halo (9.6%) background halo body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: goldearring (15.2%) ears goldearring head: whitemohawk (6.8%) head whitemohawk eyes: sunglasses (14.6%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 727 dog #727 727 mission 3 mission 3 base settled 0xdbb811ec62338db94858ec21ef1d56b658111922 @floam floam 0.011 eth 11000000000000000 22.08 $22.08 2026-05-29t18:38:33z 0xf9541014ebee8c7c90b9ba3bc511c9e80f167d3b0a90abc747b58ac2a07f5ee7 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f unavailable generated auction feed 0xfd4f915560627ddb433f222482d564e8c05356431a5ff502884670d0cd7cd08d 0x0521346b2802247c8800c2e9e7ea7b103fcde837907f7d4b1d65d5aa5fcbc572 0x8ae2e9d55fd40ddb0606d5dfbcc4dedeb913ee0dc08beebd5e77de1024608cc8 background: halo background halo body: redbrown body redbrown neck: redcollar neck redcollar mouth: none mouth none ears: goldearring ears goldearring head: whitemohawk head whitemohawk eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46645283,
       "block_time_utc": "2026-05-29T18:38:33Z",
@@ -80,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (9.6%)",
+        "display": "Background: Halo",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (15.2%)",
+        "display": "Ears: GoldEarring",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.8%)",
+        "display": "Head: WhiteMohawk",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+python_bin="${repo_dir}/.venv/bin/python3"
+if [[ ! -x "$python_bin" ]]; then
+  printf 'error: pinned Degen Dogs Python runtime is unavailable\n' >&2
+  exit 127
+fi
+exec "$python_bin" "$@"

@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#445/792",
-      "rank": 445,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth #445/792 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: StuddedCollar (9.8%)",
+        "display": "Neck: StuddedCollar",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: RedMohawk (7.2%)",
+        "display": "Head: RedMohawk",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

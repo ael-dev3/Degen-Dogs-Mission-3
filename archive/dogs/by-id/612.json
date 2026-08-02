@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#533/792",
-      "rank": 533,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 612 dog #612 612 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.07624 eth 76240000000000000 186.37 $186.37 2026-02-01t03:01:03z 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace 0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05 #533/792 generated auction feed 0x2dfba80496f17c9a7f357a4d80dbb6efdd7c3180d595f1be167c2d1cf954496c 0xf39e963cdee7b00ab69ce79496d2f5812cb2db71eaeaa82e9ae8ebb23fefd238 0x8a02290973713c5a14dbd233e0abdb751d7e09fd528027977e8f19909d6df1a4 background: none (90.4%) background none body: white (11.5%) body white neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: stripedbeanie (8.3%) head stripedbeanie eyes: eyepatch (8.0%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 612 dog #612 612 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.07624 eth 76240000000000000 186.37 $186.37 2026-02-01t03:01:03z 0x6f5bb4a229936084ad5b57e1137e0f392c67d8d0003e99029108339593ab1ace 0xc669800e09f1707831348b0648853315b719972124c3ec6c9f008bba9c823e05 unavailable generated auction feed 0x2dfba80496f17c9a7f357a4d80dbb6efdd7c3180d595f1be167c2d1cf954496c 0xf39e963cdee7b00ab69ce79496d2f5812cb2db71eaeaa82e9ae8ebb23fefd238 0x8a02290973713c5a14dbd233e0abdb751d7e09fd528027977e8f19909d6df1a4 background: none background none body: white body white neck: redcollar neck redcollar mouth: none mouth none ears: none ears none head: stripedbeanie head stripedbeanie eyes: eyepatch eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41562758,
       "block_time_utc": "2026-02-01T03:01:03Z",
@@ -81,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.3%)",
+        "display": "Head: StripedBeanie",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

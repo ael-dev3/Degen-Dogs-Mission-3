@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#418/792",
-      "rank": 418,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 176 dog #176 176 mission 1 mission 1 polygon no auction dogmaster reward weth #418/792 background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: goldearring; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 176 dog #176 176 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: goldearring; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Teeth (5.3%)",
+        "display": "Mouth: Teeth",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
       {
-        "display": "Ears: GoldEarring (15.2%)",
+        "display": "Ears: GoldEarring",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

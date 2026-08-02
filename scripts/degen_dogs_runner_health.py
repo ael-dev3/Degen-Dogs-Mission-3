@@ -19,12 +19,27 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 from typing import Any, Iterable
+
+from runner_path_security import (
+    SecurePathError,
+    create_private_temp,
+    ensure_private_directory as secure_private_directory,
+    ensure_private_file as secure_private_file,
+    open_existing_private_file,
+    open_private_lock,
+    replace_private_file,
+    unlink_private_file,
+)
+
+os.umask(0o077)
 
 HOME = Path(os.environ.get("DEGEN_DOGS_HEALTH_HOME", str(Path.home())))
 REPO_DIR = Path(os.environ.get("DEGEN_DOGS_REPO_DIR", "/Users/marko/projects/Degen-Dogs-Mission-3"))
@@ -52,15 +67,26 @@ WATCHER_STATE_PATH = Path(
 ).expanduser()
 LIVE_URL = "https://ael-dev3.github.io/Degen-Dogs-Mission-3/"
 LIVE_STATUS_URL = LIVE_URL + "generated/refresh_status.json"
+LIVE_HTML_MAX_BYTES = 250_000
+LIVE_STATUS_MAX_BYTES = 128_000
+LIVE_TARGETS = {
+    LIVE_URL: ("text/html", LIVE_HTML_MAX_BYTES),
+    LIVE_STATUS_URL: ("application/json", LIVE_STATUS_MAX_BYTES),
+}
 GITHUB_REPO = os.environ.get("DEGEN_DOGS_HEALTH_GITHUB_REPO", "ael-dev3/Degen-Dogs-Mission-3")
+RUNNER_ISSUE_TITLE = "Local runner critical health alert"
+RUNNER_ISSUE_MARKER = "<!-- degen-dogs-runner-health-incident:v1 -->"
+TRUSTED_STATE_KEY = "_degen_dogs_health_state_trusted"
 DISCORD_MENTION = os.environ.get("DEGEN_DOGS_HEALTH_DISCORD_MENTION", "@Ael")
 ALERT_STATE_PATH = Path(
     os.environ.get("DEGEN_DOGS_HEALTH_ALERT_STATE_PATH", str(CACHE_DIR / "critical-alert-state.json"))
 ).expanduser()
 EXPECTED_INTERVAL_SECONDS = int(os.environ.get("DEGEN_DOGS_REFRESH_INTERVAL_SECONDS", "3600"))
-WATCHER_INTERVAL_SECONDS = int(os.environ.get("MISSION3_WATCHER_INTERVAL_SECONDS", "30"))
+WATCHER_INTERVAL_SECONDS = int(os.environ.get("MISSION3_WATCHER_INTERVAL_SECONDS", "15"))
 WATCHER_AUTO_PUSH = os.environ.get("MISSION3_WATCHER_AUTO_PUSH", "0")
 LIVE_VERIFY_AFTER_PUSH = os.environ.get("DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH", "1")
+HOURLY_FULL_REFRESH = "1" if os.environ.get("DEGEN_DOGS_FULL_REFRESH", "0") == "1" else "0"
+HOURLY_RUN_MISSION3_ARCHIVE = "0" if os.environ.get("DEGEN_DOGS_RUN_MISSION3_ARCHIVE", "1") == "0" else "1"
 WATCHER_REFRESH_COMMAND = os.environ.get("MISSION3_REFRESH_COMMAND") or (
     "npm run refresh:publish" if WATCHER_AUTO_PUSH == "1" else "npm run refresh:current"
 )
@@ -72,7 +98,52 @@ LIVE_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS", 
 STALE_SUCCESS_SECONDS = max(2 * EXPECTED_INTERVAL_SECONDS, 2 * 3600)
 CRITICAL_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_CRITICAL_STALE_SECONDS", str(2 * 3600)))
 REPEAT_ALERT_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_REPEAT_ALERT_SECONDS", str(6 * 3600)))
-PATH_VALUE = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+BASE_PATH_VALUE = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+PYTHON_RUNTIME_PROBE = (
+    "import Crypto; from Crypto.Hash import keccak; "
+    "assert Crypto.__version__ == '3.23.0'; "
+    "assert keccak.new(digest_bits=256, data=b'').hexdigest() == "
+    "'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'"
+)
+
+
+def runner_python_ready(repo_dir: Path | None = None) -> bool:
+    root = REPO_DIR if repo_dir is None else repo_dir
+    root_text = str(root)
+    python_path = root / ".venv" / "bin" / "python3"
+    if ":" in root_text or not python_path.is_file() or not os.access(python_path, os.X_OK):
+        return False
+    try:
+        completed = subprocess.run(
+            [str(python_path), "-I", "-c", PYTHON_RUNTIME_PROBE],
+            env={"PATH": BASE_PATH_VALUE, "PYTHONNOUSERSITE": "1"},
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return completed.returncode == 0
+
+
+def runner_python_shim_ready(repo_dir: Path | None = None) -> bool:
+    root = REPO_DIR if repo_dir is None else repo_dir
+    shim = root / "scripts" / "runtime-bin" / "python3"
+    return shim.is_file() and os.access(shim, os.X_OK)
+
+
+def runner_path_value(repo_dir: Path | None = None) -> str:
+    """Prefer the hash-locked repo virtualenv without accepting PATH separators."""
+    root = REPO_DIR if repo_dir is None else repo_dir
+    root_text = str(root)
+    if runner_python_ready(root) and runner_python_shim_ready(root):
+        return f"{root_text}/scripts/runtime-bin:{BASE_PATH_VALUE}"
+    return BASE_PATH_VALUE
+
+
+PATH_VALUE = runner_path_value()
 DRY_RUN = os.environ.get("DEGEN_DOGS_HEALTH_DRY_RUN") == "1"
 ALERT_DRY_RUN = DRY_RUN or os.environ.get("DEGEN_DOGS_HEALTH_ALERT_DRY_RUN") == "1"
 GITHUB_ALERTS_ENABLED = os.environ.get("DEGEN_DOGS_HEALTH_GITHUB_ALERTS", "1") != "0"
@@ -119,6 +190,9 @@ class LaunchdSpec:
     program_arguments: tuple[str, ...]
     interval_seconds: int
     name: str
+    standard_out_path: Path
+    standard_error_path: Path
+    throttle_interval: int
     required_environment: tuple[tuple[str, str], ...] = ()
 
 
@@ -133,7 +207,12 @@ def launchd_specs() -> tuple[LaunchdSpec, LaunchdSpec]:
     plist_dir = HOME / "Library" / "LaunchAgents"
     common_env = (
         ("HOME", str(HOME)),
+        ("PATH", runner_path_value()),
+        ("GIT_TERMINAL_PROMPT", "0"),
         ("DEGEN_DOGS_REPO_DIR", str(REPO_DIR)),
+        ("DEGEN_DOGS_LOG_DIR", str(LOG_DIR)),
+        ("DEGEN_DOGS_LOCK_DIR", str(CACHE_DIR)),
+        ("DEGEN_DOGS_REFRESH_LOCK_PATH", str(REFRESH_LOCK_PATH)),
         ("DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH", LIVE_VERIFY_AFTER_PUSH),
     )
     return (
@@ -143,8 +222,15 @@ def launchd_specs() -> tuple[LaunchdSpec, LaunchdSpec]:
             installer=HOURLY_INSTALL_SCRIPT,
             program_arguments=(str(REFRESH_SCRIPT),),
             interval_seconds=EXPECTED_INTERVAL_SECONDS,
-            name="hourly full-reconcile refresh",
-            required_environment=(*common_env, ("DEGEN_DOGS_FULL_REFRESH", "1")),
+            name="hourly reconcile refresh",
+            standard_out_path=LOG_DIR / "launchd.out.log",
+            standard_error_path=LOG_DIR / "launchd.err.log",
+            throttle_interval=10,
+            required_environment=(
+                *common_env,
+                ("DEGEN_DOGS_FULL_REFRESH", HOURLY_FULL_REFRESH),
+                ("DEGEN_DOGS_RUN_MISSION3_ARCHIVE", HOURLY_RUN_MISSION3_ARCHIVE),
+            ),
         ),
         LaunchdSpec(
             label=WATCHER_LABEL,
@@ -153,9 +239,14 @@ def launchd_specs() -> tuple[LaunchdSpec, LaunchdSpec]:
             program_arguments=("/usr/bin/env", "python3", str(WATCHER_SCRIPT), "--once"),
             interval_seconds=WATCHER_INTERVAL_SECONDS,
             name="onchain auction watcher",
+            standard_out_path=LOG_DIR / "watcher.launchd.out.log",
+            standard_error_path=LOG_DIR / "watcher.launchd.err.log",
+            throttle_interval=10,
             required_environment=(
                 *common_env,
                 ("DEGEN_DOGS_FULL_REFRESH", "0"),
+                ("DEGEN_DOGS_RUN_MISSION3_ARCHIVE", "0"),
+                ("MISSION3_REFRESH_LOCK_PATH", str(REFRESH_LOCK_PATH)),
                 ("MISSION3_WATCHER_AUTO_PUSH", WATCHER_AUTO_PUSH),
                 ("MISSION3_REFRESH_COMMAND", WATCHER_REFRESH_COMMAND),
             ),
@@ -210,6 +301,97 @@ def managed_logs() -> tuple[ManagedLog, ...]:
     return tuple(unique_logs.values())
 
 
+def _absolute_runner_path(path: Path) -> Path:
+    return path if path.is_absolute() else REPO_DIR / path
+
+
+def private_runner_directories() -> tuple[Path, ...]:
+    paths = (
+        _absolute_runner_path(LOG_DIR),
+        _absolute_runner_path(CACHE_DIR),
+        REPO_DIR / ".local",
+        REPO_DIR / "logs",
+    )
+    return tuple(dict.fromkeys(paths))
+
+
+def private_runner_files() -> tuple[Path, ...]:
+    plist_dir = HOME / "Library" / "LaunchAgents"
+    paths = [
+        *(_absolute_runner_path(item.path) for item in managed_logs()),
+        _absolute_runner_path(WATCHER_STATE_PATH),
+        _absolute_runner_path(WATCHER_LOCK_PATH),
+        _absolute_runner_path(REFRESH_LOCK_PATH),
+        _absolute_runner_path(ALERT_STATE_PATH),
+        plist_dir / f"{HOURLY_LABEL}.plist",
+        plist_dir / f"{WATCHER_LABEL}.plist",
+        plist_dir / "com.ael.degendogs.mission3.health.plist",
+    ]
+    return tuple(dict.fromkeys(paths))
+
+
+def harden_private_directory(path: Path) -> bool:
+    """Create or repair a directory without following any path component."""
+    try:
+        return secure_private_directory(path)
+    except SecurePathError as exc:
+        raise PermissionError(f"runner private directory is unsafe: {path}: {exc}") from exc
+
+
+def harden_private_file(path: Path) -> bool:
+    """Repair an existing owned regular artifact in place; missing files stay absent."""
+    try:
+        return secure_private_file(path, create=False)
+    except SecurePathError as exc:
+        raise PermissionError(f"runner private file is unsafe: {path}: {exc}") from exc
+
+
+def harden_runner_permissions(lines: list[str]) -> bool:
+    """Keep private runner state unreadable to other local accounts."""
+    had_error = False
+    for path in private_runner_directories():
+        if DRY_RUN:
+            try:
+                details = path.lstat()
+                unsafe = not stat.S_ISDIR(details.st_mode) or stat.S_ISLNK(details.st_mode) or details.st_uid != os.getuid()
+                if unsafe:
+                    raise PermissionError(f"runner private directory is unsafe: {path}")
+                if stat.S_IMODE(details.st_mode) != 0o700:
+                    append_fix(lines, f"DRY-RUN would set runner directory {path} to mode 0700")
+            except FileNotFoundError:
+                append_fix(lines, f"DRY-RUN would create runner directory {path} with mode 0700")
+            except (OSError, PermissionError) as exc:
+                append_issue(lines, f"runner permission hardening failed for directory {path}: {type(exc).__name__}: {exc}")
+                had_error = True
+            continue
+        try:
+            if harden_private_directory(path):
+                append_fix(lines, f"set runner directory {path} to mode 0700")
+        except (OSError, PermissionError) as exc:
+            append_issue(lines, f"runner permission hardening failed for directory {path}: {type(exc).__name__}: {exc}")
+            had_error = True
+
+    for path in private_runner_files():
+        if DRY_RUN:
+            try:
+                details = path.lstat()
+            except FileNotFoundError:
+                continue
+            if not stat.S_ISREG(details.st_mode) or stat.S_ISLNK(details.st_mode) or details.st_uid != os.getuid():
+                append_issue(lines, f"runner permission hardening refused unsafe file: {path}")
+                had_error = True
+            elif stat.S_IMODE(details.st_mode) != 0o600:
+                append_fix(lines, f"DRY-RUN would set runner file {path} to mode 0600")
+            continue
+        try:
+            if harden_private_file(path):
+                append_fix(lines, f"set runner file {path} to mode 0600")
+        except (OSError, PermissionError) as exc:
+            append_issue(lines, f"runner permission hardening failed for file {path}: {type(exc).__name__}: {exc}")
+            had_error = True
+    return had_error
+
+
 def _reset_matching_standard_stream_offsets(file_stat: os.stat_result) -> None:
     for fd in (1, 2):
         try:
@@ -229,21 +411,14 @@ def compact_log_in_place(path: Path, *, max_bytes: int, retain_bytes: int) -> tu
     if max_bytes < 1 or retain_bytes < 0:
         raise ValueError("log bounds must be non-negative and max_bytes must be positive")
     try:
-        initial = path.lstat()
+        descriptor = open_existing_private_file(path, writable=True)
     except FileNotFoundError:
         return False, 0, 0
-    if stat.S_ISLNK(initial.st_mode) or not stat.S_ISREG(initial.st_mode):
-        raise ValueError(f"refusing to compact non-regular log: {path}")
-    if initial.st_uid != os.getuid():
-        raise PermissionError(f"refusing to compact log not owned by current user: {path}")
-    if initial.st_size <= max_bytes:
-        return False, initial.st_size, initial.st_size
-
-    with path.open("r+b", buffering=0) as handle:
+    except (OSError, SecurePathError) as exc:
+        raise ValueError(f"refusing to compact unsafe/non-regular log: {path}: {exc}") from exc
+    with os.fdopen(descriptor, "r+b", buffering=0) as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         opened = os.fstat(handle.fileno())
-        if (opened.st_dev, opened.st_ino) != (initial.st_dev, initial.st_ino):
-            raise RuntimeError(f"log changed while opening for compaction: {path}")
         before = opened.st_size
         if before <= max_bytes:
             return False, before, before
@@ -357,7 +532,7 @@ def env() -> dict[str, str]:
     data = os.environ.copy()
     data.update({
         "HOME": str(HOME),
-        "PATH": PATH_VALUE,
+        "PATH": runner_path_value(),
         "GIT_TERMINAL_PROMPT": "0",
     })
     return data
@@ -508,33 +683,92 @@ def load_local_refresh_status() -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def live_site_ok(expected_status: dict[str, Any] | None = None) -> tuple[bool, str]:
+class NoLiveRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001, ANN201, ARG002
+        return None
+
+
+LIVE_OPENER = urllib.request.build_opener(NoLiveRedirectHandler())
+
+
+def fetch_fixed_live_text(url: str, *, cache_buster: int) -> str:
+    target_policy = LIVE_TARGETS.get(url)
+    if target_policy is None:
+        raise RuntimeError("live endpoint is not an approved fixed target")
+    expected_content_type, max_bytes = target_policy
     try:
-        req = urllib.request.Request(
-            LIVE_URL + f"?runner_health={int(time.time())}",
-            headers={"User-Agent": "Hermes-DegenDogs-runner-health/1.0"},
-        )
-        with urllib.request.urlopen(req, timeout=25) as response:
-            status = getattr(response, "status", 0)
-            body = response.read(250_000).decode("utf-8", errors="replace")
-    except Exception as exc:  # noqa: BLE001 - watchdog should report compactly, not crash.
-        return False, f"live HTTP check failed: {type(exc).__name__}: {exc}"
-    if status != 200:
-        return False, f"live HTTP status {status}"
+        parts = urllib.parse.urlsplit(url)
+        port = parts.port
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("live endpoint failed fixed-target validation") from exc
+    if (
+        parts.scheme != "https"
+        or port not in (None, 443)
+        or parts.username is not None
+        or parts.password is not None
+        or parts.query
+        or parts.fragment
+    ):
+        raise RuntimeError("live endpoint failed fixed-target validation")
+    request_url = f"{url}?runner_health={cache_buster}"
+    request = urllib.request.Request(
+        request_url,
+        headers={
+            "Accept": expected_content_type,
+            "Cache-Control": "no-cache",
+            "User-Agent": "DegenDogs-runner-health/3.0",
+        },
+    )
+    try:
+        response = LIVE_OPENER.open(request, timeout=25)
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"live endpoint HTTP {exc.code}") from None
+    except Exception as exc:  # noqa: BLE001 - never expose provider-controlled URL/reason text
+        raise RuntimeError(f"live endpoint transport failed ({type(exc).__name__})") from None
+    try:
+        with response:
+            if response.getcode() != 200:
+                raise RuntimeError("live endpoint returned an unexpected HTTP status")
+            if str(response.geturl()) != request_url:
+                raise RuntimeError("live endpoint response URL changed unexpectedly")
+            content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+            if content_type != expected_content_type:
+                raise RuntimeError("live endpoint returned an unexpected content type")
+            content_length = response.headers.get("Content-Length")
+            if content_length is not None:
+                try:
+                    declared_length = int(content_length)
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError("live endpoint returned an invalid content length") from exc
+                if declared_length < 0 or declared_length > max_bytes:
+                    raise RuntimeError("live endpoint response exceeds the size limit")
+            body = response.read(max_bytes + 1)
+            if len(body) > max_bytes:
+                raise RuntimeError("live endpoint response exceeds the size limit")
+    except RuntimeError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - suppress provider-controlled read details
+        raise RuntimeError(f"live endpoint response read failed ({type(exc).__name__})") from None
+    try:
+        return body.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError("live endpoint response is not valid UTF-8") from exc
+
+
+def live_site_ok(expected_status: dict[str, Any] | None = None) -> tuple[bool, str]:
+    cache_buster = int(time.time())
+    try:
+        body = fetch_fixed_live_text(LIVE_URL, cache_buster=cache_buster)
+    except RuntimeError as exc:
+        return False, f"live HTTP check failed: {exc}"
     if "auction_feed" not in body or LIVE_URL.rstrip("/") not in body:
         return False, "live HTML missing expected auction_feed/site_url markers"
     try:
-        status_req = urllib.request.Request(
-            LIVE_STATUS_URL + f"?runner_health={int(time.time())}",
-            headers={"User-Agent": "DegenDogs-runner-health/2.0", "Cache-Control": "no-cache"},
-        )
-        with urllib.request.urlopen(status_req, timeout=25) as response:
-            status_code = getattr(response, "status", 0)
-            status_data = json.loads(response.read(128_000).decode("utf-8"))
-    except Exception as exc:  # noqa: BLE001
-        return False, f"live refresh status check failed: {type(exc).__name__}: {exc}"
-    if status_code != 200:
-        return False, f"live refresh status HTTP status {status_code}"
+        status_data = json.loads(fetch_fixed_live_text(LIVE_STATUS_URL, cache_buster=cache_buster))
+    except json.JSONDecodeError:
+        return False, "live refresh status check failed: invalid JSON"
+    except RuntimeError as exc:
+        return False, f"live refresh status check failed: {exc}"
     if not isinstance(status_data, dict) or status_data.get("kind") != "refresh_status":
         return False, "live refresh status payload is invalid"
     if status_data.get("site_url") != LIVE_URL:
@@ -664,6 +898,10 @@ def derive_causes(
         causes.append("runner_disk_space_low_or_unreadable")
     if "log rotation" in combined:
         causes.append("runner_log_rotation_failed")
+    if "runner permission hardening" in combined:
+        causes.append("runner_private_artifact_permissions_unsafe")
+    if "python virtualenv" in combined or "keccak runtime" in combined:
+        causes.append("runner_python_runtime_invalid")
     if not live_ok:
         causes.append("live_site_or_refresh_status_failure")
     last_started = log_details.get("last_started_ts")
@@ -689,17 +927,49 @@ def alert_fingerprint(snapshot: dict[str, Any]) -> str:
 
 def load_alert_state() -> dict[str, Any]:
     try:
-        data = json.loads(ALERT_STATE_PATH.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
+        fd = open_existing_private_file(ALERT_STATE_PATH)
+        try:
+            file_stat = os.fstat(fd)
+            if file_stat.st_size > 1_048_576:
+                return {}
+            with os.fdopen(fd, "r", encoding="utf-8") as handle:
+                fd = -1
+                data = json.load(handle)
+        finally:
+            if fd >= 0:
+                os.close(fd)
+    except (FileNotFoundError, OSError, SecurePathError, json.JSONDecodeError):
         return {}
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        return {}
+    data[TRUSTED_STATE_KEY] = True
+    return data
 
 
 def save_alert_state(state: dict[str, Any]) -> None:
     if ALERT_DRY_RUN:
         return
-    ALERT_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    ALERT_STATE_PATH.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        secure_private_directory(ALERT_STATE_PATH.parent)
+    except SecurePathError as exc:
+        raise PermissionError(
+            f"refusing to write alert state in unprotected directory: {ALERT_STATE_PATH.parent}: {exc}"
+        ) from exc
+    persisted = {key: value for key, value in state.items() if key != TRUSTED_STATE_KEY}
+    payload = (json.dumps(persisted, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    temporary = Path(create_private_temp(ALERT_STATE_PATH.parent / f".{ALERT_STATE_PATH.name}"))
+    fd = open_existing_private_file(temporary, writable=True)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            fd = -1
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        replace_private_file(temporary, ALERT_STATE_PATH)
+    finally:
+        if fd >= 0:
+            os.close(fd)
+        unlink_private_file(temporary, missing_ok=True)
 
 
 def iso_now() -> str:
@@ -720,12 +990,22 @@ def inspect_watcher_state(now: float | None = None, path: Path | None = None) ->
     """Return actionable watcher-state issues and a sanitized operational summary."""
     now = time.time() if now is None else now
     path = WATCHER_STATE_PATH if path is None else path
-    if not path.exists():
-        return [f"watcher state missing: {path}"], {"state_path": str(path), "present": False}
     try:
-        state = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        descriptor = open_existing_private_file(path)
+    except FileNotFoundError:
+        return [f"watcher state missing: {path}"], {"state_path": str(path), "present": False}
+    except (OSError, SecurePathError) as exc:
+        return [f"watcher state unsafe/unreadable: {type(exc).__name__}"], {"state_path": str(path), "present": True}
+    try:
+        details = os.fstat(descriptor)
+        if details.st_size > 2_097_152:
+            return ["watcher state is not a protected owned regular file"], {"state_path": str(path), "present": True}
+        with os.fdopen(descriptor, "r", encoding="utf-8", closefd=False) as handle:
+            state = json.load(handle)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         return [f"watcher state unreadable: {type(exc).__name__}"], {"state_path": str(path), "present": True}
+    finally:
+        os.close(descriptor)
     if not isinstance(state, dict):
         return ["watcher state is not a JSON object"], {"state_path": str(path), "present": True}
 
@@ -795,7 +1075,32 @@ def run_gh(args: list[str], *, body: str | None = None, timeout: int = 45) -> Re
             pass
 
 
+def github_actor_login() -> str | None:
+    """Return the authenticated account that would own a watchdog-created issue."""
+    result = run_gh(["api", "user", "--jq", ".login"], timeout=20)
+    if result.code != 0:
+        return None
+    login = result.out.strip()
+    if not login or len(login) > 39 or re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?", login) is None:
+        return None
+    return login
+
+
+def canonical_issue_url(number: int) -> str:
+    return f"https://github.com/{GITHUB_REPO}/issues/{number}"
+
+
+def trusted_state_issue_number(state: dict[str, Any]) -> int | None:
+    number = state.get("issue_number")
+    if state.get(TRUSTED_STATE_KEY) is not True or not isinstance(number, int) or isinstance(number, bool):
+        return None
+    return number if number > 0 else None
+
+
 def find_open_runner_issue() -> tuple[int | None, str | None]:
+    actor = github_actor_login()
+    if actor is None:
+        return None, None
     result = run_gh(
         [
             "issue",
@@ -804,12 +1109,14 @@ def find_open_runner_issue() -> tuple[int | None, str | None]:
             GITHUB_REPO,
             "--state",
             "open",
+            "--author",
+            actor,
             "--search",
-            "Local runner critical health alert in:title",
+            f"{RUNNER_ISSUE_TITLE} in:title",
             "--json",
-            "number,url,title",
+            "number,url,title,body,author",
             "--limit",
-            "20",
+            "100",
         ],
         timeout=30,
     )
@@ -819,12 +1126,25 @@ def find_open_runner_issue() -> tuple[int | None, str | None]:
         issues = json.loads(result.out or "[]")
     except json.JSONDecodeError:
         return None, None
+    if not isinstance(issues, list):
+        return None, None
     for issue in issues:
+        if not isinstance(issue, dict):
+            continue
         title = str(issue.get("title") or "")
-        if "Local runner critical health alert" in title:
-            number = issue.get("number")
-            if isinstance(number, int):
-                return number, str(issue.get("url") or f"https://github.com/{GITHUB_REPO}/issues/{number}")
+        body = str(issue.get("body") or "")
+        author = issue.get("author")
+        author_login = str(author.get("login") or "") if isinstance(author, dict) else ""
+        number = issue.get("number")
+        if (
+            title == RUNNER_ISSUE_TITLE
+            and RUNNER_ISSUE_MARKER in body
+            and author_login.casefold() == actor.casefold()
+            and isinstance(number, int)
+            and not isinstance(number, bool)
+            and number > 0
+        ):
+            return number, canonical_issue_url(number)
     return None, None
 
 
@@ -832,26 +1152,29 @@ def update_github_issue(snapshot: dict[str, Any], body: str, state: dict[str, An
     if not GITHUB_ALERTS_ENABLED:
         return "GitHub alert update skipped: disabled", None, None
     if ALERT_DRY_RUN:
-        number = state.get("issue_number") if isinstance(state.get("issue_number"), int) else None
-        url = state.get("issue_url") if isinstance(state.get("issue_url"), str) else None
+        number = trusted_state_issue_number(state)
+        url = canonical_issue_url(number) if number is not None else None
         return "DRY-RUN would create/update GitHub issue", number, url
     auth = run_gh(["auth", "status"], timeout=20)
     if auth.code != 0:
         return f"GitHub alert update failed: gh auth status failed: {sanitize(auth.out or auth.err)}", None, None
 
-    number = state.get("issue_number") if isinstance(state.get("issue_number"), int) else None
-    url = state.get("issue_url") if isinstance(state.get("issue_url"), str) else None
+    number = trusted_state_issue_number(state)
+    url = canonical_issue_url(number) if number is not None else None
     if not number:
         number, url = find_open_runner_issue()
     if number:
         comment = run_gh(["issue", "comment", str(number), "--repo", GITHUB_REPO], body=body, timeout=45)
         if comment.code == 0:
-            url = url or f"https://github.com/{GITHUB_REPO}/issues/{number}"
+            url = canonical_issue_url(number)
             return f"GitHub issue updated: {url}", number, url
         return f"GitHub alert update failed: {sanitize(comment.out or comment.err)}", number, url
 
-    title = "Local runner critical health alert"
-    create = run_gh(["issue", "create", "--repo", GITHUB_REPO, "--title", title], body=body, timeout=45)
+    create = run_gh(
+        ["issue", "create", "--repo", GITHUB_REPO, "--title", RUNNER_ISSUE_TITLE],
+        body=body,
+        timeout=45,
+    )
     if create.code != 0:
         return f"GitHub alert update failed: {sanitize(create.out or create.err)}", None, None
     created_url = create.out.strip().splitlines()[-1] if create.out.strip() else ""
@@ -861,20 +1184,26 @@ def update_github_issue(snapshot: dict[str, Any], body: str, state: dict[str, An
 
 
 def close_github_issue(state: dict[str, Any], body: str) -> str | None:
-    number = state.get("issue_number") if isinstance(state.get("issue_number"), int) else None
+    number = trusted_state_issue_number(state)
     if not number or not GITHUB_ALERTS_ENABLED:
         return None
     if ALERT_DRY_RUN:
         return f"DRY-RUN would close GitHub issue #{number}"
     comment = run_gh(["issue", "comment", str(number), "--repo", GITHUB_REPO], body=body, timeout=45)
     close = run_gh(["issue", "close", str(number), "--repo", GITHUB_REPO, "--reason", "completed"], timeout=45)
-    if comment.code == 0 and close.code == 0:
-        return f"GitHub issue closed: https://github.com/{GITHUB_REPO}/issues/{number}"
+    if close.code == 0:
+        if comment.code != 0:
+            return (
+                f"GitHub issue closed: {canonical_issue_url(number)} "
+                f"(recovery comment failed: {sanitize(comment.out or comment.err)})"
+            )
+        return f"GitHub issue closed: {canonical_issue_url(number)}"
     return f"GitHub recovery update failed: {sanitize(comment.out or comment.err or close.out or close.err)}"
 
 
 def build_incident_body(snapshot: dict[str, Any]) -> str:
     lines = [
+        RUNNER_ISSUE_MARKER,
         "## Critical local runner health alert",
         "",
         "The private Mac mini runner watchdog detected a critical refresh failure. Values below are sanitized before being posted to GitHub.",
@@ -990,6 +1319,17 @@ def handle_recovery_alert(snapshot: dict[str, Any]) -> str | None:
         f"Live site check: `{'ok' if snapshot.get('live_ok') else 'failed'}`\n"
     )
     github_message = close_github_issue(state, body)
+    if github_message and github_message.startswith("GitHub recovery update failed:"):
+        # Keep the incident active so the next healthy watchdog pass retries the
+        # external close instead of orphaning an open uptime issue forever.
+        state.update({
+            "active": True,
+            "last_recovery_attempt_at_utc": iso_now(),
+            "recovery_snapshot": snapshot,
+            "github_recovery_update": github_message,
+        })
+        save_alert_state(state)
+        return f"Degen Dogs local runner recovered; GitHub closure will retry\n- {github_message}"
     state.update({
         "active": False,
         "recovered_at_utc": iso_now(),
@@ -1097,17 +1437,34 @@ def clean_timestamp_only_price_changes(lines: list[str], dirty_paths: list[str])
     unique_paths = sorted(set(dirty_paths))
     if any(path not in PRICE_TIMESTAMP_ONLY_PATHS for path in unique_paths):
         return False
-    if not all(generated_price_change_is_timestamp_only(path) for path in unique_paths):
-        return False
     if DRY_RUN:
+        if not all(generated_price_change_is_timestamp_only(path) for path in unique_paths):
+            return False
         append_fix(lines, "DRY-RUN would reset timestamp-only generated price-cache changes")
         return True
-    result = run(["git", "checkout", "--", *unique_paths], timeout=30)
-    if result.code == 0:
-        append_fix(lines, "reset timestamp-only generated price-cache changes blocking launchd refresh")
-        return True
-    append_issue(lines, f"failed to reset timestamp-only generated price-cache changes: {result.out or result.err}")
-    return False
+    lock_fd, reason = acquire_refresh_mutation_lock()
+    if lock_fd is None:
+        message = f"deferred timestamp-only generated price-cache cleanup: {reason or 'refresh lock unavailable'}"
+        if reason == "refresh lock is active":
+            append_fix(lines, message)
+        else:
+            append_issue(lines, message)
+        return False
+    try:
+        # Re-read and compare every candidate only after owning the mutation
+        # lock. Otherwise a manual or scheduled generator could make a semantic
+        # change between this check and checkout and have valid work erased.
+        if not all(generated_price_change_is_timestamp_only(path) for path in unique_paths):
+            return False
+        result = maybe_run(
+            lines,
+            "reset timestamp-only generated price-cache changes blocking launchd refresh",
+            ["git", "checkout", "--", *unique_paths],
+            timeout=30,
+        )
+        return result.code == 0
+    finally:
+        release_refresh_mutation_lock(lock_fd)
 
 
 def maybe_run(lines: list[str], description: str, cmd: list[str], *, cwd: Path | None = REPO_DIR, timeout: int = 90) -> Result:
@@ -1134,12 +1491,20 @@ def plist_needs_reinstall(issues: list[str], spec: LaunchdSpec | None = None) ->
         return True
 
     actual_environment = data.get("EnvironmentVariables") or {}
+    if not isinstance(actual_environment, dict):
+        issues.append(f"{spec.name} launchd plist drift: EnvironmentVariables")
+        return True
     checks = {
         "Label": data.get("Label"),
         "ProgramArguments": tuple(data.get("ProgramArguments") or []),
         "WorkingDirectory": data.get("WorkingDirectory"),
         "StartInterval": data.get("StartInterval"),
         "RunAtLoad": data.get("RunAtLoad"),
+        "ProcessType": data.get("ProcessType"),
+        "ThrottleInterval": data.get("ThrottleInterval"),
+        "Umask": data.get("Umask"),
+        "StandardOutPath": data.get("StandardOutPath"),
+        "StandardErrorPath": data.get("StandardErrorPath"),
     }
     expected = {
         "Label": spec.label,
@@ -1147,6 +1512,11 @@ def plist_needs_reinstall(issues: list[str], spec: LaunchdSpec | None = None) ->
         "WorkingDirectory": str(REPO_DIR),
         "StartInterval": spec.interval_seconds,
         "RunAtLoad": True,
+        "ProcessType": "Background",
+        "ThrottleInterval": spec.throttle_interval,
+        "Umask": 0o077,
+        "StandardOutPath": str(spec.standard_out_path),
+        "StandardErrorPath": str(spec.standard_error_path),
     }
     drift = [name for name, actual in checks.items() if actual != expected[name]]
     drift.extend(
@@ -1154,6 +1524,20 @@ def plist_needs_reinstall(issues: list[str], spec: LaunchdSpec | None = None) ->
         for key, value in spec.required_environment
         if actual_environment.get(key) != value
     )
+    high_risk_environment = {
+        "BASH_ENV",
+        "ENV",
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "LD_PRELOAD",
+        "LD_LIBRARY_PATH",
+    }
+    unexpected_high_risk = sorted(
+        key
+        for key in actual_environment
+        if key in high_risk_environment or key.startswith("DYLD_")
+    )
+    drift.extend(f"EnvironmentVariables.{key}" for key in unexpected_high_risk)
     if drift:
         issues.append(f"{spec.name} launchd plist drift: " + ", ".join(drift))
         return True
@@ -1170,11 +1554,9 @@ def inspect_active_lock(path: Path) -> tuple[bool, float | None]:
     A leftover file is not an active attempt. Only flock contention counts as active;
     metadata is then read through the already-open descriptor to avoid a path swap.
     """
-    if not path.exists():
-        return False, None
     try:
-        fd = os.open(path, os.O_RDWR)
-    except OSError:
+        fd = open_existing_private_file(path, writable=True)
+    except (FileNotFoundError, OSError, SecurePathError):
         return False, None
     acquired = False
     active = False
@@ -1214,6 +1596,37 @@ def refresh_is_active() -> bool:
     suppress an alert; only an active flock counts.
     """
     return inspect_active_lock(REFRESH_LOCK_PATH)[0]
+
+
+def acquire_refresh_mutation_lock() -> tuple[int | None, str | None]:
+    """Try to reserve the shared refresh lock before a watchdog mutation.
+
+    The returned descriptor must remain open until the protected mutation finishes.
+    A non-empty reason with no descriptor is deliberately fail-closed.
+    """
+    fd: int | None = None
+    try:
+        fd = open_private_lock(REFRESH_LOCK_PATH)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            os.close(fd)
+            fd = None
+            return None, "refresh lock is active"
+        return fd, None
+    except (OSError, SecurePathError) as exc:
+        if fd is not None:
+            os.close(fd)
+        return None, f"refresh lock could not be acquired: {type(exc).__name__}: {exc}"
+
+
+def release_refresh_mutation_lock(fd: int | None) -> None:
+    if fd is None:
+        return
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
 
 
 def fresh_active_attempt(
@@ -1277,12 +1690,57 @@ def service_is_running(print_output: str) -> bool:
     return "state = running" in print_output or re.search(r"active count = [1-9]", print_output) is not None
 
 
+def maybe_run_with_refresh_guard(
+    lines: list[str],
+    description: str,
+    cmd: list[str],
+    *,
+    cwd: Path | None = REPO_DIR,
+    timeout: int = 90,
+    require_idle_label: str | None = None,
+    release_before_run: bool = False,
+) -> Result:
+    """Run a repair only after a fresh shared-lock and optional service-state check."""
+    if DRY_RUN:
+        return maybe_run(lines, description, cmd, cwd=cwd, timeout=timeout)
+    lock_fd, reason = acquire_refresh_mutation_lock()
+    if lock_fd is None:
+        message = f"deferred {description}: {reason or 'refresh lock unavailable'}"
+        if reason == "refresh lock is active":
+            append_fix(lines, message)
+        else:
+            append_issue(lines, message)
+        return Result(75, "", reason or "refresh lock unavailable")
+    try:
+        if require_idle_label is not None:
+            current = launchctl_print(require_idle_label)
+            current_output = current.out + "\n" + current.err
+            if service_is_running(current_output):
+                append_fix(lines, f"deferred {description}: {require_idle_label} is currently running")
+                return Result(75, "", "launchd service is running")
+        if release_before_run:
+            # Kickstarts need the worker to acquire the lock; installers now
+            # acquire and recheck the same protected lock themselves.
+            release_refresh_mutation_lock(lock_fd)
+            lock_fd = None
+        return maybe_run(lines, description, cmd, cwd=cwd, timeout=timeout)
+    finally:
+        release_refresh_mutation_lock(lock_fd)
+
+
 def ensure_launchd_service(lines: list[str], spec: LaunchdSpec, *, allow_repair: bool = True) -> str:
     reinstall_reasons: list[str] = []
     if plist_needs_reinstall(reinstall_reasons, spec):
         append_issue(lines, "; ".join(reinstall_reasons))
         if allow_repair:
-            maybe_run(lines, f"reinstall launchd {spec.name} agent", ["bash", str(spec.installer)], timeout=120)
+            maybe_run_with_refresh_guard(
+                lines,
+                f"reinstall launchd {spec.name} agent",
+                ["bash", str(spec.installer)],
+                timeout=120,
+                require_idle_label=spec.label,
+                release_before_run=True,
+            )
         else:
             append_issue(lines, f"deferred launchd {spec.name} repair while runner disk space is low")
 
@@ -1290,7 +1748,14 @@ def ensure_launchd_service(lines: list[str], spec: LaunchdSpec, *, allow_repair:
     if printed.code != 0:
         append_issue(lines, f"launchctl cannot see {spec.label}: {printed.out or printed.err}")
         if allow_repair:
-            maybe_run(lines, f"reinstall launchd {spec.name} agent after launchctl miss", ["bash", str(spec.installer)], timeout=120)
+            maybe_run_with_refresh_guard(
+                lines,
+                f"reinstall launchd {spec.name} agent after launchctl miss",
+                ["bash", str(spec.installer)],
+                timeout=120,
+                require_idle_label=spec.label,
+                release_before_run=True,
+            )
             printed = launchctl_print(spec.label)
 
     # Enabling is idempotent and cheap; do it if print-disabled says the label is disabled.
@@ -1300,7 +1765,7 @@ def ensure_launchd_service(lines: list[str], spec: LaunchdSpec, *, allow_repair:
         label_plain = f"{spec.label} => true"
         if label_quoted in disabled.out or label_plain in disabled.out:
             if allow_repair:
-                maybe_run(
+                maybe_run_with_refresh_guard(
                     lines,
                     f"enable launchd {spec.name} agent",
                     ["launchctl", "enable", launch_target(spec.label)],
@@ -1374,6 +1839,14 @@ def main() -> int:
         if not os.access(path, os.X_OK):
             maybe_run(lines, f"make {path.name} executable", ["chmod", "+x", str(path)], cwd=None, timeout=20)
 
+    runner_venv_path = REPO_DIR / ".venv"
+    runner_runtime_failed = (runner_venv_path.exists() or runner_venv_path.is_symlink()) and (
+        not runner_python_ready() or not runner_python_shim_ready()
+    )
+    if runner_runtime_failed:
+        append_issue(lines, "repo Python virtualenv failed the pinned Crypto 3.23.0 Keccak runtime check")
+
+    permission_hardening_failed = harden_runner_permissions(lines)
     refresh_in_progress = refresh_is_active()
     initial_launch_outputs = {
         HOURLY_LABEL: launchctl_print(HOURLY_LABEL),
@@ -1400,12 +1873,17 @@ def main() -> int:
     dirty_paths: list[str] = tracked_dirty_paths(status.out) if status.code == 0 else []
     if branch.code == 0 and branch.out.strip() != "main":
         if status.code == 0 and not status.out.strip():
-            maybe_run(lines, "switch runner repo back to main", ["git", "switch", "main"], timeout=60)
+            maybe_run_with_refresh_guard(
+                lines,
+                "switch runner repo back to main",
+                ["git", "switch", "main"],
+                timeout=60,
+            )
         else:
             dirty_blocking = True
             append_issue(lines, f"runner repo on {branch.out.strip() or 'unknown'} with tracked changes; not switching")
     if status.code == 0 and status.out.strip():
-        if refresh_in_progress and branch.code == 0 and branch.out.strip() == "main":
+        if refresh_is_active() and branch.code == 0 and branch.out.strip() == "main":
             # The refresh lock is acquired before the generator writes tracked output.
             # Those changes are expected until the active refresh commits or exits.
             dirty_paths = []
@@ -1416,8 +1894,18 @@ def main() -> int:
                 dirty_blocking = True
                 append_issue(lines, "tracked worktree changes remain after timestamp-only price cleanup; hourly refresh will refuse to overwrite")
         else:
-            dirty_blocking = True
-            append_issue(lines, "tracked worktree changes present; hourly refresh will refuse to overwrite")
+            # The refresh can acquire the lock between the status read and guarded
+            # checkout attempt. Recheck instead of converting that expected race into
+            # a false dirty-worktree incident.
+            status = run(["git", "status", "--porcelain", "--untracked-files=no"], timeout=30)
+            dirty_paths = tracked_dirty_paths(status.out) if status.code == 0 else dirty_paths
+            if refresh_is_active() and branch.code == 0 and branch.out.strip() == "main":
+                dirty_paths = []
+            elif status.code == 0 and not status.out.strip():
+                dirty_paths = []
+            else:
+                dirty_blocking = True
+                append_issue(lines, "tracked worktree changes present; hourly refresh will refuse to overwrite")
     elif status.code != 0:
         dirty_blocking = True
         append_issue(lines, f"could not inspect git status: {status.out or status.err}")
@@ -1432,7 +1920,7 @@ def main() -> int:
     last_error = log_details.get("last_error")
     now = time.time()
     refresh_attempt_active = fresh_active_attempt(
-        lock_held=refresh_in_progress,
+        lock_held=refresh_is_active(),
         started_ts=log_details.get("last_started_ts"),
         completed_ts=log_details.get("last_finished_ts"),
         now=now,
@@ -1464,12 +1952,14 @@ def main() -> int:
         elif service_is_running(watcher_output):
             append_issue(lines, "watcher state is unhealthy, but the watcher job is currently running; left it alone")
         else:
-            maybe_run(
+            maybe_run_with_refresh_guard(
                 lines,
                 "kickstart onchain auction watcher after unhealthy state",
-                ["launchctl", "kickstart", "-k", launch_target(WATCHER_LABEL)],
+                ["launchctl", "kickstart", launch_target(WATCHER_LABEL)],
                 cwd=None,
                 timeout=30,
+                require_idle_label=WATCHER_LABEL,
+                release_before_run=True,
             )
 
     stale = last_success_ts is None or (now - last_success_ts) > STALE_SUCCESS_SECONDS
@@ -1500,12 +1990,14 @@ def main() -> int:
             reason = "no successful refresh found" if last_success_ts is None else f"last successful refresh age={int((now - last_success_ts) / 60)}m"
             if failed_last:
                 reason += f", last status={last_finished_status}"
-            maybe_run(
+            maybe_run_with_refresh_guard(
                 lines,
                 f"kickstart hourly refresh agent ({reason})",
-                ["launchctl", "kickstart", "-k", launch_target(HOURLY_LABEL)],
+                ["launchctl", "kickstart", launch_target(HOURLY_LABEL)],
                 cwd=None,
                 timeout=30,
+                require_idle_label=HOURLY_LABEL,
+                release_before_run=True,
             )
 
     metrics = load_metrics()
@@ -1560,6 +2052,8 @@ def main() -> int:
         or bool(watcher_issues)
         or bool(disk_issues)
         or rotation_failed
+        or permission_hardening_failed
+        or runner_runtime_failed
         or launchd_fault_present(issue_lines)
         or any("required script missing" in line.lower() for line in issue_lines)
     )
@@ -1593,9 +2087,26 @@ def main() -> int:
     return 0
 
 
+def handle_cli_args(argv: list[str]) -> int | None:
+    """Handle informational/invalid CLI arguments before any health side effects."""
+    if not argv:
+        return None
+    if argv in (["-h"], ["--help"]):
+        print("usage: degen_dogs_runner_health.py")
+        print("Run without arguments to inspect and, when configured, repair/alert on runner health.")
+        return 0
+    print(f"error: unsupported argument: {argv[0]}", file=sys.stderr)
+    return 2
+
+
+def cli_main(argv: list[str]) -> int:
+    cli_result = handle_cli_args(argv)
+    return main() if cli_result is None else cli_result
+
+
 if __name__ == "__main__":
     try:
-        raise SystemExit(main())
+        raise SystemExit(cli_main(sys.argv[1:]))
     except subprocess.TimeoutExpired as exc:
         print(f"Degen Dogs local runner health fatal: timeout running {exc.cmd}")
         raise SystemExit(1)

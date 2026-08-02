@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#135/792",
-      "rank": 135,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 44 dog #44 44 mission 1 mission 1 polygon no auction dogmaster reward weth #135/792 background: halo; body: white; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 44 dog #44 44 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: halo; body: white; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: Halo (9.6%)",
+        "display": "Background: Halo",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: White (11.5%)",
+        "display": "Body: White",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Unicorn (4.7%)",
+        "display": "Head: Unicorn",
         "trait_type": "Head",
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.7%)",
+        "display": "Eyes: MaskSnorkel",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

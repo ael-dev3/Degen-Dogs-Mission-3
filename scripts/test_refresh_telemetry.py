@@ -46,7 +46,7 @@ def write_fixture(root: Path) -> None:
         "latest_block": "46822740",
         "latest_block_time_utc": "2026-06-02 21:13:47",
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
-        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,dog_token_uri_bindings,recent_event_logs",
         "onchain_chain_id": "8453",
         "snapshot_block_hash": "0x" + "a" * 64,
         "snapshot_confirmations": "1",
@@ -56,6 +56,13 @@ def write_fixture(root: Path) -> None:
         "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
         "auction_house_code_sha256": "b" * 64,
         "dog_nft_code_sha256": "c" * 64,
+        "dog_total_supply": "792",
+        "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_token_uri_present_count": "792",
+        "dog_token_uri_unavailable_count": "0",
+        "dog_metadata_verification_status": "complete_onchain_token_uri_verified",
+        "dog_metadata_onchain_verified_count": "792",
+        "dog_metadata_unavailable_count": "0",
         "current_auction_token_id": "732",
         "current_bid_eth": "0.01",
         "current_bidder": "@thec1",
@@ -131,6 +138,19 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         assert status["latest_generated_block"] == 46822740
         assert status["current_dog_token_id"] == 732
         assert status["current_high_bidder"] == "@thec1"
+        assert status["dog_token_uri_present_count"] == 792
+        assert status["dog_token_uri_unavailable_count"] == 0
+        assert status["dog_metadata_verification_status"] == "complete_onchain_token_uri_verified"
+        generated = telemetry.generated_state(root)
+        for key in (
+            "dog_token_uri_verification_status",
+            "dog_token_uri_present_count",
+            "dog_token_uri_unavailable_count",
+            "dog_metadata_verification_status",
+            "dog_metadata_onchain_verified_count",
+            "dog_metadata_unavailable_count",
+        ):
+            assert status[key] == generated[key]
         assert "/Users/" not in json.dumps(status)
         validated = telemetry.validate_refresh_status(root=root)
         assert validated == status
@@ -190,7 +210,7 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
             root=root,
             timeout_seconds=1,
             interval_seconds=1,
-            base_url="https://pages.example/project/",
+            base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
         )
         assert raw_only["live_verify_result"] == "timeout"
         assert raw_only["raw_main_verified"] is True
@@ -204,11 +224,132 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
             root=root,
             timeout_seconds=1,
             interval_seconds=1,
-            base_url="https://pages.example/project/",
+            base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
         )
         assert both["live_verify_result"] == "verified"
         assert both["raw_main_verified"] is True
         assert both["live_verify_source"] == "github_pages"
+
+
+def test_live_verify_network_and_env_file_boundaries() -> None:
+    telemetry = load_module()
+    try:
+        telemetry.fetch_json("https://evil.example/generated/refresh_status.json")
+    except RuntimeError as exc:
+        assert "allowlist" in str(exc)
+    else:
+        raise AssertionError("an untrusted live-verification origin was accepted")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        env_path = root / "verify.env"
+        telemetry.write_env_file(env_path, {"live_verify_result": "verified'$(touch /tmp/nope)"})
+        assert env_path.stat().st_mode & 0o777 == 0o600
+        assert "'\\''" in env_path.read_text(encoding="utf-8")
+
+        outside = root / "outside"
+        outside.write_text("preserve", encoding="utf-8")
+        link = root / "link.env"
+        link.symlink_to(outside)
+        try:
+            telemetry.write_env_file(link, {"live_verify_result": "verified"})
+        except OSError:
+            pass
+        else:
+            raise AssertionError("live-verification env writer followed a symlink")
+        assert outside.read_text(encoding="utf-8") == "preserve"
+
+
+def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> None:
+    telemetry = load_module()
+    original_opener = telemetry.LIVE_STATUS_OPENER
+
+    class Response:
+        def __init__(self, body: bytes, content_type: str, *, final_url: str = "", status: int = 200) -> None:
+            self.body = body
+            self.headers = {"Content-Type": content_type, "Content-Length": str(len(body))}
+            self.final_url = final_url
+            self.status = status
+            self.read_limit = None
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def getcode(self) -> int:
+            return self.status
+
+        def geturl(self) -> str:
+            return self.final_url
+
+        def read(self, limit: int) -> bytes:
+            self.read_limit = limit
+            return self.body[:limit]
+
+    class Opener:
+        def __init__(self, response) -> None:
+            self.response = response
+
+        def open(self, request, *, timeout):  # noqa: ANN001, ANN201, ARG002
+            if isinstance(self.response, Exception):
+                raise self.response
+            if not self.response.final_url:
+                self.response.final_url = request.full_url
+            return self.response
+
+    raw_url = "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json?cache_bust=1"
+    pages_url = "https://ael-dev3.github.io/Degen-Dogs-Mission-3/generated/refresh_status.json?cache_bust=1"
+    payload = {"kind": "refresh_status", "latest_generated_block": 123}
+    encoded = json.dumps(payload).encode()
+    try:
+        raw_response = Response(encoded, "text/plain; charset=utf-8")
+        telemetry.LIVE_STATUS_OPENER = Opener(raw_response)
+        assert telemetry.fetch_json(raw_url) == payload
+        assert raw_response.read_limit == telemetry.LIVE_STATUS_MAX_BYTES + 1
+
+        pages_response = Response(encoded, "application/json; charset=utf-8")
+        telemetry.LIVE_STATUS_OPENER = Opener(pages_response)
+        assert telemetry.fetch_json(pages_url) == payload
+
+        cases = [
+            (Response(encoded, "application/json"), raw_url, "content type"),
+            (Response(encoded, "text/plain", final_url="https://attacker.example/status.json"), raw_url, "URL changed"),
+            (Response(encoded, "text/plain", status=206), raw_url, "HTTP status"),
+        ]
+        for response, url, expected_error in cases:
+            telemetry.LIVE_STATUS_OPENER = Opener(response)
+            try:
+                telemetry.fetch_json(url)
+            except RuntimeError as exc:
+                assert expected_error in str(exc)
+            else:
+                raise AssertionError(f"unsafe live-verification response accepted: {expected_error}")
+
+        oversized = Response(b"{}", "text/plain")
+        oversized.headers["Content-Length"] = str(telemetry.LIVE_STATUS_MAX_BYTES + 1)
+        telemetry.LIVE_STATUS_OPENER = Opener(oversized)
+        try:
+            telemetry.fetch_json(raw_url)
+        except RuntimeError as exc:
+            assert "too large" in str(exc)
+        else:
+            raise AssertionError("oversize live-verification response accepted")
+        assert oversized.read_limit is None
+
+        secret_url = "https://provider.example/path-secret?api_key=query-secret"
+        error = telemetry.urllib.error.HTTPError(secret_url, 401, "reason-secret", {}, None)
+        telemetry.LIVE_STATUS_OPENER = Opener(error)
+        try:
+            telemetry.fetch_json(raw_url)
+        except RuntimeError as exc:
+            assert str(exc) == "live verification HTTP 401"
+            assert "secret" not in str(exc)
+        else:
+            raise AssertionError("live-verification HTTP error was accepted")
+    finally:
+        telemetry.LIVE_STATUS_OPENER = original_opener
 
 
 def test_refresh_status_validation_rejects_stale_required_fields() -> None:
@@ -242,6 +383,12 @@ def test_refresh_status_validation_rejects_stale_required_fields() -> None:
         write_json(root / "generated" / "refresh_status.json", broken)
         write_json(root / "public" / "generated" / "refresh_status.json", broken)
         assert_raises_contains(lambda: telemetry.validate_refresh_status(root=root), "missing required fields")
+
+        broken = dict(status)
+        broken["dog_token_uri_unavailable_count"] = 1
+        write_json(root / "generated" / "refresh_status.json", broken)
+        write_json(root / "public" / "generated" / "refresh_status.json", broken)
+        assert_raises_contains(lambda: telemetry.validate_refresh_status(root=root), "tokenURI aggregate counts")
 
 
 def test_metrics_summary_includes_pending_metadata_and_speed_percentiles() -> None:

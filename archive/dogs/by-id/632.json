@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#98/792",
-      "rank": 98,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 12340000000000000 24.29 $24.29 2026-02-21t06:26:53z 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #98/792 generated auction feed 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: redcollar (30.9%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: loopearring (27.1%) ears loopearring head: hoodie (4.7%) head hoodie eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 12340000000000000 24.29 $24.29 2026-02-21t06:26:53z 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b unavailable generated auction feed 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 background: none background none body: sugarskull body sugarskull neck: redcollar neck redcollar mouth: tongue mouth tongue ears: loopearring ears loopearring head: hoodie head hoodie eyes: bluelasereyes eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 42432933,
       "block_time_utc": "2026-02-21T06:26:53Z",
@@ -79,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.8%)",
+        "display": "Body: SugarSkull",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (30.9%)",
+        "display": "Neck: RedCollar",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Hoodie (4.7%)",
+        "display": "Head: Hoodie",
         "trait_type": "Head",
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
+        "display": "Eyes: BlueLaserEyes",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

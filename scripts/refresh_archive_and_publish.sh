@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+umask 077
 
 # Bridge runner: refresh the Mission 3 archive first, then run the normal cached
 # dashboard publish flow with archive public JSON included in the commit.

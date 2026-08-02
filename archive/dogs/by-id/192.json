@@ -50,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#202/792",
-      "rank": 202,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 #202/792 background: halo; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 unavailable polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 43820956,
       "block_time_utc": "2023-06-12T08:46:29Z",
@@ -75,43 +75,7 @@
       ]
     },
     "status": "settled",
-    "traits": [
-      {
-        "display": "Background: Halo (9.6%)",
-        "trait_type": "Background",
-        "value": "Halo"
-      },
-      {
-        "display": "Body: SugarSkull (6.8%)",
-        "trait_type": "Body",
-        "value": "SugarSkull"
-      },
-      {
-        "display": "Neck: RedCollar (30.9%)",
-        "trait_type": "Neck",
-        "value": "RedCollar"
-      },
-      {
-        "display": "Mouth: None (68.9%)",
-        "trait_type": "Mouth",
-        "value": "None"
-      },
-      {
-        "display": "Ears: None (25.8%)",
-        "trait_type": "Ears",
-        "value": "None"
-      },
-      {
-        "display": "Head: StripedBeanie (8.3%)",
-        "trait_type": "Head",
-        "value": "StripedBeanie"
-      },
-      {
-        "display": "Eyes: BlueLaserEyes (10.5%)",
-        "trait_type": "Eyes",
-        "value": "BlueLaserEyes"
-      }
-    ],
+    "traits": [],
     "winner_or_high_bidder": {
       "display": "0x0000…0000",
       "farcaster_fid": null,

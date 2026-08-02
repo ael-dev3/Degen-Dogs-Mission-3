@@ -52,12 +52,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#701/792",
-      "rank": 701,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 784 dog #784 784 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.86 $16.86 2026-07-26t23:16:45z 0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7 0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f #701/792 generated auction feed 0x878b90f9d2e050b7ae2422f3178e550ba849517e6dedc4f6dbb840e5353e9602 background: none (90.4%) background none body: blue (9.3%) body blue neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: eyepatch (8.0%) eyes eyepatch base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 784 dog #784 784 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.86 $16.86 2026-07-26t23:16:45z 0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7 0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f unavailable generated auction feed 0x878b90f9d2e050b7ae2422f3178e550ba849517e6dedc4f6dbb840e5353e9602 background: none background none body: blue body blue neck: none neck none mouth: none mouth none ears: earbuds ears earbuds head: none head none eyes: eyepatch eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49159229,
       "block_time_utc": "2026-07-26T23:16:45Z",
@@ -71,46 +71,46 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
+        "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.3%)",
+        "display": "Body: Blue",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

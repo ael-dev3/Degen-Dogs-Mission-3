@@ -298,6 +298,102 @@ def assert_exact_rarity_permutation(rows: list[dict[str, str]], total_supply: in
         )
 
 
+def assert_withheld_rarity(row: dict[str, object], *, label: str) -> None:
+    raw_rarity = row.get("rarity")
+    score_values: list[object] = []
+    if isinstance(raw_rarity, dict):
+        if str(raw_rarity.get("display") or "").strip() != "Unavailable":
+            raise AssertionError(f"{label} exposes a partial rarity display")
+        for key in ("rank", "total"):
+            if raw_rarity.get(key) not in (None, ""):
+                raise AssertionError(f"{label} exposes a partial rarity {key}")
+        if "score" in raw_rarity:
+            score_values.append(raw_rarity.get("score"))
+    elif str(raw_rarity or "").strip() != "Unavailable":
+        raise AssertionError(f"{label} exposes a partial rarity display")
+    if "rarity_score" in row:
+        score_values.append(row.get("rarity_score"))
+    for raw_score in score_values:
+        if raw_score in (None, ""):
+            continue
+        if isinstance(raw_score, bool):
+            raise AssertionError(f"{label} exposes a partial rarity score")
+        try:
+            score = Decimal(str(raw_score))
+        except InvalidOperation as exc:
+            raise AssertionError(f"{label} has an invalid withheld rarity score") from exc
+        if not score.is_finite() or score != 0:
+            raise AssertionError(f"{label} exposes a partial rarity score")
+
+
+def assert_metadata_rarity_state(
+    rows: list[dict[str, str]],
+    total_supply: int,
+    metrics: dict[str, str],
+) -> str:
+    if metrics.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+        raise AssertionError("dog tokenURI outcomes are not hash-pinned and cross-provider verified")
+
+    count_keys = (
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
+    )
+    counts: dict[str, int] = {}
+    for key in count_keys:
+        raw = str(metrics.get(key) or "")
+        if not raw.isdigit():
+            raise AssertionError(f"mission3 metric {key} is not a non-negative integer")
+        counts[key] = int(raw)
+    token_present = counts["dog_token_uri_present_count"]
+    token_unavailable = counts["dog_token_uri_unavailable_count"]
+    metadata_verified = counts["dog_metadata_onchain_verified_count"]
+    metadata_unavailable = counts["dog_metadata_unavailable_count"]
+    if token_present + token_unavailable != total_supply:
+        raise AssertionError("dog tokenURI aggregate counts do not equal dog_total_supply")
+    if metadata_verified + metadata_unavailable != total_supply:
+        raise AssertionError("dog metadata aggregate counts do not equal dog_total_supply")
+    if metadata_unavailable < token_unavailable:
+        raise AssertionError("dog metadata aggregates hide tokenURI-unavailable Dogs")
+
+    expected_status = (
+        "complete_onchain_token_uri_verified"
+        if metadata_unavailable == 0
+        else "partial_onchain_token_uri_unavailable"
+        if metadata_unavailable == token_unavailable
+        else "incomplete_metadata_unavailable"
+    )
+    if metrics.get("dog_metadata_verification_status") != expected_status:
+        raise AssertionError("dog metadata aggregate status contradicts its counts")
+
+    row_statuses = Counter(str(row.get("metadata_verification_status") or "") for row in rows)
+    allowed_statuses = {
+        "onchain_token_uri_verified",
+        "onchain_token_uri_unavailable",
+        "unavailable",
+    }
+    unexpected_statuses = sorted(set(row_statuses).difference(allowed_statuses))
+    if unexpected_statuses:
+        raise AssertionError(f"historical metadata rows contain unexpected statuses: {unexpected_statuses}")
+    if row_statuses["onchain_token_uri_verified"] != metadata_verified:
+        raise AssertionError("historical metadata verified rows differ from mission3 metrics")
+    if row_statuses["onchain_token_uri_unavailable"] != token_unavailable:
+        raise AssertionError("historical tokenURI-unavailable rows differ from mission3 metrics")
+    if len(rows) - row_statuses["onchain_token_uri_verified"] != metadata_unavailable:
+        raise AssertionError("historical metadata unavailable rows differ from mission3 metrics")
+
+    if metadata_unavailable == 0:
+        assert_exact_rarity_permutation(rows, total_supply)
+        return "complete"
+
+    # Rarity is a collection-wide calculation. Any unavailable metadata makes
+    # subset ranks misleading, so every surface must withhold rank and score.
+    for row in rows:
+        assert_withheld_rarity(row, label=f"Dog #{int(row['token_id'])}")
+    return "unavailable"
+
+
 def rarity_display_from_archive(row: dict[str, object]) -> str:
     raw = row.get("rarity")
     if isinstance(raw, dict):
@@ -350,6 +446,17 @@ def assert_report_counts(report: dict[str, str], rows: list[dict[str, str]]) -> 
 
 def main() -> int:
     total_supply = int(read_metric("dog_total_supply"))
+    rarity_metrics = {
+        key: read_metric(key)
+        for key in (
+            "dog_token_uri_verification_status",
+            "dog_token_uri_present_count",
+            "dog_token_uri_unavailable_count",
+            "dog_metadata_verification_status",
+            "dog_metadata_onchain_verified_count",
+            "dog_metadata_unavailable_count",
+        )
+    }
     generated_rows = read_csv(ROOT / "generated" / "historical_dog_search.csv")
     public_rows = read_csv(ROOT / "public" / "generated" / "historical_dog_search.csv")
     report_rows = read_csv(ROOT / "generated" / "historical_dog_report.csv")
@@ -368,7 +475,7 @@ def main() -> int:
         missing = sorted(expected_ids - set(ids))[:20]
         extra = sorted(set(ids) - expected_ids)[:20]
         raise AssertionError(f"historical_dog_search token coverage mismatch missing={missing} extra={extra}")
-    assert_exact_rarity_permutation(generated_rows, total_supply)
+    rarity_state = assert_metadata_rarity_state(generated_rows, total_supply, rarity_metrics)
 
     missions = {row["mission"] for row in generated_rows}
     if not {"1", "2", "3"}.issubset(missions):
@@ -422,6 +529,18 @@ def main() -> int:
         raise AssertionError(f"unified dog search mission coverage incomplete: {sorted(unified_missions)}")
     timeline_rows = read_json_list(ROOT / "generated" / "auction_timeline.json")
     winner_rows = read_json_list(ROOT / "generated" / "auction_winners.json")
+    if rarity_state == "unavailable":
+        rarity_surfaces = {
+            "current auction": read_json_list(ROOT / "generated" / "current_auction.json"),
+            "current latest bid": read_json_list(ROOT / "generated" / "current_latest_bid.json"),
+            "auction feed": read_json_list(ROOT / "generated" / "auction_feed.json"),
+            "recent auction winners": read_json_list(ROOT / "generated" / "recent_auction_winners.json"),
+            "auction timeline": timeline_rows,
+            "auction winners": winner_rows,
+        }
+        for surface, surface_rows in rarity_surfaces.items():
+            for index, row in enumerate(surface_rows):
+                assert_withheld_rarity(row, label=f"{surface} row {index}")
     mission3_source_rows = read_json_list(
         ROOT / "archive" / "mission3" / "data" / "generated" / "mission3_dog_search_index.json"
     )
@@ -438,6 +557,8 @@ def main() -> int:
         token_id = int(row.get("dog_id", -1))
         if token_id not in ids:
             continue
+        if rarity_state == "unavailable":
+            assert_withheld_rarity(row, label=f"unified Dog #{token_id}")
         unified_rarity = rarity_display_from_archive(row)
         if unified_rarity != ids[token_id].get("rarity"):
             raise AssertionError(
@@ -453,6 +574,8 @@ def main() -> int:
             token_id = int(record.get("dog_id", path.stem))
             if token_id not in ids:
                 continue
+            if rarity_state == "unavailable":
+                assert_withheld_rarity(record, label=f"by-id Dog #{token_id}")
             archive_rarity = rarity_display_from_archive(record)
             if archive_rarity != ids[token_id].get("rarity"):
                 raise AssertionError(

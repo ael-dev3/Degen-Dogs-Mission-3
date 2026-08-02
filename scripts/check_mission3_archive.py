@@ -7,18 +7,20 @@ import argparse
 import csv
 import importlib.util
 import json
+import os
 import re
 import sqlite3
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE = ROOT / "archive" / "mission3"
 DATA_DIR = ARCHIVE / "data"
-DB_PATH = DATA_DIR / "mission3_archive.sqlite"
-GENERATED_DIR = DATA_DIR / "generated"
-PUBLIC_DIR = ROOT / "public" / "generated" / "mission3"
+DEFAULT_DB_PATH = DATA_DIR / "mission3_archive.sqlite"
+DEFAULT_GENERATED_DIR = DATA_DIR / "generated"
+DEFAULT_PUBLIC_DIR = ROOT / "public" / "generated" / "mission3"
 INDEXER_PATH = ROOT / "scripts" / "archive_mission3_index.py"
 
 SECRET_PATTERNS = [
@@ -39,6 +41,68 @@ def load_indexer():
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def configured_paths(environment: dict[str, str] | None = None) -> tuple[Path, Path, Path]:
+    env = os.environ if environment is None else environment
+    db_path = Path(env.get("MISSION3_ARCHIVE_DB") or DEFAULT_DB_PATH).expanduser()
+    generated_dir = Path(env.get("MISSION3_OUTPUT_DIR") or DEFAULT_GENERATED_DIR).expanduser()
+    return db_path, generated_dir, DEFAULT_PUBLIC_DIR
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def parse_utc(value: Any) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def check_timestamp_freshness(
+    errors: list[str],
+    label: str,
+    value: Any,
+    *,
+    max_age_seconds: int,
+    now: datetime | None = None,
+) -> None:
+    parsed = parse_utc(value)
+    if parsed is None:
+        errors.append(f"{label} is missing or invalid: {value!r}")
+        return
+    current = now or datetime.now(timezone.utc)
+    age_seconds = (current - parsed).total_seconds()
+    if age_seconds < -300:
+        errors.append(f"{label} is future-dated by {int(-age_seconds)} seconds")
+    elif age_seconds > max_age_seconds:
+        errors.append(
+            f"{label} is stale: age_seconds={int(age_seconds)} max={max_age_seconds}"
+        )
+
+
+def check_head_lag(errors: list[str], latest_indexed: Any, safe_head: int, *, max_lag_blocks: int) -> None:
+    try:
+        latest = int(str(latest_indexed))
+    except (TypeError, ValueError):
+        errors.append(f"archive latest indexed block is invalid: {latest_indexed!r}")
+        return
+    lag = safe_head - latest
+    if lag > max_lag_blocks:
+        errors.append(f"archive head lag is too large: lag_blocks={lag} max={max_lag_blocks}")
+    elif lag < -64:
+        errors.append(f"archive latest indexed block is unexpectedly ahead of safe head: delta_blocks={-lag}")
 
 
 def file_sha(path: Path) -> str:
@@ -76,17 +140,21 @@ def scan_secrets(paths: list[Path]) -> list[str]:
             continue
         for pattern in SECRET_PATTERNS:
             if pattern.search(text):
-                hits.append(str(path.relative_to(ROOT)))
+                hits.append(display_path(path))
                 break
     return sorted(set(hits))
 
 
-def check_db(errors: list[str]) -> None:
-    if not DB_PATH.exists():
-        errors.append(f"missing archive database: {DB_PATH.relative_to(ROOT)}")
-        return
-    conn = sqlite3.connect(DB_PATH)
+def check_db(errors: list[str], db_path: Path, *, max_age_seconds: int) -> dict[str, Any] | None:
+    if not db_path.exists():
+        errors.append(f"missing archive database: {display_path(db_path)}")
+        return None
+    conn = sqlite3.connect(db_path)
+    state: dict[str, Any] | None = None
     try:
+        quick_check = conn.execute("PRAGMA quick_check").fetchone()
+        if not quick_check or str(quick_check[0]).lower() != "ok":
+            errors.append(f"database quick_check failed: {quick_check!r}")
         counts = dict(conn.execute("SELECT metric, value FROM mission3_archive_metrics").fetchall())
         numeric_expectations = {
             "raw_logs": 1,
@@ -107,6 +175,32 @@ def check_db(errors: list[str]) -> None:
         gaps = int(str(counts.get("unresolved_gaps", "0") or 0))
         if gaps:
             errors.append(f"archive has unresolved gaps: {gaps}")
+        row = conn.execute(
+            """SELECT latest_indexed_block, latest_indexed_block_time_utc,
+                      latest_run_at_utc, status
+               FROM mission3_index_state WHERE id = 'mission3'"""
+        ).fetchone()
+        if row:
+            state = {
+                "latest_indexed_block": row[0],
+                "latest_indexed_block_time_utc": row[1],
+                "latest_run_at_utc": row[2],
+                "status": row[3],
+            }
+            check_timestamp_freshness(
+                errors,
+                "archive latest indexed block time",
+                row[1],
+                max_age_seconds=max_age_seconds,
+            )
+            check_timestamp_freshness(
+                errors,
+                "archive latest run time",
+                row[2],
+                max_age_seconds=max_age_seconds,
+            )
+        else:
+            errors.append("archive index state row is missing")
         created_tokens = [row[0] for row in conn.execute("SELECT token_id FROM mission3_auction_created ORDER BY token_id")]
         if created_tokens:
             expected = set(range(int(created_tokens[0]), int(created_tokens[-1]) + 1))
@@ -119,21 +213,50 @@ def check_db(errors: list[str]) -> None:
         errors.append(f"database health query failed: {exc}")
     finally:
         conn.close()
+    return state
 
 
-def check_generated(errors: list[str], *, require_generated: bool) -> list[Path]:
-    manifest_path = GENERATED_DIR / "manifest.json"
+def check_generated(
+    errors: list[str],
+    generated_dir: Path,
+    *,
+    require_generated: bool,
+    max_age_seconds: int,
+    db_state: dict[str, Any] | None,
+) -> tuple[list[Path], dict[str, Any] | None]:
+    manifest_path = generated_dir / "manifest.json"
     checked_paths: list[Path] = []
     if not manifest_path.exists():
         if require_generated:
-            errors.append(f"missing archive manifest: {manifest_path.relative_to(ROOT)}")
-        return checked_paths
+            errors.append(f"missing archive manifest: {display_path(manifest_path)}")
+        return checked_paths, None
 
-    manifest = read_json(manifest_path)
+    try:
+        manifest = read_json(manifest_path)
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"archive manifest could not be read: {exc}")
+        return [manifest_path], None
+    if not isinstance(manifest, dict):
+        errors.append("archive manifest is not a JSON object")
+        return [manifest_path], None
     if manifest.get("schema_version") != 1 or manifest.get("mission") != 3:
         errors.append("archive manifest schema_version/mission mismatch")
-    if not manifest.get("generated_at_utc"):
-        errors.append("archive manifest missing generated_at_utc")
+    check_timestamp_freshness(
+        errors,
+        "archive manifest generation time",
+        manifest.get("generated_at_utc"),
+        max_age_seconds=max_age_seconds,
+    )
+    if db_state is not None:
+        manifest_state = manifest.get("index_state") or {}
+        mismatched_state = [
+            key for key, value in db_state.items() if manifest_state.get(key) != value
+        ]
+        if mismatched_state:
+            errors.append(
+                "archive manifest index_state differs from archive database state: "
+                + ", ".join(mismatched_state)
+            )
 
     checked_paths.append(manifest_path)
     for item in manifest.get("files", []):
@@ -141,7 +264,15 @@ def check_generated(errors: list[str], *, require_generated: bool) -> list[Path]
         if not rel:
             errors.append(f"manifest file entry missing path: {item}")
             continue
-        path = ROOT / rel
+        raw_path = Path(str(rel))
+        path = raw_path if raw_path.is_absolute() else ROOT / raw_path
+        try:
+            if not path.resolve().is_relative_to(generated_dir.resolve()):
+                errors.append(f"manifest-listed file escapes generated directory: {rel}")
+                continue
+        except OSError as exc:
+            errors.append(f"manifest-listed file path cannot be resolved: {rel}: {exc}")
+            continue
         checked_paths.append(path)
         if not path.exists():
             errors.append(f"manifest-listed file missing: {rel}")
@@ -163,24 +294,42 @@ def check_generated(errors: list[str], *, require_generated: bool) -> list[Path]
     for key in ("raw_logs", "auctions_created", "latest_indexed_block", "status"):
         if key not in counts:
             errors.append(f"manifest counts missing {key}")
-    return checked_paths
+    return checked_paths, manifest
 
 
-def check_public(errors: list[str]) -> list[Path]:
+def check_public(
+    errors: list[str],
+    generated_dir: Path,
+    public_dir: Path,
+    *,
+    private_manifest: dict[str, Any] | None,
+    max_age_seconds: int,
+) -> list[Path]:
     expected = {
-        "mission3_dog_search_index.json": GENERATED_DIR / "mission3_dog_search_index.json",
-        "mission3_archive_metrics.json": GENERATED_DIR / "mission3_archive_metrics.json",
+        "mission3_dog_search_index.json": generated_dir / "mission3_dog_search_index.json",
+        "mission3_archive_metrics.json": generated_dir / "mission3_archive_metrics.json",
     }
     checked: list[Path] = []
-    public_manifest_path = PUBLIC_DIR / "archive_manifest.json"
+    public_manifest_path = public_dir / "archive_manifest.json"
     checked.append(public_manifest_path)
     if not public_manifest_path.exists():
-        errors.append(f"missing public archive file: {public_manifest_path.relative_to(ROOT)}")
+        errors.append(f"missing public archive file: {display_path(public_manifest_path)}")
     else:
         try:
             public_manifest = read_json(public_manifest_path)
             if public_manifest.get("schema_version") != 1 or public_manifest.get("mission") != 3 or public_manifest.get("public") is not True:
                 errors.append("public archive manifest schema_version/mission/public mismatch")
+            check_timestamp_freshness(
+                errors,
+                "public archive manifest generation time",
+                public_manifest.get("generated_at_utc"),
+                max_age_seconds=max_age_seconds,
+            )
+            if private_manifest is not None:
+                if public_manifest.get("generated_at_utc") != private_manifest.get("generated_at_utc"):
+                    errors.append("public/private archive manifest generation times differ")
+                if public_manifest.get("index_state") != private_manifest.get("index_state"):
+                    errors.append("public/private archive manifest index states differ")
             serialized = json.dumps(public_manifest, sort_keys=True)
             forbidden = ["archive/mission3/data", "mission3_archive.sqlite", "raw_logs_ndjson", "mission3_raw_logs.ndjson"]
             leaked = [item for item in forbidden if item in serialized]
@@ -199,15 +348,15 @@ def check_public(errors: list[str]) -> list[Path]:
         except Exception as exc:  # noqa: BLE001
             errors.append(f"public archive manifest check failed: {exc}")
     for name, source in expected.items():
-        public_path = PUBLIC_DIR / name
+        public_path = public_dir / name
         checked.append(public_path)
         if not source.exists():
             continue
         if not public_path.exists():
-            errors.append(f"missing public archive file: {public_path.relative_to(ROOT)}")
+            errors.append(f"missing public archive file: {display_path(public_path)}")
             continue
         if file_sha(public_path) != file_sha(source):
-            errors.append(f"public archive copy differs from generated source: {public_path.relative_to(ROOT)}")
+            errors.append(f"public archive copy differs from generated source: {display_path(public_path)}")
     return checked
 
 
@@ -219,16 +368,48 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     errors: list[str] = []
+    db_path, generated_dir, public_dir = configured_paths()
+    max_age_seconds = max(
+        300,
+        min(int(os.environ.get("MISSION3_ARCHIVE_MAX_AGE_SECONDS", "10800")), 7 * 24 * 60 * 60),
+    )
+    max_head_lag_blocks = max(
+        100,
+        min(int(os.environ.get("MISSION3_ARCHIVE_MAX_HEAD_LAG_BLOCKS", "6000")), 1_000_000),
+    )
     indexer = load_indexer()
     try:
         indexer.verify_config(check_rpc=args.rpc)
     except Exception as exc:  # noqa: BLE001
         errors.append(f"config verification failed: {exc}")
 
-    if not args.skip_db:
-        check_db(errors)
-    checked = check_generated(errors, require_generated=not args.allow_missing_generated)
-    checked.extend(check_public(errors))
+    db_state = None if args.skip_db else check_db(errors, db_path, max_age_seconds=max_age_seconds)
+    checked, private_manifest = check_generated(
+        errors,
+        generated_dir,
+        require_generated=not args.allow_missing_generated,
+        max_age_seconds=max_age_seconds,
+        db_state=db_state,
+    )
+    checked.extend(
+        check_public(
+            errors,
+            generated_dir,
+            public_dir,
+            private_manifest=private_manifest,
+            max_age_seconds=max_age_seconds,
+        )
+    )
+    if args.rpc and db_state is not None:
+        try:
+            check_head_lag(
+                errors,
+                db_state.get("latest_indexed_block"),
+                indexer.verified_safe_head(),
+                max_lag_blocks=max_head_lag_blocks,
+            )
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"archive live head verification failed: {exc}")
     secret_hits = scan_secrets(checked)
     if secret_hits:
         errors.append("possible secret pattern in archive outputs: " + ", ".join(secret_hits))

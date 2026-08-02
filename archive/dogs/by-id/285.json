@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#397/792",
-      "rank": 397,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 285 dog #285 285 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 #397/792 background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: none; head: blackcap; eyes: none 0xcc296d9807ea70e1428a589974b400bd8304fea84cdf423e25f12dc7c6af21e2 chain_logs contract_getters",
+    "search_text": "dog 285 dog #285 285 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 unavailable background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: none; head: blackcap; eyes: none 0xcc296d9807ea70e1428a589974b400bd8304fea84cdf423e25f12dc7c6af21e2 chain_logs contract_getters",
     "settlement": {
       "block_number": 25458938,
       "block_time_utc": "2025-02-15T06:15:54Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.8%)",
+        "display": "Mouth: Tongue",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (6.7%)",
+        "display": "Head: BlackCap",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

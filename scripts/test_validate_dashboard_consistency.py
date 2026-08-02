@@ -64,7 +64,7 @@ def write_fixture(
         "latest_block": "46732183",
         "latest_block_time_utc": "2026-05-31 18:55:13",
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
-        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,dog_token_uri_bindings,recent_event_logs",
         "onchain_chain_id": "8453",
         "snapshot_block_hash": "0x" + "a" * 64,
         "snapshot_confirmations": "1",
@@ -75,6 +75,13 @@ def write_fixture(
         "auction_house_code_sha256": "b" * 64,
         "dog_nft_code_sha256": "c" * 64,
         "current_auction_token_id": "729",
+        "dog_total_supply": "792",
+        "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_token_uri_present_count": "792",
+        "dog_token_uri_unavailable_count": "0",
+        "dog_metadata_verification_status": "complete_onchain_token_uri_verified",
+        "dog_metadata_onchain_verified_count": "792",
+        "dog_metadata_unavailable_count": "0",
         "current_auction_status": "live",
         "current_bid_eth": "0.01",
         "current_bid_usd": "19.98",
@@ -187,7 +194,7 @@ def write_fixture(
         "current_auction_end_time_utc": "2026-05-31T20:40:09Z",
         "last_refresh_result": "success_generated",
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
-        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,dog_token_uri_bindings,recent_event_logs",
         "onchain_chain_id": "8453",
         "snapshot_block_hash": "0x" + "a" * 64,
         "snapshot_confirmations": "1",
@@ -197,6 +204,13 @@ def write_fixture(
         "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
         "auction_house_code_sha256": "b" * 64,
         "dog_nft_code_sha256": "c" * 64,
+        "dog_total_supply": 792,
+        "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_token_uri_present_count": 792,
+        "dog_token_uri_unavailable_count": 0,
+        "dog_metadata_verification_status": "complete_onchain_token_uri_verified",
+        "dog_metadata_onchain_verified_count": 792,
+        "dog_metadata_unavailable_count": 0,
     }
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
@@ -245,6 +259,12 @@ def write_fixture(
         "latest_bidder": "@0xael.eth",
         "latest_bid_eth": "0.01",
         "latest_bid_utc": "2026-05-30 18:40:23",
+        "start_time_utc": "2026-05-30 18:00:00",
+        "end_time_utc": "2026-05-31 20:40:09",
+        "settled_eth": "",
+        "settled_time_utc": "",
+        "created_tx_hash": "0x" + "2" * 64,
+        "settled_tx_hash": "",
     }
     daily_row = {
         "activity_day": "2026-05-30",
@@ -365,7 +385,35 @@ def write_fixture(
     write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "public" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "archive" / "data" / "identity" / "wallet_profiles.json", {})
-    write_json(root / "archive" / "mission3" / "data" / "generated" / "mission3_auction_bids.json", [])
+    write_json(root / "generated" / "auction_winners.json", [])
+    archive_mission3 = root / "archive" / "mission3" / "data" / "generated"
+    write_json(archive_mission3 / "mission3_auction_timeline.json", [{
+        "token_id": 729,
+        "auction_state": "unsettled_or_live",
+        "created_tx": "0x" + "2" * 64,
+        "settled_tx": None,
+        "bids": 1,
+        "unique_bidder_count": 1,
+        "high_bid_eth": "0.01",
+        "latest_bid_eth": "0.01",
+        "latest_bidder": wallet,
+        "latest_bid_time_utc": "2026-05-30T18:40:23Z",
+        "settled_amount_eth": None,
+        "start_time_utc": "2026-05-30 18:00:00",
+        "end_time_utc": "2026-05-31 20:40:09",
+        "settled_time_utc": None,
+        "winner": None,
+    }])
+    write_json(archive_mission3 / "mission3_auction_winners.json", [])
+    write_json(archive_mission3 / "mission3_auction_bids.json", [{
+        "token_id": 729,
+        "amount_eth": "0.01",
+        "bidder": wallet,
+        "block_number": 46732183,
+        "block_time_utc": "2026-05-30T18:40:23Z",
+        "log_index": 1,
+        "transaction_hash": "0x" + "1" * 64,
+    }])
 
     index = (
         f"<html><body><h1>{index_dog}</h1><span>0.01000 ETH ($20)</span>"
@@ -404,6 +452,217 @@ def test_validate_current_surface_accepts_consistent_apr_fixture() -> None:
         write_fixture(root)
         result = run_validation(root)
         assert result["current_dog"] == "Dog #729"
+        assert result["mission3_archive_parity"] == {
+            "checked": True,
+            "auctions": 1,
+            "settlements": 0,
+            "bids": 1,
+        }
+
+
+def test_mission3_archive_parity_accepts_exact_history_and_rejects_drift() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        dashboard_timeline = [{
+            "token_id": 1,
+            "auction_state": "settled",
+            "created_tx_hash": "0x" + "a" * 64,
+            "settled_tx_hash": "0x" + "b" * 64,
+            "bids": 1,
+            "unique_bidders": 1,
+            "total_bid_eth": "0.5",
+            "high_bid_eth": "0.5",
+            "latest_bidder": "@winner",
+            "latest_bid_eth": "0.5",
+            "settled_eth": "0.5",
+            "start_time_utc": "2026-01-01T00:00:00Z",
+            "end_time_utc": "2026-01-02T00:00:00Z",
+            "latest_bid_utc": "2026-01-01T12:00:00Z",
+            "settled_time_utc": "2026-01-02T00:01:00Z",
+        }]
+        dashboard_winners = [{
+            "token_id": 1,
+            "winner_wallet": "0x" + "1" * 40,
+            "winning_bid_eth": "0.5",
+            "block_number": 123,
+            "tx_hash": "0x" + "b" * 64,
+            "bid_count": 1,
+            "unique_bidders": 1,
+            "first_bid_utc": "2026-01-01T12:00:00Z",
+            "last_bid_utc": "2026-01-01T12:00:00Z",
+            "settled_time_utc": "2026-01-02T00:01:00Z",
+        }]
+        archive_root = root / "archive" / "mission3" / "data" / "generated"
+        write_json(root / "generated" / "auction_timeline.json", dashboard_timeline)
+        write_json(root / "generated" / "auction_winners.json", dashboard_winners)
+        write_json(archive_root / "mission3_auction_timeline.json", [{
+            "token_id": 1,
+            "auction_state": "settled",
+            "created_tx": "0x" + "a" * 64,
+            "settled_tx": "0x" + "b" * 64,
+            "bids": 1,
+            "unique_bidder_count": 1,
+            "high_bid_eth": "0.5",
+            "latest_bid_eth": "0.5",
+            "latest_bidder": "0x" + "1" * 40,
+            "latest_bid_time_utc": "2026-01-01T12:00:00Z",
+            "settled_amount_eth": "0.5",
+            "settled_block": 123,
+            "winner": "0x" + "1" * 40,
+            "start_time_utc": "2026-01-01T00:00:00Z",
+            "end_time_utc": "2026-01-02T00:00:00Z",
+            "settled_time_utc": "2026-01-02T00:01:00Z",
+        }])
+        write_json(archive_root / "mission3_auction_winners.json", [{
+            "token_id": 1,
+            "winner": "0x" + "1" * 40,
+            "amount_eth": "0.5",
+            "settled_block": 123,
+            "settled_tx": "0x" + "b" * 64,
+            "bid_count": 1,
+            "unique_bidder_count": 1,
+            "first_bid_time_utc": "2026-01-01T12:00:00Z",
+            "last_bid_time_utc": "2026-01-01T12:00:00Z",
+            "settled_time_utc": "2026-01-02T00:01:00Z",
+        }])
+        write_json(archive_root / "mission3_auction_bids.json", [{
+            "token_id": 1,
+            "amount_eth": "0.5",
+            "bidder": "0x" + "1" * 40,
+            "block_number": 100,
+            "block_time_utc": "2026-01-01T12:00:00Z",
+            "log_index": 7,
+            "transaction_hash": "0x" + "c" * 64,
+        }])
+
+        validator = load_module()
+        result = validator.validate_mission3_archive_parity(root=root)
+        assert result == {"checked": True, "auctions": 1, "settlements": 1, "bids": 1}
+
+        dashboard_winners[0]["winning_bid_eth"] = "0.4"
+        write_json(root / "generated" / "auction_winners.json", dashboard_winners)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "winning bid differs",
+        )
+
+
+def test_mission3_archive_parity_rejects_configured_archive_with_missing_inputs() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "archive" / "mission3" / "config").mkdir(parents=True)
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "archive parity inputs missing",
+        )
+
+        archive_root = root / "archive" / "mission3" / "data" / "generated"
+        for path in (
+            root / "generated" / "auction_timeline.json",
+            root / "generated" / "auction_winners.json",
+            archive_root / "mission3_auction_timeline.json",
+            archive_root / "mission3_auction_winners.json",
+            archive_root / "mission3_auction_bids.json",
+        ):
+            write_json(path, [])
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "archive timeline cannot be empty",
+        )
+
+
+def test_mission3_archive_parity_rejects_unknown_and_duplicate_raw_logs() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        validator = load_module()
+        bids_path = root / "archive" / "mission3" / "data" / "generated" / "mission3_auction_bids.json"
+        bids = json.loads(bids_path.read_text(encoding="utf-8"))
+        bids[0]["token_id"] = 730
+        write_json(bids_path, bids)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "references unknown Dog #730",
+        )
+
+        bids[0]["token_id"] = 729
+        bids.append(dict(bids[0]))
+        write_json(bids_path, bids)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "duplicate log",
+        )
+
+
+def test_mission3_archive_parity_rejects_malformed_onchain_values_even_when_surfaces_match() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        validator = load_module()
+        dashboard_path = root / "generated" / "auction_timeline.json"
+        archive_path = root / "archive" / "mission3" / "data" / "generated" / "mission3_auction_timeline.json"
+        dashboard = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        archive = json.loads(archive_path.read_text(encoding="utf-8"))
+        malformed_hash = "0x" + "g" * 64
+        dashboard[0]["created_tx_hash"] = malformed_hash
+        archive[0]["created_tx"] = malformed_hash
+        write_json(dashboard_path, dashboard)
+        write_json(archive_path, archive)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "canonical transaction hash",
+        )
+
+
+def test_mission3_archive_parity_rejects_nonfinite_bid_and_latest_bidder_drift() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        validator = load_module()
+        archive_root = root / "archive" / "mission3" / "data" / "generated"
+        bids_path = archive_root / "mission3_auction_bids.json"
+        bids = json.loads(bids_path.read_text(encoding="utf-8"))
+        bids[0]["amount_eth"] = "NaN"
+        write_json(bids_path, bids)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "canonical decimal",
+        )
+
+        bids[0]["amount_eth"] = "0.01"
+        bids[0]["bidder"] = "0x" + "g" * 40
+        write_json(bids_path, bids)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "canonical nonzero address",
+        )
+
+        bids[0]["bidder"] = "0x76d0e7a13248945ee9f808b4a472262b28778942"
+        write_json(bids_path, bids)
+        timeline_path = archive_root / "mission3_auction_timeline.json"
+        timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+        timeline[0]["latest_bidder"] = "0x" + "3" * 40
+        write_json(timeline_path, timeline)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "latest bidder differs from archive raw logs",
+        )
+
+
+def test_mission3_archive_parity_rejects_effective_end_time_drift() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        validator = load_module()
+        timeline_path = root / "archive" / "mission3" / "data" / "generated" / "mission3_auction_timeline.json"
+        timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+        timeline[0]["end_time_utc"] = "2026-05-31T20:45:09Z"
+        write_json(timeline_path, timeline)
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "end_time_utc differs from quorum archive",
+        )
 
 
 def test_validator_catches_apr_math_mismatch() -> None:

@@ -14,7 +14,7 @@ flowchart LR
   sql --> artifacts[generated/ + public/generated/\nCSV and JSON]
   artifacts --> render[index.html + README.md\nstatic render]
   render --> publish[scripts/refresh_and_publish.sh\ngit commit + push]
-  publish --> actions[GitHub Actions\nnpm ci + npm run build]
+  publish --> actions[GitHub Actions\nnpm ci --ignore-scripts + validate + build]
   actions --> pages[GitHub Pages\nstatic dashboard]
 
   watcher[launchd watcher\ncom.ael.degendogs.mission3.watch-auction] --> data
@@ -41,7 +41,7 @@ The publish script owns the reliable refresh sequence:
 2. refuse dirty tracked worktrees before refresh, and separately refuse pre-existing
    untracked publish-path files,
 3. `git fetch` + `git pull --ff-only`,
-4. install dependencies if needed,
+4. install npm dependencies if needed and verify the hash-locked Python runtime,
 5. run `npm run data`,
 6. validate generated artifacts and public status sidecar,
 7. run `npm run build`,
@@ -60,12 +60,12 @@ it cannot prove an exact incremental update falls back immediately to the full b
 - LaunchAgent label: `com.ael.degendogs.mission3.watch-auction`
 - Installer: `scripts/install_auction_watcher_launchd.sh`
 - NPM helper: `npm run watch:install`
-- Default interval: `30` seconds
+- Default interval: `15` seconds
 - Main command: `python3 scripts/watch_mission3_onchain_activity.py --once`
 - Publish mode command: `MISSION3_REFRESH_COMMAND="npm run refresh:publish"`
 - Publish mode gate: `MISSION3_WATCHER_AUTO_PUSH=1`
 
-The watcher is a one-shot job scheduled every 30 seconds, not a long-running public server.
+The watcher is a one-shot job scheduled every 15 seconds, not a long-running public server.
 It checks recent auction-house logs and direct `auction()` state for meaningful changes:
 
 - `AuctionBid`, including same-token higher bids,

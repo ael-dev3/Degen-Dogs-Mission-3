@@ -34,8 +34,8 @@
       "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
-      "0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d",
-      "0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8"
+      "0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8",
+      "0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -53,12 +53,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#611/792",
-      "rank": 611,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44411181 $18.44 2026-07-19t13:04:07z 0xdb57f06e2c234e6f50def74eb9ccba6e5b0aed26c7d7af33ec80a30839e50858 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 #611/792 generated auction feed 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: glasses (12.6%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z 0xdb57f06e2c234e6f50def74eb9ccba6e5b0aed26c7d7af33ec80a30839e50858 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 unavailable generated auction feed 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d background: none background none body: redbrown body redbrown neck: goldnecklace neck goldnecklace mouth: none mouth none ears: earbuds ears earbuds head: crazyhair head crazyhair eyes: glasses eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48838450,
       "block_time_utc": "2026-07-19T13:04:07Z",
@@ -72,9 +72,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -82,37 +80,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Glasses (12.6%)",
+        "display": "Eyes: Glasses",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -52,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#274/792",
-      "rank": 274,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 588 dog #588 588 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 14000 degen 0x614773c3d890599b122addc7227f9489578d9759b168ce4f6947999d34fd7b70 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 #274/792 background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: none; head: crazyhair; eyes: none 0x72bde0602d1681b3277cecdc67b5b239e30fd9b7cc0eaf34e7625a35cc0d2db6 chain_logs contract_getters",
+    "search_text": "dog 588 dog #588 588 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 14000 degen 0x614773c3d890599b122addc7227f9489578d9759b168ce4f6947999d34fd7b70 0xc485d08dfabfd18c95b6dcf4b42219dbbfd146a3c60b38ac846ba559c57337d0 unavailable background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: none; head: crazyhair; eyes: none 0x72bde0602d1681b3277cecdc67b5b239e30fd9b7cc0eaf34e7625a35cc0d2db6 chain_logs contract_getters",
     "settlement": {
       "block_number": 26620723,
       "block_time_utc": "2026-01-05T09:00:32Z",
@@ -77,37 +77,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: StuddedCollar (9.8%)",
+        "display": "Neck: StuddedCollar",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.4%)",
+        "display": "Mouth: Pizza",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: CrazyHair (6.6%)",
+        "display": "Head: CrazyHair",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

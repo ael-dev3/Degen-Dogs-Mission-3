@@ -34,9 +34,9 @@
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
-      "0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57",
+      "0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08",
       "0x5e6ca96d4c7dc5669c9c45ff29330e1722ae8ba98a5cbd443191c4e20d225462",
-      "0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08"
+      "0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -54,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#573/792",
-      "rank": 573,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 756 dog #756 756 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0121 eth 12100000000000000 19.01729547 $19.02 2026-06-28t00:20:29z 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 #573/792 generated auction feed 0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57 0x5e6ca96d4c7dc5669c9c45ff29330e1722ae8ba98a5cbd443191c4e20d225462 0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08 background: none (90.4%) background none body: brown (11.1%) body brown neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: headphones (6.4%) head headphones eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 756 dog #756 756 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0121 eth 12100000000000000 19.02 $19.02 2026-06-28t00:20:29z 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 unavailable generated auction feed 0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08 0x5e6ca96d4c7dc5669c9c45ff29330e1722ae8ba98a5cbd443191c4e20d225462 0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57 background: none background none body: brown body brown neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: headphones head headphones eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47908341,
       "block_time_utc": "2026-06-28T00:20:29Z",
@@ -73,9 +73,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -83,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.1%)",
+        "display": "Body: Brown",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: GoldNecklace (19.4%)",
+        "display": "Neck: GoldNecklace",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Headphones (6.4%)",
+        "display": "Head: Headphones",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

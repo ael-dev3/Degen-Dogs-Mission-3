@@ -43,12 +43,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#252/792",
-      "rank": 252,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth #252/792 background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +70,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.1%)",
+        "display": "Body: Black",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: StuddedCollar (9.8%)",
+        "display": "Neck: StuddedCollar",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.4%)",
+        "display": "Mouth: Pizza",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.1%)",
+        "display": "Ears: LoopEarring",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: RedMohawk (7.2%)",
+        "display": "Head: RedMohawk",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None",
         "trait_type": "Eyes",
         "value": "None"
       }

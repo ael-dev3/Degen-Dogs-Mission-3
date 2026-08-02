@@ -15,6 +15,8 @@ import os
 import queue
 import random
 import re
+import signal
+import stat
 import subprocess
 import threading
 import time
@@ -51,6 +53,18 @@ RPC_HEAD_PROBE_GRACE_SECONDS = max(
 RPC_SLOW_COOLDOWN_SECONDS = max(
     1.0,
     min(float(os.environ.get("BASE_RPC_SLOW_COOLDOWN_SECONDS", "60")), 600.0),
+)
+RPC_MAX_HEAD_SPREAD_BLOCKS = max(
+    1,
+    min(int(os.environ.get("BASE_RPC_MAX_HEAD_SPREAD_BLOCKS", "20")), 10_000),
+)
+RPC_MAX_BLOCK_AGE_SECONDS = max(
+    30,
+    min(int(os.environ.get("BASE_RPC_MAX_BLOCK_AGE_SECONDS", "600")), 86_400),
+)
+RPC_MAX_RESPONSE_BYTES = max(
+    1024 * 1024,
+    min(int(os.environ.get("BASE_RPC_MAX_RESPONSE_BYTES", str(32 * 1024 * 1024))), 64 * 1024 * 1024),
 )
 RPC_SLOW_UNTIL: dict[tuple[str, str], float] = {}
 
@@ -263,12 +277,15 @@ def independent_rpc_urls(urls: list[str]) -> list[str]:
 
 def configured_rpc_urls() -> list[str]:
     candidates: list[str] = []
-    if os.environ.get("BASE_RPC_URL"):
-        candidates.append(os.environ["BASE_RPC_URL"].strip())
+    environment = dict(os.environ)
+    explicit = any(environment.get(name, "").strip() for name in ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS"))
+    if environment.get("BASE_RPC_URL"):
+        candidates.append(environment["BASE_RPC_URL"].strip())
     for name in ("BASE_RPC_URLS", "BASE_LOG_RPC_URLS"):
-        candidates.extend(item.strip() for item in os.environ.get(name, "").split(",") if item.strip())
-    candidates.extend(DEFAULT_RPC_URLS)
-    candidates.extend(DEFAULT_LOG_RPC_URLS)
+        candidates.extend(item.strip() for item in environment.get(name, "").split(",") if item.strip())
+    if env_bool(environment, "BASE_INCLUDE_PUBLIC_FALLBACKS", not explicit):
+        candidates.extend(DEFAULT_RPC_URLS)
+        candidates.extend(DEFAULT_LOG_RPC_URLS)
     return candidates
 
 
@@ -330,13 +347,18 @@ def optional_path_from_env(env: dict[str, str], name: str, default: Path | None)
 
 def config_from_env(env: dict[str, str] | None = None) -> Config:
     env = dict(os.environ if env is None else env)
+    explicit_rpc = any(env.get(name, "").strip() for name in ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS"))
+    include_public_fallbacks = env_bool(env, "BASE_INCLUDE_PUBLIC_FALLBACKS", not explicit_rpc)
     rpc_candidates: list[str] = []
     if env.get("BASE_RPC_URL"):
         rpc_candidates.append(env["BASE_RPC_URL"].strip())
-    rpc_candidates.extend(parse_url_list(env, "BASE_RPC_URLS", DEFAULT_RPC_URLS))
-    rpc_candidates.extend(DEFAULT_RPC_URLS)
+    rpc_candidates.extend(parse_url_list(env, "BASE_RPC_URLS", []))
+    if not explicit_rpc or include_public_fallbacks:
+        rpc_candidates.extend(DEFAULT_RPC_URLS)
     rpc_urls = independent_rpc_urls(rpc_candidates)
-    log_candidates = parse_url_list(env, "BASE_LOG_RPC_URLS", rpc_urls or DEFAULT_LOG_RPC_URLS)
+    if len(rpc_urls) < 2:
+        raise SystemExit("configure at least two independent Base RPC providers or enable BASE_INCLUDE_PUBLIC_FALLBACKS")
+    log_candidates = parse_url_list(env, "BASE_LOG_RPC_URLS", rpc_urls)
     log_rpc_urls = independent_rpc_urls([*log_candidates, *rpc_urls])
 
     auto_push = env_bool(env, "MISSION3_WATCHER_AUTO_PUSH", False)
@@ -359,9 +381,9 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         lock_path=lock_path,
         log_path=log_path,
         refresh_lock_path=refresh_lock_path,
-        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 30, minimum=15),
+        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 15, minimum=15),
         cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 30, minimum=0),
-        bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 30, minimum=0),
+        bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 15, minimum=0),
         force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 0, minimum=0),
         lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 100, minimum=1, maximum=10000),
         safety_overlap_blocks=env_int_any(env, ["MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS", "MISSION3_WATCHER_LOG_SAFETY_OVERLAP_BLOCKS"], 50, minimum=0, maximum=500),
@@ -371,7 +393,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         require_clean_tree=env_bool(env, "MISSION3_WATCHER_REQUIRE_CLEAN_TREE", auto_push),
         timeout_seconds=env_int(env, "MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", 1800, minimum=60),
         quorum_size=env_int(env, "BASE_RPC_QUORUM_SIZE", 2, minimum=2, maximum=3),
-        confirmations=env_int(env, "BASE_SNAPSHOT_CONFIRMATIONS", 1, minimum=0, maximum=64),
+        confirmations=env_int(env, "BASE_SNAPSHOT_CONFIRMATIONS", 1, minimum=1, maximum=64),
     )
 
 
@@ -423,14 +445,57 @@ def log(config: Config | None, message: str) -> None:
     line = f"[{utc_now()}] {message}"
     print(line)
     if config and config.log_path:
-        config.log_path.parent.mkdir(parents=True, exist_ok=True)
-        with config.log_path.open("a", encoding="utf-8") as handle:
+        ensure_private_directory(config.log_path.parent)
+        flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        descriptor = os.open(config.log_path, flags, 0o600)
+        details = os.fstat(descriptor)
+        if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+            os.close(descriptor)
+            raise RuntimeError(f"watcher log is not an owned regular file: {config.log_path}")
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "a", encoding="utf-8") as handle:
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
             handle.write(line + "\n")
             handle.flush()
 
 
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Reject redirects before a provider key or JSON-RPC body can be forwarded."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001, ANN201, ARG002
+        return None
+
+
+RPC_OPENER = urllib.request.build_opener(NoRedirectHandler())
+
+
+def open_rpc_request(request: urllib.request.Request, timeout: int):
+    return RPC_OPENER.open(request, timeout=timeout)
+
+
+def validate_rpc_url(url: str) -> None:
+    if not isinstance(url, str) or not url or any(character.isspace() for character in url):
+        raise RuntimeError("RPC endpoint URL is invalid")
+    try:
+        parts = urllib.parse.urlsplit(url)
+        port = parts.port
+    except ValueError as exc:
+        raise RuntimeError("RPC endpoint URL is invalid") from exc
+    if (
+        parts.scheme.lower() != "https"
+        or not parts.hostname
+        or port not in (None, 443)
+        or parts.username is not None
+        or parts.password is not None
+        or parts.fragment
+    ):
+        raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
+
+
 def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
+    validate_rpc_url(url)
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url,
@@ -443,11 +508,43 @@ def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as response:
-            return json.loads(response.read().decode("utf-8"))
+        response = open_rpc_request(req, timeout)
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")[:300]
-        raise RuntimeError(f"HTTP {exc.code}: {detail or exc.reason}") from exc
+        raise RuntimeError(f"RPC HTTP {exc.code}") from None
+    except Exception as exc:  # noqa: BLE001 - provider exceptions must not expose credential-bearing URLs
+        raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
+    try:
+        with response:
+            if response.getcode() != 200:
+                raise RuntimeError("RPC response returned an unexpected HTTP status")
+            if str(response.geturl()) != url:
+                raise RuntimeError("RPC response URL changed unexpectedly")
+            content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+            if content_type != "application/json" and not content_type.endswith("+json"):
+                raise RuntimeError("RPC response has a non-JSON Content-Type")
+            content_length = response.headers.get("Content-Length")
+            if content_length is not None:
+                try:
+                    declared_length = int(content_length)
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError("RPC response has an invalid Content-Length") from exc
+                if declared_length < 0 or declared_length > RPC_MAX_RESPONSE_BYTES:
+                    raise RuntimeError("RPC response exceeds the configured byte limit")
+            raw = response.read(RPC_MAX_RESPONSE_BYTES + 1)
+            if len(raw) > RPC_MAX_RESPONSE_BYTES:
+                raise RuntimeError("RPC response exceeds the configured byte limit")
+    except RuntimeError:
+        raise
+    except Exception as exc:  # noqa: BLE001 - keep provider-controlled details out of logs/state
+        raise RuntimeError(f"RPC response read failed ({type(exc).__name__})") from None
+    try:
+        text = raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError as exc:
+        raise RuntimeError("RPC response is not valid UTF-8") from exc
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("RPC response is not valid JSON") from exc
 
 
 def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 30) -> tuple[Any, str]:
@@ -456,9 +553,22 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 
         try:
             payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
             data = post_json(url, payload, timeout=timeout)
-            if "error" in data:
-                raise RuntimeError(json.dumps(data["error"], sort_keys=True))
-            return data.get("result"), url
+            if not isinstance(data, dict) or data.get("jsonrpc") != "2.0" or type(data.get("id")) is not int or data.get("id") != 1:
+                raise RuntimeError("invalid JSON-RPC response envelope")
+            has_result = "result" in data
+            has_error = "error" in data
+            if has_result == has_error:
+                raise RuntimeError("invalid JSON-RPC response envelope")
+            if has_error:
+                error = data.get("error")
+                if (
+                    not isinstance(error, dict)
+                    or type(error.get("code")) is not int
+                    or not isinstance(error.get("message"), str)
+                ):
+                    raise RuntimeError("invalid JSON-RPC error envelope")
+                raise RuntimeError(f"JSON-RPC error code={error['code']}")
+            return data["result"], url
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{redact_url(url)}: {exc}")
     raise RuntimeError("; ".join(errors))
@@ -659,9 +769,25 @@ def verified_snapshot_head(config: Config) -> tuple[int, dict[str, Any], list[st
             f"Base RPC head quorum unavailable healthy={len(heads)} required={config.quorum_size}; "
             + "; ".join(errors[:3])
         )
-    quorum_head = sorted((head for _url, head in heads), reverse=True)[config.quorum_size - 1]
+    ordered_pairs = sorted(heads, key=lambda item: item[1], reverse=True)
+    head_cluster: list[tuple[str, int]] = []
+    for _anchor_url, anchor_head in ordered_pairs:
+        candidate = [
+            (url, head)
+            for url, head in ordered_pairs
+            if anchor_head - RPC_MAX_HEAD_SPREAD_BLOCKS <= head <= anchor_head
+        ]
+        if len(candidate) >= config.quorum_size:
+            head_cluster = candidate
+            break
+    if len(head_cluster) < config.quorum_size:
+        detail = ", ".join(f"{redact_url(url)}={head}" for url, head in ordered_pairs)
+        raise RuntimeError(
+            f"Base RPC heads cannot form a recent quorum within {RPC_MAX_HEAD_SPREAD_BLOCKS} blocks: {detail}"
+        )
+    quorum_head = sorted((head for _url, head in head_cluster), reverse=True)[config.quorum_size - 1]
     block_number = max(0, quorum_head - config.confirmations)
-    eligible = [url for url, head in heads if head >= block_number]
+    eligible = [url for url, head in head_cluster if head >= block_number]
     block, agreeing_urls = rpc_quorum_call(
         "eth_getBlockByNumber",
         [hex(block_number), False],
@@ -671,6 +797,20 @@ def verified_snapshot_head(config: Config) -> tuple[int, dict[str, Any], list[st
     )
     if not isinstance(block, dict) or not block.get("hash"):
         raise RuntimeError(f"verified Base block {block_number} missing hash")
+    try:
+        observed_number = int(str(block.get("number") or ""), 16)
+        block_timestamp = int(str(block.get("timestamp") or ""), 16)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(f"verified Base block {block_number} has malformed number/timestamp") from exc
+    if observed_number != block_number:
+        raise RuntimeError(
+            f"verified Base block number mismatch expected={block_number} observed={observed_number}"
+        )
+    age = time.time() - block_timestamp
+    if age < -60 or age > RPC_MAX_BLOCK_AGE_SECONDS:
+        raise RuntimeError(
+            f"verified Base block {block_number} is outside the freshness window: age_seconds={age:.0f}"
+        )
     return block_number, block, agreeing_urls
 
 
@@ -712,15 +852,21 @@ def choose_log_from_block(
     lookback_blocks: int,
     safety_overlap_blocks: int,
 ) -> int:
+    recent_from_block = max(default_from_block, latest_block - lookback_blocks + 1)
     if not state:
-        return max(default_from_block, latest_block - lookback_blocks + 1)
+        return recent_from_block
     try:
         last_checked = int(state.get("last_checked_block") or state.get("last_seen_block") or 0)
     except (TypeError, ValueError):
         last_checked = 0
+    if last_checked > latest_block:
+        # A provider can briefly report a lower head, and a canonical reorg can
+        # genuinely move it backwards. Re-scan the full configured window so a
+        # regressed head cannot collapse log coverage to only the latest block.
+        return recent_from_block
     if last_checked > 0:
         return max(default_from_block, min(latest_block, last_checked + 1 - safety_overlap_blocks))
-    return max(default_from_block, latest_block - lookback_blocks + 1)
+    return recent_from_block
 
 
 def log_filter(address: str, topics: list[str], from_block: int, to_block: int) -> dict[str, Any]:
@@ -911,6 +1057,19 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
             + "; ".join(log_errors[:3])
         )
     logs = fetch_logs(config._replace(log_rpc_urls=verified_log_urls), from_block, latest_block)
+    rechecked_block, _recheck_urls = rpc_quorum_call(
+        "eth_getBlockByNumber",
+        [hex(latest_block), False],
+        urls=call_urls,
+        required=config.quorum_size,
+        timeout=30,
+    )
+    rechecked_hash = str((rechecked_block or {}).get("hash") or "").lower() if isinstance(rechecked_block, dict) else ""
+    if rechecked_hash != expected_block_hash:
+        raise RuntimeError(
+            f"verified Base block {latest_block} reorganized during watcher scan: "
+            f"expected={expected_block_hash} observed={rechecked_hash or 'missing'}"
+        )
     providers = sorted({rpc_provider_key(url) for url in call_urls})
     log_providers = sorted({rpc_provider_key(url) for url in verified_log_urls})
     snapshot = {
@@ -934,22 +1093,59 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
 
 
 def load_state(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
+        descriptor = os.open(path, flags)
+    except FileNotFoundError:
+        return {}
+    except OSError as exc:
+        raise SystemExit(f"unable to securely open watcher state at {path}: {exc}") from exc
+    try:
+        details = os.fstat(descriptor)
+        if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+            raise SystemExit(f"unsafe watcher state at {path}: expected an owned regular file")
+        if stat.S_IMODE(details.st_mode) & 0o077:
+            raise SystemExit(f"unsafe watcher state permissions at {path}: expected mode 600")
+        if details.st_size > 2_097_152:
+            raise SystemExit(f"watcher state is unexpectedly large at {path}")
+        with os.fdopen(descriptor, "r", encoding="utf-8", closefd=False) as handle:
+            data = json.load(handle)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise SystemExit(f"invalid watcher state JSON at {path}: {exc}") from exc
+    finally:
+        os.close(descriptor)
     if not isinstance(data, dict):
         raise SystemExit(f"invalid watcher state at {path}: expected object")
     return data
 
 
+def ensure_private_directory(path: Path) -> None:
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    details = path.lstat()
+    if not stat.S_ISDIR(details.st_mode) or details.st_uid != os.getuid():
+        raise RuntimeError(f"runner directory is not an owned directory: {path}")
+    path.chmod(0o700)
+
+
 def save_state(path: Path, state: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix(path.suffix + ".tmp")
-    temp.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    temp.replace(path)
+    ensure_private_directory(path.parent)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(temp, flags, 0o600)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(state, indent=2, sort_keys=True) + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temp.replace(path)
+        path.chmod(0o600)
+    finally:
+        try:
+            temp.unlink()
+        except FileNotFoundError:
+            pass
 
 
 class RefreshAlreadyRunning(RuntimeError):
@@ -957,8 +1153,17 @@ class RefreshAlreadyRunning(RuntimeError):
 
 
 def acquire_file_lock(path: Path, *, label: str) -> Any | None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    handle = path.open("a+", encoding="utf-8")
+    ensure_private_directory(path.parent)
+    flags = os.O_RDWR | os.O_APPEND | os.O_CREAT
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(path, flags, 0o600)
+    details = os.fstat(descriptor)
+    if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid():
+        os.close(descriptor)
+        raise RuntimeError(f"runner lock is not an owned regular file: {path}")
+    os.fchmod(descriptor, 0o600)
+    handle = os.fdopen(descriptor, "a+", encoding="utf-8")
     try:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
@@ -1485,16 +1690,40 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
             # reacquire the lock it already owns through this process.
             child_env["DEGEN_DOGS_LOCK_HELD"] = "1"
             child_env["DEGEN_DOGS_LOCK_DIR"] = str(config.refresh_lock_path.parent)
+            child_env["DEGEN_DOGS_REFRESH_LOCK_PATH"] = str(config.refresh_lock_path)
+            child_env["DEGEN_DOGS_LOCK_FD"] = str(refresh_lock.fileno())
         log(config, f"running refresh command: {command_for_log}; reasons={','.join(reasons)}")
-        result = subprocess.run(
+        pass_fds = (refresh_lock.fileno(),) if refresh_lock else ()
+        process = subprocess.Popen(
             ["/bin/bash", "-lc", config.refresh_command],
             cwd=ROOT,
             text=True,
-            timeout=config.timeout_seconds,
             env=child_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            pass_fds=pass_fds,
+            start_new_session=True,
         )
+        try:
+            stdout, stderr = process.communicate(timeout=config.timeout_seconds)
+        except subprocess.TimeoutExpired:
+            # Terminate the entire refresh process group before releasing the
+            # inherited publisher lock; otherwise grandchildren can outlive the
+            # watcher and mutate after another refresh starts.
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                stdout, stderr = process.communicate(timeout=5)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                stdout, stderr = process.communicate()
+            raise subprocess.TimeoutExpired(config.refresh_command, config.timeout_seconds, output=stdout, stderr=stderr)
+        result = subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
     finally:
         release_run_lock(refresh_lock)
     stdout_tail = "\n".join((result.stdout or "").splitlines()[-20:])

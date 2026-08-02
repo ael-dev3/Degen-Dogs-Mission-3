@@ -34,12 +34,12 @@
       "unique_bidder_count": 6
     },
     "bid_tx_hashes": [
-      "0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d",
-      "0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5",
-      "0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804",
-      "0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2",
+      "0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907",
       "0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28",
-      "0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907"
+      "0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2",
+      "0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804",
+      "0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5",
+      "0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -57,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#405/792",
-      "rank": 405,
-      "total": 792
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01331 eth 13310000000000000 21.55943956 $21.56 2026-06-24t23:57:01z 0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721 0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2 #405/792 generated auction feed 0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d 0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 background: none (90.4%) background none body: blue (9.3%) body blue neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: unicorn (4.7%) head unicorn eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 753 dog #753 753 mission 3 mission 3 base settled 0x50eac8369154231a7ca59a73ccaf1131e7904d4b @melinoe melinoe 0.01331 eth 13310000000000000 21.56 $21.56 2026-06-24t23:57:01z 0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721 0xba2fca59c5b501a4ae213c27ca29e93ae35f1c87d21cae258538575e3a6f71a2 unavailable generated auction feed 0xffef26d2de7069bf1ede469d0e1e805f4bc560fcf0f51cc3f2d565460dfc0907 0x8aab32fcfd724e65dcd0ab4c74cf4a1dac96dd194733b013d32a466052738c28 0xb5d6ae32d5c4bf1bcb55f77b04fd11727a7fcfdcef857fb19e57cf5831185ea2 0x2f61684beb99179ea6c895ee58d168379617a2b9fa6f0c1e5094ec16435b3804 0x54aa55591ac74146473ef2d5d621865321f7928f26b3ae67b0ee5d8d2eda11f5 0x4727bbde0e7303c564d39b02aeafb6f32e668f2cb3641d175dd488e9b8b85a6d background: none background none body: blue body blue neck: none neck none mouth: none mouth none ears: earbuds ears earbuds head: unicorn head unicorn eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47778037,
       "block_time_utc": "2026-06-24T23:57:01Z",
@@ -76,9 +76,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
-        "generated_auction_feed",
-        "historical_dog_search_backfill",
+        "archive_indexer",
         "generated_auction_timeline",
         "generated_auction_winners"
       ]
@@ -86,37 +84,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (90.4%)",
+        "display": "Background: None",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.3%)",
+        "display": "Body: Blue",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (39.8%)",
+        "display": "Neck: None",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.9%)",
+        "display": "Mouth: None",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Unicorn (4.7%)",
+        "display": "Head: Unicorn",
         "trait_type": "Head",
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Sunglasses (14.6%)",
+        "display": "Eyes: Sunglasses",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
