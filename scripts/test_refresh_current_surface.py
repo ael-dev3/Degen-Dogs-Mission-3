@@ -312,6 +312,41 @@ def test_rarity_universe_rebases_every_rank_and_denominator_after_mint() -> None
     assert universe[0]["trait_rarity"] == "Body: Common (50.0%)"
 
 
+def test_incomplete_verified_metadata_withholds_incremental_rarity() -> None:
+    surface = load_module()
+    metrics = [
+        {"metric": "dog_total_supply", "value": "792"},
+        {"metric": "dog_token_uri_present_count", "value": "667"},
+        {"metric": "dog_token_uri_unavailable_count", "value": "125"},
+        {"metric": "dog_metadata_onchain_verified_count", "value": "667"},
+        {"metric": "dog_metadata_unavailable_count", "value": "125"},
+        {"metric": "dog_token_uri_verification_status", "value": "hash_pinned_cross_provider_exact_outcome_quorum"},
+        {"metric": "dog_metadata_verification_status", "value": "partial_onchain_token_uri_unavailable"},
+    ]
+
+    assert surface.baseline_rarity_is_complete(metrics, 792) is False
+
+
+def test_incremental_rarity_rejects_stale_metadata_supply_counts() -> None:
+    surface = load_module()
+    metrics = [
+        {"metric": "dog_total_supply", "value": "791"},
+        {"metric": "dog_token_uri_present_count", "value": "791"},
+        {"metric": "dog_token_uri_unavailable_count", "value": "0"},
+        {"metric": "dog_metadata_onchain_verified_count", "value": "791"},
+        {"metric": "dog_metadata_unavailable_count", "value": "0"},
+        {"metric": "dog_token_uri_verification_status", "value": "hash_pinned_cross_provider_exact_outcome_quorum"},
+        {"metric": "dog_metadata_verification_status", "value": "complete_onchain_token_uri_verified"},
+    ]
+
+    try:
+        surface.baseline_rarity_is_complete(metrics, 792)
+    except surface.FullRefreshRequired as exc:
+        assert "baseline metadata covers supply 791" in str(exc)
+    else:
+        raise AssertionError("stale metadata supply counts were accepted")
+
+
 def test_prior_settled_winner_block_and_historical_price_survive_fast_refresh_merge() -> None:
     surface = load_module()
     tx_hash = "0x" + "a" * 64

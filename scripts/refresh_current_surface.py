@@ -796,6 +796,49 @@ def build_rarity_universe(
     return universe
 
 
+def baseline_rarity_is_complete(metrics_rows: list[dict[str, Any]], total_supply: int) -> bool:
+    """Validate the full-build metadata envelope before any incremental ranking."""
+    metrics = {
+        str(row.get("metric")): str(row.get("value", ""))
+        for row in metrics_rows
+        if isinstance(row, dict)
+    }
+    if metrics.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+        raise FullRefreshRequired("baseline tokenURI outcomes are not hash-pinned and cross-provider verified")
+
+    def count(key: str) -> int:
+        raw = metrics.get(key, "")
+        if not raw.isdigit():
+            raise FullRefreshRequired(f"baseline metadata metric {key} is not a non-negative integer")
+        return int(raw)
+
+    baseline_supply = count("dog_total_supply")
+    token_present = count("dog_token_uri_present_count")
+    token_unavailable = count("dog_token_uri_unavailable_count")
+    metadata_verified = count("dog_metadata_onchain_verified_count")
+    metadata_unavailable = count("dog_metadata_unavailable_count")
+    if baseline_supply != total_supply:
+        raise FullRefreshRequired(
+            f"baseline metadata covers supply {baseline_supply}, but onchain total supply is {total_supply}"
+        )
+    if token_present + token_unavailable != total_supply:
+        raise FullRefreshRequired("baseline tokenURI counts do not equal onchain total supply")
+    if metadata_verified + metadata_unavailable != total_supply:
+        raise FullRefreshRequired("baseline metadata counts do not equal onchain total supply")
+    if metadata_unavailable < token_unavailable:
+        raise FullRefreshRequired("baseline metadata counts hide tokenURI-unavailable Dogs")
+    expected_status = (
+        "complete_onchain_token_uri_verified"
+        if metadata_unavailable == 0
+        else "partial_onchain_token_uri_unavailable"
+        if metadata_unavailable == token_unavailable
+        else "incomplete_metadata_unavailable"
+    )
+    if metrics.get("dog_metadata_verification_status") != expected_status:
+        raise FullRefreshRequired("baseline metadata status contradicts its verified aggregate counts")
+    return metadata_unavailable == 0
+
+
 def apply_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None:
     row.update(
         {
@@ -1428,18 +1471,30 @@ def main() -> None:
         if item.get("trait_type") and item.get("value")
     }
     history = read_json("historical_dog_search")
-    rarity_universe = build_rarity_universe(history, token_id, dog_attrs, total_supply)
-    current_rarity = rarity_universe[token_id]
-    rarity = str(current_rarity["rarity"])
-    rarity_score = float(current_rarity["rarity_score"])
-    traits = str(current_rarity["traits"])
-    trait_rarity = str(current_rarity["trait_rarity"])
+    metrics_rows = read_json("mission3_metrics")
+    rarity_complete = baseline_rarity_is_complete(metrics_rows, total_supply)
+    if rarity_complete:
+        rarity_universe = build_rarity_universe(history, token_id, dog_attrs, total_supply)
+        current_rarity = rarity_universe[token_id]
+        rarity = str(current_rarity["rarity"])
+        rarity_score: float | None = float(current_rarity["rarity_score"])
+        traits = str(current_rarity["traits"])
+        trait_rarity = str(current_rarity["trait_rarity"])
+    else:
+        # Rarity is collection-wide. Preserve the verified traits for display,
+        # but withhold every rank, score, total, and frequency until every Dog's
+        # metadata has an onchain-verified tokenURI outcome.
+        rarity_universe = {}
+        rarity = "Unavailable"
+        rarity_score = None
+        traits = "; ".join(f"{key}: {value}" for key, value in dog_attrs.items())
+        trait_rarity = ""
     historical_by_token = {
         int_value(row.get("token_id"), -1): row
         for row in history
         if isinstance(row, dict) and int_value(row.get("token_id"), -1) >= 0
     }
-    rarity_rebase_required = any(
+    rarity_rebase_required = rarity_complete and any(
         token not in historical_by_token
         or str(historical_by_token[token].get("rarity") or "") != str(values["rarity"])
         or str(historical_by_token[token].get("trait_rarity") or "") != str(values["trait_rarity"])
@@ -2052,7 +2107,19 @@ def main() -> None:
                 ] if value).lower()
 
     unified_template = baseline_unified_current or next((row for row in unified_rows if int_value(row.get("mission"), -1) == 3), {})
-    trait_items = unified_trait_items(trait_rarity)
+    trait_items = (
+        unified_trait_items(trait_rarity)
+        if rarity_complete
+        else [
+            {"display": f"{key}: {value}", "trait_type": key, "value": value}
+            for key, value in dog_attrs.items()
+        ]
+    )
+    unified_rarity = (
+        {"display": rarity, "rank": int(rarity.split("/")[0].lstrip("#")), "total": total_supply}
+        if rarity_complete
+        else {"display": "Unavailable", "rank": None, "total": None}
+    )
     tx_hashes = [str(row.get("tx_hash")) for row in current_bids if row.get("tx_hash")]
     if not tx_hashes:
         tx_hashes = [str(row.get("tx_hash")) for row in current_history_rows if row.get("tx_hash")]
@@ -2123,7 +2190,7 @@ def main() -> None:
             "era_label": "Mission 3",
             "links": {"auction_tx": current_auction_created["tx_url"], "dog_page": current_row["dog_external_url"], "explorer": f"https://basescan.org/address/{wallet}", "item": current_row["dog_opensea_url"], "repo_archive": f"archive/dogs/by-id/{token_id:03d}.json", "settlement_tx": None},
             "mission": 3,
-            "rarity": {"display": rarity, "rank": int(rarity.split("/")[0].lstrip("#")), "total": total_supply},
+            "rarity": unified_rarity,
             "search_text": (
                 f"dog {token_id} dog #{token_id} {token_id} mission 3 mission 3 base ongoing "
                 f"{wallet} {bidder} {amount_eth} eth {amount_usd} ${amount_usd:.2f} "
@@ -2179,7 +2246,6 @@ def main() -> None:
 
     archive_prices.main()
 
-    metrics_rows = read_json("mission3_metrics")
     metrics = {str(row.get("metric")): str(row.get("value", "")) for row in metrics_rows}
     metrics["eth_usd_price"] = str(eth_usd)
     season6_settled_rows = [
