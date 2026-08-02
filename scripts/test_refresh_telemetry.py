@@ -114,7 +114,7 @@ def base_env(root: Path) -> dict[str, str]:
         "DEGEN_DOGS_BUILD_COMPLETED_AT_UTC": iso(13),
         "DEGEN_DOGS_PUSH_STARTED_AT_UTC": iso(14),
         "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC": iso(17),
-        "DEGEN_DOGS_COMMIT_SHA": "abcdef1234567890",
+        "DEGEN_DOGS_COMMIT_SHA": "a" * 40,
     }
 
 
@@ -204,7 +204,13 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         calls = iter([0.0, 0.0, 2.0])
         telemetry.time.monotonic = lambda: next(calls)
         telemetry.time.sleep = lambda _seconds: None
-        telemetry.fetch_json = lambda url: expected if "raw.githubusercontent.com" in url else stale
+        fetched_urls: list[str] = []
+
+        def fetch_raw_only(url: str) -> Any:
+            fetched_urls.append(url)
+            return expected if "raw.githubusercontent.com" in url else stale
+
+        telemetry.fetch_json = fetch_raw_only
         raw_only = telemetry.verify_live(
             env,
             root=root,
@@ -213,9 +219,12 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
             base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
         )
         assert raw_only["live_verify_result"] == "timeout"
+        assert raw_only["raw_commit_verified"] is True
         assert raw_only["raw_main_verified"] is True
         assert raw_only["live_verify_source"] is None
         assert "latest_generated_block" in raw_only["error"]
+        assert any(f"/{env['DEGEN_DOGS_COMMIT_SHA']}/public/generated/refresh_status.json?" in url for url in fetched_urls)
+        assert all("/main/public/generated/refresh_status.json" not in url for url in fetched_urls)
 
         telemetry.time.monotonic = lambda: 0.0
         telemetry.fetch_json = lambda _url: expected
@@ -227,8 +236,85 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
             base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
         )
         assert both["live_verify_result"] == "verified"
+        assert both["raw_commit_verified"] is True
         assert both["raw_main_verified"] is True
         assert both["live_verify_source"] == "github_pages"
+
+        # Immutable raw commit evidence remains valid once observed. A later
+        # transient raw-host failure must not erase it just as Pages catches up.
+        monotonic_calls = iter([0.0, 0.0, 0.5])
+        telemetry.time.monotonic = lambda: next(monotonic_calls)
+        responses: list[Any] = [expected, stale, RuntimeError("transient raw failure"), expected]
+
+        def fetch_with_transient_raw_failure(_url: str) -> Any:
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        telemetry.fetch_json = fetch_with_transient_raw_failure
+        latched = telemetry.verify_live(
+            env,
+            root=root,
+            timeout_seconds=1,
+            interval_seconds=1,
+            base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
+        )
+        assert latched["live_verify_result"] == "verified"
+        assert latched["raw_commit_verified"] is True
+        assert latched["raw_main_verified"] is True
+        assert latched["live_verify_source"] == "github_pages"
+        assert responses == []
+
+        assert telemetry.snapshot_mismatch(expected, expected) == ""
+        unexpected_null = dict(expected)
+        unexpected_null["attacker_controlled"] = None
+        assert telemetry.snapshot_mismatch(expected, unexpected_null) == "fields=attacker_controlled"
+        wrong_json_type = dict(expected)
+        wrong_json_type["latest_generated_block"] = str(expected["latest_generated_block"])
+        assert telemetry.snapshot_mismatch(expected, wrong_json_type) == "fields=latest_generated_block"
+
+
+def test_live_verify_rejects_noncanonical_commit_sha_before_network() -> None:
+    telemetry = load_module()
+    invalid = (
+        "",
+        "a" * 39,
+        "a" * 41,
+        "A" * 40,
+        "main",
+        "a" * 39 + "/",
+        "a" * 39 + "?",
+        "a" * 39 + "\n",
+        "a" * 38 + "..",
+    )
+    for value in invalid:
+        try:
+            telemetry.immutable_raw_status_url(value)
+        except RuntimeError as exc:
+            assert "40-hex" in str(exc)
+        else:
+            raise AssertionError(f"invalid pushed commit SHA was accepted: {value!r}")
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        telemetry.write_refresh_status(env, root=root, prefer_current_env=True)
+        env["DEGEN_DOGS_COMMIT_SHA"] = "main/../../attacker"
+        telemetry.fetch_json = lambda _url: (_ for _ in ()).throw(AssertionError("network should not be used"))
+        try:
+            telemetry.verify_live(
+                env,
+                root=root,
+                timeout_seconds=1,
+                interval_seconds=1,
+                base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
+            )
+        except RuntimeError as exc:
+            assert "40-hex" in str(exc)
+        else:
+            raise AssertionError("invalid pushed commit SHA reached live verification")
 
 
 def test_live_verify_network_and_env_file_boundaries() -> None:
@@ -299,7 +385,8 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
                 self.response.final_url = request.full_url
             return self.response
 
-    raw_url = "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json?cache_bust=1"
+    commit_sha = "a" * 40
+    raw_url = f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1"
     pages_url = "https://ael-dev3.github.io/Degen-Dogs-Mission-3/generated/refresh_status.json?cache_bust=1"
     payload = {"kind": "refresh_status", "latest_generated_block": 123}
     encoded = json.dumps(payload).encode()
@@ -312,6 +399,25 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
         pages_response = Response(encoded, "application/json; charset=utf-8")
         telemetry.LIVE_STATUS_OPENER = Opener(pages_response)
         assert telemetry.fetch_json(pages_url) == payload
+
+        unsafe_urls = (
+            f"http://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com./ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com/attacker/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
+            "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json/extra?cache_bust=1",
+            f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}%2fmain/public/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1&next=evil",
+            f"https://raw.githubusercontent.com:443/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
+        )
+        for unsafe_url in unsafe_urls:
+            try:
+                telemetry.fetch_json(unsafe_url)
+            except RuntimeError as exc:
+                assert "allowlist" in str(exc)
+            else:
+                raise AssertionError(f"unsafe live-verification path was accepted: {unsafe_url}")
 
         cases = [
             (Response(encoded, "application/json"), raw_url, "content type"),
@@ -348,6 +454,21 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
             assert "secret" not in str(exc)
         else:
             raise AssertionError("live-verification HTTP error was accepted")
+
+        redirect = telemetry.urllib.error.HTTPError(
+            raw_url,
+            302,
+            "Found",
+            {"Location": pages_url},
+            None,
+        )
+        telemetry.LIVE_STATUS_OPENER = Opener(redirect)
+        try:
+            telemetry.fetch_json(raw_url)
+        except RuntimeError as exc:
+            assert str(exc) == "live verification HTTP 302"
+        else:
+            raise AssertionError("live-verification redirect was followed")
     finally:
         telemetry.LIVE_STATUS_OPENER = original_opener
 
