@@ -949,7 +949,7 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
             lines = []
             assert health.harden_runner_environment_file(lines) is False
             assert default_env.stat().st_mode & 0o777 == 0o644
-            assert any("DRY-RUN would set runner environment file" in line for line in lines)
+            assert any("DRY-RUN would set default runner environment file" in line for line in lines)
             assert secret_sentinel not in "\n".join(lines)
 
             health.DRY_RUN = False
@@ -988,7 +988,8 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
             # its later absence is actionable configuration drift.
             configured_dir = repo / "configured"
             configured_dir.mkdir()
-            configured_env = configured_dir / "runner.env"
+            path_secret_sentinel = "PATH_SECRET_MUST_NOT_APPEAR"
+            configured_env = configured_dir / f"{path_secret_sentinel}.env"
             configured_env.write_text(f"BASE_LOG_RPC_URLS={secret_sentinel}\n", encoding="utf-8")
             configured_env.chmod(0o640)
             os.environ["DEGEN_DOGS_ENV_FILE"] = str(configured_env)
@@ -996,23 +997,32 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
             assert health.harden_runner_environment_file(lines) is False
             assert configured_env.stat().st_mode & 0o777 == 0o600
             assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
 
             configured_env.unlink()
             lines = []
             assert health.harden_runner_environment_file(lines) is True
-            assert any("configured environment file is missing" in line for line in lines)
+            assert any("configured runner environment file is missing" in line for line in lines)
             assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
+            incident = health.build_incident_body({"issues": lines})
+            assert secret_sentinel not in incident
+            assert path_secret_sentinel not in incident
 
             # Unsafe parent substitution is rejected before the target is opened.
             configured_env.write_text(secret_sentinel, encoding="utf-8")
             configured_env.chmod(0o600)
             redirected_parent = repo / "redirected-config"
             redirected_parent.symlink_to(configured_dir, target_is_directory=True)
-            os.environ["DEGEN_DOGS_ENV_FILE"] = str(redirected_parent / "runner.env")
+            os.environ["DEGEN_DOGS_ENV_FILE"] = str(redirected_parent / f"{path_secret_sentinel}.env")
             lines = []
             assert health.harden_runner_environment_file(lines) is True
             assert configured_env.read_text(encoding="utf-8") == secret_sentinel
             assert secret_sentinel not in "\n".join(lines)
+            assert path_secret_sentinel not in "\n".join(lines)
+            incident = health.build_incident_body({"issues": lines})
+            assert secret_sentinel not in incident
+            assert path_secret_sentinel not in incident
 
             # Exercise the unexpected-owner branch without requiring privileged
             # chown: /tmp is root-owned, so changing the helper's expected uid
@@ -1030,7 +1040,10 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
                 os.environ["DEGEN_DOGS_ENV_FILE"] = str(owner_path)
                 lines = []
                 assert health.harden_runner_environment_file(lines) is True
-                assert any("not owned by the current user" in line for line in lines)
+                assert any(
+                    "configured runner environment file: SecurePathError" in line
+                    for line in lines
+                )
                 assert owner_path.read_text(encoding="utf-8") == secret_sentinel
                 assert secret_sentinel not in "\n".join(lines)
             finally:

@@ -367,42 +367,41 @@ def harden_runner_environment_file(lines: list[str]) -> bool:
     identity or path topology is reported without mutation.
     """
     path, configured = runner_environment_file()
+    label = "configured runner environment file" if configured else "default runner environment file"
     try:
         details = inspect_existing_private_file(path, require_private_mode=False)
     except (OSError, SecurePathError) as exc:
         append_issue(
             lines,
-            f"runner permission hardening failed for environment file {path}: "
-            f"{type(exc).__name__}: {exc}",
+            f"runner permission hardening failed for {label}: {type(exc).__name__}",
         )
         return True
 
     if details is None:
         if configured:
-            append_issue(lines, f"runner permission hardening failed: configured environment file is missing: {path}")
+            append_issue(lines, "runner permission hardening failed: configured runner environment file is missing")
             return True
         return False
 
     if stat.S_IMODE(details.st_mode) == 0o600:
         return False
     if DRY_RUN:
-        append_fix(lines, f"DRY-RUN would set runner environment file {path} to mode 0600")
+        append_fix(lines, f"DRY-RUN would set {label} to mode 0600")
         return False
 
     try:
         changed = harden_private_file(path)
         verified = inspect_existing_private_file(path, require_private_mode=True)
         if verified is None or stat.S_IMODE(verified.st_mode) != 0o600:
-            raise PermissionError(f"runner environment file disappeared or remained insecure: {path}")
+            raise PermissionError("runner environment file disappeared or remained insecure")
     except (OSError, PermissionError, SecurePathError) as exc:
         append_issue(
             lines,
-            f"runner permission hardening failed for environment file {path}: "
-            f"{type(exc).__name__}: {exc}",
+            f"runner permission hardening failed for {label}: {type(exc).__name__}",
         )
         return True
     if changed:
-        append_fix(lines, f"set runner environment file {path} to mode 0600")
+        append_fix(lines, f"set {label} to mode 0600")
     return False
 
 
