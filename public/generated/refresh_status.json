@@ -16,9 +16,9 @@
   "dog_total_supply": 792,
   "kind": "refresh_status",
   "last_refresh_result": "success_generated",
-  "last_successful_refresh_time_utc": "2026-08-02T22:29:29Z",
-  "latest_generated_block": 49460202,
-  "latest_generated_block_time_utc": "2026-08-02T22:29:11Z",
+  "last_successful_refresh_time_utc": "2026-08-02T23:31:03Z",
+  "latest_generated_block": 49462050,
+  "latest_generated_block_time_utc": "2026-08-02T23:30:47Z",
   "log_rpc_quorum_providers": "rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb",
   "onchain_chain_id": 8453,
   "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs,event_block_timestamps,dog_token_uri_bindings,woof_token_state,sup_token_state",
@@ -29,7 +29,7 @@
   "rpc_quorum_size": 2,
   "schema_version": 1,
   "site_url": "https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
-  "snapshot_block_hash": "0x314560f9af7d421e201ee76779dfc320bfada90b9854378f525c6164a327f85e",
+  "snapshot_block_hash": "0x45ec462e137ee1d404c58a17f66fda08174b4d7017b12550556a5a9696576399",
   "snapshot_confirmations": 1,
   "trigger": "hourly_refresh"
 }
