@@ -1020,6 +1020,17 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
             assert "<runner-env>" in incident
             assert path_secret_sentinel not in incident
 
+            os.environ["DEGEN_DOGS_ENV_FILE"] = "e"
+            ordinary_alert = "service remains healthy despite an unrelated retry"
+            assert health.sanitize(ordinary_alert) == ordinary_alert
+            assert health.sanitize(f"installer rejected path: {health.REPO_DIR / 'e'}").endswith(
+                "<runner-env>"
+            )
+            assert health.sanitize("installer rejected path: e").endswith("<runner-env>")
+            os.environ["DEGEN_DOGS_ENV_FILE"] = "~missing-runner-user/secret.env"
+            assert health.sanitize(ordinary_alert) == ordinary_alert
+            os.environ["DEGEN_DOGS_ENV_FILE"] = str(configured_env)
+
             # Unsafe parent substitution is rejected before the target is opened.
             configured_env.write_text(secret_sentinel, encoding="utf-8")
             configured_env.chmod(0o600)

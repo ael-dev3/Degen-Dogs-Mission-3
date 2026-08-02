@@ -601,11 +601,25 @@ def sanitize(text: str, limit: int = 1200) -> str:
     cleaned = text or ""
     configured_env = os.environ.get("DEGEN_DOGS_ENV_FILE")
     if configured_env:
-        expanded_env = str(Path(configured_env).expanduser())
-        absolute_env = str(_absolute_runner_path(Path(configured_env).expanduser()))
-        for candidate in sorted({configured_env, expanded_env, absolute_env}, key=len, reverse=True):
-            if candidate:
-                cleaned = cleaned.replace(candidate, "<runner-env>")
+        raw_path = Path(configured_env)
+        try:
+            expanded_path = raw_path.expanduser()
+        except (OSError, RuntimeError):
+            expanded_path = raw_path
+        absolute_path = _absolute_runner_path(expanded_path)
+        absolute_candidates = {
+            str(candidate)
+            for candidate in (raw_path, expanded_path, absolute_path)
+            if candidate.is_absolute() and str(candidate) != os.sep
+        }
+        for candidate in sorted(absolute_candidates, key=len, reverse=True):
+            cleaned = cleaned.replace(candidate, "<runner-env>")
+        if configured_env not in absolute_candidates and configured_env not in {"", ".", "..", os.sep}:
+            cleaned = re.sub(
+                rf"(?<![A-Za-z0-9._~/-]){re.escape(configured_env)}(?![A-Za-z0-9._~/-])",
+                "<runner-env>",
+                cleaned,
+            )
     cleaned = cleaned.replace(str(REPO_DIR), "<repo>").replace(str(HOME), "<home>")
     cleaned = re.sub(r"https?://[^\s\"'<>]+", "<url>", cleaned)
     for pattern in SECRET_PATTERNS:
