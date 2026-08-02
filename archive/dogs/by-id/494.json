@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-09-21",
       "usd_estimate_price_usd": "0.00352258",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#654/789",
+      "display": "#654/792",
       "rank": 654,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 494 dog #494 494 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xa08e4fdc9e17ea35ae285590991c932c86f6412b96c0f8262ade8034eb0bf9e9 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 #654/789 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: bluelasereyes 0xb7bdb5e9fae469c96bddc34793980a4d6d116adbd5944ce002f819490fad0fdd 0x1999c9da359bbec68a1585a12072baa43a2b2cba91ad5773e9b5ea58e70e6664 0x45dac7fd64048cb82e077c90d4f89bcf760566dc8775e388e715a85093be1bc7 chain_logs contract_getters",
+    "search_text": "dog 494 dog #494 494 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xa08e4fdc9e17ea35ae285590991c932c86f6412b96c0f8262ade8034eb0bf9e9 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 #654/792 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: bluelasereyes 0xb7bdb5e9fae469c96bddc34793980a4d6d116adbd5944ce002f819490fad0fdd 0x1999c9da359bbec68a1585a12072baa43a2b2cba91ad5773e9b5ea58e70e6664 0x45dac7fd64048cb82e077c90d4f89bcf760566dc8775e388e715a85093be1bc7 chain_logs contract_getters",
     "settlement": {
       "block_number": 26267958,
       "block_time_utc": "2025-09-21T23:42:53Z",
@@ -83,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.2%)",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -98,12 +99,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

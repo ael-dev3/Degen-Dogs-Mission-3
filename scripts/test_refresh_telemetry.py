@@ -45,6 +45,17 @@ def write_fixture(root: Path) -> None:
     metrics = {
         "latest_block": "46822740",
         "latest_block_time_utc": "2026-06-02 21:13:47",
+        "onchain_verification_status": "current_snapshot_cross_provider_verified",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_chain_id": "8453",
+        "snapshot_block_hash": "0x" + "a" * 64,
+        "snapshot_confirmations": "1",
+        "rpc_quorum_size": "2",
+        "rpc_quorum_agreement": "2/2",
+        "rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "auction_house_code_sha256": "b" * 64,
+        "dog_nft_code_sha256": "c" * 64,
         "current_auction_token_id": "732",
         "current_bid_eth": "0.01",
         "current_bidder": "@thec1",
@@ -158,6 +169,46 @@ def test_refresh_outcome_rows_cover_no_diff_failure_and_live_timeout() -> None:
         assert "last_pushed_commit" not in status
         assert "last_push_duration_seconds" not in status
         assert telemetry.validate_refresh_status(root=root) == status
+
+
+def test_verify_live_requires_full_github_pages_status_parity() -> None:
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        expected = telemetry.write_refresh_status(env, root=root, prefer_current_env=True)
+        stale = dict(expected)
+        stale["latest_generated_block"] = int(expected["latest_generated_block"]) - 1
+
+        calls = iter([0.0, 0.0, 2.0])
+        telemetry.time.monotonic = lambda: next(calls)
+        telemetry.time.sleep = lambda _seconds: None
+        telemetry.fetch_json = lambda url: expected if "raw.githubusercontent.com" in url else stale
+        raw_only = telemetry.verify_live(
+            env,
+            root=root,
+            timeout_seconds=1,
+            interval_seconds=1,
+            base_url="https://pages.example/project/",
+        )
+        assert raw_only["live_verify_result"] == "timeout"
+        assert raw_only["raw_main_verified"] is True
+        assert raw_only["live_verify_source"] is None
+        assert "latest_generated_block" in raw_only["error"]
+
+        telemetry.time.monotonic = lambda: 0.0
+        telemetry.fetch_json = lambda _url: expected
+        both = telemetry.verify_live(
+            env,
+            root=root,
+            timeout_seconds=1,
+            interval_seconds=1,
+            base_url="https://pages.example/project/",
+        )
+        assert both["live_verify_result"] == "verified"
+        assert both["raw_main_verified"] is True
+        assert both["live_verify_source"] == "github_pages"
 
 
 def test_refresh_status_validation_rejects_stale_required_fields() -> None:

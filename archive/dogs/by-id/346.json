@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-04-13",
       "usd_estimate_price_usd": "0.0024851",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#42/789",
+      "display": "#42/792",
       "rank": 42,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 346 dog #346 346 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7776.999999999999737856 degen 0x49f1bbc0f17561dc87320d8310afc70eccc4837363d6e01333f375c443482ec5 0x6cd7b85dce334176bd346ce4deae3f7d7cdbf186827c4a4592cba7124f394d63 #42/789 background: none; body: black; neck: goldnecklace; mouth: coin; ears: none; head: baseballcap; eyes: eyepatch 0x6f6409400934783f3ddf8ae90a00cb469bae8aa8f4f3ab55d3f775ef49a66896 0x57bc71a8b41af73f236671ab2c6acd9429d6d28f623c0a6ed3deaa6623c4cc1c 0x09c2f97deb8f25fab4dd9ebe9b583b6ce34d6885c2905a45c924898b0a12b1c6 chain_logs contract_getters",
+    "search_text": "dog 346 dog #346 346 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7776.999999999999737856 degen 0x49f1bbc0f17561dc87320d8310afc70eccc4837363d6e01333f375c443482ec5 0x6cd7b85dce334176bd346ce4deae3f7d7cdbf186827c4a4592cba7124f394d63 #42/792 background: none; body: black; neck: goldnecklace; mouth: coin; ears: none; head: baseballcap; eyes: eyepatch 0x6f6409400934783f3ddf8ae90a00cb469bae8aa8f4f3ab55d3f775ef49a66896 0x57bc71a8b41af73f236671ab2c6acd9429d6d28f623c0a6ed3deaa6623c4cc1c 0x09c2f97deb8f25fab4dd9ebe9b583b6ce34d6885c2905a45c924898b0a12b1c6 chain_logs contract_getters",
     "settlement": {
       "block_number": 25714049,
       "block_time_utc": "2025-04-13T07:25:02Z",
@@ -83,12 +84,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -98,17 +99,17 @@
         "value": "Coin"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

@@ -7,7 +7,7 @@
       "amount_usd_at_event": "24.43202508",
       "eth_usd_price_at_event": "2019.175626778262",
       "eth_usd_price_date_utc": "2026-05-30",
-      "native": "0.01210",
+      "native": "0.0121",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "12100000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 46645283,
       "block_time_utc": "2026-05-29T18:38:33Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f",
+      "tx_url": "https://basescan.org/tx/0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f"
     },
     "auction_house": null,
     "bid_stats": {
@@ -45,37 +45,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f",
       "dog_page": "https://degendogs.club/#dog728",
       "explorer": "https://basescan.org/address/0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728",
       "repo_archive": "archive/dogs/by-id/728.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0"
     },
     "mission": 3,
     "rarity": {
-      "display": "#759/789",
-      "rank": 759,
-      "total": 789
+      "display": "#762/792",
+      "rank": 762,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.01210 eth 12100000000000000 24.43202508 $24.43 2026-05-30t18:40:09z #759/789 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.4%) background none body: grey (11.5%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: vrgoggles (10.3%) eyes vrgoggles generated_auction_feed base_logs dashboard_builder historical_dog_search_backfill 3 base 8453 728 dog #728 https://api.degendogs.club/images/728.png https://degendogs.club/#dog728 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/728 settled @vaibhavmule https://farcaster.xyz/vaibhavmule 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad 0.01210 eth ($24) 3 3 2026-05-29 18:38:33 2026-05-30 18:40:09 #759/789 background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: vrgoggles background: none (90.4%); body: grey (11.5%); neck: redcollar (30.9%); mouth: none (68.9%); ears: earbuds (32.1%); head: none (20.4%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43202508 $24.43 2026-05-30t18:40:09z 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f 0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0 #762/792 generated auction feed 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 background: none (90.4%) background none body: grey (11.6%) body grey neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.2%) eyes vrgoggles generated_auction_feed base_logs dashboard_builder historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 46688531,
       "block_time_utc": "2026-05-30T18:40:09Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0",
+      "tx_url": "https://basescan.org/tx/0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "generated_auction_feed",
         "base_logs",
         "dashboard_builder",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -86,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -101,17 +103,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: VRGoggles (10.3%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

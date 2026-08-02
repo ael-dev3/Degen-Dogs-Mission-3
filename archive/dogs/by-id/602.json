@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-01-22",
       "usd_estimate_price_usd": "2978.9845331172573",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -56,12 +57,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#752/789",
-      "rank": 752,
-      "total": 789
+      "display": "#756/792",
+      "rank": 756,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 602 dog #602 602 mission 3 mission 3 base settled 0xc5831df8214b36e27c0d5fa45eed8d160610dc90 @ohosttcod ohosttcod 0.18 eth 0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f 0xc134a46ad7bceaabd381287b09e9a3270063dfdf57548536fa6d856fbbb93ed3 #752/789 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: none; eyes: masksnorkel 0x03c36be40375567736f50832cb7665a0b20a920472eea4d80163fa9bf4f79155 0x9195a65f7ef241d78f2240e9a41e0b0fe8a01dc7f1c74818436243eaffb0eee5 0xcd2898d7d907df66f26df41abc4a99b22241a5da22d185e139ae03ec24874eaa 0x1144a871175a73eaf37f678a54db6dcaa99afced69b85806295f04ccaa150900 0xabc558cb29503e997cc337c8126554f7f3df73d1ee84131ce65e36f6e507b773 0xbb03c31878706c44d60dc0280fb1b9dbaf146fe2061d6c27ea4b8c0082794f89 base_logs archive_indexer",
+    "search_text": "dog 602 dog #602 602 mission 3 mission 3 base settled 0xc5831df8214b36e27c0d5fa45eed8d160610dc90 @ohosttcod ohosttcod 0.18 eth 180000000000000000 536.22 $536.22 2026-01-22t01:52:07z 0xa5c0d2145366c6329d5310c39498350bd72d3ddfcb2dd53f4b3da7d56d6f943f 0xc134a46ad7bceaabd381287b09e9a3270063dfdf57548536fa6d856fbbb93ed3 #756/792 generated auction feed 0x03c36be40375567736f50832cb7665a0b20a920472eea4d80163fa9bf4f79155 0x9195a65f7ef241d78f2240e9a41e0b0fe8a01dc7f1c74818436243eaffb0eee5 0xcd2898d7d907df66f26df41abc4a99b22241a5da22d185e139ae03ec24874eaa 0x1144a871175a73eaf37f678a54db6dcaa99afced69b85806295f04ccaa150900 0xabc558cb29503e997cc337c8126554f7f3df73d1ee84131ce65e36f6e507b773 0xbb03c31878706c44d60dc0280fb1b9dbaf146fe2061d6c27ea4b8c0082794f89 background: none (90.4%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: none (20.3%) head none eyes: masksnorkel (9.7%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41128690,
       "block_time_utc": "2026-01-22T01:52:07Z",
@@ -72,10 +73,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -86,7 +89,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -106,12 +109,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

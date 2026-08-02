@@ -12,8 +12,11 @@ import csv
 import fcntl
 import json
 import os
+import queue
+import random
 import re
 import subprocess
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -22,15 +25,34 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, NamedTuple
+from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parents[1]
 CHAIN_ID = 8453
 DEFAULT_RPC_URLS = [
     "https://base-rpc.publicnode.com",
     "https://mainnet.base.org",
+    "https://base-mainnet.g.alchemy.com/public",
     "https://developer-access-mainnet.base.org",
 ]
-DEFAULT_LOG_RPC_URLS = ["https://mainnet.base.org"]
+DEFAULT_LOG_RPC_URLS = DEFAULT_RPC_URLS
+RPC_QUORUM_DEADLINE_SECONDS = max(
+    5.0,
+    min(float(os.environ.get("BASE_RPC_QUORUM_DEADLINE_SECONDS", "35")), 120.0),
+)
+RPC_HEAD_PROBE_DEADLINE_SECONDS = max(
+    2.0,
+    min(float(os.environ.get("BASE_RPC_HEAD_PROBE_DEADLINE_SECONDS", "12")), 60.0),
+)
+RPC_HEAD_PROBE_GRACE_SECONDS = max(
+    0.0,
+    min(float(os.environ.get("BASE_RPC_HEAD_PROBE_GRACE_SECONDS", "0.35")), 3.0),
+)
+RPC_SLOW_COOLDOWN_SECONDS = max(
+    1.0,
+    min(float(os.environ.get("BASE_RPC_SLOW_COOLDOWN_SECONDS", "60")), 600.0),
+)
+RPC_SLOW_UNTIL: dict[tuple[str, str], float] = {}
 
 MISSION3_CONTRACTS_CONFIG = ROOT / "archive" / "mission3" / "config" / "mission3_contracts.verified.json"
 MISSION3_EVENTS_CONFIG = ROOT / "archive" / "mission3" / "config" / "mission3_events.verified.json"
@@ -112,6 +134,8 @@ class Config(NamedTuple):
     auto_push: bool
     require_clean_tree: bool
     timeout_seconds: int
+    quorum_size: int
+    confirmations: int
 
 
 class RefreshDecision(NamedTuple):
@@ -203,6 +227,76 @@ def parse_url_list(env: dict[str, str], name: str, default_urls: list[str]) -> l
     return urls or list(default_urls)
 
 
+def rpc_provider_key(url: str) -> str:
+    host = (urllib.parse.urlsplit(url).hostname or url).lower().strip(".")
+    if any(host == suffix or host.endswith(f".{suffix}") for suffix in ("quicknode.pro", "quiknode.pro")):
+        return "quicknode"
+    if any(host == suffix or host.endswith(f".{suffix}") for suffix in ("alchemy.com", "alchemyapi.io", "blastapi.io")):
+        return "alchemy"
+    for suffix in (
+        "base.org",
+        "publicnode.com",
+        "ankr.com",
+        "drpc.org",
+        "infura.io",
+        "blastapi.io",
+    ):
+        if host == suffix or host.endswith(f".{suffix}"):
+            return suffix
+    return host
+
+
+def independent_rpc_urls(urls: list[str]) -> list[str]:
+    unique: list[str] = []
+    operators: set[str] = set()
+    for raw in urls:
+        url = str(raw or "").strip()
+        if not url:
+            continue
+        operator = rpc_provider_key(url)
+        if operator in operators:
+            continue
+        operators.add(operator)
+        unique.append(url)
+    return unique
+
+
+def configured_rpc_urls() -> list[str]:
+    candidates: list[str] = []
+    if os.environ.get("BASE_RPC_URL"):
+        candidates.append(os.environ["BASE_RPC_URL"].strip())
+    for name in ("BASE_RPC_URLS", "BASE_LOG_RPC_URLS"):
+        candidates.extend(item.strip() for item in os.environ.get(name, "").split(",") if item.strip())
+    candidates.extend(DEFAULT_RPC_URLS)
+    candidates.extend(DEFAULT_LOG_RPC_URLS)
+    return candidates
+
+
+def same_operator_rpc_urls(primary_url: str) -> list[str]:
+    operator = rpc_provider_key(primary_url)
+    candidates = [primary_url, *configured_rpc_urls()]
+    unique: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        if not candidate or candidate in seen or rpc_provider_key(candidate) != operator:
+            continue
+        seen.add(candidate)
+        unique.append(candidate)
+    return unique
+
+
+def responsive_rpc_urls(urls: list[str], required: int, scope: str) -> list[str]:
+    now = time.monotonic()
+    responsive = [url for url in urls if RPC_SLOW_UNTIL.get((scope, url), 0.0) <= now]
+    return responsive if len(responsive) >= required else list(urls)
+
+
+def mark_rpc_pending_slow(urls: list[str], scope: str) -> None:
+    until = time.monotonic() + RPC_SLOW_COOLDOWN_SECONDS
+    for url in urls:
+        RPC_SLOW_UNTIL[(scope, url)] = until
+
+
 def default_refresh_lock_path(env: dict[str, str]) -> Path:
     lock_dir_raw = env.get("DEGEN_DOGS_LOCK_DIR", "").strip()
     if lock_dir_raw:
@@ -236,12 +330,14 @@ def optional_path_from_env(env: dict[str, str], name: str, default: Path | None)
 
 def config_from_env(env: dict[str, str] | None = None) -> Config:
     env = dict(os.environ if env is None else env)
+    rpc_candidates: list[str] = []
     if env.get("BASE_RPC_URL"):
-        rpc_urls = [env["BASE_RPC_URL"].strip()]
-        log_rpc_urls = [env["BASE_RPC_URL"].strip()]
-    else:
-        rpc_urls = parse_url_list(env, "BASE_RPC_URLS", DEFAULT_RPC_URLS)
-        log_rpc_urls = parse_url_list(env, "BASE_LOG_RPC_URLS", DEFAULT_LOG_RPC_URLS)
+        rpc_candidates.append(env["BASE_RPC_URL"].strip())
+    rpc_candidates.extend(parse_url_list(env, "BASE_RPC_URLS", DEFAULT_RPC_URLS))
+    rpc_candidates.extend(DEFAULT_RPC_URLS)
+    rpc_urls = independent_rpc_urls(rpc_candidates)
+    log_candidates = parse_url_list(env, "BASE_LOG_RPC_URLS", rpc_urls or DEFAULT_LOG_RPC_URLS)
+    log_rpc_urls = independent_rpc_urls([*log_candidates, *rpc_urls])
 
     auto_push = env_bool(env, "MISSION3_WATCHER_AUTO_PUSH", False)
     refresh_command = env.get("MISSION3_REFRESH_COMMAND", "").strip()
@@ -263,17 +359,19 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         lock_path=lock_path,
         log_path=log_path,
         refresh_lock_path=refresh_lock_path,
-        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 120, minimum=30),
-        cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 180, minimum=0),
-        bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 60, minimum=0),
+        interval_seconds=env_int(env, "MISSION3_WATCHER_INTERVAL_SECONDS", 30, minimum=15),
+        cooldown_seconds=env_int(env, "MISSION3_WATCHER_COOLDOWN_SECONDS", 30, minimum=0),
+        bid_cooldown_seconds=env_int(env, "MISSION3_WATCHER_BID_COOLDOWN_SECONDS", 30, minimum=0),
         force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 0, minimum=0),
-        lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 2000, minimum=1, maximum=10000),
+        lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 100, minimum=1, maximum=10000),
         safety_overlap_blocks=env_int_any(env, ["MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS", "MISSION3_WATCHER_LOG_SAFETY_OVERLAP_BLOCKS"], 50, minimum=0, maximum=500),
-        log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 2000, minimum=1, maximum=10000),
+        log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 50, minimum=1, maximum=10000),
         refresh_command=refresh_command,
         auto_push=auto_push,
         require_clean_tree=env_bool(env, "MISSION3_WATCHER_REQUIRE_CLEAN_TREE", auto_push),
         timeout_seconds=env_int(env, "MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", 1800, minimum=60),
+        quorum_size=env_int(env, "BASE_RPC_QUORUM_SIZE", 2, minimum=2, maximum=3),
+        confirmations=env_int(env, "BASE_SNAPSHOT_CONFIRMATIONS", 1, minimum=0, maximum=64),
     )
 
 
@@ -327,7 +425,9 @@ def log(config: Config | None, message: str) -> None:
     if config and config.log_path:
         config.log_path.parent.mkdir(parents=True, exist_ok=True)
         with config.log_path.open("a", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
             handle.write(line + "\n")
+            handle.flush()
 
 
 def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
@@ -362,6 +462,216 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{redact_url(url)}: {exc}")
     raise RuntimeError("; ".join(errors))
+
+
+def rpc_call_with_retry(method: str, params: list[Any], *, url: str, timeout: int = 30) -> tuple[Any, str]:
+    operator_urls = same_operator_rpc_urls(url)
+    attempts = max(3, len(operator_urls))
+    for attempt in range(attempts):
+        candidate = operator_urls[attempt % len(operator_urls)]
+        try:
+            return rpc_call(method, params, urls=[candidate], timeout=timeout)
+        except Exception as exc:  # noqa: BLE001
+            message = str(exc)
+            permanent = any(code in message for code in ("HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "-32600", "-32601", "-32602"))
+            if permanent and attempt + 1 >= len(operator_urls):
+                raise
+            if attempt == attempts - 1:
+                raise
+            time.sleep(random.uniform(0, min(2.0, 0.25 * (2**attempt))))
+    raise RuntimeError(f"unreachable retry state for {method}")
+
+
+def canonical_rpc_result(method: str, value: Any) -> str:
+    if method == "eth_getLogs" and isinstance(value, list):
+        normalized = sorted(
+            (
+                {
+                    "address": str(item.get("address") or "").lower(),
+                    "blockHash": str(item.get("blockHash") or "").lower(),
+                    "blockNumber": str(item.get("blockNumber") or "").lower(),
+                    "data": str(item.get("data") or "").lower(),
+                    "logIndex": str(item.get("logIndex") or "").lower(),
+                    "removed": bool(item.get("removed", False)),
+                    "topics": [str(topic).lower() for topic in item.get("topics") or []],
+                    "transactionHash": str(item.get("transactionHash") or "").lower(),
+                }
+                for item in value
+                if isinstance(item, dict)
+            ),
+            key=lambda item: (
+                item["blockHash"],
+                item["transactionHash"],
+                int(item["logIndex"] or "0x0", 16),
+            ),
+        )
+        return json.dumps(normalized, sort_keys=True, separators=(",", ":"))
+    if isinstance(value, str):
+        return value.lower()
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def rpc_quorum_call(
+    method: str,
+    params: list[Any],
+    *,
+    urls: list[str],
+    required: int,
+    timeout: int = 30,
+) -> tuple[Any, list[str]]:
+    urls = responsive_rpc_urls(urls, required, method)
+    if len(urls) < required:
+        raise RuntimeError(f"{method} requires {required} independent RPC providers; configured={len(urls)}")
+    grouped: dict[str, list[tuple[str, Any]]] = defaultdict(list)
+    errors: list[str] = []
+    responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
+
+    def worker(index: int, url: str) -> None:
+        try:
+            value, _used = rpc_call_with_retry(method, params, url=url, timeout=timeout)
+            responses.put((index, url, value, None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(urls)))
+    for index, url in enumerate(urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"rpc-quorum-{method}-{index}",
+            daemon=True,
+        ).start()
+
+    deadline = time.monotonic() + RPC_QUORUM_DEADLINE_SECONDS
+    while pending_indexes:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        try:
+            index, url, value, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is None:
+            grouped[canonical_rpc_result(method, value)].append((url, value))
+        else:
+            errors.append(f"{redact_url(url)}: {error}")
+        pending = len(pending_indexes)
+        ordered = sorted(grouped.values(), key=len, reverse=True)
+        winner = ordered[0] if ordered else []
+        runner_up_votes = len(ordered[1]) if len(ordered) > 1 else 0
+        if len(winner) >= required and len(winner) > runner_up_votes + pending:
+            mark_rpc_pending_slow([urls[item] for item in pending_indexes], method)
+            return winner[0][1], [winner_url for winner_url, _value in winner]
+
+    if pending_indexes:
+        pending_urls = [urls[item] for item in pending_indexes]
+        mark_rpc_pending_slow(pending_urls, method)
+        errors.append(
+            "deadline exceeded: "
+            + ", ".join(redact_url(url) for url in pending_urls[:3])
+        )
+
+    votes = sorted((len(group) for group in grouped.values()), reverse=True)
+    error_detail = f" errors={'; '.join(errors[:3])}" if errors else ""
+    raise RuntimeError(f"{method} quorum disagreement required={required} votes={votes}{error_detail}")
+
+
+def collect_rpc_probes(
+    urls: list[str],
+    *,
+    required: int,
+    probe: Any,
+    label: str,
+) -> tuple[list[Any], list[str]]:
+    scope = f"probe:{label}"
+    active_urls = responsive_rpc_urls(urls, required, scope)
+    responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
+
+    def worker(index: int, url: str) -> None:
+        try:
+            responses.put((index, url, probe(url), None))
+        except Exception as exc:  # noqa: BLE001
+            responses.put((index, url, None, exc))
+
+    pending_indexes = set(range(len(active_urls)))
+    results: list[Any] = []
+    errors: list[str] = []
+    for index, url in enumerate(active_urls):
+        threading.Thread(
+            target=worker,
+            args=(index, url),
+            name=f"rpc-probe-{label}-{index}",
+            daemon=True,
+        ).start()
+
+    hard_deadline = time.monotonic() + RPC_HEAD_PROBE_DEADLINE_SECONDS
+    quorum_deadline: float | None = None
+    while pending_indexes:
+        now = time.monotonic()
+        if len(results) >= required and quorum_deadline is None:
+            quorum_deadline = now + RPC_HEAD_PROBE_GRACE_SECONDS
+        deadline = min(hard_deadline, quorum_deadline) if quorum_deadline is not None else hard_deadline
+        remaining = deadline - now
+        if remaining <= 0:
+            break
+        try:
+            index, url, value, error = responses.get(timeout=remaining)
+        except queue.Empty:
+            break
+        if index not in pending_indexes:
+            continue
+        pending_indexes.remove(index)
+        if error is None:
+            results.append(value)
+        else:
+            errors.append(f"{redact_url(url)}: {error}")
+
+    if pending_indexes:
+        pending_urls = [active_urls[item] for item in pending_indexes]
+        mark_rpc_pending_slow(pending_urls, scope)
+        errors.append(
+            f"{label} probe deadline exceeded: "
+            + ", ".join(redact_url(url) for url in pending_urls[:3])
+        )
+    return results, errors
+
+
+def verified_snapshot_head(config: Config) -> tuple[int, dict[str, Any], list[str]]:
+    def endpoint_head(url: str) -> tuple[str, int]:
+        chain_hex, _ = rpc_call_with_retry("eth_chainId", [], url=url, timeout=20)
+        chain_id = int(str(chain_hex), 16)
+        if chain_id != CHAIN_ID:
+            raise RuntimeError(f"wrong chain id {chain_id}; expected {CHAIN_ID}")
+        block_hex, _ = rpc_call_with_retry("eth_blockNumber", [], url=url, timeout=20)
+        return url, int(str(block_hex), 16)
+
+    heads, errors = collect_rpc_probes(
+        config.rpc_urls,
+        required=config.quorum_size,
+        probe=endpoint_head,
+        label="head",
+    )
+    if len(heads) < config.quorum_size:
+        raise RuntimeError(
+            f"Base RPC head quorum unavailable healthy={len(heads)} required={config.quorum_size}; "
+            + "; ".join(errors[:3])
+        )
+    quorum_head = sorted((head for _url, head in heads), reverse=True)[config.quorum_size - 1]
+    block_number = max(0, quorum_head - config.confirmations)
+    eligible = [url for url, head in heads if head >= block_number]
+    block, agreeing_urls = rpc_quorum_call(
+        "eth_getBlockByNumber",
+        [hex(block_number), False],
+        urls=eligible,
+        required=config.quorum_size,
+        timeout=30,
+    )
+    if not isinstance(block, dict) or not block.get("hash"):
+        raise RuntimeError(f"verified Base block {block_number} missing hash")
+    return block_number, block, agreeing_urls
 
 
 def word(data: str, idx: int) -> int:
@@ -429,15 +739,16 @@ def fetch_logs(config: Config, from_block: int, to_block: int) -> list[dict[str,
     start = from_block
     while start <= to_block:
         end = min(to_block, start + config.log_chunk - 1)
-        result, _url = rpc_call(
+        result, _urls = rpc_quorum_call(
             "eth_getLogs",
             [log_filter(AUCTION_HOUSE, WATCHED_TOPICS, start, end)],
             urls=config.log_rpc_urls,
+            required=config.quorum_size,
             timeout=45,
         )
         if not isinstance(result, list):
             raise RuntimeError(f"unexpected eth_getLogs response: {result!r}")
-        logs.extend(result)
+        logs.extend(item for item in result if isinstance(item, dict) and not bool(item.get("removed", False)))
         start = end + 1
     logs.sort(key=lambda item: (int(str(item.get("blockNumber", "0x0")), 16), int(str(item.get("logIndex", "0x0")), 16)))
     return logs
@@ -530,12 +841,21 @@ def latest_log_for_topic(logs: list[dict[str, Any]], topic: str) -> dict[str, An
 
 
 def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
-    block_hex, block_url = rpc_call("eth_blockNumber", [], urls=config.rpc_urls, timeout=30)
-    latest_block = int(block_hex, 16)
-    raw, call_url = rpc_call(
+    latest_block, block_data, agreeing_urls = verified_snapshot_head(config)
+    code, code_urls = rpc_quorum_call(
+        "eth_getCode",
+        [AUCTION_HOUSE, hex(latest_block)],
+        urls=agreeing_urls,
+        required=config.quorum_size,
+        timeout=30,
+    )
+    if not isinstance(code, str) or code in {"", "0x", "0x0"}:
+        raise RuntimeError(f"auction house has no code at verified Base block {latest_block}")
+    raw, call_urls = rpc_quorum_call(
         "eth_call",
         [{"to": AUCTION_HOUSE, "data": SELECTOR_AUCTION}, hex(latest_block)],
-        urls=config.rpc_urls,
+        urls=[url for url in agreeing_urls if url in code_urls],
+        required=config.quorum_size,
         timeout=30,
     )
     auction = decode_auction_result(str(raw), latest_block=latest_block)
@@ -547,7 +867,52 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         lookback_blocks=config.lookback_blocks,
         safety_overlap_blocks=config.safety_overlap_blocks,
     )
-    logs = fetch_logs(config, from_block, latest_block)
+    expected_block_hash = str(block_data.get("hash") or "").lower()
+
+    def verify_log_url(url: str) -> str:
+        chain_hex, _ = rpc_call_with_retry("eth_chainId", [], url=url, timeout=15)
+        if int(str(chain_hex), 16) != CHAIN_ID:
+            raise RuntimeError(f"wrong chain id from {redact_url(url)}")
+        candidate, _ = rpc_call_with_retry(
+            "eth_getBlockByNumber",
+            [hex(latest_block), False],
+            url=url,
+            timeout=20,
+        )
+        observed_hash = str((candidate or {}).get("hash") or "").lower() if isinstance(candidate, dict) else ""
+        if observed_hash != expected_block_hash:
+            raise RuntimeError(
+                f"snapshot hash mismatch expected={expected_block_hash} observed={observed_hash or 'missing'}"
+            )
+        sample_from = max(
+            0,
+            latest_block - max(config.lookback_blocks, config.safety_overlap_blocks, config.log_chunk) + 1,
+        )
+        sample, _ = rpc_call_with_retry(
+            "eth_getLogs",
+            [log_filter(AUCTION_HOUSE, WATCHED_TOPICS, sample_from, latest_block)],
+            url=url,
+            timeout=30,
+        )
+        if not isinstance(sample, list):
+            raise RuntimeError("eth_getLogs capability check did not return a list")
+        return url
+
+    log_candidates = independent_rpc_urls([*config.log_rpc_urls, *call_urls])
+    verified_log_urls, log_errors = collect_rpc_probes(
+        log_candidates,
+        required=config.quorum_size,
+        probe=verify_log_url,
+        label="log-capability",
+    )
+    if len(verified_log_urls) < config.quorum_size:
+        raise RuntimeError(
+            f"Base RPC log quorum unavailable healthy={len(verified_log_urls)} required={config.quorum_size}; "
+            + "; ".join(log_errors[:3])
+        )
+    logs = fetch_logs(config._replace(log_rpc_urls=verified_log_urls), from_block, latest_block)
+    providers = sorted({rpc_provider_key(url) for url in call_urls})
+    log_providers = sorted({rpc_provider_key(url) for url in verified_log_urls})
     snapshot = {
         **auction,
         "checked_from_block": from_block,
@@ -557,8 +922,13 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         "bid_log": latest_log_for_topic(logs, TOPIC_AUCTION_BID),
         "extended_log": latest_log_for_topic(logs, TOPIC_AUCTION_EXTENDED),
         "settled_log": latest_log_for_topic(logs, TOPIC_AUCTION_SETTLED),
-        "rpc_url": redact_url(call_url),
-        "block_rpc_url": redact_url(block_url),
+        "snapshot_block_hash": str(block_data.get("hash") or "").lower(),
+        "onchain_verification_status": "current_snapshot_cross_provider_verified",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,recent_event_logs",
+        "rpc_quorum_size": config.quorum_size,
+        "rpc_quorum_providers": providers,
+        "log_rpc_quorum_providers": log_providers,
+        "rpc_urls": [redact_url(url) for url in call_urls],
     }
     return snapshot
 
@@ -858,6 +1228,12 @@ def state_from_snapshot(
             "updated_at_utc": now_utc,
             "chain_id": CHAIN_ID,
             "auction_house": AUCTION_HOUSE,
+            "onchain_verification_status": snapshot.get("onchain_verification_status", ""),
+            "onchain_verification_scope": snapshot.get("onchain_verification_scope", ""),
+            "last_verified_block_hash": snapshot.get("snapshot_block_hash", ""),
+            "last_rpc_quorum_size": int(snapshot.get("rpc_quorum_size") or 0),
+            "last_rpc_quorum_providers": snapshot.get("rpc_quorum_providers") or [],
+            "last_log_rpc_quorum_providers": snapshot.get("log_rpc_quorum_providers") or [],
             "last_checked_at_utc": now_utc,
             "last_checked_block": checked_to_block,
             "last_checked_from_block": int(snapshot.get("checked_from_block") or 0),
@@ -879,7 +1255,7 @@ def state_from_snapshot(
             "last_observed_bid_tx": bid_log.get("tx_hash", "") or state.get("last_observed_bid_tx", ""),
             "last_observed_bid_log_index": int(bid_log.get("log_index") or state.get("last_observed_bid_log_index") or 0),
             "last_observed_bid_token_id": int(bid_log.get("token_id") or snapshot.get("token_id") or state.get("last_observed_bid_token_id") or 0),
-            "last_rpc_url": snapshot.get("rpc_url", ""),
+            "last_rpc_url": ",".join(snapshot.get("rpc_urls") or []),
             "last_log_count": int(snapshot.get("checked_log_count") or 0),
             "last_error": None,
         }

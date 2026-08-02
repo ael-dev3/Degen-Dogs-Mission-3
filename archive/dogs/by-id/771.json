@@ -7,7 +7,7 @@
       "amount_usd_at_event": "19.51050483",
       "eth_usd_price_at_event": "1773.6822568982184",
       "eth_usd_price_date_utc": "2026-07-13",
-      "native": "0.01100",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48523506,
       "block_time_utc": "2026-07-12T06:05:59Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c",
+      "tx_url": "https://basescan.org/tx/0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c"
     },
     "auction_house": null,
     "bid_stats": {
@@ -46,37 +46,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/771",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c",
       "dog_page": "https://degendogs.club/#dog771",
       "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/771",
       "repo_archive": "archive/dogs/by-id/771.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047"
     },
     "mission": 3,
     "rarity": {
-      "display": "#344/789",
+      "display": "#344/792",
       "rank": 344,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.01100 eth 11000000000000000 19.51050483 $19.51 2026-07-13t08:03:57z #344/789 generated auction feed 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd background: none (90.4%) background none body: black (11.2%) body black neck: redcollar (30.9%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: none (25.6%) ears none head: redmohawk (7.2%) head redmohawk eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 771 dog #771 https://api.degendogs.club/images/771.png https://degendogs.club/#dog771 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/771 settled @cryptomill https://farcaster.xyz/cryptomill 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 0.01100 eth ($20) 4 3 2026-07-12 06:05:59 2026-07-13 08:03:57 #344/789 background: none; body: black; neck: redcollar; mouth: tongue; ears: none; head: redmohawk; eyes: glasses background: none (90.4%); body: black (11.2%); neck: redcollar (30.9%); mouth: tongue (9.9%); ears: none (25.6%); head: redmohawk (7.2%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.51050483 $19.51 2026-07-13t08:03:57z 0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 #344/792 generated auction feed 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd background: none (90.4%) background none body: black (11.1%) body black neck: redcollar (30.9%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: none (25.8%) ears none head: redmohawk (7.2%) head redmohawk eyes: glasses (12.6%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48570245,
       "block_time_utc": "2026-07-13T08:03:57Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047",
+      "tx_url": "https://basescan.org/tx/0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -87,7 +89,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -97,12 +99,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -112,7 +114,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

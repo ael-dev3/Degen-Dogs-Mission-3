@@ -7,7 +7,7 @@
       "amount_usd_at_event": "79.69925378",
       "eth_usd_price_at_event": "1811.346676900944",
       "eth_usd_price_date_utc": "2026-06-04",
-      "native": "0.04400",
+      "native": "0.044",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "44000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 46863181,
       "block_time_utc": "2026-06-03T19:41:49Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4",
+      "tx_url": "https://basescan.org/tx/0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4"
     },
     "auction_house": null,
     "bid_stats": {
@@ -48,37 +48,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4",
       "dog_page": "https://degendogs.club/#dog733",
       "explorer": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733",
       "repo_archive": "archive/dogs/by-id/733.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f"
     },
     "mission": 3,
     "rarity": {
-      "display": "#586/789",
-      "rank": 586,
-      "total": 789
+      "display": "#585/792",
+      "rank": 585,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.04400 eth 44000000000000000 79.69925378 $79.70 2026-06-04t19:59:03z #586/789 generated auction feed 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.4%) background none body: blue (9.4%) body blue neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: stripedbeanie (8.4%) head stripedbeanie eyes: vrgoggles (10.3%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 733 dog #733 https://api.degendogs.club/images/733.png https://degendogs.club/#dog733 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/733 settled @pare https://farcaster.xyz/pare 0xd1ab146981d50adcfe18433500e852af396ea7b1 0.04400 eth ($80) 6 6 2026-06-03 19:41:49 2026-06-04 19:59:03 #586/789 background: none; body: blue; neck: none; mouth: none; ears: loopearring; head: stripedbeanie; eyes: vrgoggles background: none (90.4%); body: blue (9.4%); neck: none (39.8%); mouth: none (68.9%); ears: loopearring (27.1%); head: stripedbeanie (8.4%); eyes: vrgoggles (10.3%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.044 eth 44000000000000000 79.69925378 $79.70 2026-06-04t19:59:03z 0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4 0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f #585/792 generated auction feed 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 background: none (90.4%) background none body: blue (9.3%) body blue neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: loopearring (27.1%) ears loopearring head: stripedbeanie (8.3%) head stripedbeanie eyes: vrgoggles (10.2%) eyes vrgoggles base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 46906898,
       "block_time_utc": "2026-06-04T19:59:03Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f",
+      "tx_url": "https://basescan.org/tx/0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -89,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.4%)",
+        "display": "Body: Blue (9.3%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -109,12 +111,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles (10.3%)",
+        "display": "Eyes: VRGoggles (10.2%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

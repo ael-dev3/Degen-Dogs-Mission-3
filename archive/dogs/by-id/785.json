@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 49159229,
       "block_time_utc": "2026-07-26T23:16:45Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f",
+      "tx_url": "https://basescan.org/tx/0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f"
     },
     "auction_house": null,
     "bid_stats": {
@@ -44,36 +44,38 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/785",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f",
       "dog_page": "https://degendogs.club/#dog785",
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/785",
       "repo_archive": "archive/dogs/by-id/785.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c"
     },
     "mission": 3,
     "rarity": {
-      "display": "#273/789",
-      "rank": 273,
-      "total": 789
+      "display": "#272/792",
+      "rank": 272,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 785 dog #785 785 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 17.01 $17.01 2026-07-28t04:48:37z #273/789 generated auction feed 0x7acf46676903df7ef7879b5f9befa6a5b8c92553c55877dfca1a24b279553d61 0x4a133d5414c57b715b4cba05c199e343c89d3d3c5b30acd208e306e213ab73da background: none (90.4%) background none body: grey (11.5%) body grey neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: none (25.6%) ears none head: crazyhair (6.6%) head crazyhair eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 785 dog #785 785 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 17.01 $17.01 2026-07-28t04:48:37z 0x5ae1b1fba7d7af8bc46196d51c0c00ac16707cf4436a5ad155e8dd0fb655ab7f 0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c #272/792 generated auction feed 0x7acf46676903df7ef7879b5f9befa6a5b8c92553c55877dfca1a24b279553d61 0x4a133d5414c57b715b4cba05c199e343c89d3d3c5b30acd208e306e213ab73da background: none (90.4%) background none body: grey (11.6%) body grey neck: none (39.8%) neck none mouth: none (68.9%) mouth none ears: none (25.8%) ears none head: crazyhair (6.6%) head crazyhair eyes: redlasereyes (5.2%) eyes redlasereyes base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 49212385,
       "block_time_utc": "2026-07-28T04:48:37Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c",
+      "tx_url": "https://basescan.org/tx/0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -84,7 +86,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -99,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },

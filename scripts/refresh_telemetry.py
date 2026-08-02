@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import math
 import os
@@ -183,7 +184,11 @@ def append_jsonl(path: Path, row: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     safe_row = redact_value(row)
     with path.open("a", encoding="utf-8") as handle:
+        # Cooperates with the health watchdog's inode-preserving JSONL
+        # compaction so a 30-second watcher append cannot race retention.
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         handle.write(json.dumps(safe_row, sort_keys=True, separators=(",", ":")) + "\n")
+        handle.flush()
 
 
 def read_jsonl(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
@@ -209,7 +214,9 @@ def read_jsonl(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    temporary.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.replace(path)
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -253,6 +260,17 @@ def generated_state(root: Path = ROOT) -> dict[str, Any]:
         "generated_current_high_bidder_wallet": str(metrics.get("current_bidder_wallet") or current.get("bidder_wallet") or ""),
         "generated_current_end_time_utc": iso_utc(metrics.get("current_auction_end_utc") or current.get("end_time_utc")),
         "generated_current_status": str(metrics.get("current_auction_status") or current.get("auction_state") or ""),
+        "onchain_verification_status": str(metrics.get("onchain_verification_status") or ""),
+        "onchain_verification_scope": str(metrics.get("onchain_verification_scope") or ""),
+        "onchain_chain_id": int_or_none(metrics.get("onchain_chain_id")),
+        "snapshot_block_hash": str(metrics.get("snapshot_block_hash") or ""),
+        "snapshot_confirmations": int_or_none(metrics.get("snapshot_confirmations")),
+        "rpc_quorum_size": int_or_none(metrics.get("rpc_quorum_size")),
+        "rpc_quorum_agreement": str(metrics.get("rpc_quorum_agreement") or ""),
+        "rpc_quorum_providers": str(metrics.get("rpc_quorum_providers") or ""),
+        "log_rpc_quorum_providers": str(metrics.get("log_rpc_quorum_providers") or ""),
+        "auction_house_code_sha256": str(metrics.get("auction_house_code_sha256") or ""),
+        "dog_nft_code_sha256": str(metrics.get("dog_nft_code_sha256") or ""),
     }
 
 
@@ -422,6 +440,17 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "current_auction_status": state.get("generated_current_status"),
         "current_auction_end_time_utc": state.get("generated_current_end_time_utc"),
         "last_refresh_result": "success_generated",
+        "onchain_verification_status": state.get("onchain_verification_status"),
+        "onchain_verification_scope": state.get("onchain_verification_scope"),
+        "onchain_chain_id": state.get("onchain_chain_id"),
+        "snapshot_block_hash": state.get("snapshot_block_hash"),
+        "snapshot_confirmations": state.get("snapshot_confirmations"),
+        "rpc_quorum_size": state.get("rpc_quorum_size"),
+        "rpc_quorum_agreement": state.get("rpc_quorum_agreement"),
+        "rpc_quorum_providers": state.get("rpc_quorum_providers"),
+        "log_rpc_quorum_providers": state.get("log_rpc_quorum_providers"),
+        "auction_house_code_sha256": state.get("auction_house_code_sha256"),
+        "dog_nft_code_sha256": state.get("dog_nft_code_sha256"),
     }
     clean = {key: value for key, value in status.items() if value not in (None, "", [])}
     assert_public_safe(clean)
@@ -464,6 +493,17 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "current_auction_status",
         "current_auction_end_time_utc",
         "last_refresh_result",
+        "onchain_verification_status",
+        "onchain_verification_scope",
+        "onchain_chain_id",
+        "snapshot_block_hash",
+        "snapshot_confirmations",
+        "rpc_quorum_size",
+        "rpc_quorum_agreement",
+        "rpc_quorum_providers",
+        "log_rpc_quorum_providers",
+        "auction_house_code_sha256",
+        "dog_nft_code_sha256",
     }
     missing = sorted(key for key in required if status.get(key) in (None, "", []))
     if missing:
@@ -476,6 +516,16 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         raise AssertionError("refresh_status site_url is invalid")
     if str(status.get("last_refresh_result")) != "success_generated":
         raise AssertionError("refresh_status last_refresh_result is not a public generation result")
+    if status.get("onchain_verification_status") != "current_snapshot_cross_provider_verified":
+        raise AssertionError("refresh_status onchain_verification_status is not cross-provider verified")
+    if "current_auction" not in str(status.get("onchain_verification_scope") or "").split(","):
+        raise AssertionError("refresh_status onchain_verification_scope is incomplete")
+    if int_or_none(status.get("onchain_chain_id")) != 8453:
+        raise AssertionError("refresh_status onchain_chain_id is not Base mainnet")
+    if not re.fullmatch(r"0x[a-fA-F0-9]{64}", str(status.get("snapshot_block_hash") or "")):
+        raise AssertionError("refresh_status snapshot_block_hash is invalid")
+    if int_or_none(status.get("rpc_quorum_size")) is None or int(status["rpc_quorum_size"]) < 2:
+        raise AssertionError("refresh_status rpc_quorum_size is invalid")
     if not iso_utc(status.get("last_successful_refresh_time_utc")):
         raise AssertionError("refresh_status last_successful_refresh_time_utc is invalid")
     state = generated_state(root)
@@ -495,6 +545,21 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         raise AssertionError("refresh_status current_auction_status differs from mission3_metrics/current_auction")
     if iso_utc(status.get("current_auction_end_time_utc")) != state.get("generated_current_end_time_utc"):
         raise AssertionError("refresh_status current_auction_end_time_utc differs from mission3_metrics/current_auction")
+    for key in (
+        "onchain_verification_status",
+        "onchain_verification_scope",
+        "onchain_chain_id",
+        "snapshot_block_hash",
+        "snapshot_confirmations",
+        "rpc_quorum_size",
+        "rpc_quorum_agreement",
+        "rpc_quorum_providers",
+        "log_rpc_quorum_providers",
+        "auction_house_code_sha256",
+        "dog_nft_code_sha256",
+    ):
+        if str(status.get(key, "")) != str(state.get(key, "")):
+            raise AssertionError(f"refresh_status {key} differs from mission3_metrics")
     return status
 
 
@@ -617,6 +682,14 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
         return json.loads(response.read().decode("utf-8"))
 
 
+def snapshot_mismatch(expected: Any, actual: Any) -> str:
+    if not isinstance(expected, dict) or not isinstance(actual, dict):
+        return f"type expected={type(expected).__name__} actual={type(actual).__name__}"
+    keys = sorted({*expected, *actual})
+    differing = [key for key in keys if expected.get(key) != actual.get(key)]
+    return "fields=" + ",".join(differing[:12]) if differing else ""
+
+
 def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int, interval_seconds: int, base_url: str) -> dict[str, Any]:
     started = utc_now()
     state = generated_state(root)
@@ -627,22 +700,44 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
     result = "timeout"
     last_error = ""
     verified_at = ""
-    public_current_url = urllib.parse.urljoin(base_url.rstrip("/") + "/", "generated/current_auction.json")
+    expected_status = load_json(root / "public" / "generated" / "refresh_status.json", {})
+    if not isinstance(expected_status, dict) or not expected_status:
+        expected_status = load_json(root / "generated" / "refresh_status.json", {})
+    if not isinstance(expected_status, dict) or not expected_status:
+        raise RuntimeError("local refresh_status.json is missing or invalid")
+    status_urls = [
+        (
+            "raw_main",
+            "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json",
+        ),
+        ("github_pages", urllib.parse.urljoin(base_url.rstrip("/") + "/", "generated/refresh_status.json")),
+    ]
+    verified_source = ""
+    raw_main_verified = False
     while time.monotonic() <= deadline:
-        url = f"{public_current_url}?cache_bust={int(time.time())}"
-        try:
-            data = fetch_json(url)
-            row = data[0] if isinstance(data, list) and data and isinstance(data[0], dict) else {}
-            live_block = int_or_none(row.get("latest_block"))
-            live_token = int_or_none(row.get("token_id"))
-            live_bid = str(row.get("current_bid_eth") or "")
-            if live_block == expected_block and live_token == expected_token and live_bid == expected_bid:
-                result = "verified"
-                verified_at = utc_now()
-                break
-            last_error = f"live data mismatch block={live_block} token={live_token} bid={live_bid}"
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
-            last_error = str(exc)[:300]
+        raw_main_verified = False
+        pages_verified = False
+        for source, status_url in status_urls:
+            url = f"{status_url}?cache_bust={time.time_ns()}"
+            try:
+                data = fetch_json(url)
+                mismatch = snapshot_mismatch(expected_status, data)
+                if not mismatch:
+                    if source == "raw_main":
+                        raw_main_verified = True
+                    elif source == "github_pages":
+                        pages_verified = True
+                else:
+                    last_error = f"{source} refresh_status mismatch {mismatch}"
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+                last_error = f"{source}: {str(exc)[:260]}"
+        # Raw main proves the pushed artifact landed; Pages proves the actual
+        # user-facing deployment completed. Neither alone is production-live.
+        if raw_main_verified and pages_verified:
+            result = "verified"
+            verified_at = utc_now()
+            verified_source = "github_pages"
+            break
         time.sleep(max(1, interval_seconds))
     completed = verified_at or utc_now()
     push_completed = env.get("DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
@@ -652,6 +747,8 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
         "live_verified_at_utc": verified_at or None,
         "live_verify_completed_at_utc": completed,
         "live_verify_result": result,
+        "live_verify_source": verified_source or None,
+        "raw_main_verified": raw_main_verified,
         "push_to_live_seconds": seconds_between(push_completed, completed) if push_completed else None,
         "block_to_live_seconds": seconds_between(event_block_time, completed) if event_block_time else None,
         "latest_generated_block": expected_block,
@@ -689,7 +786,7 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("--prefer-current-env", action="store_true")
     sub.add_parser("validate-status", help="Validate generated refresh_status.json")
     sub.add_parser("metrics-summary", help="Print operator refresh/watch metrics summary")
-    live = sub.add_parser("verify-live", help="Poll GitHub Pages generated/current_auction.json until it matches local generated data")
+    live = sub.add_parser("verify-live", help="Poll raw main and GitHub Pages refresh_status.json until both exactly match local data")
     live.add_argument("--timeout-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_TIMEOUT_SECONDS", "300")))
     live.add_argument("--interval-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_INTERVAL_SECONDS", "10")))
     live.add_argument("--base-url", default=os.environ.get("DEGEN_DOGS_LIVE_VERIFY_BASE_URL", SITE_URL))

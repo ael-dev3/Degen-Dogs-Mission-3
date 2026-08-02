@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-12-08",
       "usd_estimate_price_usd": "0.0015363166494859976",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#156/789",
-      "rank": 156,
-      "total": 789
+      "display": "#154/792",
+      "rank": 154,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 559 dog #559 559 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12888 degen 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 0x08de1d99e256825f2559cbd1455b816a1ce477029a0b559efe88f5ffba98d8e0 #156/789 background: none; body: black; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: monocle 0x18126e002334a318bd5b352e4e3de9b3367cfd8d9f1f213bbed715a235401502 0xe3515346613ad4788bff27746a32d7e2997dc2ffaa3190679a9b129958e99ef5 chain_logs contract_getters",
+    "search_text": "dog 559 dog #559 559 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12888 degen 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 0x08de1d99e256825f2559cbd1455b816a1ce477029a0b559efe88f5ffba98d8e0 #154/792 background: none; body: black; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: monocle 0x18126e002334a318bd5b352e4e3de9b3367cfd8d9f1f213bbed715a235401502 0xe3515346613ad4788bff27746a32d7e2997dc2ffaa3190679a9b129958e99ef5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26556385,
       "block_time_utc": "2025-12-07T05:12:06Z",
@@ -82,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -107,7 +108,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.4%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2023-06-12",
       "usd_estimate_price_usd": "1742.6",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#198/789",
-      "rank": 198,
-      "total": 789
+      "display": "#202/792",
+      "rank": 202,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 #198/789 background: halo; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 192 dog #192 192 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xc26a35e8d9e75707eae09eac6df0b3fb67eb129c716a72db3e29c2b8e1242e60 0xc097acbe7656fb68e5b2b5289528d103b439442491124428967d9ec1760f7852 #202/792 background: halo; body: sugarskull; neck: redcollar; mouth: none; ears: none; head: stripedbeanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 43820956,
       "block_time_utc": "2023-06-12T08:46:29Z",
@@ -81,7 +82,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -96,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

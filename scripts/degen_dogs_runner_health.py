@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Silent watchdog for the Degen Dogs Mission 3 private Mac mini runner.
+"""Self-healing watchdog for the Degen Dogs Mission 3 private Mac mini runner.
 
-Runs from Hermes cron. Emits stdout only when it repairs drift or finds an issue
-that needs attention. Healthy/no-op runs stay silent.
+The watchdog verifies both launchd services, watcher state, refresh history, the
+local worktree, and the deployed status sidecar. Healthy/no-op runs stay silent.
 """
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ import json
 import os
 import plistlib
 import re
+import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -26,30 +28,62 @@ from typing import Any, Iterable
 
 HOME = Path(os.environ.get("DEGEN_DOGS_HEALTH_HOME", str(Path.home())))
 REPO_DIR = Path(os.environ.get("DEGEN_DOGS_REPO_DIR", "/Users/marko/projects/Degen-Dogs-Mission-3"))
-LABEL = "com.ael.degendogs.mission3.refresh"
-PLIST_PATH = HOME / "Library" / "LaunchAgents" / f"{LABEL}.plist"
-LOG_DIR = HOME / "Library" / "Logs" / "degen-dogs-mission3"
-CACHE_DIR = HOME / "Library" / "Caches" / "degen-dogs-mission3"
+HOURLY_LABEL = "com.ael.degendogs.mission3.refresh"
+WATCHER_LABEL = "com.ael.degendogs.mission3.watch-auction"
+LOG_DIR = Path(
+    os.environ.get("DEGEN_DOGS_LOG_DIR", str(HOME / "Library" / "Logs" / "degen-dogs-mission3"))
+).expanduser()
+CACHE_DIR = Path(
+    os.environ.get("DEGEN_DOGS_LOCK_DIR", str(HOME / "Library" / "Caches" / "degen-dogs-mission3"))
+).expanduser()
 REFRESH_LOCK_PATH = Path(
     os.environ.get("MISSION3_REFRESH_LOCK_PATH", str(CACHE_DIR / "refresh.lock"))
 ).expanduser()
 REFRESH_LOG = LOG_DIR / "refresh.log"
 REFRESH_SCRIPT = REPO_DIR / "scripts" / "refresh_and_publish.sh"
-INSTALL_SCRIPT = REPO_DIR / "scripts" / "install_hourly_refresh_launchd.sh"
+WATCHER_SCRIPT = REPO_DIR / "scripts" / "watch_mission3_onchain_activity.py"
+HOURLY_INSTALL_SCRIPT = REPO_DIR / "scripts" / "install_hourly_refresh_launchd.sh"
+WATCHER_INSTALL_SCRIPT = REPO_DIR / "scripts" / "install_auction_watcher_launchd.sh"
+WATCHER_STATE_PATH = Path(
+    os.environ.get("MISSION3_WATCHER_STATE_PATH", str(REPO_DIR / ".local" / "mission3_onchain_tracker_state.json"))
+).expanduser()
 LIVE_URL = "https://ael-dev3.github.io/Degen-Dogs-Mission-3/"
+LIVE_STATUS_URL = LIVE_URL + "generated/refresh_status.json"
 GITHUB_REPO = os.environ.get("DEGEN_DOGS_HEALTH_GITHUB_REPO", "ael-dev3/Degen-Dogs-Mission-3")
 DISCORD_MENTION = os.environ.get("DEGEN_DOGS_HEALTH_DISCORD_MENTION", "@Ael")
 ALERT_STATE_PATH = Path(
     os.environ.get("DEGEN_DOGS_HEALTH_ALERT_STATE_PATH", str(CACHE_DIR / "critical-alert-state.json"))
 ).expanduser()
-EXPECTED_INTERVAL_SECONDS = 3600
-STALE_SUCCESS_SECONDS = 4 * 3600
+EXPECTED_INTERVAL_SECONDS = int(os.environ.get("DEGEN_DOGS_REFRESH_INTERVAL_SECONDS", "3600"))
+WATCHER_INTERVAL_SECONDS = int(os.environ.get("MISSION3_WATCHER_INTERVAL_SECONDS", "30"))
+WATCHER_AUTO_PUSH = os.environ.get("MISSION3_WATCHER_AUTO_PUSH", "0")
+LIVE_VERIFY_AFTER_PUSH = os.environ.get("DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH", "1")
+WATCHER_REFRESH_COMMAND = os.environ.get("MISSION3_REFRESH_COMMAND") or (
+    "npm run refresh:publish" if WATCHER_AUTO_PUSH == "1" else "npm run refresh:current"
+)
+WATCHER_STALE_SECONDS = int(
+    os.environ.get("DEGEN_DOGS_HEALTH_WATCHER_STALE_SECONDS", str(max(300, WATCHER_INTERVAL_SECONDS * 5)))
+)
+PENDING_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_PENDING_STALE_SECONDS", "900"))
+LIVE_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS", str(3 * 3600)))
+STALE_SUCCESS_SECONDS = max(2 * EXPECTED_INTERVAL_SECONDS, 2 * 3600)
 CRITICAL_STALE_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_CRITICAL_STALE_SECONDS", str(2 * 3600)))
 REPEAT_ALERT_SECONDS = int(os.environ.get("DEGEN_DOGS_HEALTH_REPEAT_ALERT_SECONDS", str(6 * 3600)))
 PATH_VALUE = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 DRY_RUN = os.environ.get("DEGEN_DOGS_HEALTH_DRY_RUN") == "1"
 ALERT_DRY_RUN = DRY_RUN or os.environ.get("DEGEN_DOGS_HEALTH_ALERT_DRY_RUN") == "1"
 GITHUB_ALERTS_ENABLED = os.environ.get("DEGEN_DOGS_HEALTH_GITHUB_ALERTS", "1") != "0"
+LOG_MAX_BYTES = max(65_536, int(os.environ.get("DEGEN_DOGS_HEALTH_LOG_MAX_BYTES", str(8 * 1024 * 1024))))
+LOG_RETAIN_BYTES = max(
+    16_384,
+    min(int(os.environ.get("DEGEN_DOGS_HEALTH_LOG_RETAIN_BYTES", str(2 * 1024 * 1024))), LOG_MAX_BYTES // 2),
+)
+LOG_EMERGENCY_MAX_BYTES = max(
+    LOG_MAX_BYTES,
+    int(os.environ.get("DEGEN_DOGS_HEALTH_LOG_EMERGENCY_MAX_BYTES", str(4 * LOG_MAX_BYTES))),
+)
+MIN_FREE_BYTES = max(0, int(os.environ.get("DEGEN_DOGS_HEALTH_MIN_FREE_BYTES", str(5 * 1024 * 1024 * 1024))))
+MIN_FREE_PERCENT = max(0.0, float(os.environ.get("DEGEN_DOGS_HEALTH_MIN_FREE_PERCENT", "5")))
 
 SECRET_PATTERNS = [
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{20,}"),
@@ -64,6 +98,248 @@ class Result:
     code: int
     out: str
     err: str
+
+
+@dataclass(frozen=True)
+class LaunchdSpec:
+    label: str
+    plist_path: Path
+    installer: Path
+    program_arguments: tuple[str, ...]
+    interval_seconds: int
+    name: str
+    required_environment: tuple[tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True)
+class ManagedLog:
+    path: Path
+    services: tuple[str, ...]
+    name: str
+
+
+def launchd_specs() -> tuple[LaunchdSpec, LaunchdSpec]:
+    plist_dir = HOME / "Library" / "LaunchAgents"
+    common_env = (
+        ("HOME", str(HOME)),
+        ("DEGEN_DOGS_REPO_DIR", str(REPO_DIR)),
+        ("DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH", LIVE_VERIFY_AFTER_PUSH),
+    )
+    return (
+        LaunchdSpec(
+            label=HOURLY_LABEL,
+            plist_path=plist_dir / f"{HOURLY_LABEL}.plist",
+            installer=HOURLY_INSTALL_SCRIPT,
+            program_arguments=(str(REFRESH_SCRIPT),),
+            interval_seconds=EXPECTED_INTERVAL_SECONDS,
+            name="hourly full-reconcile refresh",
+            required_environment=(*common_env, ("DEGEN_DOGS_FULL_REFRESH", "1")),
+        ),
+        LaunchdSpec(
+            label=WATCHER_LABEL,
+            plist_path=plist_dir / f"{WATCHER_LABEL}.plist",
+            installer=WATCHER_INSTALL_SCRIPT,
+            program_arguments=("/usr/bin/env", "python3", str(WATCHER_SCRIPT), "--once"),
+            interval_seconds=WATCHER_INTERVAL_SECONDS,
+            name="onchain auction watcher",
+            required_environment=(
+                *common_env,
+                ("DEGEN_DOGS_FULL_REFRESH", "0"),
+                ("MISSION3_WATCHER_AUTO_PUSH", WATCHER_AUTO_PUSH),
+                ("MISSION3_REFRESH_COMMAND", WATCHER_REFRESH_COMMAND),
+            ),
+        ),
+    )
+
+
+def _optional_local_path(value: str | None, default: Path) -> Path | None:
+    if value is None or not value.strip():
+        return default
+    if value.strip() == "-":
+        return None
+    path = Path(value.strip()).expanduser()
+    return path if path.is_absolute() else REPO_DIR / path
+
+
+def managed_logs() -> tuple[ManagedLog, ...]:
+    """Logs compacted in place so launchd keeps writing to the same inode."""
+    both_workers = (HOURLY_LABEL, WATCHER_LABEL)
+    watcher_log = _optional_local_path(os.environ.get("MISSION3_WATCHER_LOG_PATH"), LOG_DIR / "watch-onchain.log")
+    refresh_runs = _optional_local_path(
+        os.environ.get("DEGEN_DOGS_REFRESH_TELEMETRY_PATH"), REPO_DIR / ".local" / "refresh_runs.jsonl"
+    )
+    refresh_metrics = _optional_local_path(
+        os.environ.get("DEGEN_DOGS_REFRESH_METRICS_PATH"), REPO_DIR / "logs" / "refresh-metrics.jsonl"
+    )
+    values = [
+        ManagedLog(LOG_DIR / "refresh.log", both_workers, "refresh log"),
+        ManagedLog(LOG_DIR / "launchd.out.log", (HOURLY_LABEL,), "hourly launchd stdout"),
+        ManagedLog(LOG_DIR / "launchd.err.log", (HOURLY_LABEL,), "hourly launchd stderr"),
+        ManagedLog(LOG_DIR / "watcher.launchd.out.log", (WATCHER_LABEL,), "watcher launchd stdout"),
+        ManagedLog(LOG_DIR / "watcher.launchd.err.log", (WATCHER_LABEL,), "watcher launchd stderr"),
+        ManagedLog(LOG_DIR / "health.launchd.out.log", (), "health launchd stdout"),
+        ManagedLog(LOG_DIR / "health.launchd.err.log", (), "health launchd stderr"),
+        ManagedLog(REPO_DIR / "logs" / "watch-onchain.log", (WATCHER_LABEL,), "repository watcher activity log"),
+        ManagedLog(REPO_DIR / ".local" / "watcher_checks.jsonl", (WATCHER_LABEL,), "watcher telemetry"),
+    ]
+    if watcher_log is not None:
+        values.append(ManagedLog(watcher_log, (WATCHER_LABEL,), "watcher activity log"))
+    if refresh_runs is not None:
+        values.append(ManagedLog(refresh_runs, both_workers, "refresh telemetry"))
+    if refresh_metrics is not None:
+        values.append(ManagedLog(refresh_metrics, both_workers, "refresh metrics"))
+    unique_logs: dict[Path, ManagedLog] = {}
+    for item in values:
+        previous = unique_logs.get(item.path)
+        if previous is None:
+            unique_logs[item.path] = item
+            continue
+        services = tuple(dict.fromkeys((*previous.services, *item.services)))
+        unique_logs[item.path] = ManagedLog(item.path, services, f"{previous.name}/{item.name}")
+    return tuple(unique_logs.values())
+
+
+def _reset_matching_standard_stream_offsets(file_stat: os.stat_result) -> None:
+    for fd in (1, 2):
+        try:
+            stream_stat = os.fstat(fd)
+            if (stream_stat.st_dev, stream_stat.st_ino) == (file_stat.st_dev, file_stat.st_ino):
+                os.lseek(fd, 0, os.SEEK_END)
+        except OSError:
+            continue
+
+
+def compact_log_in_place(path: Path, *, max_bytes: int, retain_bytes: int) -> tuple[bool, int, int]:
+    """Tail-compact an oversized regular log while preserving its inode.
+
+    Preserving the inode is important for launchd StandardOutPath/StandardErrorPath:
+    renaming an active file can leave launchd writing forever to an unlinked inode.
+    """
+    if max_bytes < 1 or retain_bytes < 0:
+        raise ValueError("log bounds must be non-negative and max_bytes must be positive")
+    try:
+        initial = path.lstat()
+    except FileNotFoundError:
+        return False, 0, 0
+    if stat.S_ISLNK(initial.st_mode) or not stat.S_ISREG(initial.st_mode):
+        raise ValueError(f"refusing to compact non-regular log: {path}")
+    if initial.st_uid != os.getuid():
+        raise PermissionError(f"refusing to compact log not owned by current user: {path}")
+    if initial.st_size <= max_bytes:
+        return False, initial.st_size, initial.st_size
+
+    with path.open("r+b", buffering=0) as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        opened = os.fstat(handle.fileno())
+        if (opened.st_dev, opened.st_ino) != (initial.st_dev, initial.st_ino):
+            raise RuntimeError(f"log changed while opening for compaction: {path}")
+        before = opened.st_size
+        if before <= max_bytes:
+            return False, before, before
+        header = f"[{iso_now()}] log compacted in place; prior_bytes={before}\n".encode("utf-8")[:max_bytes]
+        budget = max(0, min(retain_bytes, max_bytes - len(header)))
+        start = max(0, before - budget)
+        handle.seek(start)
+        tail = handle.read(budget)
+        if start > 0 and tail:
+            newline = tail.find(b"\n")
+            tail = tail[newline + 1 :] if newline >= 0 else b""
+        payload = header + tail
+        handle.seek(0)
+        # Truncate before the bounded write: after mutation begins, even a crash
+        # cannot leave the old oversized allocation behind.
+        handle.truncate(0)
+        handle.write(payload)
+        handle.truncate(len(payload))
+        handle.flush()
+        os.fsync(handle.fileno())
+        after_stat = os.fstat(handle.fileno())
+        _reset_matching_standard_stream_offsets(after_stat)
+        return True, before, after_stat.st_size
+
+
+def rotate_managed_logs(lines: list[str], active_services: set[str]) -> bool:
+    """Compact oversized logs; defer active logs unless they cross the emergency cap."""
+    had_error = False
+    for item in managed_logs():
+        try:
+            size = item.path.stat().st_size
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            append_issue(lines, f"log rotation could not stat {item.name}: {type(exc).__name__}")
+            had_error = True
+            continue
+        if size <= LOG_MAX_BYTES:
+            continue
+        active = any(service in active_services for service in item.services)
+        if active and size <= LOG_EMERGENCY_MAX_BYTES:
+            continue
+        if DRY_RUN:
+            append_fix(lines, f"DRY-RUN would compact {item.name} from {size} bytes")
+            continue
+        try:
+            rotated, before, after = compact_log_in_place(
+                item.path,
+                max_bytes=LOG_MAX_BYTES,
+                retain_bytes=LOG_RETAIN_BYTES,
+            )
+        except (OSError, ValueError, RuntimeError) as exc:
+            append_issue(lines, f"log rotation failed for {item.name}: {type(exc).__name__}: {exc}")
+            had_error = True
+            continue
+        if rotated:
+            qualifier = " emergency" if active else ""
+            append_fix(lines, f"{qualifier} compacted {item.name} in place from {before} to {after} bytes")
+    return had_error
+
+
+def _nearest_existing_path(path: Path) -> Path:
+    candidate = path
+    while not candidate.exists() and candidate != candidate.parent:
+        candidate = candidate.parent
+    return candidate
+
+
+def inspect_disk_free(
+    paths: Iterable[Path] | None = None,
+    *,
+    min_free_bytes: int = MIN_FREE_BYTES,
+    min_free_percent: float = MIN_FREE_PERCENT,
+    usage_fn: Any = shutil.disk_usage,
+) -> tuple[list[str], list[dict[str, Any]]]:
+    """Check each distinct filesystem backing runner state and logs."""
+    issues: list[str] = []
+    summary: list[dict[str, Any]] = []
+    seen_devices: set[int] = set()
+    for requested in paths or (REPO_DIR, LOG_DIR, CACHE_DIR):
+        anchor = _nearest_existing_path(requested)
+        try:
+            device = anchor.stat().st_dev
+            if device in seen_devices:
+                continue
+            seen_devices.add(device)
+            usage = usage_fn(anchor)
+        except OSError as exc:
+            issues.append(f"disk free-space check failed for {requested}: {type(exc).__name__}")
+            continue
+        total = max(0, int(usage.total))
+        free = max(0, int(usage.free))
+        free_percent = (100.0 * free / total) if total else 0.0
+        row = {
+            "path": str(anchor),
+            "total_bytes": total,
+            "free_bytes": free,
+            "free_percent": round(free_percent, 2),
+        }
+        summary.append(row)
+        if free < min_free_bytes or free_percent < min_free_percent:
+            issues.append(
+                f"runner disk free space low at {anchor}: {free / (1024 ** 3):.2f} GiB "
+                f"({free_percent:.1f}%) available; require at least "
+                f"{min_free_bytes / (1024 ** 3):.2f} GiB and {min_free_percent:.1f}%"
+            )
+    return issues, summary
 
 
 def env() -> dict[str, str]:
@@ -123,8 +399,8 @@ def launch_domain() -> str:
     return f"gui/{os.getuid()}"
 
 
-def launch_target() -> str:
-    return f"{launch_domain()}/{LABEL}"
+def launch_target(label: str = HOURLY_LABEL) -> str:
+    return f"{launch_domain()}/{label}"
 
 
 def parse_log_ts(value: str) -> float | None:
@@ -212,7 +488,16 @@ def load_metrics() -> dict[str, str]:
         return {row.get("metric", ""): row.get("value", "") for row in csv.DictReader(handle)}
 
 
-def live_site_ok() -> tuple[bool, str]:
+def load_local_refresh_status() -> dict[str, Any]:
+    path = REPO_DIR / "generated" / "refresh_status.json"
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
+def live_site_ok(expected_status: dict[str, Any] | None = None) -> tuple[bool, str]:
     try:
         req = urllib.request.Request(
             LIVE_URL + f"?runner_health={int(time.time())}",
@@ -227,7 +512,52 @@ def live_site_ok() -> tuple[bool, str]:
         return False, f"live HTTP status {status}"
     if "auction_feed" not in body or LIVE_URL.rstrip("/") not in body:
         return False, "live HTML missing expected auction_feed/site_url markers"
-    return True, "live site ok"
+    try:
+        status_req = urllib.request.Request(
+            LIVE_STATUS_URL + f"?runner_health={int(time.time())}",
+            headers={"User-Agent": "DegenDogs-runner-health/2.0", "Cache-Control": "no-cache"},
+        )
+        with urllib.request.urlopen(status_req, timeout=25) as response:
+            status_code = getattr(response, "status", 0)
+            status_data = json.loads(response.read(128_000).decode("utf-8"))
+    except Exception as exc:  # noqa: BLE001
+        return False, f"live refresh status check failed: {type(exc).__name__}: {exc}"
+    if status_code != 200:
+        return False, f"live refresh status HTTP status {status_code}"
+    if not isinstance(status_data, dict) or status_data.get("kind") != "refresh_status":
+        return False, "live refresh status payload is invalid"
+    if status_data.get("site_url") != LIVE_URL:
+        return False, "live refresh status site_url is invalid"
+    try:
+        latest_block = int(status_data.get("latest_generated_block") or 0)
+    except (TypeError, ValueError):
+        latest_block = 0
+    if latest_block <= 0:
+        return False, "live refresh status latest_generated_block is invalid"
+    if expected_status:
+        try:
+            expected_block = int(expected_status.get("latest_generated_block") or 0)
+        except (TypeError, ValueError):
+            expected_block = 0
+        if expected_block > 0 and latest_block < expected_block:
+            return False, f"live refresh status block {latest_block} trails local generated block {expected_block}"
+        if expected_block > 0 and latest_block == expected_block:
+            for key in (
+                "current_dog_token_id",
+                "current_bid_eth",
+                "current_high_bidder_wallet",
+                "current_auction_status",
+                "current_auction_end_time_utc",
+            ):
+                if str(status_data.get(key) or "") != str(expected_status.get(key) or ""):
+                    return False, f"live refresh status {key} differs from local validated status at block {latest_block}"
+    refreshed_at = parse_iso_timestamp(status_data.get("last_successful_refresh_time_utc"))
+    if refreshed_at is None:
+        return False, "live refresh status timestamp is invalid"
+    live_age = max(0, int(time.time() - refreshed_at))
+    if live_age > LIVE_STALE_SECONDS:
+        return False, f"live refresh status age={live_age // 60}m exceeds threshold={LIVE_STALE_SECONDS // 60}m"
+    return True, f"live site/status ok at block {latest_block}"
 
 
 def read_jsonl_tail(path: Path, limit: int) -> list[dict[str, Any]]:
@@ -317,8 +647,14 @@ def derive_causes(
         causes.append("latest_refresh_failed")
     if any("launchd" in item.lower() for item in issues) or "could not inspect disabled launchd" in combined:
         causes.append("launchd_agent_unhealthy_or_drifted")
+    if "watcher" in combined:
+        causes.append("onchain_watcher_unhealthy_or_stale")
+    if "disk free" in combined or "disk free-space" in combined or "free space" in combined:
+        causes.append("runner_disk_space_low_or_unreadable")
+    if "log rotation" in combined:
+        causes.append("runner_log_rotation_failed")
     if not live_ok:
-        causes.append("live_site_marker_or_http_failure")
+        causes.append("live_site_or_refresh_status_failure")
     last_started = log_details.get("last_started_ts")
     last_finished = log_details.get("last_finished_ts")
     if service_is_running(launch_output) and last_started and (not last_finished or last_finished < last_started):
@@ -367,6 +703,70 @@ def parse_iso_timestamp(value: Any) -> float | None:
         return datetime.fromisoformat(text).astimezone(timezone.utc).timestamp()
     except ValueError:
         return None
+
+
+def inspect_watcher_state(now: float | None = None, path: Path | None = None) -> tuple[list[str], dict[str, Any]]:
+    """Return actionable watcher-state issues and a sanitized operational summary."""
+    now = time.time() if now is None else now
+    path = WATCHER_STATE_PATH if path is None else path
+    if not path.exists():
+        return [f"watcher state missing: {path}"], {"state_path": str(path), "present": False}
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"watcher state unreadable: {type(exc).__name__}"], {"state_path": str(path), "present": True}
+    if not isinstance(state, dict):
+        return ["watcher state is not a JSON object"], {"state_path": str(path), "present": True}
+
+    issues: list[str] = []
+    checked_ts = parse_iso_timestamp(state.get("last_checked_at_utc") or state.get("updated_at_utc"))
+    checked_age_seconds = None if checked_ts is None else max(0, int(now - checked_ts))
+    if checked_ts is None:
+        issues.append("watcher state has no valid last_checked_at_utc")
+    elif checked_age_seconds is not None and checked_age_seconds > WATCHER_STALE_SECONDS:
+        issues.append(
+            f"watcher state age={checked_age_seconds // 60}m exceeds threshold={WATCHER_STALE_SECONDS // 60}m"
+        )
+
+    def failure_count(key: str) -> int:
+        try:
+            return max(0, int(state.get(key) or 0))
+        except (TypeError, ValueError):
+            issues.append(f"watcher state {key} is invalid")
+            return 0
+
+    rpc_failures = failure_count("consecutive_rpc_failures")
+    refresh_failures = failure_count("consecutive_refresh_failures")
+    if rpc_failures >= 3:
+        issues.append(f"watcher has {rpc_failures} consecutive RPC failures")
+    if refresh_failures >= 3:
+        issues.append(f"watcher has {refresh_failures} consecutive refresh failures")
+
+    pending = state.get("pending_refresh") is True
+    pending_ts = parse_iso_timestamp(state.get("pending_refresh_since_utc")) if pending else None
+    pending_age_seconds = None if pending_ts is None else max(0, int(now - pending_ts))
+    if pending and pending_ts is None:
+        issues.append("watcher pending refresh has no valid pending_refresh_since_utc")
+    elif pending_age_seconds is not None and pending_age_seconds > PENDING_STALE_SECONDS:
+        issues.append(
+            f"watcher pending refresh age={pending_age_seconds // 60}m exceeds threshold={PENDING_STALE_SECONDS // 60}m"
+        )
+
+    summary = {
+        "state_path": str(path),
+        "present": True,
+        "last_checked_at_utc": state.get("last_checked_at_utc"),
+        "last_checked_age_seconds": checked_age_seconds,
+        "last_checked_block": state.get("last_checked_block"),
+        "last_observed_block": state.get("last_observed_block"),
+        "consecutive_rpc_failures": rpc_failures,
+        "consecutive_refresh_failures": refresh_failures,
+        "pending_refresh": pending,
+        "pending_refresh_since_utc": state.get("pending_refresh_since_utc"),
+        "pending_refresh_age_seconds": pending_age_seconds,
+        "last_refresh_status": state.get("last_refresh_status"),
+    }
+    return issues, summary
 
 
 def run_gh(args: list[str], *, body: str | None = None, timeout: int = 45) -> Result:
@@ -483,6 +883,16 @@ def build_incident_body(snapshot: dict[str, Any]) -> str:
     lines.extend(f"- `{sanitize(str(path), 220)}`" for path in dirty_paths[:20])
     if not dirty_paths:
         lines.append("- none detected")
+    lines.extend(["", "### Runner disk space"])
+    disk_rows = snapshot.get("disk") or []
+    for row in disk_rows:
+        lines.append(
+            f"- `{sanitize(str(row.get('path') or ''), 160)}`: "
+            f"{int(row.get('free_bytes') or 0) / (1024 ** 3):.2f} GiB free "
+            f"({float(row.get('free_percent') or 0):.1f}%)"
+        )
+    if not disk_rows:
+        lines.append("- disk summary unavailable")
     lines.extend(["", "### Health watchdog findings"])
     findings = snapshot.get("issues") or []
     lines.extend(f"- {sanitize(str(item), 260)}" for item in findings[:20])
@@ -701,40 +1111,46 @@ def maybe_run(lines: list[str], description: str, cmd: list[str], *, cwd: Path |
     return result
 
 
-def plist_needs_reinstall(issues: list[str]) -> bool:
-    if not PLIST_PATH.exists():
-        issues.append("launchd plist missing")
+def plist_needs_reinstall(issues: list[str], spec: LaunchdSpec | None = None) -> bool:
+    spec = launchd_specs()[0] if spec is None else spec
+    if not spec.plist_path.exists():
+        issues.append(f"{spec.name} launchd plist missing")
         return True
     try:
-        data = plistlib.loads(PLIST_PATH.read_bytes())
+        data = plistlib.loads(spec.plist_path.read_bytes())
     except Exception as exc:  # noqa: BLE001
-        issues.append(f"launchd plist unreadable: {type(exc).__name__}")
+        issues.append(f"{spec.name} launchd plist unreadable: {type(exc).__name__}")
         return True
 
-    expected_program = str(REFRESH_SCRIPT)
+    actual_environment = data.get("EnvironmentVariables") or {}
     checks = {
-        "ProgramArguments[0]": (data.get("ProgramArguments") or [None])[0],
+        "Label": data.get("Label"),
+        "ProgramArguments": tuple(data.get("ProgramArguments") or []),
         "WorkingDirectory": data.get("WorkingDirectory"),
         "StartInterval": data.get("StartInterval"),
-        "EnvironmentVariables.HOME": (data.get("EnvironmentVariables") or {}).get("HOME"),
-        "EnvironmentVariables.DEGEN_DOGS_REPO_DIR": (data.get("EnvironmentVariables") or {}).get("DEGEN_DOGS_REPO_DIR"),
+        "RunAtLoad": data.get("RunAtLoad"),
     }
     expected = {
-        "ProgramArguments[0]": expected_program,
+        "Label": spec.label,
+        "ProgramArguments": spec.program_arguments,
         "WorkingDirectory": str(REPO_DIR),
-        "StartInterval": EXPECTED_INTERVAL_SECONDS,
-        "EnvironmentVariables.HOME": str(HOME),
-        "EnvironmentVariables.DEGEN_DOGS_REPO_DIR": str(REPO_DIR),
+        "StartInterval": spec.interval_seconds,
+        "RunAtLoad": True,
     }
     drift = [name for name, actual in checks.items() if actual != expected[name]]
+    drift.extend(
+        f"EnvironmentVariables.{key}"
+        for key, value in spec.required_environment
+        if actual_environment.get(key) != value
+    )
     if drift:
-        issues.append("launchd plist drift: " + ", ".join(drift))
+        issues.append(f"{spec.name} launchd plist drift: " + ", ".join(drift))
         return True
     return False
 
 
-def launchctl_print() -> Result:
-    return run(["launchctl", "print", launch_target()], cwd=None, timeout=20)
+def launchctl_print(label: str = HOURLY_LABEL) -> Result:
+    return run(["launchctl", "print", launch_target(label)], cwd=None, timeout=20)
 
 
 def refresh_is_active() -> bool:
@@ -772,29 +1188,49 @@ def service_is_running(print_output: str) -> bool:
     return "state = running" in print_output or re.search(r"active count = [1-9]", print_output) is not None
 
 
-def ensure_launchd(lines: list[str]) -> str:
+def ensure_launchd_service(lines: list[str], spec: LaunchdSpec, *, allow_repair: bool = True) -> str:
     reinstall_reasons: list[str] = []
-    if plist_needs_reinstall(reinstall_reasons):
+    if plist_needs_reinstall(reinstall_reasons, spec):
         append_issue(lines, "; ".join(reinstall_reasons))
-        maybe_run(lines, "reinstall launchd hourly refresh agent", ["npm", "run", "refresh:install"], timeout=120)
+        if allow_repair:
+            maybe_run(lines, f"reinstall launchd {spec.name} agent", ["bash", str(spec.installer)], timeout=120)
+        else:
+            append_issue(lines, f"deferred launchd {spec.name} repair while runner disk space is low")
 
-    printed = launchctl_print()
+    printed = launchctl_print(spec.label)
     if printed.code != 0:
-        append_issue(lines, f"launchctl cannot see {LABEL}: {printed.out or printed.err}")
-        maybe_run(lines, "reinstall launchd hourly refresh agent after launchctl miss", ["npm", "run", "refresh:install"], timeout=120)
-        printed = launchctl_print()
+        append_issue(lines, f"launchctl cannot see {spec.label}: {printed.out or printed.err}")
+        if allow_repair:
+            maybe_run(lines, f"reinstall launchd {spec.name} agent after launchctl miss", ["bash", str(spec.installer)], timeout=120)
+            printed = launchctl_print(spec.label)
 
     # Enabling is idempotent and cheap; do it if print-disabled says the label is disabled.
     disabled = run(["launchctl", "print-disabled", launch_domain()], cwd=None, timeout=20)
     if disabled.code == 0:
-        label_quoted = f'"{LABEL}" => true'
-        label_plain = f"{LABEL} => true"
+        label_quoted = f'"{spec.label}" => true'
+        label_plain = f"{spec.label} => true"
         if label_quoted in disabled.out or label_plain in disabled.out:
-            maybe_run(lines, "enable launchd hourly refresh agent", ["launchctl", "enable", launch_target()], cwd=None, timeout=20)
+            if allow_repair:
+                maybe_run(
+                    lines,
+                    f"enable launchd {spec.name} agent",
+                    ["launchctl", "enable", launch_target(spec.label)],
+                    cwd=None,
+                    timeout=20,
+                )
+            else:
+                append_issue(lines, f"deferred enabling launchd {spec.name} agent while runner disk space is low")
     elif disabled.err:
-        append_issue(lines, f"could not inspect disabled launchd jobs: {disabled.err}")
+        append_issue(lines, f"could not inspect disabled launchd {spec.name} job: {disabled.err}")
 
     return printed.out + "\n" + printed.err
+
+
+def ensure_launchd(lines: list[str], *, allow_repair: bool = True) -> dict[str, str]:
+    return {
+        spec.label: ensure_launchd_service(lines, spec, allow_repair=allow_repair)
+        for spec in launchd_specs()
+    }
 
 
 def emit_startup_failure(lines: list[str], causes: list[str]) -> None:
@@ -829,27 +1265,46 @@ def main() -> int:
     if not REPO_DIR.exists():
         append_issue(lines, f"repo missing: {REPO_DIR}")
         emit_startup_failure(lines, ["runner_repo_missing"])
-        return 0
+        return 1
 
     git_tree = run(["git", "rev-parse", "--is-inside-work-tree"], timeout=20)
     if git_tree.code != 0 or git_tree.out.strip() != "true":
         append_issue(lines, f"not a git worktree: {REPO_DIR}")
         emit_startup_failure(lines, ["runner_repo_not_git_worktree"])
-        return 0
+        return 1
 
-    for path in (REFRESH_SCRIPT, INSTALL_SCRIPT):
+    required_scripts = (REFRESH_SCRIPT, WATCHER_SCRIPT, HOURLY_INSTALL_SCRIPT, WATCHER_INSTALL_SCRIPT)
+    for path in required_scripts:
         if not path.exists():
             append_issue(lines, f"required script missing: {path}")
-    if not REFRESH_SCRIPT.exists() or not INSTALL_SCRIPT.exists():
+    if any(not path.exists() for path in required_scripts):
         emit_startup_failure(lines, ["required_runner_script_missing"])
-        return 0
+        return 1
 
-    if not os.access(REFRESH_SCRIPT, os.X_OK):
-        maybe_run(lines, "make refresh script executable", ["chmod", "+x", str(REFRESH_SCRIPT)], cwd=None, timeout=20)
-    if not os.access(INSTALL_SCRIPT, os.X_OK):
-        maybe_run(lines, "make install script executable", ["chmod", "+x", str(INSTALL_SCRIPT)], cwd=None, timeout=20)
+    for path in required_scripts:
+        if not os.access(path, os.X_OK):
+            maybe_run(lines, f"make {path.name} executable", ["chmod", "+x", str(path)], cwd=None, timeout=20)
 
     refresh_in_progress = refresh_is_active()
+    initial_launch_outputs = {
+        HOURLY_LABEL: launchctl_print(HOURLY_LABEL),
+        WATCHER_LABEL: launchctl_print(WATCHER_LABEL),
+    }
+    active_services = {
+        label
+        for label, result in initial_launch_outputs.items()
+        if service_is_running(result.out + "\n" + result.err)
+    }
+    if refresh_in_progress:
+        # A manual or watcher-triggered publisher owns the same files even if its
+        # launchd label cannot be identified from the refresh lock alone.
+        active_services.update({HOURLY_LABEL, WATCHER_LABEL})
+    rotation_failed = rotate_managed_logs(lines, active_services)
+    disk_issues, disk_summary = inspect_disk_free()
+    for issue in disk_issues:
+        append_issue(lines, issue)
+    disk_low = bool(disk_issues)
+
     dirty_blocking = False
     branch = run(["git", "branch", "--show-current"], timeout=20)
     status = run(["git", "status", "--porcelain", "--untracked-files=no"], timeout=30)
@@ -878,7 +1333,26 @@ def main() -> int:
         dirty_blocking = True
         append_issue(lines, f"could not inspect git status: {status.out or status.err}")
 
-    print_output = ensure_launchd(lines)
+    launch_outputs = ensure_launchd(lines, allow_repair=not disk_low)
+    print_output = launch_outputs.get(HOURLY_LABEL, "")
+    watcher_output = launch_outputs.get(WATCHER_LABEL, "")
+
+    watcher_issues, watcher_state = inspect_watcher_state()
+    for issue in watcher_issues:
+        append_issue(lines, issue)
+    if watcher_issues:
+        if disk_low:
+            append_issue(lines, "watcher repair kickstart deferred while runner disk space is low")
+        elif service_is_running(watcher_output):
+            append_issue(lines, "watcher state is unhealthy, but the watcher job is currently running; left it alone")
+        else:
+            maybe_run(
+                lines,
+                "kickstart onchain auction watcher after unhealthy state",
+                ["launchctl", "kickstart", "-k", launch_target(WATCHER_LABEL)],
+                cwd=None,
+                timeout=30,
+            )
 
     log_details = parse_refresh_log_details()
     last_success_ts = log_details.get("last_success_ts")
@@ -899,7 +1373,9 @@ def main() -> int:
         append_issue(lines, f"latest refresh log error: {sanitize(str(last_error), 300)}")
 
     if stale or failed_last:
-        if dirty_blocking:
+        if disk_low:
+            append_issue(lines, "hourly refresh kickstart deferred while runner disk space is low")
+        elif dirty_blocking:
             append_issue(lines, "refresh appears stale/failed, but tracked worktree changes still block safe kickstart")
         elif service_is_running(print_output):
             append_issue(lines, "refresh appears stale/failed, but launchd job is currently running; left it alone")
@@ -907,12 +1383,18 @@ def main() -> int:
             reason = "no successful refresh found" if last_success_ts is None else f"last successful refresh age={int((now - last_success_ts) / 60)}m"
             if failed_last:
                 reason += f", last status={last_finished_status}"
-            maybe_run(lines, f"kickstart hourly refresh agent ({reason})", ["launchctl", "kickstart", "-k", launch_target()], cwd=None, timeout=30)
+            maybe_run(
+                lines,
+                f"kickstart hourly refresh agent ({reason})",
+                ["launchctl", "kickstart", "-k", launch_target(HOURLY_LABEL)],
+                cwd=None,
+                timeout=30,
+            )
 
-    ok, live_msg = live_site_ok()
+    metrics = load_metrics()
+    ok, live_msg = live_site_ok(load_local_refresh_status())
     if not ok:
         append_issue(lines, live_msg)
-    metrics = load_metrics()
     latest_block = metrics.get("latest_block")
     current_dog = metrics.get("current_auction_token_id")
 
@@ -941,6 +1423,8 @@ def main() -> int:
         "recent_signals": log_details.get("recent_signals", []),
         "refresh_history": compact_refresh_history(),
         "watcher_history": compact_watcher_history(),
+        "watcher_state": watcher_state,
+        "disk": disk_summary,
         "live_ok": ok,
         "latest_block": latest_block,
         "current_dog": current_dog,
@@ -950,6 +1434,9 @@ def main() -> int:
         or failed_last
         or dirty_blocking
         or not ok
+        or bool(watcher_issues)
+        or bool(disk_issues)
+        or rotation_failed
         or any("launchd" in line.lower() for line in issue_lines)
         or any("required script missing" in line.lower() for line in issue_lines)
     )
@@ -958,7 +1445,7 @@ def main() -> int:
         alert_message = handle_critical_alert(snapshot)
         if alert_message:
             print(alert_message)
-        return 0
+        return 1
 
     alert_message = handle_recovery_alert(snapshot)
     if alert_message:

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-09-18",
       "usd_estimate_price_usd": "1470.6778100057832",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#256/789",
-      "rank": 256,
-      "total": 789
+      "display": "#262/792",
+      "rank": 262,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 168 dog #168 168 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd7d109cf01d3e8dfb91c5ae9dc273fbbdd18edcbe054d2c8fc2d4c42d0de8b73 0xbf6431c9044244b9a52260a4f218b31aeb46ca8ec0ad0445df91cb4e8eff008e #256/789 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: hoodie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 168 dog #168 168 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xd7d109cf01d3e8dfb91c5ae9dc273fbbdd18edcbe054d2c8fc2d4c42d0de8b73 0xbf6431c9044244b9a52260a4f218b31aeb46ca8ec0ad0445df91cb4e8eff008e #262/792 background: none; body: black; neck: redcollar; mouth: none; ears: none; head: hoodie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 33247170,
       "block_time_utc": "2022-09-18T04:44:03Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -96,7 +97,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -106,7 +107,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

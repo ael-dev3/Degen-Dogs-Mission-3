@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-07-08",
       "usd_estimate_price_usd": "0.00367966",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#41/789",
+      "display": "#41/792",
       "rank": 41,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 424 dog #424 424 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x43743a720d701f760054de8953040d326dcf2be5f993c5646921eb76de32d19e 0x7289c1d6eaea5e8cd643f74bbc371a418da742b478074b4df29ead1ba3767b36 #41/789 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: earbuds; head: toque; eyes: masksnorkel 0xe27d9dd7a77118b97b8ea9f3a78da333b7cd068933027abc6549e72fbf092588 0x0160e9e7f4139e71e7eb61b7b86441feb9938bb8cad4e9c2288058001a5fce75 0x821524ca7e3fd0586e57bf6b2ded3ee118b1e1a42fafa05d9ab6c5c9deab3b94 chain_logs contract_getters",
+    "search_text": "dog 424 dog #424 424 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x43743a720d701f760054de8953040d326dcf2be5f993c5646921eb76de32d19e 0x7289c1d6eaea5e8cd643f74bbc371a418da742b478074b4df29ead1ba3767b36 #41/792 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: earbuds; head: toque; eyes: masksnorkel 0xe27d9dd7a77118b97b8ea9f3a78da333b7cd068933027abc6549e72fbf092588 0x0160e9e7f4139e71e7eb61b7b86441feb9938bb8cad4e9c2288058001a5fce75 0x821524ca7e3fd0586e57bf6b2ded3ee118b1e1a42fafa05d9ab6c5c9deab3b94 chain_logs contract_getters",
     "settlement": {
       "block_number": 26056140,
       "block_time_utc": "2025-07-08T14:34:04Z",
@@ -83,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -98,7 +99,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +109,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

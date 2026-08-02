@@ -7,7 +7,7 @@
       "amount_usd_at_event": "16.76774350",
       "eth_usd_price_at_event": "1863.082611565993",
       "eth_usd_price_date_utc": "2026-07-17",
-      "native": "0.00900",
+      "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48700731,
       "block_time_utc": "2026-07-16T08:33:29Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7",
+      "tx_url": "https://basescan.org/tx/0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7"
     },
     "auction_house": null,
     "bid_stats": {
@@ -44,37 +44,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/775",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7",
       "dog_page": "https://degendogs.club/#dog775",
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/775",
       "repo_archive": "archive/dogs/by-id/775.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xef9f42e1f5283eed9451491457687b3ff40c37a99877a34e07310f0df2811c8b"
     },
     "mission": 3,
     "rarity": {
-      "display": "#627/789",
-      "rank": 627,
-      "total": 789
+      "display": "#631/792",
+      "rank": 631,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 775 dog #775 775 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.00900 eth 9000000000000000 16.76774350 $16.77 2026-07-17t12:36:45z #627/789 generated auction feed 0xf3d610fb783a897f46885ee7974ac704c4007909fe6c87e7e32ef4c7cec5fe74 0xee3fe1bdf84ea65f3bc31af1e85b5491bb272ec5833c78dbf61c749fd3df4674 background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: loopearring (27.1%) ears loopearring head: baseballcap (10.3%) head baseballcap eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 775 dog #775 https://api.degendogs.club/images/775.png https://degendogs.club/#dog775 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/775 settled @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00900 eth ($17) 2 2 2026-07-16 08:33:29 2026-07-17 12:36:45 #627/789 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: loopearring; head: baseballcap; eyes: none background: none (90.4%); body: redbrown (15.5%); neck: redcollar (30.9%); mouth: tongue (9.9%); ears: loopearring (27.1%); head: baseballcap (10.3%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 775 dog #775 775 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.76774350 $16.77 2026-07-17t12:36:45z 0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7 0xef9f42e1f5283eed9451491457687b3ff40c37a99877a34e07310f0df2811c8b #631/792 generated auction feed 0xf3d610fb783a897f46885ee7974ac704c4007909fe6c87e7e32ef4c7cec5fe74 0xee3fe1bdf84ea65f3bc31af1e85b5491bb272ec5833c78dbf61c749fd3df4674 background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: redcollar (30.9%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: loopearring (27.1%) ears loopearring head: baseballcap (10.5%) head baseballcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48751229,
       "block_time_utc": "2026-07-17T12:36:45Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xef9f42e1f5283eed9451491457687b3ff40c37a99877a34e07310f0df2811c8b",
+      "tx_url": "https://basescan.org/tx/0xef9f42e1f5283eed9451491457687b3ff40c37a99877a34e07310f0df2811c8b"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -85,7 +87,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -95,7 +97,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -105,12 +107,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

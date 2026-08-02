@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-12-17",
       "usd_estimate_price_usd": "0.0012607394756201258",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#66/789",
-      "rank": 66,
-      "total": 789
+      "display": "#67/792",
+      "rank": 67,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 #66/789 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters",
+    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 #67/792 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters",
     "settlement": {
       "block_number": 26594941,
       "block_time_utc": "2025-12-17T06:15:43Z",
@@ -83,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -93,7 +94,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -103,12 +104,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.7%)",
+        "display": "Head: WhiteMohawk (6.8%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: Monocle (6.5%)",
+        "display": "Eyes: Monocle (6.4%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

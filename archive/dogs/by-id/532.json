@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-11-10",
       "usd_estimate_price_usd": "0.0017410712747179553",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#78/789",
-      "rank": 78,
-      "total": 789
+      "display": "#79/792",
+      "rank": 79,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 532 dog #532 532 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2323 degen 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 #78/789 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: none; head: baseballcap; eyes: none 0x210318f218969882e489592244e27ed056b79f56fe97fba02ff98d6771e8c6d5 chain_logs contract_getters",
+    "search_text": "dog 532 dog #532 532 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2323 degen 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 0xba99f140c595e352f7c3e6707cc4fabd23f675cc4439c2611a4e74c4e9dee8b0 #79/792 background: none; body: redbrown; neck: redcollar; mouth: bone; ears: none; head: baseballcap; eyes: none 0x210318f218969882e489592244e27ed056b79f56fe97fba02ff98d6771e8c6d5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26449668,
       "block_time_utc": "2025-11-10T01:10:19Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -96,17 +97,17 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

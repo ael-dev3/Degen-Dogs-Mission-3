@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-02-07",
       "usd_estimate_price_usd": "2062.856910135724",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -53,12 +54,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#513/789",
-      "rank": 513,
-      "total": 789
+      "display": "#511/792",
+      "rank": 511,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 617 dog #617 617 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0242 eth 0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d 0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61 #513/789 background: none; body: black; neck: goldnecklace; mouth: tongue; ears: loopearring; head: none; eyes: bluelasereyes 0x76fee08bc7cf408f7308f5d58a8eee9573fe34ddb87f5c931612e44337cf0bb3 0x1a3ab6adfc37c6b800caabcee448b19f215437087f68a96fd2275c95f751cfdc 0x62cda5730524200175cee97039b02048f2c53705923e32ac01b4a0a09c53966e base_logs archive_indexer",
+    "search_text": "dog 617 dog #617 617 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0242 eth 24200000000000000 49.92 $49.92 2026-02-06t04:02:23z 0x48cd560591ef180f8c164024b782b04fd6bc4774e2bedac2e2168f061155126d 0x3665fd1ced39bac6f81847c9f0a2ab85c9f0afeb26d53486e02a862d1e28af61 #511/792 generated auction feed 0x76fee08bc7cf408f7308f5d58a8eee9573fe34ddb87f5c931612e44337cf0bb3 0x1a3ab6adfc37c6b800caabcee448b19f215437087f68a96fd2275c95f751cfdc 0x62cda5730524200175cee97039b02048f2c53705923e32ac01b4a0a09c53966e background: none (90.4%) background none body: black (11.1%) body black neck: goldnecklace (19.4%) neck goldnecklace mouth: tongue (9.8%) mouth tongue ears: loopearring (27.1%) ears loopearring head: none (20.3%) head none eyes: bluelasereyes (10.5%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41780598,
       "block_time_utc": "2026-02-06T04:02:23Z",
@@ -69,10 +70,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -83,17 +86,17 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.2%)",
+        "display": "Body: Black (11.1%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -103,7 +106,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

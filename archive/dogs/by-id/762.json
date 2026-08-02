@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48127641,
       "block_time_utc": "2026-07-03T02:10:29Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5",
+      "tx_url": "https://basescan.org/tx/0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5"
     },
     "auction_house": null,
     "bid_stats": {
@@ -49,37 +49,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/762",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5",
       "dog_page": "https://degendogs.club/#dog762",
       "explorer": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/762",
       "repo_archive": "archive/dogs/by-id/762.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e"
     },
     "mission": 3,
     "rarity": {
-      "display": "#724/789",
-      "rank": 724,
-      "total": 789
+      "display": "#728/792",
+      "rank": 728,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 762 dog #762 762 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00934 eth 9340000000000000 16.40878319 $16.41 2026-07-04t02:16:27z #724/789 generated auction feed 0x4b7590e2beabf1a886e7df1c4e4f1ac65420c96147578935635f807063cee0bc 0x9052a0e63aaf830e5b18f4f120936c97941755077c8755308df5fd1a8ce5659d 0x23460d6ed980b4539546434d2f5effadacc40a4b1676656889a2dc2b0e7a2975 0x97204d7a6d45beeb02f608ef633f9c90969f7d712a08c6afa14705b7b5cdb09b 0xd0b08c6466badeee0ab4c56e555aaf40b6952cd1568d8f5d939a3be3d1051d1e 0x625aff4604bd41507f73e543508e9d083a167ce76d88ca988cb9578a859de1a4 0x6cdfee81f95a35e526e3f62a87b691a1a21b72c834d5ddad708b4262175b49de background: none (90.4%) background none body: grey (11.5%) body grey neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.9%) mouth none ears: earbuds (32.1%) ears earbuds head: baseballcap (10.3%) head baseballcap eyes: none (18.0%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 762 dog #762 https://api.degendogs.club/images/762.png https://degendogs.club/#dog762 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/762 settled @badadan https://farcaster.xyz/badadan 0xa2648350f3566e4f18a9519734928d08d3ea08c4 0.00934 eth ($16) 7 5 2026-07-03 02:10:29 2026-07-04 02:16:27 #724/789 background: none; body: grey; neck: goldnecklace; mouth: none; ears: earbuds; head: baseballcap; eyes: none background: none (90.4%); body: grey (11.5%); neck: goldnecklace (19.5%); mouth: none (68.9%); ears: earbuds (32.1%); head: baseballcap (10.3%); eyes: none (18.0%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 762 dog #762 762 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00934 eth 9340000000000000 16.40878319 $16.41 2026-07-04t02:16:27z 0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5 0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e #728/792 generated auction feed 0x4b7590e2beabf1a886e7df1c4e4f1ac65420c96147578935635f807063cee0bc 0x9052a0e63aaf830e5b18f4f120936c97941755077c8755308df5fd1a8ce5659d 0x23460d6ed980b4539546434d2f5effadacc40a4b1676656889a2dc2b0e7a2975 0x97204d7a6d45beeb02f608ef633f9c90969f7d712a08c6afa14705b7b5cdb09b 0xd0b08c6466badeee0ab4c56e555aaf40b6952cd1568d8f5d939a3be3d1051d1e 0x625aff4604bd41507f73e543508e9d083a167ce76d88ca988cb9578a859de1a4 0x6cdfee81f95a35e526e3f62a87b691a1a21b72c834d5ddad708b4262175b49de background: none (90.4%) background none body: grey (11.6%) body grey neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: baseballcap (10.5%) head baseballcap eyes: none (17.9%) eyes none base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48171020,
       "block_time_utc": "2026-07-04T02:16:27Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e",
+      "tx_url": "https://basescan.org/tx/0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -90,12 +92,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -105,17 +107,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

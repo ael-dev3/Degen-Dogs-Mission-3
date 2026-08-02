@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2026-02-08",
       "usd_estimate_price_usd": "2088.9922383839016",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -55,12 +56,12 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#145/789",
+      "display": "#145/792",
       "rank": 145,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 620 dog #620 620 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.01974 eth 0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904 0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865 #145/789 background: halo; body: redbrown; neck: goldnecklace; mouth: tongue; ears: loopearring; head: stripedbeanie; eyes: masksnorkel 0xd5ef3f8c0c04d4b84e88e1e9025e6f621da2d2eb7c61376f3d851bffd38eaf60 0xac6793eb50628afcaa60a9dfb2e9fb6215c581e2277ff2fc83a49368149df7ce 0x6ca3c2a55d61226c5ebf3f50cab2fe8ad6c88272534ce8d6659f3f3521cb066b 0xffd42c11654f6aeeda18903720345d8d25ce3055fdb0ea8abed517fc1f649a33 0x24d6215b32478bfceef4e824202c54e4cbdf9cd94885883c95eb482d9e663403 base_logs archive_indexer",
+    "search_text": "dog 620 dog #620 620 mission 3 mission 3 base settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 0.01974 eth 19740000000000000 41.24 $41.24 2026-02-09t04:16:55z 0xa448139dd7b3e690ceb658eab50cecd469bc17492413c31402123e69434a0904 0xaa96ebfb4b2e2ffb481e51a7ab22395e2374f895993f4231b0c0d312949cd865 #145/792 generated auction feed 0xd5ef3f8c0c04d4b84e88e1e9025e6f621da2d2eb7c61376f3d851bffd38eaf60 0xac6793eb50628afcaa60a9dfb2e9fb6215c581e2277ff2fc83a49368149df7ce 0x6ca3c2a55d61226c5ebf3f50cab2fe8ad6c88272534ce8d6659f3f3521cb066b 0xffd42c11654f6aeeda18903720345d8d25ce3055fdb0ea8abed517fc1f649a33 0x24d6215b32478bfceef4e824202c54e4cbdf9cd94885883c95eb482d9e663403 background: halo (9.6%) background halo body: redbrown (15.4%) body redbrown neck: goldnecklace (19.4%) neck goldnecklace mouth: tongue (9.8%) mouth tongue ears: loopearring (27.1%) ears loopearring head: stripedbeanie (8.3%) head stripedbeanie eyes: masksnorkel (9.7%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 41910634,
       "block_time_utc": "2026-02-09T04:16:55Z",
@@ -71,10 +72,12 @@
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer"
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -85,17 +88,17 @@
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -105,12 +108,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

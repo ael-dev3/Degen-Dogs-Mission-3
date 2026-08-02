@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 from typing import Any
 
@@ -79,6 +79,162 @@ def validate_historical_event_provenance(
         fail(f"historical event USD provenance ETH price mismatch for mission {mission} dog {dog_id}")
     if text_value(amount.get("eth_usd_price_date_utc")) != text_value(row.get("eth_usd_price_date_utc")):
         fail(f"historical event USD provenance date mismatch for mission {mission} dog {dog_id}")
+    for amount_field, estimate_field in [
+        ("usd_estimate_source", "price_source"),
+        ("usd_estimate_source_detail", "price_source_detail"),
+        ("usd_estimate_confidence", "price_confidence"),
+    ]:
+        amount_value = text_value(amount.get(amount_field))
+        estimate_value = text_value(row.get(estimate_field))
+        if amount_value != estimate_value:
+            fail(
+                f"historical event USD provenance {amount_field} mismatch for mission {mission} dog {dog_id}: "
+                f"unified={amount_value!r} estimate={estimate_value!r}"
+            )
+
+
+def validate_current_bid_provenance(
+    *,
+    mission: Any,
+    dog_id: Any,
+    record: dict[str, Any],
+    amount: dict[str, Any],
+    row: dict[str, Any],
+    current_by_dog: dict[int, dict[str, Any]],
+) -> None:
+    if text_value(row.get("event_type")) != "current_bid":
+        return
+    bid_hashes = [text_value(value) for value in record.get("bid_tx_hashes", []) if text_value(value)]
+    if not bid_hashes or text_value(row.get("event_tx_hash")) != bid_hashes[-1]:
+        fail(f"current bid transaction provenance mismatch for mission {mission} dog {dog_id}")
+    bid_stats = record.get("bid_stats") if isinstance(record.get("bid_stats"), dict) else {}
+    last_bid_time = text_value(bid_stats.get("last_bid_time_utc"))
+    if not last_bid_time or text_value(row.get("event_time_utc")) != last_bid_time:
+        fail(f"current bid time provenance mismatch for mission {mission} dog {dog_id}")
+    if text_value(record.get("activity_time_utc")) != last_bid_time:
+        fail(f"current bid activity time mismatch for mission {mission} dog {dog_id}")
+
+    native = decimal_or_none(amount.get("native"))
+    explicit_price = decimal_or_none(amount.get("usd_estimate_price_usd"))
+    row_price = decimal_or_none(row.get("price_usd"))
+    row_value = decimal_or_none(row.get("estimated_usd_value"))
+    amount_value = decimal_or_none(amount.get("usd_estimate"))
+    if native is None or explicit_price is None or row_price is None or row_value is None or amount_value is None:
+        fail(f"current bid exact live-price provenance missing for mission {mission} dog {dog_id}")
+    if row_price != explicit_price:
+        fail(f"current bid ETH/USD quote mismatch for mission {mission} dog {dog_id}")
+    expected_value = (native * explicit_price).quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)
+    if row_value != expected_value or amount_value != expected_value:
+        fail(f"current bid USD value is not derived from its exact quote for mission {mission} dog {dog_id}")
+
+    current = current_by_dog.get(int(dog_id))
+    if current is not None:
+        surface_price = decimal_or_none(current.get("eth_usd_price_live"))
+        if surface_price is None or surface_price != explicit_price:
+            fail(f"current auction ETH/USD quote differs from archive for Dog #{dog_id}")
+        if text_value(current.get("eth_usd_price_date_utc")) != text_value(amount.get("usd_estimate_price_date_utc")):
+            fail(f"current auction ETH/USD quote date differs from archive for Dog #{dog_id}")
+
+
+def surface_dog_id(row: dict[str, Any]) -> int:
+    raw = row.get("token_id")
+    if raw in (None, ""):
+        raw = row.get("dog_id")
+    if raw not in (None, ""):
+        return int(raw)
+    label = text_value(row.get("dog") or row.get("dog_name"))
+    digits = "".join(char if char.isdigit() else " " for char in label).split()
+    return int(digits[-1]) if digits else -1
+
+
+def validate_surface_provenance(
+    *,
+    dog_id: int,
+    canonical: dict[str, Any],
+    surface: dict[str, Any],
+    label: str,
+    event_amount_field: str,
+) -> None:
+    event_amount = decimal_or_none(surface.get(event_amount_field))
+    canonical_amount = decimal_or_none(canonical.get("amount_usd_at_event"))
+    if event_amount is None or canonical_amount is None:
+        fail(f"{label} historical event USD amount missing for Dog #{dog_id}")
+    if event_amount.quantize(Decimal("0.01")) != canonical_amount.quantize(Decimal("0.01")):
+        fail(f"{label} historical event USD amount differs from archive for Dog #{dog_id}")
+    surface_price = decimal_or_none(surface.get("eth_usd_price_at_event"))
+    canonical_price = decimal_or_none(canonical.get("eth_usd_price_at_event"))
+    if surface_price is None or canonical_price is None or surface_price != canonical_price:
+        fail(f"{label} historical ETH/USD price differs from archive for Dog #{dog_id}")
+    for field in [
+        "eth_usd_price_date_utc",
+        "usd_estimate_source",
+        "usd_estimate_source_detail",
+        "usd_estimate_confidence",
+    ]:
+        actual = text_value(surface.get(field))
+        expected = text_value(canonical.get(field))
+        if actual != expected:
+            fail(f"{label} {field} differs from archive for Dog #{dog_id}: {actual!r} != {expected!r}")
+    if text_value(surface.get("usd_estimate_source")).lower() in LIVE_USD_SOURCES:
+        fail(f"{label} uses live/current historical provenance for Dog #{dog_id}")
+
+
+def validate_archive_surface_parity(
+    *,
+    record: dict[str, Any],
+    amount: dict[str, Any],
+    feed_by_dog: dict[int, dict[str, Any]],
+    winner_by_dog: dict[int, dict[str, Any]],
+) -> None:
+    if record.get("mission") != 3 or is_live_or_current(record):
+        return
+    dog_id = int(record.get("dog_id"))
+    dog_path = ROOT / "archive" / "dogs" / "by-id" / f"{dog_id:03d}.json"
+    if dog_path.exists():
+        dog_payload = load_json(dog_path)
+        dog_record = dog_payload.get("record") if isinstance(dog_payload, dict) else None
+        dog_amount = dog_record.get("amount") if isinstance(dog_record, dict) and isinstance(dog_record.get("amount"), dict) else None
+        if not isinstance(dog_amount, dict):
+            fail(f"archive/dogs/by-id/{dog_id:03d}.json lacks amount provenance")
+        for field in [
+            "amount_usd_at_event",
+            "eth_usd_price_at_event",
+            "eth_usd_price_date_utc",
+            "usd_estimate_source",
+            "usd_estimate_source_detail",
+            "usd_estimate_confidence",
+        ]:
+            if text_value(dog_amount.get(field)) != text_value(amount.get(field)):
+                fail(f"by-id {field} differs from unified archive for Dog #{dog_id}")
+
+    feed = feed_by_dog.get(dog_id)
+    if feed is not None and text_value(feed.get("status")).lower() == "settled":
+        validate_surface_provenance(
+            dog_id=dog_id,
+            canonical=amount,
+            surface=feed,
+            label="auction_feed",
+            event_amount_field="amount_usd_at_event",
+        )
+
+    winner = winner_by_dog.get(dog_id)
+    if winner is not None:
+        validate_surface_provenance(
+            dog_id=dog_id,
+            canonical=amount,
+            surface=winner,
+            label="auction_winners",
+            event_amount_field="winning_bid_usd_at_settlement",
+        )
+        winner_tx = text_value(winner.get("tx_hash"))
+        winner_block = text_value(winner.get("block_number"))
+        if winner_tx and not winner_block:
+            fail(f"auction_winners settlement block missing for Dog #{dog_id}")
+        raw_settlement = record.get("settlement")
+        settlement = raw_settlement if isinstance(raw_settlement, dict) else {}
+        archive_block = text_value(settlement.get("block_number"))
+        if archive_block and winner_block and archive_block != winner_block:
+            fail(f"auction_winners settlement block differs from unified archive for Dog #{dog_id}")
 
 
 def main() -> None:
@@ -106,6 +262,12 @@ def main() -> None:
         fail(f"price rows missing assets: {sorted(missing_assets)}")
 
     estimate_by_key = {(row.get("mission"), row.get("dog_id")): row for row in estimates if isinstance(row, dict)}
+    feed_rows = load_json(ROOT / "generated" / "auction_feed.json") if (ROOT / "generated" / "auction_feed.json").exists() else []
+    winner_rows = load_json(ROOT / "generated" / "auction_winners.json") if (ROOT / "generated" / "auction_winners.json").exists() else []
+    current_rows = load_json(ROOT / "generated" / "current_auction.json") if (ROOT / "generated" / "current_auction.json").exists() else []
+    feed_by_dog = {surface_dog_id(row): row for row in feed_rows if isinstance(row, dict)} if isinstance(feed_rows, list) else {}
+    winner_by_dog = {surface_dog_id(row): row for row in winner_rows if isinstance(row, dict)} if isinstance(winner_rows, list) else {}
+    current_by_dog = {surface_dog_id(row): row for row in current_rows if isinstance(row, dict)} if isinstance(current_rows, list) else {}
     priced = 0
     missing = 0
     for record in unified:
@@ -139,6 +301,20 @@ def main() -> None:
                 record=record,
                 amount=amount,
                 row=row,
+            )
+            validate_current_bid_provenance(
+                mission=mission,
+                dog_id=dog_id,
+                record=record,
+                amount=amount,
+                row=row,
+                current_by_dog=current_by_dog,
+            )
+            validate_archive_surface_parity(
+                record=record,
+                amount=amount,
+                feed_by_dog=feed_by_dog,
+                winner_by_dog=winner_by_dog,
             )
         elif status == "missing":
             missing += 1

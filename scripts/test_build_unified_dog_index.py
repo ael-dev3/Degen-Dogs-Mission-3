@@ -21,6 +21,15 @@ def load_module() -> Any:
     return module
 
 
+def assert_runtime_error_contains(callback: Any, expected: str) -> None:
+    try:
+        callback()
+    except RuntimeError as exc:
+        assert expected in str(exc), str(exc)
+    else:
+        raise AssertionError(f"expected RuntimeError containing {expected!r}")
+
+
 def test_ended_pending_settlement_feed_row_stays_in_unified_archive() -> None:
     unified = load_module()
     feed = {
@@ -320,6 +329,280 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
     assert "generated_auction_feed" in record["source"]["sources"]
 
 
+def test_all_mission3_onchain_tables_override_stale_archive_and_preserve_transactions() -> None:
+    unified = load_module()
+    stale_wallet = "0x76d0e7a13248945ee9f808b4a472262b28778942"
+    winner_wallet = "0xdbb811ec62338db94858ec21ef1d56b658111922"
+    created_tx = "0x" + "c" * 64
+    settled_tx = "0x" + "d" * 64
+    record = {
+        "mission": 3,
+        "dog_id": 727,
+        "status": "ended pending settlement",
+        "winner_or_high_bidder": {"wallet": stale_wallet, "display": "@stale"},
+        "amount": {"native": "0.01", "raw": "10000000000000000"},
+        "bid_stats": {"bid_count": 2, "unique_bidder_count": 2},
+        "auction_created": {"block_number": 46602034, "block_time_utc": "2026-05-28T18:36:55Z"},
+        "settlement": {"settled": False, "block_number": None, "tx_hash": None},
+        "links": {},
+        "source": {"sources": ["base_logs"], "confidence": "verified"},
+        "rarity": {"display": "#332/791", "rank": 332, "total": 791},
+        "traits": [],
+    }
+    historical = {
+        "mission": 3,
+        "token_id": 727,
+        "status": "settled",
+        "winner": "@floam",
+        "winner_url": "https://farcaster.xyz/floam",
+        "winner_wallet": winner_wallet,
+        "amount": "0.01100 ETH ($22)",
+        "bid_count": 3,
+        "unique_bidder_count": 3,
+        "auction_created_time_utc": "2026-05-28 18:36:55",
+        "settled_time_utc": "2026-05-29 18:38:33",
+    }
+    timeline = {
+        "token_id": 727,
+        "auction_state": "settled",
+        "bids": 3,
+        "unique_bidders": 3,
+        "latest_bid_eth": "0.011",
+        "latest_bid_utc": "2026-05-29 13:51:53",
+        "settled_eth": "0.011",
+        "settled_time_utc": "2026-05-29 18:38:33",
+        "start_time_utc": "2026-05-28 18:36:55",
+        "created_tx_hash": created_tx,
+        "settled_tx_hash": settled_tx,
+    }
+    winner = {
+        "token_id": 727,
+        "winner_wallet": winner_wallet,
+        "winner": "@floam",
+        "winner_url": "https://farcaster.xyz/floam",
+        "winning_bid_eth": "0.011",
+        "winning_bid_usd_at_settlement": "22.08",
+        "eth_usd_price_at_event": "2007.7116820979008",
+        "eth_usd_price_date_utc": "2026-05-29",
+        "usd_estimate_source": "defillama_coin_prices",
+        "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+        "usd_estimate_confidence": "medium",
+        "bid_count": 3,
+        "unique_bidders": 3,
+        "last_bid_utc": "2026-05-29 13:51:53",
+        "settled_time_utc": "2026-05-29 18:38:33",
+        "block_number": 46645283,
+        "tx_hash": settled_tx,
+    }
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        old_paths = (
+            unified.AUCTION_TIMELINE,
+            unified.AUCTION_WINNERS,
+            unified.HISTORICAL_SEARCH,
+            unified.CURRENT_AUCTION,
+        )
+        old_mission3_source = unified.MISSION_INDEXES[3]
+        try:
+            unified.AUCTION_TIMELINE = tmp_path / "auction_timeline.json"
+            unified.AUCTION_WINNERS = tmp_path / "auction_winners.json"
+            unified.HISTORICAL_SEARCH = tmp_path / "historical_dog_search.json"
+            unified.CURRENT_AUCTION = tmp_path / "current_auction.json"
+            unified.MISSION_INDEXES[3] = tmp_path / "mission3_dog_search_index.json"
+            unified.AUCTION_TIMELINE.write_text(json.dumps([timeline]), encoding="utf-8")
+            unified.AUCTION_WINNERS.write_text(json.dumps([winner]), encoding="utf-8")
+            unified.HISTORICAL_SEARCH.write_text(json.dumps([historical]), encoding="utf-8")
+            unified.CURRENT_AUCTION.write_text("[]", encoding="utf-8")
+            unified.MISSION_INDEXES[3].write_text(json.dumps([{
+                "token_id": 727,
+                "auction_created_tx": created_tx,
+                "auction_created_block": 46602034,
+            }]), encoding="utf-8")
+            updated = unified.apply_mission3_onchain_overrides([record], {}, {})
+        finally:
+            (
+                unified.AUCTION_TIMELINE,
+                unified.AUCTION_WINNERS,
+                unified.HISTORICAL_SEARCH,
+                unified.CURRENT_AUCTION,
+            ) = old_paths
+            unified.MISSION_INDEXES[3] = old_mission3_source
+
+    assert updated == 1
+    assert record["status"] == "settled"
+    assert record["winner_or_high_bidder"]["wallet"] == winner_wallet
+    assert record["winner_or_high_bidder"]["display"] == "@floam"
+    assert record["amount"]["native"] == "0.011"
+    assert record["amount"]["usd_estimate_source"] == "defillama_coin_prices"
+    assert record["bid_stats"]["bid_count"] == 3
+    assert record["bid_stats"]["unique_bidder_count"] == 3
+    assert record["auction_created"]["block_number"] == 46602034
+    assert record["auction_created"]["tx_hash"] == created_tx
+    assert record["settlement"]["block_number"] == 46645283
+    assert record["settlement"]["tx_hash"] == settled_tx
+    assert record["links"]["settlement_tx"].endswith(settled_tx)
+    assert "generated_auction_timeline" in record["source"]["sources"]
+    assert "generated_auction_winners" in record["source"]["sources"]
+    assert settled_tx in record["search_text"]
+
+
+def test_created_block_is_derived_from_matching_predecessor_settlement_transaction() -> None:
+    unified = load_module()
+    genesis_tx = "0x" + "1" * 64
+    transition_tx = "0x" + "2" * 64
+    winner_wallet = "0x" + "a" * 40
+    records = [
+        {
+            "mission": 3,
+            "dog_id": 590,
+            "status": "settled",
+            "winner_or_high_bidder": {},
+            "amount": {},
+            "bid_stats": {},
+            "auction_created": {"block_number": None},
+            "settlement": {},
+            "links": {},
+            "source": {"sources": []},
+            "rarity": {},
+            "traits": [],
+        },
+        {
+            "mission": 3,
+            "dog_id": 591,
+            "status": "archive unresolved",
+            "winner_or_high_bidder": {"wallet": "0x" + "b" * 40, "display": "@stale"},
+            "amount": {"native": "9", "raw": "9000000000000000000"},
+            "bid_stats": {},
+            "auction_created": {"block_number": None},
+            "settlement": {},
+            "links": {},
+            "source": {"sources": []},
+            "rarity": {},
+            "traits": [],
+        },
+    ]
+    timeline = [
+        {
+            "token_id": 590,
+            "auction_state": "settled",
+            "bids": 1,
+            "unique_bidders": 1,
+            "latest_bid_eth": "1",
+            "latest_bid_utc": "2026-01-01 00:30:00",
+            "settled_eth": "1",
+            "settled_time_utc": "2026-01-02 00:00:00",
+            "start_time_utc": "2026-01-01 00:00:00",
+            "created_tx_hash": genesis_tx,
+            "settled_tx_hash": transition_tx,
+        },
+        {
+            "token_id": 591,
+            "auction_state": "live",
+            "bids": 0,
+            "unique_bidders": 0,
+            "latest_bid_eth": None,
+            "latest_bid_utc": None,
+            "settled_eth": 0,
+            "settled_time_utc": None,
+            "start_time_utc": "2026-01-02 00:00:00",
+            "created_tx_hash": transition_tx,
+            "settled_tx_hash": None,
+        },
+    ]
+    historical = [
+        {
+            "mission": 3,
+            "token_id": 590,
+            "status": "settled",
+            "winner": "@winner",
+            "winner_wallet": winner_wallet,
+            "amount": "1 ETH ($1)",
+            "bid_count": 1,
+            "unique_bidder_count": 1,
+            "auction_created_time_utc": "2026-01-01 00:00:00",
+            "settled_time_utc": "2026-01-02 00:00:00",
+        },
+        {
+            "mission": 3,
+            "token_id": 591,
+            "status": "live",
+            "winner": "",
+            "winner_wallet": "",
+            "amount": "",
+            "bid_count": 0,
+            "unique_bidder_count": 0,
+            "auction_created_time_utc": "2026-01-02 00:00:00",
+            "settled_time_utc": "",
+        },
+    ]
+    winners = [{
+        "token_id": 590,
+        "winner": "@winner",
+        "winner_wallet": winner_wallet,
+        "winning_bid_eth": "1",
+        "bid_count": 1,
+        "unique_bidders": 1,
+        "last_bid_utc": "2026-01-01 00:30:00",
+        "settled_time_utc": "2026-01-02 00:00:00",
+        "block_number": 200,
+        "tx_hash": transition_tx,
+    }]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        old_paths = (
+            unified.AUCTION_TIMELINE,
+            unified.AUCTION_WINNERS,
+            unified.HISTORICAL_SEARCH,
+            unified.CURRENT_AUCTION,
+        )
+        old_mission3_source = unified.MISSION_INDEXES[3]
+        try:
+            unified.AUCTION_TIMELINE = tmp_path / "auction_timeline.json"
+            unified.AUCTION_WINNERS = tmp_path / "auction_winners.json"
+            unified.HISTORICAL_SEARCH = tmp_path / "historical_dog_search.json"
+            unified.CURRENT_AUCTION = tmp_path / "current_auction.json"
+            unified.MISSION_INDEXES[3] = tmp_path / "mission3_dog_search_index.json"
+            unified.AUCTION_TIMELINE.write_text(json.dumps(timeline), encoding="utf-8")
+            unified.AUCTION_WINNERS.write_text(json.dumps(winners), encoding="utf-8")
+            unified.HISTORICAL_SEARCH.write_text(json.dumps(historical), encoding="utf-8")
+            unified.CURRENT_AUCTION.write_text(json.dumps([{"token_id": 591, "auction_state": "live"}]), encoding="utf-8")
+            unified.MISSION_INDEXES[3].write_text(json.dumps([
+                {"token_id": 590, "auction_created_tx": genesis_tx, "auction_created_block": 100},
+                {"token_id": 591, "auction_created_tx": transition_tx, "auction_created_block": None},
+            ]), encoding="utf-8")
+            updated = unified.apply_mission3_onchain_overrides(records, {}, {})
+        finally:
+            (
+                unified.AUCTION_TIMELINE,
+                unified.AUCTION_WINNERS,
+                unified.HISTORICAL_SEARCH,
+                unified.CURRENT_AUCTION,
+            ) = old_paths
+            unified.MISSION_INDEXES[3] = old_mission3_source
+
+    assert updated == 2
+    created = records[1]["auction_created"]
+    assert created["tx_hash"] == transition_tx
+    assert created["block_number"] == 200
+    assert records[1]["activity_time_utc"] == "2026-01-02T00:00:00Z"
+    assert records[1]["activity_time_basis"] == "auction_created_block_time"
+    assert records[1]["winner_or_high_bidder"]["wallet"] is None
+    assert records[1]["amount"]["native"] is None
+    assert records[1]["amount"]["raw"] is None
+
+
+def test_required_canonical_loader_rejects_empty_and_duplicate_token_tables() -> None:
+    unified = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "canonical.json"
+        path.write_text("[]", encoding="utf-8")
+        assert_runtime_error_contains(lambda: unified.rows_by_dog(path, required=True), "is empty")
+        path.write_text(json.dumps([{"token_id": 590}, {"token_id": 590}]), encoding="utf-8")
+        assert_runtime_error_contains(lambda: unified.rows_by_dog(path, required=True), "duplicate Dog #590")
+
+
 def test() -> None:
     tests = [
         test_ended_pending_settlement_feed_row_stays_in_unified_archive,
@@ -331,6 +614,9 @@ def test() -> None:
         test_historical_mission3_backfill_keeps_settled_row_after_recent_feed_rolloff,
         test_historical_mission3_backfill_preserves_existing_bid_context,
         test_current_feed_override_drops_historical_backfill_provenance,
+        test_all_mission3_onchain_tables_override_stale_archive_and_preserve_transactions,
+        test_created_block_is_derived_from_matching_predecessor_settlement_transaction,
+        test_required_canonical_loader_rejects_empty_and_duplicate_token_tables,
     ]
     for item in tests:
         item()

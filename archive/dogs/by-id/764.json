@@ -7,7 +7,7 @@
       "amount_usd_at_event": "19.61797635",
       "eth_usd_price_at_event": "1783.452395629129",
       "eth_usd_price_date_utc": "2026-07-05",
-      "native": "0.01100",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48214328,
       "block_time_utc": "2026-07-05T02:20:03Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813",
+      "tx_url": "https://basescan.org/tx/0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813"
     },
     "auction_house": null,
     "bid_stats": {
@@ -46,37 +46,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813",
       "dog_page": "https://degendogs.club/#dog764",
       "explorer": "https://basescan.org/address/0x7732f594c38d4940e1076aa9f6f53065b7915953",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764",
       "repo_archive": "archive/dogs/by-id/764.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b"
     },
     "mission": 3,
     "rarity": {
-      "display": "#122/789",
-      "rank": 122,
-      "total": 789
+      "display": "#125/792",
+      "rank": 125,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.01100 eth 11000000000000000 19.61797635 $19.62 2026-07-06t02:22:31z #122/789 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.4%) background none body: blue (9.4%) body blue neck: studdedcollar (9.8%) neck studdedcollar mouth: teeth (5.2%) mouth teeth ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: masksnorkel (9.6%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 764 dog #764 https://api.degendogs.club/images/764.png https://degendogs.club/#dog764 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/764 settled @bitcoinvestor https://farcaster.xyz/bitcoinvestor 0x7732f594c38d4940e1076aa9f6f53065b7915953 0.01100 eth ($20) 4 4 2026-07-05 02:20:03 2026-07-06 02:22:31 #122/789 background: none; body: blue; neck: studdedcollar; mouth: teeth; ears: earbuds; head: none; eyes: masksnorkel background: none (90.4%); body: blue (9.4%); neck: studdedcollar (9.8%); mouth: teeth (5.2%); ears: earbuds (32.1%); head: none (20.4%); eyes: masksnorkel (9.6%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.61797635 $19.62 2026-07-06t02:22:31z 0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b #125/792 generated auction feed 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 background: none (90.4%) background none body: blue (9.3%) body blue neck: studdedcollar (9.8%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: masksnorkel (9.7%) eyes masksnorkel base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48257602,
       "block_time_utc": "2026-07-06T02:22:31Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b",
+      "tx_url": "https://basescan.org/tx/0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -87,7 +89,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.4%)",
+        "display": "Body: Blue (9.3%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -97,22 +99,22 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Teeth (5.2%)",
+        "display": "Mouth: Teeth (5.3%)",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import importlib.util
+import csv
+import io
 import json
 import tempfile
 from pathlib import Path
@@ -29,6 +31,14 @@ def write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def metrics_csv(rows: list[dict[str, Any]]) -> str:
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=["metric", "value"], lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return buffer.getvalue()
+
+
 def hidden_metrics_table(metrics: dict[str, str]) -> str:
     rows = "".join(f"<tr><td>{key}</td><td>{value}</td></tr>" for key, value in metrics.items())
     return f'<table data-table="mission3_metrics" hidden><tbody>{rows}</tbody></table>'
@@ -53,6 +63,17 @@ def write_fixture(
     metrics = {
         "latest_block": "46732183",
         "latest_block_time_utc": "2026-05-31 18:55:13",
+        "onchain_verification_status": "current_snapshot_cross_provider_verified",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_chain_id": "8453",
+        "snapshot_block_hash": "0x" + "a" * 64,
+        "snapshot_confirmations": "1",
+        "rpc_quorum_size": "2",
+        "rpc_quorum_agreement": "2/2",
+        "rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "auction_house_code_sha256": "b" * 64,
+        "dog_nft_code_sha256": "c" * 64,
         "current_auction_token_id": "729",
         "current_auction_status": "live",
         "current_bid_eth": "0.01",
@@ -130,7 +151,7 @@ def write_fixture(
         "season6_current_bidder_projected_capped_usd_if_wins": "2000",
     }
     metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
-    write_text(root / "generated" / "mission3_metrics.csv", "metric,value\n" + "".join(f"{key},{value}\n" for key, value in metrics.items()))
+    write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(metric_rows))
     write_json(root / "generated" / "mission3_metrics.json", metric_rows)
     write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
 
@@ -139,6 +160,8 @@ def write_fixture(
         "current_bid": "0.01000 ETH ($20)",
         "current_bid_eth": 0.01,
         "current_bid_usd": 19.98,
+        "eth_usd_price_live": "1998",
+        "eth_usd_price_date_utc": "2026-05-30",
         "bidder": "@0xael.eth",
         "bidder_wallet": wallet,
         "auction_state": "live",
@@ -163,6 +186,17 @@ def write_fixture(
         "current_auction_status": "live",
         "current_auction_end_time_utc": "2026-05-31T20:40:09Z",
         "last_refresh_result": "success_generated",
+        "onchain_verification_status": "current_snapshot_cross_provider_verified",
+        "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs",
+        "onchain_chain_id": "8453",
+        "snapshot_block_hash": "0x" + "a" * 64,
+        "snapshot_confirmations": "1",
+        "rpc_quorum_size": "2",
+        "rpc_quorum_agreement": "2/2",
+        "rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
+        "auction_house_code_sha256": "b" * 64,
+        "dog_nft_code_sha256": "c" * 64,
     }
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
@@ -198,7 +232,44 @@ def write_fixture(
         "last_bid_utc": "2026-05-30 18:40:23",
     }])
     write_json(root / "generated" / "historical_dog_search.json", [{"mission": 3, "token_id": 729, "winner": "@0xael.eth", "winner_wallet": wallet, "amount": "0.01000 ETH ($20)"}])
-    write_json(root / "generated" / "recent_bids.json", [])
+    recent_bid = dict(current_history[0])
+    write_json(root / "generated" / "recent_bids.json", [recent_bid])
+    write_json(root / "public" / "generated" / "recent_bids.json", [recent_bid])
+    timeline_row = {
+        "token_id": 729,
+        "auction_state": "live",
+        "bids": 1,
+        "unique_bidders": 1,
+        "high_bid_eth": "0.01",
+        "total_bid_eth": "0.01",
+        "latest_bidder": "@0xael.eth",
+        "latest_bid_eth": "0.01",
+        "latest_bid_utc": "2026-05-30 18:40:23",
+    }
+    daily_row = {
+        "activity_day": "2026-05-30",
+        "created_auctions": 0,
+        "settled_auctions": 0,
+        "bids": 1,
+        "unique_bidders": 1,
+        "bid_eth": "0.01",
+        "high_bid_eth": "0.01",
+        "settled_eth": "0",
+    }
+    bidder_row = {
+        "bidder": "@0xael.eth",
+        "bidder_wallet": wallet,
+        "bids": 1,
+        "auctions_bid": 1,
+        "bid_eth": "0.01",
+        "high_bid_eth": "0.01",
+        "latest_bid_token_id": 729,
+        "latest_bid_utc": "2026-05-30 18:40:23",
+    }
+    for folder in (root / "generated", root / "public" / "generated"):
+        write_json(folder / "auction_timeline.json", [timeline_row])
+        write_json(folder / "auction_daily_activity.json", [daily_row])
+        write_json(folder / "auction_bidder_leaderboard.json", [bidder_row])
     season6_winner = {
         "winner_wallet": wallet,
         "winner_display": "@0xael.eth",
@@ -281,13 +352,15 @@ def write_fixture(
             "native_symbol": "ETH",
             "usd_estimate": "19.98",
             "usd_estimate_display": "$19.98",
+            "usd_estimate_price_usd": "1998",
+            "usd_estimate_price_date_utc": "2026-05-30",
             "usd_estimate_source": "generated_auction_feed",
             "usd_estimate_confidence": "medium",
         },
         "activity_time_utc": "2026-05-30T18:40:23Z",
-        "bid_stats": {"bid_count": 0, "unique_bidder_count": 0},
-        "bid_tx_hashes": [],
-        "search_text": f"dog 729 {wallet} @0xael.eth 0.01 eth 19.98 $19.98",
+        "bid_stats": {"bid_count": 1, "unique_bidder_count": 1},
+        "bid_tx_hashes": ["0x" + "1" * 64],
+        "search_text": f"dog 729 {wallet} @0xael.eth 0.01 eth 19.98 $19.98 {'0x' + '1' * 64}",
     }
     write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "public" / "generated" / "unified_dog_search_index.json", [unified_row])
@@ -375,7 +448,7 @@ def test_validator_catches_unified_current_row_missing_live_usd() -> None:
             rows[0]["amount"]["usd_estimate_source"] = None
             rows[0]["amount"]["usd_estimate_confidence"] = "missing"
             write_json(root / rel, rows)
-        assert_raises_contains(lambda: run_validation(root), "current row USD estimate")
+        assert_raises_contains(lambda: run_validation(root), "current row exact USD quote provenance")
 
 
 def test_validator_catches_unified_current_row_bad_live_usd() -> None:
@@ -528,8 +601,7 @@ def test_validator_catches_stale_observed_per_dog_reward_math() -> None:
                 row["value"] = "158351.896454"
         write_json(root / "generated" / "mission3_metrics.json", metric_rows)
         write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
-        csv_lines = ["metric,value"] + [f"{row['metric']},{row['value']}" for row in metric_rows]
-        write_text(root / "generated" / "mission3_metrics.csv", "\n".join(csv_lines) + "\n")
+        write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(metric_rows))
         stale_index = (root / "index.html").read_text(encoding="utf-8").replace(
             "<td>reward_woof_per_dog_per_day</td><td>154091.739097744361</td>",
             "<td>reward_woof_per_dog_per_day</td><td>158351.896454</td>",
@@ -599,6 +671,49 @@ def test_validator_catches_refresh_status_block_mismatch() -> None:
         write_json(root / "generated" / "refresh_status.json", status)
         write_json(root / "public" / "generated" / "refresh_status.json", status)
         assert_raises_contains(lambda: run_validation(root), "refresh_status latest_generated_block")
+
+
+def test_validator_rejects_missing_cross_provider_verification() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        rows = json.loads((root / "generated" / "mission3_metrics.json").read_text(encoding="utf-8"))
+        for row in rows:
+            if row.get("metric") == "onchain_verification_status":
+                row["value"] = "single_provider"
+        for folder in (root / "generated", root / "public" / "generated"):
+            write_json(folder / "mission3_metrics.json", rows)
+        status = json.loads((root / "generated" / "refresh_status.json").read_text(encoding="utf-8"))
+        status["onchain_verification_status"] = "single_provider"
+        for folder in (root / "generated", root / "public" / "generated"):
+            write_json(folder / "refresh_status.json", status)
+        write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(rows))
+        index = (root / "index.html").read_text(encoding="utf-8").replace(
+            "<td>onchain_verification_status</td><td>current_snapshot_cross_provider_verified</td>",
+            "<td>onchain_verification_status</td><td>single_provider</td>",
+        )
+        write_text(root / "index.html", index)
+        assert_raises_contains(lambda: run_validation(root), "not cross-provider verified")
+
+
+def test_validator_rejects_recent_bids_that_lag_current_history() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        for folder in (root / "generated", root / "public" / "generated"):
+            write_json(folder / "recent_bids.json", [])
+        assert_raises_contains(lambda: run_validation(root), "recent_bids missing current auction")
+
+
+def test_validator_rejects_stale_current_timeline_volume() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        rows = json.loads((root / "generated" / "auction_timeline.json").read_text(encoding="utf-8"))
+        rows[0]["total_bid_eth"] = "0"
+        for folder in (root / "generated", root / "public" / "generated"):
+            write_json(folder / "auction_timeline.json", rows)
+        assert_raises_contains(lambda: run_validation(root), "total_bid_eth differs")
 
 
 def test_validator_accepts_generated_rendered_surfaces_that_match_observed_onchain_state() -> None:

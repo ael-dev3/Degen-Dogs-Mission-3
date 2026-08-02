@@ -33,6 +33,8 @@ HISTORICAL_SEARCH = ROOT / "generated" / "historical_dog_search.json"
 AUCTION_FEED = ROOT / "generated" / "auction_feed.json"
 CURRENT_AUCTION = ROOT / "generated" / "current_auction.json"
 RECENT_BIDS = ROOT / "generated" / "recent_bids.json"
+AUCTION_TIMELINE = ROOT / "generated" / "auction_timeline.json"
+AUCTION_WINNERS = ROOT / "generated" / "auction_winners.json"
 
 MISSION_CONFIG = {
     1: {
@@ -914,6 +916,411 @@ def apply_historical_mission3_backfill(records: list[dict[str, Any]], metadata: 
     return added
 
 
+def rows_by_dog(path: Path, *, required: bool = False) -> dict[int, dict[str, Any]]:
+    """Load a token-keyed generated table without hiding malformed coverage."""
+    rows = load_json(path, None)
+    label = path.name
+    if not isinstance(rows, list):
+        if required:
+            raise RuntimeError(f"canonical Mission 3 table {label} is missing or is not a JSON list")
+        return {}
+    if required and not rows:
+        raise RuntimeError(f"canonical Mission 3 table {label} is empty")
+
+    by_dog: dict[int, dict[str, Any]] = {}
+    for offset, row in enumerate(rows):
+        if not isinstance(row, dict):
+            if required:
+                raise RuntimeError(f"canonical Mission 3 table {label} row {offset} is not an object")
+            continue
+        dog_id = dog_id_from_row(row)
+        if dog_id < 0:
+            if required:
+                raise RuntimeError(f"canonical Mission 3 table {label} row {offset} has no token id")
+            continue
+        if dog_id in by_dog:
+            raise RuntimeError(f"canonical Mission 3 table {label} contains duplicate Dog #{dog_id}")
+        by_dog[dog_id] = row
+    return by_dog
+
+
+def winner_blocks_by_transaction(winner_by_id: dict[int, dict[str, Any]]) -> dict[str, int]:
+    """Index verified settlement blocks by transaction hash for creation events.
+
+    Each auction after the initial Mission 3 auction is created by the prior
+    auction's settlement transaction. Matching the transaction hashes is the
+    onchain relationship; token-number arithmetic is deliberately not used.
+    """
+    blocks_by_tx: dict[str, int] = {}
+    for dog_id, winner in sorted(winner_by_id.items()):
+        tx_hash = first_text(winner.get("tx_hash")).lower()
+        block_number = int_value(winner.get("block_number"), 0)
+        if not tx_hash or block_number <= 0:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} winner row is missing settlement tx/block")
+        prior = blocks_by_tx.get(tx_hash)
+        if prior is not None and prior != block_number:
+            raise RuntimeError(
+                f"Mission 3 settlement transaction {tx_hash} maps to conflicting blocks {prior} and {block_number}"
+            )
+        blocks_by_tx[tx_hash] = block_number
+    return blocks_by_tx
+
+
+def assert_matching_onchain_value(dog_id: int, label: str, left: Any, right: Any) -> None:
+    left_text = first_text(left)
+    right_text = first_text(right)
+    if left_text and right_text and left_text.lower() != right_text.lower():
+        raise RuntimeError(
+            f"Mission 3 Dog #{dog_id} {label} mismatch between canonical generated tables: "
+            f"{left_text!r} != {right_text!r}"
+        )
+
+
+def apply_mission3_onchain_overrides(
+    records: list[dict[str, Any]],
+    metadata: dict[int, dict[str, Any]],
+    identity: dict[str, dict[str, Any]],
+) -> int:
+    """Overlay every Mission 3 row from the full onchain-derived dashboard tables."""
+    timeline_by_id = rows_by_dog(AUCTION_TIMELINE, required=True)
+    winner_by_id = rows_by_dog(AUCTION_WINNERS, required=True)
+    all_historical_by_id = rows_by_dog(HISTORICAL_SEARCH, required=True)
+    historical_by_id = {
+        dog_id: row
+        for dog_id, row in all_historical_by_id.items()
+        if int_value(row.get("mission"), 0) == 3
+    }
+    current_by_id = rows_by_dog(CURRENT_AUCTION)
+    mission3_source_by_id = rows_by_dog(MISSION_INDEXES[3], required=True)
+    timeline_ids = set(timeline_by_id)
+    historical_ids = set(historical_by_id)
+    if timeline_ids != historical_ids:
+        raise RuntimeError(
+            "Mission 3 auction_timeline coverage differs from historical_dog_search "
+            f"missing={sorted(historical_ids - timeline_ids)[:20]} "
+            f"extra={sorted(timeline_ids - historical_ids)[:20]}"
+        )
+    settled_ids = {
+        dog_id
+        for dog_id, row in timeline_by_id.items()
+        if text_value(row.get("auction_state")).lower() == "settled"
+    }
+    winner_ids = set(winner_by_id)
+    if winner_ids != settled_ids:
+        raise RuntimeError(
+            "Mission 3 auction_winners coverage differs from settled auction_timeline "
+            f"missing={sorted(settled_ids - winner_ids)[:20]} "
+            f"extra={sorted(winner_ids - settled_ids)[:20]}"
+        )
+    live_ids = {
+        dog_id
+        for dog_id, row in timeline_by_id.items()
+        if text_value(row.get("auction_state")).lower() in {"live", "ongoing"}
+    }
+    current_live_ids = {
+        dog_id
+        for dog_id, row in current_by_id.items()
+        if text_value(row.get("auction_state")).lower() in {"live", "ongoing"}
+    }
+    if current_live_ids != live_ids:
+        raise RuntimeError(
+            "Mission 3 current_auction coverage differs from live auction_timeline "
+            f"missing={sorted(live_ids - current_live_ids)[:20]} "
+            f"extra={sorted(current_live_ids - live_ids)[:20]}"
+        )
+    settlement_blocks_by_tx = winner_blocks_by_transaction(winner_by_id)
+    by_key = {(int_value(record.get("mission")), int_value(record.get("dog_id"))): record for record in records}
+    updates = 0
+
+    for dog_id, timeline in sorted(timeline_by_id.items()):
+        historical = historical_by_id.get(dog_id, {})
+        current = current_by_id.get(dog_id, {})
+        winner = winner_by_id.get(dog_id, {})
+        mission3_source = mission3_source_by_id.get(dog_id, {})
+        record = by_key.get((3, dog_id))
+        if record is None and historical:
+            record = historical_mission3_record(historical, metadata, identity)
+            if record is not None:
+                records.append(record)
+                by_key[(3, dog_id)] = record
+        if record is None:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} is present in auction_timeline but missing from unified sources")
+
+        timeline_state = text_value(timeline.get("auction_state")).lower()
+        is_current = text_value(current.get("auction_state")).lower() == "live"
+        status = archive_status_from_feed(timeline_state, is_current_auction=is_current)
+        if timeline_state == "settled":
+            status = "settled"
+        if status == "settled" and not winner:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} is settled in auction_timeline but missing from auction_winners")
+
+        historical_state = text_value(historical.get("status")).lower()
+        for field in ("status", "auction_created_time_utc", "bid_count", "unique_bidder_count"):
+            if historical.get(field) in (None, ""):
+                raise RuntimeError(f"Mission 3 Dog #{dog_id} historical_dog_search is missing {field}")
+        historical_status = archive_status_from_feed(
+            historical_state,
+            is_current_auction=historical_state in {"live", "ongoing"},
+        )
+        if historical_status != status:
+            raise RuntimeError(
+                f"Mission 3 Dog #{dog_id} status mismatch between canonical generated tables: "
+                f"timeline={status!r} historical={historical_status!r}"
+            )
+        for field in ("start_time_utc", "created_tx_hash", "bids", "unique_bidders"):
+            if timeline.get(field) in (None, ""):
+                raise RuntimeError(f"Mission 3 Dog #{dog_id} auction_timeline is missing {field}")
+        assert_matching_onchain_value(
+            dog_id,
+            "created time",
+            iso_utc(timeline.get("start_time_utc")),
+            iso_utc(historical.get("auction_created_time_utc")),
+        )
+        timeline_bids = int_value(timeline.get("bids"), 0)
+        timeline_unique = int_value(timeline.get("unique_bidders"), 0)
+        if int_value(historical.get("bid_count"), 0) != timeline_bids:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} bid count mismatch between timeline and history")
+        if int_value(historical.get("unique_bidder_count"), 0) != timeline_unique:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} unique bidder count mismatch between timeline and history")
+
+        timeline_settlement_tx = first_text(timeline.get("settled_tx_hash"))
+        winner_settlement_tx = first_text(winner.get("tx_hash"))
+        assert_matching_onchain_value(dog_id, "settlement transaction", timeline_settlement_tx, winner_settlement_tx)
+        assert_matching_onchain_value(dog_id, "settlement time", iso_utc(timeline.get("settled_time_utc")), iso_utc(winner.get("settled_time_utc")))
+        timeline_settled_amount = decimal_value(timeline.get("settled_eth"))
+        winner_settled_amount = decimal_value(winner.get("winning_bid_eth"))
+        if (
+            status == "settled"
+            and timeline_settled_amount is not None
+            and winner_settled_amount is not None
+            and timeline_settled_amount != winner_settled_amount
+        ):
+            raise RuntimeError(
+                f"Mission 3 Dog #{dog_id} settlement amount mismatch between canonical generated tables: "
+                f"{timeline_settled_amount} != {winner_settled_amount}"
+            )
+
+        historical_native, _historical_symbol, _historical_usd = parse_historical_amount_display(historical.get("amount"))
+        expected_native = winner_settled_amount if status == "settled" else decimal_value(timeline.get("latest_bid_eth"))
+        if expected_native is not None and decimal_value(historical_native) != expected_native:
+            raise RuntimeError(f"Mission 3 Dog #{dog_id} amount mismatch between timeline/winner and history")
+        if status == "settled":
+            for field in ("winner_wallet", "amount", "settled_time_utc"):
+                if historical.get(field) in (None, ""):
+                    raise RuntimeError(f"Mission 3 Dog #{dog_id} historical_dog_search is missing {field}")
+            for label, value in (
+                ("timeline settlement transaction", timeline_settlement_tx),
+                ("timeline settlement time", timeline.get("settled_time_utc")),
+                ("timeline settlement amount", timeline.get("settled_eth")),
+            ):
+                if value in (None, ""):
+                    raise RuntimeError(f"Mission 3 Dog #{dog_id} auction_timeline is missing {label}")
+            for label, value in (
+                ("settlement transaction", winner_settlement_tx),
+                ("settlement time", winner.get("settled_time_utc")),
+                ("winner wallet", winner.get("winner_wallet")),
+                ("winning amount", winner.get("winning_bid_eth")),
+            ):
+                if value in (None, ""):
+                    raise RuntimeError(f"Mission 3 Dog #{dog_id} winner row is missing {label}")
+            if int_value(winner.get("bid_count"), -1) != timeline_bids:
+                raise RuntimeError(f"Mission 3 Dog #{dog_id} bid count mismatch between timeline and winner table")
+            if int_value(winner.get("unique_bidders"), -1) != timeline_unique:
+                raise RuntimeError(f"Mission 3 Dog #{dog_id} unique bidder count mismatch between timeline and winner table")
+            assert_matching_onchain_value(
+                dog_id,
+                "historical settlement time",
+                iso_utc(historical.get("settled_time_utc")),
+                iso_utc(winner.get("settled_time_utc")),
+            )
+            assert_matching_onchain_value(
+                dog_id,
+                "historical winner wallet",
+                historical.get("winner_wallet"),
+                winner.get("winner_wallet"),
+            )
+
+        native = first_text(
+            winner.get("winning_bid_eth") if status == "settled" else "",
+            timeline.get("latest_bid_eth"),
+            current.get("current_bid_eth"),
+            historical_native,
+        )
+        wallet = normalize_address(
+            winner.get("winner_wallet")
+            or historical.get("winner_wallet")
+            or current.get("bidder_wallet")
+        )
+        profile = identity.get(wallet, {}) if wallet else {}
+        display = first_text(
+            winner.get("winner") if status == "settled" else "",
+            historical.get("winner"),
+            current.get("bidder"),
+            timeline.get("winner") if status == "settled" else timeline.get("latest_bidder"),
+            profile.get("display"),
+            short_address(wallet),
+        )
+        profile_url = first_text(
+            winner.get("winner_url") if status == "settled" else "",
+            historical.get("winner_url"),
+            current.get("bidder_url"),
+            timeline.get("winner_url") if status == "settled" else timeline.get("latest_bidder_url"),
+            profile.get("profile_url"),
+        )
+
+        record["status"] = status
+        record["winner_or_high_bidder"] = {
+            "wallet": wallet or None,
+            "display": display or None,
+            "farcaster_fid": profile.get("farcaster_fid"),
+            "farcaster_handle": first_text(
+                profile.get("farcaster_handle"),
+                display.lstrip("@") if display.startswith("@") else "",
+            ) or None,
+            "profile_url": profile_url or None,
+            "wallet_explorer_url": address_url(3, wallet) or None,
+        }
+
+        amount_raw = record.get("amount")
+        amount: dict[str, Any] = amount_raw if isinstance(amount_raw, dict) else {}
+        amount["native"] = native or None
+        amount["native_symbol"] = "ETH"
+        amount["price_asset_key"] = "ETH"
+        amount["raw"] = eth_to_wei(native) or None
+        if status == "settled":
+            event_usd = first_text(winner.get("winning_bid_usd_at_settlement"), winner.get("winning_bid_usd"))
+            event_price = first_text(winner.get("eth_usd_price_at_event"))
+            existing_event_usd = decimal_value(amount.get("amount_usd_at_event"))
+            existing_event_price = decimal_value(amount.get("eth_usd_price_at_event"))
+            winner_event_usd = decimal_value(event_usd)
+            winner_event_price = decimal_value(event_price)
+            preserve_precise_existing = (
+                existing_event_usd is not None
+                and existing_event_price is not None
+                and winner_event_usd is not None
+                and winner_event_price is not None
+                and existing_event_price == winner_event_price
+                and existing_event_usd.quantize(Decimal("0.01")) == winner_event_usd.quantize(Decimal("0.01"))
+            )
+            if event_usd and not preserve_precise_existing:
+                amount["usd_estimate"] = str(decimal_value(event_usd) or event_usd)
+                amount["usd_estimate_display"] = usd_display(event_usd) or None
+                amount["amount_usd_at_event"] = str(decimal_value(event_usd) or event_usd)
+            if event_price:
+                amount["eth_usd_price_at_event"] = event_price
+                amount["usd_estimate_price_usd"] = event_price
+            price_date = first_text(winner.get("eth_usd_price_date_utc"))
+            if price_date:
+                amount["eth_usd_price_date_utc"] = price_date
+                amount["usd_estimate_price_date_utc"] = price_date
+            amount["usd_estimate_source"] = first_text(winner.get("usd_estimate_source"), amount.get("usd_estimate_source")) or None
+            amount["usd_estimate_source_detail"] = first_text(winner.get("usd_estimate_source_detail"), amount.get("usd_estimate_source_detail")) or None
+            amount["usd_estimate_confidence"] = first_text(winner.get("usd_estimate_confidence"), amount.get("usd_estimate_confidence")) or None
+            amount["usd_estimate_time_basis"] = "settlement_block_time"
+        record["amount"] = amount
+
+        created_tx = first_text(timeline.get("created_tx_hash"))
+        auction_created_raw = record.get("auction_created")
+        auction_created: dict[str, Any] = auction_created_raw if isinstance(auction_created_raw, dict) else {}
+        auction_created["block_time_utc"] = iso_utc(first_text(timeline.get("start_time_utc"), historical.get("auction_created_time_utc"))) or None
+        if created_tx:
+            source_created_tx = first_text(mission3_source.get("auction_created_tx"))
+            if mission3_source and not source_created_tx:
+                raise RuntimeError(f"Mission 3 Dog #{dog_id} Mission 3 source is missing created transaction")
+            assert_matching_onchain_value(dog_id, "created transaction", created_tx, source_created_tx)
+            derived_created_block = settlement_blocks_by_tx.get(created_tx.lower())
+            source_created_block = int_value(mission3_source.get("auction_created_block"), 0)
+            if derived_created_block and source_created_block and derived_created_block != source_created_block:
+                raise RuntimeError(
+                    f"Mission 3 Dog #{dog_id} created block mismatch between tx-linked winner and Mission 3 source: "
+                    f"{derived_created_block} != {source_created_block}"
+                )
+            created_block = derived_created_block or source_created_block
+            if created_block <= 0:
+                raise RuntimeError(
+                    f"Mission 3 Dog #{dog_id} created transaction {created_tx} has no verified block mapping"
+                )
+            auction_created["block_number"] = created_block
+            auction_created["tx_hash"] = created_tx
+            auction_created["tx_url"] = tx_url(3, created_tx) or None
+        record["auction_created"] = auction_created
+
+        settlement_tx = first_text(winner_settlement_tx, timeline_settlement_tx)
+        settlement_raw = record.get("settlement")
+        settlement: dict[str, Any] = settlement_raw if isinstance(settlement_raw, dict) else {}
+        if status == "settled":
+            settlement.update(
+                {
+                    "settled": True,
+                    "block_number": int_value(winner.get("block_number"), None),
+                    "block_time_utc": iso_utc(first_text(winner.get("settled_time_utc"), timeline.get("settled_time_utc"))) or None,
+                    "tx_hash": settlement_tx or None,
+                    "tx_url": tx_url(3, settlement_tx) or None,
+                }
+            )
+        else:
+            settlement.update({"settled": False, "block_number": None, "block_time_utc": None, "tx_hash": None, "tx_url": None})
+        record["settlement"] = settlement
+
+        bid_stats_raw = record.get("bid_stats")
+        bid_stats: dict[str, Any] = bid_stats_raw if isinstance(bid_stats_raw, dict) else {}
+        bid_stats["bid_count"] = int_value(winner.get("bid_count"), timeline_bids) if status == "settled" else timeline_bids
+        bid_stats["unique_bidder_count"] = (
+            int_value(winner.get("unique_bidders"), timeline_unique) if status == "settled" else timeline_unique
+        )
+        bid_stats["last_bid_time_utc"] = iso_utc(
+            first_text(winner.get("last_bid_utc") if status == "settled" else "", timeline.get("latest_bid_utc"))
+        ) or None
+        record["bid_stats"] = bid_stats
+
+        links_raw = record.get("links")
+        links: dict[str, Any] = links_raw if isinstance(links_raw, dict) else {}
+        links["auction_tx"] = tx_url(3, created_tx) or None
+        links["settlement_tx"] = tx_url(3, settlement_tx) or None
+        links["explorer"] = address_url(3, wallet) or None
+        record["links"] = links
+        activity = iso_utc(
+            first_text(
+                winner.get("settled_time_utc") if status == "settled" else "",
+                timeline.get("settled_time_utc") if status == "settled" else "",
+                timeline.get("latest_bid_utc"),
+                timeline.get("start_time_utc"),
+            )
+        )
+        record["activity_time_utc"] = activity or None
+        record["activity_time_basis"] = (
+            "settlement_block_time"
+            if status == "settled"
+            else ("last_bid_block_time" if first_text(timeline.get("latest_bid_utc")) else "auction_created_block_time")
+        )
+
+        source_raw = record.get("source")
+        source: dict[str, Any] = source_raw if isinstance(source_raw, dict) else {}
+        sources = as_sources(source.get("sources"))
+        for item in ["generated_auction_timeline", *(["generated_auction_winners"] if status == "settled" else [])]:
+            if item not in sources:
+                sources.append(item)
+        source["sources"] = sources
+        source["confidence"] = "verified"
+        source["raw_confidence"] = "verified_onchain_generated_tables"
+        source["notes"] = MISSION_CONFIG[3]["source_note"]
+        record["source"] = source
+        record["search_text"] = current_overlay_search_text(record, dog_id)
+        updates += 1
+    unified_mission3_ids = {
+        int_value(record.get("dog_id"), -1)
+        for record in records
+        if int_value(record.get("mission"), 0) == 3
+    }
+    if unified_mission3_ids != timeline_ids:
+        raise RuntimeError(
+            "Mission 3 unified coverage differs from canonical auction_timeline "
+            f"missing={sorted(timeline_ids - unified_mission3_ids)[:20]} "
+            f"extra={sorted(unified_mission3_ids - timeline_ids)[:20]}"
+        )
+    return updates
+
+
 def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identity: dict[str, dict[str, Any]]) -> dict[str, Any]:
     dog_id = dog_id_from_row(feed)
     status_text = text_value(feed.get("status")).lower()
@@ -1236,6 +1643,7 @@ def build_unified_index() -> dict[str, Any]:
         seen.add(key)
         records.append(record)
     historical_mission3_backfills = apply_historical_mission3_backfill(records, metadata, identity)
+    mission3_onchain_overrides = apply_mission3_onchain_overrides(records, metadata, identity)
     current_overrides = apply_current_auction_overrides(records, identity)
     records.sort(key=record_sort_key, reverse=True)
 
@@ -1247,8 +1655,24 @@ def build_unified_index() -> dict[str, Any]:
         "total_records": len(records),
         "records_by_mission": {str(mission): counts_by_mission.get(str(mission), 0) for mission in [1, 2, 3]},
         "records_by_confidence": dict(sorted(counts_by_conf.items())),
-        "source_files": [str(path.relative_to(ROOT)) for path in MISSION_INDEXES.values() if path.exists()],
-        "notes": notes + [f"historical_mission3_backfills:{historical_mission3_backfills}", f"current_auction_overrides:{current_overrides}", "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches."],
+        "source_files": [
+            str(path.relative_to(ROOT))
+            for path in [
+                *MISSION_INDEXES.values(),
+                HISTORICAL_SEARCH,
+                AUCTION_TIMELINE,
+                AUCTION_WINNERS,
+                CURRENT_AUCTION,
+                AUCTION_FEED,
+            ]
+            if path.exists()
+        ],
+        "notes": notes + [
+            f"historical_mission3_backfills:{historical_mission3_backfills}",
+            f"mission3_onchain_overrides:{mission3_onchain_overrides}",
+            f"current_auction_overrides:{current_overrides}",
+            "Initial dashboard view remains capped at the latest 10; search loads this index for all verified archive matches.",
+        ],
     }
 
     write_json(ARCHIVE_GENERATED / "unified_dog_search_index.json", records)

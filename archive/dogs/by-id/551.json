@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-11-29",
       "usd_estimate_price_usd": "0.0013058137309876936",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#59/789",
-      "rank": 59,
-      "total": 789
+      "display": "#57/792",
+      "rank": 57,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 551 dog #551 551 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 11111 degen 0x77b9c4d6fbf6e575f71556a5f14ae4130947969ec7bc630d4906fe5fc4e1f98f 0xc22483b39135f5d58eae11a423b33fdafb6f48098e07d1b181ad57b00c1f6e40 #59/789 background: none; body: redbrown; neck: none; mouth: coin; ears: loopearring; head: toque; eyes: bluelasereyes 0xb528351315bf9b2fa72afd573a32a15d10c337b34d71e94688b35f643e6db7c9 0xfefe44f5bbda17e3f5bc759aa69b9d297fd1c8b8194ff88b2aeda37c71560cbe chain_logs contract_getters",
+    "search_text": "dog 551 dog #551 551 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 11111 degen 0x77b9c4d6fbf6e575f71556a5f14ae4130947969ec7bc630d4906fe5fc4e1f98f 0xc22483b39135f5d58eae11a423b33fdafb6f48098e07d1b181ad57b00c1f6e40 #57/792 background: none; body: redbrown; neck: none; mouth: coin; ears: loopearring; head: toque; eyes: bluelasereyes 0xb528351315bf9b2fa72afd573a32a15d10c337b34d71e94688b35f643e6db7c9 0xfefe44f5bbda17e3f5bc759aa69b9d297fd1c8b8194ff88b2aeda37c71560cbe chain_logs contract_getters",
     "settlement": {
       "block_number": 26530588,
       "block_time_utc": "2025-11-29T04:20:58Z",
@@ -82,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },

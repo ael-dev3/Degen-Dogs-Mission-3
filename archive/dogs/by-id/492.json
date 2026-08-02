@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-09-19",
       "usd_estimate_price_usd": "0.00351569",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -52,12 +53,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#385/789",
-      "rank": 385,
-      "total": 789
+      "display": "#396/792",
+      "rank": 396,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 492 dog #492 492 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0x5184c01cee81229d1f084372d00801d5865f39faa7413f918514f502b0b382f7 0x55a819002b3fed96a4aaaf7cb5f2c681e2f53055fafa578f59391c774a5fe020 #385/789 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: none 0x9fe327332b1a505c328bf3da66748abe43b44090ddc7e89b940fda7c071b7e36 0x6f4c9a194c87eb9738fcdf5e93587d0c50d763ded6cade75fdb65192d92c6e8f chain_logs contract_getters",
+    "search_text": "dog 492 dog #492 492 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0x5184c01cee81229d1f084372d00801d5865f39faa7413f918514f502b0b382f7 0x55a819002b3fed96a4aaaf7cb5f2c681e2f53055fafa578f59391c774a5fe020 #396/792 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: goldearring; head: whitemohawk; eyes: none 0x9fe327332b1a505c328bf3da66748abe43b44090ddc7e89b940fda7c071b7e36 0x6f4c9a194c87eb9738fcdf5e93587d0c50d763ded6cade75fdb65192d92c6e8f chain_logs contract_getters",
     "settlement": {
       "block_number": 26265015,
       "block_time_utc": "2025-09-19T23:32:16Z",
@@ -82,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -102,12 +103,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.7%)",
+        "display": "Head: WhiteMohawk (6.8%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

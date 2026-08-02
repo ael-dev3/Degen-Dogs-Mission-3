@@ -7,7 +7,7 @@
       "amount_usd_at_event": "54.04855749",
       "eth_usd_price_at_event": "1637.8350754267938",
       "eth_usd_price_date_utc": "2026-06-09",
-      "native": "0.03300",
+      "native": "0.033",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "33000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 47080178,
       "block_time_utc": "2026-06-08T20:15:03Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a",
+      "tx_url": "https://basescan.org/tx/0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a"
     },
     "auction_house": null,
     "bid_stats": {
@@ -46,37 +46,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/738",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a",
       "dog_page": "https://degendogs.club/#dog738",
       "explorer": "https://basescan.org/address/0x23d660548cd61432537592dcea15b059605c9242",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/738",
       "repo_archive": "archive/dogs/by-id/738.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e"
     },
     "mission": 3,
     "rarity": {
-      "display": "#718/789",
-      "rank": 718,
-      "total": 789
+      "display": "#719/792",
+      "rank": 719,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.03300 eth 33000000000000000 54.04855749 $54.05 2026-06-09t20:37:53z #718/789 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.4%) background none body: redbrown (15.5%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.9%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 738 dog #738 https://api.degendogs.club/images/738.png https://degendogs.club/#dog738 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/738 settled @kenshiking.eth https://farcaster.xyz/kenshiking.eth 0x23d660548cd61432537592dcea15b059605c9242 0.03300 eth ($54) 4 4 2026-06-08 20:15:03 2026-06-09 20:37:53 #718/789 background: none; body: redbrown; neck: none; mouth: tongue; ears: earbuds; head: none; eyes: sunglasses background: none (90.4%); body: redbrown (15.5%); neck: none (39.8%); mouth: tongue (9.9%); ears: earbuds (32.1%); head: none (20.4%); eyes: sunglasses (14.6%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.04855749 $54.05 2026-06-09t20:37:53z 0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e #719/792 generated auction feed 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff background: none (90.4%) background none body: redbrown (15.4%) body redbrown neck: none (39.8%) neck none mouth: tongue (9.8%) mouth tongue ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 47124063,
       "block_time_utc": "2026-06-09T20:37:53Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e",
+      "tx_url": "https://basescan.org/tx/0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -87,7 +89,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -97,17 +99,17 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

@@ -7,7 +7,7 @@
       "amount_usd_at_event": "18.32130904",
       "eth_usd_price_at_event": "1665.573549112355",
       "eth_usd_price_date_utc": "2026-06-23",
-      "native": "0.01100",
+      "native": "0.011",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "11000000000000000",
@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 47691532,
       "block_time_utc": "2026-06-22T23:53:31Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x079ea047139f0f2dda951244d80d99ba01d68312df2f982896aaf8a4aa639d55",
+      "tx_url": "https://basescan.org/tx/0x079ea047139f0f2dda951244d80d99ba01d68312df2f982896aaf8a4aa639d55"
     },
     "auction_house": null,
     "bid_stats": {
@@ -45,37 +45,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/752",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x079ea047139f0f2dda951244d80d99ba01d68312df2f982896aaf8a4aa639d55",
       "dog_page": "https://degendogs.club/#dog752",
       "explorer": "https://basescan.org/address/0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/752",
       "repo_archive": "archive/dogs/by-id/752.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721"
     },
     "mission": 3,
     "rarity": {
-      "display": "#522/789",
-      "rank": 522,
-      "total": 789
+      "display": "#517/792",
+      "rank": 517,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 752 dog #752 752 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.01100 eth 11000000000000000 18.32130904 $18.32 2026-06-23t23:56:45z #522/789 generated auction feed 0xb1f05d59b6a2eeb651b3bb78ad06efe22814efdff4751a40c714e0bcc6280ea4 0x875854c385f7f250fe4a37d43bd113b91dc537bebe988dd091ed9ace80d951e3 0xac6f7e4eb2bc749e91c54d98fee77f0e8c0415f70ecc1ef0ac674f805bef503e background: none (90.4%) background none body: dalmation (9.1%) body dalmation neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (32.1%) ears earbuds head: headphones (6.5%) head headphones eyes: glasses (12.7%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill 3 base 8453 752 dog #752 https://api.degendogs.club/images/752.png https://degendogs.club/#dog752 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/752 settled @skunkape https://farcaster.xyz/skunkape 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 0.01100 eth ($18) 3 3 2026-06-22 23:53:31 2026-06-23 23:56:45 #522/789 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: headphones; eyes: glasses background: none (90.4%); body: dalmation (9.1%); neck: redcollar (30.9%); mouth: none (68.9%); ears: earbuds (32.1%); head: headphones (6.5%); eyes: glasses (12.7%) verified_live_base_logs base_logs,dashboard_builder",
+    "search_text": "dog 752 dog #752 752 mission 3 mission 3 base settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 0.011 eth 11000000000000000 18.32130904 $18.32 2026-06-23t23:56:45z 0x079ea047139f0f2dda951244d80d99ba01d68312df2f982896aaf8a4aa639d55 0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721 #517/792 generated auction feed 0xb1f05d59b6a2eeb651b3bb78ad06efe22814efdff4751a40c714e0bcc6280ea4 0x875854c385f7f250fe4a37d43bd113b91dc537bebe988dd091ed9ace80d951e3 0xac6f7e4eb2bc749e91c54d98fee77f0e8c0415f70ecc1ef0ac674f805bef503e background: none (90.4%) background none body: dalmation (9.1%) body dalmation neck: redcollar (30.9%) neck redcollar mouth: none (68.9%) mouth none ears: earbuds (31.9%) ears earbuds head: headphones (6.4%) head headphones eyes: glasses (12.6%) eyes glasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 47734829,
       "block_time_utc": "2026-06-23T23:56:45Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721",
+      "tx_url": "https://basescan.org/tx/0x9a5d8b906d0c97149ce1c37d8446d9007d2e3e5b981fc7e2f83aea67bed94721"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state. Backfilled from generated historical_dog_search so settled Mission 3 rows do not disappear when they age out of the recent feed.",
-      "raw_confidence": "verified_live_base_logs",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_feed",
-        "historical_dog_search_backfill"
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -101,17 +103,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Headphones (6.5%)",
+        "display": "Head: Headphones (6.4%)",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

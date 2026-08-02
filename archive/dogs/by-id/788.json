@@ -1,39 +1,40 @@
 {
   "generated_at_utc": "2026-07-30T08:57:04Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-07-30T10:26:31Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-07-31T13:08:17Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-07-30",
-      "native": "0.0011",
+      "amount_usd_at_event": "16.74350402",
+      "eth_usd_price_at_event": "1860.3893354831157",
+      "eth_usd_price_date_utc": "2026-07-31",
+      "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1100000000000000",
-      "usd_estimate": "2.11000000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$2.11",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-07-30",
-      "usd_estimate_price_usd": "1918.1818181818181818181818181818181818181818181818181818181818181818181818181818",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "raw": "9000000000000000",
+      "usd_estimate": "16.74350402",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.74",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-07-31",
+      "usd_estimate_price_usd": "1860.3893354831157",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 49303145,
       "block_time_utc": "2026-07-30T07:13:57Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711",
+      "tx_url": "https://basescan.org/tx/0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711"
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-07-30T10:26:31Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-07-30T11:52:47Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
+      "0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144",
       "0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935",
       "0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5"
     ],
@@ -44,39 +45,41 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/788",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711",
       "dog_page": "https://degendogs.club/#dog788",
-      "explorer": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/788",
       "repo_archive": "archive/dogs/by-id/788.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6"
     },
     "mission": 3,
     "rarity": {
-      "display": "#176/789",
-      "rank": 176,
-      "total": 789
+      "display": "#184/792",
+      "rank": 184,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base ongoing 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0011 eth 1100000000000000 2.11 $2.11 2026-07-30t10:26:31z #176/789 generated auction feed 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 background: none (90.4%) background none body: brown (11.2%) body brown neck: none (39.8%) neck none mouth: pizza (10.4%) mouth pizza ears: goldearring (15.2%) ears goldearring head: whitemohawk (6.7%) head whitemohawk eyes: eyepatch (7.9%) eyes eyepatch base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.74 $16.74 2026-07-31t13:08:17z 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6 #184/792 generated auction feed 0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 background: none (90.4%) background none body: brown (11.1%) body brown neck: none (39.8%) neck none mouth: pizza (10.4%) mouth pizza ears: goldearring (15.2%) ears goldearring head: whitemohawk (6.8%) head whitemohawk eyes: eyepatch (8.0%) eyes eyepatch base_logs dashboard_builder generated_auction_feed generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 49356975,
+      "block_time_utc": "2026-07-31T13:08:17Z",
+      "settled": true,
+      "tx_hash": "0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6",
+      "tx_url": "https://basescan.org/tx/0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (90.4%)",
@@ -84,7 +87,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.2%)",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -104,23 +107,23 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.7%)",
+        "display": "Head: WhiteMohawk (6.8%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@pare",
+      "display": "@0xael.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "pare",
-      "profile_url": "https://farcaster.xyz/pare",
-      "wallet": "0xd1ab146981d50adcfe18433500e852af396ea7b1",
-      "wallet_explorer_url": "https://basescan.org/address/0xd1ab146981d50adcfe18433500e852af396ea7b1"
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
   },
   "schema_version": 1

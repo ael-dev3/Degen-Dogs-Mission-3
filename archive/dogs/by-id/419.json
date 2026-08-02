@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-06-22",
       "usd_estimate_price_usd": "0.00280209",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#431/789",
-      "rank": 431,
-      "total": 789
+      "display": "#439/792",
+      "rank": 439,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 #431/789 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters",
+    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 #439/792 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters",
     "settlement": {
       "block_number": 26006716,
       "block_time_utc": "2025-06-22T17:49:07Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (11.2%)",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -96,17 +97,17 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: WhiteMohawk (6.7%)",
+        "display": "Head: WhiteMohawk (6.8%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

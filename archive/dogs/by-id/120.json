@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-05-31",
       "usd_estimate_price_usd": "1944.078766836179",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#699/789",
-      "rank": 699,
-      "total": 789
+      "display": "#704/792",
+      "rank": 704,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 120 dog #120 120 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 #699/789 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 120 dog #120 120 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x418ad54bd475ffe97084b6a0dbac01b53d1d0dff13ea8c3aa074269ce991b30f 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 #704/792 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29009585,
       "block_time_utc": "2022-05-31T22:44:48Z",
@@ -96,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2024-12-06",
       "usd_estimate_price_usd": "0.0185974",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -55,12 +56,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#645/789",
-      "rank": 645,
-      "total": 789
+      "display": "#653/792",
+      "rank": 653,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 211 dog #211 211 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 11750 degen 0xb434b4917a2e764d0a9028ce482f5dec674b5fd2312a4188228e1648221b1910 0x1844f912c8d19b41605ab2872b511889001d4f38bf5d2f656ec1682a7b6322a7 #645/789 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x8732be71737e9827178e330a554c21f3ae0cca03b0457578c0934ad5429f3665 0x261d533d9da5e2d9bbba290320ac642ee00752bf7aaf850d569b34d1c071e2e0 0x486523292d70d30b7babd779043a50b4941240206564f7c4cb7a0ab0f6482c8b 0x1bdfbb40bae6859e47b76cfcbc4d93d2c23e8cfc83c93a52163bc6a9cfcecf17 0xf44d51b06800027d022536d69a90b3a9f72ecf70372b95ae7f1b2ff65d9204f4 chain_logs contract_getters",
+    "search_text": "dog 211 dog #211 211 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 11750 degen 0xb434b4917a2e764d0a9028ce482f5dec674b5fd2312a4188228e1648221b1910 0x1844f912c8d19b41605ab2872b511889001d4f38bf5d2f656ec1682a7b6322a7 #653/792 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: masksnorkel 0x8732be71737e9827178e330a554c21f3ae0cca03b0457578c0934ad5429f3665 0x261d533d9da5e2d9bbba290320ac642ee00752bf7aaf850d569b34d1c071e2e0 0x486523292d70d30b7babd779043a50b4941240206564f7c4cb7a0ab0f6482c8b 0x1bdfbb40bae6859e47b76cfcbc4d93d2c23e8cfc83c93a52163bc6a9cfcecf17 0xf44d51b06800027d022536d69a90b3a9f72ecf70372b95ae7f1b2ff65d9204f4 chain_logs contract_getters",
     "settlement": {
       "block_number": 24815803,
       "block_time_utc": "2024-12-05T16:34:44Z",
@@ -85,7 +86,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -100,17 +101,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.6%)",
+        "display": "Eyes: MaskSnorkel (9.7%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

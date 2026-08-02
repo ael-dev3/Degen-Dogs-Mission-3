@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-05-24",
       "usd_estimate_price_usd": "1979.770545006472",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#131/789",
-      "rank": 131,
-      "total": 789
+      "display": "#129/792",
+      "rank": 129,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 113 dog #113 113 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x05e856fa21104d26adf042a09ecf670fe96773feebe1095fc713ee186ab6f616 0xe0077a80709589a78f3ad3c7fc9a7125afb67ae03891065e953c0810ced6ffc5 #131/789 background: none; body: rainbow; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 113 dog #113 113 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x05e856fa21104d26adf042a09ecf670fe96773feebe1095fc713ee186ab6f616 0xe0077a80709589a78f3ad3c7fc9a7125afb67ae03891065e953c0810ced6ffc5 #129/792 background: none; body: rainbow; neck: none; mouth: none; ears: loopearring; head: unicorn; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28712159,
       "block_time_utc": "2022-05-24T12:48:29Z",
@@ -106,7 +107,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-08-04",
       "usd_estimate_price_usd": "1621.572638172034",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#62/789",
+      "display": "#62/792",
       "rank": 62,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 153 dog #153 153 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x060986cf137e0c2e44083b4459b30dc7c8df29caac98f9fa096ee9759dbb62a6 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c #62/789 background: none; body: grey; neck: none; mouth: bone; ears: loopearring; head: stripedbeanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 153 dog #153 153 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x060986cf137e0c2e44083b4459b30dc7c8df29caac98f9fa096ee9759dbb62a6 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c #62/792 background: none; body: grey; neck: none; mouth: bone; ears: loopearring; head: stripedbeanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 31514983,
       "block_time_utc": "2022-08-04T15:18:19Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (11.5%)",
+        "display": "Body: Grey (11.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -101,12 +102,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.4%)",
+        "display": "Head: StripedBeanie (8.3%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (18.0%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

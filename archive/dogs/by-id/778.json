@@ -22,10 +22,10 @@
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
-      "block_number": null,
+      "block_number": 48838450,
       "block_time_utc": "2026-07-19T13:04:07Z",
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948",
+      "tx_url": "https://basescan.org/tx/0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948"
     },
     "auction_house": null,
     "bid_stats": {
@@ -45,36 +45,39 @@
     "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/778",
     "era_label": "Mission 3",
     "links": {
-      "auction_tx": null,
+      "auction_tx": "https://basescan.org/tx/0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948",
       "dog_page": "https://degendogs.club/#dog778",
       "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/778",
       "repo_archive": "archive/dogs/by-id/778.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5"
     },
     "mission": 3,
     "rarity": {
-      "display": "#495/789",
-      "rank": 495,
-      "total": 789
+      "display": "#505/792",
+      "rank": 505,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z #495/789 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.7%) body sugarskull neck: redcollar (30.9%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: earbuds (32.1%) ears earbuds head: none (20.4%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed",
+    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.75911282 $20.76 2026-07-20t13:12:49z 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 #505/792 generated auction feed 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f background: none (90.4%) background none body: sugarskull (6.8%) body sugarskull neck: redcollar (30.9%) neck redcollar mouth: tongue (9.8%) mouth tongue ears: earbuds (31.9%) ears earbuds head: none (20.3%) head none eyes: sunglasses (14.6%) eyes sunglasses base_logs dashboard_builder generated_auction_feed historical_dog_search_backfill generated_auction_timeline generated_auction_winners",
     "settlement": {
-      "block_number": null,
+      "block_number": 48881911,
       "block_time_utc": "2026-07-20T13:12:49Z",
       "settled": true,
-      "tx_hash": null,
-      "tx_url": null
+      "tx_hash": "0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5",
+      "tx_url": "https://basescan.org/tx/0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5"
     },
     "source": {
       "confidence": "verified",
       "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-      "raw_confidence": "verified_live_base_logs",
+      "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "historical_dog_search_backfill",
+        "generated_auction_timeline",
+        "generated_auction_winners"
       ]
     },
     "status": "settled",
@@ -85,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.7%)",
+        "display": "Body: SugarSkull (6.8%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -95,17 +98,17 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (31.9%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.4%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

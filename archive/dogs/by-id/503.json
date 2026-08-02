@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-10-03",
       "usd_estimate_price_usd": "0.0030572132411602103",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#314/789",
-      "rank": 314,
-      "total": 789
+      "display": "#318/792",
+      "rank": 318,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 503 dog #503 503 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x1d96512835220e65c339385008e4887b3b10e3da71ed224039a55c56177ed921 0x5463177960b113c344b5060aa991ce9bf6284e87681167600ca6fec8f32f5fe7 #314/789 background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: whitemohawk; eyes: bluelasereyes 0xcd4af778676bccc517fa1c881503b8bbc8735c6c4b423e765e968e713e012a94 chain_logs contract_getters",
+    "search_text": "dog 503 dog #503 503 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x1d96512835220e65c339385008e4887b3b10e3da71ed224039a55c56177ed921 0x5463177960b113c344b5060aa991ce9bf6284e87681167600ca6fec8f32f5fe7 #318/792 background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: loopearring; head: whitemohawk; eyes: bluelasereyes 0xcd4af778676bccc517fa1c881503b8bbc8735c6c4b423e765e968e713e012a94 chain_logs contract_getters",
     "settlement": {
       "block_number": 26286452,
       "block_time_utc": "2025-10-02T13:32:02Z",
@@ -81,12 +82,12 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +102,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.7%)",
+        "display": "Head: WhiteMohawk (6.8%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },

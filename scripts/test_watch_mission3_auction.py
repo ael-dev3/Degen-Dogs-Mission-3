@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import tempfile
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -31,6 +32,84 @@ def load_telemetry_module():
 
 def word(value: int) -> str:
     return f"{value:064x}"
+
+
+def test_rpc_quorum_rejects_two_by_two_tie():
+    watcher = load_module()
+    original = watcher.rpc_call_with_retry
+    answers = {
+        "https://one.example": "0x1",
+        "https://two.example": "0x1",
+        "https://three.example": "0x2",
+        "https://four.example": "0x2",
+    }
+
+    def fake_call(_method, _params, *, url, timeout=30):  # noqa: ARG001
+        return answers[url], url
+
+    try:
+        watcher.rpc_call_with_retry = fake_call
+        try:
+            watcher.rpc_quorum_call("eth_call", [], urls=list(answers), required=2)
+        except RuntimeError as exc:
+            assert "votes=[2, 2]" in str(exc)
+        else:
+            raise AssertionError("watcher accepted a 2-2 provider tie")
+    finally:
+        watcher.rpc_call_with_retry = original
+
+
+def test_rpc_quorum_returns_without_waiting_for_decisive_straggler():
+    watcher = load_module()
+    original = watcher.rpc_call_with_retry
+    original_deadline = watcher.RPC_QUORUM_DEADLINE_SECONDS
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://slow.example"]
+
+    def fake_call(_method, _params, *, url, timeout=30):  # noqa: ARG001
+        if url == urls[-1]:
+            time.sleep(0.6)
+        return "0xcanonical", url
+
+    try:
+        watcher.rpc_call_with_retry = fake_call
+        watcher.RPC_QUORUM_DEADLINE_SECONDS = 1.0
+        started = time.monotonic()
+        value, agreeing = watcher.rpc_quorum_call("eth_call", [], urls=urls, required=2)
+        elapsed = time.monotonic() - started
+    finally:
+        watcher.rpc_call_with_retry = original
+        watcher.RPC_QUORUM_DEADLINE_SECONDS = original_deadline
+        watcher.RPC_SLOW_UNTIL.clear()
+
+    assert value == "0xcanonical"
+    assert len(agreeing) == 2
+    assert elapsed < 0.25
+
+
+def test_head_probe_returns_after_minimum_quorum_and_grace():
+    watcher = load_module()
+    original_grace = watcher.RPC_HEAD_PROBE_GRACE_SECONDS
+    original_deadline = watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://slow.example"]
+
+    def probe(url):
+        if url == urls[-1]:
+            time.sleep(0.6)
+        return url, 100
+
+    try:
+        watcher.RPC_HEAD_PROBE_GRACE_SECONDS = 0.0
+        watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS = 1.0
+        started = time.monotonic()
+        results, _errors = watcher.collect_rpc_probes(urls, required=2, probe=probe, label="test-head")
+        elapsed = time.monotonic() - started
+    finally:
+        watcher.RPC_HEAD_PROBE_GRACE_SECONDS = original_grace
+        watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS = original_deadline
+        watcher.RPC_SLOW_UNTIL.clear()
+
+    assert len(results) == 2
+    assert elapsed < 0.25
 
 
 def address_word(address: str) -> str:
@@ -741,6 +820,20 @@ def test_config_uses_shared_log_dir_for_watcher_log():
         assert config.log_path == Path(tmp) / "watch-onchain.log"
 
 
+def test_quicknode_hostname_variants_cannot_double_vote():
+    watcher = load_module()
+    urls = watcher.independent_rpc_urls(
+        [
+            "https://alpha.quiknode.pro/key-a",
+            "https://beta.quiknode.pro/key-b",
+            "https://mainnet.base.org",
+        ]
+    )
+    assert urls == ["https://alpha.quiknode.pro/key-a", "https://mainnet.base.org"]
+    assert watcher.rpc_provider_key("https://base-mainnet.g.alchemy.com/public") == "alchemy"
+    assert watcher.rpc_provider_key("https://base-mainnet.public.blastapi.io") == "alchemy"
+
+
 def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     watcher = load_module()
     env = {}
@@ -748,9 +841,12 @@ def test_refresh_command_default_safe_and_auto_push_guard(monkeypatch=None):
     assert config.auto_push is False
     assert config.refresh_command == "npm run refresh:current"
     assert config.state_path.name == "mission3_onchain_tracker_state.json"
-    assert config.interval_seconds == 120
-    assert config.cooldown_seconds == 180
-    assert config.bid_cooldown_seconds == 60
+    assert config.interval_seconds == 30
+    assert config.cooldown_seconds == 30
+    assert config.bid_cooldown_seconds == 30
+    assert config.quorum_size == 2
+    assert len(config.rpc_urls) >= 2
+    assert len({watcher.rpc_provider_key(url) for url in config.rpc_urls}) == len(config.rpc_urls)
     assert config.force_after_seconds == 0
     assert config.refresh_lock_path and config.refresh_lock_path.name == "refresh.lock"
 

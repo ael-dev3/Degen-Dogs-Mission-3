@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2025-10-05",
       "usd_estimate_price_usd": "0.0029041229929225704",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:degen-base",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#659/789",
-      "rank": 659,
-      "total": 789
+      "display": "#661/792",
+      "rank": 661,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 506 dog #506 506 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5060 degen 0xfedc21d6a6bed212d3898a06e24d7f344af0976d376531a2f568f133cf30f31e 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec #659/789 background: none; body: redbrown; neck: none; mouth: none; ears: none; head: blackcap; eyes: glasses 0xa04b9e787f1fffa7c6d42545ee9e38650a1f10c7685c44dd7a38119bc5668c10 chain_logs contract_getters",
+    "search_text": "dog 506 dog #506 506 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5060 degen 0xfedc21d6a6bed212d3898a06e24d7f344af0976d376531a2f568f133cf30f31e 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec #661/792 background: none; body: redbrown; neck: none; mouth: none; ears: none; head: blackcap; eyes: glasses 0xa04b9e787f1fffa7c6d42545ee9e38650a1f10c7685c44dd7a38119bc5668c10 chain_logs contract_getters",
     "settlement": {
       "block_number": 26291802,
       "block_time_utc": "2025-10-05T15:40:08Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -96,7 +97,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.6%)",
+        "display": "Ears: None (25.8%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -106,7 +107,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-05-26",
       "usd_estimate_price_usd": "1944.2662044828226",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -51,12 +52,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#496/789",
-      "rank": 496,
-      "total": 789
+      "display": "#498/792",
+      "rank": 498,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 115 dog #115 115 mission 1 mission 1 polygon settled 0xeecce11af9d72ae9ff15d7c106f13349d336aeaf 0xeecc…aeaf 0.05 weth 0xa7a1a52d185916fe0c81a328270649b4e27025f3711bfcb499981cbce7ef73fb 0x84ebff366697d3a61d81bc77ae4d9d34f469510d37195aa0d9955df40763bc7b #496/789 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: toque; eyes: sunglasses 0x595ca46f59346d8bdee988b3364251dfcdcfae6c3b6e3c6d780b2acd339a49aa polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 115 dog #115 115 mission 1 mission 1 polygon settled 0xeecce11af9d72ae9ff15d7c106f13349d336aeaf 0xeecc…aeaf 0.05 weth 0xa7a1a52d185916fe0c81a328270649b4e27025f3711bfcb499981cbce7ef73fb 0x84ebff366697d3a61d81bc77ae4d9d34f469510d37195aa0d9955df40763bc7b #498/792 background: none; body: orange; neck: none; mouth: none; ears: goldearring; head: toque; eyes: sunglasses 0x595ca46f59346d8bdee988b3364251dfcdcfae6c3b6e3c6d780b2acd339a49aa polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28794091,
       "block_time_utc": "2022-05-26T13:40:42Z",

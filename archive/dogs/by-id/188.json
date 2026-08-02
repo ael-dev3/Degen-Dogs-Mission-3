@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2023-01-11",
       "usd_estimate_price_usd": "1335.6668643642906",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#445/789",
-      "rank": 445,
-      "total": 789
+      "display": "#451/792",
+      "rank": 451,
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 188 dog #188 188 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d 0x0e5446f3a85e5d0ace9ef138066ad894e414beaad4ec189208f85ad8e8f8978c #445/789 background: none; body: blue; neck: redcollar; mouth: pizza; ears: loopearring; head: baseballcap; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 188 dog #188 188 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d 0x0e5446f3a85e5d0ace9ef138066ad894e414beaad4ec189208f85ad8e8f8978c #451/792 background: none; body: blue; neck: redcollar; mouth: pizza; ears: loopearring; head: baseballcap; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 37961362,
       "block_time_utc": "2023-01-11T23:09:40Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (9.4%)",
+        "display": "Body: Blue (9.3%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -101,12 +102,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: BaseballCap (10.3%)",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -18,6 +18,7 @@
       "usd_estimate_price_date_utc": "2022-05-23",
       "usd_estimate_price_usd": "1974.5811944790914",
       "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
       "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
@@ -49,12 +50,12 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#170/789",
+      "display": "#170/792",
       "rank": 170,
-      "total": 789
+      "total": 792
     },
     "schema_version": 1,
-    "search_text": "dog 112 dog #112 112 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x047315e0767cede7058d36c4e66ce6bf0ba6c33b42127b6b93c495a0a756da6f 0x05e856fa21104d26adf042a09ecf670fe96773feebe1095fc713ee186ab6f616 #170/789 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: loopearring; head: hoodie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 112 dog #112 112 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x047315e0767cede7058d36c4e66ce6bf0ba6c33b42127b6b93c495a0a756da6f 0x05e856fa21104d26adf042a09ecf670fe96773feebe1095fc713ee186ab6f616 #170/792 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: loopearring; head: hoodie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28670991,
       "block_time_utc": "2022-05-23T12:37:22Z",
@@ -81,7 +82,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -106,7 +107,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: EyePatch (7.9%)",
+        "display": "Eyes: EyePatch (8.0%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }
