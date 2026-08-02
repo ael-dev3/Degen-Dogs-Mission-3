@@ -201,7 +201,8 @@ npm run watch:onchain
 
 Guardrails:
 
-- Commands that look like they publish (`git push`, `refresh:publish`, `refresh:archive`, `refresh_and_publish`) are refused unless `MISSION3_WATCHER_AUTO_PUSH=1`.
+- `MISSION3_REFRESH_COMMAND` accepts exactly `npm run refresh:current` or `npm run refresh:publish`. It is mapped to a fixed argument vector and executed without a shell; paths, extra arguments, metacharacters, and whitespace variants are rejected by both the watcher and launchd installers.
+- `npm run refresh:publish` additionally requires `MISSION3_WATCHER_AUTO_PUSH=1`. No other publish or legacy command form is supported.
 - `MISSION3_REFRESH_LOCK_PATH` defaults to the same `refresh.lock` path as the hourly publish script (`DEGEN_DOGS_LOCK_DIR` or `~/Library/Caches/degen-dogs-mission3/refresh.lock`). If that lock is busy, the watcher marks the refresh pending instead of starting a second run.
 - `MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1` is enabled by default when auto-push is enabled.
 - The publish script still owns `git pull --ff-only`, expected-path staging, secret scanning, and no-diff/no-commit behavior.

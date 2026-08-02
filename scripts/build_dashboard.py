@@ -75,6 +75,10 @@ DEFAULT_LOG_RPC_URLS = [
     "https://base.gateway.tenderly.co",
     "https://base.lava.build",
 ]
+PUBLIC_RPC_HOSTNAMES = frozenset(
+    (urllib.parse.urlsplit(url).hostname or "").lower().rstrip(".")
+    for url in (*DEFAULT_RPC_URLS, *DEFAULT_LOG_RPC_URLS)
+)
 EXPLICIT_RPC_CONFIG = any(
     os.environ.get(name, "").strip()
     for name in ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS")
@@ -753,10 +757,18 @@ def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url:
 
 def _redact_rpc_url(url: str) -> str:
     """Return enough endpoint identity for diagnostics without leaking keys."""
-    parsed = urllib.parse.urlsplit(url)
-    host = parsed.hostname or "unknown"
-    port = f":{parsed.port}" if parsed.port else ""
-    return f"{parsed.scheme or 'https'}://{host}{port}"
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        port_number = parsed.port
+    except (TypeError, ValueError):
+        return "<redacted-url>"
+    host = (parsed.hostname or "").lower().rstrip(".")
+    if not host:
+        return "<redacted-url>"
+    if host not in PUBLIC_RPC_HOSTNAMES:
+        host = f"rpc-host-{hashlib.sha256(host.encode('utf-8')).hexdigest()[:12]}"
+    port = f":{port_number}" if port_number else ""
+    return f"https://{host}{port}"
 
 
 def _rpc_provider_key(url: str) -> str:
@@ -777,7 +789,7 @@ def _rpc_provider_key(url: str) -> str:
     for suffix in known_operators:
         if host == suffix or host.endswith(f".{suffix}"):
             return suffix
-    return host
+    return f"rpc-host-{hashlib.sha256(host.encode('utf-8')).hexdigest()[:12]}"
 
 
 def _configured_rpc_urls() -> list[str]:

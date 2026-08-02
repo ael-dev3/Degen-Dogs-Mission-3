@@ -130,6 +130,8 @@ grep -Fq 'RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-1}"' "${ROOT}
 grep -Fq 'plist["EnvironmentVariables"]["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] = os.environ["RUN_MISSION3_ARCHIVE"]' "${ROOT}/scripts/install_hourly_refresh_launchd.sh"
 grep -Fq 'env["DEGEN_DOGS_FULL_REFRESH"] = "0"' "${ROOT}/scripts/install_auction_watcher_launchd.sh"
 grep -Fq 'env["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] = "0"' "${ROOT}/scripts/install_auction_watcher_launchd.sh"
+grep -Fq 'degen_dogs_validate_watcher_refresh_command "$MISSION3_REFRESH_COMMAND" "$MISSION3_WATCHER_AUTO_PUSH"' "${ROOT}/scripts/install_auction_watcher_launchd.sh"
+grep -Fq 'degen_dogs_validate_watcher_refresh_command "$MISSION3_REFRESH_COMMAND" "$WATCHER_AUTO_PUSH"' "${ROOT}/scripts/install_runner_health_launchd.sh"
 grep -Fq '"DEGEN_DOGS_FULL_REFRESH": os.environ["HOURLY_FULL_REFRESH"]' "${ROOT}/scripts/install_runner_health_launchd.sh"
 grep -Fq '"DEGEN_DOGS_RUN_MISSION3_ARCHIVE": os.environ["HOURLY_RUN_MISSION3_ARCHIVE"]' "${ROOT}/scripts/install_runner_health_launchd.sh"
 grep -Fq 'MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1' "${ROOT}/.env.example"

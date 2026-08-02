@@ -226,8 +226,7 @@ def redact_url(value: str) -> str:
         netloc += f":{port}"
     path = "/<redacted-path>" if parts.path and parts.path != "/" else ("/" if parts.path == "/" else "")
     query = "redacted=1" if parts.query else ""
-    scheme = parts.scheme.lower() if parts.scheme else "https"
-    return urllib.parse.urlunsplit((scheme, netloc, path, query, ""))
+    return urllib.parse.urlunsplit(("https", netloc, path, query, ""))
 
 
 def validate_rpc_url(url: str) -> None:

@@ -62,6 +62,14 @@ GIT_RETRY_JITTER_SECONDS="${DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS:-3}"
 LIVE_VERIFY_TIMEOUT_SECONDS="${DEGEN_DOGS_LIVE_VERIFY_TIMEOUT_SECONDS:-300}"
 LIVE_VERIFY_INTERVAL_SECONDS="${DEGEN_DOGS_LIVE_VERIFY_INTERVAL_SECONDS:-10}"
 ALLOW_RUNNING_RESTART="${DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART:-0}"
+MISSION3_WATCHER_AUTO_PUSH="${MISSION3_WATCHER_AUTO_PUSH:-0}"
+MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
+if [[ -z "$MISSION3_REFRESH_COMMAND" && "$MISSION3_WATCHER_AUTO_PUSH" == "1" ]]; then
+  MISSION3_REFRESH_COMMAND="npm run refresh:publish"
+fi
+if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
+  MISSION3_REFRESH_COMMAND="npm run refresh:current"
+fi
 
 fail() {
   printf 'error: %s\n' "$*" >&2
@@ -89,6 +97,8 @@ fi
 [[ "$FULL_REFRESH" == "0" || "$FULL_REFRESH" == "1" ]] || fail "DEGEN_DOGS_FULL_REFRESH must be 0 or 1"
 [[ "$LIVE_VERIFY_AFTER_PUSH" == "0" || "$LIVE_VERIFY_AFTER_PUSH" == "1" ]] || fail "DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH must be 0 or 1"
 [[ "$ALLOW_RUNNING_RESTART" == "0" || "$ALLOW_RUNNING_RESTART" == "1" ]] || fail "DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART must be 0 or 1"
+[[ "$MISSION3_WATCHER_AUTO_PUSH" == "0" || "$MISSION3_WATCHER_AUTO_PUSH" == "1" ]] || fail "MISSION3_WATCHER_AUTO_PUSH must be 0 or 1"
+degen_dogs_validate_watcher_refresh_command "$MISSION3_REFRESH_COMMAND" "$MISSION3_WATCHER_AUTO_PUSH"
 [[ "$REPO_DIR" = /* ]] || fail "repo dir must be absolute: ${REPO_DIR}"
 [[ -f "$SCRIPT_PATH" ]] || fail "watcher script missing: ${SCRIPT_PATH}"
 
@@ -142,16 +152,8 @@ cleanup_plist_candidate() {
 trap cleanup_plist_candidate EXIT
 
 # Safe default: local installs run current refresh only. Publish-enabled installs use the
-# commit/push wrapper unless an explicit command is supplied.
+# commit/push wrapper. The exact-command validator above rejects all other command text.
 #   MISSION3_WATCHER_AUTO_PUSH=1 npm run watch:install
-MISSION3_WATCHER_AUTO_PUSH="${MISSION3_WATCHER_AUTO_PUSH:-0}"
-MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
-if [[ -z "$MISSION3_REFRESH_COMMAND" && "$MISSION3_WATCHER_AUTO_PUSH" == "1" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run refresh:publish"
-fi
-if [[ -z "$MISSION3_REFRESH_COMMAND" ]]; then
-  MISSION3_REFRESH_COMMAND="npm run refresh:current"
-fi
 export MISSION3_WATCHER_AUTO_PUSH MISSION3_REFRESH_COMMAND
 
 PLIST_PATH="$PLIST_PATH" \

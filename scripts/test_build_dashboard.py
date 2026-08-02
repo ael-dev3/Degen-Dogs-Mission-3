@@ -82,6 +82,17 @@ def test_quicknode_hostname_variants_share_one_quorum_vote() -> None:
     assert dashboard._rpc_provider_key("https://legacy.quicknode.pro/key") == "quicknode"
     assert dashboard._rpc_provider_key("https://base-mainnet.g.alchemy.com/public") == "alchemy"
     assert dashboard._rpc_provider_key("https://base-mainnet.public.blastapi.io") == "alchemy"
+    custom_provider = dashboard._rpc_provider_key(
+        "https://host-secret.rpc.custom.example/path-secret?token=query-secret"
+    )
+    custom_log_url = dashboard._redact_rpc_url(
+        "https://host-secret.rpc.custom.example/path-secret?token=query-secret"
+    )
+    assert custom_provider.startswith("rpc-host-")
+    assert custom_log_url.startswith("https://rpc-host-")
+    assert "host-secret" not in custom_provider + custom_log_url
+    assert "path-secret" not in custom_provider + custom_log_url
+    assert "query-secret" not in custom_provider + custom_log_url
     base_failovers = dashboard._same_operator_rpc_urls("https://mainnet.base.org")
     assert "https://mainnet.base.org" in base_failovers
     assert "https://developer-access-mainnet.base.org" in base_failovers
@@ -1573,7 +1584,11 @@ def test_rpc_batch_quorum_rejects_provider_disagreement() -> None:
         except RuntimeError as exc:
             message = str(exc)
             assert "batch quorum disagreement" in message
-            assert 'provider_groups=[["one.example"],["two.example"]]' in message
+            one = dashboard._rpc_provider_key("https://one.example")
+            two = dashboard._rpc_provider_key("https://two.example")
+            assert "provider_groups=" in message
+            assert one in message
+            assert two in message
             assert "https://" not in message
         else:
             raise AssertionError("conflicting JSON-RPC batch results reached quorum")

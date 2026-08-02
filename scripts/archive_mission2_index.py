@@ -39,6 +39,7 @@ SCHEMA_PATH = ARCHIVE / "sql" / "schema.sql"
 MARTS_PATH = ARCHIVE / "sql" / "marts.sql"
 ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 SQL_IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+PUBLIC_RPC_HOSTNAMES = frozenset({"rpc.degen.tips"})
 
 
 def sql_identifier(name: str) -> str:
@@ -48,18 +49,52 @@ def sql_identifier(name: str) -> str:
 
 
 def redact_url(value: str) -> str:
-    """Remove obvious credentials from RPC URLs before writing manifests/DB rows."""
+    """Remove provider identities and credentials before writing manifests/DB rows."""
     try:
         parts = urllib.parse.urlsplit(value)
-    except Exception:
+        port = parts.port
+    except (TypeError, ValueError):
         return "<redacted-url>"
-    netloc = parts.hostname or ""
-    if parts.port:
-        netloc += f":{parts.port}"
-    if parts.username or parts.password:
-        netloc = "***@" + netloc
+    hostname = (parts.hostname or "").lower().rstrip(".")
+    if not hostname:
+        return "<redacted-url>"
+    if hostname in PUBLIC_RPC_HOSTNAMES:
+        netloc = hostname
+    else:
+        host_label = hashlib.sha256(hostname.encode("utf-8")).hexdigest()[:12]
+        netloc = f"rpc-host-{host_label}"
+    if port:
+        netloc += f":{port}"
+    path = "/<redacted-path>" if parts.path and parts.path != "/" else ("/" if parts.path == "/" else "")
     query = "redacted=1" if parts.query else ""
-    return urllib.parse.urlunsplit((parts.scheme, netloc, parts.path, query, ""))
+    return urllib.parse.urlunsplit(("https", netloc, path, query, ""))
+
+
+def redact_text(value: Any) -> str:
+    text = json.dumps(value, sort_keys=True) if isinstance(value, (dict, list)) else str(value)
+    for url in re.findall(r"[A-Za-z][A-Za-z0-9+.-]*://[^\s\"'<>]+", text):
+        text = text.replace(url, redact_url(url))
+    return text
+
+
+def validate_rpc_url(url: str) -> None:
+    """Reject unsafe endpoints before urllib can echo credential-bearing schemes."""
+    if not isinstance(url, str) or not url or any(character.isspace() for character in url):
+        raise RuntimeError("RPC endpoint URL is invalid")
+    try:
+        parts = urllib.parse.urlsplit(url)
+        port = parts.port
+    except ValueError as exc:
+        raise RuntimeError("RPC endpoint URL is invalid") from exc
+    if (
+        parts.scheme.lower() != "https"
+        or not parts.hostname
+        or port not in (None, 443)
+        or parts.username is not None
+        or parts.password is not None
+        or parts.fragment
+    ):
+        raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
 def utc_now() -> str:
@@ -182,6 +217,7 @@ def keccak256_text(text: str) -> str:
 
 
 def rpc_call(rpc_url: str, method: str, params: list[Any], *, timeout: int = 45) -> Any:
+    validate_rpc_url(rpc_url)
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode("utf-8")
     req = urllib.request.Request(
         rpc_url,
@@ -191,22 +227,38 @@ def rpc_call(rpc_url: str, method: str, params: list[Any], *, timeout: int = 45)
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    if "error" in data:
-        raise RuntimeError(f"RPC {method} error: {data['error']}")
-    return data.get("result")
+    if (
+        not isinstance(data, dict)
+        or data.get("jsonrpc") != "2.0"
+        or type(data.get("id")) is not int
+        or data.get("id") != 1
+    ):
+        raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC response envelope")
+    has_result = "result" in data
+    has_error = "error" in data
+    if has_result == has_error:
+        raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC response envelope")
+    if has_error:
+        error = data.get("error")
+        if not isinstance(error, dict) or type(error.get("code")) is not int:
+            raise RuntimeError(f"RPC {method} returned an invalid JSON-RPC error envelope")
+        raise RuntimeError(f"RPC {method} error code={error['code']}")
+    return data["result"]
 
 
 def rpc_call_retry(rpc_url: str, method: str, params: list[Any], *, attempts: int = 4) -> Any:
-    last: Exception | None = None
+    last_type = "RuntimeError"
     for idx in range(attempts):
         try:
             return rpc_call(rpc_url, method, params)
-        except (urllib.error.URLError, TimeoutError, RuntimeError) as exc:
-            last = exc
+        except Exception as exc:  # noqa: BLE001 - exception details can contain credential fragments
+            last_type = type(exc).__name__
             if idx == attempts - 1:
                 break
             time.sleep(min(2 ** idx, 8))
-    raise RuntimeError(f"RPC {method} failed after {attempts} attempts: {last}")
+    raise RuntimeError(
+        f"RPC {method} failed after {attempts} attempts at {redact_url(rpc_url)} ({last_type})"
+    )
 
 
 def hex_int(value: str | None) -> int | None:
@@ -278,7 +330,9 @@ def fetch_logs(rpc_url: str, address: str, topics0: list[str], from_block: int, 
         }]
         result = rpc_call_retry(rpc_url, "eth_getLogs", params)
         if not isinstance(result, list):
-            raise RuntimeError(f"eth_getLogs returned non-list for {lo}-{hi}: {result!r}")
+            raise RuntimeError(
+                f"eth_getLogs returned non-list for {lo}-{hi}: {redact_text(result)}"
+            )
         all_logs.extend(result)
     all_logs.sort(key=lambda log: (hex_int(log.get("blockNumber")) or 0, hex_int(log.get("logIndex")) or 0))
     return all_logs
@@ -467,7 +521,11 @@ def decode_events(logs: list[dict[str, Any]], chain_id: int, address: str, topic
                     "run_id": run_id,
                 })
         except Exception as exc:
-            raise RuntimeError(f"failed decoding {event_name} log {log.get('transactionHash')}:{log.get('logIndex')}: {exc}") from exc
+            transaction_hash = redact_text(log.get("transactionHash"))
+            log_index = redact_text(log.get("logIndex"))
+            raise RuntimeError(
+                f"failed decoding {event_name} log {transaction_hash}:{log_index}: {redact_text(exc)}"
+            ) from exc
     return decoded
 
 

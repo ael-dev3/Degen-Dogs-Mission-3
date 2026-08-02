@@ -70,6 +70,10 @@ DEFAULT_RPC_URLS = [
     "https://1rpc.io/matic",
     "https://polygon-bor-rpc.publicnode.com",
 ]
+PUBLIC_RPC_HOSTNAMES = frozenset(
+    (urlsplit(url).hostname or "").lower().rstrip(".")
+    for url in DEFAULT_RPC_URLS
+)
 
 EVENT_SIGNATURES = {
     "AuctionCreated": "AuctionCreated(uint256,uint256,uint256)",
@@ -122,31 +126,57 @@ def function_selector(signature: str) -> str:
 
 def redact_url(url: str) -> str:
     """Return a log-safe RPC URL without embedded credentials or API keys."""
-    if url in DEFAULT_RPC_URLS:
-        return url
     try:
         parts = urlsplit(url)
-    except Exception:
-        return "[redacted-rpc-url]"
-    netloc = parts.hostname or ""
-    try:
         port = parts.port
-    except ValueError:
-        port = None
+    except (TypeError, ValueError):
+        return "[redacted-rpc-url]"
+    hostname = (parts.hostname or "").lower().rstrip(".")
+    if not hostname:
+        return "[redacted-rpc-url]"
+    if hostname in PUBLIC_RPC_HOSTNAMES:
+        netloc = hostname
+    else:
+        host_label = hashlib.sha256(hostname.encode("utf-8")).hexdigest()[:12]
+        netloc = f"rpc-host-{host_label}"
     if port:
         netloc = f"{netloc}:{port}"
-    if not parts.scheme or not netloc:
-        return "[redacted-rpc-url]"
-    return urlunsplit((parts.scheme, netloc, "/[redacted]", "", ""))
+    path = "/<redacted-path>" if parts.path and parts.path != "/" else ("/" if parts.path == "/" else "")
+    query = "redacted=1" if parts.query else ""
+    return urlunsplit(("https", netloc, path, query, ""))
 
 
 def redact_text(text: Any) -> str:
-    raw = text if isinstance(text, str) else json.dumps(text, sort_keys=True)
-    return re.sub(r"https?://[^\s'\"<>]+", lambda m: redact_url(m.group(0)), raw)
+    raw = json.dumps(text, sort_keys=True) if isinstance(text, (dict, list)) else str(text)
+    return re.sub(
+        r"[A-Za-z][A-Za-z0-9+.-]*://[^\s'\"<>]+",
+        lambda m: redact_url(m.group(0)),
+        raw,
+    )
 
 
 def redact_urls(urls: Iterable[str]) -> List[str]:
     return [redact_url(url) for url in urls]
+
+
+def validate_rpc_url(url: str) -> None:
+    """Reject unsafe endpoints before urllib can echo credential-bearing schemes."""
+    if not isinstance(url, str) or not url or any(character.isspace() for character in url):
+        raise RuntimeError("RPC endpoint URL is invalid")
+    try:
+        parts = urlsplit(url)
+        port = parts.port
+    except ValueError as exc:
+        raise RuntimeError("RPC endpoint URL is invalid") from exc
+    if (
+        parts.scheme.lower() != "https"
+        or not parts.hostname
+        or port not in (None, 443)
+        or parts.username is not None
+        or parts.password is not None
+        or parts.fragment
+    ):
+        raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
 def rpc_urls() -> List[str]:
@@ -167,14 +197,30 @@ def rpc_call(urls: List[str], method: str, params: list, timeout: int = 45) -> T
     body = json.dumps(payload).encode()
     for url in urls:
         try:
+            validate_rpc_url(url)
             req = Request(url, data=body, headers={"Content-Type": "application/json", "User-Agent": "degen-dogs-mission1-archive/0.1"})
             data = json.loads(urlopen(req, timeout=timeout).read().decode())
-            if "error" in data:
-                last_error = f"{redact_url(url)}: {redact_text(data['error'])}"
+            if (
+                not isinstance(data, dict)
+                or data.get("jsonrpc") != "2.0"
+                or type(data.get("id")) is not int
+                or data.get("id") != 1
+            ):
+                raise RuntimeError("invalid JSON-RPC response envelope")
+            has_result = "result" in data
+            has_error = "error" in data
+            if has_result == has_error:
+                raise RuntimeError("invalid JSON-RPC response envelope")
+            if has_error:
+                error = data.get("error")
+                if not isinstance(error, dict) or type(error.get("code")) is not int:
+                    last_error = f"{redact_url(url)}: invalid JSON-RPC error envelope"
+                else:
+                    last_error = f"{redact_url(url)}: JSON-RPC error code={error['code']}"
                 continue
-            return data.get("result"), url
-        except (HTTPError, URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
-            last_error = f"{redact_url(url)}: {type(exc).__name__}: {redact_text(str(exc))[:220]}"
+            return data["result"], url
+        except Exception as exc:  # noqa: BLE001 - exception details can contain credential fragments
+            last_error = f"{redact_url(url)}: {type(exc).__name__}"
             continue
     raise RuntimeError(last_error or f"all RPCs failed for {method}")
 
