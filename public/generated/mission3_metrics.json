@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49457992"
+    "value": "49458358"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-02 21:15:31"
+    "value": "2026-08-02 21:27:43"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x79e3c8708c3158008ed5475752767d68a4a2b85a1392c6f1a59b275754301e7f"
+    "value": "0x1b1362b95f76faa2cccceba2b193a422c261cf59a1488822684d1142b0e23419"
   },
   {
     "metric": "snapshot_confirmations",
@@ -41,11 +41,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "2/2"
+    "value": "3/3"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "publicnode.com,rpc-host-6dea8b229ba1"
+    "value": "publicnode.com,rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -153,7 +153,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1884.21"
+    "value": "1884.415"
   },
   {
     "metric": "eth_usd_source",
@@ -477,7 +477,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "168668.946963"
+    "value": "168692.347054"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
