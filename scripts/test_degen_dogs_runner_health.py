@@ -1027,6 +1027,9 @@ def test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_d
                 "<runner-env>"
             )
             assert health.sanitize("installer rejected path: e").endswith("<runner-env>")
+            os.environ["DEGEN_DOGS_ENV_FILE"] = os.sep
+            root_path_alert = "root path / must not erase ordinary slash-delimited output"
+            assert health.sanitize(root_path_alert) == root_path_alert
             os.environ["DEGEN_DOGS_ENV_FILE"] = "~missing-runner-user/secret.env"
             assert health.sanitize(ordinary_alert) == ordinary_alert
             os.environ["DEGEN_DOGS_ENV_FILE"] = str(configured_env)
