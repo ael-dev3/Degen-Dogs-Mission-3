@@ -2641,12 +2641,13 @@ def test_generated_dashboard_hardens_dynamic_urls_freshness_and_archive_rows() -
         "url.protocol==='https:'",
         "url.port===''",
         "Array.isArray(record.bid_tx_hashes)?record.bid_tx_hashes:[]",
-        "const LIVE_STALE_MS=3*60*60*1000",
+        "const LIVE_STALE_MS=90*60*1000",
         "data-live-label",
         "status.last_refresh_result!=='success_generated'",
         "const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI)",
     ):
         assert marker in rendered
+    assert "const LIVE_STALE_MS=3*60*60*1000" not in rendered
     assert "raw.githubusercontent.com" not in rendered
 
 
