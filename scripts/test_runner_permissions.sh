@@ -18,7 +18,14 @@ cleanup() {
 trap cleanup EXIT
 
 file_mode() {
-  stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+  local mode
+  if mode="$(stat -f '%Lp' "$1" 2>/dev/null)"; then
+    printf '%s\n' "$mode"
+  else
+    # GNU stat can emit filesystem details to stdout before rejecting BSD's
+    # `-f FORMAT` syntax, so never combine the two probes with a bare `||`.
+    stat -c '%a' "$1"
+  fi
 }
 
 private_dir="${PRIVATE_TEST_ROOT}/private"
