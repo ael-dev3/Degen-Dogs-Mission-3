@@ -43,6 +43,124 @@ def test_refresh_lock_detection() -> None:
         assert health.refresh_is_active() is False
 
 
+def test_active_lock_metadata_requires_a_held_flock() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        lock_path = Path(directory) / "watcher.lock"
+        lock_path.write_text(
+            "kind=watcher\npid=123\nstarted_at_utc=2026-08-02T12:00:00Z\n",
+            encoding="utf-8",
+        )
+        assert health.inspect_active_lock(lock_path) == (False, None)
+
+        fd = os.open(lock_path, os.O_RDWR)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            active, started_ts = health.inspect_active_lock(lock_path)
+            assert active is True
+            assert started_ts == datetime(2026, 8, 2, 12, 0, tzinfo=timezone.utc).timestamp()
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+
+        assert health.inspect_active_lock(lock_path) == (False, None)
+
+
+def test_fresh_active_attempt_requires_new_held_bounded_run() -> None:
+    now = datetime(2026, 8, 2, 12, 10, tzinfo=timezone.utc).timestamp()
+    started = now - 60
+    completed = now - 120
+    assert health.fresh_active_attempt(
+        lock_held=True,
+        started_ts=started,
+        completed_ts=completed,
+        now=now,
+        grace_seconds=90,
+    ) is True
+    assert health.fresh_active_attempt(
+        lock_held=False,
+        started_ts=started,
+        completed_ts=completed,
+        now=now,
+        grace_seconds=90,
+    ) is False
+    assert health.fresh_active_attempt(
+        lock_held=True,
+        started_ts=completed,
+        completed_ts=completed,
+        now=now,
+        grace_seconds=90,
+    ) is False
+    assert health.fresh_active_attempt(
+        lock_held=True,
+        started_ts=now - 90,
+        completed_ts=completed,
+        now=now,
+        grace_seconds=90,
+    ) is False
+    assert health.fresh_active_attempt(
+        lock_held=True,
+        started_ts=now + 1,
+        completed_ts=completed,
+        now=now,
+        grace_seconds=90,
+    ) is False
+
+
+def test_active_watcher_filters_only_completion_lag_issues() -> None:
+    issues = [
+        "watcher state missing: /tmp/state.json",
+        "watcher state has no valid last_checked_at_utc",
+        "watcher state age=12m exceeds threshold=5m",
+        "watcher has 3 consecutive RPC failures",
+        "watcher has 4 consecutive refresh failures",
+        "watcher pending refresh age=20m exceeds threshold=15m",
+        "watcher state unreadable: JSONDecodeError",
+    ]
+    filtered = health.filter_watcher_issues_for_active_attempt(issues, True)
+    assert filtered == issues[3:]
+    assert health.filter_watcher_issues_for_active_attempt(issues, False) == issues
+
+
+def test_launchd_cause_requires_an_explicit_launchd_fault() -> None:
+    benign = health.derive_causes(
+        issues=[
+            "issue: refresh appears stale/failed, but launchd job is currently running; left it alone",
+            "issue: watcher state is unhealthy, but the watcher job is currently running; left it alone",
+        ],
+        dirty_paths=[],
+        log_details={},
+        stale=False,
+        failed_last=False,
+        live_ok=True,
+        launch_output="state = running",
+        now=0,
+    )
+    assert "launchd_agent_unhealthy_or_drifted" not in benign
+
+    drifted = health.derive_causes(
+        issues=["issue: onchain auction watcher launchd plist drift: StartInterval"],
+        dirty_paths=[],
+        log_details={},
+        stale=False,
+        failed_last=False,
+        live_ok=True,
+        launch_output="state = not running",
+        now=0,
+    )
+    assert "launchd_agent_unhealthy_or_drifted" in drifted
+
+
+def test_expected_live_publish_lag_is_narrow() -> None:
+    assert health.expected_live_publish_lag(
+        "live refresh status block 100 trails local generated block 101"
+    ) is True
+    assert health.expected_live_publish_lag(
+        "live refresh status current_bid_eth differs from local validated status at block 101"
+    ) is True
+    assert health.expected_live_publish_lag("live HTTP status 503") is False
+    assert health.expected_live_publish_lag("live refresh status payload is invalid") is False
+
+
 def valid_plist(spec: object) -> dict[str, object]:
     required_environment = dict(getattr(spec, "required_environment"))
     return {
@@ -255,6 +373,11 @@ def test_disk_free_thresholds() -> None:
 
 if __name__ == "__main__":
     test_refresh_lock_detection()
+    test_active_lock_metadata_requires_a_held_flock()
+    test_fresh_active_attempt_requires_new_held_bounded_run()
+    test_active_watcher_filters_only_completion_lag_issues()
+    test_launchd_cause_requires_an_explicit_launchd_fault()
+    test_expected_live_publish_lag_is_narrow()
     test_launchd_plist_validation_covers_hourly_and_watcher()
     test_watcher_state_health()
     test_log_compaction_is_bounded_and_preserves_launchd_inode()
