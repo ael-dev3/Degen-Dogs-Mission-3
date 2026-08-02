@@ -64,20 +64,34 @@ SUCCESS_RESULTS = {
     "success_pushed_live_timeout",
 }
 LIVE_STATUS_MAX_BYTES = 2 * 1024 * 1024
-LIVE_STATUS_TARGETS = {
-    ("raw.githubusercontent.com", "/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json"): "text/plain",
-    ("ael-dev3.github.io", "/Degen-Dogs-Mission-3/generated/refresh_status.json"): "application/json",
-}
+RAW_STATUS_HOST = "raw.githubusercontent.com"
+RAW_STATUS_PATH = re.compile(
+    r"^/ael-dev3/Degen-Dogs-Mission-3/(?P<commit>[0-9a-f]{40})/public/generated/refresh_status\.json$"
+)
+PAGES_STATUS_HOST = "ael-dev3.github.io"
+PAGES_STATUS_PATH = "/Degen-Dogs-Mission-3/generated/refresh_status.json"
+COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+LIVE_STATUS_CACHE_BUST = re.compile(r"^cache_bust=[0-9]+$")
 
 
 class RejectRedirectHandler(urllib.request.HTTPRedirectHandler):
-    """Never forward a live-verification request to a different origin."""
+    """Never follow a live-verification redirect."""
 
     def redirect_request(self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> Any:
         return None
 
 
 LIVE_STATUS_OPENER = urllib.request.build_opener(RejectRedirectHandler())
+
+
+def immutable_raw_status_url(commit_sha: str) -> str:
+    """Build the only raw GitHub artifact URL accepted by live verification."""
+    if not isinstance(commit_sha, str) or not COMMIT_SHA.fullmatch(commit_sha):
+        raise RuntimeError("live verification requires a canonical 40-hex pushed commit SHA")
+    return (
+        f"https://{RAW_STATUS_HOST}/ael-dev3/Degen-Dogs-Mission-3/"
+        f"{commit_sha}/public/generated/refresh_status.json"
+    )
 
 
 def utc_now() -> str:
@@ -836,16 +850,21 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
         port = parsed.port
     except (TypeError, ValueError) as exc:
         raise RuntimeError("invalid live verification URL") from exc
-    target = ((parsed.hostname or "").lower().rstrip("."), parsed.path)
+    host = parsed.hostname or ""
+    raw_target = host == RAW_STATUS_HOST and RAW_STATUS_PATH.fullmatch(parsed.path)
+    pages_target = host == PAGES_STATUS_HOST and parsed.path == PAGES_STATUS_PATH
     if (
-        parsed.scheme.lower() != "https"
-        or port not in (None, 443)
+        parsed.scheme != "https"
+        or port is not None
         or parsed.username is not None
         or parsed.password is not None
-        or target not in LIVE_STATUS_TARGETS
+        or parsed.netloc != host
+        or parsed.fragment
+        or (parsed.query and not LIVE_STATUS_CACHE_BUST.fullmatch(parsed.query))
+        or not (raw_target or pages_target)
     ):
         raise RuntimeError("live verification URL is outside the fixed GitHub publication allowlist")
-    expected_content_type = LIVE_STATUS_TARGETS[target]
+    expected_content_type = "text/plain" if raw_target else "application/json"
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-refresh-verify/0.1"})
     try:
         response = LIVE_STATUS_OPENER.open(req, timeout=timeout)
@@ -887,8 +906,18 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
 def snapshot_mismatch(expected: Any, actual: Any) -> str:
     if not isinstance(expected, dict) or not isinstance(actual, dict):
         return f"type expected={type(expected).__name__} actual={type(actual).__name__}"
+
+    def exactly_equal(left: Any, right: Any) -> bool:
+        if type(left) is not type(right):
+            return False
+        if isinstance(left, dict):
+            return left.keys() == right.keys() and all(exactly_equal(left[key], right[key]) for key in left)
+        if isinstance(left, list):
+            return len(left) == len(right) and all(exactly_equal(a, b) for a, b in zip(left, right, strict=True))
+        return bool(left == right)
+
     keys = sorted({*expected, *actual})
-    differing = [key for key in keys if expected.get(key) != actual.get(key)]
+    differing = [key for key in keys if key not in expected or key not in actual or not exactly_equal(expected[key], actual[key])]
     return "fields=" + ",".join(differing[:12]) if differing else ""
 
 
@@ -907,17 +936,15 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
         expected_status = load_json(root / "generated" / "refresh_status.json", {})
     if not isinstance(expected_status, dict) or not expected_status:
         raise RuntimeError("local refresh_status.json is missing or invalid")
+    raw_commit_url = immutable_raw_status_url(env.get("DEGEN_DOGS_COMMIT_SHA", ""))
     status_urls = [
-        (
-            "raw_main",
-            "https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/main/public/generated/refresh_status.json",
-        ),
+        ("raw_commit", raw_commit_url),
         ("github_pages", urllib.parse.urljoin(base_url.rstrip("/") + "/", "generated/refresh_status.json")),
     ]
     verified_source = ""
-    raw_main_verified = False
+    raw_commit_verified = False
     while time.monotonic() <= deadline:
-        raw_main_verified = False
+        raw_commit_verified = False
         pages_verified = False
         for source, status_url in status_urls:
             url = f"{status_url}?cache_bust={time.time_ns()}"
@@ -925,17 +952,17 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
                 data = fetch_json(url)
                 mismatch = snapshot_mismatch(expected_status, data)
                 if not mismatch:
-                    if source == "raw_main":
-                        raw_main_verified = True
+                    if source == "raw_commit":
+                        raw_commit_verified = True
                     elif source == "github_pages":
                         pages_verified = True
                 else:
                     last_error = f"{source} refresh_status mismatch {mismatch}"
             except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError, OSError, RuntimeError) as exc:
                 last_error = f"{source}: {str(exc)[:260]}"
-        # Raw main proves the pushed artifact landed; Pages proves the actual
-        # user-facing deployment completed. Neither alone is production-live.
-        if raw_main_verified and pages_verified:
+        # The immutable raw URL proves the exact pushed artifact landed; Pages
+        # proves the user-facing deployment completed. Neither alone is live.
+        if raw_commit_verified and pages_verified:
             result = "verified"
             verified_at = utc_now()
             verified_source = "github_pages"
@@ -950,7 +977,10 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
         "live_verify_completed_at_utc": completed,
         "live_verify_result": result,
         "live_verify_source": verified_source or None,
-        "raw_main_verified": raw_main_verified,
+        "raw_commit_verified": raw_commit_verified,
+        # Retain the old result key for existing private telemetry readers. It
+        # now aliases immutable-commit verification; no mutable main URL is used.
+        "raw_main_verified": raw_commit_verified,
         "push_to_live_seconds": seconds_between(push_completed, completed) if push_completed else None,
         "block_to_live_seconds": seconds_between(event_block_time, completed) if event_block_time else None,
         "latest_generated_block": expected_block,
@@ -1002,7 +1032,7 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("--prefer-current-env", action="store_true")
     sub.add_parser("validate-status", help="Validate generated refresh_status.json")
     sub.add_parser("metrics-summary", help="Print operator refresh/watch metrics summary")
-    live = sub.add_parser("verify-live", help="Poll raw main and GitHub Pages refresh_status.json until both exactly match local data")
+    live = sub.add_parser("verify-live", help="Poll the immutable pushed commit and GitHub Pages until both exactly match local refresh_status.json")
     live.add_argument("--timeout-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_TIMEOUT_SECONDS", "300")))
     live.add_argument("--interval-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_INTERVAL_SECONDS", "10")))
     live.add_argument("--base-url", default=os.environ.get("DEGEN_DOGS_LIVE_VERIFY_BASE_URL", SITE_URL))
