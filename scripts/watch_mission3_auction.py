@@ -599,6 +599,26 @@ def rpc_call_with_retry(method: str, params: list[Any], *, url: str, timeout: in
 
 
 def canonical_rpc_result(method: str, value: Any) -> str:
+    if method == "eth_getBlockByNumber" and isinstance(value, dict):
+        # Providers may legitimately omit or differently encode optional body
+        # fields such as `uncles`/`withdrawals` even when they agree on the
+        # canonical Base block. Quorum only over the header commitments and the
+        # fields consumed by this watcher; any hash, root, number, parent, or
+        # timestamp disagreement must still fail closed.
+        header_fields = (
+            "number",
+            "hash",
+            "parentHash",
+            "timestamp",
+            "stateRoot",
+            "transactionsRoot",
+            "receiptsRoot",
+        )
+        normalized = {
+            key: item.lower() if isinstance((item := value.get(key)), str) else item
+            for key in header_fields
+        }
+        return json.dumps(normalized, sort_keys=True, separators=(",", ":"))
     if method == "eth_getLogs" and isinstance(value, list):
         normalized = sorted(
             (

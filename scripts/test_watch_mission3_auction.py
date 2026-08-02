@@ -276,6 +276,50 @@ def test_rpc_quorum_rejects_two_by_two_tie():
         watcher.rpc_call_with_retry = original
 
 
+def test_block_quorum_ignores_optional_provider_fields_but_enforces_header():
+    watcher = load_module()
+    original = watcher.rpc_call_with_retry
+    urls = ["https://one.example", "https://two.example"]
+    canonical = {
+        "number": "0x64",
+        "hash": "0x" + "a" * 64,
+        "parentHash": "0x" + "b" * 64,
+        "timestamp": "0x123",
+        "stateRoot": "0x" + "c" * 64,
+        "transactionsRoot": "0x" + "d" * 64,
+        "receiptsRoot": "0x" + "e" * 64,
+        "uncles": [],
+        "withdrawals": [],
+    }
+    provider_variant = dict(canonical)
+    provider_variant.pop("uncles")
+    provider_variant.pop("withdrawals")
+    answers = {urls[0]: canonical, urls[1]: provider_variant}
+
+    def fake_call(_method, _params, *, url, timeout=30):  # noqa: ARG001
+        return answers[url], url
+
+    try:
+        watcher.rpc_call_with_retry = fake_call
+        value, agreeing = watcher.rpc_quorum_call(
+            "eth_getBlockByNumber", ["0x64", False], urls=urls, required=2
+        )
+        assert value["hash"] == canonical["hash"]
+        assert len(agreeing) == 2
+
+        answers[urls[1]] = {**provider_variant, "stateRoot": "0x" + "f" * 64}
+        try:
+            watcher.rpc_quorum_call(
+                "eth_getBlockByNumber", ["0x64", False], urls=urls, required=2
+            )
+        except RuntimeError as exc:
+            assert "votes=[1, 1]" in str(exc)
+        else:
+            raise AssertionError("watcher accepted providers that disagreed on the block header")
+    finally:
+        watcher.rpc_call_with_retry = original
+
+
 def test_rpc_quorum_returns_without_waiting_for_decisive_straggler():
     watcher = load_module()
     original = watcher.rpc_call_with_retry
