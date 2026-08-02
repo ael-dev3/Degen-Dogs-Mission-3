@@ -240,6 +240,32 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         assert both["raw_main_verified"] is True
         assert both["live_verify_source"] == "github_pages"
 
+        # Immutable raw commit evidence remains valid once observed. A later
+        # transient raw-host failure must not erase it just as Pages catches up.
+        monotonic_calls = iter([0.0, 0.0, 0.5])
+        telemetry.time.monotonic = lambda: next(monotonic_calls)
+        responses: list[Any] = [expected, stale, RuntimeError("transient raw failure"), expected]
+
+        def fetch_with_transient_raw_failure(_url: str) -> Any:
+            response = responses.pop(0)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        telemetry.fetch_json = fetch_with_transient_raw_failure
+        latched = telemetry.verify_live(
+            env,
+            root=root,
+            timeout_seconds=1,
+            interval_seconds=1,
+            base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
+        )
+        assert latched["live_verify_result"] == "verified"
+        assert latched["raw_commit_verified"] is True
+        assert latched["raw_main_verified"] is True
+        assert latched["live_verify_source"] == "github_pages"
+        assert responses == []
+
         assert telemetry.snapshot_mismatch(expected, expected) == ""
         unexpected_null = dict(expected)
         unexpected_null["attacker_controlled"] = None

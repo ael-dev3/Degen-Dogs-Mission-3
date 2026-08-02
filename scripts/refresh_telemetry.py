@@ -944,7 +944,6 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
     verified_source = ""
     raw_commit_verified = False
     while time.monotonic() <= deadline:
-        raw_commit_verified = False
         pages_verified = False
         for source, status_url in status_urls:
             url = f"{status_url}?cache_bust={time.time_ns()}"
