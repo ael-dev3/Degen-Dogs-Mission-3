@@ -19,6 +19,8 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).with_name("degen_dogs_runner_health.py")
+REPO_VENV_PYTHON = SCRIPT.parent.parent / ".venv" / "bin" / "python3"
+TEST_RUNTIME_PYTHON = REPO_VENV_PYTHON if os.access(REPO_VENV_PYTHON, os.X_OK) else Path(sys.executable)
 spec = importlib.util.spec_from_file_location("degen_dogs_runner_health", SCRIPT)
 if spec is None or spec.loader is None:
     raise RuntimeError(f"could not load {SCRIPT}")
@@ -598,7 +600,7 @@ def test_runner_path_prefers_executable_repo_virtualenv() -> None:
         python_path = root / ".venv" / "bin" / "python3"
         python_path.parent.mkdir(parents=True)
         python_path.write_text(
-            f"#!/bin/sh\nexec {shlex.quote(sys.executable)} \"$@\"\n",
+            f"#!/bin/sh\nexec {shlex.quote(str(TEST_RUNTIME_PYTHON))} \"$@\"\n",
             encoding="utf-8",
         )
         python_path.chmod(0o700)
@@ -639,7 +641,7 @@ def test_launchd_plist_validation_covers_hourly_and_watcher() -> None:
             python_path = health.REPO_DIR / ".venv" / "bin" / "python3"
             python_path.parent.mkdir(parents=True)
             python_path.write_text(
-                f"#!/bin/sh\nexec {shlex.quote(sys.executable)} \"$@\"\n",
+                f"#!/bin/sh\nexec {shlex.quote(str(TEST_RUNTIME_PYTHON))} \"$@\"\n",
                 encoding="utf-8",
             )
             python_path.chmod(0o700)

@@ -46,10 +46,21 @@ for required in MISSION3_WATCHER_TELEMETRY_PATH MISSION3_WATCHER_AUTO_PUSH; do
   [[ " ${DEGEN_DOGS_RUNNER_WATCHER_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
 done
 [[ " ${DEGEN_DOGS_RUNNER_HEALTH_ENV_ALLOWLIST//$'\n'/ } " == *" DEGEN_DOGS_HEALTH_GITHUB_ALERTS "* ]]
-[[ "$(grep -l 'DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST' \
+# Only the two data workers may inherit the common provider/API configuration.
+# The independent watchdog deliberately reloads workers through their installers
+# and must never receive provider credentials in its own launchd environment.
+for worker_installer in \
   "${ROOT}/scripts/install_hourly_refresh_launchd.sh" \
-  "${ROOT}/scripts/install_auction_watcher_launchd.sh" \
-  "${ROOT}/scripts/install_runner_health_launchd.sh" | wc -l | tr -d ' ')" == "3" ]]
+  "${ROOT}/scripts/install_auction_watcher_launchd.sh"; do
+  grep -q 'DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST' "$worker_installer"
+done
+if grep -q 'DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST' \
+  "${ROOT}/scripts/install_runner_health_launchd.sh"; then
+  printf '%s\n' 'health watchdog inherited the common credential allowlist' >&2
+  exit 1
+fi
+grep -q 'The watchdog must not inherit provider/API credentials' \
+  "${ROOT}/scripts/install_runner_health_launchd.sh"
 
 chmod 644 "$ENV_FILE"
 if (
