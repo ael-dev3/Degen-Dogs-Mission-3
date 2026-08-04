@@ -53,12 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#176/669",
+      "rank": 176,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 559 dog #559 559 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12888 degen 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 0x08de1d99e256825f2559cbd1455b816a1ce477029a0b559efe88f5ffba98d8e0 unavailable background: none; body: black; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: monocle 0x18126e002334a318bd5b352e4e3de9b3367cfd8d9f1f213bbed715a235401502 0xe3515346613ad4788bff27746a32d7e2997dc2ffaa3190679a9b129958e99ef5 chain_logs contract_getters",
+    "search_text": "dog 559 dog #559 559 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12888 degen 0xa9ad838b32f84d5290d1659afa0f07c22a50bb89877d0aa98d1924d6c3c902e3 0x08de1d99e256825f2559cbd1455b816a1ce477029a0b559efe88f5ffba98d8e0 #176/669 background: none; body: black; neck: studdedcollar; mouth: none; ears: goldearring; head: redmohawk; eyes: monocle 0x18126e002334a318bd5b352e4e3de9b3367cfd8d9f1f213bbed715a235401502 0xe3515346613ad4788bff27746a32d7e2997dc2ffaa3190679a9b129958e99ef5 chain_logs contract_getters",
     "settlement": {
       "block_number": 26556385,
       "block_time_utc": "2025-12-07T05:12:06Z",
@@ -78,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black",
+        "display": "Body: Black (11.7%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: StuddedCollar",
+        "display": "Neck: StuddedCollar (10.3%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring",
+        "display": "Ears: GoldEarring (14.6%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: RedMohawk",
+        "display": "Head: RedMohawk (7.5%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Monocle",
+        "display": "Eyes: Monocle (7.2%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

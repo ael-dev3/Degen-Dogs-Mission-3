@@ -351,12 +351,30 @@ def generated_state(root: Path = ROOT) -> dict[str, Any]:
         "auction_house_code_sha256": str(metrics.get("auction_house_code_sha256") or ""),
         "dog_nft_code_sha256": str(metrics.get("dog_nft_code_sha256") or ""),
         "dog_total_supply": int_or_none(metrics.get("dog_total_supply")),
+        "dog_id_ceiling": int_or_none(metrics.get("dog_id_ceiling")),
         "dog_token_uri_verification_status": str(metrics.get("dog_token_uri_verification_status") or ""),
+        "dog_base_existence_verification_status": str(metrics.get("dog_base_existence_verification_status") or ""),
         "dog_token_uri_present_count": int_or_none(metrics.get("dog_token_uri_present_count")),
         "dog_token_uri_unavailable_count": int_or_none(metrics.get("dog_token_uri_unavailable_count")),
+        "dog_base_existing_count": int_or_none(metrics.get("dog_base_existing_count")),
+        "dog_base_unclaimed_count": int_or_none(metrics.get("dog_base_unclaimed_count")),
+        "dog_base_existing_token_ids_sha256": str(metrics.get("dog_base_existing_token_ids_sha256") or ""),
+        "dog_base_unclaimed_token_ids_sha256": str(metrics.get("dog_base_unclaimed_token_ids_sha256") or ""),
         "dog_metadata_verification_status": str(metrics.get("dog_metadata_verification_status") or ""),
         "dog_metadata_onchain_verified_count": int_or_none(metrics.get("dog_metadata_onchain_verified_count")),
         "dog_metadata_unavailable_count": int_or_none(metrics.get("dog_metadata_unavailable_count")),
+        "dog_metadata_content_verification_status": str(metrics.get("dog_metadata_content_verification_status") or ""),
+        "dog_metadata_content_observed_count": int_or_none(metrics.get("dog_metadata_content_observed_count")),
+        "dog_rarity_verification_status": str(metrics.get("dog_rarity_verification_status") or ""),
+        "dog_rarity_universe_count": int_or_none(metrics.get("dog_rarity_universe_count")),
+        "dog_rarity_excluded_nonexistent_count": int_or_none(metrics.get("dog_rarity_excluded_nonexistent_count")),
+        "dog_rarity_incomplete_metadata_count": int_or_none(metrics.get("dog_rarity_incomplete_metadata_count")),
+        "dog_rarity_scope": str(metrics.get("dog_rarity_scope") or ""),
+        "dog_rarity_attested_block": int_or_none(metrics.get("dog_rarity_attested_block")),
+        "dog_rarity_attested_block_hash": str(metrics.get("dog_rarity_attested_block_hash") or ""),
+        "dog_rarity_continuity_through_block": int_or_none(metrics.get("dog_rarity_continuity_through_block")),
+        "dog_rarity_continuity_through_block_hash": str(metrics.get("dog_rarity_continuity_through_block_hash") or ""),
+        "dog_rarity_continuity_verification_status": str(metrics.get("dog_rarity_continuity_verification_status") or ""),
     }
 
 
@@ -538,12 +556,30 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "auction_house_code_sha256": state.get("auction_house_code_sha256"),
         "dog_nft_code_sha256": state.get("dog_nft_code_sha256"),
         "dog_total_supply": state.get("dog_total_supply"),
+        "dog_id_ceiling": state.get("dog_id_ceiling"),
         "dog_token_uri_verification_status": state.get("dog_token_uri_verification_status"),
+        "dog_base_existence_verification_status": state.get("dog_base_existence_verification_status"),
         "dog_token_uri_present_count": state.get("dog_token_uri_present_count"),
         "dog_token_uri_unavailable_count": state.get("dog_token_uri_unavailable_count"),
+        "dog_base_existing_count": state.get("dog_base_existing_count"),
+        "dog_base_unclaimed_count": state.get("dog_base_unclaimed_count"),
+        "dog_base_existing_token_ids_sha256": state.get("dog_base_existing_token_ids_sha256"),
+        "dog_base_unclaimed_token_ids_sha256": state.get("dog_base_unclaimed_token_ids_sha256"),
         "dog_metadata_verification_status": state.get("dog_metadata_verification_status"),
         "dog_metadata_onchain_verified_count": state.get("dog_metadata_onchain_verified_count"),
         "dog_metadata_unavailable_count": state.get("dog_metadata_unavailable_count"),
+        "dog_metadata_content_verification_status": state.get("dog_metadata_content_verification_status"),
+        "dog_metadata_content_observed_count": state.get("dog_metadata_content_observed_count"),
+        "dog_rarity_verification_status": state.get("dog_rarity_verification_status"),
+        "dog_rarity_universe_count": state.get("dog_rarity_universe_count"),
+        "dog_rarity_excluded_nonexistent_count": state.get("dog_rarity_excluded_nonexistent_count"),
+        "dog_rarity_incomplete_metadata_count": state.get("dog_rarity_incomplete_metadata_count"),
+        "dog_rarity_scope": state.get("dog_rarity_scope"),
+        "dog_rarity_attested_block": state.get("dog_rarity_attested_block"),
+        "dog_rarity_attested_block_hash": state.get("dog_rarity_attested_block_hash"),
+        "dog_rarity_continuity_through_block": state.get("dog_rarity_continuity_through_block"),
+        "dog_rarity_continuity_through_block_hash": state.get("dog_rarity_continuity_through_block_hash"),
+        "dog_rarity_continuity_verification_status": state.get("dog_rarity_continuity_verification_status"),
     }
     clean = redact_value({key: value for key, value in status.items() if value not in (None, "", [])})
     assert_public_safe(clean)
@@ -598,12 +634,30 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "auction_house_code_sha256",
         "dog_nft_code_sha256",
         "dog_total_supply",
+        "dog_id_ceiling",
         "dog_token_uri_verification_status",
+        "dog_base_existence_verification_status",
         "dog_token_uri_present_count",
         "dog_token_uri_unavailable_count",
+        "dog_base_existing_count",
+        "dog_base_unclaimed_count",
+        "dog_base_existing_token_ids_sha256",
+        "dog_base_unclaimed_token_ids_sha256",
         "dog_metadata_verification_status",
         "dog_metadata_onchain_verified_count",
         "dog_metadata_unavailable_count",
+        "dog_metadata_content_verification_status",
+        "dog_metadata_content_observed_count",
+        "dog_rarity_verification_status",
+        "dog_rarity_universe_count",
+        "dog_rarity_excluded_nonexistent_count",
+        "dog_rarity_incomplete_metadata_count",
+        "dog_rarity_scope",
+        "dog_rarity_attested_block",
+        "dog_rarity_attested_block_hash",
+        "dog_rarity_continuity_through_block",
+        "dog_rarity_continuity_through_block_hash",
+        "dog_rarity_continuity_verification_status",
     }
     missing = sorted(key for key in required if status.get(key) in (None, "", []))
     if missing:
@@ -648,34 +702,136 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
     for key in ("auction_house_code_sha256", "dog_nft_code_sha256"):
         if not re.fullmatch(r"[a-fA-F0-9]{64}", str(status.get(key) or "")):
             raise AssertionError(f"refresh_status {key} is invalid")
-    if status.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+    full_token_uri_status = "hash_pinned_cross_provider_exact_outcome_quorum"
+    continuity_token_uri_status = "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity"
+    full_existence_status = "hash_pinned_cross_provider_exists_token_uri_parity_quorum"
+    continuity_existence_status = (
+        "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity"
+    )
+    full_continuity_status = "full_snapshot_exists_token_uri_content_schema_attested"
+    incremental_continuity_status = (
+        "hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation"
+    )
+    if status.get("dog_token_uri_verification_status") not in {
+        full_token_uri_status,
+        continuity_token_uri_status,
+    }:
         raise AssertionError("refresh_status tokenURI outcomes are not hash-pinned and cross-provider verified")
+    if status.get("dog_base_existence_verification_status") not in {
+        full_existence_status,
+        continuity_existence_status,
+    }:
+        raise AssertionError("refresh_status Base exists/tokenURI parity is not cross-provider verified")
+    rarity_attested_block = int_or_none(status.get("dog_rarity_attested_block"))
+    rarity_continuity_block = int_or_none(status.get("dog_rarity_continuity_through_block"))
+    latest_generated_block = int_or_none(status.get("latest_generated_block"))
+    if (
+        rarity_attested_block is None
+        or rarity_continuity_block is None
+        or latest_generated_block is None
+        or rarity_attested_block <= 0
+        or rarity_attested_block > rarity_continuity_block
+        or rarity_continuity_block != latest_generated_block
+    ):
+        raise AssertionError("refresh_status rarity attestation block range is invalid")
+    for key in ("dog_rarity_attested_block_hash", "dog_rarity_continuity_through_block_hash"):
+        if not re.fullmatch(r"0x[a-fA-F0-9]{64}", str(status.get(key) or "")):
+            raise AssertionError(f"refresh_status {key} is invalid")
+    if str(status.get("dog_rarity_continuity_through_block_hash")).lower() != str(
+        status.get("snapshot_block_hash")
+    ).lower():
+        raise AssertionError("refresh_status rarity continuity hash differs from the snapshot")
+    continuity_status = status.get("dog_rarity_continuity_verification_status")
+    if continuity_status == full_continuity_status:
+        if (
+            status.get("dog_token_uri_verification_status") != full_token_uri_status
+            or status.get("dog_base_existence_verification_status") != full_existence_status
+            or rarity_attested_block != latest_generated_block
+            or str(status.get("dog_rarity_attested_block_hash")).lower()
+            != str(status.get("snapshot_block_hash")).lower()
+        ):
+            raise AssertionError("refresh_status full rarity attestation is internally inconsistent")
+    elif continuity_status == incremental_continuity_status:
+        if (
+            status.get("dog_token_uri_verification_status") != continuity_token_uri_status
+            or status.get("dog_base_existence_verification_status") != continuity_existence_status
+        ):
+            raise AssertionError("refresh_status incremental rarity continuity is internally inconsistent")
+    else:
+        raise AssertionError("refresh_status rarity continuity verification status is unsupported")
     dog_total_supply = int_or_none(status.get("dog_total_supply"))
+    dog_id_ceiling = int_or_none(status.get("dog_id_ceiling"))
     token_uri_present = int_or_none(status.get("dog_token_uri_present_count"))
     token_uri_unavailable = int_or_none(status.get("dog_token_uri_unavailable_count"))
+    base_existing = int_or_none(status.get("dog_base_existing_count"))
+    base_unclaimed = int_or_none(status.get("dog_base_unclaimed_count"))
     metadata_verified = int_or_none(status.get("dog_metadata_onchain_verified_count"))
     metadata_unavailable = int_or_none(status.get("dog_metadata_unavailable_count"))
+    metadata_content_observed = int_or_none(status.get("dog_metadata_content_observed_count"))
+    rarity_universe = int_or_none(status.get("dog_rarity_universe_count"))
+    rarity_excluded = int_or_none(status.get("dog_rarity_excluded_nonexistent_count"))
+    rarity_incomplete = int_or_none(status.get("dog_rarity_incomplete_metadata_count"))
     if None in {
         dog_total_supply,
+        dog_id_ceiling,
         token_uri_present,
         token_uri_unavailable,
+        base_existing,
+        base_unclaimed,
         metadata_verified,
         metadata_unavailable,
+        metadata_content_observed,
+        rarity_universe,
+        rarity_excluded,
+        rarity_incomplete,
     }:
         raise AssertionError("refresh_status tokenURI/metadata aggregate counts are invalid")
     assert dog_total_supply is not None
+    assert dog_id_ceiling is not None
     assert token_uri_present is not None
     assert token_uri_unavailable is not None
+    assert base_existing is not None
+    assert base_unclaimed is not None
     assert metadata_verified is not None
     assert metadata_unavailable is not None
-    if min(token_uri_present, token_uri_unavailable, metadata_verified, metadata_unavailable) < 0:
+    assert metadata_content_observed is not None
+    assert rarity_universe is not None
+    assert rarity_excluded is not None
+    assert rarity_incomplete is not None
+    if min(
+        dog_id_ceiling,
+        token_uri_present,
+        token_uri_unavailable,
+        base_existing,
+        base_unclaimed,
+        metadata_verified,
+        metadata_unavailable,
+        metadata_content_observed,
+        rarity_universe,
+        rarity_excluded,
+        rarity_incomplete,
+    ) < 0:
         raise AssertionError("refresh_status tokenURI/metadata aggregate counts cannot be negative")
+    if dog_id_ceiling != dog_total_supply:
+        raise AssertionError("refresh_status Dog ID ceiling contradicts legacy dog_total_supply")
     if token_uri_present + token_uri_unavailable != dog_total_supply:
         raise AssertionError("refresh_status tokenURI aggregate counts do not equal Dog total supply")
+    if base_existing != token_uri_present or base_unclaimed != token_uri_unavailable:
+        raise AssertionError("refresh_status Base existence counts contradict tokenURI outcomes")
+    for key in ("dog_base_existing_token_ids_sha256", "dog_base_unclaimed_token_ids_sha256"):
+        if not re.fullmatch(r"[0-9a-f]{64}", str(status.get(key) or "")):
+            raise AssertionError(f"refresh_status {key} is invalid")
     if metadata_verified + metadata_unavailable != dog_total_supply:
         raise AssertionError("refresh_status metadata aggregate counts do not equal Dog total supply")
     if metadata_unavailable < token_uri_unavailable:
         raise AssertionError("refresh_status hides tokenURI-unavailable Dogs from metadata unavailability")
+    if metadata_content_observed != metadata_verified:
+        raise AssertionError("refresh_status observed metadata content count contradicts verified tokenURIs")
+    if (
+        status.get("dog_metadata_content_verification_status")
+        != "verified_token_uri_offchain_content_hash_observed"
+    ):
+        raise AssertionError("refresh_status metadata content verification class is unsupported")
     expected_metadata_status = (
         "complete_onchain_token_uri_verified"
         if metadata_unavailable == 0
@@ -685,6 +841,21 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
     )
     if status.get("dog_metadata_verification_status") != expected_metadata_status:
         raise AssertionError("refresh_status dog metadata aggregate status contradicts its counts")
+    if rarity_universe != metadata_verified or rarity_excluded != token_uri_unavailable:
+        raise AssertionError("refresh_status rarity coverage contradicts verified Base metadata")
+    if rarity_incomplete != metadata_unavailable - token_uri_unavailable:
+        raise AssertionError("refresh_status rarity incomplete count contradicts metadata outcomes")
+    expected_rarity_status = (
+        "complete_verified_existing_token_universe"
+        if rarity_universe > 0 and rarity_incomplete == 0
+        else "unavailable_no_verified_existing_tokens"
+        if rarity_universe == 0
+        else "incomplete_existing_token_metadata"
+    )
+    if status.get("dog_rarity_verification_status") != expected_rarity_status:
+        raise AssertionError("refresh_status rarity status contradicts its counts")
+    if status.get("dog_rarity_scope") != "base_existing":
+        raise AssertionError("refresh_status rarity scope is not Base-existing")
     if not iso_utc(status.get("last_successful_refresh_time_utc")):
         raise AssertionError("refresh_status last_successful_refresh_time_utc is invalid")
     state = generated_state(root)
@@ -717,12 +888,30 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "auction_house_code_sha256",
         "dog_nft_code_sha256",
         "dog_total_supply",
+        "dog_id_ceiling",
         "dog_token_uri_verification_status",
+        "dog_base_existence_verification_status",
         "dog_token_uri_present_count",
         "dog_token_uri_unavailable_count",
+        "dog_base_existing_count",
+        "dog_base_unclaimed_count",
+        "dog_base_existing_token_ids_sha256",
+        "dog_base_unclaimed_token_ids_sha256",
         "dog_metadata_verification_status",
         "dog_metadata_onchain_verified_count",
         "dog_metadata_unavailable_count",
+        "dog_metadata_content_verification_status",
+        "dog_metadata_content_observed_count",
+        "dog_rarity_verification_status",
+        "dog_rarity_universe_count",
+        "dog_rarity_excluded_nonexistent_count",
+        "dog_rarity_incomplete_metadata_count",
+        "dog_rarity_scope",
+        "dog_rarity_attested_block",
+        "dog_rarity_attested_block_hash",
+        "dog_rarity_continuity_through_block",
+        "dog_rarity_continuity_through_block_hash",
+        "dog_rarity_continuity_verification_status",
     ):
         if str(status.get(key, "")) != str(state.get(key, "")):
             raise AssertionError(f"refresh_status {key} differs from mission3_metrics")

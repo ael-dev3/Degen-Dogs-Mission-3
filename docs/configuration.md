@@ -48,6 +48,7 @@ configured `DEGEN_DOGS_ENV_FILE` is reported as configuration drift.
 | `BASE_RPC_MAX_BLOCK_AGE_SECONDS` | Maximum age for a newly selected safe snapshot block; default 600 seconds. | no |
 | `BASE_RPC_MAX_RESPONSE_BYTES` | Hard response-body cap protecting RPC workers from memory exhaustion; default 32 MiB. | no |
 | `BASE_RPC_BATCH_LIMIT` | JSON-RPC batch size for balance/metadata calls; capped at 10. | no |
+| `BASE_TOKEN_URI_CHUNK_DELAY_SECONDS` | Minimum spacing between hash-pinned cross-provider `exists`/`tokenURI` batches; defaults to 1 second to avoid public-provider throttling. | no |
 | `DOG_METADATA_WORKERS` | Concurrent Dog metadata fetch workers. | no |
 | `DOG_METADATA_ALLOWED_HOSTS` | Exact HTTPS host allowlist for onchain token metadata retrieval. | no |
 | `DOG_METADATA_MAX_RESPONSE_BYTES` | Maximum metadata JSON body size; default 2 MiB. | no |

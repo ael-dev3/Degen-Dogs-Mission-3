@@ -43,12 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#146/669",
+      "rank": 146,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 77 dog #77 77 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: dalmation; neck: none; mouth: tongue; ears: earbuds; head: beanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 77 dog #77 77 mission 1 mission 1 polygon no auction dogmaster reward weth #146/669 background: none; body: dalmation; neck: none; mouth: tongue; ears: earbuds; head: beanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +71,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Tongue",
+        "display": "Mouth: Tongue (9.7%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Beanie",
+        "display": "Head: Beanie (5.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: MaskSnorkel",
+        "display": "Eyes: MaskSnorkel (9.9%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

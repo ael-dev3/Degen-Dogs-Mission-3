@@ -52,12 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#520/669",
+      "rank": 520,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 234 dog #234 234 mission 2 mission 2 degen chain settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 5000 degen 0x7fca126ef5cd22a423597bd0c4ce5b8750eeb74a08d21681f11b442cb8406952 0xb4311a9a39bbc7ca556c3c3388fca2883ea715519587c47be02b48dbbe730e78 unavailable background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: whitemohawk; eyes: glasses 0xf0575a3f17ce89721f546bf23761929d80e56b23e4aa820e587485f34ca6ab04 chain_logs contract_getters",
+    "search_text": "dog 234 dog #234 234 mission 2 mission 2 degen chain settled 0xca0edb47a8c9ef04dc2368946f46fb3d7c1a3202 @skunkape skunkape 5000 degen 0x7fca126ef5cd22a423597bd0c4ce5b8750eeb74a08d21681f11b442cb8406952 0xb4311a9a39bbc7ca556c3c3388fca2883ea715519587c47be02b48dbbe730e78 #520/669 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: whitemohawk; eyes: glasses 0xf0575a3f17ce89721f546bf23761929d80e56b23e4aa820e587485f34ca6ab04 chain_logs contract_getters",
     "settlement": {
       "block_number": 25048819,
       "block_time_utc": "2024-12-27T15:54:50Z",
@@ -77,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: WhiteMohawk",
+        "display": "Head: WhiteMohawk (6.7%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: Glasses",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -11,6 +11,7 @@ import json
 import os
 import queue
 import random
+import re
 import signal
 import sqlite3
 import stat
@@ -572,6 +573,7 @@ CONFIGURATION_ENV_VARS = [
     ("BASE_LOG_CHUNK", "Maximum block range per eth_getLogs request; defaults to Base's reliable 2,000-block recommendation and is capped at 10,000."),
     ("BASE_LOG_WORKERS", "Concurrent log-fetch workers, capped by the builder to avoid public RPC overload."),
     ("BASE_RPC_BATCH_LIMIT", "Maximum JSON-RPC batch size for balance/metadata calls, capped at 10."),
+    ("BASE_TOKEN_URI_CHUNK_DELAY_SECONDS", "Minimum spacing between cross-provider exists/tokenURI batches; defaults to one second to avoid burst throttling."),
     ("BASE_RPC_MAX_RESPONSE_BYTES", "Maximum accepted JSON-RPC response size; defaults to 32 MiB and is capped at 64 MiB."),
     ("BASE_RPC_ATTEMPTS", "Maximum attempts per JSON-RPC request before failing over/failing fast."),
     ("BASE_RPC_QUORUM_DEADLINE_SECONDS", "Hard wall-clock deadline for a cross-provider quorum call."),
@@ -618,11 +620,25 @@ SELECTOR_TOTAL_SUPPLY = "0x18160ddd"
 SELECTOR_AUCTION = "0x7d9f6db5"
 SELECTOR_BALANCE_OF = "0x70a08231"
 SELECTOR_TOKEN_URI = "0xc87b56dd"
+SELECTOR_EXISTS = "0x4f558e79"
 # OpenZeppelin ERC721NonexistentToken(uint256). Only this exact revert, with
 # the requested token ID encoded in its data, is accepted as an onchain proof
 # that a sparse/burned token currently has no tokenURI binding.
 ERC721_NONEXISTENT_TOKEN_ERROR = "0x7e273289"
 TOKEN_URI_CHUNK_WORKERS = 1
+TOKEN_URI_CHUNK_DELAY_SECONDS = max(
+    0.0,
+    min(float(os.environ.get("BASE_TOKEN_URI_CHUNK_DELAY_SECONDS", "1.0")), 5.0),
+)
+DOG_RARITY_TRAIT_TYPES = (
+    "Background",
+    "Body",
+    "Neck",
+    "Mouth",
+    "Ears",
+    "Head",
+    "Eyes",
+)
 
 
 def read_bounded_json_response(response: Any, limit: int, label: str) -> Any:
@@ -2606,6 +2622,10 @@ def token_uri_data(token_id: int) -> str:
     return SELECTOR_TOKEN_URI + f"{token_id:x}".rjust(64, "0")
 
 
+def exists_data(token_id: int) -> str:
+    return SELECTOR_EXISTS + f"{token_id:x}".rjust(64, "0")
+
+
 def fetch_dog_total_supply(block_tag: str) -> int:
     return decode_uint_call(eth_call(DEGEN_DOGS, SELECTOR_TOTAL_SUPPLY, block_tag))
 
@@ -2817,8 +2837,12 @@ def _token_uri_provider_outcomes(
     deadline: float,
 ) -> list[TokenUriOutcome]:
     calls = [
-        ("eth_call", [{"to": DEGEN_DOGS, "data": token_uri_data(token_id)}, state_tag])
+        call
         for token_id in token_ids
+        for call in (
+            ("eth_call", [{"to": DEGEN_DOGS, "data": token_uri_data(token_id)}, state_tag]),
+            ("eth_call", [{"to": DEGEN_DOGS, "data": exists_data(token_id)}, state_tag]),
+        )
     ]
     payload = [
         {"jsonrpc": "2.0", "id": index, "method": method, "params": params}
@@ -2841,22 +2865,34 @@ def _token_uri_provider_outcomes(
             by_id = _validated_batch_items(items, len(calls))
             outcomes: list[TokenUriOutcome] = []
             for index, token_id in enumerate(token_ids):
-                item = by_id[index]
-                if "error" in item:
-                    outcome = _token_uri_nonexistent_outcome(item["error"], token_id)
+                token_uri_item = by_id[index * 2]
+                exists_item = by_id[index * 2 + 1]
+                if "error" in exists_item:
+                    raise RuntimeError("exists() RPC returned a contract error")
+                exists_raw = exists_item.get("result")
+                if not isinstance(exists_raw, str) or not re.fullmatch(r"0x[0-9a-fA-F]{64}", exists_raw):
+                    raise RuntimeError("exists() RPC returned a malformed ABI boolean")
+                exists_value = int(exists_raw, 16)
+                if exists_value not in {0, 1}:
+                    raise RuntimeError("exists() RPC returned a non-boolean ABI value")
+                if "error" in token_uri_item:
+                    outcome = _token_uri_nonexistent_outcome(token_uri_item["error"], token_id)
                     if outcome is None:
                         raise RuntimeError(
-                            f"tokenURI RPC returned an unsupported contract error code={item['error'].get('code')}"
+                            "tokenURI RPC returned an unsupported contract error "
+                            f"code={token_uri_item['error'].get('code')}"
                         )
-                    outcomes.append(outcome)
-                    continue
-                raw = item.get("result")
-                if not isinstance(raw, str):
-                    raise RuntimeError("tokenURI RPC returned a non-string result")
-                uri = decode_abi_string(raw)
-                if not uri or uri != uri.strip():
-                    raise RuntimeError("tokenURI RPC returned an empty or malformed URI")
-                outcomes.append(("uri", uri))
+                else:
+                    raw = token_uri_item.get("result")
+                    if not isinstance(raw, str):
+                        raise RuntimeError("tokenURI RPC returned a non-string result")
+                    uri = decode_abi_string(raw)
+                    if not uri or uri != uri.strip():
+                        raise RuntimeError("tokenURI RPC returned an empty or malformed URI")
+                    outcome = ("uri", uri)
+                if (outcome[0] == "uri") != bool(exists_value):
+                    raise RuntimeError(f"exists()/tokenURI outcome mismatch for Dog #{token_id}")
+                outcomes.append(outcome)
             return outcomes
         except Exception as exc:  # noqa: BLE001
             last_error = exc
@@ -2869,6 +2905,7 @@ def _token_uri_provider_outcomes(
                     "HTTP 403",
                     "HTTP 404",
                     "unsupported contract error",
+                    "exists()",
                     "non-string result",
                     "empty or malformed URI",
                     "JSON-RPC batch response",
@@ -2991,13 +3028,28 @@ def fetch_token_uri_bindings(
             f"tokenURI verification requires {RPC_QUORUM_SIZE} independent Base RPC providers; configured={len(urls)}"
         )
     state_tag = _token_uri_state_tag(block_tag, block_hash)
-    chunks = [token_ids[index : index + RPC_BATCH_LIMIT] for index in range(0, len(token_ids), RPC_BATCH_LIMIT)]
+    # Each token contributes tokenURI() and exists() calls. Keep the combined
+    # request within the configured RPC batch cap and pace chunks so public
+    # providers do not fail a correct snapshot merely due to burst throttling.
+    token_chunk_size = max(1, RPC_BATCH_LIMIT // 2)
+    chunks = [
+        token_ids[index : index + token_chunk_size]
+        for index in range(0, len(token_ids), token_chunk_size)
+    ]
+    pacing_lock = threading.Lock()
+    next_chunk_start = 0.0
 
     def fetch_verified_chunk(chunk: list[int]) -> list[tuple[int, str | None]]:
+        nonlocal next_chunk_start
         # Every chunk creates its own hard monotonic deadline after leaving the
         # worker queue. Production deliberately uses one chunk at a time to
         # avoid a public-RPC burst while providers within that chunk run in
         # parallel and must return an exact matching outcome vector.
+        with pacing_lock:
+            wait_seconds = next_chunk_start - time.monotonic()
+            if wait_seconds > 0:
+                time.sleep(wait_seconds)
+            next_chunk_start = time.monotonic() + TOKEN_URI_CHUNK_DELAY_SECONDS
         outcomes = _token_uri_chunk_quorum(chunk, state_tag, urls)
         values: list[tuple[int, str | None]] = []
         for token_id, (kind, value) in zip(chunk, outcomes):
@@ -3148,42 +3200,79 @@ def fetch_dog_metadata_rows(
         )
         metadata.append(row)
 
-    metadata_complete = len(metadata) == total_supply and all(row["_metadata_verified"] for row in metadata)
-
+    verified_attributes: dict[int, list[dict[str, str]]] = {}
     trait_counts: Counter[tuple[str, str]] = Counter()
     for row in metadata:
         if not row["_metadata_verified"]:
             continue
-        for attr in row.get("attributes") or []:
-            trait_counts[(str(attr.get("trait_type") or ""), str(attr.get("value") or ""))] += 1
-
-    score_by_token: dict[int, float] = {}
-    for row in metadata:
-        if not row["_metadata_verified"]:
-            continue
         token_id = int(row["token_id"])
-        score = 0.0
+        attributes_by_type: dict[str, str] = {}
+        seen_trait_types: set[str] = set()
         for attr in row.get("attributes") or []:
-            key = (str(attr.get("trait_type") or ""), str(attr.get("value") or ""))
-            count = max(1, trait_counts.get(key, 1))
-            score += total_supply / count
-        score_by_token[token_id] = score
-    ranks = (
-        {
-            token_id: rank
-            for rank, token_id in enumerate(
-                sorted(score_by_token, key=lambda tid: (-score_by_token[tid], tid)),
-                start=1,
+            trait_type = str(attr.get("trait_type") or "").strip()
+            value = str(attr.get("value") or "").strip()
+            if not trait_type or not value:
+                continue
+            if trait_type in seen_trait_types:
+                raise RuntimeError(f"Dog #{token_id} metadata repeats rarity trait {trait_type!r}")
+            if ";" in trait_type or ";" in value:
+                raise RuntimeError(f"Dog #{token_id} metadata contains an unsafe rarity trait delimiter")
+            seen_trait_types.add(trait_type)
+            attributes_by_type[trait_type] = value
+        actual_trait_types = set(attributes_by_type)
+        expected_trait_types = set(DOG_RARITY_TRAIT_TYPES)
+        if actual_trait_types != expected_trait_types:
+            missing_traits = sorted(expected_trait_types.difference(actual_trait_types))
+            unexpected_traits = sorted(actual_trait_types.difference(expected_trait_types))
+            raise RuntimeError(
+                f"Dog #{token_id} rarity trait schema mismatch: "
+                f"missing={missing_traits} unexpected={unexpected_traits}"
             )
-        }
-        if metadata_complete
-        else {}
+        attributes = [
+            {"trait_type": trait_type, "value": attributes_by_type[trait_type]}
+            for trait_type in DOG_RARITY_TRAIT_TYPES
+        ]
+        for attr in attributes:
+            trait_counts[(attr["trait_type"], attr["value"])] += 1
+        verified_attributes[token_id] = attributes
+
+    # totalSupply is an ID-space counter on this bridged collection: some IDs
+    # have an exact, hash-pinned ERC721NonexistentToken outcome on Base. Those
+    # IDs are not Dogs and must not dilute trait frequencies. A URI that exists
+    # but whose metadata could not be fetched is different and still fails the
+    # collection-wide calculation closed.
+    rarity_universe_size = len(verified_attributes)
+    rarity_universe_complete = rarity_universe_size > 0 and all(
+        row["_metadata_verified"]
+        or row["_metadata_verification_status"] == "onchain_token_uri_unavailable"
+        for row in metadata
     )
+
+    score_by_token: dict[int, Decimal] = {}
+    for token_id, attributes in verified_attributes.items():
+        score = Decimal(0)
+        for attr in attributes:
+            key = (attr["trait_type"], attr["value"])
+            count = max(1, trait_counts.get(key, 1))
+            score += Decimal(rarity_universe_size) / Decimal(count)
+        score_by_token[token_id] = score
+    ranks: dict[int, int] = {}
+    if rarity_universe_complete:
+        previous_score: Decimal | None = None
+        competition_rank = 0
+        for position, token_id in enumerate(
+            sorted(score_by_token, key=lambda tid: (-score_by_token[tid], tid)),
+            start=1,
+        ):
+            if previous_score is None or score_by_token[token_id] != previous_score:
+                competition_rank = position
+                previous_score = score_by_token[token_id]
+            ranks[token_id] = competition_rank
 
     rows: list[dict[str, Any]] = []
     for row in metadata:
         token_id = int(row["token_id"])
-        attrs = row.get("attributes") or []
+        attrs = verified_attributes.get(token_id, [])
         traits = []
         rarity_items = []
         for attr in attrs:
@@ -3192,9 +3281,9 @@ def fetch_dog_metadata_rows(
             if not trait_type or not value:
                 continue
             traits.append(f"{trait_type}: {value}")
-            if metadata_complete:
+            if rarity_universe_complete:
                 count = trait_counts[(trait_type, value)]
-                pct = (Decimal(count) * Decimal(100)) / Decimal(total_supply) if total_supply else Decimal(0)
+                pct = (Decimal(count) * Decimal(100)) / Decimal(rarity_universe_size)
                 rarity_items.append(f"{trait_type}: {value} ({pct:.1f}%)")
         rows.append(
             {
@@ -3205,8 +3294,8 @@ def fetch_dog_metadata_rows(
                 "dog_opensea_url": dog_opensea_url(token_id),
                 "traits": "; ".join(traits),
                 "trait_rarity": "; ".join(rarity_items),
-                "rarity": f"#{ranks[token_id]}/{total_supply}" if token_id in ranks else "Unavailable",
-                "rarity_score": round(score_by_token[token_id], 6) if token_id in ranks else None,
+                "rarity": f"#{ranks[token_id]}/{rarity_universe_size}" if token_id in ranks else "Unavailable",
+                "rarity_score": round(float(score_by_token[token_id]), 6) if token_id in ranks else None,
                 "metadata_verification_status": row["_metadata_verification_status"],
             }
         )
@@ -5208,6 +5297,14 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     if image:
         image_html = f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image">'
     rarity = current.get("rarity", "")
+    rarity_universe = str(metrics.get("dog_rarity_universe_count", "")).strip()
+    rarity_excluded = str(metrics.get("dog_rarity_excluded_nonexistent_count", "")).strip()
+    rarity_title = ""
+    if rarity_universe.isdigit() and rarity_excluded.isdigit():
+        rarity_title = (
+            f' title="Ranked across {html.escape(rarity_universe, quote=True)} Base-existing Dogs; '
+            f'{html.escape(rarity_excluded, quote=True)} canonically nonexistent Base IDs excluded"'
+        )
     bid_history_menu = render_bid_history_menu(tables)
     current_detail = "".join(
         [
@@ -5217,7 +5314,7 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
                 f'<span class="detail-time timer-card timer-card--{timer_state}" '
                 f'data-auction-status="{auction_status_attr}"><b class="timer-label">Time left</b>{time_left_html}</span>'
             ) if time_left else "",
-            f'<span class="detail-rarity"><b>Rarity</b>{html.escape(rarity)}</span>' if rarity else "",
+            f'<span class="detail-rarity"{rarity_title}><b>Base rarity</b>{html.escape(rarity)}</span>' if rarity else "",
             f'<span class="detail-bidder"><b>High bidder</b>{participant_html}</span>' if participant else "",
             bid_history_menu,
         ]
@@ -5471,12 +5568,12 @@ const metricNumber=(metrics,key)=>toNumber(metrics[key]);
 const metricAmount=(metrics,key,places,suffix)=>{const value=metricNumber(metrics,key);return value===null?'':`${value.toLocaleString(undefined,{minimumFractionDigits:places,maximumFractionDigits:places})}${suffix}`;};
 const rewardTile=(label,value,note,title='')=>value?`<span class="reward-tile"${title?` title="${attr(title)}"`:''}><b>${escapeHtml(label)}</b><strong>${value}</strong><em>${escapeHtml(note)}</em>${title?`<small class="reward-caveat sr-only">${escapeHtml(title)}</small>`:''}</span>`:'';
 const renderRewards=metrics=>{if(!currentRewards)return;const woof=metricAmount(metrics,'reward_woof_per_dog_per_day',2,' WOOF/day');const woofUsd=metricAmount(metrics,'reward_woof_per_dog_usd_per_day',2,'/day');const sup=metricAmount(metrics,'reward_sup_per_dog_per_day',2,' SUP/day');const supUsd=metricAmount(metrics,'reward_sup_per_dog_usd_per_day',2,'/day');const total=metricAmount(metrics,'reward_total_per_dog_usd_per_day',2,'/day');const tiles=[rewardTile('WOOF / Dog',woof?`${escapeHtml(woof)}${woofUsd?` <span>($${escapeHtml(woofUsd)})</span>`:''}`:'','Observed stream'),rewardTile('SUP / Dog',sup?`${escapeHtml(sup)}${supUsd?` <span>($${escapeHtml(supUsd)})</span>`:''}`:'','Observed stream'),rewardTile('Total / Dog',total?`$${escapeHtml(total)}`:'','WOOF + SUP')];const s6Enabled=/^(true|1|yes|live_estimate)$/i.test(metrics.season6_sup_enabled||metrics.season6_sup_status||'');const currentWallet=String(metrics.current_bidder_wallet||'').toLowerCase();const s6Wallet=String(metrics.season6_sup_current_bidder_wallet||'').toLowerCase();const s6Aligned=!s6Wallet||s6Wallet===currentWallet;if(s6Enabled&&s6Aligned){const noBid=metrics.season6_sup_estimate_status==='no_current_bid'||(!metrics.season6_sup_current_bidder_wallet&&!metrics.season6_sup_current_bid_estimated_cap_aware_sup);const supEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_sup');const usdEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_usd');const main=noBid?'Bid to estimate S6 SUP':`≈${(supEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})} SUP`;const secondary=noBid?'Current high bidder needed':`≈$${(usdEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})}`;tiles.push(`<span class="reward-tile season6-sup-estimate"><b>Season 6 if bid wins</b><strong>${escapeHtml(main)}</strong><em>${escapeHtml(secondary)} · Wallet-level estimate</em></span>`);}const days=metricNumber(metrics,'reward_current_bid_payback_days');const apr=metrics.reward_current_bid_apr_display||'';const payback=days&&days>0?(days<1?'&lt;1 day':`≈${days<10?days.toFixed(1):days.toFixed(0)} days`):(metrics.reward_current_bid_payback_days?'N/A':'');if(payback||apr){const caveat='Simple APR estimate from the current bid and observed per-Dog daily reward flow; not guaranteed future return.';tiles.push(rewardTile('Bid payback',`<span class="payback-days">${payback}</span><span class="payback-apr">${escapeHtml(apr)}</span>`,'Current bid / observed per-Dog flow',caveat));}const body=tiles.filter(Boolean).join('');currentRewards.innerHTML=body?`<section class="reward-strip" aria-label="Per-Dog reward estimate">${body}</section>`:'';};
-const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"><b>Rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url,SAFE_IMAGE_HOSTS);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
+const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const rarityUniverse=String(metrics.dog_rarity_universe_count||'');const rarityExcluded=String(metrics.dog_rarity_excluded_nonexistent_count||'');const rarityTitle=/^\d+$/.test(rarityUniverse)&&/^\d+$/.test(rarityExcluded)?`Ranked across ${rarityUniverse} Base-existing Dogs; ${rarityExcluded} canonically nonexistent Base IDs excluded`:'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"${rarityTitle?` title="${attr(rarityTitle)}"`:''}><b>Base rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url,SAFE_IMAGE_HOSTS);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
 const normalizedState=value=>{const state=String(value||'').toLowerCase();return state==='live'||state.includes('ongoing')?'live':state.includes('settled')||state.includes('ended')?'ended':state;};
 const assertSame=(label,values,normalize=value=>String(value))=>{const present=values.filter(value=>value!==null&&value!==undefined&&String(value)!=='').map(normalize);if(new Set(present).size>1)throw new Error(`${label} datasets disagree`);};
 const canonicalUint=(value,label,minimum=0)=>{const text=String(value??'').trim();if(!/^(0|[1-9]\d*)$/.test(text))throw new Error(`${label} is not a canonical integer`);const number=Number(text);if(!Number.isSafeInteger(number)||number<minimum)throw new Error(`${label} is out of range`);return number;};
 const normalizedAmount=value=>{const text=String(value??'').trim();const number=Number(text);if(!text||!Number.isFinite(number)||number<0)throw new Error('amount is not finite and nonnegative');return number.toFixed(12);};
-const assertStatusAttestation=status=>{const blockNumber=canonicalUint(status.latest_generated_block,'snapshot block',1);if(status.last_refresh_result!=='success_generated'||!setVerificationState(status))throw new Error('verified snapshot is stale or unsuccessful');if(!/^0x[0-9a-f]{64}$/i.test(String(status.snapshot_block_hash||'')))throw new Error('verified snapshot hash is invalid');for(const key of ['auction_house_code_sha256','dog_nft_code_sha256'])if(!/^[0-9a-f]{64}$/i.test(String(status[key]||'')))throw new Error(`verified ${key} is invalid`);const quorum=canonicalUint(status.rpc_quorum_size,'RPC quorum size',2);const agreement=String(status.rpc_quorum_agreement||'').match(/^(\d+)\/(\d+)$/);if(!agreement||canonicalUint(agreement[1],'RPC agreement',quorum)>canonicalUint(agreement[2],'RPC responders',quorum))throw new Error('verified RPC agreement is invalid');const providers=new Set(String(status.rpc_quorum_providers||'').split(',').map(value=>value.trim()).filter(Boolean));if(providers.size<quorum)throw new Error('verified RPC provider set is incomplete');if(canonicalUint(status.snapshot_confirmations,'snapshot confirmations',1)<1)throw new Error('snapshot is unconfirmed');if(canonicalUint(status.onchain_chain_id,'onchain chain ID',8453)!==8453)throw new Error('snapshot is not Base mainnet');const scope=new Set(String(status.onchain_verification_scope||'').split(',').map(value=>value.trim()).filter(Boolean));for(const required of ['snapshot_hash','contract_code','current_auction','dog_total_supply','recent_event_logs'])if(!scope.has(required))throw new Error(`verified snapshot scope is missing ${required}`);return String(blockNumber);};
+const assertStatusAttestation=status=>{const blockNumber=canonicalUint(status.latest_generated_block,'snapshot block',1);if(status.last_refresh_result!=='success_generated'||!setVerificationState(status))throw new Error('verified snapshot is stale or unsuccessful');if(!/^0x[0-9a-f]{64}$/i.test(String(status.snapshot_block_hash||'')))throw new Error('verified snapshot hash is invalid');for(const key of ['auction_house_code_sha256','dog_nft_code_sha256'])if(!/^[0-9a-f]{64}$/i.test(String(status[key]||'')))throw new Error(`verified ${key} is invalid`);const quorum=canonicalUint(status.rpc_quorum_size,'RPC quorum size',2);const agreement=String(status.rpc_quorum_agreement||'').match(/^(\d+)\/(\d+)$/);if(!agreement||canonicalUint(agreement[1],'RPC agreement',quorum)>canonicalUint(agreement[2],'RPC responders',quorum))throw new Error('verified RPC agreement is invalid');const providers=new Set(String(status.rpc_quorum_providers||'').split(',').map(value=>value.trim()).filter(Boolean));if(providers.size<quorum)throw new Error('verified RPC provider set is incomplete');if(canonicalUint(status.snapshot_confirmations,'snapshot confirmations',1)<1)throw new Error('snapshot is unconfirmed');if(canonicalUint(status.onchain_chain_id,'onchain chain ID',8453)!==8453)throw new Error('snapshot is not Base mainnet');const scope=new Set(String(status.onchain_verification_scope||'').split(',').map(value=>value.trim()).filter(Boolean));for(const required of ['snapshot_hash','contract_code','current_auction','dog_total_supply','dog_token_uri_bindings','recent_event_logs'])if(!scope.has(required))throw new Error(`verified snapshot scope is missing ${required}`);return String(blockNumber);};
 const assertCurrentSnapshot=(status,current,feed,history,metrics)=>{const block=assertStatusAttestation(status);if(String(current.latest_block||'')!==block||String(metrics.latest_block||'')!==block)throw new Error('generated snapshot is not atomic yet');if(canonicalUint(metrics.onchain_chain_id,'metrics chain ID',8453)!==8453)throw new Error('metrics are not Base mainnet');const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');if(canonicalUint(current.token_id,'current auction token')!==token||canonicalUint(dogToken(feed),'auction feed token')!==token||canonicalUint(metrics.current_auction_token_id,'metrics auction token')!==token)throw new Error('current auction datasets disagree');assertSame('auction state',[status.current_auction_status,current.auction_state,feed.status,metrics.current_auction_status],normalizedState);assertSame('high bidder',[status.current_high_bidder_wallet,current.bidder_wallet,feed.bidder_winner_wallet,metrics.current_bidder_wallet],value=>String(value).toLowerCase());assertSame('current bid',[status.current_bid_eth,current.current_bid_eth,feed.amount_eth,metrics.current_bid_eth],normalizedAmount);const hashes=[status.snapshot_block_hash,metrics.snapshot_block_hash].filter(Boolean);if(hashes.length!==2)throw new Error('verified snapshot hash is missing');assertSame('snapshot hash',hashes,value=>String(value).toLowerCase());const verification=[status.onchain_verification_status,metrics.onchain_verification_status].filter(Boolean);if(verification.length!==2||verification.some(value=>value!=='current_snapshot_cross_provider_verified'))throw new Error('current snapshot is not cross-provider verified');const topBid=asRows(history)[0];if(topBid){if(canonicalUint(topBid.token_id,'current bid history token')!==token)throw new Error('current bid history token disagrees');assertSame('bid history bidder',[current.bidder_wallet,topBid.bidder_wallet],value=>String(value).toLowerCase());assertSame('bid history amount',[current.current_bid_eth,topBid.bid_eth],normalizedAmount);}return {block,token};};
 const assertArchiveSnapshot=(context,records)=>{const unified=asRows(records).find(row=>Number(row.mission)===3&&Number(row.dog_id)===context.token);if(!unified)throw new Error('archive index is behind current auction');assertSame('archive state',[context.status.current_auction_status,context.current.auction_state,context.feed.status,context.metrics.current_auction_status,unified.status],normalizedState);assertSame('archive high bidder',[context.status.current_high_bidder_wallet,context.current.bidder_wallet,context.feed.bidder_winner_wallet,context.metrics.current_bidder_wallet,unified.winner_or_high_bidder?.wallet],value=>String(value).toLowerCase());assertSame('archive current bid',[context.status.current_bid_eth,context.current.current_bid_eth,context.feed.amount_eth,context.metrics.current_bid_eth,unified.amount?.native],normalizedAmount);};
 const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=await fetchGenerated('unified_dog_search_index',target.block);if(target.key!==liveSnapshotKey)continue;assertArchiveSnapshot(target,records);const nextRecords=asRows(records);const previousRecords=unifiedRecords;const previousReady=unifiedReady;unifiedRecords=nextRecords;unifiedReady=true;try{renderArchive();}catch(error){unifiedRecords=previousRecords;unifiedReady=previousReady;throw error;}unifiedSnapshotBlock=target.block;archiveSnapshotKey=target.key;}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
@@ -5582,6 +5679,7 @@ def main() -> None:
     token_stats.update(onchain_verification)
     decimals = int(token_stats["woof_decimals"])
     token_stats["dog_total_supply"] = str(dog_total_supply)
+    token_stats["dog_id_ceiling"] = str(dog_total_supply)
     token_stats.update(current_bid_reward_stats(current, token_stats))
     snapshot_block_hash = onchain_verification["snapshot_block_hash"]
     dog_token_uris = fetch_token_uri_bindings(
@@ -5591,11 +5689,24 @@ def main() -> None:
     )
     token_uri_present_count = sum(uri is not None for uri in dog_token_uris.values())
     token_uri_unavailable_count = dog_total_supply - token_uri_present_count
+    base_existing_ids = sorted(token_id for token_id, uri in dog_token_uris.items() if uri is not None)
+    base_unclaimed_ids = sorted(token_id for token_id, uri in dog_token_uris.items() if uri is None)
+    base_existing_ids_sha256 = hashlib.sha256(
+        ",".join(str(token_id) for token_id in base_existing_ids).encode("ascii")
+    ).hexdigest()
+    base_unclaimed_ids_sha256 = hashlib.sha256(
+        ",".join(str(token_id) for token_id in base_unclaimed_ids).encode("ascii")
+    ).hexdigest()
     token_stats.update(
         {
             "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+            "dog_base_existence_verification_status": "hash_pinned_cross_provider_exists_token_uri_parity_quorum",
             "dog_token_uri_present_count": str(token_uri_present_count),
             "dog_token_uri_unavailable_count": str(token_uri_unavailable_count),
+            "dog_base_existing_count": str(token_uri_present_count),
+            "dog_base_unclaimed_count": str(token_uri_unavailable_count),
+            "dog_base_existing_token_ids_sha256": base_existing_ids_sha256,
+            "dog_base_unclaimed_token_ids_sha256": base_unclaimed_ids_sha256,
         }
     )
     progress(
@@ -5621,10 +5732,19 @@ def main() -> None:
         token_uris=dog_token_uris,
     )
     metadata_status_counts = Counter(str(row["metadata_verification_status"]) for row in dog_metadata)
+    metadata_verified_count = metadata_status_counts.get("onchain_token_uri_verified", 0)
     metadata_unavailable_count = sum(
         count
         for status, count in metadata_status_counts.items()
         if status != "onchain_token_uri_verified"
+    )
+    rarity_incomplete_metadata_count = max(0, token_uri_present_count - metadata_verified_count)
+    rarity_verification_status = (
+        "complete_verified_existing_token_universe"
+        if metadata_verified_count > 0 and rarity_incomplete_metadata_count == 0
+        else "unavailable_no_verified_existing_tokens"
+        if metadata_verified_count == 0
+        else "incomplete_existing_token_metadata"
     )
     token_stats.update(
         {
@@ -5635,10 +5755,25 @@ def main() -> None:
                 if metadata_status_counts.get("onchain_token_uri_unavailable", 0) == metadata_unavailable_count
                 else "incomplete_metadata_unavailable"
             ),
-            "dog_metadata_onchain_verified_count": str(
-                metadata_status_counts.get("onchain_token_uri_verified", 0)
-            ),
+            "dog_metadata_onchain_verified_count": str(metadata_verified_count),
             "dog_metadata_unavailable_count": str(metadata_unavailable_count),
+            "dog_metadata_content_verification_status": "verified_token_uri_offchain_content_hash_observed",
+            "dog_metadata_content_observed_count": str(metadata_verified_count),
+            "dog_rarity_verification_status": rarity_verification_status,
+            "dog_rarity_universe_count": str(metadata_verified_count),
+            "dog_rarity_excluded_nonexistent_count": str(token_uri_unavailable_count),
+            "dog_rarity_incomplete_metadata_count": str(rarity_incomplete_metadata_count),
+            "dog_rarity_scope": "base_existing",
+            "dog_rarity_score_method": "sum_existing_token_count_divided_by_trait_frequency_v1",
+            "dog_rarity_tie_policy": "competition_rank_equal_scores_share_rank",
+            "dog_rarity_trait_schema": "|".join(DOG_RARITY_TRAIT_TYPES),
+            "dog_rarity_attested_block": str(latest_block),
+            "dog_rarity_attested_block_hash": snapshot_block_hash,
+            "dog_rarity_continuity_through_block": str(latest_block),
+            "dog_rarity_continuity_through_block_hash": snapshot_block_hash,
+            "dog_rarity_continuity_verification_status": (
+                "full_snapshot_exists_token_uri_content_schema_attested"
+            ),
         }
     )
     progress(f"dog metadata rows={len(dog_metadata)}")

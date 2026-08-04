@@ -48,8 +48,19 @@ def test_exact_rarity_permutation_rejects_duplicate_and_missing_rank() -> None:
 
     assert_raises_contains(
         lambda: checker.assert_exact_rarity_permutation(rows, 3),
-        "missing=[2] duplicates=[3]",
+        "invalid competition rank 3 at position 2",
     )
+
+
+def test_competition_rarity_accepts_equal_scores_with_shared_rank() -> None:
+    checker = load_module()
+    rows = [
+        {"token_id": "0", "rarity": "#1/3"},
+        {"token_id": "1", "rarity": "#1/3"},
+        {"token_id": "2", "rarity": "#3/3"},
+    ]
+
+    checker.assert_exact_rarity_permutation(rows, 3)
 
 
 def rarity_metrics(*, present: int, unavailable: int, metadata_verified: int, metadata_unavailable: int) -> dict[str, str]:
@@ -60,13 +71,27 @@ def rarity_metrics(*, present: int, unavailable: int, metadata_verified: int, me
         if metadata_unavailable == unavailable
         else "incomplete_metadata_unavailable"
     )
+    rarity_incomplete = metadata_unavailable - unavailable
+    rarity_status = (
+        "complete_verified_existing_token_universe"
+        if metadata_verified > 0 and rarity_incomplete == 0
+        else "unavailable_no_verified_existing_tokens"
+        if metadata_verified == 0
+        else "incomplete_existing_token_metadata"
+    )
     return {
         "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_base_existence_verification_status": "hash_pinned_cross_provider_exists_token_uri_parity_quorum",
         "dog_token_uri_present_count": str(present),
         "dog_token_uri_unavailable_count": str(unavailable),
         "dog_metadata_verification_status": metadata_status,
         "dog_metadata_onchain_verified_count": str(metadata_verified),
         "dog_metadata_unavailable_count": str(metadata_unavailable),
+        "dog_rarity_verification_status": rarity_status,
+        "dog_rarity_universe_count": str(metadata_verified),
+        "dog_rarity_excluded_nonexistent_count": str(unavailable),
+        "dog_rarity_incomplete_metadata_count": str(rarity_incomplete),
+        "dog_rarity_scope": "base_existing",
     }
 
 
@@ -74,10 +99,10 @@ def test_incomplete_metadata_requires_every_rarity_and_score_withheld() -> None:
     checker = load_module()
     rows = [
         {"token_id": "0", "rarity": "Unavailable", "rarity_score": "", "metadata_verification_status": "onchain_token_uri_verified"},
-        {"token_id": "1", "rarity": "Unavailable", "rarity_score": 0, "metadata_verification_status": "onchain_token_uri_verified"},
-        {"token_id": "2", "rarity": "Unavailable", "rarity_score": None, "metadata_verification_status": "onchain_token_uri_unavailable"},
+        {"token_id": "1", "rarity": "Unavailable", "rarity_score": "", "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": "2", "rarity": "Unavailable", "rarity_score": None, "metadata_verification_status": "unavailable"},
     ]
-    metrics = rarity_metrics(present=2, unavailable=1, metadata_verified=2, metadata_unavailable=1)
+    metrics = rarity_metrics(present=3, unavailable=0, metadata_verified=2, metadata_unavailable=1)
 
     assert checker.assert_metadata_rarity_state(rows, 3, metrics) == "unavailable"
 
@@ -108,6 +133,18 @@ def test_complete_metadata_never_accepts_unavailable_or_missing_ranks() -> None:
         lambda: checker.assert_metadata_rarity_state(rows, 3, metrics),
         "invalid rarity display",
     )
+
+
+def test_exact_nonexistent_base_id_is_excluded_from_complete_rarity_scope() -> None:
+    checker = load_module()
+    rows = [
+        {"token_id": "0", "rarity": "#1/2", "rarity_score": "8", "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": "1", "rarity": "Unavailable", "rarity_score": "", "metadata_verification_status": "onchain_token_uri_unavailable"},
+        {"token_id": "2", "rarity": "#1/2", "rarity_score": "8", "metadata_verification_status": "onchain_token_uri_verified"},
+    ]
+    metrics = rarity_metrics(present=2, unavailable=1, metadata_verified=2, metadata_unavailable=1)
+
+    assert checker.assert_metadata_rarity_state(rows, 3, metrics) == "complete"
 
 
 def test_dashboard_wiring_accepts_generated_loader_abstraction() -> None:

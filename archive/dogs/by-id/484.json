@@ -52,12 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#668/669",
+      "rank": 668,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 484 dog #484 484 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 unavailable background: none; body: redbrown; neck: none; mouth: none; ears: earbuds; head: none; eyes: glasses 0x7acfe488169333c81c2bc3d5003b8e7b108a2d2d8025e224bf1c97e9cda6170d chain_logs contract_getters",
+    "search_text": "dog 484 dog #484 484 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 #668/669 background: none; body: redbrown; neck: none; mouth: none; ears: earbuds; head: none; eyes: glasses 0x7acfe488169333c81c2bc3d5003b8e7b108a2d2d8025e224bf1c97e9cda6170d chain_logs contract_getters",
     "settlement": {
       "block_number": 26250494,
       "block_time_utc": "2025-09-11T14:19:26Z",
@@ -77,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None",
+        "display": "Head: None (20.2%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: Glasses",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

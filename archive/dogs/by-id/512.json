@@ -53,12 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#604/669",
+      "rank": 604,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 512 dog #512 512 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0xf82b860839121e5dc5784fb23bb7ea9c11024842f17349ff5a51c7248a57f7eb 0x70071a34d184e02162d5aadf5daf3fc8a616014129f68608604fb9427a2cfc5e unavailable background: none; body: orange; neck: redcollar; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0x87dd524dd3ab56fc0ae422bfcfac9a7a34f8a52eba14664c404359ad70b63e90 0x9e40e6610033cf2e6f1aa3275ee24dd13af4cd5aef6e5a857e5ec47ded1d3c66 chain_logs contract_getters",
+    "search_text": "dog 512 dog #512 512 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0xf82b860839121e5dc5784fb23bb7ea9c11024842f17349ff5a51c7248a57f7eb 0x70071a34d184e02162d5aadf5daf3fc8a616014129f68608604fb9427a2cfc5e #604/669 background: none; body: orange; neck: redcollar; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0x87dd524dd3ab56fc0ae422bfcfac9a7a34f8a52eba14664c404359ad70b63e90 0x9e40e6610033cf2e6f1aa3275ee24dd13af4cd5aef6e5a857e5ec47ded1d3c66 chain_logs contract_getters",
     "settlement": {
       "block_number": 26343940,
       "block_time_utc": "2025-10-18T00:49:32Z",
@@ -78,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange",
+        "display": "Body: Orange (8.2%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar",
+        "display": "Neck: RedCollar (29.6%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring",
+        "display": "Ears: LoopEarring (27.5%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None",
+        "display": "Head: None (20.2%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes",
+        "display": "Eyes: BlueLaserEyes (11.2%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

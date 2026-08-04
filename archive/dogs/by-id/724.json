@@ -55,12 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#174/669",
+      "rank": 174,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 724 dog #724 724 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.71 $20.71 2026-05-26t16:03:59z 0xa371adf04d31bc48732abe5be9f184ac72d723838956d3bf72d7724e1856d8ee 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 unavailable generated auction feed 0x21c269232c5329f8baf42e458b2ccc61e7947f246ddc483c1c3d138707de745e 0xcbd0b5dcc2246cb583635897b5791b9cd9afc5dc2e8a9fc6cddd80397aad7f62 0xe2f0b844cafd460b23a4a2223cac8c4756855900395ce863ab70a2c27bb41a3b 0x311e9f998ac3aa3afb97354067ff86d9eb510cd15ebcf616d87598f477762bee background: halo background halo body: redbrown body redbrown neck: redcollar neck redcollar mouth: none mouth none ears: earbuds ears earbuds head: hoodie head hoodie eyes: glasses eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 724 dog #724 724 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 20.71 $20.71 2026-05-26t16:03:59z 0xa371adf04d31bc48732abe5be9f184ac72d723838956d3bf72d7724e1856d8ee 0xfedcbff43d8e3938621ee44bcf968e39d8ee22389e309e268bdb9c9a26bfe293 #174/669 generated auction feed 0x21c269232c5329f8baf42e458b2ccc61e7947f246ddc483c1c3d138707de745e 0xcbd0b5dcc2246cb583635897b5791b9cd9afc5dc2e8a9fc6cddd80397aad7f62 0xe2f0b844cafd460b23a4a2223cac8c4756855900395ce863ab70a2c27bb41a3b 0x311e9f998ac3aa3afb97354067ff86d9eb510cd15ebcf616d87598f477762bee background: halo (8.5%) background halo body: redbrown (15.2%) body redbrown neck: redcollar (29.6%) neck redcollar mouth: none (68.5%) mouth none ears: earbuds (31.4%) ears earbuds head: hoodie (4.8%) head hoodie eyes: glasses (12.7%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46511046,
       "block_time_utc": "2026-05-26T16:03:59Z",
@@ -82,37 +83,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo",
+        "display": "Background: Halo (8.5%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: RedBrown",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar",
+        "display": "Neck: RedCollar (29.6%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Hoodie",
+        "display": "Head: Hoodie (4.8%)",
         "trait_type": "Head",
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: Glasses",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

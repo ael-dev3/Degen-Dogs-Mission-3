@@ -57,12 +57,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#465/669",
+      "rank": 465,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.044 eth 44000000000000000 79.7 $79.70 2026-06-04t19:59:03z 0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4 0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f unavailable generated auction feed 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c background: none background none body: blue body blue neck: none neck none mouth: none mouth none ears: loopearring ears loopearring head: stripedbeanie head stripedbeanie eyes: vrgoggles eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 733 dog #733 733 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.044 eth 44000000000000000 79.7 $79.70 2026-06-04t19:59:03z 0x7ddb6db404da5c3fef65fcb24c2dab093b366a522b98407c003c2b436e10c8d4 0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f #465/669 generated auction feed 0x61ce1af37a58feab4cf088894e2a01812902ee8f634bad25d884b14dbcc6aa80 0x3ab0ee94ef66d9e6a2d36f0de48538d1e13f0b6a665735d37f7d91c2d7a53a8f 0x20b00f8743f387e3250add772a6bfbca799e2438bb73d905de4dea7d81856c18 0xb551d5fed3d470c5faadc609c9c12f63b294434962fb4b8c026252a060dd7666 0x281cfa2d61aee64eb4452b25f8ffc176e7518eb235a8272c9cbae5c9e1c443f2 0xdb202a38d9abaee18b85055855703bed1d5c47cbde0284ea650264f87344851c background: none (91.5%) background none body: blue (8.8%) body blue neck: none (41.1%) neck none mouth: none (68.5%) mouth none ears: loopearring (27.5%) ears loopearring head: stripedbeanie (8.1%) head stripedbeanie eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46906898,
       "block_time_utc": "2026-06-04T19:59:03Z",
@@ -84,37 +85,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue",
+        "display": "Body: Blue (8.8%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring",
+        "display": "Ears: LoopEarring (27.5%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie",
+        "display": "Head: StripedBeanie (8.1%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: VRGoggles",
+        "display": "Eyes: VRGoggles (10.5%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

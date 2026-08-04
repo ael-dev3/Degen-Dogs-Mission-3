@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.82959500",
+      "usd_estimate": "16.80574500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.83",
+      "usd_estimate_display": "$16.81",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-04",
-      "usd_estimate_price_usd": "1869.955",
+      "usd_estimate_price_usd": "1867.305",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -53,12 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#565/669",
+      "rank": 565,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.83 $16.83 2026-08-04 14:16:17 Unavailable Background: None; Body: Black; Neck: GoldNecklace; Mouth: None; Ears: None; Head: BaseballCap; Eyes: Glasses @0xael.eth 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94",
+    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.81 $16.81 2026-08-04 14:16:17 #565/669 Background: None; Body: Black; Neck: GoldNecklace; Mouth: None; Ears: None; Head: BaseballCap; Eyes: Glasses @0xael.eth 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -80,37 +81,37 @@
     "status": "ongoing",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black",
+        "display": "Body: Black (11.7%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace",
+        "display": "Neck: GoldNecklace (19.0%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None",
+        "display": "Ears: None (26.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BaseballCap",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: Glasses",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

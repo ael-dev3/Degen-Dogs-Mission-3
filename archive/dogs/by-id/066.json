@@ -43,12 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#401/669",
+      "rank": 401,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 66 dog #66 66 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 66 dog #66 66 mission 1 mission 1 polygon no auction dogmaster reward weth #401/669 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +71,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown",
+        "display": "Body: Brown (11.1%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Beanie",
+        "display": "Head: Beanie (5.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: BlueLaserEyes",
+        "display": "Eyes: BlueLaserEyes (11.2%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

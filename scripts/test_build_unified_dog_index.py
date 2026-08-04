@@ -69,6 +69,7 @@ def test_ended_pending_settlement_feed_row_stays_in_unified_archive() -> None:
     assert record["activity_time_basis"] == "last_bid_block_time"
     assert record["winner_or_high_bidder"]["wallet"] == "0x412b7153504217b405af821bdcdc5f21c71e3cbc"
     assert record["amount"]["native"] == "0.04311"
+    assert record["rarity"]["scope"] == "base_existing"
     assert unified.record_sort_key(record)[0] == 0
     assert "ended pending settlement" in record["search_text"]
 
@@ -105,6 +106,7 @@ def test_non_mission3_archive_status_labels_are_preserved() -> None:
         "token_id": 0,
         "status": "no auction dogmaster reward",
         "mint_time_utc": "2022-03-14T14:01:34Z",
+        "rarity": "#10/669",
         "sources": ["polygon_receipts"],
         "confidence": "verified",
     }
@@ -113,6 +115,7 @@ def test_non_mission3_archive_status_labels_are_preserved() -> None:
 
     assert record is not None
     assert record["status"] == "no auction dogmaster reward"
+    assert record["rarity"]["scope"] == "base_existing"
     assert "no auction dogmaster reward" in record["search_text"]
 
 
@@ -311,6 +314,7 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
                 "amount_eth": "0.0265",
                 "amount_usd": "43.70",
                 "last_bid_utc": "2026-06-09 20:38:17",
+                "rarity": "#100/669",
             }]), encoding="utf-8")
             unified.CURRENT_AUCTION.write_text(json.dumps([{"token_id": 739, "auction_state": "live"}]), encoding="utf-8")
             unified.RECENT_BIDS.write_text("[]", encoding="utf-8")
@@ -324,6 +328,7 @@ def test_current_feed_override_drops_historical_backfill_provenance() -> None:
     assert record["amount"]["amount_usd_at_event"] is None
     assert record["amount"]["eth_usd_price_at_event"] is None
     assert record["amount"]["usd_estimate"] == "43.70"
+    assert record["rarity"]["scope"] == "base_existing"
     assert "historical_dog_search_backfill" not in record["source"]["sources"]
     assert "historical_dog_search" not in record["source"]["notes"]
     assert "generated_auction_feed" in record["source"]["sources"]
@@ -346,7 +351,7 @@ def test_all_mission3_onchain_tables_override_stale_archive_and_preserve_transac
         "settlement": {"settled": False, "block_number": None, "tx_hash": None},
         "links": {},
         "source": {"sources": ["base_logs"], "confidence": "verified"},
-        "rarity": {"display": "#332/791", "rank": 332, "total": 791},
+        "rarity": {"display": "#332/791", "rank": 332, "scope": "base_existing", "total": 791},
         "traits": [],
     }
     historical = {

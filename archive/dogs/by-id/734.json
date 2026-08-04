@@ -53,12 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#441/669",
+      "rank": 441,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 58.32 $58.32 2026-06-05t20:03:17z 0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f 0x9749ec39c2944be8d6d397b092343309a0c898c6fd4dbe17d125e81f4b43a995 unavailable generated auction feed 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 background: none background none body: white body white neck: studdedcollar neck studdedcollar mouth: none mouth none ears: loopearring ears loopearring head: stripedbeanie head stripedbeanie eyes: none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 734 dog #734 734 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.0369 eth 36900000000000000 58.32 $58.32 2026-06-05t20:03:17z 0xb864369f5fc13c61f435ee5eb579a0f367ad1fe99ee3e054ea44fad15b62c36f 0x9749ec39c2944be8d6d397b092343309a0c898c6fd4dbe17d125e81f4b43a995 #441/669 generated auction feed 0xadd81626c52d664b5dbc1777bdd078288f1386966a952045dd0bac3412366556 0xbe8ff61f02989961a611e46c357c71b6f6a60ae1daa6ca83baab2fdea470afc7 background: none (91.5%) background none body: white (11.2%) body white neck: studdedcollar (10.3%) neck studdedcollar mouth: none (68.5%) mouth none ears: loopearring (27.5%) ears loopearring head: stripedbeanie (8.1%) head stripedbeanie eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46950225,
       "block_time_utc": "2026-06-05T20:03:17Z",
@@ -80,37 +81,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: StuddedCollar",
+        "display": "Neck: StuddedCollar (10.3%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring",
+        "display": "Ears: LoopEarring (27.5%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: StripedBeanie",
+        "display": "Head: StripedBeanie (8.1%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None",
+        "display": "Eyes: None (17.8%)",
         "trait_type": "Eyes",
         "value": "None"
       }

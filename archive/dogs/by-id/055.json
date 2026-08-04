@@ -43,12 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#16/669",
+      "rank": 16,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 55 dog #55 55 mission 1 mission 1 polygon no auction dogmaster reward weth unavailable background: halo; body: blue; neck: redcollar; mouth: coin; ears: none; head: baseballcap; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 55 dog #55 55 mission 1 mission 1 polygon no auction dogmaster reward weth #16/669 background: halo; body: blue; neck: redcollar; mouth: coin; ears: none; head: baseballcap; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -70,37 +71,37 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: Halo",
+        "display": "Background: Halo (8.5%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Blue",
+        "display": "Body: Blue (8.8%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar",
+        "display": "Neck: RedCollar (29.6%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Coin",
+        "display": "Mouth: Coin (2.5%)",
         "trait_type": "Mouth",
         "value": "Coin"
       },
       {
-        "display": "Ears: None",
+        "display": "Ears: None (26.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BaseballCap",
+        "display": "Head: BaseballCap (10.5%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: MaskSnorkel",
+        "display": "Eyes: MaskSnorkel (9.9%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

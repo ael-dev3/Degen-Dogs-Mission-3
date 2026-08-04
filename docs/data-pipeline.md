@@ -20,7 +20,9 @@ The command runs three steps:
 - fetches current Base block and current auction contract state,
 - scans Mission 3 auction-house logs from the configured start block,
 - checks WOOF balances for discovered holders,
-- fetches Dog metadata and rarity where needed,
+- cross-checks Base `exists()` and `tokenURI()` outcomes at the snapshot block,
+- validates the seven-slot Dog trait schema and computes explicitly scoped
+  Base-existing rarity with independently validated coverage metrics,
 - optionally resolves Farcaster identities when an API key is available,
 - computes token/reward context,
 - loads input rows into in-memory SQLite,
