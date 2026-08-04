@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-08-04T13:50:10Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-04T13:45:17Z",
+    "activity_time_utc": "2026-08-04T14:16:17Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-08-04",
-      "native": "0.001",
+      "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "1000000000000000",
-      "usd_estimate": "1.86256000",
+      "raw": "9000000000000000",
+      "usd_estimate": "16.82959500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.86",
+      "usd_estimate_display": "$16.83",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-04",
-      "usd_estimate_price_usd": "1862.56",
+      "usd_estimate_price_usd": "1869.955",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,12 +29,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-08-04T13:45:17Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-08-04T14:16:17Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
-      "0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4"
+      "0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4",
+      "0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -45,7 +46,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197",
       "dog_page": "https://degendogs.club/#dog793",
-      "explorer": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/793",
       "repo_archive": "archive/dogs/by-id/793.json",
       "settlement_tx": null
@@ -57,7 +58,7 @@
       "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base ongoing 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.001 eth 1000000000000000 1.86 $1.86 2026-08-04t13:45:17z 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 unavailable generated auction feed 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 background: none background none body: black body black neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: baseballcap head baseballcap eyes: glasses eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.83 $16.83 2026-08-04 14:16:17 Unavailable Background: None; Body: Black; Neck: GoldNecklace; Mouth: None; Ears: None; Head: BaseballCap; Eyes: Glasses @0xael.eth 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,7 +72,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer",
+        "dashboard_builder",
         "generated_auction_timeline",
         "generated_auction_feed"
       ]
@@ -115,12 +116,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@badadan",
+      "display": "@0xael.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "badadan",
-      "profile_url": "https://farcaster.xyz/badadan",
-      "wallet": "0xa2648350f3566e4f18a9519734928d08d3ea08c4",
-      "wallet_explorer_url": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4"
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
   },
   "schema_version": 1
