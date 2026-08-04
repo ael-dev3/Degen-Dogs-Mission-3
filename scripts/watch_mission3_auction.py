@@ -124,6 +124,7 @@ DEFAULT_STATE_PATH = ROOT / ".local" / "mission3_onchain_tracker_state.json"
 DEFAULT_LOG_PATH = ROOT / "logs" / "watch-onchain.log"
 DEFAULT_LOCAL_REFRESH_COMMAND = "npm run refresh:current"
 DEFAULT_PUBLISH_REFRESH_COMMAND = "npm run refresh:publish"
+PUBLISH_REFRESH_SCRIPT = ROOT / "scripts" / "refresh_and_publish.sh"
 SUPPORTED_REFRESH_COMMANDS: dict[str, tuple[str, ...]] = {
     DEFAULT_LOCAL_REFRESH_COMMAND: ("npm", "run", "refresh:current"),
     DEFAULT_PUBLISH_REFRESH_COMMAND: ("npm", "run", "refresh:publish"),
@@ -1722,8 +1723,16 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
             child_env["DEGEN_DOGS_LOCK_FD"] = str(refresh_lock.fileno())
         log(config, f"running refresh command: {command_for_log}; reasons={','.join(reasons)}")
         pass_fds = (refresh_lock.fileno(),) if refresh_lock else ()
+        process_argv = list(refresh_argv)
+        if refresh_lock and config.refresh_command == DEFAULT_PUBLISH_REFRESH_COMMAND:
+            # npm closes non-stdio descriptors when it spawns the package
+            # script. Invoke the fixed, repository-owned publisher directly so
+            # its inherited-lock verification receives the descriptor that this
+            # watcher actually owns. The user-facing command remains restricted
+            # to the exact allowlisted npm script above.
+            process_argv = ["/bin/bash", "-p", str(PUBLISH_REFRESH_SCRIPT)]
         process = subprocess.Popen(
-            list(refresh_argv),
+            process_argv,
             cwd=ROOT,
             text=True,
             env=child_env,
@@ -1751,7 +1760,7 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
                 except ProcessLookupError:
                     pass
                 stdout, stderr = process.communicate()
-            raise subprocess.TimeoutExpired(list(refresh_argv), config.timeout_seconds, output=stdout, stderr=stderr)
+            raise subprocess.TimeoutExpired(process_argv, config.timeout_seconds, output=stdout, stderr=stderr)
         result = subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
     finally:
         release_run_lock(refresh_lock)

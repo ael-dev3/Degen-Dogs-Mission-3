@@ -2329,6 +2329,58 @@ def test_run_refresh_executes_fixed_argv_without_a_shell():
         assert captured["timeout"] == config.timeout_seconds
 
 
+def test_publish_refresh_bypasses_npm_to_preserve_lock_descriptor():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        captured: dict[str, object] = {}
+
+        class FakeProcess:
+            pid = 12346
+            returncode = 0
+
+            def __init__(self, args):
+                self.args = args
+
+            def communicate(self, timeout=None):  # noqa: ANN001, ANN201
+                captured["timeout"] = timeout
+                return "", ""
+
+        def fake_popen(args, **kwargs):  # noqa: ANN001, ANN202
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            return FakeProcess(args)
+
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(Path(tmp) / "refresh.lock"),
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:publish",
+            "MISSION3_WATCHER_REQUIRE_CLEAN_TREE": "1",
+        })
+        original_popen = watcher.subprocess.Popen
+        original_git_status = watcher.git_status_tracked
+        watcher.subprocess.Popen = fake_popen
+        watcher.git_status_tracked = lambda: ""
+        try:
+            assert watcher.run_refresh(config, ["auction_bid"], dry_run=False) == ("success", 0)
+        finally:
+            watcher.subprocess.Popen = original_popen
+            watcher.git_status_tracked = original_git_status
+
+        assert captured["args"] == [
+            "/bin/bash",
+            "-p",
+            str(watcher.PUBLISH_REFRESH_SCRIPT),
+        ]
+        kwargs = captured["kwargs"]
+        assert isinstance(kwargs, dict)
+        assert kwargs["shell"] is False
+        assert kwargs["start_new_session"] is True
+        assert len(kwargs["pass_fds"]) == 1
+        assert kwargs["env"]["DEGEN_DOGS_LOCK_HELD"] == "1"
+        assert kwargs["env"]["DEGEN_DOGS_LOCK_FD"] == str(kwargs["pass_fds"][0])
+
+
 def test_run_lock_prevents_overlapping_one_shot_runs():
     watcher = load_module()
     with tempfile.TemporaryDirectory() as tmp:
