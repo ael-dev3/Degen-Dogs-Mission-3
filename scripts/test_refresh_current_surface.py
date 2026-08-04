@@ -76,6 +76,18 @@ def test_overlap_history_drops_reorg_orphan_before_merge() -> None:
     assert [row["tx_hash"] for row in merged] == ["0xkeep", "0xcanonical"]
 
 
+def test_current_bid_history_public_rows_are_high_bid_first() -> None:
+    surface = load_module()
+    rows = [
+        bid(793, 100, "0xopening", log_index=2, amount="0.001"),
+        bid(793, 120, "0xhigh", log_index=3, amount="0.009"),
+    ]
+
+    ordered = surface.high_bid_first(rows)
+
+    assert [row["tx_hash"] for row in ordered] == ["0xhigh", "0xopening"]
+
+
 def test_read_table_preserves_header_for_zero_row_bid_history() -> None:
     surface = load_module()
     with tempfile.TemporaryDirectory() as tmp:

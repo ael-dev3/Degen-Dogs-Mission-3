@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49533528"
+    "value": "49534061"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-04 15:13:23"
+    "value": "2026-08-04 15:31:09"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x7c837c858a07cc22805e865ad517578d56d77752a5542ca8e87331ba4c793dd1"
+    "value": "0xfe7631632ec9984f9e19eda5f6b95645d9b4673aa2e53383c9b9dfe3d7647513"
   },
   {
     "metric": "snapshot_confirmations",
@@ -153,7 +153,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1867.305"
+    "value": "1866.015"
   },
   {
     "metric": "eth_usd_source",
@@ -265,19 +265,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "214.08"
+    "value": "213.82"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4671"
+    "value": "0.4677"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "170.5"
+    "value": "170.7"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈170% APR"
+    "value": "≈171% APR"
   },
   {
     "metric": "woof_holders",
@@ -309,7 +309,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "16.81"
+    "value": "16.79"
   },
   {
     "metric": "current_bidder",
@@ -449,7 +449,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "27.37"
+    "value": "27.35"
   },
   {
     "metric": "season6_sup_enabled",
@@ -477,7 +477,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "173498.316682"
+    "value": "173532.393864"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
@@ -625,11 +625,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49533528"
+    "value": "49534061"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x7c837c858a07cc22805e865ad517578d56d77752a5542ca8e87331ba4c793dd1"
+    "value": "0xfe7631632ec9984f9e19eda5f6b95645d9b4673aa2e53383c9b9dfe3d7647513"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
