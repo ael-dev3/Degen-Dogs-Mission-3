@@ -15,7 +15,10 @@ data, commits generated files, and GitHub Pages deploys.
 
 - Current auction state: Base contract calls.
 - Historical Mission 3 auction rows: Base event logs.
-- Dog metadata and traits: token metadata fetched by the pipeline and cached locally.
+- Dog metadata and traits: Base `exists()` and `tokenURI()` outcomes are hash-pinned and
+  cross-provider checked; the referenced HTTPS metadata content is schema-validated,
+  hashed, cached for a bounded period, and accurately described as observed offchain
+  content rather than an onchain content commitment.
 - Farcaster identities: optional best-effort resolution.
 - Mission 1 and Mission 2 archive rows: era-specific recovery scripts and checked-in
   archive outputs.
@@ -50,6 +53,39 @@ payback and APR as `N/A`.
 - Mission 3: live Base dashboard and rolling archive.
 
 Do not fabricate missing history. Keep verified, candidate, and unknown data separated.
+
+## Rarity scope
+
+Mission 3 currently shows **Base-existing rarity**, not a whole-collection cross-chain
+rank. The Base contract's `totalSupply()` is its next token-ID ceiling: historical Dogs
+below ID 590 exist on Base only after they are claimed. The runner therefore requires
+independent providers to agree that `exists(id)` matches the exact `tokenURI(id)`
+outcome, excludes canonically nonexistent Base IDs, and ranks the remaining verified
+Base-existing Dogs.
+
+The score is the sum of `Base-existing Dog count / trait frequency` across exactly one
+each of Background, Body, Neck, Mouth, Ears, Head, and Eyes. Trait percentages use the
+same Base-existing denominator. Equal scores share a competition rank. The displayed
+`#rank/total`, metrics, and tooltip expose that denominator; an unavailable or malformed
+metadata response for an existing Base Dog withholds every rank rather than guessing.
+
+Fast current-auction refreshes preserve that full-set attestation only after rechecking
+the latest continuity-checkpoint block hash and NFT bytecode and obtaining an independent
+log quorum for every Dog `Transfer`, `BaseURIUpdated`, `MetadataUpdate`, and
+`BatchMetadataUpdate` event from that checkpoint through the new snapshot. Each verified
+snapshot becomes the next checkpoint, keeping refresh work bounded while its block hash
+commits the chain back to the full attestation. A mint, burn, historical claim, or URI
+mutation forces the full metadata/rank rebuild. A temporarily lagging snapshot preserves
+the newer artifacts and retries later. The published attestation block/hash and
+continuity-through block/hash make this reuse explicit instead of implying that every
+token was re-fetched.
+
+A whole-collection rank requires reliable multi-provider historical-chain verification
+for unclaimed Polygon- and Degen-era Dogs, plus origin/Base URI and content agreement
+for claimed legacy Dogs. Until that quorum is configured, the dashboard deliberately
+does not present public metadata endpoints alone as whole-collection onchain truth. The
+[verified Base contract source](https://basescan.org/address/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428#code)
+documents the next-ID and historical-claim behavior.
 
 ## Historical USD estimates
 

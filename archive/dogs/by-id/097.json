@@ -50,12 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#349/669",
+      "rank": 349,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 97 dog #97 97 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x106fbd9e46583789cfe4798f3d5b7acb094cb32a3c9545656b06a9c11767a1c5 0xa631186226cc4feb4370908167f3fa12a964c3935be076914593e79870ea7447 unavailable background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: toque; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 97 dog #97 97 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x106fbd9e46583789cfe4798f3d5b7acb094cb32a3c9545656b06a9c11767a1c5 0xa631186226cc4feb4370908167f3fa12a964c3935be076914593e79870ea7447 #349/669 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: none; head: toque; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 28116522,
       "block_time_utc": "2022-05-09T15:32:19Z",
@@ -77,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Dalmation",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: GoldNecklace",
+        "display": "Neck: GoldNecklace (19.0%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None",
+        "display": "Ears: None (26.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Toque",
+        "display": "Head: Toque (7.2%)",
         "trait_type": "Head",
         "value": "Toque"
       },
       {
-        "display": "Eyes: MaskSnorkel",
+        "display": "Eyes: MaskSnorkel (9.9%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

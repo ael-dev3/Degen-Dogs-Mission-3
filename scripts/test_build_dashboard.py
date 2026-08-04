@@ -35,6 +35,20 @@ def log(block: int, tx: str, index: int) -> dict[str, Any]:
     return {"blockNumber": hex(block), "transactionHash": tx, "logIndex": hex(index), "data": "0x", "topics": []}
 
 
+def rarity_attributes(**overrides: str) -> list[dict[str, str]]:
+    values = {
+        "Background": "None",
+        "Body": "Black",
+        "Neck": "None",
+        "Mouth": "None",
+        "Ears": "None",
+        "Head": "None",
+        "Eyes": "None",
+        **overrides,
+    }
+    return [{"trait_type": trait_type, "value": value} for trait_type, value in values.items()]
+
+
 def test_atomic_writer_never_follows_target_or_parent_symlinks() -> None:
     dashboard = load_module()
     with tempfile.TemporaryDirectory() as tmp:
@@ -936,7 +950,7 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
     dashboard.insert_rows(conn, "dog_metadata", [
         {"token_id": 9, "dog_name": "Degen Dog #9", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0, "metadata_verification_status": "onchain_token_uri_verified"},
         {"token_id": 10, "dog_name": "Degen Dog #10", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0, "metadata_verification_status": "onchain_token_uri_verified"},
-        {"token_id": 11, "dog_name": "Degen Dog #11", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "", "rarity_score": 0, "metadata_verification_status": "unavailable"},
+        {"token_id": 11, "dog_name": "Degen Dog #11", "dog_image_url": "", "dog_external_url": "", "dog_opensea_url": "", "traits": "", "trait_rarity": "", "rarity": "Unavailable", "rarity_score": None, "metadata_verification_status": "unavailable"},
     ], [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL"), ("metadata_verification_status", "TEXT")])
     dashboard.insert_rows(conn, "token_stats", [
         {"metric": "eth_usd_price", "value": current_eth_usd},
@@ -1016,6 +1030,8 @@ def test_metadata_verification_status_reaches_public_sql_outputs() -> None:
     timeline = next(row for row in fixture["auction_timeline"] if row["token_id"] == 10)
     current_feed = next(row for row in fixture["auction_feed"] if row["status"] == "ongoing")
     assert current["metadata_verification_status"] == "unavailable"
+    assert current["rarity"] == "Unavailable"
+    assert current["rarity_score"] is None
     assert winner["metadata_verification_status"] == "onchain_token_uri_verified"
     assert timeline["metadata_verification_status"] == "onchain_token_uri_verified"
     assert current_feed["metadata_verification_status"] == "unavailable"
@@ -1642,6 +1658,7 @@ def test_token_uri_quorum_gives_each_queued_chunk_a_fresh_deadline() -> None:
     old_batch_limit = dashboard.RPC_BATCH_LIMIT
     old_deadline = dashboard.RPC_QUORUM_DEADLINE_SECONDS
     old_workers = dashboard.TOKEN_URI_CHUNK_WORKERS
+    old_chunk_delay = dashboard.TOKEN_URI_CHUNK_DELAY_SECONDS
     urls = ["https://fast-one.example", "https://fast-two.example"]
     calls: list[tuple[str, int]] = []
     block_hash = "0x" + ("11" * 32)
@@ -1657,24 +1674,28 @@ def test_token_uri_quorum_gives_each_queued_chunk_a_fresh_deadline() -> None:
         ).hex()
 
     def fake_post_json(payload: Any, timeout: int, url: str) -> list[dict[str, Any]]:  # noqa: ARG001
-        assert isinstance(payload, list) and len(payload) == 1
+        assert isinstance(payload, list) and len(payload) == 2
         time.sleep(0.18)
-        item = payload[0]
-        assert item["method"] == "eth_call"
-        assert item["params"][1] == {"blockHash": block_hash, "requireCanonical": True}
-        token_id = int(str(item["params"][0]["data"])[-64:], 16)
-        calls.append((url, token_id))
-        return [{
-            "jsonrpc": "2.0",
-            "id": item["id"],
-            "result": encode_abi_string(f"https://ipfs.io/ipfs/dog-{token_id}"),
-        }]
+        response: list[dict[str, Any]] = []
+        for item in payload:
+            assert item["method"] == "eth_call"
+            assert item["params"][1] == {"blockHash": block_hash, "requireCanonical": True}
+            call_data = str(item["params"][0]["data"])
+            token_id = int(call_data[-64:], 16)
+            if call_data.startswith(dashboard.SELECTOR_EXISTS):
+                result = "0x" + f"{1:064x}"
+            else:
+                calls.append((url, token_id))
+                result = encode_abi_string(f"https://ipfs.io/ipfs/dog-{token_id}")
+            response.append({"jsonrpc": "2.0", "id": item["id"], "result": result})
+        return response
 
     try:
         dashboard.VERIFIED_SNAPSHOT_URLS = urls
         dashboard.post_json = fake_post_json
         dashboard.RPC_BATCH_LIMIT = 1
         dashboard.TOKEN_URI_CHUNK_WORKERS = 1
+        dashboard.TOKEN_URI_CHUNK_DELAY_SECONDS = 0
         # Token 1 waits behind token 0. Its work finishes after this duration
         # measured from the collection start, but
         # within a fresh duration measured from that chunk's actual start.
@@ -1688,6 +1709,7 @@ def test_token_uri_quorum_gives_each_queued_chunk_a_fresh_deadline() -> None:
         dashboard.RPC_BATCH_LIMIT = old_batch_limit
         dashboard.RPC_QUORUM_DEADLINE_SECONDS = old_deadline
         dashboard.TOKEN_URI_CHUNK_WORKERS = old_workers
+        dashboard.TOKEN_URI_CHUNK_DELAY_SECONDS = old_chunk_delay
         dashboard.RPC_SLOW_UNTIL.clear()
 
     assert bindings == {token_id: f"https://ipfs.io/ipfs/dog-{token_id}" for token_id in range(2)}
@@ -1719,8 +1741,15 @@ def test_token_uri_quorum_accepts_mixed_exact_uri_and_nonexistent_token_outcomes
         response: list[dict[str, Any]] = []
         for item in payload:
             observed_tags.append(item["params"][1])
-            token_id = int(str(item["params"][0]["data"])[-64:], 16)
-            if token_id == 2:
+            call_data = str(item["params"][0]["data"])
+            token_id = int(call_data[-64:], 16)
+            if call_data.startswith(dashboard.SELECTOR_EXISTS):
+                response.append({
+                    "jsonrpc": "2.0",
+                    "id": item["id"],
+                    "result": "0x" + f"{int(token_id != 2):064x}",
+                })
+            elif token_id == 2:
                 response.append({
                     "jsonrpc": "2.0",
                     "id": item["id"],
@@ -1748,7 +1777,7 @@ def test_token_uri_quorum_accepts_mixed_exact_uri_and_nonexistent_token_outcomes
         dashboard.RPC_SLOW_UNTIL.clear()
 
     assert bindings == {0: "https://degendogs.club/meta/0", 2: None}
-    assert observed_tags == [{"blockHash": block_hash, "requireCanonical": True}] * 4
+    assert observed_tags == [{"blockHash": block_hash, "requireCanonical": True}] * 8
 
 
 def test_token_uri_chunk_quorum_fails_closed_on_provider_disagreement() -> None:
@@ -1769,13 +1798,17 @@ def test_token_uri_chunk_quorum_fails_closed_on_provider_disagreement() -> None:
         ).hex()
 
     def fake_post_json(payload: Any, timeout: int, url: str) -> list[dict[str, Any]]:  # noqa: ARG001
-        assert isinstance(payload, list) and len(payload) == 1
-        item = payload[0]
-        return [{
-            "jsonrpc": "2.0",
-            "id": item["id"],
-            "result": encode_abi_string(f"https://ipfs.io/ipfs/{url}"),
-        }]
+        assert isinstance(payload, list) and len(payload) == 2
+        response: list[dict[str, Any]] = []
+        for item in payload:
+            call_data = str(item["params"][0]["data"])
+            result = (
+                "0x" + f"{1:064x}"
+                if call_data.startswith(dashboard.SELECTOR_EXISTS)
+                else encode_abi_string(f"https://ipfs.io/ipfs/{url}")
+            )
+            response.append({"jsonrpc": "2.0", "id": item["id"], "result": result})
+        return response
 
     try:
         dashboard.VERIFIED_SNAPSHOT_URLS = urls
@@ -1791,6 +1824,52 @@ def test_token_uri_chunk_quorum_fails_closed_on_provider_disagreement() -> None:
         dashboard.VERIFIED_SNAPSHOT_URLS = old_urls
         dashboard.post_json = old_post_json
         dashboard.RPC_QUORUM_DEADLINE_SECONDS = old_deadline
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+
+def test_token_uri_quorum_rejects_exists_outcome_mismatch() -> None:
+    dashboard = load_module()
+    old_urls = list(dashboard.VERIFIED_SNAPSHOT_URLS)
+    old_post_json = dashboard.post_json
+    old_attempts = dashboard.RPC_ATTEMPTS
+    urls = ["https://one.example", "https://two.example"]
+
+    def encode_abi_string(value: str) -> str:
+        encoded = value.encode("utf-8")
+        padding = (-len(encoded)) % 32
+        return "0x" + (
+            (32).to_bytes(32, "big")
+            + len(encoded).to_bytes(32, "big")
+            + encoded
+            + (b"\x00" * padding)
+        ).hex()
+
+    def fake_post_json(payload: Any, timeout: int, url: str) -> list[dict[str, Any]]:  # noqa: ARG001
+        response = []
+        for item in payload:
+            call_data = str(item["params"][0]["data"])
+            result = (
+                "0x" + f"{0:064x}"
+                if call_data.startswith(dashboard.SELECTOR_EXISTS)
+                else encode_abi_string("https://degendogs.club/meta/0")
+            )
+            response.append({"jsonrpc": "2.0", "id": item["id"], "result": result})
+        return response
+
+    try:
+        dashboard.VERIFIED_SNAPSHOT_URLS = urls
+        dashboard.post_json = fake_post_json
+        dashboard.RPC_ATTEMPTS = 1
+        try:
+            dashboard.fetch_token_uri_bindings([0], "0x64")
+        except RuntimeError as exc:
+            assert "exists()" in str(exc)
+        else:
+            raise AssertionError("exists()/tokenURI mismatch reached rarity metadata")
+    finally:
+        dashboard.VERIFIED_SNAPSHOT_URLS = old_urls
+        dashboard.post_json = old_post_json
+        dashboard.RPC_ATTEMPTS = old_attempts
         dashboard.RPC_SLOW_UNTIL.clear()
 
 
@@ -2701,9 +2780,9 @@ def test_verified_log_collection_rejects_disabled_quorum_and_overlap_knobs() -> 
 def test_onchain_token_uri_is_metadata_authority_and_cache_is_content_bound() -> None:
     dashboard = load_module()
     authoritative = {
-        0: {"name": "Degen Dog #0", "attributes": [{"trait_type": "Color", "value": "Rare"}]},
-        1: {"name": "Degen Dog #1", "attributes": [{"trait_type": "Color", "value": "Common"}]},
-        2: {"name": "Degen Dog #2", "attributes": [{"trait_type": "Color", "value": "Common"}]},
+        0: {"name": "Degen Dog #0", "attributes": rarity_attributes(Body="Rare")},
+        1: {"name": "Degen Dog #1", "attributes": rarity_attributes(Body="Common")},
+        2: {"name": "Degen Dog #2", "attributes": rarity_attributes(Body="Common")},
     }
     uris = {token_id: f"https://ipfs.io/ipfs/authoritative-{token_id}" for token_id in authoritative}
     mirror_calls: list[str] = []
@@ -2722,7 +2801,7 @@ def test_onchain_token_uri_is_metadata_authority_and_cache_is_content_bound() ->
             def fake_fetch_json(url: str, timeout: int = 45) -> dict[str, Any]:  # noqa: ARG001
                 if url.startswith("https://degendogs.club/meta/"):
                     mirror_calls.append(url)
-                    return {"attributes": [{"trait_type": "Color", "value": "Common"}]}
+                    return {"attributes": rarity_attributes(Body="Common")}
                 content_calls.append(url)
                 token_id = int(url.rsplit("-", 1)[1])
                 return authoritative[token_id]
@@ -2738,7 +2817,7 @@ def test_onchain_token_uri_is_metadata_authority_and_cache_is_content_bound() ->
             dashboard.DOG_METADATA_SEQUENTIAL_THRESHOLD = old_threshold
 
     by_token = {row["token_id"]: row for row in first}
-    assert by_token[0]["traits"] == "Color: Rare"
+    assert "Body: Rare" in by_token[0]["traits"]
     assert by_token[0]["rarity"] == "#1/3"
     assert second == first
     assert mirror_calls == []
@@ -2808,7 +2887,7 @@ def test_metadata_failure_never_fabricates_rarity_rank() -> None:
                     "metadata": {
                         "token_id": token_id,
                         "name": f"Degen Dog #{token_id}",
-                        "attributes": [{"trait_type": "Body", "value": "Blue"}],
+                        "attributes": rarity_attributes(Body="Blue"),
                     }
                 }
 
@@ -2826,6 +2905,82 @@ def test_metadata_failure_never_fabricates_rarity_rank() -> None:
     assert all(row["rarity"] == "Unavailable" for row in rows)
     assert all(row["rarity_score"] is None for row in rows)
     assert all(row["trait_rarity"] == "" for row in rows)
+
+
+def test_sparse_base_existing_tokens_receive_scoped_rarity_without_unclaimed_ids() -> None:
+    dashboard = load_module()
+    old_cache = dashboard.DOG_METADATA_CACHE
+    old_record = dashboard.authoritative_metadata_record
+    old_threshold = dashboard.DOG_METADATA_SEQUENTIAL_THRESHOLD
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            dashboard.DOG_METADATA_CACHE = Path(tmp) / "dog_metadata.json"
+            dashboard.DOG_METADATA_SEQUENTIAL_THRESHOLD = 10
+
+            def fake_record(token_id: int, _block: str, token_uri: str | None = None) -> dict[str, Any]:
+                assert token_uri
+                return {
+                    "metadata": {
+                        "token_id": token_id,
+                        "name": f"Degen Dog #{token_id}",
+                        "attributes": rarity_attributes(Body="Rare" if token_id == 0 else "Common"),
+                    }
+                }
+
+            dashboard.authoritative_metadata_record = fake_record
+            rows = dashboard.fetch_dog_metadata_rows(
+                3,
+                "0x64",
+                token_uris={
+                    0: "https://degendogs.club/meta/0",
+                    1: None,
+                    2: "https://degendogs.club/meta/2",
+                },
+            )
+        finally:
+            dashboard.DOG_METADATA_CACHE = old_cache
+            dashboard.authoritative_metadata_record = old_record
+            dashboard.DOG_METADATA_SEQUENTIAL_THRESHOLD = old_threshold
+
+    by_token = {row["token_id"]: row for row in rows}
+    assert by_token[0]["rarity"] == "#1/2"
+    assert by_token[2]["rarity"] == "#1/2"
+    assert "Body: Rare (50.0%)" in by_token[0]["trait_rarity"]
+    assert "Background: None (100.0%)" in by_token[0]["trait_rarity"]
+    assert by_token[1]["rarity"] == "Unavailable"
+    assert by_token[1]["rarity_score"] is None
+    assert by_token[1]["metadata_verification_status"] == "onchain_token_uri_unavailable"
+
+
+def test_verified_metadata_with_invalid_trait_schema_fails_closed() -> None:
+    dashboard = load_module()
+    old_cache = dashboard.DOG_METADATA_CACHE
+    old_record = dashboard.authoritative_metadata_record
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            dashboard.DOG_METADATA_CACHE = Path(tmp) / "dog_metadata.json"
+            dashboard.authoritative_metadata_record = lambda token_id, _block, _uri=None: {
+                "metadata": {
+                    "token_id": token_id,
+                    "attributes": [
+                        *rarity_attributes(),
+                        {"trait_type": "Body", "value": "Forged"},
+                    ],
+                }
+            }
+            try:
+                dashboard.fetch_dog_metadata_rows(
+                    1,
+                    "0x64",
+                    token_uris={0: "https://degendogs.club/meta/0"},
+                )
+            except RuntimeError as exc:
+                assert "repeats rarity trait" in str(exc)
+            else:
+                raise AssertionError("duplicate rarity trait reached scoring")
+        finally:
+            dashboard.DOG_METADATA_CACHE = old_cache
+            dashboard.authoritative_metadata_record = old_record
 
 
 if __name__ == "__main__":

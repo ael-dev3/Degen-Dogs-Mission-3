@@ -52,12 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#159/669",
+      "rank": 159,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 348 dog #348 348 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0xd1cb59532c4905c87e4f1b0f2cf043e41c2bca2832db0fc05dd599ffb1a28bff 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f unavailable background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: redmohawk; eyes: redlasereyes 0xb6c2ad09db8e8aedc5e9404c43e48438bc324f450bdf81caaf9e9d92e533f852 chain_logs contract_getters",
+    "search_text": "dog 348 dog #348 348 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 6968.999999999999737856 degen 0xd1cb59532c4905c87e4f1b0f2cf043e41c2bca2832db0fc05dd599ffb1a28bff 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f #159/669 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: redmohawk; eyes: redlasereyes 0xb6c2ad09db8e8aedc5e9404c43e48438bc324f450bdf81caaf9e9d92e533f852 chain_logs contract_getters",
     "settlement": {
       "block_number": 25722512,
       "block_time_utc": "2025-04-15T11:57:50Z",
@@ -77,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: StuddedCollar",
+        "display": "Neck: StuddedCollar (10.3%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds",
+        "display": "Ears: Earbuds (31.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: RedMohawk",
+        "display": "Head: RedMohawk (7.5%)",
         "trait_type": "Head",
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: RedLaserEyes",
+        "display": "Eyes: RedLaserEyes (4.9%)",
         "trait_type": "Eyes",
         "value": "RedLaserEyes"
       }

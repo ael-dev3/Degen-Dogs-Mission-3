@@ -10,6 +10,7 @@ feed, latest-bid, search, metrics, and rendered HTML files.
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
 import os
@@ -36,10 +37,46 @@ LIVE_USD_SOURCES = {
     "generated_recent_bids",
     "token_stats.eth_usd_price",
 }
+RARITY_TRAIT_TYPES = (
+    "Background",
+    "Body",
+    "Neck",
+    "Mouth",
+    "Ears",
+    "Head",
+    "Eyes",
+)
+FULL_TOKEN_URI_VERIFICATION_STATUS = "hash_pinned_cross_provider_exact_outcome_quorum"
+CONTINUITY_TOKEN_URI_VERIFICATION_STATUS = (
+    "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity"
+)
+FULL_EXISTENCE_VERIFICATION_STATUS = "hash_pinned_cross_provider_exists_token_uri_parity_quorum"
+CONTINUITY_EXISTENCE_VERIFICATION_STATUS = (
+    "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity"
+)
+FULL_RARITY_CONTINUITY_STATUS = "full_snapshot_exists_token_uri_content_schema_attested"
+INCREMENTAL_RARITY_CONTINUITY_STATUS = (
+    "hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation"
+)
+ZERO_ADDRESS_TOPIC = "0x" + "0" * 64
+RARITY_MUTATION_TOPICS = (
+    # Transfer(address,address,uint256)
+    "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    # BaseURIUpdated(string,string)
+    "0x309b29ded109b9e28fb9885757b3e0096eb75c51d23aa4635d68bcd569f6adc1",
+    # MetadataUpdate(uint256)
+    "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7",
+    # BatchMetadataUpdate(uint256,uint256)
+    "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
+)
 
 
 class FullRefreshRequired(RuntimeError):
     """Raised before writes when committed artifacts cannot support an exact delta."""
+
+
+class TransientSnapshotLag(RuntimeError):
+    """Raised when the verified RPC tip is older than the persisted checkpoint."""
 
 
 def bid_tx_hash(row: dict[str, Any]) -> str:
@@ -736,9 +773,9 @@ def build_rarity(
     history: list[dict[str, Any]],
     token_id: int,
     new_attrs: dict[str, str],
-    total_supply: int,
+    rarity_universe_size: int,
 ) -> tuple[str, float, str, str]:
-    universe = build_rarity_universe(history, token_id, new_attrs, total_supply)
+    universe = build_rarity_universe(history, token_id, new_attrs, rarity_universe_size)
     current = universe[token_id]
     return (
         str(current["rarity"]),
@@ -752,59 +789,263 @@ def build_rarity_universe(
     history: list[dict[str, Any]],
     token_id: int,
     new_attrs: dict[str, str],
-    total_supply: int,
+    rarity_universe_size: int,
+    expected_token_ids_sha256: str | None = None,
 ) -> dict[int, dict[str, Any]]:
-    """Recompute the exact all-token rarity permutation after a mint."""
+    """Recompute the exact verified Base-existing rarity permutation."""
+    if rarity_universe_size <= 0:
+        raise FullRefreshRequired("rarity universe must contain at least one Base-existing Dog")
+    expected_trait_types = set(RARITY_TRAIT_TYPES)
+    if set(new_attrs) != expected_trait_types:
+        raise FullRefreshRequired(f"Dog #{token_id} metadata has an invalid rarity trait schema")
+    if any(";" in key or ";" in value for key, value in new_attrs.items()):
+        raise FullRefreshRequired(f"Dog #{token_id} metadata contains an unsafe rarity trait delimiter")
+    new_attrs = {trait_type: new_attrs[trait_type] for trait_type in RARITY_TRAIT_TYPES}
     all_attrs: dict[int, dict[str, str]] = {}
     for row in history:
         historical_token_id = int_value(row.get("token_id"), -1)
-        if historical_token_id >= 0:
-            all_attrs[historical_token_id] = traits_from_text(str(row.get("traits") or ""))
+        if historical_token_id < 0:
+            continue
+        verification_status = str(row.get("metadata_verification_status") or "").strip()
+        if verification_status and verification_status != "onchain_token_uri_verified":
+            continue
+        attributes = traits_from_text(str(row.get("traits") or ""))
+        if not attributes:
+            if verification_status == "onchain_token_uri_verified":
+                raise FullRefreshRequired(
+                    f"verified Dog #{historical_token_id} has no usable rarity traits"
+                )
+            continue
+        if set(attributes) != expected_trait_types:
+            raise FullRefreshRequired(
+                f"verified Dog #{historical_token_id} has an invalid rarity trait schema"
+            )
+        attributes = {trait_type: attributes[trait_type] for trait_type in RARITY_TRAIT_TYPES}
+        if historical_token_id in all_attrs:
+            raise FullRefreshRequired(f"rarity history repeats Dog #{historical_token_id}")
+        all_attrs[historical_token_id] = attributes
     # The current Dog may already be present after a full rebuild. Replacing its
     # attributes avoids scoring a phantom `max_id + 1` Dog and duplicating a rank.
     all_attrs[token_id] = new_attrs
-    if len(all_attrs) != total_supply:
+    if len(all_attrs) != rarity_universe_size:
         raise FullRefreshRequired(
-            f"rarity universe has {len(all_attrs)} Dogs at total supply {total_supply}; full refresh required"
+            f"rarity universe has {len(all_attrs)} Base-existing Dogs, expected {rarity_universe_size}; "
+            "full refresh required"
         )
+    actual_token_ids_sha256 = hashlib.sha256(
+        ",".join(str(candidate_id) for candidate_id in sorted(all_attrs)).encode("ascii")
+    ).hexdigest()
+    if expected_token_ids_sha256 is not None and actual_token_ids_sha256 != expected_token_ids_sha256:
+        raise FullRefreshRequired("rarity history token IDs do not match the verified Base existence set")
     counts: Counter[tuple[str, str]] = Counter()
     for attrs in all_attrs.values():
         counts.update(attrs.items())
-    scores: dict[int, float] = {}
+    scores: dict[int, Decimal] = {}
     for candidate_id, attrs in all_attrs.items():
-        scores[candidate_id] = sum(total_supply / max(1, counts[(key, value)]) for key, value in attrs.items())
-    ranks = {
-        candidate_id: rank
-        for rank, candidate_id in enumerate(
-            sorted(scores, key=lambda candidate: (-scores[candidate], candidate)),
-            start=1,
+        scores[candidate_id] = sum(
+            (
+                Decimal(rarity_universe_size) / Decimal(max(1, counts[(key, value)]))
+                for key, value in attrs.items()
+            ),
+            Decimal(0),
         )
-    }
+    ranks: dict[int, int] = {}
+    previous_score: Decimal | None = None
+    competition_rank = 0
+    for position, candidate_id in enumerate(
+        sorted(scores, key=lambda candidate: (-scores[candidate], candidate)),
+        start=1,
+    ):
+        if previous_score is None or scores[candidate_id] != previous_score:
+            competition_rank = position
+            previous_score = scores[candidate_id]
+        ranks[candidate_id] = competition_rank
     universe: dict[int, dict[str, Any]] = {}
     for candidate_id, attrs in all_attrs.items():
         traits = "; ".join(f"{key}: {value}" for key, value in attrs.items())
         trait_rarity = "; ".join(
-            f"{key}: {value} ({counts[(key, value)] * 100 / total_supply:.1f}%)"
+            f"{key}: {value} ({counts[(key, value)] * 100 / rarity_universe_size:.1f}%)"
             for key, value in attrs.items()
         )
         universe[candidate_id] = {
-            "rarity": f"#{ranks[candidate_id]}/{total_supply}",
-            "rarity_score": round(scores[candidate_id], 6),
+            "rarity": f"#{ranks[candidate_id]}/{rarity_universe_size}",
+            "rarity_score": round(float(scores[candidate_id]), 6),
             "trait_rarity": trait_rarity,
             "traits": traits,
         }
     return universe
 
 
-def baseline_rarity_is_complete(metrics_rows: list[dict[str, Any]], total_supply: int) -> bool:
-    """Validate the full-build metadata envelope before any incremental ranking."""
+def verify_rarity_universe_continuity(
+    builder: Any,
+    metrics_rows: list[dict[str, Any]],
+    *,
+    latest_block: int,
+    latest_block_hash: str,
+    latest_dog_code_sha256: str,
+) -> dict[str, str]:
+    """Prove that a full rarity attestation is still valid at a newer block.
+
+    Historical claims do not advance this collection's nonstandard
+    ``totalSupply()`` counter, and token URIs can be changed independently of
+    minting. The fast path may therefore reuse the full-set hashes only after
+    independent log providers prove that no mint/burn or metadata mutation
+    occurred after the full attestation. Any relevant event forces the exact
+    full builder instead of publishing a stale rank under a fresh snapshot.
+    """
+
     metrics = {
         str(row.get("metric")): str(row.get("value", ""))
         for row in metrics_rows
         if isinstance(row, dict)
     }
-    if metrics.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+
+    def positive_block(key: str) -> int:
+        raw = metrics.get(key, "")
+        if not raw.isdigit() or int(raw) <= 0:
+            raise FullRefreshRequired(f"baseline rarity metric {key} is not a positive block")
+        return int(raw)
+
+    attested_block = positive_block("dog_rarity_attested_block")
+    continuity_through = positive_block("dog_rarity_continuity_through_block")
+    baseline_latest_block = positive_block("latest_block")
+    attested_hash = metrics.get("dog_rarity_attested_block_hash", "").lower()
+    continuity_hash = metrics.get("dog_rarity_continuity_through_block_hash", "").lower()
+    baseline_snapshot_hash = metrics.get("snapshot_block_hash", "").lower()
+    latest_hash = str(latest_block_hash or "").lower()
+    for label, value in (
+        ("attested block hash", attested_hash),
+        ("continuity block hash", continuity_hash),
+        ("baseline snapshot block hash", baseline_snapshot_hash),
+        ("latest block hash", latest_hash),
+    ):
+        if not re.fullmatch(r"0x[0-9a-f]{64}", value):
+            raise FullRefreshRequired(f"baseline rarity {label} is invalid")
+    if continuity_through > latest_block:
+        raise TransientSnapshotLag(
+            "verified snapshot is behind the persisted rarity checkpoint; preserving newer artifacts"
+        )
+    if attested_block > continuity_through:
+        raise FullRefreshRequired("baseline rarity continuity block range is invalid")
+    if continuity_through != baseline_latest_block or continuity_hash != baseline_snapshot_hash:
+        raise FullRefreshRequired("baseline rarity continuity checkpoint differs from the persisted snapshot")
+    if metrics.get("dog_nft_code_sha256") != latest_dog_code_sha256:
+        raise FullRefreshRequired("Dog NFT bytecode changed after the rarity attestation")
+
+    continuity_status = metrics.get("dog_rarity_continuity_verification_status", "")
+    if continuity_status == FULL_RARITY_CONTINUITY_STATUS:
+        if continuity_through != attested_block or continuity_hash != attested_hash:
+            raise FullRefreshRequired("full rarity attestation checkpoint is internally inconsistent")
+        if metrics.get("dog_token_uri_verification_status") != FULL_TOKEN_URI_VERIFICATION_STATUS:
+            raise FullRefreshRequired("full rarity attestation tokenURI status is inconsistent")
+        if metrics.get("dog_base_existence_verification_status") != FULL_EXISTENCE_VERIFICATION_STATUS:
+            raise FullRefreshRequired("full rarity attestation existence status is inconsistent")
+    elif continuity_status == INCREMENTAL_RARITY_CONTINUITY_STATUS:
+        if metrics.get("dog_token_uri_verification_status") != CONTINUITY_TOKEN_URI_VERIFICATION_STATUS:
+            raise FullRefreshRequired("incremental rarity continuity tokenURI status is inconsistent")
+        if metrics.get("dog_base_existence_verification_status") != CONTINUITY_EXISTENCE_VERIFICATION_STATUS:
+            raise FullRefreshRequired("incremental rarity continuity existence status is inconsistent")
+    else:
+        raise FullRefreshRequired("baseline rarity continuity verification status is unsupported")
+
+    # Re-prove the most recent continuity checkpoint against the currently
+    # qualified log quorum. Its block hash commits to every prior checkpoint,
+    # including the full-attestation anchor, so a reorg cannot silently carry
+    # stale no-mutation evidence forward. Starting the next scan immediately
+    # after this checkpoint keeps every fast refresh bounded to only new blocks.
+    if continuity_through == latest_block:
+        observed_continuity_hash = latest_hash
+    else:
+        block_data, _agreeing_urls = builder.rpc_quorum(
+            "eth_getBlockByNumber",
+            [hex(continuity_through), False],
+            urls=builder.VERIFIED_LOG_URLS,
+            min_agreement=builder.RPC_QUORUM_SIZE,
+            timeout=builder.LOG_RPC_TIMEOUT,
+        )
+        if not isinstance(block_data, dict):
+            raise FullRefreshRequired("rarity continuity checkpoint quorum returned a non-object")
+        try:
+            observed_number = int(str(block_data.get("number") or ""), 16)
+        except (TypeError, ValueError) as exc:
+            raise FullRefreshRequired("rarity continuity checkpoint quorum returned a malformed number") from exc
+        observed_continuity_hash = str(block_data.get("hash") or "").lower()
+        if observed_number != continuity_through:
+            raise FullRefreshRequired("rarity continuity checkpoint quorum returned the wrong block")
+    if observed_continuity_hash != continuity_hash:
+        raise FullRefreshRequired("rarity continuity checkpoint hash changed; full refresh required")
+
+    # Use direct quorum calls for every chunk instead of the general history
+    # cache, whose deliberately cold prefix may be served by one archive
+    # provider on very large ranges. Rarity continuity must never inherit that
+    # optimization: an empty result is security-critical evidence here.
+    mutation_logs: list[dict[str, Any]] = []
+    start_block = continuity_through + 1
+    chunk_size = max(1, int(builder.LOG_QUORUM_MAX_BLOCKS))
+    while start_block <= latest_block:
+        end_block = min(latest_block, start_block + chunk_size - 1)
+        result, _agreeing_urls = builder.rpc_quorum(
+            "eth_getLogs",
+            [builder.log_filter(builder.DEGEN_DOGS, list(RARITY_MUTATION_TOPICS), start_block, end_block)],
+            urls=builder.VERIFIED_LOG_URLS,
+            min_agreement=builder.RPC_QUORUM_SIZE,
+            timeout=builder.LOG_RPC_TIMEOUT,
+        )
+        if not isinstance(result, list):
+            raise FullRefreshRequired("Dog rarity continuity log quorum returned a non-list")
+        mutation_logs.extend(result)
+        start_block = end_block + 1
+    allowed_topics = set(RARITY_MUTATION_TOPICS)
+    transfer_topic = RARITY_MUTATION_TOPICS[0]
+    for row in mutation_logs:
+        if not isinstance(row, dict):
+            raise FullRefreshRequired("Dog rarity continuity log is not an object")
+        if str(row.get("address") or "").lower() != str(builder.DEGEN_DOGS).lower():
+            raise FullRefreshRequired("Dog rarity continuity log has the wrong contract address")
+        topics = row.get("topics")
+        if not isinstance(topics, list) or not topics:
+            raise FullRefreshRequired("Dog rarity continuity log has malformed topics")
+        normalized_topics = [str(topic).lower() for topic in topics]
+        if any(not re.fullmatch(r"0x[0-9a-f]{64}", topic) for topic in normalized_topics):
+            raise FullRefreshRequired("Dog rarity continuity log has a malformed topic")
+        event_topic = normalized_topics[0]
+        if event_topic not in allowed_topics:
+            raise FullRefreshRequired("Dog rarity continuity scan returned an unexpected event")
+        if event_topic != transfer_topic:
+            raise FullRefreshRequired("Dog token URI metadata changed after the rarity attestation")
+        if len(normalized_topics) != 4:
+            raise FullRefreshRequired("Dog Transfer continuity event has malformed indexed fields")
+        if ZERO_ADDRESS_TOPIC in normalized_topics[1:3]:
+            raise FullRefreshRequired("Dog existence set changed after the rarity attestation")
+
+    return {
+        "dog_token_uri_verification_status": CONTINUITY_TOKEN_URI_VERIFICATION_STATUS,
+        "dog_base_existence_verification_status": CONTINUITY_EXISTENCE_VERIFICATION_STATUS,
+        "dog_rarity_attested_block": str(attested_block),
+        "dog_rarity_attested_block_hash": attested_hash,
+        "dog_rarity_continuity_through_block": str(latest_block),
+        "dog_rarity_continuity_through_block_hash": latest_hash,
+        "dog_rarity_continuity_verification_status": INCREMENTAL_RARITY_CONTINUITY_STATUS,
+    }
+
+
+def baseline_rarity_universe_size(metrics_rows: list[dict[str, Any]], total_supply: int) -> int:
+    """Validate the full-build envelope and return its Base-existing rarity size."""
+    metrics = {
+        str(row.get("metric")): str(row.get("value", ""))
+        for row in metrics_rows
+        if isinstance(row, dict)
+    }
+    if metrics.get("dog_token_uri_verification_status") not in {
+        FULL_TOKEN_URI_VERIFICATION_STATUS,
+        CONTINUITY_TOKEN_URI_VERIFICATION_STATUS,
+    }:
         raise FullRefreshRequired("baseline tokenURI outcomes are not hash-pinned and cross-provider verified")
+    if metrics.get("dog_base_existence_verification_status") not in {
+        FULL_EXISTENCE_VERIFICATION_STATUS,
+        CONTINUITY_EXISTENCE_VERIFICATION_STATUS,
+    }:
+        raise FullRefreshRequired("baseline Base existence/tokenURI parity is not cross-provider verified")
 
     def count(key: str) -> int:
         raw = metrics.get(key, "")
@@ -813,18 +1054,36 @@ def baseline_rarity_is_complete(metrics_rows: list[dict[str, Any]], total_supply
         return int(raw)
 
     baseline_supply = count("dog_total_supply")
+    id_ceiling = count("dog_id_ceiling")
     token_present = count("dog_token_uri_present_count")
     token_unavailable = count("dog_token_uri_unavailable_count")
+    base_existing = count("dog_base_existing_count")
+    base_unclaimed = count("dog_base_unclaimed_count")
     metadata_verified = count("dog_metadata_onchain_verified_count")
     metadata_unavailable = count("dog_metadata_unavailable_count")
+    metadata_content_observed = count("dog_metadata_content_observed_count")
     if baseline_supply != total_supply:
         raise FullRefreshRequired(
             f"baseline metadata covers supply {baseline_supply}, but onchain total supply is {total_supply}"
         )
+    if id_ceiling != baseline_supply:
+        raise FullRefreshRequired("baseline Dog ID ceiling contradicts the legacy total-supply metric")
+    if base_existing != token_present or base_unclaimed != token_unavailable:
+        raise FullRefreshRequired("baseline Base existence counts contradict tokenURI outcomes")
+    for key in ("dog_base_existing_token_ids_sha256", "dog_base_unclaimed_token_ids_sha256"):
+        if not re.fullmatch(r"[0-9a-f]{64}", metrics.get(key, "")):
+            raise FullRefreshRequired(f"baseline Base existence metric {key} is invalid")
     if token_present + token_unavailable != total_supply:
         raise FullRefreshRequired("baseline tokenURI counts do not equal onchain total supply")
     if metadata_verified + metadata_unavailable != total_supply:
         raise FullRefreshRequired("baseline metadata counts do not equal onchain total supply")
+    if metadata_content_observed != metadata_verified:
+        raise FullRefreshRequired("baseline observed metadata content count contradicts verified tokenURIs")
+    if (
+        metrics.get("dog_metadata_content_verification_status")
+        != "verified_token_uri_offchain_content_hash_observed"
+    ):
+        raise FullRefreshRequired("baseline metadata content verification class is missing or unsupported")
     if metadata_unavailable < token_unavailable:
         raise FullRefreshRequired("baseline metadata counts hide tokenURI-unavailable Dogs")
     expected_status = (
@@ -836,7 +1095,33 @@ def baseline_rarity_is_complete(metrics_rows: list[dict[str, Any]], total_supply
     )
     if metrics.get("dog_metadata_verification_status") != expected_status:
         raise FullRefreshRequired("baseline metadata status contradicts its verified aggregate counts")
-    return metadata_unavailable == 0
+    rarity_universe = count("dog_rarity_universe_count")
+    rarity_excluded = count("dog_rarity_excluded_nonexistent_count")
+    rarity_incomplete = count("dog_rarity_incomplete_metadata_count")
+    if rarity_universe != metadata_verified:
+        raise FullRefreshRequired("baseline rarity universe does not equal verified Base metadata count")
+    if rarity_excluded != token_unavailable:
+        raise FullRefreshRequired("baseline rarity exclusions do not equal nonexistent Base token count")
+    if rarity_incomplete != metadata_unavailable - token_unavailable:
+        raise FullRefreshRequired("baseline rarity incomplete count contradicts metadata outcomes")
+    expected_rarity_status = (
+        "complete_verified_existing_token_universe"
+        if rarity_universe > 0 and rarity_incomplete == 0
+        else "unavailable_no_verified_existing_tokens"
+        if rarity_universe == 0
+        else "incomplete_existing_token_metadata"
+    )
+    if metrics.get("dog_rarity_verification_status") != expected_rarity_status:
+        raise FullRefreshRequired("baseline rarity status contradicts its aggregate counts")
+    if metrics.get("dog_rarity_scope") != "base_existing":
+        raise FullRefreshRequired("baseline rarity scope is missing or unsupported")
+    if metrics.get("dog_rarity_score_method") != "sum_existing_token_count_divided_by_trait_frequency_v1":
+        raise FullRefreshRequired("baseline rarity score method is missing or unsupported")
+    if metrics.get("dog_rarity_tie_policy") != "competition_rank_equal_scores_share_rank":
+        raise FullRefreshRequired("baseline rarity tie policy is missing or unsupported")
+    if metrics.get("dog_rarity_trait_schema") != "|".join(RARITY_TRAIT_TYPES):
+        raise FullRefreshRequired("baseline rarity trait schema is missing or unsupported")
+    return rarity_universe if rarity_incomplete == 0 else 0
 
 
 def apply_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None:
@@ -864,6 +1149,7 @@ def apply_unified_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any])
         "display": rarity_row["rarity"],
         "rank": int(str(rarity_row["rarity"]).split("/", 1)[0].lstrip("#")),
         "total": int(str(rarity_row["rarity"]).split("/", 1)[1]),
+        "scope": "base_existing",
     }
     row["traits"] = structured_traits
     fresh_terms = [str(rarity_row["rarity"]), *(str(item.get("display") or "") for item in structured_traits)]
@@ -1136,6 +1422,9 @@ def main() -> None:
     current_rows = read_json("current_auction")
     if not isinstance(current_rows, list) or not current_rows:
         raise RuntimeError("generated/current_auction.json has no baseline row")
+    metrics_rows = read_json("mission3_metrics")
+    if not isinstance(metrics_rows, list) or not metrics_rows:
+        raise FullRefreshRequired("generated/mission3_metrics.json has no verified rarity baseline")
     previous_block = int_value(current_rows[0].get("latest_block"))
     if previous_block <= 0:
         raise RuntimeError("current auction baseline has no latest_block")
@@ -1170,7 +1459,26 @@ def main() -> None:
     current = builder.fetch_current_auction(latest_block, latest_time, hex(latest_block))
     token_id = int(current["token_id"])
     total_supply = builder.fetch_dog_total_supply(hex(latest_block))
-    metadata = builder.fetch_one_dog_metadata(token_id, hex(latest_block))
+    continuity_metrics = verify_rarity_universe_continuity(
+        builder,
+        metrics_rows,
+        latest_block=latest_block,
+        latest_block_hash=str(verification["snapshot_block_hash"]),
+        latest_dog_code_sha256=str(verification["dog_nft_code_sha256"]),
+    )
+    current_token_uris = builder.fetch_token_uri_bindings(
+        [token_id],
+        hex(latest_block),
+        block_hash=str(verification["snapshot_block_hash"]),
+    )
+    current_token_uri = current_token_uris[token_id]
+    if current_token_uri is None:
+        raise FullRefreshRequired(f"current Dog #{token_id} does not exist on Base at the verified snapshot")
+    metadata = builder.authoritative_metadata_record(
+        token_id,
+        hex(latest_block),
+        current_token_uri,
+    )["metadata"]
 
     timeline_by_token = {int_value(row.get("token_id"), -1): dict(row) for row in timeline_rows}
     previous_token_id = token_id - 1
@@ -1465,25 +1773,46 @@ def main() -> None:
     surface_status = "ongoing" if state == "live" else state
     bid_text = f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
     bid_time = current_bids[-1].get("bid_time_utc") if current_bids else current.get("start_time_utc") or latest_time
-    dog_attrs = {
-        str(item.get("trait_type")): str(item.get("value"))
-        for item in metadata.get("attributes", [])
-        if item.get("trait_type") and item.get("value")
-    }
+    dog_attrs: dict[str, str] = {}
+    for item in metadata.get("attributes", []):
+        trait_type = str(item.get("trait_type") or "").strip()
+        value = str(item.get("value") or "").strip()
+        if not trait_type or not value:
+            continue
+        if trait_type in dog_attrs:
+            raise FullRefreshRequired(f"Dog #{token_id} metadata repeats rarity trait {trait_type!r}")
+        dog_attrs[trait_type] = value
+    if set(dog_attrs) != set(RARITY_TRAIT_TYPES):
+        raise FullRefreshRequired(f"Dog #{token_id} metadata has an invalid rarity trait schema")
+    if any(";" in key or ";" in value for key, value in dog_attrs.items()):
+        raise FullRefreshRequired(f"Dog #{token_id} metadata contains an unsafe rarity trait delimiter")
+    dog_attrs = {trait_type: dog_attrs[trait_type] for trait_type in RARITY_TRAIT_TYPES}
     history = read_json("historical_dog_search")
-    metrics_rows = read_json("mission3_metrics")
-    rarity_complete = baseline_rarity_is_complete(metrics_rows, total_supply)
-    if rarity_complete:
-        rarity_universe = build_rarity_universe(history, token_id, dog_attrs, total_supply)
+    metrics_by_name = {
+        str(row.get("metric")): str(row.get("value", ""))
+        for row in metrics_rows
+        if isinstance(row, dict)
+    }
+    metrics_by_name.update(continuity_metrics)
+    rarity_universe_size = baseline_rarity_universe_size(metrics_rows, total_supply)
+    rarity_available = rarity_universe_size > 0
+    if rarity_available:
+        rarity_universe = build_rarity_universe(
+            history,
+            token_id,
+            dog_attrs,
+            rarity_universe_size,
+            metrics_by_name["dog_base_existing_token_ids_sha256"],
+        )
         current_rarity = rarity_universe[token_id]
         rarity = str(current_rarity["rarity"])
         rarity_score: float | None = float(current_rarity["rarity_score"])
         traits = str(current_rarity["traits"])
         trait_rarity = str(current_rarity["trait_rarity"])
     else:
-        # Rarity is collection-wide. Preserve the verified traits for display,
-        # but withhold every rank, score, total, and frequency until every Dog's
-        # metadata has an onchain-verified tokenURI outcome.
+        # Base-existing rarity is universe-wide. Preserve verified traits for
+        # display, but withhold every score and frequency while any Base-existing
+        # tokenURI metadata remains unresolved.
         rarity_universe = {}
         rarity = "Unavailable"
         rarity_score = None
@@ -1494,7 +1823,7 @@ def main() -> None:
         for row in history
         if isinstance(row, dict) and int_value(row.get("token_id"), -1) >= 0
     }
-    rarity_rebase_required = rarity_complete and any(
+    rarity_rebase_required = rarity_available and any(
         token not in historical_by_token
         or str(historical_by_token[token].get("rarity") or "") != str(values["rarity"])
         or str(historical_by_token[token].get("trait_rarity") or "") != str(values["trait_rarity"])
@@ -2109,15 +2438,20 @@ def main() -> None:
     unified_template = baseline_unified_current or next((row for row in unified_rows if int_value(row.get("mission"), -1) == 3), {})
     trait_items = (
         unified_trait_items(trait_rarity)
-        if rarity_complete
+        if rarity_available
         else [
             {"display": f"{key}: {value}", "trait_type": key, "value": value}
             for key, value in dog_attrs.items()
         ]
     )
     unified_rarity = (
-        {"display": rarity, "rank": int(rarity.split("/")[0].lstrip("#")), "total": total_supply}
-        if rarity_complete
+        {
+            "display": rarity,
+            "rank": int(rarity.split("/")[0].lstrip("#")),
+            "total": rarity_universe_size,
+            "scope": "base_existing",
+        }
+        if rarity_available
         else {"display": "Unavailable", "rank": None, "total": None}
     )
     tx_hashes = [str(row.get("tx_hash")) for row in current_bids if row.get("tx_hash")]
@@ -2311,6 +2645,7 @@ def main() -> None:
         {
             "current_auction_token_id": str(token_id),
             "dog_total_supply": str(total_supply),
+            "dog_id_ceiling": str(total_supply),
             "current_auction_status": state,
             "current_auction_end_utc": str(current.get("end_time_utc", "")),
             "current_bid_eth": str(current.get("amount_eth", "")),
@@ -2320,6 +2655,7 @@ def main() -> None:
             "latest_block": str(latest_block),
             "latest_block_time_utc": latest_time,
             **{str(key): str(value) for key, value in verification.items()},
+            **continuity_metrics,
         }
     )
     metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
@@ -2341,6 +2677,7 @@ def main() -> None:
             "current_high_bidder_wallet": wallet,
             "refresh_reason": "current_surface_incremental",
             **{str(key): str(value) for key, value in verification.items()},
+            **continuity_metrics,
         }
     )
     write_json("refresh_status", refresh_status)
@@ -2370,6 +2707,9 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
+    except TransientSnapshotLag as exc:
+        print(json.dumps({"status": "transient_snapshot_lag", "reason": str(exc)}, sort_keys=True), file=sys.stderr)
+        raise SystemExit(76) from exc
     except FullRefreshRequired as exc:
         print(json.dumps({"status": "full_refresh_required", "reason": str(exc)}, sort_keys=True), file=sys.stderr)
         raise SystemExit(75) from exc

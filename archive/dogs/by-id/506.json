@@ -52,12 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#585/669",
+      "rank": 585,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 506 dog #506 506 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5060 degen 0xfedc21d6a6bed212d3898a06e24d7f344af0976d376531a2f568f133cf30f31e 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec unavailable background: none; body: redbrown; neck: none; mouth: none; ears: none; head: blackcap; eyes: glasses 0xa04b9e787f1fffa7c6d42545ee9e38650a1f10c7685c44dd7a38119bc5668c10 chain_logs contract_getters",
+    "search_text": "dog 506 dog #506 506 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5060 degen 0xfedc21d6a6bed212d3898a06e24d7f344af0976d376531a2f568f133cf30f31e 0x0cbab2017b2cbe1a7318c74e087fb723892cde8bedcdc9b4e54aeec76fc95cec #585/669 background: none; body: redbrown; neck: none; mouth: none; ears: none; head: blackcap; eyes: glasses 0xa04b9e787f1fffa7c6d42545ee9e38650a1f10c7685c44dd7a38119bc5668c10 chain_logs contract_getters",
     "settlement": {
       "block_number": 26291802,
       "block_time_utc": "2025-10-05T15:40:08Z",
@@ -77,37 +78,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None",
+        "display": "Ears: None (26.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: BlackCap",
+        "display": "Head: BlackCap (7.3%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: Glasses",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

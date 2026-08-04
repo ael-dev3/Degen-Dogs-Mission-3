@@ -285,17 +285,16 @@ def assert_exact_rarity_permutation(rows: list[dict[str, str]], total_supply: in
         if total != total_supply:
             raise AssertionError(f"Dog #{token_id} rarity total {total} != dog_total_supply {total_supply}")
         ranks.append(rank)
-    expected = set(range(1, total_supply + 1))
-    observed = set(ranks)
-    if len(ranks) != len(observed) or observed != expected:
-        rank_counts = Counter(ranks)
-        missing = sorted(expected - observed)[:20]
-        duplicates = sorted(rank for rank, count in rank_counts.items() if count > 1)[:20]
-        extra = sorted(observed - expected)[:20]
-        raise AssertionError(
-            f"historical rarity ranks are not an exact 1..{total_supply} permutation "
-            f"missing={missing} duplicates={duplicates} extra={extra}"
-        )
+    ordered = sorted(ranks)
+    previous: int | None = None
+    for position, rank in enumerate(ordered, start=1):
+        if rank < 1 or rank > total_supply:
+            raise AssertionError(f"historical rarity rank {rank} is outside 1..{total_supply}")
+        if rank != previous and rank != position:
+            raise AssertionError(
+                f"historical rarity has invalid competition rank {rank} at position {position}"
+            )
+        previous = rank
 
 
 def assert_withheld_rarity(row: dict[str, object], *, label: str) -> None:
@@ -316,14 +315,7 @@ def assert_withheld_rarity(row: dict[str, object], *, label: str) -> None:
     for raw_score in score_values:
         if raw_score in (None, ""):
             continue
-        if isinstance(raw_score, bool):
-            raise AssertionError(f"{label} exposes a partial rarity score")
-        try:
-            score = Decimal(str(raw_score))
-        except InvalidOperation as exc:
-            raise AssertionError(f"{label} has an invalid withheld rarity score") from exc
-        if not score.is_finite() or score != 0:
-            raise AssertionError(f"{label} exposes a partial rarity score")
+        raise AssertionError(f"{label} exposes a partial rarity score")
 
 
 def assert_metadata_rarity_state(
@@ -331,14 +323,25 @@ def assert_metadata_rarity_state(
     total_supply: int,
     metrics: dict[str, str],
 ) -> str:
-    if metrics.get("dog_token_uri_verification_status") != "hash_pinned_cross_provider_exact_outcome_quorum":
+    if metrics.get("dog_token_uri_verification_status") not in {
+        "hash_pinned_cross_provider_exact_outcome_quorum",
+        "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity",
+    }:
         raise AssertionError("dog tokenURI outcomes are not hash-pinned and cross-provider verified")
+    if metrics.get("dog_base_existence_verification_status") not in {
+        "hash_pinned_cross_provider_exists_token_uri_parity_quorum",
+        "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity",
+    }:
+        raise AssertionError("dog Base existence/tokenURI parity is not cross-provider verified")
 
     count_keys = (
         "dog_token_uri_present_count",
         "dog_token_uri_unavailable_count",
         "dog_metadata_onchain_verified_count",
         "dog_metadata_unavailable_count",
+        "dog_rarity_universe_count",
+        "dog_rarity_excluded_nonexistent_count",
+        "dog_rarity_incomplete_metadata_count",
     )
     counts: dict[str, int] = {}
     for key in count_keys:
@@ -350,12 +353,23 @@ def assert_metadata_rarity_state(
     token_unavailable = counts["dog_token_uri_unavailable_count"]
     metadata_verified = counts["dog_metadata_onchain_verified_count"]
     metadata_unavailable = counts["dog_metadata_unavailable_count"]
+    rarity_universe = counts["dog_rarity_universe_count"]
+    rarity_excluded = counts["dog_rarity_excluded_nonexistent_count"]
+    rarity_incomplete = counts["dog_rarity_incomplete_metadata_count"]
     if token_present + token_unavailable != total_supply:
         raise AssertionError("dog tokenURI aggregate counts do not equal dog_total_supply")
     if metadata_verified + metadata_unavailable != total_supply:
         raise AssertionError("dog metadata aggregate counts do not equal dog_total_supply")
     if metadata_unavailable < token_unavailable:
         raise AssertionError("dog metadata aggregates hide tokenURI-unavailable Dogs")
+    if rarity_universe != metadata_verified:
+        raise AssertionError("dog rarity universe differs from verified Base metadata")
+    if rarity_excluded != token_unavailable:
+        raise AssertionError("dog rarity exclusions differ from nonexistent Base tokens")
+    if rarity_incomplete != metadata_unavailable - token_unavailable:
+        raise AssertionError("dog rarity incomplete count contradicts metadata outcomes")
+    if metrics.get("dog_rarity_scope") != "base_existing":
+        raise AssertionError("dog rarity scope is not Base-existing")
 
     expected_status = (
         "complete_onchain_token_uri_verified"
@@ -383,12 +397,31 @@ def assert_metadata_rarity_state(
     if len(rows) - row_statuses["onchain_token_uri_verified"] != metadata_unavailable:
         raise AssertionError("historical metadata unavailable rows differ from mission3 metrics")
 
-    if metadata_unavailable == 0:
-        assert_exact_rarity_permutation(rows, total_supply)
+    rarity_complete = rarity_universe > 0 and rarity_incomplete == 0
+    expected_rarity_status = (
+        "complete_verified_existing_token_universe"
+        if rarity_complete
+        else "unavailable_no_verified_existing_tokens"
+        if rarity_universe == 0
+        else "incomplete_existing_token_metadata"
+    )
+    if metrics.get("dog_rarity_verification_status") != expected_rarity_status:
+        raise AssertionError("dog rarity aggregate status contradicts its counts")
+
+    if rarity_complete:
+        verified_rows = [
+            row
+            for row in rows
+            if row.get("metadata_verification_status") == "onchain_token_uri_verified"
+        ]
+        assert_exact_rarity_permutation(verified_rows, rarity_universe)
+        for row in rows:
+            if row.get("metadata_verification_status") != "onchain_token_uri_verified":
+                assert_withheld_rarity(row, label=f"Dog #{int(row['token_id'])}")
         return "complete"
 
-    # Rarity is a collection-wide calculation. Any unavailable metadata makes
-    # subset ranks misleading, so every surface must withhold rank and score.
+    # Any unresolved metadata inside the Base-existing scope makes subset ranks
+    # misleading, so every surface must withhold rank and score.
     for row in rows:
         assert_withheld_rarity(row, label=f"Dog #{int(row['token_id'])}")
     return "unavailable"
@@ -450,11 +483,17 @@ def main() -> int:
         key: read_metric(key)
         for key in (
             "dog_token_uri_verification_status",
+            "dog_base_existence_verification_status",
             "dog_token_uri_present_count",
             "dog_token_uri_unavailable_count",
             "dog_metadata_verification_status",
             "dog_metadata_onchain_verified_count",
             "dog_metadata_unavailable_count",
+            "dog_rarity_verification_status",
+            "dog_rarity_universe_count",
+            "dog_rarity_excluded_nonexistent_count",
+            "dog_rarity_incomplete_metadata_count",
+            "dog_rarity_scope",
         )
     }
     generated_rows = read_csv(ROOT / "generated" / "historical_dog_search.csv")
@@ -564,6 +603,9 @@ def main() -> int:
             raise AssertionError(
                 f"unified Dog #{token_id} rarity {unified_rarity!r} differs from historical rarity {ids[token_id].get('rarity')!r}"
             )
+        raw_unified_rarity = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
+        if unified_rarity.startswith("#") and raw_unified_rarity.get("scope") != "base_existing":
+            raise AssertionError(f"unified Dog #{token_id} numeric rarity has no Base-existing scope")
     dog_archive = ROOT / "archive" / "dogs" / "by-id"
     if dog_archive.exists():
         for path in dog_archive.glob("*.json"):
@@ -581,6 +623,9 @@ def main() -> int:
                 raise AssertionError(
                     f"by-id Dog #{token_id} rarity {archive_rarity!r} differs from historical rarity {ids[token_id].get('rarity')!r}"
                 )
+            raw_archive_rarity = record.get("rarity") if isinstance(record.get("rarity"), dict) else {}
+            if archive_rarity.startswith("#") and raw_archive_rarity.get("scope") != "base_existing":
+                raise AssertionError(f"by-id Dog #{token_id} numeric rarity has no Base-existing scope")
     unified_mission3 = indexed_token_rows(unified_archive, label="unified Mission 3 by-id parity", mission=3)
     for token_id, expected_record in unified_mission3.items():
         path = dog_archive / f"{token_id:03d}.json"

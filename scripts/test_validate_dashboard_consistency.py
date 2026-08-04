@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import csv
+import hashlib
 import io
 import json
 import tempfile
@@ -59,6 +60,10 @@ def write_fixture(
     season6_by_winner_capped: str = "1000",
 ) -> None:
     wallet = "0x76d0e7a13248945ee9f808b4a472262b28778942"
+    existing_ids_sha256 = hashlib.sha256(
+        ",".join(str(token_id) for token_id in range(792)).encode("ascii")
+    ).hexdigest()
+    unclaimed_ids_sha256 = hashlib.sha256(b"").hexdigest()
     apr_display_value = apr_display or index_apr
     metrics = {
         "latest_block": "46732183",
@@ -76,12 +81,33 @@ def write_fixture(
         "dog_nft_code_sha256": "c" * 64,
         "current_auction_token_id": "729",
         "dog_total_supply": "792",
+        "dog_id_ceiling": "792",
         "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_base_existence_verification_status": "hash_pinned_cross_provider_exists_token_uri_parity_quorum",
         "dog_token_uri_present_count": "792",
         "dog_token_uri_unavailable_count": "0",
+        "dog_base_existing_count": "792",
+        "dog_base_unclaimed_count": "0",
+        "dog_base_existing_token_ids_sha256": existing_ids_sha256,
+        "dog_base_unclaimed_token_ids_sha256": unclaimed_ids_sha256,
         "dog_metadata_verification_status": "complete_onchain_token_uri_verified",
         "dog_metadata_onchain_verified_count": "792",
         "dog_metadata_unavailable_count": "0",
+        "dog_metadata_content_verification_status": "verified_token_uri_offchain_content_hash_observed",
+        "dog_metadata_content_observed_count": "792",
+        "dog_rarity_verification_status": "complete_verified_existing_token_universe",
+        "dog_rarity_universe_count": "792",
+        "dog_rarity_excluded_nonexistent_count": "0",
+        "dog_rarity_incomplete_metadata_count": "0",
+        "dog_rarity_scope": "base_existing",
+        "dog_rarity_score_method": "sum_existing_token_count_divided_by_trait_frequency_v1",
+        "dog_rarity_tie_policy": "competition_rank_equal_scores_share_rank",
+        "dog_rarity_trait_schema": "Background|Body|Neck|Mouth|Ears|Head|Eyes",
+        "dog_rarity_attested_block": "46732183",
+        "dog_rarity_attested_block_hash": "0x" + "a" * 64,
+        "dog_rarity_continuity_through_block": "46732183",
+        "dog_rarity_continuity_through_block_hash": "0x" + "a" * 64,
+        "dog_rarity_continuity_verification_status": "full_snapshot_exists_token_uri_content_schema_attested",
         "current_auction_status": "live",
         "current_bid_eth": "0.01",
         "current_bid_usd": "19.98",
@@ -172,6 +198,8 @@ def write_fixture(
         "bidder": "@0xael.eth",
         "bidder_wallet": wallet,
         "auction_state": "live",
+        "rarity": "#1/792",
+        "rarity_score": 7,
         "end_time_utc": "2026-05-31 20:40:09",
         "latest_block": 46732183,
         "latest_block_time_utc": "2026-05-31 18:55:13",
@@ -205,12 +233,33 @@ def write_fixture(
         "auction_house_code_sha256": "b" * 64,
         "dog_nft_code_sha256": "c" * 64,
         "dog_total_supply": 792,
+        "dog_id_ceiling": 792,
         "dog_token_uri_verification_status": "hash_pinned_cross_provider_exact_outcome_quorum",
+        "dog_base_existence_verification_status": "hash_pinned_cross_provider_exists_token_uri_parity_quorum",
         "dog_token_uri_present_count": 792,
         "dog_token_uri_unavailable_count": 0,
+        "dog_base_existing_count": 792,
+        "dog_base_unclaimed_count": 0,
+        "dog_base_existing_token_ids_sha256": existing_ids_sha256,
+        "dog_base_unclaimed_token_ids_sha256": unclaimed_ids_sha256,
         "dog_metadata_verification_status": "complete_onchain_token_uri_verified",
         "dog_metadata_onchain_verified_count": 792,
         "dog_metadata_unavailable_count": 0,
+        "dog_metadata_content_verification_status": "verified_token_uri_offchain_content_hash_observed",
+        "dog_metadata_content_observed_count": 792,
+        "dog_rarity_verification_status": "complete_verified_existing_token_universe",
+        "dog_rarity_universe_count": 792,
+        "dog_rarity_excluded_nonexistent_count": 0,
+        "dog_rarity_incomplete_metadata_count": 0,
+        "dog_rarity_scope": "base_existing",
+        "dog_rarity_score_method": "sum_existing_token_count_divided_by_trait_frequency_v1",
+        "dog_rarity_tie_policy": "competition_rank_equal_scores_share_rank",
+        "dog_rarity_trait_schema": "Background|Body|Neck|Mouth|Ears|Head|Eyes",
+        "dog_rarity_attested_block": 46732183,
+        "dog_rarity_attested_block_hash": "0x" + "a" * 64,
+        "dog_rarity_continuity_through_block": 46732183,
+        "dog_rarity_continuity_through_block_hash": "0x" + "a" * 64,
+        "dog_rarity_continuity_verification_status": "full_snapshot_exists_token_uri_content_schema_attested",
     }
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
@@ -245,7 +294,34 @@ def write_fixture(
         "auction_end_utc": "2026-05-31 20:40:09",
         "last_bid_utc": "2026-05-30 18:40:23",
     }])
-    write_json(root / "generated" / "historical_dog_search.json", [{"mission": 3, "token_id": 729, "winner": "@0xael.eth", "winner_wallet": wallet, "amount": "0.01000 ETH ($20)"}])
+    rarity_traits = "; ".join(f"{trait_type}: None" for trait_type in (
+        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
+    ))
+    rarity_percentages = "; ".join(f"{trait_type}: None (100.0%)" for trait_type in (
+        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
+    ))
+    historical_rows = [
+        {
+            "mission": 1 if token_id <= 200 else 2 if token_id <= 589 else 3,
+            "token_id": token_id,
+            "traits": rarity_traits,
+            "trait_rarity": rarity_percentages,
+            "rarity": "#1/792",
+            "rarity_score": 7,
+            "metadata_verification_status": "onchain_token_uri_verified",
+            **(
+                {
+                    "winner": "@0xael.eth",
+                    "winner_wallet": wallet,
+                    "amount": "0.01000 ETH ($20)",
+                }
+                if token_id == 729
+                else {}
+            ),
+        }
+        for token_id in range(792)
+    ]
+    write_json(root / "generated" / "historical_dog_search.json", historical_rows)
     recent_bid = dict(current_history[0])
     write_json(root / "generated" / "recent_bids.json", [recent_bid])
     write_json(root / "public" / "generated" / "recent_bids.json", [recent_bid])
@@ -929,7 +1005,7 @@ def test_validator_catches_refresh_status_block_mismatch() -> None:
         status["latest_generated_block"] = 1
         write_json(root / "generated" / "refresh_status.json", status)
         write_json(root / "public" / "generated" / "refresh_status.json", status)
-        assert_raises_contains(lambda: run_validation(root), "refresh_status latest_generated_block")
+        assert_raises_contains(lambda: run_validation(root), "rarity attestation block range")
 
 
 def test_validator_rejects_missing_cross_provider_verification() -> None:

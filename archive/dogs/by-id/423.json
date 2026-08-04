@@ -53,12 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "Unavailable",
-      "rank": null,
-      "total": null
+      "display": "#194/669",
+      "rank": 194,
+      "scope": "base_existing",
+      "total": 669
     },
     "schema_version": 1,
-    "search_text": "dog 423 dog #423 423 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x9f63b7f9cdded89cbd2737141e92b8ab7b42d9e4d929e9cb8a440804252457a6 0x43743a720d701f760054de8953040d326dcf2be5f993c5646921eb76de32d19e unavailable background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: none; head: unicorn; eyes: sunglasses 0x0d5e68709c9243a25a5a5565af6935a96e7ae9495e3ea02ab4d48e8a59240210 0xc3e857bd726d05038a90e46c65fb692a15039178f26023a61c47f510d9197042 chain_logs contract_getters",
+    "search_text": "dog 423 dog #423 423 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x9f63b7f9cdded89cbd2737141e92b8ab7b42d9e4d929e9cb8a440804252457a6 0x43743a720d701f760054de8953040d326dcf2be5f993c5646921eb76de32d19e #194/669 background: none; body: redbrown; neck: goldnecklace; mouth: pizza; ears: none; head: unicorn; eyes: sunglasses 0x0d5e68709c9243a25a5a5565af6935a96e7ae9495e3ea02ab4d48e8a59240210 0xc3e857bd726d05038a90e46c65fb692a15039178f26023a61c47f510d9197042 chain_logs contract_getters",
     "settlement": {
       "block_number": 26053254,
       "block_time_utc": "2025-07-07T13:45:03Z",
@@ -78,37 +79,37 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace",
+        "display": "Neck: GoldNecklace (19.0%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Pizza",
+        "display": "Mouth: Pizza (11.1%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: None",
+        "display": "Ears: None (26.5%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: Unicorn",
+        "display": "Head: Unicorn (4.8%)",
         "trait_type": "Head",
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Sunglasses",
+        "display": "Eyes: Sunglasses (13.6%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

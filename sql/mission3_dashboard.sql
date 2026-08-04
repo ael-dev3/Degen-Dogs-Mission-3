@@ -127,7 +127,7 @@ SELECT
   COALESCE(d.traits, '') AS traits,
   COALESCE(d.trait_rarity, '') AS trait_rarity,
   COALESCE(d.rarity, '') AS rarity,
-  COALESCE(d.rarity_score, 0) AS rarity_score,
+  d.rarity_score AS rarity_score,
   COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   s.winner AS winner_wallet,
   COALESCE(l.label, substr(LOWER(s.winner), 1, 6) || '…' || substr(LOWER(s.winner), -4)) AS winner,
@@ -514,7 +514,7 @@ SELECT
   COALESCE(d.traits, '') AS traits,
   COALESCE(d.trait_rarity, '') AS trait_rarity,
   COALESCE(d.rarity, '') AS rarity,
-  COALESCE(d.rarity_score, 0) AS rarity_score,
+  d.rarity_score AS rarity_score,
   COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
@@ -807,12 +807,33 @@ UNION ALL SELECT 'dog_nft_code_sha256', (SELECT value FROM token_stats WHERE met
 UNION ALL SELECT 'auction_house', (SELECT value FROM token_stats WHERE metric = 'auction_house')
 UNION ALL SELECT 'dog_nft', (SELECT value FROM token_stats WHERE metric = 'dog_nft')
 UNION ALL SELECT 'dog_total_supply', (SELECT value FROM token_stats WHERE metric = 'dog_total_supply')
+UNION ALL SELECT 'dog_id_ceiling', (SELECT value FROM token_stats WHERE metric = 'dog_id_ceiling')
 UNION ALL SELECT 'dog_token_uri_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_verification_status')
+UNION ALL SELECT 'dog_base_existence_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_base_existence_verification_status')
 UNION ALL SELECT 'dog_token_uri_present_count', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_present_count')
 UNION ALL SELECT 'dog_token_uri_unavailable_count', (SELECT value FROM token_stats WHERE metric = 'dog_token_uri_unavailable_count')
+UNION ALL SELECT 'dog_base_existing_count', (SELECT value FROM token_stats WHERE metric = 'dog_base_existing_count')
+UNION ALL SELECT 'dog_base_unclaimed_count', (SELECT value FROM token_stats WHERE metric = 'dog_base_unclaimed_count')
+UNION ALL SELECT 'dog_base_existing_token_ids_sha256', (SELECT value FROM token_stats WHERE metric = 'dog_base_existing_token_ids_sha256')
+UNION ALL SELECT 'dog_base_unclaimed_token_ids_sha256', (SELECT value FROM token_stats WHERE metric = 'dog_base_unclaimed_token_ids_sha256')
 UNION ALL SELECT 'dog_metadata_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_verification_status')
 UNION ALL SELECT 'dog_metadata_onchain_verified_count', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_onchain_verified_count')
 UNION ALL SELECT 'dog_metadata_unavailable_count', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_unavailable_count')
+UNION ALL SELECT 'dog_metadata_content_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_content_verification_status')
+UNION ALL SELECT 'dog_metadata_content_observed_count', (SELECT value FROM token_stats WHERE metric = 'dog_metadata_content_observed_count')
+UNION ALL SELECT 'dog_rarity_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_verification_status')
+UNION ALL SELECT 'dog_rarity_universe_count', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_universe_count')
+UNION ALL SELECT 'dog_rarity_excluded_nonexistent_count', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_excluded_nonexistent_count')
+UNION ALL SELECT 'dog_rarity_incomplete_metadata_count', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_incomplete_metadata_count')
+UNION ALL SELECT 'dog_rarity_scope', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_scope')
+UNION ALL SELECT 'dog_rarity_score_method', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_score_method')
+UNION ALL SELECT 'dog_rarity_tie_policy', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_tie_policy')
+UNION ALL SELECT 'dog_rarity_trait_schema', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_trait_schema')
+UNION ALL SELECT 'dog_rarity_attested_block', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_attested_block')
+UNION ALL SELECT 'dog_rarity_attested_block_hash', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_attested_block_hash')
+UNION ALL SELECT 'dog_rarity_continuity_through_block', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_continuity_through_block')
+UNION ALL SELECT 'dog_rarity_continuity_through_block_hash', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_continuity_through_block_hash')
+UNION ALL SELECT 'dog_rarity_continuity_verification_status', (SELECT value FROM token_stats WHERE metric = 'dog_rarity_continuity_verification_status')
 UNION ALL SELECT 'woof_token', (SELECT value FROM token_stats WHERE metric = 'woof_token')
 UNION ALL SELECT 'woof_symbol', (SELECT value FROM token_stats WHERE metric = 'woof_symbol')
 UNION ALL SELECT 'woof_total_supply', (SELECT value FROM token_stats WHERE metric = 'woof_total_supply')

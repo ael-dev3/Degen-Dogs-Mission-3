@@ -406,12 +406,17 @@ def load_mission_rows() -> tuple[list[dict[str, Any]], list[str]]:
     return rows, notes
 
 
-def parse_rarity(value: Any) -> dict[str, Any]:
+def parse_rarity(value: Any, scope: str | None = None) -> dict[str, Any]:
     text = text_value(value)
     if text.startswith("#") and "/" in text:
         left, right = text[1:].split("/", 1)
-        return {"rank": int_value(left, None), "total": int_value(right, None), "display": text}
-    return {"rank": None, "total": None, "display": text or None}
+        return {
+            "rank": int_value(left, None),
+            "total": int_value(right, None),
+            "display": text,
+            "scope": scope,
+        }
+    return {"rank": None, "total": None, "display": text or None, "scope": scope}
 
 
 def parse_traits(value: Any) -> list[dict[str, str]]:
@@ -642,7 +647,11 @@ def normalize_record(row: dict[str, Any], metadata: dict[int, dict[str, Any]], i
             "last_bid_time_utc": last_bid_time or None,
         },
         "bid_tx_hashes": bid_tx_hashes,
-        "rarity": parse_rarity(rarity_display),
+        # Rarity is sourced from the verified Base-existing metadata universe
+        # for every claimed Dog, including Dogs whose original mission label is
+        # Polygon or Degen Chain. Never let the historical mission label erase
+        # the rank's Base scope.
+        "rarity": parse_rarity(rarity_display, "base_existing"),
         "traits": parse_traits(first_text(meta.get("trait_rarity"), traits_text)),
         "links": {
             "item": dog_item_url or None,
@@ -932,7 +941,10 @@ def historical_mission3_record(row: dict[str, Any], metadata: dict[int, dict[str
             "last_bid_time_utc": None,
         },
         "bid_tx_hashes": [],
-        "rarity": parse_rarity(first_text(row.get("rarity"), meta.get("rarity"))),
+        "rarity": parse_rarity(
+            first_text(row.get("rarity"), meta.get("rarity")),
+            "base_existing",
+        ),
         "traits": parse_traits(first_text(row.get("trait_rarity"), meta.get("trait_rarity"), row.get("traits"), meta.get("traits"))),
         "links": {
             "item": first_text(row.get("dog_opensea_url"), meta.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
@@ -1476,7 +1488,10 @@ def generated_feed_record(feed: dict[str, Any], current: dict[str, Any], identit
             "last_bid_time_utc": last_bid_time or None,
         },
         "bid_tx_hashes": [],
-        "rarity": parse_rarity(first_text(feed.get("rarity"), current.get("rarity"))),
+        "rarity": parse_rarity(
+            first_text(feed.get("rarity"), current.get("rarity")),
+            "base_existing",
+        ),
         "traits": parse_traits(first_text(current.get("trait_rarity"), feed.get("trait_rarity"), current.get("traits"), feed.get("traits"))),
         "links": {
             "item": first_text(feed.get("dog_opensea_url"), current.get("dog_opensea_url"), mission3_item_url(dog_id)) or None,
@@ -1631,7 +1646,14 @@ def apply_current_auction_overrides(records: list[dict[str, Any]], identity: dic
         if unique_bidder_count:
             bid_stats["unique_bidder_count"] = unique_bidder_count
         record["bid_stats"] = bid_stats
-        record["rarity"] = parse_rarity(first_text(feed.get("rarity"), current.get("rarity"), record.get("rarity", {}).get("display") if isinstance(record.get("rarity"), dict) else ""))
+        record["rarity"] = parse_rarity(
+            first_text(
+                feed.get("rarity"),
+                current.get("rarity"),
+                record.get("rarity", {}).get("display") if isinstance(record.get("rarity"), dict) else "",
+            ),
+            "base_existing",
+        )
         record["traits"] = parse_traits(first_text(current.get("trait_rarity"), feed.get("trait_rarity"), current.get("traits"), feed.get("traits"))) or record.get("traits", [])
         links = record.get("links") if isinstance(record.get("links"), dict) else {}
         links["item"] = record.get("dog_item_url")
