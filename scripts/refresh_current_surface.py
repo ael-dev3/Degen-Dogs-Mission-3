@@ -131,6 +131,11 @@ def bid_sort_key(row: dict[str, Any]) -> tuple[int, int, str]:
     return (bid_block(row), bid_log_index(row), bid_tx_hash(row))
 
 
+def high_bid_first(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return the current-auction public contract: high/latest bid first."""
+    return sorted(rows, key=bid_sort_key, reverse=True)
+
+
 def merge_overlap_bid_history(
     existing_rows: list[dict[str, Any]],
     fresh_rows: list[dict[str, Any]],
@@ -1925,7 +1930,7 @@ def main() -> None:
 
     current_history_rows = [
         {column: row.get(column, "") for column in history_columns}
-        for row in current_bids
+        for row in high_bid_first(current_bids)
     ]
     write_table("current_auction_bid_history", history_columns, current_history_rows)
 

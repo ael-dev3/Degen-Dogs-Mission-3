@@ -1232,11 +1232,12 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
         "current_auction_bid_history": (
             ["bid_time_utc", "token_id", "dog", "bidder", "bidder_url", "bidder_wallet", "bid", "bid_eth", "bid_usd", "block_number", "log_index", "tx_hash"],
             [
-                ("2026-06-02 01:00:00", 11, "Dog #11", "@unitcurrent", "https://farcaster.xyz/unitcurrent", wallet, "1.00000 ETH ($2000)", 1.0, 2000.0, 210, 0, "0xbid11"),
                 ("2026-06-02 00:30:00", 11, "Dog #11", "@unitearly", "https://farcaster.xyz/unitearly", "0x00000000000000000000000000000000000000c3", "0.75000 ETH ($1500)", 0.75, 1500.0, 205, 0, "0xbid11early"),
+                ("2026-06-02 01:00:00", 11, "Dog #11", "@unitcurrent", "https://farcaster.xyz/unitcurrent", wallet, "1.00000 ETH ($2000)", 1.0, 2000.0, 210, 0, "0xbid11"),
             ],
         ),
     }
+    menu = dashboard.render_bid_history_menu(tables)
     with tempfile.TemporaryDirectory() as tmp:
         old_root = dashboard.ROOT
         try:
@@ -1252,6 +1253,11 @@ def test_current_bid_history_renders_top_dropdown_without_bottom_table() -> None
     assert "@unitcurrent" in rendered
     assert wallet in rendered
     assert "1.00000 ETH ($2000)" in rendered
+    assert menu.index("1.00000 ETH ($2000)") < menu.index("0.75000 ETH ($1500)")
+    assert '<span class="bid-history-rank">High bid</span>' in menu
+    assert "const bidHistoryHighFirst=" in rendered
+    assert "const topBid=bidHistoryHighFirst(history)[0]" in rendered
+    assert "Live dashboard refresh failed:" in rendered
     assert rendered.index("detail-bidder") < rendered.index("bid-history-menu")
     assert 'data-table="current_auction_bid_history"' not in rendered
     assert 'data-name="current_auction_bid_history"' not in rendered
