@@ -1,24 +1,147 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-02T13:17:09Z",
+    "activity_time_utc": "2026-08-03T17:31:19Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-04",
+      "native": "0.01792",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "17920000000000000",
+      "usd_estimate": "33.42976000",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$33.43",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-08-04",
+      "usd_estimate_price_usd": "1865.5",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 49487567,
+      "block_time_utc": "2026-08-03T13:41:21Z",
+      "tx_hash": "0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa",
+      "tx_url": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-08-03T17:31:19Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0xebccbad2c50eb3d4915e423ec3c8195b52016cfab0f5f42eeae06808cd62f820"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 792,
+    "dog_image_url": "https://api.degendogs.club/images/792.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/792",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa",
+      "dog_page": "https://degendogs.club/#dog792",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/792",
+      "repo_archive": "archive/dogs/by-id/792.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "Unavailable",
+      "rank": null,
+      "total": null
+    },
+    "schema_version": 1,
+    "search_text": "dog 792 dog #792 792 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01792 eth 17920000000000000 33.43 $33.43 2026-08-03t17:31:19z 0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa unavailable generated auction feed 0xebccbad2c50eb3d4915e423ec3c8195b52016cfab0f5f42eeae06808cd62f820 background: none background none body: alien body alien neck: studdedcollar neck studdedcollar mouth: none mouth none ears: loopearring ears loopearring head: crazyhair head crazyhair eyes: monocle eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Alien",
+        "trait_type": "Body",
+        "value": "Alien"
+      },
+      {
+        "display": "Neck: StuddedCollar",
+        "trait_type": "Neck",
+        "value": "StuddedCollar"
+      },
+      {
+        "display": "Mouth: None",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: CrazyHair",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: Monocle",
+        "trait_type": "Eyes",
+        "value": "Monocle"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-03T13:41:21Z",
+    "amount": {
+      "amount_usd_at_event": "16.93933217",
+      "eth_usd_price_at_event": "1882.1480192693857",
       "eth_usd_price_date_utc": "2026-08-03",
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.56625500",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.57",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "16.93933217",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.94",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-03",
-      "usd_estimate_price_usd": "1840.695",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1882.1480192693857",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 49443635,
@@ -47,7 +170,7 @@
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/791",
       "repo_archive": "archive/dogs/by-id/791.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa"
     },
     "mission": 3,
     "rarity": {
@@ -56,13 +179,13 @@
       "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 791 dog #791 791 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.57 $16.57 2026-08-02 13:17:09 Unavailable Background: None; Body: White; Neck: StuddedCollar; Mouth: Teeth; Ears: LoopEarring; Head: BaseballCap; Eyes: Sunglasses @0xael.eth 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f 0x673f9bde21cfc1fb8edd9c4b64498af31d2ddf21a55638eb2d8c0604f0ddcff8",
+    "search_text": "dog 791 dog #791 791 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.94 $16.94 2026-08-03t13:41:21z 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f 0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa unavailable generated auction feed 0x673f9bde21cfc1fb8edd9c4b64498af31d2ddf21a55638eb2d8c0604f0ddcff8 background: none background none body: white body white neck: studdedcollar neck studdedcollar mouth: teeth mouth teeth ears: loopearring ears loopearring head: baseballcap head baseballcap eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 49487567,
+      "block_time_utc": "2026-08-03T13:41:21Z",
+      "settled": true,
+      "tx_hash": "0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa",
+      "tx_url": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa"
     },
     "source": {
       "confidence": "verified",
@@ -70,12 +193,13 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
+        "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None",
@@ -1311,7 +1435,7 @@
       "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a unavailable generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 background: none background none body: redbrown body redbrown neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: stripedbeanie head stripedbeanie eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a unavailable generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 background: none background none body: redbrown body redbrown neck: goldnecklace neck goldnecklace mouth: none mouth none ears: none ears none head: stripedbeanie head stripedbeanie eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49023751,
       "block_time_utc": "2026-07-23T20:00:49Z",
@@ -1327,8 +1451,7 @@
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_winners",
-        "generated_auction_feed"
+        "generated_auction_winners"
       ]
     },
     "status": "settled",

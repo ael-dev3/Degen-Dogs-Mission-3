@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-08-02T13:20:25Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-02T13:17:09Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-03T13:41:21Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "16.93933217",
+      "eth_usd_price_at_event": "1882.1480192693857",
       "eth_usd_price_date_utc": "2026-08-03",
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.56625500",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.57",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "16.93933217",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.94",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-03",
-      "usd_estimate_price_usd": "1840.695",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1882.1480192693857",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 49443635,
@@ -48,7 +48,7 @@
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/791",
       "repo_archive": "archive/dogs/by-id/791.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa"
     },
     "mission": 3,
     "rarity": {
@@ -57,13 +57,13 @@
       "total": null
     },
     "schema_version": 1,
-    "search_text": "dog 791 dog #791 791 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.57 $16.57 2026-08-02 13:17:09 Unavailable Background: None; Body: White; Neck: StuddedCollar; Mouth: Teeth; Ears: LoopEarring; Head: BaseballCap; Eyes: Sunglasses @0xael.eth 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f 0x673f9bde21cfc1fb8edd9c4b64498af31d2ddf21a55638eb2d8c0604f0ddcff8",
+    "search_text": "dog 791 dog #791 791 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.94 $16.94 2026-08-03t13:41:21z 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f 0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa unavailable generated auction feed 0x673f9bde21cfc1fb8edd9c4b64498af31d2ddf21a55638eb2d8c0604f0ddcff8 background: none background none body: white body white neck: studdedcollar neck studdedcollar mouth: teeth mouth teeth ears: loopearring ears loopearring head: baseballcap head baseballcap eyes: sunglasses eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 49487567,
+      "block_time_utc": "2026-08-03T13:41:21Z",
+      "settled": true,
+      "tx_hash": "0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa",
+      "tx_url": "https://basescan.org/tx/0xbdaf69a1e80659dec4dae46dad7d39b7bfa6d4e24a1be21fafbb4d7dc60425aa"
     },
     "source": {
       "confidence": "verified",
@@ -71,12 +71,13 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
+        "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None",
