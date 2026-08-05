@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49553337"
+    "value": "49555186"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-05 02:13:41"
+    "value": "2026-08-05 03:15:19"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,11 +29,11 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xc9bbca674bc0f656ca35f7cc50622f00d4055709377ef3115631e67767723a2a"
+    "value": "0x26c6870332e963e0953e4ee2819dc062c553275dcb9c058654f6648f91c8c14e"
   },
   {
     "metric": "snapshot_confirmations",
-    "value": "2"
+    "value": "1"
   },
   {
     "metric": "rpc_quorum_size",
@@ -41,11 +41,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "3/3"
+    "value": "2/2"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "publicnode.com,rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb"
+    "value": "publicnode.com,rpc-host-a0d298ecc6bb"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -153,7 +153,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1874.82"
+    "value": "1869.585"
   },
   {
     "metric": "eth_usd_source",
@@ -265,15 +265,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "214.84"
+    "value": "214.33"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4655"
+    "value": "0.4666"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "169.89"
+    "value": "170.3"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -309,7 +309,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "16.87"
+    "value": "16.83"
   },
   {
     "metric": "current_bidder",
@@ -449,7 +449,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "26.91"
+    "value": "26.86"
   },
   {
     "metric": "season6_sup_enabled",
@@ -477,7 +477,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "174764.798687"
+    "value": "174883.013904"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
@@ -625,11 +625,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49553337"
+    "value": "49555186"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xc9bbca674bc0f656ca35f7cc50622f00d4055709377ef3115631e67767723a2a"
+    "value": "0x26c6870332e963e0953e4ee2819dc062c553275dcb9c058654f6648f91c8c14e"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
