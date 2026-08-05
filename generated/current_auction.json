@@ -14,7 +14,7 @@
     "current_bid_eth": 0.009,
     "current_bid_usd": 16.84,
     "current_bid_usd_live": 16.84,
-    "eth_usd_price_live": "1870.715",
+    "eth_usd_price_live": "1870.925",
     "eth_usd_price_date_utc": "2026-08-05",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
@@ -26,10 +26,10 @@
     "start_time_utc": "2026-08-04 13:42:27",
     "end_time_utc": "2026-08-05 13:42:27",
     "auction_state": "live",
-    "seconds_remaining": 15168,
-    "time_remaining": "04:12:48",
+    "seconds_remaining": 11452,
+    "time_remaining": "03:10:52",
     "settled": 0,
-    "latest_block": 49566416,
-    "latest_block_time_utc": "2026-08-05 09:29:39"
+    "latest_block": 49568274,
+    "latest_block_time_utc": "2026-08-05 10:31:35"
   }
 ]
