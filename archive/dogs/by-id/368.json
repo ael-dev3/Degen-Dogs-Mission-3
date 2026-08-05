@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#446/669",
+      "display": "#446/670",
       "rank": 446,
       "scope": "base_existing",
-      "total": 669
+      "total": 670
     },
     "schema_version": 1,
-    "search_text": "dog 368 dog #368 368 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xde1d1dd4599d8d30ab67996a9d488929df4abf1a403ecb4a7b33173d5d889f9e 0x0a3f8848760883ae8e594d8339cc546afe999a909d9e7a9804c4a6d0bac3b5da #446/669 background: none; body: grey; neck: studdedcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: vrgoggles 0xe9178ad03127547ee063b1eb7b94d33f8b495320fe9ed9f023e2b051ea591878 0x4e1ef247a05c2a4de6ddd166e40020e0db89d367dcca91a214a9619070ea361a 0x377956a5e1aa1e6941a63e6002203b0bf9c3f87cb9b39846453803a5ebf105a8 chain_logs contract_getters",
+    "search_text": "dog 368 dog #368 368 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xde1d1dd4599d8d30ab67996a9d488929df4abf1a403ecb4a7b33173d5d889f9e 0x0a3f8848760883ae8e594d8339cc546afe999a909d9e7a9804c4a6d0bac3b5da #446/670 background: none; body: grey; neck: studdedcollar; mouth: none; ears: earbuds; head: baseballcap; eyes: vrgoggles 0xe9178ad03127547ee063b1eb7b94d33f8b495320fe9ed9f023e2b051ea591878 0x4e1ef247a05c2a4de6ddd166e40020e0db89d367dcca91a214a9619070ea361a 0x377956a5e1aa1e6941a63e6002203b0bf9c3f87cb9b39846453803a5ebf105a8 chain_logs contract_getters",
     "settlement": {
       "block_number": 25822503,
       "block_time_utc": "2025-05-04T10:20:15Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.6%)",
+        "display": "Body: Grey (12.5%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -100,17 +100,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (31.4%)",
+        "display": "Ears: Earbuds (31.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BaseballCap (10.5%)",
+        "display": "Head: BaseballCap (10.4%)",
         "trait_type": "Head",
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.5%)",
+        "display": "Eyes: VRGoggles (10.4%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

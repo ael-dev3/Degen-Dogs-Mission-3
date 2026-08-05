@@ -56,13 +56,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#529/669",
+      "display": "#529/670",
       "rank": 529,
       "scope": "base_existing",
-      "total": 669
+      "total": 670
     },
     "schema_version": 1,
-    "search_text": "dog 766 dog #766 766 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.45 $19.45 2026-07-08t04:45:43z 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 #529/669 generated auction feed 0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc 0x4d8caff2c5dc5a0e1cd59dd3da33d0cbc838135e649d8034c48b9b8e4fbf42a2 0xc44206baa7b5c760541c45baa0590b5c8093b1c93705b42a799e77bf691f7f56 0x394bbfcdf45ca4e3ce2aed9cd0014f54422d0f1c0e7e9448cb7c318909541148 0x0af956e2225256a0c2bf7441befffe121b787da1dfe5036e46a638c158f268f3 background: none (91.5%) background none body: grey (12.6%) body grey neck: none (41.1%) neck none mouth: none (68.5%) mouth none ears: none (26.5%) ears none head: redmohawk (7.5%) head redmohawk eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 766 dog #766 766 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.45 $19.45 2026-07-08t04:45:43z 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 #529/670 generated auction feed 0xf519496047f2dcbc6c357e09dbfcb4ec809eb0520469812a06dcb781ffb7cbfc 0x4d8caff2c5dc5a0e1cd59dd3da33d0cbc838135e649d8034c48b9b8e4fbf42a2 0xc44206baa7b5c760541c45baa0590b5c8093b1c93705b42a799e77bf691f7f56 0x394bbfcdf45ca4e3ce2aed9cd0014f54422d0f1c0e7e9448cb7c318909541148 0x0af956e2225256a0c2bf7441befffe121b787da1dfe5036e46a638c158f268f3 background: none (91.5%) background none body: grey (12.5%) body grey neck: none (41.2%) neck none mouth: none (68.5%) mouth none ears: none (26.4%) ears none head: redmohawk (7.5%) head redmohawk eyes: vrgoggles (10.4%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48348298,
       "block_time_utc": "2026-07-08T04:45:43Z",
@@ -89,12 +89,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.6%)",
+        "display": "Body: Grey (12.5%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (26.5%)",
+        "display": "Ears: None (26.4%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -114,7 +114,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.5%)",
+        "display": "Eyes: VRGoggles (10.4%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

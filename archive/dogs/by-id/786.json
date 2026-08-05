@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#149/669",
-      "rank": 149,
+      "display": "#148/670",
+      "rank": 148,
       "scope": "base_existing",
-      "total": 669
+      "total": 670
     },
     "schema_version": 1,
-    "search_text": "dog 786 dog #786 786 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 18.91 $18.91 2026-07-29t04:57:11z 0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c 0xd717fe3449c4fd9aa9d14accc23cf031ffb4fa3bc0a13f2222c177949489832b #149/669 generated auction feed 0x101b02cb6e967307bc80d0a63d33e70bf1d591e843384fbf9df8dc81ac1a573d 0xe8891fc4d11bdbbba546ac954e67de8630fbd5d45c33238a0ab7bd5645022094 0x650e758f7a3538474200a87fc60190f463ae2cd3fb5f378ef9a22f3198c394d1 background: none (91.5%) background none body: sugarskull (6.6%) body sugarskull neck: redcollar (29.6%) neck redcollar mouth: pizza (11.1%) mouth pizza ears: loopearring (27.5%) ears loopearring head: beanie (5.4%) head beanie eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 786 dog #786 786 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 18.91 $18.91 2026-07-29t04:57:11z 0x5c4ff2815cba9be492056d6442bbcd0a90a33db5b2ad4894de39e9be80dd384c 0xd717fe3449c4fd9aa9d14accc23cf031ffb4fa3bc0a13f2222c177949489832b #148/670 generated auction feed 0x101b02cb6e967307bc80d0a63d33e70bf1d591e843384fbf9df8dc81ac1a573d 0xe8891fc4d11bdbbba546ac954e67de8630fbd5d45c33238a0ab7bd5645022094 0x650e758f7a3538474200a87fc60190f463ae2cd3fb5f378ef9a22f3198c394d1 background: none (91.5%) background none body: sugarskull (6.6%) body sugarskull neck: redcollar (29.6%) neck redcollar mouth: pizza (11.0%) mouth pizza ears: loopearring (27.5%) ears loopearring head: beanie (5.4%) head beanie eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49255842,
       "block_time_utc": "2026-07-29T04:57:11Z",
@@ -98,7 +98,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (11.1%)",
+        "display": "Mouth: Pizza (11.0%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
