@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49568274"
+    "value": "49570133"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-05 10:31:35"
+    "value": "2026-08-05 11:33:33"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xdba375f818fa9b7c9141f1f77d4fd806dce3686a4878aebf72ab0cee04a17727"
+    "value": "0x127a2f444efa31d8d962034c2cde5b42cd7831f14e6d2e8c21b0471cc50c6b94"
   },
   {
     "metric": "snapshot_confirmations",
@@ -153,7 +153,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1870.925"
+    "value": "1868.875"
   },
   {
     "metric": "eth_usd_source",
@@ -265,15 +265,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "214.46"
+    "value": "214.2"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4663"
+    "value": "0.4668"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "170.2"
+    "value": "170.4"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -309,7 +309,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "16.84"
+    "value": "16.82"
   },
   {
     "metric": "current_bidder",
@@ -449,7 +449,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "26.56"
+    "value": "26.52"
   },
   {
     "metric": "season6_sup_enabled",
@@ -477,7 +477,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "175719.790949"
+    "value": "175838.645513"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
@@ -625,11 +625,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49568274"
+    "value": "49570133"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xdba375f818fa9b7c9141f1f77d4fd806dce3686a4878aebf72ab0cee04a17727"
+    "value": "0x127a2f444efa31d8d962034c2cde5b42cd7831f14e6d2e8c21b0471cc50c6b94"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
