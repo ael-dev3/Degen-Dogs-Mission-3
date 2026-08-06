@@ -55,13 +55,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#161/670",
-      "rank": 161,
+      "display": "#160/671",
+      "rank": 160,
       "scope": "base_existing",
-      "total": 670
+      "total": 671
     },
     "schema_version": 1,
-    "search_text": "dog 303 dog #303 303 mission 2 mission 2 degen chain settled 0xd2db6ab0dc4743a77719b38d9f7196aa32fa519f 0xd2db…519f 6968.999999999999737856 degen 0x87d48c4a6b0b7d52059f0bab9a1904355f6a847e1f5fb46b54c344951922cc70 0x3ed49dd04d1e12fba46f5a68f871375f78dc1c311f06daab133cea283122d1f1 #161/670 background: none; body: brown; neck: redcollar; mouth: none; ears: goldearring; head: hoodie; eyes: eyepatch 0xb7e63ef4465e46b3cf35d3c84978fc1360751ddfa3a49d88b3269db0ae91cf64 0xea07401709fdf501a2da8104b18321fd99abbd9e6abd46c937d9ba0e5890d37a 0xa99ce0de6517537e984fbfa82a6aa64b48d3fc05f49ab94e05c8989bd5c7b400 0x6b1444142c50d17bccd06a63bed2647527d74fbba5ef2e8cb0213ffc3857a844 chain_logs contract_getters",
+    "search_text": "dog 303 dog #303 303 mission 2 mission 2 degen chain settled 0xd2db6ab0dc4743a77719b38d9f7196aa32fa519f 0xd2db…519f 6968.999999999999737856 degen 0x87d48c4a6b0b7d52059f0bab9a1904355f6a847e1f5fb46b54c344951922cc70 0x3ed49dd04d1e12fba46f5a68f871375f78dc1c311f06daab133cea283122d1f1 #160/671 background: none; body: brown; neck: redcollar; mouth: none; ears: goldearring; head: hoodie; eyes: eyepatch 0xb7e63ef4465e46b3cf35d3c84978fc1360751ddfa3a49d88b3269db0ae91cf64 0xea07401709fdf501a2da8104b18321fd99abbd9e6abd46c937d9ba0e5890d37a 0xa99ce0de6517537e984fbfa82a6aa64b48d3fc05f49ab94e05c8989bd5c7b400 0x6b1444142c50d17bccd06a63bed2647527d74fbba5ef2e8cb0213ffc3857a844 chain_logs contract_getters",
     "settlement": {
       "block_number": 25540165,
       "block_time_utc": "2025-03-03T23:33:53Z",
@@ -91,12 +91,12 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.6%)",
+        "display": "Neck: RedCollar (29.5%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -111,7 +111,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: EyePatch (7.8%)",
+        "display": "Eyes: EyePatch (7.7%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

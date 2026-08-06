@@ -56,13 +56,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#532/670",
-      "rank": 532,
+      "display": "#530/671",
+      "rank": 530,
       "scope": "base_existing",
-      "total": 670
+      "total": 671
     },
     "schema_version": 1,
-    "search_text": "dog 770 dog #770 770 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.011 eth 11000000000000000 19.66 $19.66 2026-07-12t06:05:59z 0x45aba473ff2f7f54ccc27368a2af4f04df5983cad4c77caceb9caa10fe37ce73 0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c #532/670 generated auction feed 0xfc84a708ae6ff545cfe35b23da10d3b1c7a1c865a0285c069ac051a5664db57c 0x4618173bb55fe6c397c8e3d3676bc9551e03c190b300d26ffded024a00d428fc 0xc0aafbce7f664dbb4781383c6f25bd4530a4544982b0b74f951b80031f0e3c9b 0x59653cff5cdffcc42bbc402927bd2df1272d5d43124ce4d1f8f86d983d3ebc16 0xe2e1d683c3667a6f6a143a425c231956a41ff769d99e0eedce9635471c76d768 background: none (91.5%) background none body: brown (11.0%) body brown neck: redcollar (29.6%) neck redcollar mouth: none (68.5%) mouth none ears: none (26.4%) ears none head: redmohawk (7.5%) head redmohawk eyes: sunglasses (13.6%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 770 dog #770 770 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.011 eth 11000000000000000 19.66 $19.66 2026-07-12t06:05:59z 0x45aba473ff2f7f54ccc27368a2af4f04df5983cad4c77caceb9caa10fe37ce73 0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c #530/671 generated auction feed 0xfc84a708ae6ff545cfe35b23da10d3b1c7a1c865a0285c069ac051a5664db57c 0x4618173bb55fe6c397c8e3d3676bc9551e03c190b300d26ffded024a00d428fc 0xc0aafbce7f664dbb4781383c6f25bd4530a4544982b0b74f951b80031f0e3c9b 0x59653cff5cdffcc42bbc402927bd2df1272d5d43124ce4d1f8f86d983d3ebc16 0xe2e1d683c3667a6f6a143a425c231956a41ff769d99e0eedce9635471c76d768 background: none (91.5%) background none body: brown (11.0%) body brown neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: none (26.4%) ears none head: redmohawk (7.5%) head redmohawk eyes: sunglasses (13.6%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48523506,
       "block_time_utc": "2026-07-12T06:05:59Z",
@@ -94,12 +94,12 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.6%)",
+        "display": "Neck: RedCollar (29.5%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },

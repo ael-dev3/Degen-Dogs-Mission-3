@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#359/670",
-      "rank": 359,
+      "display": "#368/671",
+      "rank": 368,
       "scope": "base_existing",
-      "total": 670
+      "total": 671
     },
     "schema_version": 1,
-    "search_text": "dog 285 dog #285 285 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 #359/670 background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: none; head: blackcap; eyes: none 0xcc296d9807ea70e1428a589974b400bd8304fea84cdf423e25f12dc7c6af21e2 chain_logs contract_getters",
+    "search_text": "dog 285 dog #285 285 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3333 degen 0x9ef08c6fef55b1cc39eea42ad0e65f70367654fb577be36221fd6a4a0da46e51 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 #368/671 background: none; body: redbrown; neck: goldnecklace; mouth: tongue; ears: none; head: blackcap; eyes: none 0xcc296d9807ea70e1428a589974b400bd8304fea84cdf423e25f12dc7c6af21e2 chain_logs contract_getters",
     "settlement": {
       "block_number": 25458938,
       "block_time_utc": "2025-02-15T06:15:54Z",
@@ -83,17 +83,17 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.2%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.0%)",
+        "display": "Neck: GoldNecklace (18.9%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.7%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -103,12 +103,12 @@
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (7.3%)",
+        "display": "Head: BlackCap (7.5%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

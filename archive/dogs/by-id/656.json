@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#185/670",
-      "rank": 185,
+      "display": "#187/671",
+      "rank": 187,
       "scope": "base_existing",
-      "total": 670
+      "total": 671
     },
     "schema_version": 1,
-    "search_text": "dog 656 dog #656 656 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 25.86 $25.86 2026-03-17t14:30:27z 0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 #185/670 generated auction feed 0x2894b851c3ff64b0e02b181fca55bc8ea7f428c387a1b1df7689fb4b37aba46e 0x80ecda11e75d6c09472a370daecb44191e2f90b5f28145949dfe2c5cdf8c0ab0 0x24b6d81b319f4bd9119e2b9518c84a90e74780c96a2c3fe8e12f177196a9ee6c background: halo (8.5%) background halo body: white (11.2%) body white neck: none (41.2%) neck none mouth: pizza (11.0%) mouth pizza ears: earbuds (31.5%) ears earbuds head: blackcap (7.3%) head blackcap eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 656 dog #656 656 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 25.86 $25.86 2026-03-17t14:30:27z 0x5164717a195822754cef96202156ad988a32c58c640fcb1ccb1d3c6e955f8dce 0x0371db7306759898199507380627f0111968e18b95fb801d478acc0496580dd0 #187/671 generated auction feed 0x2894b851c3ff64b0e02b181fca55bc8ea7f428c387a1b1df7689fb4b37aba46e 0x80ecda11e75d6c09472a370daecb44191e2f90b5f28145949dfe2c5cdf8c0ab0 0x24b6d81b319f4bd9119e2b9518c84a90e74780c96a2c3fe8e12f177196a9ee6c background: halo (8.5%) background halo body: white (11.2%) body white neck: none (41.1%) neck none mouth: pizza (11.0%) mouth pizza ears: earbuds (31.6%) ears earbuds head: blackcap (7.5%) head blackcap eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 43484240,
       "block_time_utc": "2026-03-17T14:30:27Z",
@@ -92,7 +92,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,17 +102,17 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (31.5%)",
+        "display": "Ears: Earbuds (31.6%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BlackCap (7.3%)",
+        "display": "Head: BlackCap (7.5%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }
