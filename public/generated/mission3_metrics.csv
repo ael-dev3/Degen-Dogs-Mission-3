@@ -1,12 +1,12 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,49625238
-latest_block_time_utc,2026-08-06 18:10:23
+latest_block,49625544
+latest_block_time_utc,2026-08-06 18:20:35
 onchain_verification_status,current_snapshot_cross_provider_verified
 onchain_verification_scope,"snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs,event_block_timestamps,dog_token_uri_bindings,woof_token_state,sup_token_state"
 onchain_chain_id,8453
-snapshot_block_hash,0xf3d929fb5ad29071566d91420432be42e6b6bc0c9e19a41af37a4549fd59f477
+snapshot_block_hash,0xe70db66ba9bcb6948e63f3a6ab86dc3049bcf74f16eb3836113e6614a2193c7f
 snapshot_confirmations,1
 rpc_quorum_size,2
 rpc_quorum_agreement,3/3
@@ -41,8 +41,8 @@ dog_rarity_tie_policy,competition_rank_equal_scores_share_rank
 dog_rarity_trait_schema,Background|Body|Neck|Mouth|Ears|Head|Eyes
 dog_rarity_attested_block,49619872
 dog_rarity_attested_block_hash,0xac336fc58add6be7c0b499a450f7e84ea20745c95f6078851d6c7da557797521
-dog_rarity_continuity_through_block,49625238
-dog_rarity_continuity_through_block_hash,0xf3d929fb5ad29071566d91420432be42e6b6bc0c9e19a41af37a4549fd59f477
+dog_rarity_continuity_through_block,49625544
+dog_rarity_continuity_through_block_hash,0xe70db66ba9bcb6948e63f3a6ab86dc3049bcf74f16eb3836113e6614a2193c7f
 dog_rarity_continuity_verification_status,hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation
 woof_token,0x3e5c4FA0cAA794516eD0DF77f31daA534918d492
 woof_symbol,WOOF
@@ -58,7 +58,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.00604
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,1908.565
+eth_usd_price,1910.635
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -86,9 +86,9 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.009064
 reward_total_flow_usd_per_day,10.51
 reward_total_per_dog_usd_per_day,0.079052
-reward_current_bid_payback_days,193.16
-reward_current_bid_daily_roi_pct,0.5177
-reward_current_bid_apr_pct,188.96
+reward_current_bid_payback_days,193.42
+reward_current_bid_daily_roi_pct,0.517
+reward_current_bid_apr_pct,188.71
 reward_current_bid_apr_display,≈189% APR
 woof_holders,unavailable
 top_woof_holder,
@@ -97,7 +97,7 @@ farcaster_profiles_resolved,62
 current_auction_token_id,795
 current_auction_status,live
 current_bid_eth,0.008
-current_bid_usd,15.27
+current_bid_usd,15.29
 current_bidder,@0xael.eth
 current_bidder_wallet,0x76d0e7a13248945ee9f808b4a472262b28778942
 current_auction_end_utc,2026-08-07 14:47:19
@@ -139,7 +139,7 @@ season6_sup_estimate_status,wallet_near_cap
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,179361.765858
+season6_sup_raw_allocated_to_date,179381.329869
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
