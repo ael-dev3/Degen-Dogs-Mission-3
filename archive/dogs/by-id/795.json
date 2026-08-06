@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-08-06T15:15:43Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-06T14:47:37Z",
+    "activity_time_utc": "2026-08-06T21:54:45Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-08-06",
-      "native": "0.008",
+      "native": "0.0088",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "8000000000000000",
-      "usd_estimate": "15.24316000",
+      "raw": "8800000000000000",
+      "usd_estimate": "16.72602800",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$15.24",
+      "usd_estimate_display": "$16.73",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-06",
-      "usd_estimate_price_usd": "1905.395",
+      "usd_estimate_price_usd": "1900.685",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,12 +29,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-08-06T14:47:37Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-08-06T21:54:45Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
-      "0xbc3d1354ab8f90e0f8092c6339dde15712dc99e7987505a483f6f819a9dbd8d0"
+      "0xbc3d1354ab8f90e0f8092c6339dde15712dc99e7987505a483f6f819a9dbd8d0",
+      "0x93d00d000b5fd701d89330ba4f778dcb3c2876afdac4cc95e7f408a812f8806e"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -45,7 +46,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0x0d6eae9072e7911d2af60814036bde5f71d30177c8802212259ad1becff15584",
       "dog_page": "https://degendogs.club/#dog795",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/795",
       "repo_archive": "archive/dogs/by-id/795.json",
       "settlement_tx": null
@@ -58,7 +59,7 @@
       "total": 671
     },
     "schema_version": 1,
-    "search_text": "dog 795 dog #795 795 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.008 eth 15.24 $15.24 2026-08-06 14:47:37 #208/671 Background: None; Body: RedBrown; Neck: StuddedCollar; Mouth: Tongue; Ears: Earbuds; Head: BlackCap; Eyes: VRGoggles @0xael.eth 0x0d6eae9072e7911d2af60814036bde5f71d30177c8802212259ad1becff15584 0xbc3d1354ab8f90e0f8092c6339dde15712dc99e7987505a483f6f819a9dbd8d0",
+    "search_text": "dog 795 dog #795 795 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill 0.0088 eth 16.73 $16.73 2026-08-06 21:54:45 #208/671 Background: None; Body: RedBrown; Neck: StuddedCollar; Mouth: Tongue; Ears: Earbuds; Head: BlackCap; Eyes: VRGoggles @cryptomill 0x0d6eae9072e7911d2af60814036bde5f71d30177c8802212259ad1becff15584 0xbc3d1354ab8f90e0f8092c6339dde15712dc99e7987505a483f6f819a9dbd8d0 0x93d00d000b5fd701d89330ba4f778dcb3c2876afdac4cc95e7f408a812f8806e",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@cryptomill",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "cryptomill",
+      "profile_url": "https://farcaster.xyz/cryptomill",
+      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
     }
   },
   "schema_version": 1

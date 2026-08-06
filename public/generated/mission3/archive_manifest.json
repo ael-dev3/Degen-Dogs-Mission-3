@@ -1,13 +1,13 @@
 {
   "counts": {
     "auctions_created": "206",
-    "bids": "1578",
+    "bids": "1579",
     "current_snapshots": "1",
     "extensions": "342",
-    "latest_indexed_block": "49631681",
-    "latest_indexed_block_time_utc": "2026-08-06T21:45:09Z",
-    "latest_run_at_utc": "2026-08-06T21:45:12Z",
-    "raw_logs": "2331",
+    "latest_indexed_block": "49634889",
+    "latest_indexed_block_time_utc": "2026-08-06T23:32:05Z",
+    "latest_run_at_utc": "2026-08-06T23:32:10Z",
+    "raw_logs": "2332",
     "settlements": "205",
     "status": "success",
     "unresolved_gaps": "0"
@@ -17,27 +17,27 @@
       "name": "mission3_dog_search_index",
       "path": "generated/mission3/mission3_dog_search_index.json",
       "rows": 206,
-      "sha256": "ad56f046ff65e994ac59988dcc529a1454ca1bef6761121d2facc337c9486f24",
+      "sha256": "52bd77c9efc1dd7fdeef5877ceb50c0aff362951f25fa9938839ac82381e1696",
       "type": "json"
     },
     {
       "name": "mission3_archive_metrics",
       "path": "generated/mission3/mission3_archive_metrics.json",
       "rows": 12,
-      "sha256": "b67b1638fcf858df2f12cc9a4dbd0bf2ee354426099dcf0e66678b197d5cbee3",
+      "sha256": "cdbd006a5f470a7471f2291f85e99c7a8a10ec011fa33c64bc79fee856c7854f",
       "type": "json"
     }
   ],
-  "generated_at_utc": "2026-08-06T21:45:13Z",
+  "generated_at_utc": "2026-08-06T23:32:10Z",
   "index_state": {
     "auction_house": "0x8f34fe11ce28893dea6a802c8d0b3d0ffc7f5cea",
     "chain_id": 8453,
     "error": null,
     "from_block": 40500000,
     "id": "mission3",
-    "latest_indexed_block": 49631681,
-    "latest_indexed_block_time_utc": "2026-08-06T21:45:09Z",
-    "latest_run_at_utc": "2026-08-06T21:45:12Z",
+    "latest_indexed_block": 49634889,
+    "latest_indexed_block_time_utc": "2026-08-06T23:32:05Z",
+    "latest_run_at_utc": "2026-08-06T23:32:10Z",
     "status": "success"
   },
   "mission": 3,
