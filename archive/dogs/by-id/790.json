@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#220/671",
-      "rank": 220,
+      "display": "#225/672",
+      "rank": 225,
       "scope": "base_existing",
-      "total": 671
+      "total": 672
     },
     "schema_version": 1,
-    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base settled 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d @monicacline monicacline 0.01 eth 10000000000000000 18.43 $18.43 2026-08-02t13:16:57z 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f #220/671 generated auction feed 0x3565e21ecc8fbc1baf37ff0deab1bb4e966558acc3a5e3c8755601f93c1acbf6 background: none (91.5%) background none body: sugarskull (6.6%) body sugarskull neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: none (26.4%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: eyepatch (7.7%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 790 dog #790 790 mission 3 mission 3 base settled 0x021f6491c31ee6ecd0a840e8e5c562f5c555261d @monicacline monicacline 0.01 eth 10000000000000000 18.43 $18.43 2026-08-02t13:16:57z 0x20e67a176bb9c09017b9ee5084aa59de53fe7341e6c613d055bce7a1357dbdca 0x1d74738c07b1c9873d9123d5bf6e9715c898cae780d1766e6a7319065dad158f #225/672 generated auction feed 0x3565e21ecc8fbc1baf37ff0deab1bb4e966558acc3a5e3c8755601f93c1acbf6 background: none (91.5%) background none body: sugarskull (6.5%) body sugarskull neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: none (26.3%) ears none head: whitemohawk (6.7%) head whitemohawk eyes: eyepatch (7.9%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49443635,
       "block_time_utc": "2026-08-02T13:16:57Z",
@@ -86,7 +86,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.6%)",
+        "display": "Body: SugarSkull (6.5%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -96,12 +96,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.4%)",
+        "display": "Ears: None (26.3%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -111,7 +111,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: EyePatch (7.7%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

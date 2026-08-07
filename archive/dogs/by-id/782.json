@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#284/671",
-      "rank": 284,
+      "display": "#285/672",
+      "rank": 285,
       "scope": "base_existing",
-      "total": 671
+      "total": 672
     },
     "schema_version": 1,
-    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.74 $16.74 2026-07-24t22:52:45z 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a 0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859 #284/671 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (91.5%) background none body: blue (8.8%) body blue neck: goldnecklace (18.9%) neck goldnecklace mouth: pizza (11.0%) mouth pizza ears: earbuds (31.6%) ears earbuds head: baseballcap (10.4%) head baseballcap eyes: masksnorkel (9.8%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 782 dog #782 782 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.009 eth 9000000000000000 16.74 $16.74 2026-07-24t22:52:45z 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a 0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859 #285/672 generated auction feed 0x3d8a21c44f2410879773c935f8926b7293b82e47e1b95d317047ff3d2c7d1479 background: none (91.5%) background none body: blue (8.8%) body blue neck: goldnecklace (19.0%) neck goldnecklace mouth: pizza (11.0%) mouth pizza ears: earbuds (31.7%) ears earbuds head: baseballcap (10.4%) head baseballcap eyes: masksnorkel (9.8%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49072109,
       "block_time_utc": "2026-07-24T22:52:45Z",
@@ -90,7 +90,7 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: GoldNecklace (18.9%)",
+        "display": "Neck: GoldNecklace (19.0%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -100,7 +100,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (31.6%)",
+        "display": "Ears: Earbuds (31.7%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
