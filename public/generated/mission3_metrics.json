@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49643685"
+    "value": "49643967"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-07 04:25:17"
+    "value": "2026-08-07 04:34:41"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xb5027d8a2951a80aa97b7921db511bd270e449feb0124cfd867b2e6b8beb28b7"
+    "value": "0x3214caa09eb083bf0f6478985fdb39c8c615a3d8144d7699c9cdccf76d8e6e1c"
   },
   {
     "metric": "snapshot_confirmations",
@@ -41,11 +41,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "3/3"
+    "value": "2/2"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "publicnode.com,rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb"
+    "value": "publicnode.com,rpc-host-a0d298ecc6bb"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -169,11 +169,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49643685"
+    "value": "49643967"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xb5027d8a2951a80aa97b7921db511bd270e449feb0124cfd867b2e6b8beb28b7"
+    "value": "0x3214caa09eb083bf0f6478985fdb39c8c615a3d8144d7699c9cdccf76d8e6e1c"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1897.885"
+    "value": "1898.23"
   },
   {
     "metric": "eth_usd_source",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "24.82"
+    "value": "24.81"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "180541.168834"
+    "value": "180559.198413"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
