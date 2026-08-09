@@ -193,6 +193,8 @@ def test_refresh_outcome_rows_cover_no_diff_failure_and_live_timeout() -> None:
             {
                 "DEGEN_DOGS_LIVE_VERIFY_STARTED_AT_UTC": iso(18),
                 "DEGEN_DOGS_LIVE_VERIFY_RESULT": "timeout",
+                "DEGEN_DOGS_RAW_COMMIT_VERIFIED": "true",
+                "DEGEN_DOGS_LIVE_VERIFY_ERROR": "github_pages mismatch fields=latest_generated_block",
                 "DEGEN_DOGS_PUSH_TO_LIVE_SECONDS": "300",
                 "DEGEN_DOGS_BLOCK_TO_LIVE_SECONDS": "420",
             }
@@ -200,6 +202,8 @@ def test_refresh_outcome_rows_cover_no_diff_failure_and_live_timeout() -> None:
         timeout = telemetry.build_refresh_row(timeout_env, result="success_pushed_live_timeout", root=root)
         assert timeout["result"] == "success_pushed_live_timeout"
         assert timeout["live_verify_result"] == "timeout"
+        assert timeout["raw_commit_verified"] is True
+        assert timeout["live_verify_error"] == "github_pages mismatch fields=latest_generated_block"
         assert timeout["push_to_live_seconds"] == 300
         telemetry.record_refresh(timeout_env, result="success_pushed_live_timeout", root=root)
         status = telemetry.write_refresh_status(env, root=root)
@@ -347,9 +351,19 @@ def test_live_verify_network_and_env_file_boundaries() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         env_path = root / "verify.env"
-        telemetry.write_env_file(env_path, {"live_verify_result": "verified'$(touch /tmp/nope)"})
+        telemetry.write_env_file(
+            env_path,
+            {
+                "live_verify_result": "verified'$(touch /tmp/nope)",
+                "raw_commit_verified": True,
+                "error": "github_pages mismatch",
+            },
+        )
         assert env_path.stat().st_mode & 0o777 == 0o600
-        assert "'\\''" in env_path.read_text(encoding="utf-8")
+        env_text = env_path.read_text(encoding="utf-8")
+        assert "'\\''" in env_text
+        assert "DEGEN_DOGS_RAW_COMMIT_VERIFIED='True'" in env_text
+        assert "DEGEN_DOGS_LIVE_VERIFY_ERROR='github_pages mismatch'" in env_text
 
         outside = root / "outside"
         outside.write_text("preserve", encoding="utf-8")

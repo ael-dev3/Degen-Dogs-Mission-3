@@ -14,6 +14,7 @@ import os
 import plistlib
 import re
 import shutil
+import signal
 import stat
 import subprocess
 import sys
@@ -53,7 +54,9 @@ CACHE_DIR = Path(
     os.environ.get("DEGEN_DOGS_LOCK_DIR", str(HOME / "Library" / "Caches" / "degen-dogs-mission3"))
 ).expanduser()
 REFRESH_LOCK_PATH = Path(
-    os.environ.get("MISSION3_REFRESH_LOCK_PATH", str(CACHE_DIR / "refresh.lock"))
+    os.environ.get("DEGEN_DOGS_REFRESH_LOCK_PATH")
+    or os.environ.get("MISSION3_REFRESH_LOCK_PATH")
+    or str(CACHE_DIR / "refresh.lock")
 ).expanduser()
 WATCHER_LOCK_PATH = Path(
     os.environ.get("MISSION3_WATCHER_LOCK_PATH", str(REPO_DIR / ".local" / "mission3_onchain_tracker.lock"))
@@ -496,7 +499,21 @@ def compact_log_in_place(path: Path, *, max_bytes: int, retain_bytes: int) -> tu
         before = opened.st_size
         if before <= max_bytes:
             return False, before, before
-        header = f"[{iso_now()}] log compacted in place; prior_bytes={before}\n".encode("utf-8")[:max_bytes]
+        if path.suffix == ".jsonl":
+            header = (
+                json.dumps(
+                    {
+                        "kind": "log_compaction",
+                        "compacted_at_utc": iso_now(),
+                        "prior_bytes": before,
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                + "\n"
+            ).encode("utf-8")[:max_bytes]
+        else:
+            header = f"[{iso_now()}] log compacted in place; prior_bytes={before}\n".encode("utf-8")[:max_bytes]
         budget = max(0, min(retain_bytes, max_bytes - len(header)))
         start = max(0, before - budget)
         handle.seek(start)
@@ -504,6 +521,9 @@ def compact_log_in_place(path: Path, *, max_bytes: int, retain_bytes: int) -> tu
         if start > 0 and tail:
             newline = tail.find(b"\n")
             tail = tail[newline + 1 :] if newline >= 0 else b""
+        if tail and not tail.endswith(b"\n"):
+            newline = tail.rfind(b"\n")
+            tail = tail[: newline + 1] if newline >= 0 else b""
         payload = header + tail
         handle.seek(0)
         # Truncate before the bounded write: after mutation begins, even a crash
@@ -645,35 +665,107 @@ def sanitize(text: str, limit: int = 1200) -> str:
     return cleaned.strip()
 
 
-def run(cmd: list[str], *, cwd: Path | None = REPO_DIR, timeout: int = 60, check: bool = False) -> Result:
-    proc = subprocess.run(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        env=env(),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=timeout,
-        check=False,
-    )
-    result = Result(proc.returncode, sanitize(proc.stdout), sanitize(proc.stderr))
-    if check and result.code != 0:
-        raise RuntimeError(f"command failed ({result.code}): {' '.join(cmd)}\n{result.out}\n{result.err}")
-    return result
+def terminate_process_group_bounded(
+    process: subprocess.Popen[str],
+    *,
+    stdout: str | bytes | None = None,
+    stderr: str | bytes | None = None,
+    grace_seconds: float = 3,
+) -> tuple[str, str]:
+    """Stop an isolated command tree without waiting on escaped pipe holders."""
+
+    def as_text(value: str | bytes | None) -> str:
+        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
+
+    process_group = process.pid
+
+    def group_exists() -> bool:
+        try:
+            os.killpg(process_group, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        return True
+
+    try:
+        os.killpg(process_group, signal.SIGTERM)
+    except OSError:
+        try:
+            process.terminate()
+        except OSError:
+            pass
+
+    deadline = time.monotonic() + grace_seconds
+    while group_exists() and time.monotonic() < deadline:
+        remaining = max(0.001, min(0.05, deadline - time.monotonic()))
+        try:
+            process.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            continue
+        # The direct child may exit while a same-group grandchild survives.
+        # Keep the bounded grace period before escalating the original group.
+        time.sleep(remaining)
+
+    if group_exists():
+        try:
+            os.killpg(process_group, signal.SIGKILL)
+        except OSError:
+            try:
+                process.kill()
+            except OSError:
+                pass
+    try:
+        process.wait(timeout=grace_seconds)
+    except subprocess.TimeoutExpired:
+        try:
+            process.kill()
+            process.wait(timeout=grace_seconds)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    for stream in (process.stdout, process.stderr):
+        if stream is not None:
+            stream.close()
+    return as_text(stdout), as_text(stderr)
 
 
 def run_raw(cmd: list[str], *, cwd: Path | None = REPO_DIR, timeout: int = 60) -> Result:
-    proc = subprocess.run(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        env=env(),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=timeout,
-        check=False,
-    )
-    return Result(proc.returncode, proc.stdout, proc.stderr)
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=str(cwd) if cwd else None,
+            env=env(),
+            text=True,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            start_new_session=True,
+        )
+    except OSError as exc:
+        return Result(127, "", f"command could not start ({type(exc).__name__})")
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        # Git, gh, launchctl, and installers may spawn helpers. Terminate their
+        # whole isolated process group before another repair cycle touches the
+        # same locks or worktree.
+        stdout, stderr = terminate_process_group_bounded(
+            proc,
+            stdout=exc.output,
+            stderr=exc.stderr,
+        )
+        timeout_message = f"command timed out after {timeout}s"
+        stderr = f"{stderr.rstrip()}\n{timeout_message}" if stderr else timeout_message
+        return Result(124, stdout or "", stderr)
+    return Result(proc.returncode, stdout or "", stderr or "")
+
+
+def run(cmd: list[str], *, cwd: Path | None = REPO_DIR, timeout: int = 60, check: bool = False) -> Result:
+    raw = run_raw(cmd, cwd=cwd, timeout=timeout)
+    result = Result(raw.code, sanitize(raw.out), sanitize(raw.err))
+    if check and result.code != 0:
+        raise RuntimeError(f"command failed ({result.code}): {' '.join(cmd)}\n{result.out}\n{result.err}")
+    return result
 
 
 def launch_domain() -> str:
@@ -1466,19 +1558,10 @@ PRICE_TIMESTAMP_ONLY_PATHS = {
 
 
 def git_show_head(rel_path: str) -> str | None:
-    proc = subprocess.run(
-        ["git", "show", f"HEAD:{rel_path}"],
-        cwd=str(REPO_DIR),
-        env=env(),
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=30,
-        check=False,
-    )
-    if proc.returncode != 0:
+    result = run_raw(["git", "show", f"HEAD:{rel_path}"], timeout=30)
+    if result.code != 0:
         return None
-    return proc.stdout
+    return result.out
 
 
 def csv_equal_excluding_volatile_timestamps(old_text: str, new_text: str) -> bool:
@@ -2031,7 +2114,7 @@ def main() -> int:
         completed_ts=watcher_checked_ts,
         now=now,
         grace_seconds=WATCHER_ACTIVE_GRACE_SECONDS,
-    ) or (watcher_lock_held and refresh_attempt_active)
+    ) or refresh_attempt_active
     watcher_issues = filter_watcher_issues_for_active_attempt(all_watcher_issues, watcher_attempt_active)
     suppressed_watcher_issues = [issue for issue in all_watcher_issues if issue not in watcher_issues]
     if suppressed_watcher_issues:

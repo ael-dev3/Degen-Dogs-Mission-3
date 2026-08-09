@@ -5,6 +5,8 @@ import importlib.util
 import json
 import os
 import sqlite3
+import subprocess
+import sys
 import tempfile
 import time
 from datetime import datetime, timedelta, timezone
@@ -2220,6 +2222,12 @@ def test_refresh_command_exact_allowlist_and_auto_push_guard(monkeypatch=None):
     assert config.force_after_seconds == 0
     assert config.refresh_lock_path and config.refresh_lock_path.name == "refresh.lock"
 
+    config = watcher.config_from_env({
+        "DEGEN_DOGS_REFRESH_LOCK_PATH": "/tmp/degen-refresh.lock",
+        "MISSION3_REFRESH_LOCK_PATH": "/tmp/mission-refresh.lock",
+    })
+    assert config.refresh_lock_path == Path("/tmp/degen-refresh.lock")
+
     env = {"MISSION3_WATCHER_AUTO_PUSH": "1"}
     config = watcher.config_from_env(env)
     assert config.auto_push is True
@@ -2236,6 +2244,16 @@ def test_refresh_command_exact_allowlist_and_auto_push_guard(monkeypatch=None):
         assert "clean_tree" in str(exc).lower()
     else:
         raise AssertionError("auto-push accepted a disabled clean-tree safety gate")
+
+    try:
+        watcher.config_from_env({
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_REFRESH_LOCK_PATH": "-",
+        })
+    except SystemExit as exc:
+        assert "cannot be disabled" in str(exc)
+    else:
+        raise AssertionError("auto-push accepted a disabled shared refresh lock")
 
     try:
         watcher.config_from_env({"MISSION3_REFRESH_COMMAND": "npm run refresh:publish"})
@@ -2523,6 +2541,39 @@ def test_refresh_lock_defers_overlapping_refresh_commands():
         assert git_status_calls == 0
 
 
+def test_run_once_defers_before_rpc_scan_while_publisher_lock_is_active():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        refresh_lock_path = tmp_path / "refresh.lock"
+        state_path = tmp_path / "state.json"
+        original_state = {
+            "last_seen_token_id": 727,
+            "pending_refresh": True,
+            "pending_refresh_reasons": ["auction_bid"],
+        }
+        state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
+        config = watcher.config_from_env({
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
+            "MISSION3_REFRESH_LOCK_PATH": str(refresh_lock_path),
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:publish",
+        })
+        held = watcher.acquire_refresh_lock(config)
+        assert held is not None
+        watcher.fetch_snapshot = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("RPC/log scan must be deferred while the publisher owns refresh.lock")
+        )
+        try:
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.release_run_lock(held)
+        assert json.loads(state_path.read_text(encoding="utf-8")) == original_state
+
+
 def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
     watcher = load_module()
     with tempfile.TemporaryDirectory() as tmp:
@@ -2577,9 +2628,14 @@ def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
             AssertionError("git status must not run while another publisher owns the refresh lock")
         )
         watcher.fetch_snapshot = lambda _config, _state: snapshot
+        original_probe = watcher.refresh_lock_is_active
+        # Simulate the narrow race where the publisher takes the lock after the
+        # early probe but before the watcher starts its refresh command.
+        watcher.refresh_lock_is_active = lambda _config: False
         try:
             assert watcher.run_once(config) == 0
         finally:
+            watcher.refresh_lock_is_active = original_probe
             watcher.git_status_tracked = original_git_status
             watcher.release_run_lock(held)
 
@@ -2589,6 +2645,198 @@ def test_run_once_records_lock_contention_as_healthy_deferred_refresh():
         assert saved["pending_bid_log_id"] == "101:0xnewbid:4"
         assert saved.get("consecutive_refresh_failures", 0) == 0
         assert saved["last_seen_bid_log_id"] == "100:0xoldbid:1"
+
+
+def test_watcher_log_catchup_starts_large_and_adaptively_shrinks_ranges():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": "https://one.example,https://two.example",
+        "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    assert config.log_chunk == 2000
+    observed_spans: list[int] = []
+    original_quorum_call = watcher.rpc_quorum_call
+
+    def bounded_log_quorum(method, params, **_kwargs):  # noqa: ANN001, ANN202
+        assert method == "eth_getLogs"
+        request_filter = params[0]
+        start = int(request_filter["fromBlock"], 16)
+        end = int(request_filter["toBlock"], 16)
+        span = end - start + 1
+        observed_spans.append(span)
+        if span > 250:
+            raise watcher.RpcLogRangeLimit("provider range limit")
+        return [], ["https://one.example", "https://two.example"]
+
+    watcher.rpc_quorum_call = bounded_log_quorum
+    try:
+        assert watcher.fetch_logs(config, 1, 1000) == []
+    finally:
+        watcher.rpc_quorum_call = original_quorum_call
+    assert observed_spans[:2] == [1000, 500]
+    assert observed_spans[2:] == [250, 250, 250, 250]
+
+
+def test_watcher_log_catchup_does_not_amplify_generic_quorum_failures():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": "https://one.example,https://two.example",
+        "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    calls = 0
+    original_quorum_call = watcher.rpc_quorum_call
+
+    def failed_quorum(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("transport/quorum unavailable")
+
+    watcher.rpc_quorum_call = failed_quorum
+    try:
+        try:
+            watcher.fetch_logs(config, 1, 1000)
+        except RuntimeError as exc:
+            assert "transport/quorum unavailable" in str(exc)
+        else:
+            raise AssertionError("generic quorum failure was incorrectly treated as a range limit")
+    finally:
+        watcher.rpc_quorum_call = original_quorum_call
+    assert calls == 1
+
+
+def test_log_quorum_shrinks_only_when_explicit_range_failures_make_quorum_impossible():
+    watcher = load_module()
+    urls = ["https://one.example", "https://two.example", "https://three.example"]
+    original_call = watcher.rpc_call_with_retry
+    original_deadline = watcher.RPC_QUORUM_DEADLINE_SECONDS
+
+    def two_range_one_stall(_method, _params, *, url, timeout):  # noqa: ANN001, ANN202, ARG001
+        if url != urls[-1]:
+            raise watcher.RpcLogRangeLimit("range")
+        time.sleep(0.5)
+        return [], url
+
+    watcher.RPC_QUORUM_DEADLINE_SECONDS = 0.05
+    watcher.rpc_call_with_retry = two_range_one_stall
+    try:
+        try:
+            watcher.rpc_quorum_call("eth_getLogs", [], urls=urls, required=2)
+        except watcher.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("impossible range-limited quorum was not classified for adaptive shrink")
+
+        watcher.RPC_SLOW_UNTIL.clear()
+
+        def two_range_one_generic(_method, _params, *, url, timeout):  # noqa: ANN001, ANN202, ARG001
+            if url != urls[-1]:
+                raise watcher.RpcLogRangeLimit("range")
+            raise RuntimeError("transport unavailable")
+
+        watcher.rpc_call_with_retry = two_range_one_generic
+        try:
+            watcher.rpc_quorum_call("eth_getLogs", [], urls=urls, required=2)
+        except watcher.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("two range failures plus a generic failure did not trigger safe adaptive shrink")
+
+        watcher.RPC_SLOW_UNTIL.clear()
+
+        def one_range_one_generic_one_success(_method, _params, *, url, timeout):  # noqa: ANN001, ANN202, ARG001
+            if url == urls[0]:
+                raise watcher.RpcLogRangeLimit("range")
+            if url == urls[1]:
+                raise RuntimeError("transport unavailable")
+            return [], url
+
+        watcher.rpc_call_with_retry = one_range_one_generic_one_success
+        try:
+            watcher.rpc_quorum_call("eth_getLogs", [], urls=urls, required=2)
+        except watcher.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("a good vote plus a range-limited provider did not trigger safe adaptive shrink")
+
+        watcher.RPC_SLOW_UNTIL.clear()
+
+        def one_range_two_stalls(_method, _params, *, url, timeout):  # noqa: ANN001, ANN202, ARG001
+            if url == urls[0]:
+                raise watcher.RpcLogRangeLimit("range")
+            time.sleep(0.5)
+            return [], url
+
+        watcher.rpc_call_with_retry = one_range_two_stalls
+        try:
+            watcher.rpc_quorum_call("eth_getLogs", [], urls=urls, required=2)
+        except watcher.RpcLogRangeLimit as exc:
+            raise AssertionError("one range failure with two possible providers was over-classified") from exc
+        except RuntimeError as exc:
+            assert "deadline exceeded" in str(exc)
+        else:
+            raise AssertionError("stalled generic quorum unexpectedly succeeded")
+    finally:
+        watcher.rpc_call_with_retry = original_call
+        watcher.RPC_QUORUM_DEADLINE_SECONDS = original_deadline
+
+
+def test_watcher_timeout_teardown_does_not_wait_for_escaped_pipe_holder():
+    watcher = load_module()
+    child = "import time; time.sleep(2)"
+    parent = (
+        "import subprocess,sys,time; "
+        f"subprocess.Popen([sys.executable, '-c', {child!r}], start_new_session=True); "
+        "time.sleep(5)"
+    )
+    process = subprocess.Popen(
+        [sys.executable, "-c", parent],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        start_new_session=True,
+    )
+    started = time.monotonic()
+    time.sleep(0.05)
+    stdout, stderr = watcher.terminate_process_group_bounded(process, grace_seconds=0.2)
+    assert stdout == ""
+    assert stderr == ""
+    assert time.monotonic() - started < 1.5
+
+
+def test_watcher_timeout_kills_same_group_grandchild_before_lock_release():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        ready = root / "ready"
+        survived = root / "survived"
+        child = (
+            "import pathlib,signal,time; "
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+            f"pathlib.Path({str(ready)!r}).write_text('ready'); "
+            "time.sleep(0.7); "
+            f"pathlib.Path({str(survived)!r}).write_text('survived')"
+        )
+        parent = (
+            "import subprocess,sys,time; "
+            f"subprocess.Popen([sys.executable, '-c', {child!r}]); "
+            "time.sleep(5)"
+        )
+        process = subprocess.Popen(
+            [sys.executable, "-c", parent],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            start_new_session=True,
+        )
+        deadline = time.monotonic() + 1
+        while not ready.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert ready.exists(), "same-group grandchild did not initialize"
+        watcher.terminate_process_group_bounded(process, grace_seconds=0.1)
+        time.sleep(0.75)
+        assert not survived.exists(), "same-group grandchild outlived watcher teardown"
 
 
 def test_log_scan_start_uses_last_checked_block_safety_overlap_or_recent_lookback():

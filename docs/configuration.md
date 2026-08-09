@@ -92,7 +92,7 @@ These keep Mission 3 current-auction data fresher than the hourly baseline witho
 | `MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS` | Optional local fallback interval; default `0` disables duplicate time-based watcher refreshes because hourly refresh remains the baseline. | no |
 | `MISSION3_WATCHER_LOOKBACK_BLOCKS` | Recent block lookback for missing state. | no |
 | `MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS` | Overlap subtracted from `last_checked_block + 1` to avoid missed logs. | no |
-| `MISSION3_WATCHER_LOG_CHUNK` | Max blocks per `eth_getLogs` request; defaults to 50 for the independent public fallback quorum. | no |
+| `MISSION3_WATCHER_LOG_CHUNK` | Initial max blocks per `eth_getLogs` request; defaults to 2,000 and halves automatically if the independent RPC quorum rejects a range. | no |
 | `MISSION3_WATCHER_STATE_PATH` | Local state path, normally `.local/mission3_onchain_tracker_state.json`. | can reveal local paths |
 | `MISSION3_WATCHER_LOCK_PATH` | Local watcher non-overlap lock path. | can reveal local paths |
 | `MISSION3_WATCHER_LOG_PATH` | Local concise watcher log path. | can reveal local paths |

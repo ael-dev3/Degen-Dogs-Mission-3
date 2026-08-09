@@ -8,6 +8,7 @@ from pathlib import Path
 
 MODULE_PATH = Path(__file__).with_name("check_remote_freshness.py")
 WORKFLOW_PATH = MODULE_PATH.parent.parent / ".github" / "workflows" / "freshness-watchdog.yml"
+PAGES_WORKFLOW_PATH = MODULE_PATH.parent.parent / ".github" / "workflows" / "deploy-pages.yml"
 
 
 def load_module():
@@ -333,6 +334,23 @@ def test_watchdog_issue_matching_requires_bot_and_marker_in_both_paths() -> None
     assert workflow.count("contains($marker)") == 2
     assert "<!-- degen-dogs-freshness-watchdog:v1 -->" in workflow
     assert "gh issue list" not in workflow
+
+
+def test_pages_recovery_is_latest_wins_bounded_and_deduplicated() -> None:
+    pages_workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
+    watchdog_workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "group: pages" in pages_workflow
+    assert "cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}" in pages_workflow
+    assert "--json databaseId,status,headSha,createdAt" in watchdog_workflow
+    assert "--limit 1000" in watchdog_workflow
+    assert "^[0-9a-f]{40}$" in watchdog_workflow
+    assert "fromdateiso8601" in watchdog_workflow
+    assert "1800" in watchdog_workflow
+    assert "stale_run_ids" in watchdog_workflow
+    assert "gh run cancel" in watchdog_workflow
+    assert "completed during the cancellation race" in watchdog_workflow
+    assert "recent_same_sha_runs" in watchdog_workflow
+    assert watchdog_workflow.count("gh workflow run deploy-pages.yml") == 1
 
 
 if __name__ == "__main__":

@@ -33,11 +33,76 @@ jobs:
         continue-on-error: true
         run: python3 scripts/check_remote_freshness.py --github-output "$GITHUB_OUTPUT"
 
-      - name: Re-dispatch Pages when raw data is newer
+      - name: Recover or re-dispatch Pages for latest main
         if: ${{ steps.check.outcome == 'success' && steps.check.outputs.pages_needs_deploy == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+        run: |
+          set -euo pipefail
+          if [[ ! "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "refusing Pages recovery for an invalid main SHA" >&2
+            exit 1
+          fi
+
+          # A normal push already starts Pages. Do not queue duplicates while
+          # that exact SHA is making progress. After 30 minutes, a same-SHA run
+          # is considered wedged; the new dispatch replaces it through the
+          # Pages workflow's latest-wins concurrency policy.
+          cutoff_epoch="$(( $(date -u +%s) - 1800 ))"
+          # A wedged environment-waiting run can be much older than the many
+          # cancelled snapshots created behind it. Scan a deep, paginated
+          # history so the actual concurrency blocker is seen.
+          pages_runs="$(
+            gh run list \
+              --repo "$GITHUB_REPOSITORY" \
+              --workflow deploy-pages.yml \
+              --branch main \
+              --limit 1000 \
+              --json databaseId,status,headSha,createdAt
+          )"
+          stale_run_ids="$(
+            jq -r \
+              --argjson cutoff "$cutoff_epoch" \
+              '.[]
+                | select(.status != "completed")
+                | select((.createdAt | fromdateiso8601) < $cutoff)
+                | .databaseId' \
+              <<<"$pages_runs"
+          )"
+          while IFS= read -r run_id; do
+            [[ -n "$run_id" ]] || continue
+            echo "Cancelling stale Pages run ${run_id} before releasing the latest queued snapshot"
+            if ! gh run cancel "$run_id" --repo "$GITHUB_REPOSITORY"; then
+              if ! current_status="$(
+                gh run view "$run_id" --repo "$GITHUB_REPOSITORY" --json status --jq .status
+              )"; then
+                echo "could not re-check Pages run ${run_id} after cancellation failed" >&2
+                exit 1
+              fi
+              if [[ "$current_status" != "completed" ]]; then
+                echo "failed to cancel nonterminal stale Pages run ${run_id} (status=${current_status})" >&2
+                exit 1
+              fi
+              echo "Pages run ${run_id} completed during the cancellation race"
+            fi
+          done <<<"$stale_run_ids"
+
+          recent_same_sha_runs="$(
+            jq \
+                --arg sha "$GITHUB_SHA" \
+                --argjson cutoff "$cutoff_epoch" \
+                '[.[]
+                  | select(.status != "completed")
+                  | select(.headSha == $sha)
+                  | select((.createdAt | fromdateiso8601) >= $cutoff)
+                ] | length' \
+              <<<"$pages_runs"
+          )"
+          if (( recent_same_sha_runs > 0 )); then
+            echo "Pages deployment for ${GITHUB_SHA} is already active; skipping duplicate dispatch"
+          else
+            gh workflow run deploy-pages.yml --repo "$GITHUB_REPOSITORY" --ref main
+          fi
 
       - name: Create or update freshness incident
         if: ${{ always() && (steps.check.outcome == 'failure' || steps.check.outputs.incident == 'true') }}

@@ -408,6 +408,7 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
     pushed = env_timestamp(env, "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
     detected = env_timestamp(env, "DEGEN_DOGS_DETECTED_AT_UTC")
     event_block_time = env_timestamp(env, "DEGEN_DOGS_EVENT_BLOCK_TIME_UTC")
+    raw_commit_verified = str(env.get("DEGEN_DOGS_RAW_COMMIT_VERIFIED") or "").strip().lower()
     row: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
@@ -460,6 +461,8 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "push_to_live_seconds": number_or_none(env.get("DEGEN_DOGS_PUSH_TO_LIVE_SECONDS")),
         "block_to_live_seconds": number_or_none(env.get("DEGEN_DOGS_BLOCK_TO_LIVE_SECONDS")),
         "live_verify_result": env.get("DEGEN_DOGS_LIVE_VERIFY_RESULT") or None,
+        "raw_commit_verified": raw_commit_verified in {"1", "true", "yes"} if raw_commit_verified else None,
+        "live_verify_error": redact_value(env.get("DEGEN_DOGS_LIVE_VERIFY_ERROR") or "") or None,
         "error": redact_value(error or env.get("DEGEN_DOGS_REFRESH_ERROR") or "") or None,
     }
     row.update(generated_state(root))
@@ -1183,6 +1186,8 @@ def write_env_file(path: Path, values: dict[str, Any]) -> None:
         "live_verify_result": "DEGEN_DOGS_LIVE_VERIFY_RESULT",
         "push_to_live_seconds": "DEGEN_DOGS_PUSH_TO_LIVE_SECONDS",
         "block_to_live_seconds": "DEGEN_DOGS_BLOCK_TO_LIVE_SECONDS",
+        "raw_commit_verified": "DEGEN_DOGS_RAW_COMMIT_VERIFIED",
+        "error": "DEGEN_DOGS_LIVE_VERIFY_ERROR",
     }
     lines = []
     for key, env_key in mapping.items():

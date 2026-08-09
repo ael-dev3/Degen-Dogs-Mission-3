@@ -134,13 +134,15 @@ MISSION3_WATCHER_BID_COOLDOWN_SECONDS=15
 MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS=0
 MISSION3_WATCHER_LOOKBACK_BLOCKS=100
 MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS=50
-MISSION3_WATCHER_LOG_CHUNK=50
+MISSION3_WATCHER_LOG_CHUNK=2000
 MISSION3_REFRESH_LOCK_PATH=~/Library/Caches/degen-dogs-mission3/refresh.lock
 ```
 
 Rules:
 
 - One-shot runs take a non-blocking watcher lock at `.local/mission3_onchain_tracker.lock` so watcher checks do not overlap.
+- Watcher checks defer before RPC/log scanning while the shared publisher lock is active, avoiding duplicate long-outage catch-up work after a reboot.
+- Log catch-up starts with 2,000-block quorum requests and halves the range on provider rejection, preserving fail-closed quorum checks without thousands of fixed 50-block calls.
 - Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.
 - Same-token high-bid changes use `MISSION3_WATCHER_BID_COOLDOWN_SECONDS` (15s default), so real new bids publish quickly without commit-spamming every repeated signal.

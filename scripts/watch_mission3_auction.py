@@ -386,7 +386,16 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
 
     lock_path = optional_path_from_env(env, "MISSION3_WATCHER_LOCK_PATH", ROOT / ".local" / "mission3_onchain_tracker.lock")
     log_path = optional_path_from_env(env, "MISSION3_WATCHER_LOG_PATH", default_log_path(env))
-    refresh_lock_path = optional_path_from_env(env, "MISSION3_REFRESH_LOCK_PATH", default_refresh_lock_path(env))
+    refresh_lock_env = dict(env)
+    if env.get("DEGEN_DOGS_REFRESH_LOCK_PATH", "").strip():
+        refresh_lock_env["MISSION3_REFRESH_LOCK_PATH"] = env["DEGEN_DOGS_REFRESH_LOCK_PATH"]
+    refresh_lock_path = optional_path_from_env(
+        refresh_lock_env,
+        "MISSION3_REFRESH_LOCK_PATH",
+        default_refresh_lock_path(env),
+    )
+    if auto_push and refresh_lock_path is None:
+        raise SystemExit("MISSION3_REFRESH_LOCK_PATH cannot be disabled when auto-push is enabled")
 
     return Config(
         rpc_urls=rpc_urls,
@@ -401,7 +410,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         force_after_seconds=env_int(env, "MISSION3_WATCHER_FORCE_REFRESH_AFTER_SECONDS", 0, minimum=0),
         lookback_blocks=env_int_any(env, ["MISSION3_WATCHER_LOOKBACK_BLOCKS", "MISSION3_WATCHER_LOG_WINDOW_BLOCKS"], 100, minimum=1, maximum=10000),
         safety_overlap_blocks=env_int_any(env, ["MISSION3_WATCHER_SAFETY_OVERLAP_BLOCKS", "MISSION3_WATCHER_LOG_SAFETY_OVERLAP_BLOCKS"], 50, minimum=0, maximum=500),
-        log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 50, minimum=1, maximum=10000),
+        log_chunk=env_int(env, "MISSION3_WATCHER_LOG_CHUNK", 2000, minimum=1, maximum=10000),
         refresh_command=refresh_command,
         auto_push=auto_push,
         require_clean_tree=require_clean_tree,
@@ -501,6 +510,30 @@ def validate_rpc_url(url: str) -> None:
         raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
+class RpcLogRangeLimit(RuntimeError):
+    """An explicit eth_getLogs range/response-size limit, safe to retry smaller."""
+
+
+def is_explicit_log_range_error(code: int, message: str) -> bool:
+    if code >= 0:
+        return False
+    normalized = message.casefold()
+    return any(
+        marker in normalized
+        for marker in (
+            "block range",
+            "range limit",
+            "range is too",
+            "maximum range",
+            "max range",
+            "too many results",
+            "response size",
+            "query returned more than",
+            "please limit the query",
+        )
+    )
+
+
 def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
     validate_rpc_url(url)
     body = json.dumps(payload).encode("utf-8")
@@ -517,6 +550,8 @@ def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
     try:
         response = open_rpc_request(req, timeout)
     except urllib.error.HTTPError as exc:
+        if isinstance(payload, dict) and payload.get("method") == "eth_getLogs" and exc.code == 413:
+            raise RpcLogRangeLimit("eth_getLogs request exceeded the provider range/size limit") from None
         raise RuntimeError(f"RPC HTTP {exc.code}") from None
     except Exception as exc:  # noqa: BLE001 - provider exceptions must not expose credential-bearing URLs
         raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
@@ -536,9 +571,13 @@ def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
                 except (TypeError, ValueError) as exc:
                     raise RuntimeError("RPC response has an invalid Content-Length") from exc
                 if declared_length < 0 or declared_length > RPC_MAX_RESPONSE_BYTES:
+                    if isinstance(payload, dict) and payload.get("method") == "eth_getLogs":
+                        raise RpcLogRangeLimit("eth_getLogs response exceeded the configured byte limit")
                     raise RuntimeError("RPC response exceeds the configured byte limit")
             raw = response.read(RPC_MAX_RESPONSE_BYTES + 1)
             if len(raw) > RPC_MAX_RESPONSE_BYTES:
+                if isinstance(payload, dict) and payload.get("method") == "eth_getLogs":
+                    raise RpcLogRangeLimit("eth_getLogs response exceeded the configured byte limit")
                 raise RuntimeError("RPC response exceeds the configured byte limit")
     except RuntimeError:
         raise
@@ -556,6 +595,7 @@ def post_json(url: str, payload: Any, *, timeout: int = 30) -> Any:
 
 def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 30) -> tuple[Any, str]:
     errors: list[str] = []
+    range_limit_errors = 0
     for url in urls:
         try:
             payload = {"jsonrpc": "2.0", "id": 1, "method": method, "params": params}
@@ -574,10 +614,16 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str], timeout: int = 
                     or not isinstance(error.get("message"), str)
                 ):
                     raise RuntimeError("invalid JSON-RPC error envelope")
+                if method == "eth_getLogs" and is_explicit_log_range_error(error["code"], error["message"]):
+                    raise RpcLogRangeLimit("eth_getLogs provider range/response limit")
                 raise RuntimeError(f"JSON-RPC error code={error['code']}")
             return data["result"], url
         except Exception as exc:  # noqa: BLE001
+            if isinstance(exc, RpcLogRangeLimit):
+                range_limit_errors += 1
             errors.append(f"{redact_url(url)}: {redact_rpc_text(exc)}")
+    if errors and range_limit_errors == len(errors):
+        raise RpcLogRangeLimit("eth_getLogs range was rejected by every attempted provider")
     raise RuntimeError("; ".join(errors))
 
 
@@ -588,6 +634,8 @@ def rpc_call_with_retry(method: str, params: list[Any], *, url: str, timeout: in
         candidate = operator_urls[attempt % len(operator_urls)]
         try:
             return rpc_call(method, params, urls=[candidate], timeout=timeout)
+        except RpcLogRangeLimit:
+            raise
         except Exception as exc:  # noqa: BLE001
             message = str(exc)
             permanent = any(code in message for code in ("HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "-32600", "-32601", "-32602"))
@@ -661,6 +709,7 @@ def rpc_quorum_call(
         raise RuntimeError(f"{method} requires {required} independent RPC providers; configured={len(urls)}")
     grouped: dict[str, list[tuple[str, Any]]] = defaultdict(list)
     errors: list[str] = []
+    range_limit_errors = 0
     responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
 
     def worker(index: int, url: str) -> None:
@@ -694,6 +743,8 @@ def rpc_quorum_call(
         if error is None:
             grouped[canonical_rpc_result(method, value)].append((url, value))
         else:
+            if isinstance(error, RpcLogRangeLimit):
+                range_limit_errors += 1
             errors.append(f"{redact_url(url)}: {redact_rpc_text(error)}")
         pending = len(pending_indexes)
         ordered = sorted(grouped.values(), key=len, reverse=True)
@@ -712,6 +763,19 @@ def rpc_quorum_call(
         )
 
     votes = sorted((len(group) for group in grouped.values()), reverse=True)
+    top_votes = votes[0] if votes else 0
+    if (
+        method == "eth_getLogs"
+        and range_limit_errors > 0
+        # Shrinking is useful only when the providers that rejected this range
+        # could join the strongest completed vote and make quorum. This covers
+        # degraded mixes such as one good response + one range rejection + one
+        # transport failure without amplifying a lone range error when no
+        # smaller-span quorum is possible.
+        and top_votes + range_limit_errors >= required
+    ):
+        raise RpcLogRangeLimit("eth_getLogs range was rejected by the independent RPC quorum")
+
     error_detail = f" errors={'; '.join(errors[:3])}" if errors else ""
     raise RuntimeError(f"{method} quorum disagreement required={required} votes={votes}{error_detail}")
 
@@ -910,15 +974,23 @@ def fetch_logs(config: Config, from_block: int, to_block: int) -> list[dict[str,
         return []
     logs: list[dict[str, Any]] = []
     start = from_block
+    chunk_size = config.log_chunk
     while start <= to_block:
-        end = min(to_block, start + config.log_chunk - 1)
-        result, _urls = rpc_quorum_call(
-            "eth_getLogs",
-            [log_filter(AUCTION_HOUSE, WATCHED_TOPICS, start, end)],
-            urls=config.log_rpc_urls,
-            required=config.quorum_size,
-            timeout=45,
-        )
+        end = min(to_block, start + chunk_size - 1)
+        try:
+            result, _urls = rpc_quorum_call(
+                "eth_getLogs",
+                [log_filter(AUCTION_HOUSE, WATCHED_TOPICS, start, end)],
+                urls=config.log_rpc_urls,
+                required=config.quorum_size,
+                timeout=45,
+            )
+        except RpcLogRangeLimit:
+            if chunk_size <= 1:
+                raise
+            attempted_span = end - start + 1
+            chunk_size = max(1, min(chunk_size // 2, attempted_span // 2))
+            continue
         if not isinstance(result, list):
             raise RuntimeError(f"unexpected eth_getLogs response: {result!r}")
         logs.extend(item for item in result if isinstance(item, dict) and not bool(item.get("removed", False)))
@@ -1059,7 +1131,7 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
             )
         sample_from = max(
             0,
-            latest_block - max(config.lookback_blocks, config.safety_overlap_blocks, config.log_chunk) + 1,
+            latest_block - max(config.lookback_blocks, config.safety_overlap_blocks, min(config.log_chunk, 100)) + 1,
         )
         sample, _ = rpc_call_with_retry(
             "eth_getLogs",
@@ -1665,6 +1737,39 @@ def acquire_refresh_lock(config: Config) -> Any | None:
     return acquire_file_lock(config.refresh_lock_path, label="refresh")
 
 
+def refresh_lock_is_active(config: Config) -> bool:
+    """Probe the shared publisher lock without truncating or replacing it."""
+    path = config.refresh_lock_path
+    if not path:
+        return False
+    flags = os.O_RDWR
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        raise RuntimeError(f"could not safely inspect refresh lock: {path}") from exc
+    try:
+        details = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(details.st_mode)
+            or details.st_uid != os.getuid()
+            or details.st_nlink != 1
+            or stat.S_IMODE(details.st_mode) & 0o077
+        ):
+            raise RuntimeError(f"runner lock is not a private owned single-link regular file: {path}")
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        return False
+    finally:
+        os.close(descriptor)
+
+
 def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: str, status: str) -> dict[str, Any]:
     state = dict(state)
     state["last_refresh_status"] = status
@@ -1672,6 +1777,64 @@ def mark_pending_refresh(state: dict[str, Any], *, reasons: list[str], now_utc: 
     state.setdefault("pending_refresh_since_utc", now_utc)
     state["pending_refresh_reasons"] = reasons
     return state
+
+
+def terminate_process_group_bounded(
+    process: subprocess.Popen[str],
+    *,
+    stdout: str | bytes | None = None,
+    stderr: str | bytes | None = None,
+    grace_seconds: float = 3,
+) -> tuple[str, str]:
+    def as_text(value: str | bytes | None) -> str:
+        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
+
+    process_group = process.pid
+
+    def group_exists() -> bool:
+        try:
+            os.killpg(process_group, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        return True
+
+    try:
+        os.killpg(process_group, signal.SIGTERM)
+    except OSError:
+        try:
+            process.terminate()
+        except OSError:
+            pass
+    deadline = time.monotonic() + grace_seconds
+    while group_exists() and time.monotonic() < deadline:
+        remaining = max(0.001, min(0.05, deadline - time.monotonic()))
+        try:
+            process.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            continue
+        time.sleep(remaining)
+    if group_exists():
+        try:
+            os.killpg(process_group, signal.SIGKILL)
+        except OSError:
+            try:
+                process.kill()
+            except OSError:
+                pass
+    try:
+        process.wait(timeout=grace_seconds)
+    except subprocess.TimeoutExpired:
+        try:
+            process.kill()
+            process.wait(timeout=grace_seconds)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    for stream in (process.stdout, process.stderr):
+        if stream is not None:
+            stream.close()
+    return as_text(stdout), as_text(stderr)
 
 
 def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dict[str, Any] | None = None) -> tuple[str, int]:
@@ -1744,22 +1907,15 @@ def run_refresh(config: Config, reasons: list[str], *, dry_run: bool, event: dic
         )
         try:
             stdout, stderr = process.communicate(timeout=config.timeout_seconds)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as exc:
             # Terminate the entire refresh process group before releasing the
             # inherited publisher lock; otherwise grandchildren can outlive the
             # watcher and mutate after another refresh starts.
-            try:
-                os.killpg(process.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-            try:
-                stdout, stderr = process.communicate(timeout=5)
-            except subprocess.TimeoutExpired:
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                stdout, stderr = process.communicate()
+            stdout, stderr = terminate_process_group_bounded(
+                process,
+                stdout=exc.output,
+                stderr=exc.stderr,
+            )
             raise subprocess.TimeoutExpired(process_argv, config.timeout_seconds, output=stdout, stderr=stderr)
         result = subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
     finally:
@@ -1779,6 +1935,38 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
     check_started = utc_now()
     now = check_started
     state = load_state(config.state_path)
+    if not dry_run and config.auto_push:
+        try:
+            publisher_active = refresh_lock_is_active(config)
+        except Exception as exc:  # noqa: BLE001
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed),
+                    "result": "refresh_lock_probe_failed",
+                    "error": str(exc)[:500],
+                    "dry_run": dry_run,
+                    "force_refresh": force_refresh,
+                },
+            )
+            log(config, f"refresh_lock_probe_error: {exc}")
+            return 1
+        if publisher_active:
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed),
+                    "result": "deferred_refresh_lock_preflight",
+                    "pending_refresh": bool(state.get("pending_refresh")),
+                    "refresh_status": "deferred_refresh_lock_preflight",
+                    "dry_run": dry_run,
+                    "force_refresh": force_refresh,
+                },
+            )
+            log(config, "refresh_lock_preflight_skip: publisher active; deferred RPC/log scan")
+            return 0
     try:
         snapshot = fetch_snapshot(config, state)
     except Exception as exc:  # noqa: BLE001
