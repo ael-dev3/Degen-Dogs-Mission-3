@@ -48,6 +48,65 @@ def test_cli_arguments_are_side_effect_free() -> None:
         health.main = original_main
 
 
+def test_bounded_command_timeout_is_structured_and_nonfatal() -> None:
+    started = time.monotonic()
+    result = health.run_raw(
+        [sys.executable, "-c", "import time; time.sleep(5)"],
+        cwd=None,
+        timeout=0.05,
+    )
+    assert result.code == 124
+    assert "timed out" in result.err
+    assert time.monotonic() - started < 1.5
+
+
+def test_bounded_timeout_does_not_wait_for_escaped_pipe_holder() -> None:
+    child = "import time; time.sleep(2)"
+    parent = (
+        "import subprocess,sys,time; "
+        f"subprocess.Popen([sys.executable, '-c', {child!r}], start_new_session=True); "
+        "time.sleep(5)"
+    )
+    started = time.monotonic()
+    result = health.run_raw([sys.executable, "-c", parent], cwd=None, timeout=0.05)
+    assert result.code == 124
+    assert "timed out" in result.err
+    assert time.monotonic() - started < 1.5
+
+
+def test_timeout_kills_same_group_grandchild_before_returning() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        ready = root / "ready"
+        survived = root / "survived"
+        child = (
+            "import pathlib,signal,time; "
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN); "
+            f"pathlib.Path({str(ready)!r}).write_text('ready'); "
+            "time.sleep(0.7); "
+            f"pathlib.Path({str(survived)!r}).write_text('survived')"
+        )
+        parent = (
+            "import subprocess,sys,time; "
+            f"subprocess.Popen([sys.executable, '-c', {child!r}]); "
+            "time.sleep(5)"
+        )
+        process = health.subprocess.Popen(
+            [sys.executable, "-c", parent],
+            text=True,
+            stdout=health.subprocess.PIPE,
+            stderr=health.subprocess.PIPE,
+            start_new_session=True,
+        )
+        deadline = time.monotonic() + 1
+        while not ready.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert ready.exists(), "same-group grandchild did not initialize"
+        health.terminate_process_group_bounded(process, grace_seconds=0.1)
+        time.sleep(0.75)
+        assert not survived.exists(), "same-group grandchild outlived bounded teardown"
+
+
 class FakeLiveResponse:
     def __init__(
         self,
@@ -1140,18 +1199,21 @@ def test_jsonl_compaction_retains_complete_latest_rows() -> None:
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "watcher_checks.jsonl"
         path.write_text(
-            "".join(json.dumps({"id": index, "result": "no_refresh"}) + "\n" for index in range(100)),
+            "".join(json.dumps({"id": index, "result": "no_refresh"}) + "\n" for index in range(100))
+            + '{"id":',
             encoding="utf-8",
         )
 
         rotated, _before, after = health.compact_log_in_place(path, max_bytes=600, retain_bytes=420)
         rows = health.read_jsonl_tail(path, 100)
+        raw_rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
         assert rotated is True
         assert after <= 600
         assert rows
+        assert raw_rows[0]["kind"] == "log_compaction"
         assert rows[-1]["id"] == 99
-        assert all(isinstance(row.get("id"), int) for row in rows)
+        assert all(isinstance(row.get("id"), int) for row in rows if row.get("kind") != "log_compaction")
 
 
 def test_active_log_defers_until_emergency_cap() -> None:
@@ -1214,6 +1276,10 @@ def test_disk_free_thresholds() -> None:
 
 
 if __name__ == "__main__":
+    test_cli_arguments_are_side_effect_free()
+    test_bounded_command_timeout_is_structured_and_nonfatal()
+    test_bounded_timeout_does_not_wait_for_escaped_pipe_holder()
+    test_timeout_kills_same_group_grandchild_before_returning()
     test_live_site_transport_accepts_only_exact_bounded_targets()
     test_default_live_status_freshness_window_is_ninety_minutes()
     test_live_site_transport_rejects_unapproved_redirect_status_mime_and_oversize()

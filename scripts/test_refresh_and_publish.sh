@@ -42,6 +42,48 @@ git -C "$TEST_REPO" config user.email "degen-dogs-test@example.invalid"
 git -C "$TEST_REPO" add package.json scripts generated
 git -C "$TEST_REPO" commit -qm "test baseline"
 
+# Caller-provided run IDs are journal/commit provenance and must be rejected
+# before any mutation if they cannot be represented by the recovery schema.
+set +e
+HOME="$TEST_ROOT/home" \
+DEGEN_DOGS_REFRESH_RUN_ID="invalid run id" \
+DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/invalid-run-id-logs" \
+DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/invalid-run-id-locks" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+"$TEST_REPO/scripts/refresh_and_publish.sh"
+status=$?
+set -e
+if [[ "$status" == "0" || "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]]; then
+  echo "invalid recovery run ID was accepted or reached the generator" >&2
+  exit 1
+fi
+
+# A recent index lock is not proven stale and must remain untouched. This also
+# proves the generator cannot start while another git mutation may be active.
+: >"$TEST_REPO/.git/index.lock"
+chmod 600 "$TEST_REPO/.git/index.lock"
+set +e
+HOME="$TEST_ROOT/home" \
+DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/recent-index-lock-logs" \
+DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/recent-index-lock-locks" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+"$TEST_REPO/scripts/refresh_and_publish.sh"
+status=$?
+set -e
+if [[ "$status" == "0" || ! -f "$TEST_REPO/.git/index.lock" ]]; then
+  echo "recent git index lock was accepted or removed" >&2
+  exit 1
+fi
+if [[ "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]]; then
+  echo "generator ran despite a recent git index lock" >&2
+  exit 1
+fi
+rm -- "$TEST_REPO/.git/index.lock"
+
 # Reject a symlink in any shared-lock ancestor before creating anything through
 # it or starting the generator.
 LOCK_ATTACK_PARENT="$TEST_ROOT/lock-attack-parent"
@@ -198,6 +240,14 @@ printf '%s\n' \
 printf '%s\n' '# fixture compiles' >"$SUCCESS_REPO/scripts/build_dashboard.py"
 printf '%s\n' \
   '#!/usr/bin/env python3' \
+  'from __future__ import annotations' \
+  'import os' \
+  'import sys' \
+  'from pathlib import Path' \
+  'if len(sys.argv) > 1 and sys.argv[1] == "verify-live" and os.environ.get("FIXTURE_LIVE_TIMEOUT") == "1":' \
+  '    env_path = Path(sys.argv[sys.argv.index("--env-file") + 1])' \
+  '    env_path.write_text("export DEGEN_DOGS_LIVE_VERIFY_RESULT='"'"'timeout'"'"'\nexport DEGEN_DOGS_RAW_COMMIT_VERIFIED='"'"'True'"'"'\nexport DEGEN_DOGS_LIVE_VERIFY_ERROR='"'"'github_pages mismatch'"'"'\n", encoding="utf-8")' \
+  '    raise SystemExit(2)' \
   'raise SystemExit(0)' >"$SUCCESS_REPO/scripts/refresh_telemetry.py"
 chmod +x "$SUCCESS_REPO/scripts/refresh_telemetry.py"
 printf '%s\n' 'table,file,rows' 'auction_feed,generated/auction_feed.csv,1' >"$SUCCESS_REPO/generated/manifest.csv"
@@ -226,6 +276,14 @@ git -C "$SUCCESS_REPO" config user.email "degen-dogs-test@example.invalid"
 git -C "$SUCCESS_REPO" add .
 git -C "$SUCCESS_REPO" commit -qm "successful baseline"
 
+# A proven-stale, safely permissioned, owned index lock left by a crash must be removed
+# before preflight so it cannot block staging or rollback later in the run.
+: >"$SUCCESS_REPO/.git/index.lock"
+# Git commonly creates this as 0644 under umask 022. This fixture must reflect
+# the real crash artifact rather than only the runner's stricter umask 077.
+chmod 644 "$SUCCESS_REPO/.git/index.lock"
+touch -t 200001010000 "$SUCCESS_REPO/.git/index.lock"
+
 HOME="$TEST_ROOT/home" \
 VALIDATOR_MARKER="$SUCCESS_MARKER" \
 DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
@@ -236,6 +294,14 @@ DEGEN_DOGS_SKIP_PUSH=1 \
 "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
 
 [[ "$(<"$SUCCESS_MARKER")" == "validated" ]]
+if [[ -e "$SUCCESS_REPO/.git/index.lock" ]]; then
+  echo "proven-stale git index lock was not removed" >&2
+  exit 1
+fi
+if ! grep -q "removed proven-stale git index lock before publisher preflight" "$TEST_ROOT/success-logs/refresh.log"; then
+  echo "stale git index lock recovery was not logged" >&2
+  exit 1
+fi
 if git -C "$SUCCESS_REPO" cat-file -e HEAD^:generated/obsolete.json 2>/dev/null && \
   git -C "$SUCCESS_REPO" cat-file -e HEAD:generated/obsolete.json 2>/dev/null; then
   echo "tracked generated deletion was not committed" >&2
@@ -251,6 +317,82 @@ if [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- R
   exit 1
 fi
 
+# A power loss after mutation cannot run the Bash EXIT trap. The next locked
+# run must authenticate the private baseline journal, restore tracked files,
+# quarantine runner-created untracked artifacts, and continue automatically.
+printf '%s\n' \
+  "const fs = require('fs');" \
+  "fs.writeFileSync('generated/auction_feed.csv', 'id\\n2\\n');" \
+  "fs.writeFileSync('generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" \
+  "fs.writeFileSync('public/generated/auction_feed.csv', 'id\\n2\\n');" \
+  "fs.writeFileSync('public/generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" >"$SUCCESS_REPO/scripts/success_generation.js"
+git -C "$SUCCESS_REPO" add scripts/success_generation.js
+git -C "$SUCCESS_REPO" commit -qm "fixture: stable recovery generator"
+CRASH_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+CRASH_LOCK_DIR="$TEST_ROOT/crash-recovery-locks"
+CRASH_CONFIG_LOCK_DIR="$TEST_ROOT/crash-config-locks"
+mkdir -m 700 "$CRASH_LOCK_DIR"
+python3 - "$CRASH_LOCK_DIR/publisher-recovery.json" "$SUCCESS_REPO" "$CRASH_BASELINE" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = {
+    "schema_version": 1,
+    "repo_realpath": str(Path(sys.argv[2]).resolve()),
+    "branch": "main",
+    "baseline_head": sys.argv[3],
+    "run_id": "crash-fixture",
+    "created_at_utc": "2026-08-09T00:00:00Z",
+    "publish_paths": [
+        "README.md",
+        "index.html",
+        "generated",
+        "public",
+        "archive/mission3/data/generated",
+        "archive/data/generated",
+        "archive/data/identity/wallet_profiles.json",
+        "archive/dogs",
+        "archive/prices/data/generated",
+        "archive/prices/data/raw",
+    ],
+}
+path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+os.chmod(path, 0o600)
+PY
+printf '%s\n' '{"partial":true}' >"$SUCCESS_REPO/generated/auction_feed.json"
+printf '%s\n' '{"runner_crash":true}' >"$SUCCESS_REPO/generated/crash-only.json"
+
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/crash-recovery-logs" \
+DEGEN_DOGS_LOCK_DIR="$CRASH_CONFIG_LOCK_DIR" \
+MISSION3_REFRESH_LOCK_PATH="$CRASH_LOCK_DIR/refresh.lock" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+
+if [[ -e "$CRASH_LOCK_DIR/publisher-recovery.json" ]] || \
+  [[ "$(<"$SUCCESS_REPO/generated/auction_feed.json")" != '[{"id":2}]' ]] || \
+  [[ -e "$SUCCESS_REPO/generated/crash-only.json" ]]; then
+  echo "authenticated interrupted-generation recovery did not restore the baseline" >&2
+  exit 1
+fi
+if ! grep -q "interrupted publisher recovery completed" "$TEST_ROOT/crash-recovery-logs/refresh.log" || \
+  ! find "$CRASH_LOCK_DIR/recovery" -type f -name crash-only.json -print -quit | grep -q .; then
+  echo "interrupted-generation recovery was not logged or quarantined" >&2
+  exit 1
+fi
+if [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- README.md index.html generated public)" ]]; then
+  echo "interrupted-generation recovery left publish artifacts dirty" >&2
+  exit 1
+fi
+
 # A post-commit push failure must atomically rewind only the commit created by
 # this runner. Otherwise one transient outage leaves main permanently ahead and
 # every later scheduled refresh refuses to run.
@@ -258,6 +400,99 @@ REJECT_REMOTE="$TEST_ROOT/reject-remote.git"
 git -C "$TEST_ROOT" init -q --bare "$REJECT_REMOTE"
 git -C "$SUCCESS_REPO" remote add origin "$REJECT_REMOTE"
 git -C "$SUCCESS_REPO" push -q -u origin main
+
+# A crash after commit but before push is journal-authenticated too. If the
+# remote still equals the recorded baseline, rewind that one allowlisted child
+# commit and regenerate instead of leaving main permanently local-ahead.
+INTERRUPTED_COMMIT_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+printf '%s\n' '[{"id":99}]' >"$SUCCESS_REPO/generated/auction_feed.json"
+printf '%s\n' '[{"id":99}]' >"$SUCCESS_REPO/public/generated/auction_feed.json"
+git -C "$SUCCESS_REPO" add generated/auction_feed.json public/generated/auction_feed.json
+git -C "$SUCCESS_REPO" commit -qm "[cron] simulated interrupted publisher commit" \
+  -m "Refresh-Run-ID: unrelated-run"
+python3 - "$CRASH_LOCK_DIR/publisher-recovery.json" "$SUCCESS_REPO" "$INTERRUPTED_COMMIT_BASELINE" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+payload = {
+    "schema_version": 1,
+    "repo_realpath": str(Path(sys.argv[2]).resolve()),
+    "branch": "main",
+    "baseline_head": sys.argv[3],
+    "run_id": "post-commit-crash-fixture",
+    "created_at_utc": "2026-08-09T00:00:00Z",
+    "publish_paths": [
+        "README.md", "index.html", "generated", "public",
+        "archive/mission3/data/generated", "archive/data/generated",
+        "archive/data/identity/wallet_profiles.json", "archive/dogs",
+        "archive/prices/data/generated", "archive/prices/data/raw",
+    ],
+}
+path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
+os.chmod(path, 0o600)
+PY
+
+UNATTRIBUTED_HEAD="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+UNATTRIBUTED_JOURNAL_HASH="$(git -C "$SUCCESS_REPO" hash-object "$CRASH_LOCK_DIR/publisher-recovery.json")"
+UNATTRIBUTED_STATUS_BEFORE="$TEST_ROOT/unattributed-status-before"
+UNATTRIBUTED_STATUS_AFTER="$TEST_ROOT/unattributed-status-after"
+git -C "$SUCCESS_REPO" status --porcelain=v1 -z --untracked-files=all >"$UNATTRIBUTED_STATUS_BEFORE"
+set +e
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/post-commit-refusal-logs" \
+DEGEN_DOGS_LOCK_DIR="$CRASH_CONFIG_LOCK_DIR" \
+MISSION3_REFRESH_LOCK_PATH="$CRASH_LOCK_DIR/refresh.lock" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+status=$?
+set -e
+git -C "$SUCCESS_REPO" status --porcelain=v1 -z --untracked-files=all >"$UNATTRIBUTED_STATUS_AFTER"
+if [[ "$status" == "0" ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$UNATTRIBUTED_HEAD" ]] || \
+  ! cmp -s "$UNATTRIBUTED_STATUS_BEFORE" "$UNATTRIBUTED_STATUS_AFTER" || \
+  [[ "$(git -C "$SUCCESS_REPO" hash-object "$CRASH_LOCK_DIR/publisher-recovery.json")" != "$UNATTRIBUTED_JOURNAL_HASH" ]]; then
+  echo "refused journal attribution mutated HEAD, worktree, or recovery provenance" >&2
+  exit 1
+fi
+
+git -C "$SUCCESS_REPO" commit --amend -q \
+  -m "[cron] simulated interrupted publisher commit" \
+  -m "Refresh-Run-ID: post-commit-crash-fixture"
+
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/post-commit-recovery-logs" \
+DEGEN_DOGS_LOCK_DIR="$CRASH_CONFIG_LOCK_DIR" \
+MISSION3_REFRESH_LOCK_PATH="$CRASH_LOCK_DIR/refresh.lock" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$INTERRUPTED_COMMIT_BASELINE" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$INTERRUPTED_COMMIT_BASELINE" ]] || \
+  [[ -e "$CRASH_LOCK_DIR/publisher-recovery.json" ]] || \
+  ! grep -q "recovering unpushed interrupted publisher commit" "$TEST_ROOT/post-commit-recovery-logs/refresh.log"; then
+  echo "post-commit crash journal did not safely rewind and reconcile" >&2
+  exit 1
+fi
+
 printf '%s\n' \
   "const fs = require('fs');" \
   "fs.writeFileSync('generated/auction_feed.csv', 'id\\n3\\n');" \
@@ -304,6 +539,31 @@ if [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- R
 fi
 if ! grep -q "rewound unpushed runner commit" "$TEST_ROOT/push-failure-logs/refresh.log"; then
   echo "push-failure commit rewind was not logged" >&2
+  exit 1
+fi
+
+# A successful push followed only by a bounded Pages timeout is a successful
+# publication awaiting deployment, not a data-generation failure. It must not
+# trigger the health watchdog's rapid regenerate-and-repush loop.
+rm -- "$REJECT_REMOTE/hooks/pre-receive"
+HOME="$TEST_ROOT/home" \
+FIXTURE_LIVE_TIMEOUT=1 \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/live-timeout-logs" \
+DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/live-timeout-locks" \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" ]]; then
+  echo "live-timeout fixture did not preserve the successfully pushed commit" >&2
+  exit 1
+fi
+if ! grep -q "pushed snapshot is awaiting GitHub Pages" "$TEST_ROOT/live-timeout-logs/refresh.log" || \
+  ! grep -q "finished status=0" "$TEST_ROOT/live-timeout-logs/refresh.log"; then
+  echo "post-push live timeout was not recorded as a successful deferred deployment" >&2
   exit 1
 fi
 

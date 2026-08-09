@@ -9,7 +9,9 @@ permissions: {}
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  # Normal push deployments finish even if another snapshot arrives. A bounded
+  # watchdog recovery dispatch may replace a stale environment-waiting run.
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   build:

@@ -32,7 +32,15 @@ if [[ -e "${REPO_DIR}/.venv" || -L "${REPO_DIR}/.venv" ]]; then
 fi
 LOG_DIR="${DEGEN_DOGS_LOG_DIR:-${USER_HOME}/Library/Logs/degen-dogs-mission3}"
 LOCK_DIR="${DEGEN_DOGS_LOCK_DIR:-${USER_HOME}/Library/Caches/degen-dogs-mission3}"
-REFRESH_LOCK_PATH="${DEGEN_DOGS_REFRESH_LOCK_PATH:-${LOCK_DIR}/refresh.lock}"
+REFRESH_LOCK_PATH="${DEGEN_DOGS_REFRESH_LOCK_PATH:-${MISSION3_REFRESH_LOCK_PATH:-${LOCK_DIR}/refresh.lock}}"
+REFRESH_LOCK_PATH="$(python3 - "$REFRESH_LOCK_PATH" <<'PY'
+import os
+import sys
+
+print(os.path.abspath(os.path.expanduser(sys.argv[1])))
+PY
+)"
+RECOVERY_STATE_DIR="$(dirname "$REFRESH_LOCK_PATH")"
 REMOTE="${DEGEN_DOGS_REMOTE:-origin}"
 BRANCH="${DEGEN_DOGS_BRANCH:-main}"
 COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
@@ -65,10 +73,12 @@ PUBLISH_PATHS=(
 BASELINE_HEAD=""
 MUTATION_STARTED=0
 RUNNER_COMMIT_HEAD=""
+RUNNER_COMMIT_RUN_ID=""
 ARTIFACT_LIST=""
 LIVE_VERIFY_ENV=""
 LOCAL_AHEAD_COUNT=0
 QUARANTINE_DIR=""
+RECOVERY_JOURNAL="${RECOVERY_STATE_DIR}/publisher-recovery.json"
 
 utc_stamp() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
@@ -82,6 +92,7 @@ export DEGEN_DOGS_REFRESH_METRICS_PATH="${DEGEN_DOGS_REFRESH_METRICS_PATH:-${REP
 
 degen_dogs_private_dir "$LOG_DIR"
 degen_dogs_private_dir "$LOCK_DIR"
+degen_dogs_private_dir "$RECOVERY_STATE_DIR"
 LOG_FILE="${LOG_FILE:-${LOG_DIR}/refresh.log}"
 degen_dogs_private_file "$LOG_FILE"
 exec >>"$LOG_FILE" 2>&1
@@ -149,11 +160,192 @@ run_with_retry() {
   return "$status"
 }
 
+remove_recovery_journal() {
+  [[ -e "$RECOVERY_JOURNAL" || -L "$RECOVERY_JOURNAL" ]] || return 0
+  python3 - "$RECOVERY_JOURNAL" <<'PY'
+from __future__ import annotations
+
+import os
+import stat
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+details = path.lstat()
+if (
+    not stat.S_ISREG(details.st_mode)
+    or stat.S_ISLNK(details.st_mode)
+    or details.st_uid != os.getuid()
+    or details.st_nlink != 1
+    or stat.S_IMODE(details.st_mode) != 0o600
+):
+    raise SystemExit(f"refusing unsafe publisher recovery journal: {path}")
+path.unlink()
+PY
+}
+
+write_recovery_journal() {
+  export RECOVERY_JOURNAL REPO_DIR BRANCH BASELINE_HEAD DEGEN_DOGS_REFRESH_RUN_ID
+  python3 - "${PUBLISH_PATHS[@]}" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import sys
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+path = Path(os.environ["RECOVERY_JOURNAL"])
+if path.exists() or path.is_symlink():
+    raise SystemExit(f"publisher recovery journal already exists: {path}")
+payload = {
+    "schema_version": 1,
+    "repo_realpath": str(Path(os.environ["REPO_DIR"]).resolve()),
+    "branch": os.environ["BRANCH"],
+    "baseline_head": os.environ["BASELINE_HEAD"],
+    "run_id": os.environ["DEGEN_DOGS_REFRESH_RUN_ID"],
+    "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    "publish_paths": list(sys.argv[1:]),
+}
+descriptor, temporary_name = tempfile.mkstemp(prefix=".publisher-recovery.", suffix=".tmp", dir=path.parent)
+temporary = Path(temporary_name)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, sort_keys=True, separators=(",", ":"))
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+    os.chmod(path, 0o600)
+    directory = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+finally:
+    temporary.unlink(missing_ok=True)
+PY
+}
+
+read_recovery_journal_baseline() {
+  python3 - "$RECOVERY_JOURNAL" "$REPO_DIR" "$BRANCH" "${PUBLISH_PATHS[@]}" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import re
+import stat
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+expected_repo = str(Path(sys.argv[2]).resolve())
+expected_branch = sys.argv[3]
+expected_paths = sys.argv[4:]
+flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+descriptor = os.open(path, flags)
+details = os.fstat(descriptor)
+if (
+    not stat.S_ISREG(details.st_mode)
+    or details.st_uid != os.getuid()
+    or details.st_nlink != 1
+    or stat.S_IMODE(details.st_mode) != 0o600
+    or details.st_size > 16_384
+):
+    os.close(descriptor)
+    raise SystemExit("publisher recovery journal is not a private owned regular file")
+with os.fdopen(descriptor, encoding="utf-8") as handle:
+    payload = json.load(handle)
+if not isinstance(payload, dict) or payload.get("schema_version") != 1:
+    raise SystemExit("publisher recovery journal schema is invalid")
+baseline = payload.get("baseline_head")
+run_id = payload.get("run_id")
+if (
+    payload.get("repo_realpath") != expected_repo
+    or payload.get("branch") != expected_branch
+    or payload.get("publish_paths") != expected_paths
+    or not isinstance(baseline, str)
+    or re.fullmatch(r"[0-9a-f]{40}", baseline) is None
+    or not isinstance(run_id, str)
+    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", run_id) is None
+):
+    raise SystemExit("publisher recovery journal provenance is invalid")
+print(f"{baseline}\t{run_id}")
+PY
+}
+
+validate_runner_commit() {
+  local commit="$1"
+  local baseline="$2"
+  local run_id="$3"
+  python3 - "$commit" "$baseline" "$run_id" <<'PY'
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+import sys
+
+commit, baseline, run_id = sys.argv[1:]
+sha = re.compile(r"[0-9a-f]{40}")
+if not sha.fullmatch(commit) or not sha.fullmatch(baseline):
+    raise SystemExit("runner commit identity is invalid")
+
+history = subprocess.check_output(
+    ["git", "rev-list", "--parents", "-n", "1", commit],
+    text=True,
+).split()
+if history != [commit, baseline]:
+    raise SystemExit("runner commit is not the single expected child of the refresh baseline")
+
+message = subprocess.check_output(["git", "show", "-s", "--format=%B", commit], text=True)
+if message.splitlines().count(f"Refresh-Run-ID: {run_id}") != 1:
+    raise SystemExit("runner commit refresh-run attribution is missing or ambiguous")
+
+raw = subprocess.check_output(
+    ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", commit]
+)
+changed = [os.fsdecode(item) for item in raw.split(b"\0") if item]
+allowed_exact = {
+    "README.md",
+    "index.html",
+    "archive/data/identity/wallet_profiles.json",
+    "archive/dogs/manifest.json",
+}
+allowed_patterns = (
+    re.compile(r"^(generated|public/generated)/[A-Za-z0-9_]+\.(csv|json)$"),
+    re.compile(r"^archive/mission3/data/generated/[A-Za-z0-9_]+\.(csv|json)$"),
+    re.compile(r"^public/generated/mission3/[A-Za-z0-9_]+\.json$"),
+    re.compile(r"^archive/data/generated/unified_dog_search_[A-Za-z0-9_]+\.json$"),
+    re.compile(r"^archive/dogs/by-id/[0-9]+\.json$"),
+    re.compile(r"^archive/prices/data/generated/[A-Za-z0-9_]+\.(csv|json)$"),
+    re.compile(r"^archive/prices/data/raw/[A-Za-z0-9_-]+\.json$"),
+)
+unexpected = [
+    path
+    for path in changed
+    if path not in allowed_exact and not any(pattern.fullmatch(path) for pattern in allowed_patterns)
+]
+if not changed or unexpected:
+    raise SystemExit(
+        "runner commit changed no publish artifacts"
+        if not changed
+        else "runner commit changed paths outside the exact publish allowlist: " + ", ".join(unexpected)
+    )
+PY
+}
+
 cleanup_partial_generation() {
   local tracked_changes=""
   local path=""
   if [[ "$MUTATION_STARTED" != "1" || -z "$BASELINE_HEAD" ]]; then
     return 0
+  fi
+  if ! clear_stale_git_index_lock "rollback"; then
+    log "warning: refusing partial-generation rollback while the git index lock is active or unsafe"
+    return 1
   fi
   if [[ -n "$RUNNER_COMMIT_HEAD" ]]; then
     local current_head=""
@@ -170,33 +362,8 @@ cleanup_partial_generation() {
       log "warning: refusing to rewind an unauthenticated local commit (head=${current_head} runner=${RUNNER_COMMIT_HEAD} parent=${runner_parent} baseline=${BASELINE_HEAD})"
       return 1
     fi
-    export RUNNER_COMMIT_HEAD
-    if ! python3 - "${PUBLISH_PATHS[@]}" <<'PY'
-from __future__ import annotations
-
-import os
-import subprocess
-import sys
-
-commit = os.environ["RUNNER_COMMIT_HEAD"]
-allowed = tuple(sys.argv[1:])
-raw = subprocess.check_output(
-    ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", commit]
-)
-changed = [os.fsdecode(item) for item in raw.split(b"\0") if item]
-unsafe = [
-    path
-    for path in changed
-    if not any(path == root or path.startswith(f"{root}/") for root in allowed)
-]
-if not changed or unsafe:
-    raise SystemExit(
-        "runner commit changed no publish artifacts"
-        if not changed
-        else "runner commit changed paths outside the publish allowlist: " + ", ".join(unsafe)
-    )
-PY
-    then
+    if [[ -z "$RUNNER_COMMIT_RUN_ID" ]] || \
+      ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$RUNNER_COMMIT_RUN_ID"; then
       log "warning: refusing to rewind runner commit with an unsafe path set"
       return 1
     fi
@@ -206,6 +373,7 @@ PY
     }
     log "rewound unpushed runner commit ${RUNNER_COMMIT_HEAD} to ${BASELINE_HEAD}"
     RUNNER_COMMIT_HEAD=""
+    RUNNER_COMMIT_RUN_ID=""
   fi
 
   log "rolling back partial generated artifacts to ${BASELINE_HEAD}"
@@ -226,7 +394,7 @@ PY
   # existed before this run, but a same-user process could still create a file
   # concurrently; quarantine keeps recovery possible without poisoning the
   # next scheduled run.
-  QUARANTINE_DIR="${LOCK_DIR}/recovery/${DEGEN_DOGS_REFRESH_RUN_ID}"
+  QUARANTINE_DIR="${RECOVERY_STATE_DIR}/recovery/${DEGEN_DOGS_REFRESH_RUN_ID}"
   export QUARANTINE_DIR REPO_DIR
   python3 - "${PUBLISH_PATHS[@]}" <<'PY' || {
 from __future__ import annotations
@@ -272,56 +440,167 @@ PY
     git status --short --untracked-files=all -- "${PUBLISH_PATHS[@]}"
     return 1
   fi
+  remove_recovery_journal || {
+    log "warning: could not remove the authenticated publisher recovery journal"
+    return 1
+  }
   MUTATION_STARTED=0
   log "partial generated artifacts rolled back"
+}
+
+portable_stat_value() {
+  local bsd_format="$1"
+  local gnu_format="$2"
+  local path="$3"
+  if stat -f "$bsd_format" "$path" >/dev/null 2>&1; then
+    stat -f "$bsd_format" "$path"
+  else
+    stat -c "$gnu_format" "$path"
+  fi
 }
 
 git_index_lock_is_stale() {
   local lock_path="$1"
   local lock_mtime
+  local lock_mode
+  local lock_owner
+  local lock_links
+  local lsof_output
+  local lsof_status
   local now
 
-  [[ -e "$lock_path" ]] || return 1
-  if command -v lsof >/dev/null 2>&1 && lsof "$lock_path" >/dev/null 2>&1; then
+  [[ -f "$lock_path" && ! -L "$lock_path" ]] || return 1
+  lock_owner="$(portable_stat_value %u %u "$lock_path" 2>/dev/null || printf '%s' '-1')"
+  lock_links="$(portable_stat_value %l %h "$lock_path" 2>/dev/null || printf '0')"
+  lock_mode="$(portable_stat_value %Lp %a "$lock_path" 2>/dev/null || printf '0')"
+  # Git honors the invoking process umask when creating index.lock, so an
+  # otherwise safe crash artifact may be 0600 (runner) or 0644 (interactive
+  # Git). Never accept executable or group/other-writable lock files.
+  [[ "$lock_owner" == "$(id -u)" && "$lock_links" == "1" && "$lock_mode" =~ ^6(00|44)$ ]] || return 1
+  command -v lsof >/dev/null 2>&1 || return 1
+  if lsof_output="$(lsof "$lock_path" 2>&1)"; then
     return 1
+  else
+    lsof_status=$?
   fi
-  lock_mtime="$(stat -f %m "$lock_path" 2>/dev/null || stat -c %Y "$lock_path" 2>/dev/null || printf '0')"
+  # lsof uses status 1 with no output for an explicit no-match. Any diagnostic
+  # or different status is an inspection failure, not proof that the file is idle.
+  [[ "$lsof_status" == "1" && -z "$lsof_output" ]] || return 1
+  lock_mtime="$(portable_stat_value %m %Y "$lock_path" 2>/dev/null || printf '0')"
   now="$(date +%s)"
   [[ "$lock_mtime" =~ ^[0-9]+$ ]] || return 1
   (( now - lock_mtime >= 60 ))
 }
 
+git_index_lock_path() {
+  local lock_path
+  lock_path="$(git rev-parse --git-path index.lock)" || return 1
+  if [[ "$lock_path" != /* ]]; then
+    lock_path="${REPO_DIR}/${lock_path}"
+  fi
+  printf '%s\n' "$lock_path"
+}
+
+clear_stale_git_index_lock() {
+  local context="$1"
+  local lock_path
+  lock_path="$(git_index_lock_path)" || return 1
+  [[ -e "$lock_path" || -L "$lock_path" ]] || return 0
+  if ! git_index_lock_is_stale "$lock_path"; then
+    log "git index lock is active, recent, or unsafe during ${context}; refusing automatic removal"
+    return 1
+  fi
+  rm -- "$lock_path" || return 1
+  log "removed proven-stale git index lock before ${context}"
+}
+
+recover_interrupted_generation() {
+  local journal_record
+  local journal_baseline
+  local journal_run_id
+  local current_branch
+  local current_head
+  local remote_head
+
+  [[ -e "$RECOVERY_JOURNAL" || -L "$RECOVERY_JOURNAL" ]] || return 0
+  journal_record="$(read_recovery_journal_baseline)" || fail "publisher recovery journal could not be authenticated"
+  IFS=$'\t' read -r journal_baseline journal_run_id <<<"$journal_record"
+  current_branch="$(git branch --show-current)" || fail "could not resolve branch during interrupted-run recovery"
+  current_head="$(git rev-parse HEAD)" || fail "could not resolve HEAD during interrupted-run recovery"
+  if [[ "$current_branch" != "$BRANCH" ]]; then
+    fail "authenticated publisher recovery journal belongs to ${BRANCH}, but worktree is on ${current_branch:-detached}"
+  fi
+
+  if [[ "$current_head" == "$journal_baseline" ]]; then
+    log "recovering interrupted generated artifacts from baseline ${journal_baseline}"
+  else
+    validate_runner_commit "$current_head" "$journal_baseline" "$journal_run_id" || \
+      fail "refusing to attribute an unsafe or different commit to the interrupted publisher"
+
+    run_with_retry "git fetch for interrupted publisher recovery" git fetch "$REMOTE" "$BRANCH"
+    remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || fail "could not resolve remote during interrupted publisher recovery"
+    if [[ "$remote_head" == "$current_head" ]]; then
+      if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+        fail "interrupted publisher commit reached the remote but publish artifacts are unexpectedly dirty"
+      fi
+      remove_recovery_journal || fail "could not clear landed publisher recovery journal"
+      BASELINE_HEAD=""
+      MUTATION_STARTED=0
+      log "reconciled publisher commit ${current_head} that landed before the interruption"
+      return 0
+    fi
+    [[ "$remote_head" == "$journal_baseline" ]] || fail "remote changed across interrupted publisher recovery"
+    log "recovering unpushed interrupted publisher commit ${current_head}"
+  fi
+
+  # Arm EXIT rollback only after every provenance/history/remote check passes.
+  # A refused or temporarily blocked recovery must leave HEAD, files, and the
+  # journal byte-for-byte intact for the next safe retry.
+  BASELINE_HEAD="$journal_baseline"
+  if [[ "$current_head" != "$journal_baseline" ]]; then
+    RUNNER_COMMIT_HEAD="$current_head"
+    RUNNER_COMMIT_RUN_ID="$journal_run_id"
+  fi
+  MUTATION_STARTED=1
+  cleanup_partial_generation || fail "authenticated interrupted publisher rollback did not complete"
+  BASELINE_HEAD=""
+  RUNNER_COMMIT_HEAD=""
+  RUNNER_COMMIT_RUN_ID=""
+  log "interrupted publisher recovery completed"
+}
+
 commit_refresh_snapshot() {
   local commit_output
   local commit_status
-  local index_lock="${REPO_DIR}/.git/index.lock"
 
   if commit_output="$(git commit \
     -m "$commit_message" \
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
-    -m "Automated refresh from the private Mac mini runner." 2>&1)"; then
+    -m "Automated refresh from the private Mac mini runner." \
+    -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}" 2>&1)"; then
     printf '%s\n' "$commit_output"
     return 0
   fi
   commit_status=$?
   printf '%s\n' "$commit_output"
-  if [[ "$commit_status" != "128" || "$commit_output" != *".git/index.lock"* || "$commit_output" != *"File exists"* ]]; then
+  if [[ "$commit_status" != "128" || "$commit_output" != *"index.lock"* || "$commit_output" != *"File exists"* ]]; then
     return "$commit_status"
   fi
-  if ! git_index_lock_is_stale "$index_lock"; then
+  if ! clear_stale_git_index_lock "commit retry"; then
     return "$commit_status"
   fi
-  rm -f -- "$index_lock"
-  log "removed stale git index lock and retrying commit"
+  log "retrying commit after stale git index lock recovery"
   git commit \
     -m "$commit_message" \
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
-    -m "Automated refresh from the private Mac mini runner."
+    -m "Automated refresh from the private Mac mini runner." \
+    -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}"
 }
 
 verify_live_deployment() {
+  unset DEGEN_DOGS_LIVE_VERIFY_RESULT DEGEN_DOGS_RAW_COMMIT_VERIFIED DEGEN_DOGS_LIVE_VERIFY_ERROR
   if [[ "$LIVE_VERIFY_AFTER_PUSH" != "1" ]]; then
     return 0
   fi
@@ -332,8 +611,16 @@ verify_live_deployment() {
   else
     # shellcheck disable=SC1090
     source "$LIVE_VERIFY_ENV" || true
-    export DEGEN_DOGS_REFRESH_RESULT="failed_live_verify"
-    fail "live verification did not complete before timeout"
+    if [[ "${DEGEN_DOGS_LIVE_VERIFY_RESULT:-}" == "timeout" && "${DEGEN_DOGS_RAW_COMMIT_VERIFIED:-}" == "True" ]]; then
+      # The commit has already been pushed and immutable-commit verification is
+      # recorded separately. A slow or wedged Pages deployment must not turn a
+      # successful data publication into a rapid regenerate-and-repush storm.
+      export DEGEN_DOGS_REFRESH_RESULT="success_pushed_live_timeout"
+      log "warning: pushed snapshot is awaiting GitHub Pages after the live-verification timeout"
+    else
+      export DEGEN_DOGS_REFRESH_RESULT="failed_live_verify"
+      fail "live verification failed before proving the immutable pushed snapshot"
+    fi
   fi
   rm -f -- "$LIVE_VERIFY_ENV"
   LIVE_VERIFY_ENV=""
@@ -349,6 +636,9 @@ validate_name() {
 
 validate_name "remote" "$REMOTE"
 validate_name "branch" "$BRANCH"
+if [[ ! "$DEGEN_DOGS_REFRESH_RUN_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]; then
+  fail "invalid refresh run ID"
+fi
 validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_ATTEMPTS" "$GIT_RETRY_ATTEMPTS"
 validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_BASE_SECONDS" "$GIT_RETRY_BASE_SECONDS"
 validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_MAX_SECONDS" "$GIT_RETRY_MAX_SECONDS"
@@ -478,6 +768,8 @@ fi
 if ! git check-ref-format --branch "$BRANCH" >/dev/null 2>&1; then
   fail "invalid git branch ref: ${BRANCH}"
 fi
+clear_stale_git_index_lock "publisher preflight" || fail "git index lock is active, recent, or unsafe"
+recover_interrupted_generation
 
 current_branch="$(git branch --show-current)"
 if [[ "$current_branch" != "$BRANCH" ]]; then
@@ -561,6 +853,7 @@ PY
   fi
 fi
 
+write_recovery_journal || fail "could not persist publisher crash-recovery journal"
 MUTATION_STARTED=1
 
 if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
@@ -722,6 +1015,7 @@ export DEGEN_DOGS_GIT_STATUS_COMPLETED_AT_UTC="$(utc_stamp)"
 if [[ "$DEGEN_DOGS_CHANGED_FILES" == "[]" ]]; then
   log "no generated website/archive data changes to publish"
   MUTATION_STARTED=0
+  remove_recovery_journal || fail "could not clear publisher recovery journal after no-diff refresh"
   export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
   exit 0
 fi
@@ -796,6 +1090,7 @@ git diff --name-only -z --diff-filter=D "$BASELINE_HEAD" -- "${PUBLISH_PATHS[@]}
 # Stage the allowlisted inventory in one index transaction. The previous
 # per-file loop spawned hundreds of git processes and could hold the shared
 # refresh lock for close to a minute on every full rebuild.
+clear_stale_git_index_lock "artifact staging" || fail "git index lock is active, recent, or unsafe"
 git --literal-pathspecs add --pathspec-from-file="$ARTIFACT_LIST" --pathspec-file-nul
 
 rm -f -- "$ARTIFACT_LIST"
@@ -893,11 +1188,18 @@ commit_refresh_snapshot
 export DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
 RUNNER_COMMIT_HEAD="$DEGEN_DOGS_COMMIT_SHA"
+RUNNER_COMMIT_RUN_ID="$DEGEN_DOGS_REFRESH_RUN_ID"
+if [[ "$(git rev-parse HEAD)" != "$RUNNER_COMMIT_HEAD" ]] || \
+  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID"; then
+  fail "publisher commit identity, parent, attribution, or exact path set failed validation"
+fi
 
 if [[ "$SKIP_PUSH" == "1" ]]; then
   log "DEGEN_DOGS_SKIP_PUSH=1; leaving commit local"
   MUTATION_STARTED=0
   RUNNER_COMMIT_HEAD=""
+  RUNNER_COMMIT_RUN_ID=""
+  remove_recovery_journal || fail "could not clear publisher recovery journal after skip-push refresh"
   export DEGEN_DOGS_REFRESH_RESULT="success_skip_push"
   exit 0
 fi
@@ -909,11 +1211,46 @@ remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")"
 if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
   fail "${REMOTE}/${BRANCH} changed during refresh; refusing a divergent push (remote=${remote_head} baseline=${BASELINE_HEAD})"
 fi
-run_with_retry "git push" git push "$REMOTE" "$BRANCH"
+if [[ "$(git rev-parse HEAD)" != "$RUNNER_COMMIT_HEAD" ]] || \
+  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID"; then
+  fail "local branch changed after publisher commit; refusing to push a moving branch ref"
+fi
+push_status=0
+if run_with_retry "git push" git push "$REMOTE" "${RUNNER_COMMIT_HEAD}:refs/heads/${BRANCH}"; then
+  :
+else
+  push_status=$?
+  if ! run_with_retry "git fetch after ambiguous push failure" git fetch "$REMOTE" "$BRANCH"; then
+    # A transport failure can hide a push that actually landed. Preserve the
+    # authenticated commit and journal for the next locked recovery instead of
+    # rewinding a potentially published snapshot.
+    MUTATION_STARTED=0
+    fail "push failed and remote state could not be reconciled; preserving authenticated recovery journal"
+  fi
+  remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || {
+    MUTATION_STARTED=0
+    fail "push failed and reconciled remote ref could not be resolved"
+  }
+  if [[ "$remote_head" == "$RUNNER_COMMIT_HEAD" ]]; then
+    log "push command reported failure, but immutable publisher commit is confirmed on the remote"
+  elif [[ "$remote_head" == "$BASELINE_HEAD" ]]; then
+    fail "immutable publisher push failed with status ${push_status} and did not land"
+  else
+    MUTATION_STARTED=0
+    fail "remote changed unexpectedly after ambiguous push failure; preserving authenticated recovery journal"
+  fi
+fi
+# From this point the immutable commit is known to have landed. Never let a
+# later diagnostic or Pages failure rewind it locally.
+MUTATION_STARTED=0
+if [[ "$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" != "$RUNNER_COMMIT_HEAD" ]]; then
+  fail "remote-tracking ref did not confirm the immutable publisher commit after push"
+fi
 export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
-MUTATION_STARTED=0
 RUNNER_COMMIT_HEAD=""
+RUNNER_COMMIT_RUN_ID=""
+remove_recovery_journal || fail "could not clear publisher recovery journal after push"
 
 verify_live_deployment
 log "published snapshot block=${latest_block} current_dog=${current_dog}"

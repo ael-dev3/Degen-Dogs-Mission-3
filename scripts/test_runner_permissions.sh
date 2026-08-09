@@ -127,6 +127,7 @@ done
 
 grep -Fq 'FULL_REFRESH="${DEGEN_DOGS_FULL_REFRESH:-0}"' "${ROOT}/scripts/install_hourly_refresh_launchd.sh"
 grep -Fq 'RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-1}"' "${ROOT}/scripts/install_hourly_refresh_launchd.sh"
+grep -Fq '${DEGEN_DOGS_REFRESH_LOCK_PATH:-${MISSION3_REFRESH_LOCK_PATH:-${LOCK_DIR}/refresh.lock}}' "${ROOT}/scripts/install_hourly_refresh_launchd.sh"
 grep -Fq 'plist["EnvironmentVariables"]["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] = os.environ["RUN_MISSION3_ARCHIVE"]' "${ROOT}/scripts/install_hourly_refresh_launchd.sh"
 grep -Fq 'env["DEGEN_DOGS_FULL_REFRESH"] = "0"' "${ROOT}/scripts/install_auction_watcher_launchd.sh"
 grep -Fq 'env["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] = "0"' "${ROOT}/scripts/install_auction_watcher_launchd.sh"
