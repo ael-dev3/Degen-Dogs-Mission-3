@@ -1,0 +1,129 @@
+{
+  "generated_at_utc": "2026-08-09T18:42:11Z",
+  "record": {
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-09T15:18:05Z",
+    "amount": {
+      "amount_usd_at_event": "15.32358249",
+      "eth_usd_price_at_event": "1915.447810935271",
+      "eth_usd_price_date_utc": "2026-08-09",
+      "native": "0.008",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "8000000000000000",
+      "usd_estimate": "15.32358249",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$15.32",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
+      "usd_estimate_price_date_utc": "2026-08-09",
+      "usd_estimate_price_usd": "1915.447810935271",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
+    },
+    "auction_created": {
+      "block_number": 49706256,
+      "block_time_utc": "2026-08-08T15:10:59Z",
+      "tx_hash": "0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83",
+      "tx_url": "https://basescan.org/tx/0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-08-08T15:11:21Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0xe15d6b5c12390865129938063884467a9c365a50e246151af3e4110fcd81ef5d"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 797,
+    "dog_image_url": "https://api.degendogs.club/images/797.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/797",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83",
+      "dog_page": "https://degendogs.club/#dog797",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/797",
+      "repo_archive": "archive/dogs/by-id/797.json",
+      "settlement_tx": "https://basescan.org/tx/0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4"
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#387/674",
+      "rank": 387,
+      "scope": "base_existing",
+      "total": 674
+    },
+    "schema_version": 1,
+    "search_text": "dog 797 dog #797 797 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.32 $15.32 2026-08-09t15:18:05z 0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83 0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4 #387/674 generated auction feed 0xe15d6b5c12390865129938063884467a9c365a50e246151af3e4110fcd81ef5d background: none (91.5%) background none body: grey (12.6%) body grey neck: none (41.2%) neck none mouth: tongue (10.1%) mouth tongue ears: earbuds (31.9%) ears earbuds head: blackcap (7.7%) head blackcap eyes: glasses (12.8%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "settlement": {
+      "block_number": 49749669,
+      "block_time_utc": "2026-08-09T15:18:05Z",
+      "settled": true,
+      "tx_hash": "0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4",
+      "tx_url": "https://basescan.org/tx/0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4"
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_winners",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "settled",
+    "traits": [
+      {
+        "display": "Background: None (91.5%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Grey (12.6%)",
+        "trait_type": "Body",
+        "value": "Grey"
+      },
+      {
+        "display": "Neck: None (41.2%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Tongue (10.1%)",
+        "trait_type": "Mouth",
+        "value": "Tongue"
+      },
+      {
+        "display": "Ears: Earbuds (31.9%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: BlackCap (7.7%)",
+        "trait_type": "Head",
+        "value": "BlackCap"
+      },
+      {
+        "display": "Eyes: Glasses (12.8%)",
+        "trait_type": "Eyes",
+        "value": "Glasses"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}

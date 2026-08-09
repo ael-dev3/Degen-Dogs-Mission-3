@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#518/672",
-      "rank": 518,
+      "display": "#517/674",
+      "rank": 517,
       "scope": "base_existing",
-      "total": 672
+      "total": 674
     },
     "schema_version": 1,
-    "search_text": "dog 171 dog #171 171 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d #518/672 background: none; body: blue; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 171 dog #171 171 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x1cfcfd22ec6fef044783c06e7005e1bf04bcbb406b79369e84cc73cc4c2be1a8 0x3d3269a290ce1ad00e14ef6926f758d7b3e06479d59997af17c90a29829a8f0d #517/674 background: none; body: blue; neck: redcollar; mouth: none; ears: loopearring; head: baseballcap; eyes: vrgoggles polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 34382779,
       "block_time_utc": "2022-10-15T17:00:39Z",
@@ -88,17 +88,17 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.2%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.4%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -108,7 +108,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.6%)",
+        "display": "Eyes: VRGoggles (10.5%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

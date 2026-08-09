@@ -2058,5 +2058,25 @@
     "token_id": 795,
     "transaction_hash": "0x1aef22ca486089151846f86bd0b2798d484639882de007e2b9a5702c7a10489a",
     "winner": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
+  },
+  {
+    "amount_eth": "0.008",
+    "amount_raw": "8000000000000000",
+    "block_number": 49706256,
+    "block_time_utc": "2026-08-08T15:10:59Z",
+    "log_index": 277,
+    "token_id": 796,
+    "transaction_hash": "0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83",
+    "winner": "0x76d0e7a13248945ee9f808b4a472262b28778942"
+  },
+  {
+    "amount_eth": "0.008",
+    "amount_raw": "8000000000000000",
+    "block_number": 49749669,
+    "block_time_utc": "2026-08-09T15:18:05Z",
+    "log_index": 308,
+    "token_id": 797,
+    "transaction_hash": "0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4",
+    "winner": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   }
 ]
