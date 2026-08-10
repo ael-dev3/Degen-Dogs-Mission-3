@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#52/674",
-      "rank": 52,
+      "display": "#57/675",
+      "rank": 57,
       "scope": "base_existing",
-      "total": 674
+      "total": 675
     },
     "schema_version": 1,
-    "search_text": "dog 148 dog #148 148 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21c2792480006bc591b1c9267e356fe6160a748cf407853dabdb3687d95bfc08 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 #52/674 background: halo; body: blue; neck: none; mouth: tongue; ears: earbuds; head: partyhat; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 148 dog #148 148 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x21c2792480006bc591b1c9267e356fe6160a748cf407853dabdb3687d95bfc08 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 #57/675 background: halo; body: blue; neck: none; mouth: tongue; ears: earbuds; head: partyhat; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 30981510,
       "block_time_utc": "2022-07-21T16:42:42Z",
@@ -78,12 +78,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.5%)",
+        "display": "Background: Halo (8.4%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Blue (8.8%)",
+        "display": "Body: Blue (8.7%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -93,22 +93,22 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Tongue (10.1%)",
+        "display": "Mouth: Tongue (10.2%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (31.9%)",
+        "display": "Ears: Earbuds (32.0%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: PartyHat (4.2%)",
+        "display": "Head: PartyHat (4.3%)",
         "trait_type": "Head",
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: Glasses (12.8%)",
+        "display": "Eyes: Glasses (12.7%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

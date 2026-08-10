@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#604/674",
-      "rank": 604,
+      "display": "#605/675",
+      "rank": 605,
       "scope": "base_existing",
-      "total": 674
+      "total": 675
     },
     "schema_version": 1,
-    "search_text": "dog 481 dog #481 481 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xff872eb74e44e9d2284614f9080bfea8d593d1680f014424f9a3268a2e6b2a4d 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 #604/674 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: sunglasses 0xf09332b7e15f080f5f637d0d2c7f9b93b3472375f9ea09571f88bf29222022c7 chain_logs contract_getters",
+    "search_text": "dog 481 dog #481 481 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xff872eb74e44e9d2284614f9080bfea8d593d1680f014424f9a3268a2e6b2a4d 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 #605/675 background: none; body: brown; neck: redcollar; mouth: none; ears: none; head: baseballcap; eyes: sunglasses 0xf09332b7e15f080f5f637d0d2c7f9b93b3472375f9ea09571f88bf29222022c7 chain_logs contract_getters",
     "settlement": {
       "block_number": 26245226,
       "block_time_utc": "2025-09-08T13:34:53Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,17 +88,17 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.4%)",
+        "display": "Neck: RedCollar (29.5%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.3%)",
+        "display": "Ears: None (26.2%)",
         "trait_type": "Ears",
         "value": "None"
       },

@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#112/674",
-      "rank": 112,
+      "display": "#109/675",
+      "rank": 109,
       "scope": "base_existing",
-      "total": 674
+      "total": 675
     },
     "schema_version": 1,
-    "search_text": "dog 287 dog #287 287 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 3300 degen 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a #112/674 background: none; body: blue; neck: studdedcollar; mouth: none; ears: none; head: beanie; eyes: monocle 0xa770381b8e13a2edb2e0fa1ed2dc68efe327e5b74fff839e22f166c1feeee349 0xd8f426cf2c186555f021af4c2832cd73f4478269698d4b1188ab53b2a05abd66 chain_logs contract_getters",
+    "search_text": "dog 287 dog #287 287 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 3300 degen 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a #109/675 background: none; body: blue; neck: studdedcollar; mouth: none; ears: none; head: beanie; eyes: monocle 0xa770381b8e13a2edb2e0fa1ed2dc68efe327e5b74fff839e22f166c1feeee349 0xd8f426cf2c186555f021af4c2832cd73f4478269698d4b1188ab53b2a05abd66 chain_logs contract_getters",
     "settlement": {
       "block_number": 25461075,
       "block_time_utc": "2025-02-16T07:07:01Z",
@@ -79,12 +79,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Blue (8.8%)",
+        "display": "Body: Blue (8.7%)",
         "trait_type": "Body",
         "value": "Blue"
       },
@@ -94,12 +94,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.3%)",
+        "display": "Ears: None (26.2%)",
         "trait_type": "Ears",
         "value": "None"
       },

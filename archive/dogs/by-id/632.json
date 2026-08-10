@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#90/674",
+      "display": "#90/675",
       "rank": 90,
       "scope": "base_existing",
-      "total": 674
+      "total": 675
     },
     "schema_version": 1,
-    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 12340000000000000 24.29 $24.29 2026-02-21t06:26:53z 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #90/674 generated auction feed 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 background: none (91.5%) background none body: sugarskull (6.5%) body sugarskull neck: redcollar (29.4%) neck redcollar mouth: tongue (10.1%) mouth tongue ears: loopearring (27.3%) ears loopearring head: hoodie (4.7%) head hoodie eyes: bluelasereyes (11.3%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 632 dog #632 632 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01234 eth 12340000000000000 24.29 $24.29 2026-02-21t06:26:53z 0x28ca4cbd01944f1e5cf494926d898def36477fc2f26c9c76160fc0b76afb2832 0x61c5ac667fdf9958d41e9b5e82cbed9aa9dd3bb846219d1b030651f0b8f0437b #90/675 generated auction feed 0xa0312d803f03e50054fde2473ae05bebd1b52e286a41699e27a223ec57049371 background: none (91.6%) background none body: sugarskull (6.5%) body sugarskull neck: redcollar (29.5%) neck redcollar mouth: tongue (10.2%) mouth tongue ears: loopearring (27.3%) ears loopearring head: hoodie (4.7%) head hoodie eyes: bluelasereyes (11.3%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 42432933,
       "block_time_utc": "2026-02-21T06:26:53Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,12 +90,12 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (29.4%)",
+        "display": "Neck: RedCollar (29.5%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (10.1%)",
+        "display": "Mouth: Tongue (10.2%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
