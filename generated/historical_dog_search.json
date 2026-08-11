@@ -21582,13 +21582,13 @@
     "dog_external_url": "https://degendogs.club/#dog799",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/799",
     "status": "ongoing",
-    "winner": "@0xael.eth",
-    "winner_url": "https://farcaster.xyz/0xael.eth",
-    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "amount": "0.007 ETH ($13)",
-    "amount_raw": "7000000000000000",
-    "bid_count": 1,
-    "unique_bidder_count": 1,
+    "winner": "@farcy",
+    "winner_url": "https://farcaster.xyz/farcy",
+    "winner_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
+    "amount": "0.00849 ETH ($16)",
+    "amount_raw": "8490000000000000",
+    "bid_count": 3,
+    "unique_bidder_count": 3,
     "auction_created_time_utc": "2026-08-10 15:53:45",
     "settled_time_utc": "",
     "rarity": "#127/675",
@@ -21597,6 +21597,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "live_base_contract_call",
     "sources": "base_rpc,dog_metadata_api",
-    "search_text": "3 Base 8453 799 Dog #799 Background: None; Body: Orange; Neck: RedCollar; Mouth: Tongue; Ears: Earbuds; Head: PartyHat; Eyes: None @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942"
+    "search_text": "3 Base 8453 799 Dog #799 Background: None; Body: Orange; Neck: RedCollar; Mouth: Tongue; Ears: Earbuds; Head: PartyHat; Eyes: None @farcy 0x84cb3b93f9a918632f05528770b5cf926396b0f4"
   }
 ]
