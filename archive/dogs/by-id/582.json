@@ -56,13 +56,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#147/675",
+      "display": "#147/676",
       "rank": 147,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 582 dog #582 582 mission 2 mission 2 degen chain settled 0x409538216575caefe49af5af9b12ef4b4496041b 0x4095…041b 26622 degen 0xbd9e74c2f5cdb195bce02b3d82c3de9f6ed34a57bfd6e8e36eea04e73409ce7d 0xa468e1432ca06647f30621f3b4ed7136f40e63d29f936e404feb27da32d582d2 #147/675 background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: bluelasereyes 0x083684c926d9e9b0502e93bf77c37d4f2907a3316138f0ab0432882e99f2fe67 0x189e0db1c3582389f361cd317b186d16c969f295656364f3e55a914e2bcda409 0x51dbda9818652e1daf3eefb0dc636f2243e9e122350b85d3330e06b17cefdd2b 0x8122d4ed1587f813c9a41958db689c8a17d7ac2f6ac07d4dfbd546ac7efe4fb0 0x0a042e51a4844b37d4c238ad3f943eb2d93111a9e9ca725c956ce4bc462f04e3 chain_logs contract_getters",
+    "search_text": "dog 582 dog #582 582 mission 2 mission 2 degen chain settled 0x409538216575caefe49af5af9b12ef4b4496041b 0x4095…041b 26622 degen 0xbd9e74c2f5cdb195bce02b3d82c3de9f6ed34a57bfd6e8e36eea04e73409ce7d 0xa468e1432ca06647f30621f3b4ed7136f40e63d29f936e404feb27da32d582d2 #147/676 background: none; body: grey; neck: redcollar; mouth: teeth; ears: earbuds; head: toque; eyes: bluelasereyes 0x083684c926d9e9b0502e93bf77c37d4f2907a3316138f0ab0432882e99f2fe67 0x189e0db1c3582389f361cd317b186d16c969f295656364f3e55a914e2bcda409 0x51dbda9818652e1daf3eefb0dc636f2243e9e122350b85d3330e06b17cefdd2b 0x8122d4ed1587f813c9a41958db689c8a17d7ac2f6ac07d4dfbd546ac7efe4fb0 0x0a042e51a4844b37d4c238ad3f943eb2d93111a9e9ca725c956ce4bc462f04e3 chain_logs contract_getters",
     "settlement": {
       "block_number": 26612567,
       "block_time_utc": "2025-12-30T07:45:46Z",
@@ -92,7 +92,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -102,7 +102,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -112,7 +112,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.3%)",
+        "display": "Eyes: BlueLaserEyes (11.2%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

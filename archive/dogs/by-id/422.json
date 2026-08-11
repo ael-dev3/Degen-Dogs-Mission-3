@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#330/675",
-      "rank": 330,
+      "display": "#332/676",
+      "rank": 332,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 422 dog #422 422 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xaeeffbafd0bf80c239dac6d21483abc070f6c61fc79d59cfc4afd31c6fe6c785 0x9f63b7f9cdded89cbd2737141e92b8ab7b42d9e4d929e9cb8a440804252457a6 #330/675 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: beanie; eyes: masksnorkel 0xe3cdfc28ddb5edf3f6bacd7260c6313cb9d1905998d0598d4f8b30ef49da512c 0x16cc1778411a0f1567ebf52e65e8cf08f9f81e8cbcee5397b2dfc3f6390af57c chain_logs contract_getters",
+    "search_text": "dog 422 dog #422 422 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0xaeeffbafd0bf80c239dac6d21483abc070f6c61fc79d59cfc4afd31c6fe6c785 0x9f63b7f9cdded89cbd2737141e92b8ab7b42d9e4d929e9cb8a440804252457a6 #332/676 background: none; body: white; neck: redcollar; mouth: none; ears: none; head: beanie; eyes: masksnorkel 0xe3cdfc28ddb5edf3f6bacd7260c6313cb9d1905998d0598d4f8b30ef49da512c 0x16cc1778411a0f1567ebf52e65e8cf08f9f81e8cbcee5397b2dfc3f6390af57c chain_logs contract_getters",
     "settlement": {
       "block_number": 26040340,
       "block_time_utc": "2025-07-03T04:38:04Z",
@@ -84,17 +84,17 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.1%)",
+        "display": "Mouth: None (68.2%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.8%)",
+        "display": "Eyes: MaskSnorkel (9.9%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

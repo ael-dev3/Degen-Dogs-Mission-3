@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-08-10T16:10:45Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-11T15:55:23Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-11T16:00:33Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "15.88816609",
+      "eth_usd_price_at_event": "1871.3976551883159",
       "eth_usd_price_date_utc": "2026-08-11",
       "native": "0.00849",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "8490000000000000",
-      "usd_estimate": "15.80417745",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$15.80",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "15.88816609",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$15.89",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-11",
-      "usd_estimate_price_usd": "1861.505",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1871.3976551883159",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 49793939,
@@ -50,23 +50,23 @@
       "explorer": "https://basescan.org/address/0x84cb3b93f9a918632f05528770b5cf926396b0f4",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/799",
       "repo_archive": "archive/dogs/by-id/799.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626"
     },
     "mission": 3,
     "rarity": {
-      "display": "#127/675",
+      "display": "#127/676",
       "rank": 127,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 799 dog #799 799 mission 3 mission 3 base ongoing 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy 0.00849 eth 15.80 $15.80 2026-08-11 15:55:23 #127/675 Background: None; Body: Orange; Neck: RedCollar; Mouth: Tongue; Ears: Earbuds; Head: PartyHat; Eyes: None @farcy 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 0x4e1fa22c4944ccb2b72a40025d752f96a31c56965eed0c10bf89beaa1b75f239 0x5717a95a54210e70f0243b7fc98e82f85bb846cff6f62d37351d4966f8f9c8b4 0x5eaf0e5bd2badee803194b9256510e4efd01f70adc14fd73b93d70c3d8e902e9",
+    "search_text": "dog 799 dog #799 799 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.00849 eth 8490000000000000 15.89 $15.89 2026-08-11t16:00:33z 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626 #127/676 generated auction feed 0x4e1fa22c4944ccb2b72a40025d752f96a31c56965eed0c10bf89beaa1b75f239 0x5717a95a54210e70f0243b7fc98e82f85bb846cff6f62d37351d4966f8f9c8b4 0x5eaf0e5bd2badee803194b9256510e4efd01f70adc14fd73b93d70c3d8e902e9 background: none (91.6%) background none body: orange (8.3%) body orange neck: redcollar (29.4%) neck redcollar mouth: tongue (10.2%) mouth tongue ears: earbuds (32.1%) ears earbuds head: partyhat (4.3%) head partyhat eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 49837343,
+      "block_time_utc": "2026-08-11T16:00:33Z",
+      "settled": true,
+      "tx_hash": "0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626",
+      "tx_url": "https://basescan.org/tx/0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626"
     },
     "source": {
       "confidence": "verified",
@@ -74,12 +74,13 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
+        "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (91.6%)",
@@ -92,7 +93,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -102,7 +103,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.0%)",
+        "display": "Ears: Earbuds (32.1%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

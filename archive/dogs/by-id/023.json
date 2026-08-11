@@ -55,13 +55,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#318/675",
-      "rank": 318,
+      "display": "#316/676",
+      "rank": 316,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 23 dog #23 23 mission 1 mission 1 polygon settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 0.311 weth 0x08deabc9dee5049a24dec4661a1f29f8c8e7fd2e8f8e32fb21e9ae73657db384 0xb4bc56416e84a1ce6de6e8ecfa0dbbd49fc6ce57bfa4bba135d4ed298bee96fc #318/675 background: halo; body: black; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: glasses 0x4ad7109e22bf968464f609b16ce4a25ca157665d36bb2c432b91787cbb0f544c 0x239e0bae85eb7f5e16f1069dfe893c8f4c08b0873e94938e3fd078dd2abe7bb3 0x24bf775b968f5e146f8c95935dc25c0e76895a5f934961ae61dda154c46dad40 0x966040c8b338caf5f314b18b364526172335bc4bd68e6977bc3e02658dc167b3 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 23 dog #23 23 mission 1 mission 1 polygon settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 0.311 weth 0x08deabc9dee5049a24dec4661a1f29f8c8e7fd2e8f8e32fb21e9ae73657db384 0xb4bc56416e84a1ce6de6e8ecfa0dbbd49fc6ce57bfa4bba135d4ed298bee96fc #316/676 background: halo; body: black; neck: studdedcollar; mouth: none; ears: none; head: none; eyes: glasses 0x4ad7109e22bf968464f609b16ce4a25ca157665d36bb2c432b91787cbb0f544c 0x239e0bae85eb7f5e16f1069dfe893c8f4c08b0873e94938e3fd078dd2abe7bb3 0x24bf775b968f5e146f8c95935dc25c0e76895a5f934961ae61dda154c46dad40 0x966040c8b338caf5f314b18b364526172335bc4bd68e6977bc3e02658dc167b3 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 26103604,
       "block_time_utc": "2022-03-19T07:26:07Z",
@@ -88,7 +88,7 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Black (11.9%)",
+        "display": "Body: Black (11.8%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -98,7 +98,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.1%)",
+        "display": "Mouth: None (68.2%)",
         "trait_type": "Mouth",
         "value": "None"
       },

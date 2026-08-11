@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#654/675",
-      "rank": 654,
+      "display": "#656/676",
+      "rank": 656,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 #654/675 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (91.6%) background none body: redbrown (15.3%) body redbrown neck: redcollar (29.5%) neck redcollar mouth: none (68.1%) mouth none ears: loopearring (27.3%) ears loopearring head: none (20.3%) head none eyes: masksnorkel (9.8%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 773 dog #773 773 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 18.89 $18.89 2026-07-15t08:24:57z 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 #656/676 generated auction feed 0x7cc16e4ee052c4bc8941ff940b9cfac2ca2e2d6904eb6b3e9fd01913c8cddd6e background: none (91.6%) background none body: redbrown (15.2%) body redbrown neck: redcollar (29.4%) neck redcollar mouth: none (68.2%) mouth none ears: loopearring (27.2%) ears loopearring head: none (20.3%) head none eyes: masksnorkel (9.9%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48657275,
       "block_time_utc": "2026-07-15T08:24:57Z",
@@ -85,22 +85,22 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.3%)",
+        "display": "Body: RedBrown (15.2%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.1%)",
+        "display": "Mouth: None (68.2%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -110,7 +110,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (9.8%)",
+        "display": "Eyes: MaskSnorkel (9.9%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

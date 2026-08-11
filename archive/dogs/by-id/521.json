@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#15/675",
+      "display": "#15/676",
       "rank": 15,
       "scope": "base_existing",
-      "total": 675
+      "total": 676
     },
     "schema_version": 1,
-    "search_text": "dog 521 dog #521 521 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x4a1fa18fed571136b227cf6d27150977bb98241e2100ddee5f29c6a981bc2d97 0x5437af9c573f5fedb5fc6648ab65278a9be0dd1ff138debd072d3a81de85c2fc #15/675 background: none; body: sugarskull; neck: goldnecklace; mouth: bone; ears: loopearring; head: headphones; eyes: monocle 0x1f93b2b1f87fa0820aaaa125e0624b5595a43c5d5e908f6f5e9dad0b39ac3f03 chain_logs contract_getters",
+    "search_text": "dog 521 dog #521 521 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0x4a1fa18fed571136b227cf6d27150977bb98241e2100ddee5f29c6a981bc2d97 0x5437af9c573f5fedb5fc6648ab65278a9be0dd1ff138debd072d3a81de85c2fc #15/676 background: none; body: sugarskull; neck: goldnecklace; mouth: bone; ears: loopearring; head: headphones; eyes: monocle 0x1f93b2b1f87fa0820aaaa125e0624b5595a43c5d5e908f6f5e9dad0b39ac3f03 chain_logs contract_getters",
     "settlement": {
       "block_number": 26391336,
       "block_time_utc": "2025-10-27T03:11:01Z",
@@ -88,7 +88,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: GoldNecklace (19.0%)",
+        "display": "Neck: GoldNecklace (18.9%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -98,7 +98,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -108,7 +108,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Monocle (7.3%)",
+        "display": "Eyes: Monocle (7.2%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }
