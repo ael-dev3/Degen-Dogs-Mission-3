@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "7000000000000000",
-      "usd_estimate": "13.21376000",
+      "usd_estimate": "13.19804500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$13.21",
+      "usd_estimate_display": "$13.20",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-12",
-      "usd_estimate_price_usd": "1887.68",
+      "usd_estimate_price_usd": "1885.435",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 677
     },
     "schema_version": 1,
-    "search_text": "dog 801 dog #801 801 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 13.21 $13.21 2026-08-12t16:30:17z 0x373ca217764a26d00c507d8b1eeb2506eba9683d26ce994884831357ed153ace #423/677 generated auction feed 0x91bd08cfb2958e8c974ccf87aec86c1dc149aee41780d764682c24e26c8610eb background: none (91.6%) background none body: redbrown (15.4%) body redbrown neck: redcollar (29.5%) neck redcollar mouth: none (68.2%) mouth none ears: earbuds (32.2%) ears earbuds head: whitemohawk (6.8%) head whitemohawk eyes: monocle (7.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 801 dog #801 801 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.007 eth 13.20 $13.20 2026-08-12 16:30:17 #423/677 Background: None; Body: RedBrown; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: WhiteMohawk; Eyes: Monocle @0xael.eth 0x373ca217764a26d00c507d8b1eeb2506eba9683d26ce994884831357ed153ace 0x91bd08cfb2958e8c974ccf87aec86c1dc149aee41780d764682c24e26c8610eb",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -72,7 +72,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer",
+        "dashboard_builder",
         "generated_auction_timeline",
         "generated_auction_feed"
       ]
