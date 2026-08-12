@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49880289"
+    "value": "49882753"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-12 15:52:05"
+    "value": "2026-08-12 17:14:13"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xfcb16380ff515c2339ae4d6698c9e60e5e3d758994d6e7ae16a6f8a1582d1e24"
+    "value": "0xbf30f7967d8bc7df310d005fc936b10eec82ea82afa57aa96d2962c0de3adf3e"
   },
   {
     "metric": "snapshot_confirmations",
@@ -69,23 +69,23 @@
   },
   {
     "metric": "dog_total_supply",
-    "value": "801"
+    "value": "802"
   },
   {
     "metric": "dog_id_ceiling",
-    "value": "801"
+    "value": "802"
   },
   {
     "metric": "dog_token_uri_verification_status",
-    "value": "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity"
+    "value": "hash_pinned_cross_provider_exact_outcome_quorum"
   },
   {
     "metric": "dog_base_existence_verification_status",
-    "value": "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity"
+    "value": "hash_pinned_cross_provider_exists_token_uri_parity_quorum"
   },
   {
     "metric": "dog_token_uri_present_count",
-    "value": "676"
+    "value": "677"
   },
   {
     "metric": "dog_token_uri_unavailable_count",
@@ -93,7 +93,7 @@
   },
   {
     "metric": "dog_base_existing_count",
-    "value": "676"
+    "value": "677"
   },
   {
     "metric": "dog_base_unclaimed_count",
@@ -101,7 +101,7 @@
   },
   {
     "metric": "dog_base_existing_token_ids_sha256",
-    "value": "d83b090d38e6482a0e5b71a399123a0a455eacc57f1a837b98f22f0fe3c05729"
+    "value": "5f252293080c13c6becc9d03fd76c6e5bb0a3606c83ad57c928281a1373dcb2d"
   },
   {
     "metric": "dog_base_unclaimed_token_ids_sha256",
@@ -113,7 +113,7 @@
   },
   {
     "metric": "dog_metadata_onchain_verified_count",
-    "value": "676"
+    "value": "677"
   },
   {
     "metric": "dog_metadata_unavailable_count",
@@ -125,7 +125,7 @@
   },
   {
     "metric": "dog_metadata_content_observed_count",
-    "value": "676"
+    "value": "677"
   },
   {
     "metric": "dog_rarity_verification_status",
@@ -133,7 +133,7 @@
   },
   {
     "metric": "dog_rarity_universe_count",
-    "value": "676"
+    "value": "677"
   },
   {
     "metric": "dog_rarity_excluded_nonexistent_count",
@@ -161,23 +161,23 @@
   },
   {
     "metric": "dog_rarity_attested_block",
-    "value": "49839157"
+    "value": "49882753"
   },
   {
     "metric": "dog_rarity_attested_block_hash",
-    "value": "0xd02968db35b12bd400b47ed80b9618f0dd1ab202523e7fd276ebd20a7fb098f7"
+    "value": "0xbf30f7967d8bc7df310d005fc936b10eec82ea82afa57aa96d2962c0de3adf3e"
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49880289"
+    "value": "49882753"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xfcb16380ff515c2339ae4d6698c9e60e5e3d758994d6e7ae16a6f8a1582d1e24"
+    "value": "0xbf30f7967d8bc7df310d005fc936b10eec82ea82afa57aa96d2962c0de3adf3e"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
-    "value": "hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation"
+    "value": "full_snapshot_exists_token_uri_content_schema_attested"
   },
   {
     "metric": "woof_token",
@@ -201,7 +201,7 @@
   },
   {
     "metric": "woof_holder_candidate_count",
-    "value": "0"
+    "value": "311"
   },
   {
     "metric": "woof_holder_balance_sum_raw",
@@ -213,7 +213,7 @@
   },
   {
     "metric": "woof_usd_price",
-    "value": "0.0000004395"
+    "value": "0.000000444"
   },
   {
     "metric": "woof_usd_source",
@@ -229,7 +229,7 @@
   },
   {
     "metric": "sup_usd_price",
-    "value": "0.006119"
+    "value": "0.00615"
   },
   {
     "metric": "sup_usd_source",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1890.91"
+    "value": "1887.68"
   },
   {
     "metric": "eth_usd_source",
@@ -305,7 +305,7 @@
   },
   {
     "metric": "reward_woof_flow_usd_per_day",
-    "value": "9.01"
+    "value": "9.1"
   },
   {
     "metric": "reward_woof_per_dog_per_day",
@@ -313,7 +313,7 @@
   },
   {
     "metric": "reward_woof_per_dog_usd_per_day",
-    "value": "0.067723"
+    "value": "0.068417"
   },
   {
     "metric": "reward_sup_received",
@@ -329,7 +329,7 @@
   },
   {
     "metric": "reward_sup_flow_usd_per_day",
-    "value": "1.22"
+    "value": "1.23"
   },
   {
     "metric": "reward_sup_per_dog_per_day",
@@ -337,31 +337,31 @@
   },
   {
     "metric": "reward_sup_per_dog_usd_per_day",
-    "value": "0.009182"
+    "value": "0.009229"
   },
   {
     "metric": "reward_total_flow_usd_per_day",
-    "value": "10.23"
+    "value": "10.33"
   },
   {
     "metric": "reward_total_per_dog_usd_per_day",
-    "value": "0.076905"
+    "value": "0.077645"
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "196.74"
+    "value": "170.13"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.5083"
+    "value": "0.5878"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "185.53"
+    "value": "214.54"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈186% APR"
+    "value": "≈215% APR"
   },
   {
     "metric": "woof_holders",
@@ -381,7 +381,7 @@
   },
   {
     "metric": "current_auction_token_id",
-    "value": "800"
+    "value": "801"
   },
   {
     "metric": "current_auction_status",
@@ -389,11 +389,11 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.008"
+    "value": "0.007"
   },
   {
     "metric": "current_bid_usd",
-    "value": "15.13"
+    "value": "13.21"
   },
   {
     "metric": "current_bidder",
@@ -405,27 +405,27 @@
   },
   {
     "metric": "current_auction_end_utc",
-    "value": "2026-08-12 16:00:33"
+    "value": "2026-08-13 16:03:19"
   },
   {
     "metric": "created_auctions",
-    "value": "211"
+    "value": "212"
   },
   {
     "metric": "settled_auctions",
-    "value": "210"
+    "value": "211"
   },
   {
     "metric": "total_bid_eth",
-    "value": "38.18880300"
+    "value": "38.195803"
   },
   {
     "metric": "total_settled_eth",
-    "value": "7.84954000"
+    "value": "7.85754"
   },
   {
     "metric": "highest_bid_eth",
-    "value": "0.30210000"
+    "value": "0.3021"
   },
   {
     "metric": "season5_reward_total_sup",
@@ -441,7 +441,7 @@
   },
   {
     "metric": "season6_current_bidder_prior_wins",
-    "value": "16"
+    "value": "17"
   },
   {
     "metric": "season6_current_bidder_projected_capped_sup_if_wins",
@@ -449,15 +449,15 @@
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "76.49"
+    "value": "76.88"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
-    "value": "26259.481062"
+    "value": "26898.008253"
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "160.68"
+    "value": "165.42"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -477,7 +477,7 @@
   },
   {
     "metric": "season6_sup_capped_projected_full_allocated",
-    "value": "204603.968311"
+    "value": "204261.287506"
   },
   {
     "metric": "season6_sup_confirmed_wallets",
@@ -485,7 +485,7 @@
   },
   {
     "metric": "season6_sup_confirmed_wins",
-    "value": "69"
+    "value": "70"
   },
   {
     "metric": "season6_sup_current_bid_cap_remaining_before_win_sup",
@@ -505,27 +505,27 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_raw_incremental_sup",
-    "value": "537.667239"
+    "value": "499.123582"
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-08-12T16:00:33Z"
+    "value": "2026-08-13T16:03:19Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
-    "value": "26259.481062"
+    "value": "26898.008253"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_without_win_sup",
-    "value": "25721.813824"
+    "value": "26398.884671"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_wins",
-    "value": "16"
+    "value": "17"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_xp",
-    "value": "1600"
+    "value": "1700"
   },
   {
     "metric": "season6_sup_current_bidder_wallet",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "19.34"
+    "value": "19.28"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "195668.369017"
+    "value": "195825.90406"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
@@ -577,7 +577,7 @@
   },
   {
     "metric": "season6_sup_settled_win_count_to_date",
-    "value": "69"
+    "value": "70"
   },
   {
     "metric": "season6_sup_start_utc",
@@ -601,7 +601,7 @@
   },
   {
     "metric": "season6_sup_total_xp_confirmed",
-    "value": "6900"
+    "value": "7000"
   },
   {
     "metric": "season6_sup_unallocated_due_to_zero_xp",
@@ -609,11 +609,11 @@
   },
   {
     "metric": "season6_sup_usd_price",
-    "value": "0.006119"
+    "value": "0.00615"
   },
   {
     "metric": "season6_sup_usd_price_used",
-    "value": "0.006119"
+    "value": "0.00615"
   },
   {
     "metric": "season6_sup_usd_source_used",

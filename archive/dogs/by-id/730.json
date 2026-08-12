@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#86/676",
+      "display": "#86/677",
       "rank": 86,
       "scope": "base_existing",
-      "total": 676
+      "total": 677
     },
     "schema_version": 1,
-    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.011 eth 11000000000000000 22.05 $22.05 2026-06-01t19:24:33z 0xab978626dd79d6e4a1f50f3dbd926b1309ca3a9f70c4134a2211a4a33fa016e8 0xb94452d9c31d47ee4129c1043fbd00a92ead7169fb17b285b52502a2fc6b37b2 #86/676 generated auction feed 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 background: none (91.6%) background none body: orange (8.3%) body orange neck: goldnecklace (18.9%) neck goldnecklace mouth: teeth (5.5%) mouth teeth ears: none (26.2%) ears none head: toque (7.1%) head toque eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 730 dog #730 730 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.011 eth 11000000000000000 22.05 $22.05 2026-06-01t19:24:33z 0xab978626dd79d6e4a1f50f3dbd926b1309ca3a9f70c4134a2211a4a33fa016e8 0xb94452d9c31d47ee4129c1043fbd00a92ead7169fb17b285b52502a2fc6b37b2 #86/677 generated auction feed 0x92cb76ad620ab09516ce05d9b994e8ba3fcb069cf5cdcdfd03ea2bfd9e46f3ad 0xfb210ca207028cfc79809d17cb1fd7611f8fee391454ba9b04cd10622da38001 background: none (91.6%) background none body: orange (8.3%) body orange neck: goldnecklace (18.9%) neck goldnecklace mouth: teeth (5.5%) mouth teeth ears: none (26.1%) ears none head: toque (7.1%) head toque eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46776263,
       "block_time_utc": "2026-06-01T19:24:33Z",
@@ -101,7 +101,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: None (26.2%)",
+        "display": "Ears: None (26.1%)",
         "trait_type": "Ears",
         "value": "None"
       },
