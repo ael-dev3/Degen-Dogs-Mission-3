@@ -12,10 +12,10 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "current_bid": "0.008 ETH ($15)",
     "current_bid_eth": 0.008,
-    "current_bid_usd": 15.02,
-    "current_bid_usd_live": 15.02,
-    "eth_usd_price_live": "1877.68",
-    "eth_usd_price_date_utc": "2026-08-11",
+    "current_bid_usd": 15.04,
+    "current_bid_usd_live": 15.04,
+    "eth_usd_price_live": "1879.555",
+    "eth_usd_price_date_utc": "2026-08-12",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
     "usd_estimate_confidence": "live_current",
@@ -26,10 +26,10 @@
     "start_time_utc": "2026-08-11 16:00:33",
     "end_time_utc": "2026-08-12 16:00:33",
     "auction_state": "live",
-    "seconds_remaining": 60222,
-    "time_remaining": "16:43:42",
+    "seconds_remaining": 56508,
+    "time_remaining": "15:41:48",
     "settled": 0,
-    "latest_block": 49850432,
-    "latest_block_time_utc": "2026-08-11 23:16:51"
+    "latest_block": 49852289,
+    "latest_block_time_utc": "2026-08-12 00:18:45"
   }
 ]
