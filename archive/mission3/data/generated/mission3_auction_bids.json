@@ -17466,5 +17466,38 @@
     "log_index": 615,
     "token_id": 801,
     "transaction_hash": "0x91bd08cfb2958e8c974ccf87aec86c1dc149aee41780d764682c24e26c8610eb"
+  },
+  {
+    "amount_eth": "0.00052",
+    "amount_raw": "520000000000000",
+    "bidder": "0x9cdc885e2ed8eda44d9c777078fabedbd6e21021",
+    "block_number": 49924075,
+    "block_time_utc": "2026-08-13T16:11:37Z",
+    "extended": 0,
+    "log_index": 145,
+    "token_id": 802,
+    "transaction_hash": "0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab"
+  },
+  {
+    "amount_eth": "0.00058",
+    "amount_raw": "580000000000000",
+    "bidder": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "block_number": 49924132,
+    "block_time_utc": "2026-08-13T16:13:31Z",
+    "extended": 0,
+    "log_index": 524,
+    "token_id": 802,
+    "transaction_hash": "0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef"
+  },
+  {
+    "amount_eth": "0.00064",
+    "amount_raw": "640000000000000",
+    "bidder": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "block_number": 49924496,
+    "block_time_utc": "2026-08-13T16:25:39Z",
+    "extended": 0,
+    "log_index": 309,
+    "token_id": 802,
+    "transaction_hash": "0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b"
   }
 ]

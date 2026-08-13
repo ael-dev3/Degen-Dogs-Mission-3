@@ -1,0 +1,130 @@
+{
+  "generated_at_utc": "2026-08-13T16:30:35Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-08-13T16:25:39Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-13",
+      "native": "0.00064",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "640000000000000",
+      "usd_estimate": "1.20455680",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$1.20",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-08-13",
+      "usd_estimate_price_usd": "1882.12",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 49923848,
+      "block_time_utc": "2026-08-13T16:04:03Z",
+      "tx_hash": "0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617",
+      "tx_url": "https://basescan.org/tx/0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-08-13T16:25:39Z",
+      "unique_bidder_count": 3
+    },
+    "bid_tx_hashes": [
+      "0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab",
+      "0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef",
+      "0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 802,
+    "dog_image_url": "https://api.degendogs.club/images/802.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/802",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617",
+      "dog_page": "https://degendogs.club/#dog802",
+      "explorer": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/802",
+      "repo_archive": "archive/dogs/by-id/802.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#291/678",
+      "rank": 291,
+      "scope": "base_existing",
+      "total": 678
+    },
+    "schema_version": 1,
+    "search_text": "dog 802 dog #802 802 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00064 eth 640000000000000 1.2 $1.20 2026-08-13t16:25:39z 0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617 #291/678 generated auction feed 0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab 0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef 0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b background: none (91.6%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.0%) neck goldnecklace mouth: pizza (11.1%) mouth pizza ears: loopearring (27.3%) ears loopearring head: whitemohawk (6.9%) head whitemohawk eyes: vrgoggles (10.6%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None (91.6%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: RedBrown (15.5%)",
+        "trait_type": "Body",
+        "value": "RedBrown"
+      },
+      {
+        "display": "Neck: GoldNecklace (19.0%)",
+        "trait_type": "Neck",
+        "value": "GoldNecklace"
+      },
+      {
+        "display": "Mouth: Pizza (11.1%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: WhiteMohawk (6.9%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: VRGoggles (10.6%)",
+        "trait_type": "Eyes",
+        "value": "VRGoggles"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@thec1",
+      "farcaster_fid": null,
+      "farcaster_handle": "thec1",
+      "profile_url": "https://farcaster.xyz/thec1",
+      "wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+      "wallet_explorer_url": "https://basescan.org/address/0xd29c790466675153a50df7860b9efdb689a21cde"
+    }
+  },
+  "schema_version": 1
+}

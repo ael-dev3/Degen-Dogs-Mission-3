@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#427/677",
-      "rank": 427,
+      "display": "#426/678",
+      "rank": 426,
       "scope": "base_existing",
-      "total": 677
+      "total": 678
     },
     "schema_version": 1,
-    "search_text": "dog 652 dog #652 652 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.02 eth 20000000000000000 41.46 $41.46 2026-03-13t09:30:07z 0x970d1dcc155c650767147ad00a0e94c0d34baf90d2713c4ea223c16d27790b8d 0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205 #427/677 generated auction feed 0xc5dc7b0078d6f4bd4b181d89188c82f2991da69150337c0a02a61765f954734b 0xf6bb501ea00c424048e0917f35ce5c38102f1844f16f7ed6d997949995ed838b 0x22318b921778f4212c479356a93dd28d9d2e5197e3907f6ff86cf2aae7063971 0xefac38c60ec3807d3b7bafd2ec51562f4565c4afe5fc92feca32ce5f7b242b52 background: none (91.6%) background none body: black (11.8%) body black neck: none (41.2%) neck none mouth: none (68.2%) mouth none ears: earbuds (32.2%) ears earbuds head: redmohawk (7.4%) head redmohawk eyes: monocle (7.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 652 dog #652 652 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.02 eth 20000000000000000 41.46 $41.46 2026-03-13t09:30:07z 0x970d1dcc155c650767147ad00a0e94c0d34baf90d2713c4ea223c16d27790b8d 0x6bfa161e8f59bedd874f27e611b1e6552e2b0d049961410d15d95e031fff9205 #426/678 generated auction feed 0xc5dc7b0078d6f4bd4b181d89188c82f2991da69150337c0a02a61765f954734b 0xf6bb501ea00c424048e0917f35ce5c38102f1844f16f7ed6d997949995ed838b 0x22318b921778f4212c479356a93dd28d9d2e5197e3907f6ff86cf2aae7063971 0xefac38c60ec3807d3b7bafd2ec51562f4565c4afe5fc92feca32ce5f7b242b52 background: none (91.6%) background none body: black (11.8%) body black neck: none (41.2%) neck none mouth: none (68.1%) mouth none ears: earbuds (32.2%) ears earbuds head: redmohawk (7.4%) head redmohawk eyes: monocle (7.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 43302430,
       "block_time_utc": "2026-03-13T09:30:07Z",
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },

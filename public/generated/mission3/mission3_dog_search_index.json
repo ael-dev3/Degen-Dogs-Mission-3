@@ -2,6 +2,30 @@
   {
     "amount_eth": null,
     "amount_raw": null,
+    "auction_created_block": 49923848,
+    "auction_created_time_utc": "2026-08-13T16:04:03Z",
+    "auction_created_tx": "0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617",
+    "bid_count": 3,
+    "chain": "Base",
+    "chain_id": 8453,
+    "confidence": "verified",
+    "mission": 3,
+    "opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/802",
+    "settled": false,
+    "settled_block": null,
+    "settled_time_utc": null,
+    "settled_tx": null,
+    "sources": [
+      "base_logs",
+      "archive_indexer"
+    ],
+    "token_id": 802,
+    "unique_bidder_count": 3,
+    "winner": null
+  },
+  {
+    "amount_eth": "0.007",
+    "amount_raw": "7000000000000000",
     "auction_created_block": 49880626,
     "auction_created_time_utc": "2026-08-12T16:03:19Z",
     "auction_created_tx": "0x373ca217764a26d00c507d8b1eeb2506eba9683d26ce994884831357ed153ace",
@@ -11,17 +35,17 @@
     "confidence": "verified",
     "mission": 3,
     "opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/801",
-    "settled": false,
-    "settled_block": null,
-    "settled_time_utc": null,
-    "settled_tx": null,
+    "settled": true,
+    "settled_block": 49923848,
+    "settled_time_utc": "2026-08-13T16:04:03Z",
+    "settled_tx": "0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617",
     "sources": [
       "base_logs",
       "archive_indexer"
     ],
     "token_id": 801,
     "unique_bidder_count": 1,
-    "winner": null
+    "winner": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "amount_eth": "0.008",
