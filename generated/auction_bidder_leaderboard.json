@@ -3,14 +3,14 @@
     "bidder": "@0xael.eth",
     "bidder_url": "https://farcaster.xyz/0xael.eth",
     "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bids": "199",
-    "auctions_bid": "129",
-    "bid_eth": "4.54445",
+    "bids": 200,
+    "auctions_bid": 129,
+    "bid_eth": "4.55345",
     "high_bid_eth": "0.16455",
     "auction_wins": 30,
     "winning_eth": "0.73413",
-    "latest_bid_token_id": "802",
-    "latest_bid_utc": "2026-08-13 17:11:25"
+    "latest_bid_token_id": 802,
+    "latest_bid_utc": "2026-08-13 22:44:23"
   },
   {
     "bidder": "@stemo.eth",
@@ -884,6 +884,19 @@
     "latest_bid_utc": "2026-04-07 08:20:01"
   },
   {
+    "bidder": "@richieboston",
+    "bidder_url": "https://farcaster.xyz/richieboston",
+    "bidder_wallet": "0xd559e433718b1f2667fde7c859fc982cf0bc491f",
+    "bids": 8,
+    "auctions_bid": 8,
+    "bid_eth": "0.02645",
+    "high_bid_eth": "0.00931",
+    "auction_wins": 0,
+    "winning_eth": "0",
+    "latest_bid_token_id": 802,
+    "latest_bid_utc": "2026-08-13 22:38:19"
+  },
+  {
     "bidder": "0x4c29…5bbf",
     "bidder_url": "https://basescan.org/address/0x4c2904e42ce586a114dc08b0b15a4a09de025bbf",
     "bidder_wallet": "0x4c2904e42ce586a114dc08b0b15a4a09de025bbf",
@@ -999,19 +1012,6 @@
     "winning_eth": "0",
     "latest_bid_token_id": "605",
     "latest_bid_utc": "2026-01-24 02:13:05"
-  },
-  {
-    "bidder": "@richieboston",
-    "bidder_url": "https://farcaster.xyz/richieboston",
-    "bidder_wallet": "0xd559e433718b1f2667fde7c859fc982cf0bc491f",
-    "bids": "7",
-    "auctions_bid": "7",
-    "bid_eth": "0.01874",
-    "high_bid_eth": "0.00931",
-    "auction_wins": 0,
-    "winning_eth": "0",
-    "latest_bid_token_id": "783",
-    "latest_bid_utc": "2026-07-24 23:14:41"
   },
   {
     "bidder": "0x76d3…d313",
