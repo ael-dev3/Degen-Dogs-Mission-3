@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "640000000000000",
-      "usd_estimate": "1.20455680",
+      "usd_estimate": "1.19557440",
       "usd_estimate_confidence": "live_current",
       "usd_estimate_display": "$1.20",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-13",
-      "usd_estimate_price_usd": "1882.12",
+      "usd_estimate_price_usd": "1868.085",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -60,7 +60,7 @@
       "total": 678
     },
     "schema_version": 1,
-    "search_text": "dog 802 dog #802 802 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00064 eth 640000000000000 1.2 $1.20 2026-08-13t16:25:39z 0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617 #291/678 generated auction feed 0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab 0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef 0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b background: none (91.6%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.0%) neck goldnecklace mouth: pizza (11.1%) mouth pizza ears: loopearring (27.3%) ears loopearring head: whitemohawk (6.9%) head whitemohawk eyes: vrgoggles (10.6%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 802 dog #802 802 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 0.00064 eth 1.20 $1.20 2026-08-13 16:25:39 #291/678 Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: Pizza; Ears: LoopEarring; Head: WhiteMohawk; Eyes: VRGoggles @thec1 0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617 0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab 0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef 0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -74,7 +74,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer",
+        "dashboard_builder",
         "generated_auction_timeline",
         "generated_auction_feed"
       ]
