@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "49958203"
+    "value": "49960063"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-14 11:09:13"
+    "value": "2026-08-14 12:11:13"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x2dbd14e130d8b08bd1c2f78e4134a2fad252fffe2cacbf6ec76e4147a173db43"
+    "value": "0x163ff683dbee670c90cd62947ee67dddb1a44d5d6d17272f5362c6d38f9a32b2"
   },
   {
     "metric": "snapshot_confirmations",
@@ -169,11 +169,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "49958203"
+    "value": "49960063"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x2dbd14e130d8b08bd1c2f78e4134a2fad252fffe2cacbf6ec76e4147a173db43"
+    "value": "0x163ff683dbee670c90cd62947ee67dddb1a44d5d6d17272f5362c6d38f9a32b2"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1874.765"
+    "value": "1873.995"
   },
   {
     "metric": "eth_usd_source",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "17.54"
+    "value": "17.49"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "200649.775397"
+    "value": "200768.693895"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
