@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-08-13T16:30:35Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-13T22:44:23Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-14T16:29:31Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "16.95954742",
+      "eth_usd_price_at_event": "1884.3941576877892",
       "eth_usd_price_date_utc": "2026-08-14",
       "native": "0.009",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "9000000000000000",
-      "usd_estimate": "16.80493500",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$16.80",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "16.95954742",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$16.96",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-14",
-      "usd_estimate_price_usd": "1867.215",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "1884.3941576877892",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 49923848,
@@ -53,23 +53,23 @@
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/802",
       "repo_archive": "archive/dogs/by-id/802.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a"
     },
     "mission": 3,
     "rarity": {
-      "display": "#291/678",
-      "rank": 291,
+      "display": "#290/679",
+      "rank": 290,
       "scope": "base_existing",
-      "total": 678
+      "total": 679
     },
     "schema_version": 1,
-    "search_text": "dog 802 dog #802 802 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 16.80 $16.80 2026-08-13 22:44:23 #291/678 Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: Pizza; Ears: LoopEarring; Head: WhiteMohawk; Eyes: VRGoggles @0xael.eth 0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617 0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab 0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef 0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b 0xdaa40773abe5e60e15abb6a51e18ef86e38841fa36bdf35ffa71efe801b8a5c9 0xc1aecd7d2e96e2d48c7db5dfb1643a43f0cf27af9de4c4a41a90e53fb7698ea0 0x8f352338b10a7551141d16c8871ae9273ac35f76cfc90960d35c05bc3211b5ae",
+    "search_text": "dog 802 dog #802 802 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.96 $16.96 2026-08-14t16:29:31z 0x2ced1055219cd539147dc2127231d33c654322175fe33f050c755b8ed265f617 0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a #290/679 generated auction feed 0x0e7e6dcbd4863a4671348e968cf58092c5288daa8a2bbbca626392f9686ee6ab 0x0d2dd5e28d44a16c5b2cc35738ca8ee3f27bd0b68a6053bf881a017e4873caef 0x88bea03880a44ccfc782476b43e95e1a4d7b0c08d497efc0e0b9b0ba5584ec2b 0xdaa40773abe5e60e15abb6a51e18ef86e38841fa36bdf35ffa71efe801b8a5c9 0xc1aecd7d2e96e2d48c7db5dfb1643a43f0cf27af9de4c4a41a90e53fb7698ea0 0x8f352338b10a7551141d16c8871ae9273ac35f76cfc90960d35c05bc3211b5ae background: none (91.6%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.0%) neck goldnecklace mouth: pizza (11.0%) mouth pizza ears: loopearring (27.4%) ears loopearring head: whitemohawk (6.9%) head whitemohawk eyes: vrgoggles (10.6%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 49967812,
+      "block_time_utc": "2026-08-14T16:29:31Z",
+      "settled": true,
+      "tx_hash": "0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a",
+      "tx_url": "https://basescan.org/tx/0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a"
     },
     "source": {
       "confidence": "verified",
@@ -77,12 +77,13 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "dashboard_builder",
+        "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (91.6%)",
@@ -100,12 +101,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Pizza (11.1%)",
+        "display": "Mouth: Pizza (11.0%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.4%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
