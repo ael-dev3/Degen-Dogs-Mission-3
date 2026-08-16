@@ -21744,13 +21744,13 @@
     "dog_external_url": "https://degendogs.club/#dog805",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/805",
     "status": "ongoing",
-    "winner": "@kzl27.eth",
-    "winner_url": "https://farcaster.xyz/kzl27.eth",
-    "winner_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "amount": "0.001 ETH ($2)",
-    "amount_raw": "1000000000000000",
-    "bid_count": 1,
-    "unique_bidder_count": 1,
+    "winner": "@farcy",
+    "winner_url": "https://farcaster.xyz/farcy",
+    "winner_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
+    "amount": "0.0011 ETH ($2)",
+    "amount_raw": "1100000000000000",
+    "bid_count": 2,
+    "unique_bidder_count": 2,
     "auction_created_time_utc": "2026-08-16 17:38:09",
     "settled_time_utc": "",
     "rarity": "#383/681",
@@ -21759,6 +21759,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "live_base_contract_call",
     "sources": "base_rpc,dog_metadata_api",
-    "search_text": "3 Base 8453 805 Dog #805 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: None; Head: CrazyHair; Eyes: VRGoggles @kzl27.eth 0x13dbc7d5ace21d1eeb5f884666e284138fbff620"
+    "search_text": "3 Base 8453 805 Dog #805 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: None; Head: CrazyHair; Eyes: VRGoggles @farcy 0x84cb3b93f9a918632f05528770b5cf926396b0f4"
   }
 ]
