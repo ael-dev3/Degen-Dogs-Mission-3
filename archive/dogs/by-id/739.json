@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#320/679",
-      "rank": 320,
+      "display": "#318/680",
+      "rank": 318,
       "scope": "base_existing",
-      "total": 679
+      "total": 680
     },
     "schema_version": 1,
-    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 53.48 $53.48 2026-06-10t21:15:59z 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 #320/679 generated auction feed 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e background: none (91.6%) background none body: grey (12.7%) body grey neck: none (41.1%) neck none mouth: none (68.2%) mouth none ears: none (26.1%) ears none head: partyhat (4.3%) head partyhat eyes: glasses (12.7%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 739 dog #739 739 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 53.48 $53.48 2026-06-10t21:15:59z 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 #318/680 generated auction feed 0xd88224075c56ba2eed2b35a45395fd05e255d81e1d61b60605cea0461e647880 0x73d80456abf8bdb20f3130c7a9513df40d694a8e48e51e78288c1be36382b516 0x4aaf05fa27283ce03d1ac6001da92740be5c09b8dc36abea545c442cdd65d60e background: none (91.6%) background none body: grey (12.6%) body grey neck: none (41.0%) neck none mouth: none (68.1%) mouth none ears: none (26.0%) ears none head: partyhat (4.3%) head partyhat eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 47168406,
       "block_time_utc": "2026-06-10T21:15:59Z",
@@ -87,22 +87,22 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.7%)",
+        "display": "Body: Grey (12.6%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.0%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.1%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -112,7 +112,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: Glasses (12.7%)",
+        "display": "Eyes: Glasses (12.6%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#446/679",
-      "rank": 446,
+      "display": "#450/680",
+      "rank": 450,
       "scope": "base_existing",
-      "total": 679
+      "total": 680
     },
     "schema_version": 1,
-    "search_text": "dog 196 dog #196 196 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x8dd9991b433a0ef4da0f23183a6fa0178e8b88836a593e2e78b43130219aea1b 0xfc36c9e22e7104573c776729f805f61d6ce0e6ad8b94a78aa801b9405968e1d1 #446/679 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 196 dog #196 196 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x8dd9991b433a0ef4da0f23183a6fa0178e8b88836a593e2e78b43130219aea1b 0xfc36c9e22e7104573c776729f805f61d6ce0e6ad8b94a78aa801b9405968e1d1 #450/680 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 49663919,
       "block_time_utc": "2023-11-07T18:54:57Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.0%)",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -93,17 +93,17 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.1%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (8.0%)",
+        "display": "Head: StripedBeanie (7.9%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#275/679",
+      "display": "#275/680",
       "rank": 275,
       "scope": "base_existing",
-      "total": 679
+      "total": 680
     },
     "schema_version": 1,
-    "search_text": "dog 217 dog #217 217 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7900 degen 0xbde5386e86ffe87ef0cc5f01ff7b29264e89cbf7d4d9f824c6ee3097397d302f 0x2a1303b9b86215f052c506c2f16f6138f4991edccb2a9d1d9885708e6dd7553b #275/679 background: none; body: orange; neck: none; mouth: pizza; ears: earbuds; head: blackcap; eyes: vrgoggles 0x0b955b86bc1b90c929d3d7a0123dbc4276d3d3c815dc67afc4056f61cc7511ba 0x079b93b4f2458fdfdba2103ce31742f9374c3603f70e7ee2c976da79cbf0f7b0 chain_logs contract_getters",
+    "search_text": "dog 217 dog #217 217 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7900 degen 0xbde5386e86ffe87ef0cc5f01ff7b29264e89cbf7d4d9f824c6ee3097397d302f 0x2a1303b9b86215f052c506c2f16f6138f4991edccb2a9d1d9885708e6dd7553b #275/680 background: none; body: orange; neck: none; mouth: pizza; ears: earbuds; head: blackcap; eyes: vrgoggles 0x0b955b86bc1b90c929d3d7a0123dbc4276d3d3c815dc67afc4056f61cc7511ba 0x079b93b4f2458fdfdba2103ce31742f9374c3603f70e7ee2c976da79cbf0f7b0 chain_logs contract_getters",
     "settlement": {
       "block_number": 24884778,
       "block_time_utc": "2024-12-11T17:23:29Z",
@@ -89,7 +89,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.0%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,12 +99,12 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.1%)",
+        "display": "Ears: Earbuds (32.2%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: BlackCap (7.7%)",
+        "display": "Head: BlackCap (7.6%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
