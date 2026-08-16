@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#573/680",
-      "rank": 573,
+      "display": "#575/681",
+      "rank": 575,
       "scope": "base_existing",
-      "total": 680
+      "total": 681
     },
     "schema_version": 1,
-    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.82 $16.82 2026-08-05t13:46:25z 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 0xd11b7fe191d1f5b531321b448b57feb1a0f6278e6ebe13555db33e280b41361a #573/680 generated auction feed 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94 background: none (91.6%) background none body: black (11.8%) body black neck: goldnecklace (19.1%) neck goldnecklace mouth: none (68.1%) mouth none ears: none (26.0%) ears none head: baseballcap (10.3%) head baseballcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 793 dog #793 793 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.82 $16.82 2026-08-05t13:46:25z 0x4c3ae4b89ad742be9d0c96e7675662d6d626965cc18088d3d13408f36c881197 0xd11b7fe191d1f5b531321b448b57feb1a0f6278e6ebe13555db33e280b41361a #575/681 generated auction feed 0xf9fbdf7f619abbde9ccab9f11456a6862090939bb2d4c3f16ddde43f2804e8f4 0xdd76edce40ac6ee563f695663dabb930fdd7afa737fd05042f5959fd4c2bce94 background: none (91.6%) background none body: black (11.7%) body black neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.1%) mouth none ears: none (26.1%) ears none head: baseballcap (10.3%) head baseballcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49574119,
       "block_time_utc": "2026-08-05T13:46:25Z",
@@ -86,12 +86,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.8%)",
+        "display": "Body: Black (11.7%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.1%)",
+        "display": "Neck: GoldNecklace (19.2%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (26.1%)",
         "trait_type": "Ears",
         "value": "None"
       },
