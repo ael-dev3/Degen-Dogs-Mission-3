@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "7710000000000000",
-      "usd_estimate": "14.64533775",
+      "usd_estimate": "14.64263925",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$14.65",
+      "usd_estimate_display": "$14.64",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-17",
-      "usd_estimate_price_usd": "1899.525",
+      "usd_estimate_price_usd": "1899.175",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -62,7 +62,7 @@
       "total": 681
     },
     "schema_version": 1,
-    "search_text": "dog 805 dog #805 805 mission 3 mission 3 base ongoing 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth 0.00771 eth 14.65 $14.65 2026-08-17 02:49:47 #383/681 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: None; Head: CrazyHair; Eyes: VRGoggles @kzl27.eth 0x55ae544798c956842c95c10b045b20db05f8c0507f37f428f2c85bf9d9862aaf 0x2522330e0e2e95b928342472d71f26ad81c06dc4f4aedfe01bc868847f5be62f 0x80d53e35d2797a91270a9362f5194de4dfe39776d646d7c91c21e5febe72877f 0x5e732b36920397c4014a3cdf9e04f8b21aea439d6fcba59bb286cd5cec75e27f 0x31bfaa6999275a7a65dfce3e95b73bb40b40236fab5e1c41e1c29c3fd0976627 0xab89e292071ea36f6adad89638afaa72b21c458f04ccc73318c69925c1b39585",
+    "search_text": "dog 805 dog #805 805 mission 3 mission 3 base ongoing 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth 0.00771 eth 14.64 $14.64 2026-08-17 02:49:47 #383/681 Background: None; Body: White; Neck: GoldNecklace; Mouth: None; Ears: None; Head: CrazyHair; Eyes: VRGoggles @kzl27.eth 0x55ae544798c956842c95c10b045b20db05f8c0507f37f428f2c85bf9d9862aaf 0x2522330e0e2e95b928342472d71f26ad81c06dc4f4aedfe01bc868847f5be62f 0x80d53e35d2797a91270a9362f5194de4dfe39776d646d7c91c21e5febe72877f 0x5e732b36920397c4014a3cdf9e04f8b21aea439d6fcba59bb286cd5cec75e27f 0x31bfaa6999275a7a65dfce3e95b73bb40b40236fab5e1c41e1c29c3fd0976627 0xab89e292071ea36f6adad89638afaa72b21c458f04ccc73318c69925c1b39585",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
