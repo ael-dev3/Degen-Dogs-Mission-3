@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#660/681",
-      "rank": 660,
+      "display": "#661/682",
+      "rank": 661,
       "scope": "base_existing",
-      "total": 681
+      "total": 682
     },
     "schema_version": 1,
-    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f 0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0 #660/681 generated auction feed 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb background: none (91.6%) background none body: grey (12.6%) body grey neck: redcollar (29.5%) neck redcollar mouth: none (68.1%) mouth none ears: earbuds (32.2%) ears earbuds head: none (20.1%) head none eyes: vrgoggles (10.7%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 728 dog #728 728 mission 3 mission 3 base settled 0xffe16898fc0af80ee9bcf29d2b54a0f20f9498ad @vaibhavmule vaibhavmule 0.0121 eth 12100000000000000 24.43 $24.43 2026-05-30t18:40:09z 0xf1ac12f56899a62ccb24f5686d1ef99245045b0b389912b2dd7b2b2dec17f34f 0xa10214d0aaaabc3ea3808e9d7f68ac72b429ac4380a04ff690e2db428d9d31f0 #661/682 generated auction feed 0xe946a06a72d4bbd92e8967119b0fc3a015cd7b942207b5f765be2d3df1cdb651 0xf9190cd2892acdcce50fc181b743bc841f46afdf41ea2dc347d65b1613066847 0x62012d2a57a5be2be2f8aad6aaece699c6e75f54ba2bf261d512796bcd4ac4bb background: none (91.6%) background none body: grey (12.6%) body grey neck: redcollar (29.5%) neck redcollar mouth: none (68.2%) mouth none ears: earbuds (32.3%) ears earbuds head: none (20.1%) head none eyes: vrgoggles (10.7%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46688531,
       "block_time_utc": "2026-05-30T18:40:09Z",
@@ -97,12 +97,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.1%)",
+        "display": "Mouth: None (68.2%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.2%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
