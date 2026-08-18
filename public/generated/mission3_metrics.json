@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50140560"
+    "value": "50142424"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-18 16:27:47"
+    "value": "2026-08-18 17:29:55"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x25e527db4a49fbc941bd204398249b68bcb621689963d0f296a3c709da971c03"
+    "value": "0x17c5eff955146c4850ac4dd2fb48216d7a15681125574dd567064da67017c7a3"
   },
   {
     "metric": "snapshot_confirmations",
@@ -169,11 +169,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50140560"
+    "value": "50142424"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x25e527db4a49fbc941bd204398249b68bcb621689963d0f296a3c709da971c03"
+    "value": "0x17c5eff955146c4850ac4dd2fb48216d7a15681125574dd567064da67017c7a3"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "1912.7"
+    "value": "1914.6"
   },
   {
     "metric": "eth_usd_source",
@@ -349,15 +349,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "222.9"
+    "value": "223.17"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.4486"
+    "value": "0.4481"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "163.75"
+    "value": "163.56"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -393,7 +393,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "17.02"
+    "value": "17.04"
   },
   {
     "metric": "current_bidder",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "13.31"
+    "value": "13.27"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "212308.711187"
+    "value": "212427.885424"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
