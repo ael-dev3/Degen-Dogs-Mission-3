@@ -586,11 +586,41 @@ def validate_mission3_archive_parity(*, root: Path = ROOT) -> dict[str, int | bo
     archive_timeline = by_token(loaded["archive_timeline"], "Mission 3 archive timeline")
     if set(dashboard_timeline) != set(archive_timeline):
         missing_dashboard = sorted(set(archive_timeline) - set(dashboard_timeline))
-        missing_archive = sorted(set(dashboard_timeline) - set(archive_timeline))
-        raise AssertionError(
-            "Mission 3 timeline/archive Dog set differs: "
-            f"missing_dashboard={missing_dashboard[:20]} missing_archive={missing_archive[:20]}"
-        )
+        missing_archive = set(dashboard_timeline) - set(archive_timeline)
+
+        # The bounded current-surface refresh can observe and publish a newly
+        # created auction before the independently scheduled archive indexer
+        # catches up. Permit exactly that current, non-settled Dog to lead the
+        # archive; every settled or historical dashboard gap remains fatal.
+        current_rows = load_json(root / "generated" / "current_auction.json")
+        allowed_current_lag: set[int] = set()
+        if (
+            isinstance(current_rows, list)
+            and len(current_rows) == 1
+            and isinstance(current_rows[0], dict)
+        ):
+            current_row = current_rows[0]
+            try:
+                current_token = dog_id(current_row)
+            except (AssertionError, TypeError, ValueError):
+                current_token = -1
+            dashboard_current = dashboard_timeline.get(current_token)
+            current_state = text(current_row.get("auction_state")).lower()
+            dashboard_state = text((dashboard_current or {}).get("auction_state")).lower()
+            if (
+                current_token in missing_archive
+                and current_state in {"live", "ended_unsettled"}
+                and dashboard_state == current_state
+            ):
+                allowed_current_lag.add(current_token)
+
+        unexpected_missing_archive = sorted(missing_archive - allowed_current_lag)
+        if missing_dashboard or unexpected_missing_archive:
+            raise AssertionError(
+                "Mission 3 timeline/archive Dog set differs: "
+                f"missing_dashboard={missing_dashboard[:20]} "
+                f"missing_archive={unexpected_missing_archive[:20]}"
+            )
 
     archive_bid_totals: dict[int, Decimal] = {}
     archive_bid_counts: dict[int, int] = {}

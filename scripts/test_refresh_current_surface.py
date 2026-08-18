@@ -88,6 +88,14 @@ def test_current_bid_history_public_rows_are_high_bid_first() -> None:
     assert [row["tx_hash"] for row in ordered] == ["0xhigh", "0xopening"]
 
 
+def test_public_auction_status_maps_ended_unsettled_to_canonical_feed_label() -> None:
+    surface = load_module()
+
+    assert surface.public_auction_status("live") == "ongoing"
+    assert surface.public_auction_status("ended_unsettled") == "ended pending settlement"
+    assert surface.public_auction_status("settled") == "settled"
+
+
 def test_read_table_preserves_header_for_zero_row_bid_history() -> None:
     surface = load_module()
     with tempfile.TemporaryDirectory() as tmp:

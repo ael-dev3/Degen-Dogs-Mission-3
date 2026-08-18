@@ -623,6 +623,68 @@ def test_mission3_archive_parity_accepts_exact_history_and_rejects_drift() -> No
         )
 
 
+def test_mission3_archive_parity_allows_current_nonsettled_dog_to_lead_archive() -> None:
+    for current_state in ("live", "ended_unsettled"):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_fixture(root)
+            timeline = json.loads((root / "generated" / "auction_timeline.json").read_text(encoding="utf-8"))
+            timeline.append({"token_id": 730, "auction_state": current_state})
+            write_json(root / "generated" / "auction_timeline.json", timeline)
+            write_json(
+                root / "generated" / "current_auction.json",
+                [{"token_id": 730, "auction_state": current_state}],
+            )
+
+            validator = load_module()
+            result = validator.validate_mission3_archive_parity(root=root)
+
+            assert result == {"checked": True, "auctions": 1, "settlements": 0, "bids": 1}
+
+
+def test_mission3_archive_parity_rejects_historical_gap_while_current_dog_lags() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        timeline = json.loads((root / "generated" / "auction_timeline.json").read_text(encoding="utf-8"))
+        timeline.extend(
+            [
+                {"token_id": 728, "auction_state": "live"},
+                {"token_id": 730, "auction_state": "live"},
+            ]
+        )
+        write_json(root / "generated" / "auction_timeline.json", timeline)
+        write_json(
+            root / "generated" / "current_auction.json",
+            [{"token_id": 730, "auction_state": "live"}],
+        )
+
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "missing_archive=[728]",
+        )
+
+
+def test_mission3_archive_parity_rejects_settled_current_dog_missing_from_archive() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        timeline = json.loads((root / "generated" / "auction_timeline.json").read_text(encoding="utf-8"))
+        timeline.append({"token_id": 730, "auction_state": "settled"})
+        write_json(root / "generated" / "auction_timeline.json", timeline)
+        write_json(
+            root / "generated" / "current_auction.json",
+            [{"token_id": 730, "auction_state": "settled"}],
+        )
+
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_mission3_archive_parity(root=root),
+            "missing_archive=[730]",
+        )
+
+
 def test_mission3_archive_parity_rejects_configured_archive_with_missing_inputs() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)

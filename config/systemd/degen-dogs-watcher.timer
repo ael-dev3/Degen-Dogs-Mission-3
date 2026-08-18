@@ -1,0 +1,16 @@
+[Unit]
+Description=Check Mission 3 onchain activity every 15 seconds, offset for the peer runner
+
+[Timer]
+OnBootSec=20s
+# The Mac launchd watcher normally samples on the opposite half of this cycle.
+# Wall-clock staggering reduces duplicate RPC bursts; peer-aware Git CAS remains
+# the correctness boundary if the hosts still race.
+OnCalendar=*-*-* *:*:07,22,37,52
+AccuracySec=1s
+RandomizedDelaySec=1s
+Persistent=false
+Unit=degen-dogs-watcher.service
+
+[Install]
+WantedBy=timers.target

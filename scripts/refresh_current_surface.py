@@ -136,6 +136,15 @@ def high_bid_first(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(rows, key=bid_sort_key, reverse=True)
 
 
+def public_auction_status(auction_state: str) -> str:
+    """Map internal current-auction states to the canonical public labels."""
+
+    return {
+        "live": "ongoing",
+        "ended_unsettled": "ended pending settlement",
+    }.get(auction_state, auction_state)
+
+
 def merge_overlap_bid_history(
     existing_rows: list[dict[str, Any]],
     fresh_rows: list[dict[str, Any]],
@@ -1775,7 +1784,7 @@ def main() -> None:
         state = "live"
     else:
         state = "ended_unsettled"
-    surface_status = "ongoing" if state == "live" else state
+    surface_status = public_auction_status(state)
     bid_text = f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
     bid_time = current_bids[-1].get("bid_time_utc") if current_bids else current.get("start_time_utc") or latest_time
     dog_attrs: dict[str, str] = {}

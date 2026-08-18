@@ -2,6 +2,11 @@
 
 The public site is served by GitHub Pages, but fresh data comes from private/local runners that regenerate static files and push commits. For a fresh-machine reconstruction runbook and future-agent prompts, see [`reconstruction/LOCAL_RUNNERS.md`](../reconstruction/LOCAL_RUNNERS.md).
 
+For the second Windows publisher, use the supported WSL2/systemd design in
+[`windows-wsl-runner.md`](windows-wsl-runner.md). Native Windows/Git Bash does
+not provide the POSIX lock, descriptor, permission, and process-group semantics
+required by the publisher.
+
 ## Available commands
 
 ```bash

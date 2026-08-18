@@ -9,6 +9,10 @@ Use this with [`docs/refresh-runner.md`](../docs/refresh-runner.md) when moving 
 runner to a new machine, repairing launchd, or asking a future agent to rebuild the
 setup.
 
+The Mac mini launchd instructions remain below. The complementary Windows PC
+uses an isolated WSL2 ext4 clone, systemd timers, and a Task Scheduler keepalive;
+see [`docs/windows-wsl-runner.md`](../docs/windows-wsl-runner.md).
+
 ## Runner model
 
 There are two worker runners plus an independent health watchdog. They are
