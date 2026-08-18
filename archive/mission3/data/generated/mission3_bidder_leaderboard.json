@@ -540,6 +540,16 @@
     "winning_eth": 0.0
   },
   {
+    "auction_wins": 2,
+    "auctions_bid": 5,
+    "bid_eth": 0.07304,
+    "bidder": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "bids": 9,
+    "high_bid_eth": 0.0202,
+    "latest_bid_time_utc": "2026-08-18T06:29:55Z",
+    "winning_eth": 0.01742
+  },
+  {
     "auction_wins": 1,
     "auctions_bid": 9,
     "bid_eth": 0.07212,
@@ -558,16 +568,6 @@
     "high_bid_eth": 0.02543,
     "latest_bid_time_utc": "2026-07-05T02:14:39Z",
     "winning_eth": 0.02451
-  },
-  {
-    "auction_wins": 2,
-    "auctions_bid": 4,
-    "bid_eth": 0.06414,
-    "bidder": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "bids": 8,
-    "high_bid_eth": 0.0202,
-    "latest_bid_time_utc": "2026-08-17T02:49:47Z",
-    "winning_eth": 0.01742
   },
   {
     "auction_wins": 0,
