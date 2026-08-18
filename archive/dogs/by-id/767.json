@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#504/682",
-      "rank": 504,
+      "display": "#499/683",
+      "rank": 499,
       "scope": "base_existing",
-      "total": 682
+      "total": 683
     },
     "schema_version": 1,
-    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 #504/682 generated auction feed 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c background: none (91.6%) background none body: white (11.3%) body white neck: redcollar (29.5%) neck redcollar mouth: none (68.2%) mouth none ears: loopearring (27.3%) ears loopearring head: headphones (6.9%) head headphones eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 #499/683 generated auction feed 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c background: none (91.7%) background none body: white (11.3%) body white neck: redcollar (29.4%) neck redcollar mouth: none (68.2%) mouth none ears: loopearring (27.2%) ears loopearring head: headphones (6.9%) head headphones eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48392164,
       "block_time_utc": "2026-07-09T05:07:55Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.7%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

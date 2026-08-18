@@ -1,12 +1,12 @@
 [
   {
     "auction_wins": 32,
-    "auctions_bid": 133,
-    "bid_eth": 4.58151,
+    "auctions_bid": 134,
+    "bid_eth": 4.59151,
     "bidder": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bids": 204,
+    "bids": 205,
     "high_bid_eth": 0.16455,
-    "latest_bid_time_utc": "2026-08-17T19:19:25Z",
+    "latest_bid_time_utc": "2026-08-18T19:41:17Z",
     "winning_eth": 0.75013
   },
   {
@@ -71,12 +71,12 @@
   },
   {
     "auction_wins": 17,
-    "auctions_bid": 62,
-    "bid_eth": 1.39953,
+    "auctions_bid": 63,
+    "bid_eth": 1.40013,
     "bidder": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
-    "bids": 96,
+    "bids": 97,
     "high_bid_eth": 0.06064,
-    "latest_bid_time_utc": "2026-08-17T17:48:45Z",
+    "latest_bid_time_utc": "2026-08-18T19:27:47Z",
     "winning_eth": 0.27422
   },
   {
@@ -540,14 +540,14 @@
     "winning_eth": 0.0
   },
   {
-    "auction_wins": 2,
-    "auctions_bid": 5,
-    "bid_eth": 0.07304,
+    "auction_wins": 3,
+    "auctions_bid": 6,
+    "bid_eth": 0.07374,
     "bidder": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "bids": 9,
+    "bids": 10,
     "high_bid_eth": 0.0202,
-    "latest_bid_time_utc": "2026-08-18T06:29:55Z",
-    "winning_eth": 0.01742
+    "latest_bid_time_utc": "2026-08-18T19:33:21Z",
+    "winning_eth": 0.02632
   },
   {
     "auction_wins": 1,
@@ -847,6 +847,16 @@
     "bids": 1,
     "high_bid_eth": 0.0121,
     "latest_bid_time_utc": "2026-05-13T03:09:57Z",
+    "winning_eth": 0.0
+  },
+  {
+    "auction_wins": 0,
+    "auctions_bid": 2,
+    "bid_eth": 0.012,
+    "bidder": "0xea3ef7d0090872ce5e26fdcbb5507eb97be21843",
+    "bids": 2,
+    "high_bid_eth": 0.011,
+    "latest_bid_time_utc": "2026-08-18T19:50:11Z",
     "winning_eth": 0.0
   },
   {
@@ -1367,16 +1377,6 @@
     "bids": 1,
     "high_bid_eth": 0.00102,
     "latest_bid_time_utc": "2026-01-25T02:47:23Z",
-    "winning_eth": 0.0
-  },
-  {
-    "auction_wins": 0,
-    "auctions_bid": 1,
-    "bid_eth": 0.001,
-    "bidder": "0xea3ef7d0090872ce5e26fdcbb5507eb97be21843",
-    "bids": 1,
-    "high_bid_eth": 0.001,
-    "latest_bid_time_utc": "2026-07-07T02:53:47Z",
     "winning_eth": 0.0
   },
   {

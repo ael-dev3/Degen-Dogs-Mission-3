@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#324/682",
-      "rank": 324,
+      "display": "#322/683",
+      "rank": 322,
       "scope": "base_existing",
-      "total": 682
+      "total": 683
     },
     "schema_version": 1,
-    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.51 $19.51 2026-07-13t08:03:57z 0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 #324/682 generated auction feed 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de background: none (91.6%) background none body: black (11.7%) body black neck: redcollar (29.5%) neck redcollar mouth: tongue (10.1%) mouth tongue ears: none (26.1%) ears none head: redmohawk (7.5%) head redmohawk eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 771 dog #771 771 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.011 eth 11000000000000000 19.51 $19.51 2026-07-13t08:03:57z 0x37b9fec49e7488cc0d96122832b2b37117a671002e0c90f3b4505313df27571c 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 #322/683 generated auction feed 0xb9c52e4a92940fecfa5b1a06ff15426e487f4e4f5bb18c48569b4fcdffbc70bd 0x8d4993c7bc7594b0d9ed09e929d5e9a8028c33e5f1554206fad7fc20fa6a3cf6 0x17f506323823c6eb3503ff0cca29d3a7a8a31a0fc5575bee8ea9dd7996ff2a47 0xf2135b7ab82c21bfb3954fc26d132ebda27915f0ae147f1f044c88a08671f7de background: none (91.7%) background none body: black (11.7%) body black neck: redcollar (29.4%) neck redcollar mouth: tongue (10.1%) mouth tongue ears: none (26.1%) ears none head: redmohawk (7.5%) head redmohawk eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48570245,
       "block_time_utc": "2026-07-13T08:03:57Z",
@@ -83,7 +83,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.7%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,7 +93,7 @@
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },

@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#664/682",
-      "rank": 664,
+      "display": "#665/683",
+      "rank": 665,
       "scope": "base_existing",
-      "total": 682
+      "total": 683
     },
     "schema_version": 1,
-    "search_text": "dog 798 dog #798 798 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.27 $15.27 2026-08-10t15:53:45z 0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 #664/682 generated auction feed 0xb356bcf411a8187e6dff7809879dac020dc71db34184da8a950260e720d3e765 background: none (91.6%) background none body: white (11.3%) body white neck: none (41.1%) neck none mouth: none (68.2%) mouth none ears: earbuds (32.3%) ears earbuds head: none (20.1%) head none eyes: bluelasereyes (11.3%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 798 dog #798 798 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.27 $15.27 2026-08-10t15:53:45z 0x1674c1135f42c9c0ab506a1569153c1694368be4b5663441acaa77d9ae9e1ee4 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 #665/683 generated auction feed 0xb356bcf411a8187e6dff7809879dac020dc71db34184da8a950260e720d3e765 background: none (91.7%) background none body: white (11.3%) body white neck: none (41.1%) neck none mouth: none (68.2%) mouth none ears: earbuds (32.4%) ears earbuds head: none (20.1%) head none eyes: bluelasereyes (11.3%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 49793939,
       "block_time_utc": "2026-08-10T15:53:45Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.7%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
