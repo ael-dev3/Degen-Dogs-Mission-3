@@ -147,6 +147,25 @@ def test_exact_nonexistent_base_id_is_excluded_from_complete_rarity_scope() -> N
     assert checker.assert_metadata_rarity_state(rows, 3, metrics) == "complete"
 
 
+def test_complete_rarity_requires_numeric_scores_for_verified_dogs() -> None:
+    checker = load_module()
+    rows = [
+        {"token_id": "0", "rarity": "#1/2", "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": "1", "rarity": "#1/2", "rarity_score": "8", "metadata_verification_status": "onchain_token_uri_verified"},
+    ]
+    metrics = rarity_metrics(
+        present=2,
+        unavailable=0,
+        metadata_verified=2,
+        metadata_unavailable=0,
+    )
+
+    assert_raises_contains(
+        lambda: checker.assert_metadata_rarity_state(rows, 2, metrics),
+        "Dog #0 has no numeric rarity score",
+    )
+
+
 def test_dashboard_wiring_accepts_generated_loader_abstraction() -> None:
     checker = load_module()
     html = "\n".join(checker.DASHBOARD_ARCHIVE_MARKERS)

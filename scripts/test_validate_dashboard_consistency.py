@@ -232,10 +232,10 @@ def write_fixture(
         "last_refresh_result": "success_generated",
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
         "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,dog_token_uri_bindings,recent_event_logs",
-        "onchain_chain_id": "8453",
+        "onchain_chain_id": 8453,
         "snapshot_block_hash": "0x" + "a" * 64,
-        "snapshot_confirmations": "1",
-        "rpc_quorum_size": "2",
+        "snapshot_confirmations": 1,
+        "rpc_quorum_size": 2,
         "rpc_quorum_agreement": "2/2",
         "rpc_quorum_providers": "provider-one.example|provider-two.example",
         "log_rpc_quorum_providers": "provider-one.example|provider-two.example",
@@ -354,7 +354,13 @@ def write_fixture(
         "latest_bid_eth": "0.01",
         "latest_bid_utc": "2026-05-30 18:40:23",
         "start_time_utc": "2026-05-30 18:00:00",
+        "initial_end_time_utc": "2026-05-31 20:40:09",
         "end_time_utc": "2026-05-31 20:40:09",
+        "extension_count": 0,
+        "latest_extension_end_time_utc": None,
+        "latest_extension_block": None,
+        "latest_extension_tx_hash": None,
+        "latest_extension_log_index": None,
         "settled_eth": "",
         "settled_time_utc": "",
         "rarity": "#1/792",
@@ -383,6 +389,7 @@ def write_fixture(
         "latest_bid_utc": "2026-05-30 18:40:23",
     }
     for folder in (root / "generated", root / "public" / "generated"):
+        write_json(folder / "auction_extensions.json", [])
         write_json(folder / "auction_timeline.json", [timeline_row])
         write_json(folder / "auction_daily_activity.json", [daily_row])
         write_json(folder / "auction_bidder_leaderboard.json", [bidder_row])
@@ -554,6 +561,156 @@ def assert_raises_contains(fn, text: str) -> None:
         raise AssertionError(f"expected AssertionError containing {text!r}")
 
 
+def write_extension_schedule_fixture(root: Path) -> None:
+    timeline = [
+        {
+            "token_id": 10,
+            "initial_end_time_utc": "2026-01-01 00:10:00",
+            "end_time_utc": "2026-01-01 00:10:00",
+            "extension_count": 0,
+            "latest_extension_end_time_utc": None,
+            "latest_extension_block": None,
+            "latest_extension_tx_hash": None,
+            "latest_extension_log_index": None,
+        },
+        {
+            "token_id": 11,
+            "initial_end_time_utc": "2026-01-01 00:10:00",
+            "end_time_utc": "2026-01-01 00:30:00",
+            "extension_count": 2,
+            "latest_extension_end_time_utc": "2026-01-01 00:30:00",
+            "latest_extension_block": 102,
+            "latest_extension_tx_hash": "0x" + "b" * 64,
+            "latest_extension_log_index": 8,
+        },
+    ]
+    # Deliberately store the ledger out of order: canonical identity comes
+    # from block/log position, never incidental JSON row order.
+    extensions = [
+        {
+            "token_id": 11,
+            "end_time_utc": "2026-01-01 00:30:00",
+            "block_number": 102,
+            "tx_hash": "0x" + "b" * 64,
+            "log_index": 8,
+        },
+        {
+            "token_id": 11,
+            "end_time_utc": "2026-01-01 00:20:00",
+            "block_number": 101,
+            "tx_hash": "0x" + "a" * 64,
+            "log_index": 7,
+        },
+    ]
+    write_json(root / "generated" / "auction_timeline.json", timeline)
+    write_json(root / "generated" / "auction_extensions.json", extensions)
+
+
+def test_auction_extension_schedule_validator_accepts_all_token_ledger() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_extension_schedule_fixture(root)
+        validator = load_module()
+        assert validator.validate_auction_extension_schedules(root=root) == {
+            "auctions": 2,
+            "extensions": 2,
+        }
+
+
+def test_auction_extension_schedule_validator_rejects_count_and_latest_tampering() -> None:
+    cases = (
+        ("extension_count", 1, "extension count differs"),
+        (
+            "latest_extension_end_time_utc",
+            "2026-01-01 00:29:00",
+            "latest_extension_end_time_utc differs",
+        ),
+        ("latest_extension_block", 999, "latest_extension_block differs"),
+        ("latest_extension_tx_hash", "0x" + "c" * 64, "latest_extension_tx_hash differs"),
+        ("latest_extension_log_index", 99, "latest_extension_log_index differs"),
+        ("end_time_utc", "2026-01-01 00:31:00", "effective auction end differs"),
+    )
+    for field, value, expected_error in cases:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_extension_schedule_fixture(root)
+            timeline_path = root / "generated" / "auction_timeline.json"
+            timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+            timeline[1][field] = value
+            write_json(timeline_path, timeline)
+            validator = load_module()
+            assert_raises_contains(
+                lambda: validator.validate_auction_extension_schedules(root=root),
+                expected_error,
+            )
+
+
+def test_auction_extension_schedule_validator_rejects_nonmonotonic_and_zero_provenance() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_extension_schedule_fixture(root)
+        extension_path = root / "generated" / "auction_extensions.json"
+        extensions = json.loads(extension_path.read_text(encoding="utf-8"))
+        extensions[0]["end_time_utc"] = "2026-01-01 00:20:00"
+        write_json(extension_path, extensions)
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_auction_extension_schedules(root=root),
+            "not strictly increasing",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_extension_schedule_fixture(root)
+        timeline_path = root / "generated" / "auction_timeline.json"
+        timeline = json.loads(timeline_path.read_text(encoding="utf-8"))
+        timeline[0]["latest_extension_tx_hash"] = ""
+        write_json(timeline_path, timeline)
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_auction_extension_schedules(root=root),
+            "must use null latest provenance",
+        )
+
+
+def test_auction_extension_schedule_validator_rejects_orphan_and_duplicate_logs() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_extension_schedule_fixture(root)
+        extension_path = root / "generated" / "auction_extensions.json"
+        extensions = json.loads(extension_path.read_text(encoding="utf-8"))
+        extensions.append(
+            {
+                "token_id": 12,
+                "end_time_utc": "2026-01-01 00:40:00",
+                "block_number": 103,
+                "tx_hash": "0x" + "c" * 64,
+                "log_index": 9,
+            }
+        )
+        write_json(extension_path, extensions)
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_auction_extension_schedules(root=root),
+            "references unknown Dog #12",
+        )
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_extension_schedule_fixture(root)
+        extension_path = root / "generated" / "auction_extensions.json"
+        extensions = json.loads(extension_path.read_text(encoding="utf-8"))
+        duplicate = dict(extensions[0])
+        duplicate["tx_hash"] = "0x" + "c" * 64
+        extensions.append(duplicate)
+        write_json(extension_path, extensions)
+        validator = load_module()
+        assert_raises_contains(
+            lambda: validator.validate_auction_extension_schedules(root=root),
+            "duplicate canonical log",
+        )
+
+
 def test_validate_current_surface_accepts_consistent_apr_fixture() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -568,6 +725,20 @@ def test_validate_current_surface_accepts_consistent_apr_fixture() -> None:
         }
 
 
+def test_validate_current_surface_rejects_public_extension_mirror_drift() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        write_json(
+            root / "public" / "generated" / "auction_extensions.json",
+            [{"token_id": 729}],
+        )
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "public/generated/auction_extensions.json differs",
+        )
+
+
 def test_validate_current_surface_rejects_stale_timeline_rarity() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -580,6 +751,25 @@ def test_validate_current_surface_rejects_stale_timeline_rarity() -> None:
             lambda: run_validation(root),
             "auction_timeline Dog #729 rarity differs from validated history",
         )
+
+
+def test_validate_current_surface_requires_every_verified_historical_score() -> None:
+    for replacement in ("missing", None):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_fixture(root)
+            history = json.loads(
+                (root / "generated" / "historical_dog_search.json").read_text()
+            )
+            if replacement == "missing":
+                history[0].pop("rarity_score")
+            else:
+                history[0]["rarity_score"] = replacement
+            write_json(root / "generated" / "historical_dog_search.json", history)
+            assert_raises_contains(
+                lambda: run_validation(root),
+                "Dog #0 rarity score is inconsistent",
+            )
 
 
 def test_validate_current_surface_rejects_blank_winner_metadata_provenance() -> None:

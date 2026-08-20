@@ -15,11 +15,12 @@ import io
 import json
 import os
 import re
+import sqlite3
 import stat
 import sys
 import tempfile
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -73,6 +74,31 @@ RARITY_MUTATION_TOPICS = (
     "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
 )
 
+REFRESH_STATUS_INTEGER_FIELDS = frozenset(
+    {
+        "latest_generated_block",
+        "current_dog_token_id",
+        "onchain_chain_id",
+        "snapshot_confirmations",
+        "rpc_quorum_size",
+        "dog_total_supply",
+        "dog_id_ceiling",
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_base_existing_count",
+        "dog_base_unclaimed_count",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
+        "dog_metadata_content_observed_count",
+        "dog_rarity_universe_count",
+        "dog_rarity_excluded_nonexistent_count",
+        "dog_rarity_incomplete_metadata_count",
+        "dog_rarity_attested_block",
+        "dog_rarity_continuity_through_block",
+        "dog_rarity_extension_mint_count",
+    }
+)
+
 
 class FullRefreshRequired(RuntimeError):
     """Raised before writes when committed artifacts cannot support an exact delta."""
@@ -99,6 +125,289 @@ def bid_wallet(row: dict[str, Any]) -> str:
 
 def bid_amount(row: dict[str, Any]) -> Decimal:
     return Decimal(str(row.get("bid_eth") or row.get("amount_eth") or 0))
+
+
+_SQLITE_FORMATTER = sqlite3.connect(":memory:")
+
+
+def sqlite_real(value: Any) -> float:
+    number = Decimal(str(value or 0))
+    if not number.is_finite():
+        raise FullRefreshRequired("dashboard numeric value is not finite")
+    return float(number)
+
+
+def numeric_8(value: Any) -> float:
+    """Use the same binary REAL and ROUND(..., 8) path as the full SQL build."""
+    return float(_SQLITE_FORMATTER.execute("SELECT ROUND(?, 8)", (sqlite_real(value),)).fetchone()[0])
+
+
+def require_exact_8_decimal_amount(value: Any, label: str) -> None:
+    """Fail to the full builder before bounded aggregates discard sub-1e-8 residuals."""
+    amount = Decimal(str(value or 0))
+    scaled = amount * Decimal(100_000_000)
+    if not amount.is_finite() or amount < 0 or scaled != scaled.to_integral_value():
+        raise FullRefreshRequired(f"{label} amount requires more than 8 decimal places")
+
+
+def numeric_2(value: Any) -> float:
+    """Use the same binary REAL and ROUND(..., 2) path as the full SQL build."""
+    return float(_SQLITE_FORMATTER.execute("SELECT ROUND(?, 2)", (sqlite_real(value),)).fetchone()[0])
+
+
+def format_eth_5(value: Any) -> str:
+    """Match the full dashboard's printf('%.5f ETH', ...) display contract."""
+    return str(
+        _SQLITE_FORMATTER.execute("SELECT printf('%.5f', ?)", (sqlite_real(value),)).fetchone()[0]
+    )
+
+
+def format_usd_0(value: Any) -> str:
+    """Match the full dashboard's printf('$%.0f', ...) display contract."""
+    return str(
+        _SQLITE_FORMATTER.execute("SELECT printf('%.0f', ?)", (sqlite_real(value),)).fetchone()[0]
+    )
+
+
+def numeric_usd_2(amount_eth: Any, eth_usd: Any) -> float:
+    """Match SQLite REAL multiplication followed by ROUND(..., 2)."""
+    return float(
+        _SQLITE_FORMATTER.execute(
+            "SELECT ROUND(? * ?, 2)",
+            (sqlite_real(amount_eth), sqlite_real(eth_usd)),
+        ).fetchone()[0]
+    )
+
+
+def format_usd_product_0(amount_eth: Any, eth_usd: Any) -> str:
+    """Match SQLite printf('%.0f', amount_eth * eth_usd)."""
+    return str(
+        _SQLITE_FORMATTER.execute(
+            "SELECT printf('%.0f', ? * ?)",
+            (sqlite_real(amount_eth), sqlite_real(eth_usd)),
+        ).fetchone()[0]
+    )
+
+
+def reconcile_timeline_extensions(
+    baseline: dict[str, Any],
+    created: dict[str, Any],
+    canonical_rows: list[dict[str, Any]],
+    *,
+    authenticated_checkpoint_block: int,
+    snapshot_block: int,
+    expected_end_time_utc: Any = None,
+) -> dict[str, Any]:
+    """Rebuild a schedule from its raw extension export and a re-proved checkpoint."""
+    if authenticated_checkpoint_block <= 0 or snapshot_block < authenticated_checkpoint_block:
+        raise FullRefreshRequired("auction timeline checkpoint was not authenticated")
+    baseline_initial = str(baseline.get("initial_end_time_utc") or "")
+    created_initial = str(created.get("end_time_utc") or "")
+    if baseline_initial and created_initial and baseline_initial != created_initial:
+        raise FullRefreshRequired("AuctionCreated initial end time disagrees with the timeline")
+    initial_end = baseline_initial or created_initial
+    if not initial_end or parse_utc(initial_end) is None:
+        raise FullRefreshRequired("auction timeline is missing its canonical initial end time")
+    if not baseline and int_value(created.get("block_number"), -1) <= authenticated_checkpoint_block:
+        raise FullRefreshRequired("persisted timeline omitted a pre-checkpoint AuctionCreated log")
+
+    raw_count = baseline.get("extension_count")
+    if raw_count in (None, ""):
+        baseline_count = 0
+    else:
+        try:
+            baseline_count = int(str(raw_count))
+        except ValueError as exc:
+            raise FullRefreshRequired("auction timeline extension count is malformed") from exc
+    if baseline_count < 0:
+        raise FullRefreshRequired("auction timeline extension count is negative")
+
+    latest_keys = (
+        "latest_extension_end_time_utc",
+        "latest_extension_block",
+        "latest_extension_tx_hash",
+        "latest_extension_log_index",
+    )
+    if baseline_count:
+        if any(baseline.get(key) in (None, "") for key in latest_keys):
+            raise FullRefreshRequired("auction timeline extension provenance is incomplete")
+        baseline_position = (
+            int_value(baseline.get("latest_extension_block"), -1),
+            int_value(baseline.get("latest_extension_log_index"), -1),
+        )
+        if min(baseline_position) < 0:
+            raise FullRefreshRequired("auction timeline extension position is malformed")
+        if baseline_position[0] > authenticated_checkpoint_block:
+            raise FullRefreshRequired("persisted AuctionExtended log is newer than its checkpoint")
+        effective_end = str(baseline["latest_extension_end_time_utc"])
+    else:
+        if any(baseline.get(key) not in (None, "") for key in latest_keys):
+            raise FullRefreshRequired("zero-extension timeline has contradictory provenance")
+        baseline_position = (-1, -1)
+        effective_end = initial_end
+
+    ordered = sorted(
+        (dict(row) for row in canonical_rows),
+        key=lambda row: (int_value(row.get("block_number"), -1), int_value(row.get("log_index"), -1)),
+    )
+    positions: set[tuple[int, int]] = set()
+    for row in ordered:
+        position = (int_value(row.get("block_number"), -1), int_value(row.get("log_index"), -1))
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        if (
+            min(position) < 0
+            or position[0] > snapshot_block
+            or position in positions
+            or not re.fullmatch(r"0x[0-9a-f]{64}", tx_hash)
+        ):
+            raise FullRefreshRequired("AuctionExtended log ordering is malformed or duplicated")
+        positions.add(position)
+
+    pre_checkpoint_rows = [
+        row for row in ordered if int_value(row.get("block_number"), -1) <= authenticated_checkpoint_block
+    ]
+    if len(pre_checkpoint_rows) != baseline_count:
+        raise FullRefreshRequired("raw extension export and checkpointed timeline count disagree")
+    if baseline_count:
+        persisted_latest = pre_checkpoint_rows[-1]
+        if (
+            (int_value(persisted_latest.get("block_number"), -1), int_value(persisted_latest.get("log_index"), -1))
+            != baseline_position
+            or str(persisted_latest.get("tx_hash") or "").lower()
+            != str(baseline.get("latest_extension_tx_hash") or "").lower()
+            or str(persisted_latest.get("end_time_utc") or "") != effective_end
+        ):
+            raise FullRefreshRequired("raw extension export and checkpointed timeline latest event disagree")
+
+    previous_end = parse_utc(initial_end)
+    created_block = int_value(created.get("block_number"), -1)
+    for row in ordered:
+        if created_block >= 0 and int_value(row.get("block_number"), -1) < created_block:
+            raise FullRefreshRequired("AuctionExtended log precedes AuctionCreated")
+        next_end = parse_utc(row.get("end_time_utc"))
+        if next_end is None or previous_end is None or next_end <= previous_end:
+            raise FullRefreshRequired("AuctionExtended end time did not increase monotonically")
+        previous_end = next_end
+        effective_end = str(row["end_time_utc"])
+
+    extension_count = len(ordered)
+    latest_row = ordered[-1] if ordered else None
+    if latest_row is not None:
+        latest_end: Any = latest_row["end_time_utc"]
+        latest_block: Any = int_value(latest_row.get("block_number"), -1)
+        latest_tx: Any = str(latest_row.get("tx_hash") or "").lower()
+        latest_log_index: Any = int_value(latest_row.get("log_index"), -1)
+    else:
+        latest_end = latest_block = latest_tx = latest_log_index = None
+
+    expected_end = str(expected_end_time_utc or "")
+    if expected_end and effective_end != expected_end:
+        raise FullRefreshRequired(
+            f"effective AuctionExtended end time disagrees with auction(): logs={effective_end} contract={expected_end}"
+        )
+    return {
+        "initial_end_time_utc": initial_end,
+        "end_time_utc": effective_end,
+        "extension_count": extension_count,
+        "latest_extension_end_time_utc": latest_end,
+        "latest_extension_block": latest_block,
+        "latest_extension_tx_hash": latest_tx,
+        "latest_extension_log_index": latest_log_index,
+    }
+
+
+def merge_extension_overlap(
+    existing: list[dict[str, Any]],
+    fresh: list[dict[str, Any]],
+    coverage_ranges: list[tuple[int, int]],
+) -> list[dict[str, Any]]:
+    """Replace every covered raw extension row with the canonical quorum result."""
+    def covered(block_number: int) -> bool:
+        return any(start <= block_number <= end for start, end in coverage_ranges)
+
+    for row in fresh:
+        if not covered(int_value(row.get("block_number"), -1)):
+            raise FullRefreshRequired("fresh AuctionExtended log is outside the verified ranges")
+    output = [
+        dict(row)
+        for row in existing
+        if not covered(int_value(row.get("block_number"), -1))
+    ]
+    output.extend(dict(row) for row in fresh)
+    output.sort(key=lambda row: (int_value(row.get("block_number"), -1), int_value(row.get("log_index"), -1)))
+    identities: set[tuple[str, int]] = set()
+    positions: set[tuple[int, int]] = set()
+    for row in output:
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        log_index = int_value(row.get("log_index"), -1)
+        block_number = int_value(row.get("block_number"), -1)
+        identity = (tx_hash, log_index)
+        position = (block_number, log_index)
+        if (
+            not re.fullmatch(r"0x[0-9a-f]{64}", tx_hash)
+            or min(position) < 0
+            or identity in identities
+            or position in positions
+        ):
+            raise FullRefreshRequired("raw AuctionExtended export is malformed or duplicated")
+        identities.add(identity)
+        positions.add(position)
+    return output
+
+
+def validate_extended_bid_pairs(
+    bids: list[dict[str, Any]],
+    extensions: list[dict[str, Any]],
+    token_ids: set[int],
+) -> None:
+    bids_by_position: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for row in bids:
+        extended = int_value(row.get("extended"), -1)
+        if extended not in {0, 1}:
+            raise FullRefreshRequired("AuctionBid has a non-boolean extension flag")
+        token_id = int_value(row.get("token_id"), -1)
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        if token_id in token_ids:
+            block_number = int_value(row.get("block_number"), -1)
+            log_index = int_value(row.get("log_index"), -1)
+            if not tx_hash or block_number < 0 or log_index < 0:
+                raise FullRefreshRequired("AuctionBid is missing its canonical log identity")
+            position = (block_number, tx_hash, log_index)
+            if position in bids_by_position:
+                raise FullRefreshRequired("auction extension transaction has duplicate bid logs")
+            bids_by_position[position] = row
+
+    extensions_by_position: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for row in extensions:
+        token_id = int_value(row.get("token_id"), -1)
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        block_number = int_value(row.get("block_number"), -1)
+        log_index = int_value(row.get("log_index"), -1)
+        if token_id not in token_ids or not tx_hash or block_number < 0 or log_index < 0:
+            raise FullRefreshRequired("AuctionExtended log is outside the active auction scope")
+        position = (block_number, tx_hash, log_index)
+        if position in extensions_by_position:
+            raise FullRefreshRequired("auction extension transaction has duplicate extension logs")
+        extensions_by_position[position] = row
+
+    for position, bid in bids_by_position.items():
+        extension = extensions_by_position.get((position[0], position[1], position[2] + 1))
+        should_extend = int_value(bid.get("extended")) == 1
+        if should_extend != (
+            extension is not None
+            and int_value(extension.get("token_id"), -1)
+            == int_value(bid.get("token_id"), -1)
+        ):
+            raise FullRefreshRequired("AuctionBid extension flags and AuctionExtended logs disagree")
+    for position, extension in extensions_by_position.items():
+        bid = bids_by_position.get((position[0], position[1], position[2] - 1))
+        if (
+            bid is None
+            or int_value(bid.get("extended"), -1) != 1
+            or int_value(bid.get("token_id"), -1)
+            != int_value(extension.get("token_id"), -1)
+        ):
+            raise FullRefreshRequired("AuctionExtended log does not follow its paired AuctionBid")
 
 
 def bid_block(row: dict[str, Any]) -> int:
@@ -187,7 +496,7 @@ def format_fresh_bid_rows(
         wallet = bid_wallet(bid)
         name, url = display_for(wallet, profiles)
         amount = bid_amount(bid)
-        amount_usd = (amount * eth_usd).quantize(Decimal("0.01"))
+        amount_usd = numeric_usd_2(amount, eth_usd)
         token_id = int_value(bid.get("token_id"), -1)
         formatted.append(
             {
@@ -197,17 +506,17 @@ def format_fresh_bid_rows(
                 "bidder": name,
                 "bidder_url": url,
                 "bidder_wallet": wallet,
-                "bid": f"{format_eth_amount(amount)} ETH (${amount_usd:,.0f})",
-                "bid_eth": float(amount),
-                "bid_usd": float(amount_usd),
-                "bid_usd_at_event": float(amount_usd),
+                "bid": f"{format_eth_5(amount)} ETH (${format_usd_product_0(amount, eth_usd)})",
+                "bid_eth": numeric_8(amount),
+                "bid_usd": amount_usd,
+                "bid_usd_at_event": amount_usd,
                 "eth_usd_price_live": str(eth_usd),
                 "eth_usd_price_at_event": str(eth_usd),
                 "eth_usd_price_date_utc": price_date_utc,
                 "usd_estimate_source": "current_eth_usd_price",
                 "usd_estimate_source_detail": eth_source,
                 "usd_estimate_confidence": "live_current",
-                "usd_estimate_basis": "current_eth_usd_price",
+                "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
                 "extended": int_value(bid.get("extended")),
                 "block_number": bid_block(bid),
                 "log_index": bid_log_index(bid),
@@ -264,7 +573,11 @@ def reconcile_recent_bid_rows(
         for row in existing_rows
         if bid_block(row) < from_block
     }
-    for row in [*fresh_rows, *complete_active_history]:
+    # Active-auction tables are live-priced, while ``fresh_rows`` carries the
+    # immutable event-date quote required by recent_bids. Seed any recovered
+    # active-only identities first, then let the canonical historical row win
+    # when both surfaces describe the same onchain event.
+    for row in [*complete_active_history, *fresh_rows]:
         candidates[bid_public_identity(row)] = dict(row)
     all_rows = sorted(candidates.values(), key=bid_sort_key, reverse=True)
     return all_rows[:limit], added, removed, all_rows
@@ -337,7 +650,9 @@ def apply_bidder_leaderboard_delta(
             # bidder, so the exact leaderboard boundary cannot be proven here.
             raise FullRefreshRequired(f"leaderboard rank may change after removed bid(s) for {wallet}")
         target["bids"] = int_value(target.get("bids")) + bid_delta
-        target["bid_eth"] = format_eth_amount(Decimal(str(target.get("bid_eth") or 0)) + eth_delta)
+        target["bid_eth"] = numeric_8(
+            Decimal(str(target.get("bid_eth") or 0)) + eth_delta
+        )
 
         pair_delta = 0
         affected_tokens = {
@@ -368,7 +683,7 @@ def apply_bidder_leaderboard_delta(
         fresh_high = max((bid_amount(row) for row in wallet_added), default=Decimal(0))
         if removed_high >= prior_high and fresh_high < prior_high:
             raise FullRefreshRequired(f"cannot reconstruct historical high bid for {wallet}")
-        target["high_bid_eth"] = format_eth_amount(max(prior_high, fresh_high))
+        target["high_bid_eth"] = numeric_8(max(prior_high, fresh_high))
 
         known = sorted(known_by_wallet.get(wallet, []), key=bid_sort_key, reverse=True)
         if known:
@@ -382,11 +697,10 @@ def apply_bidder_leaderboard_delta(
     output = list(by_wallet.values())
     output.sort(
         key=lambda row: (
-            Decimal(str(row.get("bid_eth") or 0)),
-            int_value(row.get("bids")),
+            -Decimal(str(row.get("bid_eth") or 0)),
+            -int_value(row.get("bids")),
             bid_wallet(row),
-        ),
-        reverse=True,
+        )
     )
     return output[:100]
 
@@ -431,9 +745,11 @@ def recompute_daily_activity(
             "settled_auctions": len(settled_on_day),
             "bids": len(day_bids),
             "unique_bidders": len({bid_wallet(row) for row in day_bids if bid_wallet(row)}),
-            "bid_eth": format_eth_amount(sum((bid_amount(row) for row in day_bids), Decimal(0))),
-            "high_bid_eth": format_eth_amount(max((bid_amount(row) for row in day_bids), default=Decimal(0))),
-            "settled_eth": format_eth_amount(
+            "bid_eth": numeric_8(sum((bid_amount(row) for row in day_bids), Decimal(0))),
+            "high_bid_eth": numeric_8(
+                max((bid_amount(row) for row in day_bids), default=Decimal(0))
+            ),
+            "settled_eth": numeric_8(
                 sum((Decimal(str(row.get("settled_eth") or 0)) for row in settled_on_day), Decimal(0))
             ),
         }
@@ -456,7 +772,7 @@ def apply_winner_stats_to_leaderboard(
         row = dict(original)
         wins, amount = stats.get(bid_wallet(row), (0, Decimal(0)))
         row["auction_wins"] = wins
-        row["winning_eth"] = format_eth_amount(amount)
+        row["winning_eth"] = numeric_8(amount)
         output.append(row)
     return output
 
@@ -555,29 +871,199 @@ def write_unified_by_id_records(records: list[dict[str, Any]], affected_token_id
     )
 
 
+def unified_by_id_mismatches(records: list[dict[str, Any]]) -> set[int]:
+    """Find master records whose per-Dog mirror is absent or crash-stale."""
+    mismatches: set[int] = set()
+    by_id = ROOT / "archive" / "dogs" / "by-id"
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        token_id = int_value(record.get("dog_id"), -1)
+        if token_id < 0:
+            continue
+        payload = load_json_file(by_id / f"{token_id:03d}.json", {})
+        if not isinstance(payload, dict) or payload.get("record") != record:
+            mismatches.add(token_id)
+    return mismatches
+
+
 def write_json(name: str, value: Any) -> None:
     payload = json.dumps(value, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
     for directory in (GENERATED, PUBLIC_GENERATED):
         atomic_write_text(directory / f"{name}.json", payload)
 
 
+TABLE_JSON_TYPE_CONTRACTS: dict[str, dict[str, tuple[type, bool]]] = {
+    "auction_extensions": {
+        "token_id": (int, False), "block_number": (int, False), "log_index": (int, False),
+    },
+    "auction_daily_activity": {
+        "created_auctions": (int, False), "settled_auctions": (int, False),
+        "bids": (int, False), "unique_bidders": (int, False),
+        "bid_eth": (float, False), "high_bid_eth": (float, False), "settled_eth": (float, False),
+    },
+    "auction_bidder_leaderboard": {
+        "bids": (int, False), "auctions_bid": (int, False), "auction_wins": (int, False),
+        "latest_bid_token_id": (int, False), "bid_eth": (float, False),
+        "high_bid_eth": (float, False), "winning_eth": (float, False),
+    },
+    "auction_feed": {
+        "amount_eth": (float, False), "amount_usd": (float, True),
+        "amount_usd_at_event": (float, True),
+    },
+    "auction_timeline": {
+        "token_id": (int, False), "extension_count": (int, False),
+        "latest_extension_block": (int, True), "latest_extension_log_index": (int, True),
+        "bids": (int, False), "unique_bidders": (int, False),
+        "high_bid_eth": (float, False), "total_bid_eth": (float, False),
+        "latest_bid_eth": (float, False), "settled_eth": (float, False),
+    },
+    "auction_winners": {
+        "token_id": (int, False), "rarity_score": (float, True),
+        "winning_bid_eth": (float, False), "winning_bid_usd": (float, True),
+        "winning_bid_usd_at_settlement": (float, True), "bid_count": (int, False),
+        "unique_bidders": (int, False), "block_number": (int, False),
+    },
+    "recent_auction_winners": {
+        "winning_bid_eth": (float, False), "winning_bid_usd": (float, True),
+        "winning_bid_usd_at_settlement": (float, True),
+    },
+    "current_auction": {
+        "token_id": (int, False), "rarity_score": (float, True),
+        "current_bid_eth": (float, False), "current_bid_usd": (float, False),
+        "current_bid_usd_live": (float, False), "seconds_remaining": (int, True),
+        "settled": (int, False), "latest_block": (int, False),
+    },
+    "current_latest_bid": {
+        "latest_bid_eth": (float, False), "latest_bid_usd": (float, False),
+        "latest_bid_usd_live": (float, False),
+    },
+    "current_auction_bid_history": {
+        "token_id": (int, False), "bid_eth": (float, False), "bid_usd": (float, False),
+        "extended": (int, False), "block_number": (int, False), "log_index": (int, False),
+    },
+    "recent_bids": {
+        "token_id": (int, False), "bid_eth": (float, False), "bid_usd": (float, True),
+        "bid_usd_at_event": (float, True), "extended": (int, False), "block_number": (int, False),
+    },
+}
+
+
 def read_table(name: str) -> tuple[list[str], list[dict[str, Any]]]:
     path = GENERATED / f"{name}.csv"
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
-        rows = list(reader)
-    return list(reader.fieldnames or []), rows
+        csv_rows = list(reader)
+        columns = list(reader.fieldnames or [])
+    json_path = GENERATED / f"{name}.json"
+    try:
+        json_rows = json.loads(json_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise FullRefreshRequired(f"{json_path.relative_to(ROOT)} is missing or invalid: {exc}") from exc
+    if not isinstance(json_rows, list) or len(json_rows) != len(csv_rows):
+        raise FullRefreshRequired(f"generated/{name} CSV/JSON row counts disagree")
+    expected_columns = set(columns)
+    type_contract = TABLE_JSON_TYPE_CONTRACTS.get(name, {})
+    missing_contract_columns = sorted(set(type_contract) - expected_columns)
+    if missing_contract_columns:
+        raise FullRefreshRequired(
+            f"generated/{name} is missing typed column(s): {','.join(missing_contract_columns)}"
+        )
+    for index, (csv_row, json_row) in enumerate(zip(csv_rows, json_rows, strict=True)):
+        if not isinstance(json_row, dict) or set(json_row) != expected_columns:
+            raise FullRefreshRequired(
+                f"generated/{name} CSV/JSON schema disagrees at row {index}"
+            )
+        for column in columns:
+            json_value = json_row.get(column)
+            if isinstance(json_value, (dict, list)):
+                raise FullRefreshRequired(
+                    f"generated/{name} has a non-scalar table value at row {index} column {column}"
+                )
+            json_csv_value = "" if json_value is None else str(json_value)
+            if json_csv_value != str(csv_row.get(column) or ""):
+                raise FullRefreshRequired(
+                    f"generated/{name} CSV/JSON values disagree at row {index} column {column}"
+                )
+        for column, (expected_type, nullable) in type_contract.items():
+            value = json_row.get(column)
+            if value is None and nullable:
+                continue
+            if type(value) is not expected_type:
+                null_label = " or null" if nullable else ""
+                raise FullRefreshRequired(
+                    f"generated/{name} row {index} column {column} must be "
+                    f"{expected_type.__name__}{null_label}"
+                )
+    # CSV declares column order while JSON preserves the canonical scalar
+    # types. Reusing both prevents bounded refreshes from flipping integers,
+    # decimals, and nulls into strings/blanks after a full build.
+    return columns, json_rows
 
 
 def write_table(name: str, columns: list[str], rows: list[dict[str, Any]]) -> None:
+    projected_rows = [
+        {column: row.get(column, "") for column in columns}
+        for row in rows
+    ]
     buffer = io.StringIO(newline="")
     writer = csv.DictWriter(buffer, fieldnames=columns, extrasaction="ignore", lineterminator="\n")
     writer.writeheader()
-    writer.writerows({column: row.get(column, "") for column in columns} for row in rows)
+    writer.writerows(projected_rows)
     payload = buffer.getvalue()
     for directory in (GENERATED, PUBLIC_GENERATED):
         atomic_write_text(directory / f"{name}.csv", payload)
-    write_json(name, rows)
+    # CSV is the table schema authority. Project JSON through the same columns
+    # so bounded and full builds cannot expose different API fields.
+    write_json(name, projected_rows)
+
+
+def ensure_table_column(
+    columns: list[str],
+    column: str,
+    *,
+    after: str | None = None,
+) -> list[str]:
+    """Return a schema containing ``column`` without mutating the input list."""
+    if column in columns:
+        return list(columns)
+    migrated = list(columns)
+    if after in migrated:
+        migrated.insert(migrated.index(after) + 1, column)
+    else:
+        migrated.append(column)
+    return migrated
+
+
+def prepare_historical_rarity_table(
+    columns: list[str],
+    rows: list[dict[str, Any]],
+    rarity_universe: dict[int, dict[str, Any]],
+) -> tuple[list[str], list[dict[str, Any]]]:
+    """Migrate the historical schema and normalize every verified rarity row."""
+    migrated_columns = ensure_table_column(
+        columns,
+        "rarity_score",
+        after="rarity",
+    )
+    # JSON and CSV can be split across a hard crash because they are separate
+    # atomic files. Normalize from the independently recomputed universe every
+    # run instead of trusting either surface as the rebase signal.
+    for row in rows:
+        historical_token_id = int_value(row.get("token_id"), -1)
+        if historical_token_id in rarity_universe:
+            expected = rarity_universe[historical_token_id]
+            if (
+                rarity_row_requires_rebase(row, expected)
+                or str(row.get("traits") or "") != str(expected["traits"])
+                or str(row.get("metadata_verification_status") or "")
+                != "onchain_token_uri_verified"
+            ):
+                apply_rarity_fields(row, expected)
+                row["search_text"] = " ".join(
+                    str(row.get(key, "")) for key in row if key != "search_text"
+                ).lower()
+    return migrated_columns, rows
 
 
 def int_value(value: Any, default: int = 0) -> int:
@@ -587,6 +1073,208 @@ def int_value(value: Any, default: int = 0) -> int:
         return int(str(value).replace(",", ""))
     except (TypeError, ValueError):
         return default
+
+
+def canonical_historical_search_text(row: dict[str, Any]) -> str:
+    """Match the full builder's complete scalar search corpus."""
+    return " ".join(
+        str(value)
+        for key, value in row.items()
+        if key != "search_text"
+        and value is not None
+        and not isinstance(value, (list, dict))
+        and str(value)
+    )
+
+
+def apply_historical_provenance_defaults(
+    row: dict[str, Any],
+    archive_source: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Prefer independent archive provenance, otherwise preserve or fill it."""
+    archive_source = archive_source or {}
+    archive_confidence = str(archive_source.get("confidence") or "")
+    archive_sources_raw = archive_source.get("sources")
+    if isinstance(archive_sources_raw, list):
+        archive_sources = ",".join(str(value) for value in archive_sources_raw if str(value))
+    else:
+        archive_sources = str(archive_sources_raw or "")
+    if archive_confidence:
+        row["confidence"] = archive_confidence
+    if archive_sources:
+        row["sources"] = archive_sources
+    if not row.get("confidence"):
+        row["confidence"] = "verified_live_base_logs"
+    if not row.get("sources"):
+        row["sources"] = "base_logs,dashboard_builder"
+    return row
+
+
+def recompute_historical_report_rows(
+    report_rows: list[dict[str, Any]],
+    history_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Rebuild report aggregates with the same event-time basis as the full builder."""
+    report_groups = {"all": history_rows}
+    report_groups.update(
+        {
+            mission: [row for row in history_rows if str(row.get("mission")) == mission]
+            for mission in ("1", "2", "3")
+        }
+    )
+    for report in report_rows:
+        group = report_groups.get(str(report.get("mission")))
+        if group is None:
+            continue
+        statuses = [str(row.get("status") or "").lower() for row in group]
+        created_times = [
+            str(row.get("auction_created_time_utc"))
+            for row in group
+            if row.get("auction_created_time_utc")
+        ]
+        activity_times = [
+            str(value)
+            for row in group
+            for value in (row.get("settled_time_utc"), row.get("auction_created_time_utc"))
+            if value
+        ]
+        winners = {
+            str(row.get("winner_wallet") or row.get("winner"))
+            for row in group
+            if row.get("winner_wallet") or row.get("winner")
+        }
+        report.update(
+            {
+                "dogs": len(group),
+                "auctions_or_records": sum(
+                    1
+                    for row in group
+                    if row.get("auction_created_time_utc")
+                    or row.get("settled_time_utc")
+                    or row.get("amount")
+                ),
+                "settled": sum(
+                    1
+                    for status in statuses
+                    if status == "settled"
+                    or (status.startswith("settled") and "unsettled" not in status)
+                ),
+                "live_or_unsettled": sum(
+                    1
+                    for status in statuses
+                    if "live" in status
+                    or "ongoing" in status
+                    or "unsettled" in status
+                    or "pending settlement" in status
+                    or "created" in status
+                ),
+                "metadata_only": sum(1 for status in statuses if status == "metadata_only"),
+                "bid_count": sum(int_value(row.get("bid_count")) for row in group),
+                "unique_winners_or_high_bidders": len(winners),
+                "first_auction_utc": min(created_times) if created_times else "",
+                "latest_activity_utc": max(activity_times) if activity_times else "",
+            }
+        )
+    return report_rows
+
+
+def canonical_unified_current_search_text(row: dict[str, Any], token_id: int) -> str:
+    """Match the unified builder's live-row search corpus without stale overlay terms."""
+    who = row.get("winner_or_high_bidder") if isinstance(row.get("winner_or_high_bidder"), dict) else {}
+    amount = row.get("amount") if isinstance(row.get("amount"), dict) else {}
+    rarity = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
+    source = row.get("source") if isinstance(row.get("source"), dict) else {}
+    created = row.get("auction_created") if isinstance(row.get("auction_created"), dict) else {}
+    settlement = row.get("settlement") if isinstance(row.get("settlement"), dict) else {}
+    traits = row.get("traits") if isinstance(row.get("traits"), list) else []
+    parts: list[Any] = [
+        f"dog {token_id}",
+        f"dog #{token_id}",
+        str(token_id),
+        "Mission 3",
+        "mission 3",
+        "Base",
+        row.get("status"),
+        who.get("wallet"),
+        who.get("display"),
+        who.get("farcaster_handle"),
+        amount.get("native"),
+        amount.get("native_symbol"),
+        amount.get("raw"),
+        amount.get("usd_estimate"),
+        amount.get("usd_estimate_display"),
+        row.get("activity_time_utc"),
+        created.get("tx_hash"),
+        settlement.get("tx_hash"),
+        rarity.get("display"),
+        "generated auction feed",
+    ]
+    parts.extend(row.get("bid_tx_hashes") or [])
+    for trait in traits:
+        if isinstance(trait, dict):
+            parts.extend((trait.get("display"), trait.get("trait_type"), trait.get("value")))
+        else:
+            parts.append(trait)
+    parts.extend(source.get("sources") if isinstance(source.get("sources"), list) else [])
+    return " ".join(str(part) for part in parts if part not in (None, "")).lower()
+
+
+def canonical_unified_source(
+    existing_source: dict[str, Any],
+    archive_source: dict[str, Any],
+    *,
+    settled: bool,
+    baseline_exists: bool,
+) -> dict[str, Any]:
+    """Preserve/recover independent archive attribution for a live overlay."""
+    source = dict(existing_source)
+    source.setdefault("confidence", "verified")
+    source.setdefault(
+        "notes",
+        "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+    )
+    source.setdefault("raw_confidence", "verified_onchain_generated_tables")
+    archive_sources = (
+        [str(value) for value in archive_source.get("sources", []) if str(value)]
+        if isinstance(archive_source.get("sources"), list)
+        else []
+    )
+    existing_sources = [
+        str(value)
+        for value in source.get("sources", [])
+        if str(value)
+    ]
+    sources = list(archive_sources)
+    for existing in existing_sources:
+        if existing == "dashboard_builder" and archive_sources:
+            continue
+        if existing not in sources:
+            sources.append(existing)
+    required = [
+        "base_logs",
+        *([] if baseline_exists else ["dashboard_builder"]),
+        "generated_auction_timeline",
+        "generated_auction_feed",
+        *(["generated_auction_winners"] if settled else []),
+    ]
+    for value in required:
+        if value not in sources:
+            sources.append(value)
+    source["sources"] = sources
+    if archive_source.get("confidence"):
+        source["confidence"] = str(archive_source["confidence"])
+    return source
+
+
+def normalize_refresh_status_integer_fields(status: dict[str, Any]) -> dict[str, Any]:
+    """Keep the public status API's integer fields stable across build paths."""
+    normalized = dict(status)
+    for key in REFRESH_STATUS_INTEGER_FIELDS.intersection(normalized):
+        value = normalized[key]
+        if isinstance(value, bool) or not re.fullmatch(r"(?:0|[1-9][0-9]*)", str(value)):
+            raise FullRefreshRequired(f"refresh_status {key} is not a non-negative integer")
+        normalized[key] = int(value)
+    return normalized
 
 
 def format_eth_amount(value: Any) -> str:
@@ -604,10 +1292,25 @@ def historical_settlement_amount_display(
 ) -> str:
     if historical_usd is None:
         raise FullRefreshRequired(f"Dog #{token_id} settlement lost historical USD provenance")
-    amount_usd = decimal_or_none(historical_usd.get("amount_usd_at_event"))
-    if amount_usd is None or amount_usd < 0:
+    event_price = decimal_or_none(historical_usd.get("eth_usd_price_at_event"))
+    if event_price is None or event_price <= 0:
         raise FullRefreshRequired(f"Dog #{token_id} settlement has invalid historical USD provenance")
-    return f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
+    return f"{format_eth_5(amount_eth)} ETH (${format_usd_product_0(amount_eth, event_price)})"
+
+
+def dashboard_settlement_usd_basis(historical_usd: dict[str, Any], event_time: Any) -> str:
+    """Match the SQL winner/feed label for exact-day versus nearest-day prices."""
+    event_dt = parse_utc(event_time)
+    price_raw = str(historical_usd.get("eth_usd_price_date_utc") or "")
+    try:
+        price_date = date.fromisoformat(price_raw)
+    except ValueError as exc:
+        raise FullRefreshRequired("settlement has invalid historical USD date provenance") from exc
+    if event_dt is None:
+        raise FullRefreshRequired("settlement has invalid historical USD date provenance")
+    if event_dt.date() == price_date:
+        return "settlement_date_eth_usd"
+    return "nearest_settlement_date_eth_usd"
 
 
 def now_utc() -> datetime:
@@ -624,6 +1327,13 @@ def parse_utc(value: Any) -> datetime | None:
         return datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError:
         return None
+
+
+def canonical_utc_z(value: Any, label: str) -> str:
+    parsed = parse_utc(value)
+    if parsed is None:
+        raise FullRefreshRequired(f"{label} is not a canonical UTC timestamp")
+    return parsed.replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def resolve_current_auction_creation(
@@ -1524,26 +2234,54 @@ def apply_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None
     )
 
 
-def apply_unified_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None:
+def normalize_table_rarity_rows(
+    rows: list[dict[str, Any]],
+    rarity_universe: dict[int, dict[str, Any]],
+    *,
+    token_from_dog_label: bool = False,
+) -> list[dict[str, Any]]:
+    """Normalize rarity rows independently of an earlier surface write."""
+    for row in rows:
+        if token_from_dog_label:
+            match = re.search(r"(\d+)", str(row.get("dog") or ""))
+            token_id = int(match.group(1)) if match else -1
+        else:
+            token_id = int_value(row.get("token_id"), -1)
+        if token_id in rarity_universe:
+            apply_rarity_fields(row, rarity_universe[token_id])
+    return rows
+
+
+def apply_unified_rarity_fields(
+    row: dict[str, Any],
+    rarity_row: dict[str, Any],
+) -> bool:
     old_rarity = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
     old_traits = row.get("traits") if isinstance(row.get("traits"), list) else []
+    structured_traits = unified_trait_items(str(rarity_row["trait_rarity"]))
+    expected_rarity = {
+        "display": rarity_row["rarity"],
+        "rank": int(str(rarity_row["rarity"]).split("/", 1)[0].lstrip("#")),
+        "total": int(str(rarity_row["rarity"]).split("/", 1)[1]),
+        "scope": "base_existing",
+    }
+    # The canonical full builder already embeds the authoritative structured
+    # fields in its own search-text order. Preserve that byte-for-byte so a
+    # no-change bounded refresh cannot create master/by-id divergence.
+    if old_rarity == expected_rarity and old_traits == structured_traits:
+        return False
     search_text = str(row.get("search_text") or "")
     stale_terms = [str(old_rarity.get("display") or "")]
     stale_terms.extend(str(item.get("display") or "") for item in old_traits if isinstance(item, dict))
     for term in stale_terms:
         if term:
             search_text = re.sub(re.escape(term), " ", search_text, flags=re.IGNORECASE)
-    structured_traits = unified_trait_items(str(rarity_row["trait_rarity"]))
-    row["rarity"] = {
-        "display": rarity_row["rarity"],
-        "rank": int(str(rarity_row["rarity"]).split("/", 1)[0].lstrip("#")),
-        "total": int(str(rarity_row["rarity"]).split("/", 1)[1]),
-        "scope": "base_existing",
-    }
+    row["rarity"] = expected_rarity
     row["traits"] = structured_traits
     fresh_terms = [str(rarity_row["rarity"]), *(str(item.get("display") or "") for item in structured_traits)]
     row["search_text"] = " ".join([search_text, *fresh_terms]).lower().split()
     row["search_text"] = " ".join(row["search_text"])
+    return True
 
 
 def decimal_or_none(value: Any) -> Decimal | None:
@@ -1557,6 +2295,15 @@ def decimal_or_none(value: Any) -> Decimal | None:
     return parsed if parsed.is_finite() else None
 
 
+def rarity_row_requires_rebase(row: dict[str, Any], rarity_row: dict[str, Any]) -> bool:
+    return (
+        str(row.get("rarity") or "") != str(rarity_row["rarity"])
+        or str(row.get("trait_rarity") or "") != str(rarity_row["trait_rarity"])
+        or decimal_or_none(row.get("rarity_score"))
+        != decimal_or_none(rarity_row.get("rarity_score"))
+    )
+
+
 def historical_usd_candidate(row: Any) -> dict[str, Any] | None:
     """Normalize complete, non-live event-price provenance from an archive surface."""
     if not isinstance(row, dict):
@@ -1566,6 +2313,7 @@ def historical_usd_candidate(row: Any) -> dict[str, Any] | None:
     amount = row.get("amount") if isinstance(row.get("amount"), dict) else row
     event_amount = decimal_or_none(
         amount.get("amount_usd_at_event")
+        or amount.get("bid_usd_at_event")
         or amount.get("winning_bid_usd_at_settlement")
     )
     event_price = decimal_or_none(amount.get("eth_usd_price_at_event"))
@@ -1689,6 +2437,88 @@ def canonical_historical_usd(token_id: int, native_amount: Decimal, event_time: 
     )
 
 
+def dashboard_bid_usd_basis(price_date_utc: Any, event_time: Any) -> str:
+    event_dt = parse_utc(event_time)
+    try:
+        price_date = date.fromisoformat(str(price_date_utc or ""))
+    except ValueError as exc:
+        raise FullRefreshRequired("bid has invalid historical USD date provenance") from exc
+    if event_dt is None:
+        raise FullRefreshRequired("bid has invalid historical USD event time")
+    return "bid_date_eth_usd" if event_dt.date() == price_date else "nearest_bid_date_eth_usd"
+
+
+def format_historical_bid_rows(
+    rows: list[dict[str, Any]],
+    existing_rows: list[dict[str, Any]],
+    profiles: dict[str, tuple[str, str]],
+) -> list[dict[str, Any]]:
+    """Format recent-bid exports with immutable event-date price provenance."""
+    existing_by_identity = {bid_public_identity(row): row for row in existing_rows}
+    output: list[dict[str, Any]] = []
+    for bid in rows:
+        amount = bid_amount(bid)
+        event_time = bid.get("block_time_utc") or bid.get("bid_time_utc") or ""
+        quote: dict[str, Any] | None = None
+        prior = existing_by_identity.get(bid_public_identity(bid))
+        if prior is not None:
+            candidate = historical_usd_candidate(prior)
+            if candidate is not None:
+                event_price = decimal_or_none(candidate.get("eth_usd_price_at_event"))
+                event_amount = decimal_or_none(candidate.get("amount_usd_at_event"))
+                price_dt = parse_utc(candidate.get("eth_usd_price_date_utc"))
+                event_dt = parse_utc(event_time)
+                if (
+                    event_price is not None
+                    and event_price > 0
+                    and event_amount is not None
+                    and event_amount == Decimal(str(numeric_usd_2(amount, event_price)))
+                    and price_dt is not None
+                    and event_dt is not None
+                    and abs((price_dt - event_dt).total_seconds()) <= 3 * 86400
+                ):
+                    quote = candidate
+        if quote is None:
+            quote = local_historical_usd(amount, event_time)
+        if quote is None:
+            raise FullRefreshRequired(
+                f"Dog #{int_value(bid.get('token_id'), -1)} bid has no canonical historical ETH/USD provenance"
+            )
+        event_price = decimal_or_none(quote.get("eth_usd_price_at_event"))
+        if event_price is None or event_price <= 0:
+            raise FullRefreshRequired("bid has invalid historical ETH/USD price provenance")
+        token_id = int_value(bid.get("token_id"), -1)
+        wallet = bid_wallet(bid)
+        bidder, bidder_url = display_for(wallet, profiles)
+        amount_usd = numeric_usd_2(amount, event_price)
+        output.append(
+            {
+                "bid_time_utc": event_time,
+                "token_id": token_id,
+                "bidder": bidder,
+                "bidder_url": bidder_url,
+                "bidder_wallet": wallet,
+                "bid": f"{format_eth_5(amount)} ETH (${format_usd_product_0(amount, event_price)})",
+                "bid_eth": numeric_8(amount),
+                "bid_usd": amount_usd,
+                "bid_usd_at_event": amount_usd,
+                "eth_usd_price_at_event": str(quote["eth_usd_price_at_event"]),
+                "eth_usd_price_date_utc": str(quote["eth_usd_price_date_utc"]),
+                "usd_estimate_source": str(quote["usd_estimate_source"]),
+                "usd_estimate_source_detail": str(quote.get("usd_estimate_source_detail") or ""),
+                "usd_estimate_confidence": str(quote.get("usd_estimate_confidence") or "medium"),
+                "usd_estimate_basis": dashboard_bid_usd_basis(
+                    quote["eth_usd_price_date_utc"],
+                    event_time,
+                ),
+                "extended": int_value(bid.get("extended")),
+                "block_number": bid_block(bid),
+                "tx_hash": bid_tx_hash(bid),
+            }
+        )
+    return output
+
+
 def settlement_candidate(row: Any) -> dict[str, Any] | None:
     if not isinstance(row, dict):
         return None
@@ -1751,18 +2581,23 @@ def merge_settled_winner_row(
         if row.get(key) in (None, "") and existing.get(key) not in (None, ""):
             row[key] = existing[key]
     event_amount = decimal_or_none(historical_usd.get("amount_usd_at_event"))
-    if event_amount is None:
+    event_price = decimal_or_none(historical_usd.get("eth_usd_price_at_event"))
+    settlement_amount = decimal_or_none(settlement.get("amount_eth"))
+    if event_amount is None or event_price is None or event_price <= 0 or settlement_amount is None:
         raise FullRefreshRequired("settled winner is missing canonical event USD")
     row.update(
         {
-            "winning_bid_usd": f"{event_amount.quantize(Decimal('0.01')):.2f}",
-            "winning_bid_usd_at_settlement": f"{event_amount.quantize(Decimal('0.01')):.2f}",
+            "winning_bid_usd": numeric_usd_2(settlement_amount, event_price),
+            "winning_bid_usd_at_settlement": numeric_usd_2(settlement_amount, event_price),
             "eth_usd_price_at_event": historical_usd["eth_usd_price_at_event"],
             "eth_usd_price_date_utc": historical_usd["eth_usd_price_date_utc"],
             "usd_estimate_source": historical_usd["usd_estimate_source"],
             "usd_estimate_source_detail": historical_usd.get("usd_estimate_source_detail", ""),
             "usd_estimate_confidence": historical_usd.get("usd_estimate_confidence", "medium"),
-            "usd_estimate_basis": historical_usd.get("usd_estimate_basis", "settlement_block_time"),
+            "usd_estimate_basis": dashboard_settlement_usd_basis(
+                historical_usd,
+                settlement.get("block_time_utc"),
+            ),
             "block_number": settlement.get("block_number") or existing.get("block_number", ""),
             "tx_hash": settlement.get("tx_hash") or existing.get("tx_hash", ""),
         }
@@ -1772,6 +2607,24 @@ def merge_settled_winner_row(
 
 def display_for(wallet: str, profiles: dict[str, tuple[str, str]]) -> tuple[str, str]:
     return profiles.get(wallet.lower(), (f"{short_wallet(wallet)}", f"https://basescan.org/address/{wallet}"))
+
+
+def unified_bidder_projection(
+    contract_wallet: str,
+    display: str,
+    profile_url: str,
+    *,
+    has_bid: bool,
+) -> tuple[str | None, dict[str, Any]]:
+    explorer = f"https://basescan.org/address/{contract_wallet}" if has_bid else None
+    return explorer, {
+        "display": display,
+        "farcaster_fid": None,
+        "farcaster_handle": display.lstrip("@") if display.startswith("@") else None,
+        "profile_url": profile_url or None,
+        "wallet": contract_wallet,
+        "wallet_explorer_url": explorer,
+    }
 
 
 def update_readme_snapshot(current_row: dict[str, Any], metrics: dict[str, str], builder: Any) -> None:
@@ -1807,6 +2660,23 @@ def update_readme_snapshot(current_row: dict[str, Any], metrics: dict[str, str],
         text = re.sub(pattern, f"| {label} | {value} |", text, flags=re.MULTILINE)
     atomic_write_text(path, text)
 
+
+def authenticated_surface_checkpoint(
+    current_row: dict[str, Any],
+    metrics_rows: list[dict[str, Any]],
+) -> int:
+    """Require the current surface and hash-attested metric checkpoint to be atomic."""
+    current_block = int_value(current_row.get("latest_block"), -1)
+    metric_values = {
+        str(row.get("metric")): str(row.get("value") or "")
+        for row in metrics_rows
+        if isinstance(row, dict)
+    }
+    raw_metric_block = metric_values.get("latest_block", "")
+    if current_block <= 0 or not raw_metric_block.isdigit() or int(raw_metric_block) != current_block:
+        raise FullRefreshRequired("current auction and mission metrics checkpoints disagree")
+    return current_block
+
 def main() -> None:
     current_rows = read_json("current_auction")
     if not isinstance(current_rows, list) or not current_rows:
@@ -1814,13 +2684,12 @@ def main() -> None:
     metrics_rows = read_json("mission3_metrics")
     if not isinstance(metrics_rows, list) or not metrics_rows:
         raise FullRefreshRequired("generated/mission3_metrics.json has no verified rarity baseline")
-    previous_block = int_value(current_rows[0].get("latest_block"))
-    if previous_block <= 0:
-        raise RuntimeError("current auction baseline has no latest_block")
+    previous_block = authenticated_surface_checkpoint(current_rows[0], metrics_rows)
     baseline_token_id = int_value(current_rows[0].get("token_id"), -1)
     if baseline_token_id < 0:
         raise RuntimeError("current auction baseline has no token_id")
     timeline_columns, timeline_rows = read_table("auction_timeline")
+    extension_columns, baseline_extension_rows = read_table("auction_extensions")
     history_columns, baseline_history_rows = read_table("current_auction_bid_history")
     recent_bid_columns, baseline_recent_bid_rows = read_table("recent_bids")
     leaderboard_columns, baseline_leaderboard_rows = read_table("auction_bidder_leaderboard")
@@ -1846,6 +2715,10 @@ def main() -> None:
     latest_block, latest_block_data, verification = builder.verified_snapshot()
     latest_time = builder.utc_from_unix(int(latest_block_data["timestamp"], 16))
     current = builder.fetch_current_auction(latest_block, latest_time, hex(latest_block))
+    require_exact_8_decimal_amount(
+        current.get("amount_eth_exact", current.get("amount_eth")),
+        "auction()",
+    )
     token_id = int(current["token_id"])
     total_supply = builder.fetch_dog_total_supply(hex(latest_block))
     if token_id not in {baseline_token_id, baseline_token_id + 1}:
@@ -1898,7 +2771,12 @@ def main() -> None:
             history,
             baseline_rarity_size,
             metrics_by_name["dog_base_existing_token_ids_sha256"],
-            int(metrics_by_name["latest_block"]),
+            # A failed/rolled-back generation can safely leave this private
+            # cache newer than the committed dashboard baseline. Accept only
+            # hash-valid, trait-identical records no newer than the current
+            # quorum-verified snapshot; rejecting them would force an
+            # unnecessary full rebuild after every such recovery.
+            latest_block,
         )
     metadata_token_ids = sorted({token_id, *minted_token_ids})
     current_token_uris = builder.fetch_token_uri_bindings(
@@ -1990,9 +2868,15 @@ def main() -> None:
         previous_status in {"live", "ongoing"} or not previous_timeline.get("settled_time_utc") or not previous_timeline.get("settled_tx_hash")
     )
 
+    log_coverage_ranges = [(from_block, latest_block)]
     logs = builder.fetch_logs(
         builder.AUCTION_HOUSE,
-        [builder.TOPIC_AUCTION_CREATED, builder.TOPIC_AUCTION_BID, builder.TOPIC_AUCTION_SETTLED],
+        [
+            builder.TOPIC_AUCTION_CREATED,
+            builder.TOPIC_AUCTION_BID,
+            builder.TOPIC_AUCTION_EXTENDED,
+            builder.TOPIC_AUCTION_SETTLED,
+        ],
         from_block,
         latest_block,
     )
@@ -2010,10 +2894,16 @@ def main() -> None:
             estimate = latest_block - int(max(0, (latest_dt - current_start_dt).total_seconds()) / seconds_per_block)
             reconcile_from = max(0, estimate - margin_blocks)
             reconcile_to = min(latest_block, estimate + margin_blocks)
+            log_coverage_ranges.append((reconcile_from, reconcile_to))
             logs.extend(
                 builder.fetch_logs(
                     builder.AUCTION_HOUSE,
-                    [builder.TOPIC_AUCTION_CREATED, builder.TOPIC_AUCTION_SETTLED],
+                    [
+                        builder.TOPIC_AUCTION_CREATED,
+                        builder.TOPIC_AUCTION_BID,
+                        builder.TOPIC_AUCTION_EXTENDED,
+                        builder.TOPIC_AUCTION_SETTLED,
+                    ],
                     reconcile_from,
                     reconcile_to,
                 )
@@ -2026,10 +2916,59 @@ def main() -> None:
         log_index = str(row.get("logIndex") or "").lower()
         deduped_logs[(tx_hash, log_index)] = row
     logs = list(deduped_logs.values())
+    expected_auction_address = str(builder.AUCTION_HOUSE).lower()
+    expected_auction_topics = {
+        builder.TOPIC_AUCTION_CREATED,
+        builder.TOPIC_AUCTION_BID,
+        builder.TOPIC_AUCTION_EXTENDED,
+        builder.TOPIC_AUCTION_SETTLED,
+    }
+    for row in logs:
+        topics = row.get("topics")
+        try:
+            block_number = int(str(row.get("blockNumber") or ""), 16)
+        except ValueError as exc:
+            raise FullRefreshRequired("auction log has a malformed block number") from exc
+        if (
+            str(row.get("address") or "").lower() != expected_auction_address
+            or not isinstance(topics, list)
+            or not topics
+            or str(topics[0]).lower() not in expected_auction_topics
+            or not any(start <= block_number <= end for start, end in log_coverage_ranges)
+        ):
+            raise FullRefreshRequired("auction log is outside its verified address/topic/range filter")
     created_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_CREATED]
     bid_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_BID]
+    extension_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_EXTENDED]
     settled_logs = [row for row in logs if row["topics"][0].lower() == builder.TOPIC_AUCTION_SETTLED]
+    extension_block_hashes: dict[int, str] = {}
+    for log in extension_logs:
+        block_number = int(str(log.get("blockNumber") or ""), 16)
+        block_hash = builder.canonical_block_hash(log.get("blockHash"))
+        if not block_hash:
+            raise FullRefreshRequired("AuctionExtended log is missing its canonical block hash")
+        previous_hash = extension_block_hashes.setdefault(block_number, block_hash)
+        if previous_hash != block_hash:
+            raise FullRefreshRequired("AuctionExtended logs disagree on their canonical block hash")
+    if extension_block_hashes:
+        builder.fetch_block_times(set(extension_block_hashes), extension_block_hashes)
     created, bids, settled = builder.decode_auction_logs(created_logs, bid_logs, settled_logs)
+    for bid in bids:
+        require_exact_8_decimal_amount(
+            bid.get("bid_eth_exact", bid.get("bid_eth")),
+            "AuctionBid",
+        )
+    for settlement in settled:
+        require_exact_8_decimal_amount(
+            settlement.get("amount_eth_exact", settlement.get("amount_eth")),
+            "AuctionSettled",
+        )
+    extensions = builder.decode_auction_extension_logs(extension_logs)
+    extension_rows = merge_extension_overlap(
+        baseline_extension_rows,
+        extensions,
+        log_coverage_ranges,
+    )
     fresh_bids = list(bids)
     previous_settlements = [row for row in settled if int(row["token_id"]) == previous_token_id]
     previous_settlement = max(previous_settlements, key=lambda row: (int(row.get("block_number") or 0), int(row.get("log_index") or 0)), default=None)
@@ -2066,6 +3005,7 @@ def main() -> None:
         raise FullRefreshRequired(f"contract reports Dog #{token_id} settled without a canonical AuctionSettled event")
     previous_settlement = preserve_settlement_fields(previous_token_id, previous_settlement)
     current_settlement = preserve_settlement_fields(token_id, current_settlement)
+    validate_extended_bid_pairs(fresh_bids, extensions, {previous_token_id, token_id})
 
     unified_paths = [
         ROOT / "archive" / "data" / "generated" / "unified_dog_search_index.json",
@@ -2123,8 +3063,20 @@ def main() -> None:
         ),
         {},
     )
+    mission3_source_previous = next(
+        (
+            row
+            for row in mission3_source_rows
+            if isinstance(row, dict)
+            and int_value(row.get("token_id"), -1) == previous_token_id
+        ),
+        {},
+    )
+    current_created_rows = [row for row in created if int(row.get("token_id")) == token_id]
+    if len(current_created_rows) > 1:
+        raise FullRefreshRequired(f"multiple AuctionCreated logs observed for Dog #{token_id}")
     current_created = max(
-        (row for row in created if int(row.get("token_id")) == token_id),
+        current_created_rows,
         key=lambda row: (int(row.get("block_number") or 0), str(row.get("tx_hash") or "")),
         default={},
     )
@@ -2137,13 +3089,33 @@ def main() -> None:
         mission3_source_current,
         read_json("auction_winners"),
     )
+    previous_created_rows = [
+        row for row in created if int(row.get("token_id")) == previous_token_id
+    ]
+    if len(previous_created_rows) > 1:
+        raise FullRefreshRequired(f"multiple AuctionCreated logs observed for Dog #{previous_token_id}")
+    previous_created = previous_created_rows[0] if previous_created_rows else {}
+    current_extension_fields = reconcile_timeline_extensions(
+        current_timeline_baseline,
+        current_created,
+        [row for row in extension_rows if int_value(row.get("token_id"), -1) == token_id],
+        authenticated_checkpoint_block=previous_block,
+        snapshot_block=latest_block,
+        expected_end_time_utc=current.get("end_time_utc"),
+    )
+    previous_extension_fields = reconcile_timeline_extensions(
+        previous_timeline,
+        previous_created,
+        [row for row in extension_rows if int_value(row.get("token_id"), -1) == previous_token_id],
+        authenticated_checkpoint_block=previous_block,
+        snapshot_block=latest_block,
+    )
 
     eth_usd, eth_source = builder.fetch_eth_usd_price()
     amount_eth = Decimal(str(current["amount_eth"]))
-    amount_usd = (amount_eth * eth_usd).quantize(Decimal("0.01"))
-    wallet = str(current.get("bidder") or "").lower()
-    if wallet == builder.ZERO:
-        wallet = ""
+    amount_usd = numeric_usd_2(amount_eth, eth_usd)
+    contract_wallet = str(current.get("bidder") or "").lower()
+    wallet = "" if contract_wallet == builder.ZERO else contract_wallet
     profiles = profile_map()
     try:
         for profile in builder.fetch_degendogs_auction_profiles(current):
@@ -2153,13 +3125,18 @@ def main() -> None:
                 profiles[address] = (f"@{handle}", f"https://farcaster.xyz/{handle}")
     except Exception as exc:  # noqa: BLE001
         print(f"warning: current Farcaster identity lookup failed: {exc}", file=sys.stderr)
-    bidder, bidder_url = display_for(wallet, profiles)
+    bidder, bidder_url = display_for(wallet, profiles) if wallet else ("no bids yet", "")
     formatted_fresh_bids = format_fresh_bid_rows(
         fresh_bids,
         eth_usd=eth_usd,
         eth_source=eth_source,
         price_date_utc=latest_time[:10],
         profiles=profiles,
+    )
+    formatted_historical_bids = format_historical_bid_rows(
+        fresh_bids,
+        baseline_recent_bid_rows,
+        profiles,
     )
     active_token_ids = {token_id, baseline_token_id}
     history_by_token = merge_overlap_bid_history(
@@ -2184,6 +3161,19 @@ def main() -> None:
         price_date_utc=latest_time[:10],
         profiles=profiles,
     )
+    active_history_rows = [
+        *history_by_token.get(token_id, []),
+        *(
+            history_by_token.get(previous_token_id, [])
+            if previous_token_id != token_id
+            else []
+        ),
+    ]
+    historical_active_bids = format_historical_bid_rows(
+        active_history_rows,
+        baseline_recent_bid_rows,
+        profiles,
+    )
     if token_id != baseline_token_id and not any(int_value(row.get("token_id"), -1) == token_id for row in created):
         raise FullRefreshRequired(f"AuctionCreated for new current Dog #{token_id} is outside the bounded window")
 
@@ -2199,11 +3189,15 @@ def main() -> None:
     elif current_bids:
         raise FullRefreshRequired(f"contract reports no bid for Dog #{token_id}, but bid events are present")
 
-    ensure_no_untracked_bid_gap(timeline_rows, baseline_recent_bid_rows, [*formatted_fresh_bids, *current_bids, *previous_bids])
+    ensure_no_untracked_bid_gap(
+        timeline_rows,
+        baseline_recent_bid_rows,
+        [*formatted_historical_bids, *historical_active_bids],
+    )
     recent_bid_rows, added_bid_rows, removed_bid_rows, known_bid_rows = reconcile_recent_bid_rows(
         baseline_recent_bid_rows,
-        formatted_fresh_bids,
-        [*current_bids, *previous_bids],
+        formatted_historical_bids,
+        historical_active_bids,
         from_block=from_block,
     )
     leaderboard_rows = apply_bidder_leaderboard_delta(
@@ -2245,8 +3239,8 @@ def main() -> None:
     else:
         state = "ended_unsettled"
     surface_status = auction_feed_status(state)
-    bid_text = f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
-    bid_time = current_bids[-1].get("bid_time_utc") if current_bids else current.get("start_time_utc") or latest_time
+    bid_text = f"{format_eth_5(amount_eth)} ETH (${format_usd_product_0(amount_eth, eth_usd)})"
+    bid_time = current_bids[-1].get("bid_time_utc") if current_bids else latest_time
     dog_attrs = verified_rarity_attrs[token_id]
     rarity_universe_size = (
         baseline_rarity_size + len(minted_token_ids) if baseline_rarity_size > 0 else 0
@@ -2290,9 +3284,7 @@ def main() -> None:
         bool(minted_token_ids)
         or any(
             token not in historical_by_token
-            or str(historical_by_token[token].get("rarity") or "") != str(values["rarity"])
-            or str(historical_by_token[token].get("trait_rarity") or "")
-            != str(values["trait_rarity"])
+            or rarity_row_requires_rebase(historical_by_token[token], values)
             for token, values in rarity_universe.items()
         )
     )
@@ -2329,9 +3321,9 @@ def main() -> None:
             "rarity_score": rarity_score,
             "metadata_verification_status": "onchain_token_uri_verified",
             "current_bid": bid_text,
-            "current_bid_eth": float(amount_eth),
-            "current_bid_usd": float(amount_usd),
-            "current_bid_usd_live": float(amount_usd),
+            "current_bid_eth": numeric_8(amount_eth),
+            "current_bid_usd": amount_usd,
+            "current_bid_usd_live": amount_usd,
             "eth_usd_price_live": str(eth_usd),
             "eth_usd_price_date_utc": latest_time[:10],
             "usd_estimate_source": "current_eth_usd_price",
@@ -2340,7 +3332,7 @@ def main() -> None:
             "usd_estimate_basis": "current_eth_usd_price",
             "bidder": bidder,
             "bidder_url": bidder_url,
-            "bidder_wallet": wallet,
+            "bidder_wallet": contract_wallet,
             "start_time_utc": current.get("start_time_utc", ""),
             "end_time_utc": current.get("end_time_utc", ""),
             "auction_state": state,
@@ -2348,7 +3340,7 @@ def main() -> None:
             "time_remaining": (
                 format_seconds(remaining)
                 if state == "live"
-                else ("settled" if state == "settled" else "ended; settlement pending")
+                else "ended"
             ),
             "settled": int(current.get("settled") or 0),
             "latest_block": latest_block,
@@ -2367,9 +3359,9 @@ def main() -> None:
             "dog_external_url": current_row["dog_external_url"],
             "dog_opensea_url": current_row["dog_opensea_url"],
             "latest_bid": bid_text,
-            "latest_bid_eth": float(amount_eth),
-            "latest_bid_usd": float(amount_usd),
-            "latest_bid_usd_live": float(amount_usd),
+            "latest_bid_eth": numeric_8(amount_eth),
+            "latest_bid_usd": amount_usd,
+            "latest_bid_usd_live": amount_usd,
             "eth_usd_price_live": str(eth_usd),
             "eth_usd_price_date_utc": latest_time[:10],
             "usd_estimate_source": "current_eth_usd_price",
@@ -2378,7 +3370,7 @@ def main() -> None:
             "usd_estimate_basis": "current_eth_usd_price",
             "bidder": bidder,
             "bidder_url": bidder_url,
-            "bidder_wallet": wallet,
+            "bidder_wallet": contract_wallet,
             "bid_time_utc": bid_time,
             "auction_state": state,
             "time_remaining": current_row["time_remaining"],
@@ -2407,12 +3399,11 @@ def main() -> None:
     write_table("recent_bids", recent_bid_columns, recent_bid_output)
 
     feed_columns, feed_rows = read_table("auction_feed")
-    if rarity_rebase_required:
-        for row in feed_rows:
-            match = re.search(r"(\d+)", str(row.get("dog") or ""))
-            feed_token_id = int(match.group(1)) if match else -1
-            if feed_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[feed_token_id])
+    feed_rows = normalize_table_rarity_rows(
+        feed_rows,
+        rarity_universe,
+        token_from_dog_label=True,
+    )
     old_current = dict(feed_rows[0]) if feed_rows else {}
     previous_feed = next((dict(row) for row in feed_rows if int(re.sub(r"\D", "", str(row.get("dog") or "-1")) or -1) == previous_token_id), {})
     if not previous_feed and historical_snapshot:
@@ -2440,31 +3431,47 @@ def main() -> None:
         settled_previous["status"] = "settled"
         settled_previous["settled_time_utc"] = settlement_time
         settled_previous["auction_time_utc"] = settlement_time
-        settled_previous["time_remaining"] = "settled"
+        settled_previous["time_remaining"] = ""
+        settled_previous["auction_end_utc"] = ""
         if previous_settlement:
             previous_wallet = str(previous_settlement.get("winner") or "").lower()
             previous_bidder, previous_bidder_url = display_for(previous_wallet, profiles)
             previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
             if previous_historical_usd is None:
                 raise FullRefreshRequired(f"Dog #{previous_token_id} settlement lost historical USD provenance")
-            previous_amount_usd = Decimal(previous_historical_usd["amount_usd_at_event"])
-            previous_last_bid = previous_bids[-1].get("bid_time_utc") if previous_bids else settled_previous.get("last_bid_utc", "")
+            previous_event_price = Decimal(previous_historical_usd["eth_usd_price_at_event"])
+            if previous_bids:
+                previous_last_bid = previous_bids[-1].get("bid_time_utc")
+            elif int_value(previous_timeline.get("bids")) > 0:
+                previous_last_bid = (
+                    settled_previous.get("last_bid_utc")
+                    or previous_timeline.get("latest_bid_utc")
+                )
+                if not previous_last_bid:
+                    raise FullRefreshRequired(
+                        f"Dog #{previous_token_id} has bids but no canonical last-bid timestamp"
+                    )
+            else:
+                previous_last_bid = None
             settled_previous.update(
                 {
                     "bidder_winner": previous_bidder,
                     "bidder_winner_url": previous_bidder_url,
                     "bidder_winner_wallet": previous_wallet,
-                    "bid": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
-                    "amount_eth": float(previous_amount_eth),
-                    "amount_usd": f"{previous_amount_usd.quantize(Decimal('0.01')):.2f}",
-                    "amount_usd_at_event": f"{previous_amount_usd.quantize(Decimal('0.01')):.2f}",
-                    "eth_usd_price_live": "",
+                    "bid": f"{format_eth_5(previous_amount_eth)} ETH (${format_usd_product_0(previous_amount_eth, previous_event_price)})",
+                    "amount_eth": numeric_8(previous_amount_eth),
+                    "amount_usd": numeric_usd_2(previous_amount_eth, previous_event_price),
+                    "amount_usd_at_event": numeric_usd_2(previous_amount_eth, previous_event_price),
+                    "eth_usd_price_live": None,
                     "eth_usd_price_at_event": previous_historical_usd["eth_usd_price_at_event"],
                     "eth_usd_price_date_utc": previous_historical_usd["eth_usd_price_date_utc"],
                     "usd_estimate_source": previous_historical_usd["usd_estimate_source"],
                     "usd_estimate_source_detail": previous_historical_usd.get("usd_estimate_source_detail", ""),
                     "usd_estimate_confidence": previous_historical_usd.get("usd_estimate_confidence", "medium"),
-                    "usd_estimate_basis": previous_historical_usd.get("usd_estimate_basis", "settlement_block_time"),
+                    "usd_estimate_basis": dashboard_settlement_usd_basis(
+                        previous_historical_usd,
+                        previous_settlement.get("block_time_utc"),
+                    ),
                     "last_bid_utc": previous_last_bid,
                 }
             )
@@ -2478,11 +3485,13 @@ def main() -> None:
             "dog_opensea_url": current_row["dog_opensea_url"],
             "bidder_winner": bidder,
             "bidder_winner_url": bidder_url,
-            "bidder_winner_wallet": wallet,
+            "bidder_winner_wallet": contract_wallet,
             "bid": bid_text,
-            "amount_eth": float(amount_eth),
-            "amount_usd": float(amount_usd),
+            "amount_eth": numeric_8(amount_eth),
+            "amount_usd": amount_usd,
+            "amount_usd_at_event": None,
             "eth_usd_price_live": str(eth_usd),
+            "eth_usd_price_at_event": None,
             "eth_usd_price_date_utc": latest_time[:10],
             "usd_estimate_source": "current_eth_usd_price",
             "usd_estimate_source_detail": eth_source,
@@ -2502,19 +3511,22 @@ def main() -> None:
     if state == "settled":
         if current_historical_usd is None:
             raise FullRefreshRequired(f"Dog #{token_id} settlement lost historical USD provenance")
-        settled_usd = Decimal(current_historical_usd["amount_usd_at_event"])
+        settled_event_price = Decimal(current_historical_usd["eth_usd_price_at_event"])
         new_feed.update(
             {
-                "bid": f"{format_eth_amount(amount_eth)} ETH (${settled_usd:,.0f})",
-                "amount_usd": f"{settled_usd.quantize(Decimal('0.01')):.2f}",
-                "amount_usd_at_event": f"{settled_usd.quantize(Decimal('0.01')):.2f}",
-                "eth_usd_price_live": "",
+                "bid": f"{format_eth_5(amount_eth)} ETH (${format_usd_product_0(amount_eth, settled_event_price)})",
+                "amount_usd": numeric_usd_2(amount_eth, settled_event_price),
+                "amount_usd_at_event": numeric_usd_2(amount_eth, settled_event_price),
+                "eth_usd_price_live": None,
                 "eth_usd_price_at_event": current_historical_usd["eth_usd_price_at_event"],
                 "eth_usd_price_date_utc": current_historical_usd["eth_usd_price_date_utc"],
                 "usd_estimate_source": current_historical_usd["usd_estimate_source"],
                 "usd_estimate_source_detail": current_historical_usd.get("usd_estimate_source_detail", ""),
                 "usd_estimate_confidence": current_historical_usd.get("usd_estimate_confidence", "medium"),
-                "usd_estimate_basis": current_historical_usd.get("usd_estimate_basis", "settlement_block_time"),
+                "usd_estimate_basis": dashboard_settlement_usd_basis(
+                    current_historical_usd,
+                    current_settlement.get("block_time_utc"),
+                ),
             }
         )
     remaining_feed = [row for row in feed_rows if str(row.get("dog")) not in {f"Dog #{token_id}", f"Dog #{previous_token_id}"}]
@@ -2525,15 +3537,13 @@ def main() -> None:
     write_table("auction_feed", feed_columns, output_feed)
 
     # Add the newly minted/auctioned Dog to the unified searchable table.
-    history_columns, history_rows = read_table("historical_dog_search")
-    if rarity_rebase_required:
-        for row in history_rows:
-            historical_token_id = int_value(row.get("token_id"), -1)
-            if historical_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[historical_token_id])
-                row["search_text"] = " ".join(
-                    str(row.get(key, "")) for key in row if key != "search_text"
-                ).lower()
+    history_columns, history_rows = prepare_historical_rarity_table(
+        *read_table("historical_dog_search"),
+        rarity_universe,
+    )
+    # Older generated snapshots predate the score column. The bounded writer
+    # migrates that CSV schema before writing rebased scores; write_table
+    # deliberately ignores dictionary keys outside its explicit field list.
     history_rows = [row for row in history_rows if int_value(row.get("token_id"), -1) != token_id]
     if previous_settlement:
         previous_wallet = str(previous_settlement.get("winner") or "").lower()
@@ -2558,13 +3568,11 @@ def main() -> None:
                     "bid_count": len(previous_bids) or int_value(row.get("bid_count")),
                     "unique_bidder_count": len({bid_wallet(item) for item in previous_bids if bid_wallet(item)}) or int_value(row.get("unique_bidder_count")),
                     "settled_time_utc": previous_settlement.get("block_time_utc", ""),
-                    "confidence": "verified_live_base_logs",
-                    "sources": "base_logs,dashboard_builder",
                 }
             )
-            row["search_text"] = " ".join(str(row.get(key, "")) for key in row if key != "search_text")
-    template = dict(history_rows[-1] if history_rows else {})
-    new_search = dict(template)
+            apply_historical_provenance_defaults(row, mission3_source_previous)
+            row["search_text"] = canonical_historical_search_text(row)
+    new_search = dict(historical_by_token.get(token_id, {}))
     new_search.update(
         {
             "mission": 3,
@@ -2575,10 +3583,14 @@ def main() -> None:
             "dog_image_url": current_row["dog_image_url"],
             "dog_external_url": current_row["dog_external_url"],
             "dog_opensea_url": current_row["dog_opensea_url"],
-            "status": surface_status,
+            "status": (
+                "ended pending settlement"
+                if state == "ended_unsettled"
+                else state
+            ),
             "winner": bidder,
             "winner_url": bidder_url,
-            "winner_wallet": wallet,
+            "winner_wallet": contract_wallet,
             "amount": bid_text,
             "amount_raw": str(current.get("amount_wei", "")),
             "bid_count": len(current_bids),
@@ -2590,40 +3602,23 @@ def main() -> None:
             "traits": traits,
             "trait_rarity": trait_rarity,
             "metadata_verification_status": "onchain_token_uri_verified",
-            "confidence": "live_base_contract_call",
-            "sources": "base_rpc,dog_metadata_api",
-            "search_text": f"3 Base 8453 {token_id} Dog #{token_id} {traits} {bidder} {wallet}".strip(),
         }
     )
+    apply_historical_provenance_defaults(new_search, mission3_source_current)
+    new_search["search_text"] = canonical_historical_search_text(new_search)
     write_table("historical_dog_search", history_columns, [*history_rows, new_search])
 
     report_columns, report_rows = read_table("historical_dog_report")
-    report_groups = {"all": history_rows + [new_search]}
-    report_groups.update({mission: [row for row in report_groups["all"] if str(row.get("mission")) == mission] for mission in ("1", "2", "3")})
-    for report in report_rows:
-        group = report_groups.get(str(report.get("mission")))
-        if group is None:
-            continue
-        statuses = [str(row.get("status") or "").lower() for row in group]
-        report["dogs"] = len(group)
-        report["settled"] = sum(1 for status in statuses if status == "settled" or (status.startswith("settled") and "unsettled" not in status))
-        report["live_or_unsettled"] = sum(1 for status in statuses if "live" in status or "ongoing" in status or "unsettled" in status or "pending settlement" in status or "created" in status)
-        report["metadata_only"] = sum(1 for status in statuses if status == "metadata_only")
-        report["bid_count"] = sum(int_value(row.get("bid_count")) for row in group)
-        if str(report.get("mission")) == "all":
-            report["latest_activity_utc"] = latest_time
-        elif str(report.get("mission")) == "3":
-            report["latest_activity_utc"] = bid_time
+    report_rows = recompute_historical_report_rows(
+        report_rows,
+        [*history_rows, new_search],
+    )
     write_table("historical_dog_report", report_columns, report_rows)
 
     # Reconcile the specialized Mission 3 tables too. These are the source
     # tables used to build the unified archive rows and must move together with
     # the homepage feed when a previous auction settles.
-    if rarity_rebase_required:
-        for row in timeline_rows:
-            timeline_token_id = int_value(row.get("token_id"), -1)
-            if timeline_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[timeline_token_id])
+    timeline_rows = normalize_table_rarity_rows(timeline_rows, rarity_universe)
     timeline_rows = [row for row in timeline_rows if int_value(row.get("token_id"), -1) not in {previous_token_id, token_id}]
     if previous_settlement:
         previous_wallet = str(previous_settlement.get("winner") or "").lower()
@@ -2633,18 +3628,19 @@ def main() -> None:
         previous_timeline_row = dict(previous_timeline)
         previous_timeline_row.update(
             {
+                **previous_extension_fields,
                 "auction_state": "settled",
                 "bids": len(previous_bids) or int_value(previous_timeline.get("bids")),
                 "unique_bidders": len({bid_wallet(item) for item in previous_bids if bid_wallet(item)}) or int_value(previous_timeline.get("unique_bidders")),
-                "high_bid_eth": format_eth_amount(max([Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids] or [previous_amount_eth])),
-                "total_bid_eth": f"{sum((Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids), Decimal(0)):.8f}" if previous_bids else previous_timeline.get("total_bid_eth", ""),
+                "high_bid_eth": numeric_8(max([Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids] or [previous_amount_eth])),
+                "total_bid_eth": numeric_8(sum((Decimal(str(item.get('bid_eth') or 0)) for item in previous_bids), Decimal(0))) if previous_bids else previous_timeline.get("total_bid_eth", 0.0),
                 "latest_bidder": display_for(bid_wallet(previous_latest_bid), profiles)[0] if previous_latest_bid else previous_timeline.get("latest_bidder", ""),
                 "latest_bidder_url": display_for(bid_wallet(previous_latest_bid), profiles)[1] if previous_latest_bid else previous_timeline.get("latest_bidder_url", ""),
-                "latest_bid_eth": previous_latest_bid.get("bid_eth", previous_timeline.get("latest_bid_eth", "")),
+                "latest_bid_eth": numeric_8(previous_latest_bid.get("bid_eth", previous_timeline.get("latest_bid_eth", 0.0)) or 0),
                 "latest_bid_utc": previous_latest_bid.get("bid_time_utc", previous_timeline.get("latest_bid_utc", "")),
                 "winner": previous_bidder,
                 "winner_url": previous_bidder_url,
-                "settled_eth": format_eth_amount(previous_amount_eth),
+                "settled_eth": numeric_8(previous_amount_eth),
                 "settled_time_utc": previous_settlement.get("block_time_utc", ""),
                 "settled_tx_hash": previous_settlement.get("tx_hash", ""),
             }
@@ -2658,26 +3654,26 @@ def main() -> None:
     settled_amount = Decimal(str((current_settlement or {}).get("amount_eth") or 0))
     current_timeline_row.update(
         {
-            "token_id": str(token_id),
+            **current_extension_fields,
+            "token_id": token_id,
             "dog_image_url": current_row["dog_image_url"],
             "start_time_utc": current.get("start_time_utc", ""),
-            "end_time_utc": current.get("end_time_utc", ""),
             "auction_state": state,
             "bids": len(current_bids),
             "unique_bidders": len({bid_wallet(item) for item in current_bids if bid_wallet(item)}),
-            "high_bid_eth": f"{max((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), default=amount_eth):.8f}",
-            "total_bid_eth": f"{sum((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), Decimal(0)):.8f}",
-            "latest_bidder": bidder,
-            "latest_bidder_url": bidder_url,
-            "latest_bid_eth": f"{amount_eth:.8f}",
-            "latest_bid_utc": bid_time,
-            "winner": settled_bidder if state == "settled" else "",
-            "winner_url": settled_bidder_url if state == "settled" else "",
-            "settled_eth": f"{settled_amount:.8f}" if state == "settled" else "",
-            "settled_time_utc": (current_settlement or {}).get("block_time_utc", "") if state == "settled" else "",
+            "high_bid_eth": numeric_8(max((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), default=amount_eth)),
+            "total_bid_eth": numeric_8(sum((Decimal(str(item.get('bid_eth') or 0)) for item in current_bids), Decimal(0))),
+            "latest_bidder": bidder if current_bids else None,
+            "latest_bidder_url": bidder_url if current_bids else None,
+            "latest_bid_eth": numeric_8(amount_eth),
+            "latest_bid_utc": bid_time if current_bids else None,
+            "winner": settled_bidder if state == "settled" else None,
+            "winner_url": settled_bidder_url if state == "settled" else None,
+            "settled_eth": numeric_8(settled_amount) if state == "settled" else 0.0,
+            "settled_time_utc": (current_settlement or {}).get("block_time_utc", "") if state == "settled" else None,
             "rarity": rarity,
             "created_tx_hash": current_auction_created["tx_hash"],
-            "settled_tx_hash": (current_settlement or {}).get("tx_hash", "") if state == "settled" else "",
+            "settled_tx_hash": (current_settlement or {}).get("tx_hash", "") if state == "settled" else None,
         }
     )
     if token_id in rarity_universe:
@@ -2692,15 +3688,12 @@ def main() -> None:
         known_bid_rows,
         affected_days,
     )
+    write_table("auction_extensions", extension_columns, extension_rows)
     write_table("auction_timeline", timeline_columns, timeline_rows)
     write_table("auction_daily_activity", daily_columns, daily_rows)
 
     winner_columns, winner_rows = read_table("auction_winners")
-    if rarity_rebase_required:
-        for row in winner_rows:
-            winner_token_id = int_value(row.get("token_id"), -1)
-            if winner_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[winner_token_id])
+    winner_rows = normalize_table_rarity_rows(winner_rows, rarity_universe)
     winner_by_token = {int_value(row.get("token_id"), -1): dict(row) for row in winner_rows}
     replace_winner_tokens = {previous_token_id}
     if current_settlement:
@@ -2712,7 +3705,7 @@ def main() -> None:
         previous_amount_eth = Decimal(str(previous_settlement.get("amount_eth") or 0))
         if previous_historical_usd is None:
             raise FullRefreshRequired(f"Dog #{previous_token_id} settlement lost historical USD provenance")
-        previous_amount_usd = Decimal(previous_historical_usd["amount_usd_at_event"])
+        previous_event_price = Decimal(previous_historical_usd["eth_usd_price_at_event"])
         existing_winner_row = dict(winner_by_token.get(previous_token_id, {}))
         winner_row = merge_settled_winner_row(
             existing_winner_row,
@@ -2728,12 +3721,12 @@ def main() -> None:
                 "winner_wallet": previous_wallet,
                 "winner": previous_bidder,
                 "winner_url": previous_bidder_url,
-                "winning_bid": f"{format_eth_amount(previous_amount_eth)} ETH (${previous_amount_usd:,.0f})",
-                "winning_bid_eth": format_eth_amount(previous_amount_eth),
+                "winning_bid": f"{format_eth_5(previous_amount_eth)} ETH (${format_usd_product_0(previous_amount_eth, previous_event_price)})",
+                "winning_bid_eth": numeric_8(previous_amount_eth),
                 "bid_count": len(previous_bids) or int_value(previous_timeline.get("bids")),
                 "unique_bidders": len({bid_wallet(item) for item in previous_bids if bid_wallet(item)}) or int_value(previous_timeline.get("unique_bidders")),
-                "first_bid_utc": previous_bids[0].get("bid_time_utc", "") if previous_bids else "",
-                "last_bid_utc": previous_bids[-1].get("bid_time_utc", "") if previous_bids else "",
+                "first_bid_utc": previous_bids[0].get("bid_time_utc", "") if previous_bids else None,
+                "last_bid_utc": previous_bids[-1].get("bid_time_utc", "") if previous_bids else None,
             },
         )
         if previous_token_id in rarity_universe:
@@ -2745,7 +3738,7 @@ def main() -> None:
         current_winning_eth = Decimal(str(current_settlement.get("amount_eth") or 0))
         if current_historical_usd is None:
             raise FullRefreshRequired(f"Dog #{token_id} settlement lost historical USD provenance")
-        current_winning_usd = Decimal(current_historical_usd["amount_usd_at_event"])
+        current_event_price = Decimal(current_historical_usd["eth_usd_price_at_event"])
         existing_current_winner = dict(winner_by_token.get(token_id, {}))
         current_winner_row = merge_settled_winner_row(
             existing_current_winner,
@@ -2765,12 +3758,12 @@ def main() -> None:
                 "winner_wallet": current_winner_wallet,
                 "winner": current_winner,
                 "winner_url": current_winner_url,
-                "winning_bid": f"{format_eth_amount(current_winning_eth)} ETH (${current_winning_usd:,.0f})",
-                "winning_bid_eth": format_eth_amount(current_winning_eth),
+                "winning_bid": f"{format_eth_5(current_winning_eth)} ETH (${format_usd_product_0(current_winning_eth, current_event_price)})",
+                "winning_bid_eth": numeric_8(current_winning_eth),
                 "bid_count": len(current_bids),
                 "unique_bidders": len({bid_wallet(item) for item in current_bids if bid_wallet(item)}),
-                "first_bid_utc": current_bids[0].get("bid_time_utc", "") if current_bids else "",
-                "last_bid_utc": current_bids[-1].get("bid_time_utc", "") if current_bids else "",
+                "first_bid_utc": current_bids[0].get("bid_time_utc", "") if current_bids else None,
+                "last_bid_utc": current_bids[-1].get("bid_time_utc", "") if current_bids else None,
             },
         )
         if token_id in rarity_universe:
@@ -2818,13 +3811,16 @@ def main() -> None:
     write_table("recent_auction_winners", recent_columns, recent_rows)
 
     unified_rows = json.loads(json.dumps(baseline_unified_rows))
-    if rarity_rebase_required:
-        for row in unified_rows:
-            if not isinstance(row, dict):
-                continue
-            unified_token_id = int_value(row.get("dog_id"), -1)
-            if unified_token_id in rarity_universe:
-                apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
+    changed_unified_tokens: set[int] = set()
+    for row in unified_rows:
+        if not isinstance(row, dict):
+            continue
+        unified_token_id = int_value(row.get("dog_id"), -1)
+        if (
+            unified_token_id in rarity_universe
+            and apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
+        ):
+            changed_unified_tokens.add(unified_token_id)
     unified_rows = [row for row in unified_rows if not (int_value(row.get("mission"), -1) == 3 and int_value(row.get("dog_id"), -1) == token_id)]
     should_reconcile_previous_unified = (
         reconcile_previous
@@ -2987,18 +3983,23 @@ def main() -> None:
             "usd_estimate_time_basis": "last_bid_block_time",
             "eth_usd_price_date_utc": latest_time[:10],
         }
-    unified_source = {
-        "confidence": "verified",
-        "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
-        "raw_confidence": "verified_onchain_generated_tables",
-        "sources": [
-            "base_logs",
-            "dashboard_builder",
-            "generated_auction_timeline",
-            "generated_auction_feed",
-            *(["generated_auction_winners"] if state == "settled" else []),
-        ],
-    }
+    baseline_source = (
+        baseline_unified_current.get("source")
+        if isinstance(baseline_unified_current.get("source"), dict)
+        else {}
+    )
+    unified_source = canonical_unified_source(
+        baseline_source,
+        mission3_source_current,
+        settled=state == "settled",
+        baseline_exists=bool(baseline_unified_current),
+    )
+    unified_explorer, unified_bidder = unified_bidder_projection(
+        contract_wallet,
+        bidder,
+        bidder_url,
+        has_bid=bool(wallet),
+    )
     unified_row = json.loads(json.dumps(unified_template))
     unified_row.update(
         {
@@ -3014,18 +4015,13 @@ def main() -> None:
             "dog_image_url": current_row["dog_image_url"],
             "dog_item_url": current_row["dog_opensea_url"],
             "era_label": "Mission 3",
-            "links": {"auction_tx": current_auction_created["tx_url"], "dog_page": current_row["dog_external_url"], "explorer": f"https://basescan.org/address/{wallet}", "item": current_row["dog_opensea_url"], "repo_archive": f"archive/dogs/by-id/{token_id:03d}.json", "settlement_tx": None},
+            "links": {"auction_tx": current_auction_created["tx_url"], "dog_page": current_row["dog_external_url"], "explorer": unified_explorer, "item": current_row["dog_opensea_url"], "repo_archive": f"archive/dogs/by-id/{token_id:03d}.json", "settlement_tx": None},
             "mission": 3,
             "rarity": unified_rarity,
-            "search_text": (
-                f"dog {token_id} dog #{token_id} {token_id} mission 3 mission 3 base ongoing "
-                f"{wallet} {bidder} {amount_eth} eth {amount_usd} ${amount_usd:.2f} "
-                f"{bid_time} {rarity} {traits} {bidder} {current_auction_created['tx_hash']} {' '.join(tx_hashes)}"
-            ).strip(),
             "source": unified_source,
             "status": surface_status,
             "traits": trait_items,
-            "winner_or_high_bidder": {"display": bidder, "farcaster_fid": None, "farcaster_handle": bidder.lstrip("@"), "profile_url": bidder_url, "wallet": wallet, "wallet_explorer_url": f"https://basescan.org/address/{wallet}"},
+            "winner_or_high_bidder": unified_bidder,
             "settlement": {
                 "block_number": int_value((current_settlement or {}).get("block_number")) or None,
                 "block_time_utc": (
@@ -3043,6 +4039,10 @@ def main() -> None:
             },
         }
     )
+    unified_row["search_text"] = canonical_unified_current_search_text(
+        unified_row,
+        token_id,
+    )
     unified_rows.append(unified_row)
     unified_rows.sort(key=lambda row: (1 if str(row.get("status", "")).lower() == "live" or "ongoing" in str(row.get("status", "")).lower() else 0, str(row.get("activity_time_utc", "")), int_value(row.get("dog_id"), -1)), reverse=True)
     unified_payload = json.dumps(unified_rows, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
@@ -3057,11 +4057,11 @@ def main() -> None:
     # Mission 2 has a small set of metadata-only Dogs with no unified/by-id
     # record. Rebase every record that actually exists without inventing a
     # synthetic auction record for those sparse IDs.
-    affected_unified_tokens = (
-        set(rarity_universe) & unified_record_ids
-        if rarity_rebase_required
-        else {token_id}
-    )
+    affected_unified_tokens = {
+        token_id,
+        *changed_unified_tokens,
+        *unified_by_id_mismatches(unified_rows),
+    }
     if should_reconcile_previous_unified:
         affected_unified_tokens.add(previous_token_id)
     write_unified_by_id_records(unified_rows, affected_unified_tokens)
@@ -3144,7 +4144,7 @@ def main() -> None:
             "current_bid_eth": str(current.get("amount_eth", "")),
             "current_bid_usd": str(amount_usd),
             "current_bidder": bidder,
-            "current_bidder_wallet": wallet,
+            "current_bidder_wallet": contract_wallet,
             "latest_block": str(latest_block),
             "latest_block_time_utc": latest_time,
             **{str(key): str(value) for key, value in verification.items()},
@@ -3161,13 +4161,19 @@ def main() -> None:
             "last_refresh_result": "success_generated",
             "last_successful_refresh_time_utc": now_utc().replace(microsecond=0).isoformat().replace("+00:00", "Z"),
             "latest_generated_block": latest_block,
-            "latest_generated_block_time_utc": latest_time,
+            "latest_generated_block_time_utc": canonical_utc_z(
+                latest_time,
+                "latest generated block time",
+            ),
             "current_dog_token_id": token_id,
-            "current_auction_end_time_utc": current.get("end_time_utc", ""),
+            "current_auction_end_time_utc": canonical_utc_z(
+                current.get("end_time_utc", ""),
+                "current auction end time",
+            ),
             "current_auction_status": state,
             "current_bid_eth": str(current.get("amount_eth", "")),
             "current_high_bidder": bidder,
-            "current_high_bidder_wallet": wallet,
+            "current_high_bidder_wallet": contract_wallet,
             "refresh_reason": "current_surface_incremental",
             "dog_total_supply": str(total_supply),
             "dog_id_ceiling": str(total_supply),
@@ -3176,7 +4182,7 @@ def main() -> None:
             **continuity_metrics,
         }
     )
-    write_json("refresh_status", refresh_status)
+    write_json("refresh_status", normalize_refresh_status_integer_fields(refresh_status))
 
     manifest_rows = []
     for name in builder.OUTPUT_TABLES:
