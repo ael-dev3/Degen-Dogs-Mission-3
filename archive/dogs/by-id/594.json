@@ -57,13 +57,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#630/683",
-      "rank": 630,
+      "display": "#631/684",
+      "rank": 631,
       "scope": "base_existing",
-      "total": 683
+      "total": 684
     },
     "schema_version": 1,
-    "search_text": "dog 594 dog #594 594 mission 3 mission 3 base settled 0xc5831df8214b36e27c0d5fa45eed8d160610dc90 @ohosttcod ohosttcod 0.15974 eth 159740000000000000 530.83 $530.83 2026-01-14t01:08:51z 0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7 0x6ee1e80cc606e534e6fa9d9092a01cb94290b84559ba3a6469b2c212681feef7 #630/683 generated auction feed 0x9cd03b58343e6872da0e0bff047d6092d21ef3309a9d22c4776f29ea529afa0c 0xce504aab26074452e87bd4a56e7a9b20b038490d9224d5e97c71118d1a3eb8b6 0x4fe0443620753cc7633f6e4605bca2ff8562ead0bf2358925ef30be623a08c2d 0xeae6f20f344558f58e02630c44a1a7821c18668ce4bf7b209a95d22f4dfc6fa2 0x27ad02b85622253f514794e929711ac46d2bd85ffb20e628b92c87daca5226bb 0x32c68863e1b6a2705a314b8f059a58fd151a4cd66c0f2c36ba918122c46bf271 background: none (91.7%) background none body: orange (8.2%) body orange neck: redcollar (29.4%) neck redcollar mouth: none (68.2%) mouth none ears: loopearring (27.2%) ears loopearring head: none (20.1%) head none eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 594 dog #594 594 mission 3 mission 3 base settled 0xc5831df8214b36e27c0d5fa45eed8d160610dc90 @ohosttcod ohosttcod 0.15974 eth 159740000000000000 530.83 $530.83 2026-01-14t01:08:51z 0x22dd741f6a4cd7442adef4edd317596fa1f9a48d2a42229e28f50167148f11e7 0x6ee1e80cc606e534e6fa9d9092a01cb94290b84559ba3a6469b2c212681feef7 #631/684 generated auction feed 0x9cd03b58343e6872da0e0bff047d6092d21ef3309a9d22c4776f29ea529afa0c 0xce504aab26074452e87bd4a56e7a9b20b038490d9224d5e97c71118d1a3eb8b6 0x4fe0443620753cc7633f6e4605bca2ff8562ead0bf2358925ef30be623a08c2d 0xeae6f20f344558f58e02630c44a1a7821c18668ce4bf7b209a95d22f4dfc6fa2 0x27ad02b85622253f514794e929711ac46d2bd85ffb20e628b92c87daca5226bb 0x32c68863e1b6a2705a314b8f059a58fd151a4cd66c0f2c36ba918122c46bf271 background: none (91.7%) background none body: orange (8.2%) body orange neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: loopearring (27.2%) ears loopearring head: none (20.0%) head none eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 40781792,
       "block_time_utc": "2026-01-14T01:08:51Z",
@@ -95,12 +95,12 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (29.4%)",
+        "display": "Neck: RedCollar (29.5%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.2%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.0%)",
         "trait_type": "Head",
         "value": "None"
       },

@@ -1,0 +1,129 @@
+{
+  "generated_at_utc": "2026-08-20T18:24:25Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-08-19T20:23:21Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-20",
+      "native": "0.01",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "10000000000000000",
+      "usd_estimate": "23.30910000",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$23.31",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-08-20",
+      "usd_estimate_price_usd": "2330.91",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 50189700,
+      "block_time_utc": "2026-08-19T19:45:47Z",
+      "tx_hash": "0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d",
+      "tx_url": "https://basescan.org/tx/0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-08-19T20:23:21Z",
+      "unique_bidder_count": 2
+    },
+    "bid_tx_hashes": [
+      "0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301",
+      "0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 808,
+    "dog_image_url": "https://api.degendogs.club/images/808.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/808",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d",
+      "dog_page": "https://degendogs.club/#dog808",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/808",
+      "repo_archive": "archive/dogs/by-id/808.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#476/684",
+      "rank": 476,
+      "scope": "base_existing",
+      "total": 684
+    },
+    "schema_version": 1,
+    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 23.31 $23.31 2026-08-19t20:23:21z 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d #476/684 generated auction feed 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21 background: none (91.7%) background none body: grey (12.9%) body grey neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: masksnorkel (10.1%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None (91.7%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Grey (12.9%)",
+        "trait_type": "Body",
+        "value": "Grey"
+      },
+      {
+        "display": "Neck: RedCollar (29.5%)",
+        "trait_type": "Neck",
+        "value": "RedCollar"
+      },
+      {
+        "display": "Mouth: None (68.3%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: Earbuds (32.5%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: CrazyHair (6.6%)",
+        "trait_type": "Head",
+        "value": "CrazyHair"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (10.1%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}

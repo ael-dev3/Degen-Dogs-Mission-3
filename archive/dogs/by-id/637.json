@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#324/683",
-      "rank": 324,
+      "display": "#327/684",
+      "rank": 327,
       "scope": "base_existing",
-      "total": 683
+      "total": 684
     },
     "schema_version": 1,
-    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 10000000000000000 20.55 $20.55 2026-02-26t06:46:45z 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #324/683 generated auction feed 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d background: none (91.7%) background none body: grey (12.7%) body grey neck: none (41.1%) neck none mouth: teeth (5.4%) mouth teeth ears: earbuds (32.4%) ears earbuds head: none (20.1%) head none eyes: masksnorkel (10.0%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 637 dog #637 637 mission 3 mission 3 base settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 0.01 eth 10000000000000000 20.55 $20.55 2026-02-26t06:46:45z 0xc958aad5e80cac3f07e45c115c67adf6bc2be8eb5ed8ca1b0d99a684826c9c33 0x47225c1442d007cf6e959c33cc2a4b9537508f10586f3d65546b9bc158af3a25 #327/684 generated auction feed 0x9856cf591b5d4e1d1015ee72b75f5790135d9e69f8a6af18c270f6b60a11479d background: none (91.7%) background none body: grey (12.9%) body grey neck: none (41.1%) neck none mouth: teeth (5.4%) mouth teeth ears: earbuds (32.5%) ears earbuds head: none (20.0%) head none eyes: masksnorkel (10.1%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 42649529,
       "block_time_utc": "2026-02-26T06:46:45Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.7%)",
+        "display": "Body: Grey (12.9%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -100,17 +100,17 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.0%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (10.0%)",
+        "display": "Eyes: MaskSnorkel (10.1%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

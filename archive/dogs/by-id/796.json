@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#200/683",
+      "display": "#200/684",
       "rank": 200,
       "scope": "base_existing",
-      "total": 683
+      "total": 684
     },
     "schema_version": 1,
-    "search_text": "dog 796 dog #796 796 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.3 $15.30 2026-08-08t15:10:59z 0x1aef22ca486089151846f86bd0b2798d484639882de007e2b9a5702c7a10489a 0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83 #200/683 generated auction feed 0x58660c8c31f7487f81ca9cfbef549d1967b65fcc1408bbd307fecf0807a3431a background: none (91.7%) background none body: black (11.7%) body black neck: goldnecklace (19.2%) neck goldnecklace mouth: tongue (10.1%) mouth tongue ears: earbuds (32.4%) ears earbuds head: blackcap (7.6%) head blackcap eyes: eyepatch (7.8%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 796 dog #796 796 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.3 $15.30 2026-08-08t15:10:59z 0x1aef22ca486089151846f86bd0b2798d484639882de007e2b9a5702c7a10489a 0x6be5fa9e2461aedd856f4fcb33f61e6ef6ec5613a930ed2a72be3686c8634f83 #200/684 generated auction feed 0x58660c8c31f7487f81ca9cfbef549d1967b65fcc1408bbd307fecf0807a3431a background: none (91.7%) background none body: black (11.7%) body black neck: goldnecklace (19.2%) neck goldnecklace mouth: tongue (10.1%) mouth tongue ears: earbuds (32.5%) ears earbuds head: blackcap (7.6%) head blackcap eyes: eyepatch (7.7%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49706256,
       "block_time_utc": "2026-08-08T15:10:59Z",
@@ -100,7 +100,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -110,7 +110,7 @@
         "value": "BlackCap"
       },
       {
-        "display": "Eyes: EyePatch (7.8%)",
+        "display": "Eyes: EyePatch (7.7%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }
