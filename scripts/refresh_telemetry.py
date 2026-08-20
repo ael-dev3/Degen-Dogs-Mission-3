@@ -70,6 +70,31 @@ PAGES_STATUS_HOST = "ael-dev3.github.io"
 PAGES_STATUS_PATH = "/Degen-Dogs-Mission-3/generated/refresh_status.json"
 COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 LIVE_STATUS_CACHE_BUST = re.compile(r"^cache_bust=[0-9]+$")
+REFRESH_STATUS_INTEGER_FIELDS = frozenset(
+    {
+        "schema_version",
+        "latest_generated_block",
+        "current_dog_token_id",
+        "onchain_chain_id",
+        "snapshot_confirmations",
+        "rpc_quorum_size",
+        "dog_total_supply",
+        "dog_id_ceiling",
+        "dog_token_uri_present_count",
+        "dog_token_uri_unavailable_count",
+        "dog_base_existing_count",
+        "dog_base_unclaimed_count",
+        "dog_metadata_onchain_verified_count",
+        "dog_metadata_unavailable_count",
+        "dog_metadata_content_observed_count",
+        "dog_rarity_universe_count",
+        "dog_rarity_excluded_nonexistent_count",
+        "dog_rarity_incomplete_metadata_count",
+        "dog_rarity_attested_block",
+        "dog_rarity_continuity_through_block",
+        "dog_rarity_extension_mint_count",
+    }
+)
 
 
 class RejectRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -623,6 +648,16 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
     if public.read_bytes() != generated.read_bytes():
         raise AssertionError("public/generated/refresh_status.json differs from generated/refresh_status.json")
     assert_public_safe(status)
+    invalid_integer_types = sorted(
+        key
+        for key in REFRESH_STATUS_INTEGER_FIELDS.intersection(status)
+        if type(status[key]) is not int
+    )
+    if invalid_integer_types:
+        raise AssertionError(
+            "refresh_status integer fields have invalid JSON types: "
+            + ", ".join(invalid_integer_types)
+        )
     required = {
         "schema_version",
         "kind",

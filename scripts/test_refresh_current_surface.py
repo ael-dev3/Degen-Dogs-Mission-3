@@ -126,12 +126,224 @@ def test_read_table_preserves_header_for_zero_row_bid_history() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         generated = Path(tmp)
         (generated / "empty.csv").write_text("tx_hash,log_index\n", encoding="utf-8")
+        (generated / "empty.json").write_text("[]\n", encoding="utf-8")
         surface.GENERATED = generated
 
         columns, rows = surface.read_table("empty")
 
     assert columns == ["tx_hash", "log_index"]
     assert rows == []
+
+
+def test_read_table_preserves_json_scalar_types_after_exact_csv_parity() -> None:
+    surface = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        generated = Path(tmp)
+        (generated / "typed.csv").write_text(
+            "token_id,rarity_score,settled_time_utc\n7,1.5,\n",
+            encoding="utf-8",
+        )
+        (generated / "typed.json").write_text(
+            json.dumps(
+                [{"token_id": 7, "rarity_score": 1.5, "settled_time_utc": None}]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        surface.GENERATED = generated
+
+        columns, rows = surface.read_table("typed")
+
+        assert columns == ["token_id", "rarity_score", "settled_time_utc"]
+    assert rows == [{"token_id": 7, "rarity_score": 1.5, "settled_time_utc": None}]
+
+
+def test_numeric_helpers_match_sqlite_real_rounding_and_printf() -> None:
+    surface = load_module()
+
+    assert surface.numeric_8("1.234567845") == 1.23456784
+    assert surface.numeric_2("2.675") == 2.67
+    assert surface.format_eth_5("1.234565") == "1.23456"
+    assert surface.format_usd_0("1000.5") == "1001"
+    assert surface.numeric_usd_2("0.00002", "2250") == 0.05
+    assert surface.format_usd_product_0("0.00002", "2250") == "0"
+    surface.require_exact_8_decimal_amount("0.12345678", "test")
+    try:
+        surface.require_exact_8_decimal_amount("0.000000004", "AuctionBid")
+    except surface.FullRefreshRequired as exc:
+        assert "more than 8 decimal places" in str(exc)
+    else:
+        raise AssertionError("sub-1e-8 amount was accepted by bounded aggregates")
+
+
+def test_refresh_status_integer_fields_remain_json_numbers() -> None:
+    surface = load_module()
+    status = {
+        "latest_generated_block": 123,
+        "onchain_chain_id": "8453",
+        "snapshot_confirmations": "1",
+        "rpc_quorum_size": "2",
+        "dog_total_supply": "810",
+        "dog_rarity_attested_block": "120",
+        "dog_rarity_continuity_through_block": "123",
+        "current_bid_eth": "0.01",
+    }
+
+    normalized = surface.normalize_refresh_status_integer_fields(status)
+
+    for key in surface.REFRESH_STATUS_INTEGER_FIELDS.intersection(normalized):
+        assert type(normalized[key]) is int
+    assert normalized["current_bid_eth"] == "0.01"
+    try:
+        surface.normalize_refresh_status_integer_fields({"rpc_quorum_size": "2.0"})
+    except surface.FullRefreshRequired as exc:
+        assert "rpc_quorum_size" in str(exc)
+    else:
+        raise AssertionError("noncanonical status integer was accepted")
+
+    assert surface.canonical_utc_z(
+        "2026-08-20 21:39:27",
+        "snapshot",
+    ) == "2026-08-20T21:39:27Z"
+
+
+def test_historical_bid_rows_preserve_event_price_provenance() -> None:
+    surface = load_module()
+    raw_bid = bid(
+        809,
+        100,
+        "0xevent",
+        amount="0.009",
+        timestamp="2026-08-19T20:23:21Z",
+    )
+    prior = {
+        **raw_bid,
+        "bid_usd": 20.27,
+        "bid_usd_at_event": 20.27,
+        "eth_usd_price_at_event": "2251.7346",
+        "eth_usd_price_date_utc": "2026-08-19",
+        "usd_estimate_source": "defillama_coin_prices",
+        "usd_estimate_source_detail": "coins.llama.fi",
+        "usd_estimate_confidence": "high",
+        "usd_estimate_basis": "bid_date_eth_usd",
+    }
+
+    rows = surface.format_historical_bid_rows([raw_bid], [prior], {})
+
+    assert rows[0]["bid_usd"] == 20.27
+    assert rows[0]["bid_usd_at_event"] == 20.27
+    assert rows[0]["eth_usd_price_at_event"] == "2251.7346"
+    assert rows[0]["usd_estimate_source"] == "defillama_coin_prices"
+    assert rows[0]["usd_estimate_basis"] == "bid_date_eth_usd"
+
+
+def test_recent_bid_reconciliation_never_overwrites_event_price_with_live_copy() -> None:
+    surface = load_module()
+    historical = {
+        **bid(809, 100, "0xevent", amount="0.009"),
+        "bid_usd": 20.27,
+        "bid_usd_at_event": 20.27,
+        "eth_usd_price_at_event": "2251.7346",
+        "usd_estimate_source": "defillama_coin_prices",
+        "usd_estimate_basis": "bid_date_eth_usd",
+    }
+    live = {
+        **historical,
+        "bid_usd": 20.88,
+        "bid_usd_at_event": 20.88,
+        "eth_usd_price_at_event": "2320.555",
+        "usd_estimate_source": "current_eth_usd_price",
+        "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    }
+
+    rows, added, removed, known = surface.reconcile_recent_bid_rows(
+        [],
+        [historical],
+        [live],
+        from_block=90,
+    )
+
+    assert rows == [historical]
+    assert known == [historical]
+    assert added == [historical]
+    assert removed == []
+
+
+def test_unified_no_bid_projection_matches_full_builder_null_contract() -> None:
+    surface = load_module()
+    zero = "0x" + "0" * 40
+
+    explorer, who = surface.unified_bidder_projection(
+        zero,
+        "no bids yet",
+        "",
+        has_bid=False,
+    )
+
+    assert explorer is None
+    assert who == {
+        "display": "no bids yet",
+        "farcaster_fid": None,
+        "farcaster_handle": None,
+        "profile_url": None,
+        "wallet": zero,
+        "wallet_explorer_url": None,
+    }
+
+
+def test_read_table_rejects_csv_json_value_or_schema_disagreement() -> None:
+    surface = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        generated = Path(tmp)
+        (generated / "split.csv").write_text("token_id,rarity\n7,#1/1\n", encoding="utf-8")
+        surface.GENERATED = generated
+        for payload, expected in (
+            ([{"token_id": 8, "rarity": "#1/1"}], "values disagree"),
+            ([{"token_id": 7, "rarity": "#1/1", "extra": True}], "schema disagrees"),
+        ):
+            (generated / "split.json").write_text(json.dumps(payload) + "\n", encoding="utf-8")
+            try:
+                surface.read_table("split")
+            except surface.FullRefreshRequired as exc:
+                assert expected in str(exc)
+            else:
+                raise AssertionError("split CSV/JSON table was accepted")
+
+
+def test_read_table_rejects_matching_but_noncanonical_json_scalar_types() -> None:
+    surface = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        generated = Path(tmp)
+        header = (
+            "activity_day,created_auctions,settled_auctions,bids,unique_bidders,"
+            "bid_eth,high_bid_eth,settled_eth\n"
+        )
+        values = "2026-08-20,1,1,1,1,0.01,0.01,0.01\n"
+        (generated / "auction_daily_activity.csv").write_text(header + values, encoding="utf-8")
+        (generated / "auction_daily_activity.json").write_text(
+            json.dumps(
+                [{
+                    "activity_day": "2026-08-20",
+                    "created_auctions": "1",
+                    "settled_auctions": "1",
+                    "bids": "1",
+                    "unique_bidders": "1",
+                    "bid_eth": "0.01",
+                    "high_bid_eth": "0.01",
+                    "settled_eth": "0.01",
+                }]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        surface.GENERATED = generated
+
+        try:
+            surface.read_table("auction_daily_activity")
+        except surface.FullRefreshRequired as exc:
+            assert "must be int" in str(exc)
+        else:
+            raise AssertionError("matching CSV/JSON numeric strings were accepted")
 
 
 def test_write_table_projects_json_through_the_csv_schema() -> None:
@@ -155,6 +367,155 @@ def test_write_table_projects_json_through_the_csv_schema() -> None:
         assert generated_json == [{"token_id": 7, "rarity": "#1/1"}]
         assert public_json == generated_json
         assert (generated / "rank_only.csv").read_text().splitlines()[0] == "token_id,rarity"
+
+
+def test_new_timeline_schedule_has_typed_zero_extension_provenance() -> None:
+    surface = load_module()
+
+    fields = surface.reconcile_timeline_extensions(
+        {},
+        {"block_number": 101, "end_time_utc": "2026-08-21 20:00:00"},
+        [],
+        authenticated_checkpoint_block=100,
+        snapshot_block=110,
+        expected_end_time_utc="2026-08-21 20:00:00",
+    )
+
+    assert fields == {
+        "initial_end_time_utc": "2026-08-21 20:00:00",
+        "end_time_utc": "2026-08-21 20:00:00",
+        "extension_count": 0,
+        "latest_extension_end_time_utc": None,
+        "latest_extension_block": None,
+        "latest_extension_tx_hash": None,
+        "latest_extension_log_index": None,
+    }
+
+
+def test_timeline_schedule_rebuilds_raw_extensions_after_authenticated_checkpoint() -> None:
+    surface = load_module()
+    tx_hash = "0x" + "a" * 64
+    fields = surface.reconcile_timeline_extensions(
+        {},
+        {"block_number": 101, "end_time_utc": "2026-08-21 20:00:00"},
+        [{
+            "token_id": 7,
+            "end_time_utc": "2026-08-21 20:15:00",
+            "block_number": 105,
+            "tx_hash": tx_hash,
+            "log_index": 5,
+        }],
+        authenticated_checkpoint_block=100,
+        snapshot_block=110,
+        expected_end_time_utc="2026-08-21 20:15:00",
+    )
+
+    assert fields["extension_count"] == 1
+    assert fields["latest_extension_block"] == 105
+    assert fields["latest_extension_tx_hash"] == tx_hash
+    assert fields["latest_extension_log_index"] == 5
+
+
+def test_timeline_schedule_rejects_raw_checkpoint_count_or_end_mismatch() -> None:
+    surface = load_module()
+    tx_hash = "0x" + "a" * 64
+    baseline = {
+        "initial_end_time_utc": "2026-08-21 20:00:00",
+        "extension_count": 1,
+        "latest_extension_end_time_utc": "2026-08-21 20:15:00",
+        "latest_extension_block": 90,
+        "latest_extension_tx_hash": tx_hash,
+        "latest_extension_log_index": 5,
+    }
+    row = {
+        "token_id": 7,
+        "end_time_utc": "2026-08-21 20:15:00",
+        "block_number": 90,
+        "tx_hash": tx_hash,
+        "log_index": 5,
+    }
+    for canonical_rows, expected in (([], "count disagree"), ([row], "auction():")):
+        try:
+            surface.reconcile_timeline_extensions(
+                baseline,
+                {},
+                canonical_rows,
+                authenticated_checkpoint_block=100,
+                snapshot_block=110,
+                expected_end_time_utc="2026-08-21 20:30:00",
+            )
+        except surface.FullRefreshRequired as exc:
+            assert expected in str(exc)
+        else:
+            raise AssertionError("inconsistent raw extension schedule was accepted")
+
+
+def test_extended_bid_pairing_is_exact_and_adjacent() -> None:
+    surface = load_module()
+    tx_hash = "0x" + "b" * 64
+    bid_row = {
+        "token_id": 7,
+        "tx_hash": tx_hash,
+        "block_number": 105,
+        "log_index": 4,
+        "extended": 1,
+    }
+    extension_row = {
+        "token_id": 7,
+        "tx_hash": tx_hash,
+        "block_number": 105,
+        "log_index": 5,
+    }
+    surface.validate_extended_bid_pairs([bid_row], [extension_row], {7})
+    second_bid = {**bid_row, "token_id": 8, "log_index": 6}
+    second_extension = {**extension_row, "token_id": 8, "log_index": 7}
+    surface.validate_extended_bid_pairs(
+        [bid_row, second_bid],
+        [extension_row, second_extension],
+        {7, 8},
+    )
+    for bids, extensions in (
+        ([{**bid_row, "extended": 2}], [extension_row]),
+        ([bid_row, dict(bid_row)], [extension_row]),
+        ([bid_row], [extension_row, dict(extension_row)]),
+        ([bid_row], [{**extension_row, "token_id": 8}]),
+        ([bid_row], [{**extension_row, "log_index": 6}]),
+    ):
+        try:
+            surface.validate_extended_bid_pairs(bids, extensions, {7})
+        except surface.FullRefreshRequired:
+            pass
+        else:
+            raise AssertionError("malformed AuctionBid/AuctionExtended pairing was accepted")
+
+
+def test_extension_overlap_rejects_fresh_rows_outside_requested_ranges() -> None:
+    surface = load_module()
+    row = {
+        "token_id": 7,
+        "end_time_utc": "2026-08-21 20:15:00",
+        "block_number": 99,
+        "tx_hash": "0x" + "c" * 64,
+        "log_index": 5,
+    }
+    try:
+        surface.merge_extension_overlap([], [row], [(100, 110)])
+    except surface.FullRefreshRequired as exc:
+        assert "outside the verified ranges" in str(exc)
+    else:
+        raise AssertionError("out-of-range AuctionExtended row was accepted")
+
+
+def test_surface_checkpoint_requires_current_and_metrics_atomicity() -> None:
+    surface = load_module()
+    metrics = [{"metric": "latest_block", "value": "100"}]
+    assert surface.authenticated_surface_checkpoint({"latest_block": 100}, metrics) == 100
+    try:
+        surface.authenticated_surface_checkpoint({"latest_block": 101}, metrics)
+    except surface.FullRefreshRequired as exc:
+        assert "checkpoints disagree" in str(exc)
+    else:
+        raise AssertionError("split current/metrics checkpoint was authenticated")
 
 
 def test_legacy_historical_schema_migrates_rarity_score_after_rarity() -> None:
@@ -186,6 +547,108 @@ def test_legacy_historical_schema_migrates_rarity_score_after_rarity() -> None:
     assert migrated_rows[0]["metadata_verification_status"] == "onchain_token_uri_verified"
     assert legacy == ["token_id", "dog", "rarity", "traits"]
     assert surface.ensure_table_column(migrated, "rarity_score", after="rarity") == migrated
+
+
+def test_canonical_historical_rarity_preserves_full_builder_search_text() -> None:
+    surface = load_module()
+    expected = {
+        "rarity": "#1/1",
+        "rarity_score": 7.0,
+        "traits": rarity_traits("Blue"),
+        "trait_rarity": "Body: Blue (100.0%)",
+    }
+    canonical = {
+        "token_id": 7,
+        **expected,
+        "metadata_verification_status": "onchain_token_uri_verified",
+        "search_text": "full builder canonical search ordering",
+    }
+
+    _, rows = surface.prepare_historical_rarity_table(
+        [*canonical],
+        [dict(canonical)],
+        {7: expected},
+    )
+
+    assert rows[0] == canonical
+
+
+def test_historical_search_preserves_attested_provenance_and_full_scalar_corpus() -> None:
+    surface = load_module()
+    row = {
+        "mission": 3,
+        "token_id": 809,
+        "dog": "Dog #809",
+        "status": "live",
+        "amount": "0.00900 ETH ($21)",
+        "rarity": "#367/685",
+        "confidence": "verified",
+        "sources": "base_logs,archive_indexer",
+    }
+
+    surface.apply_historical_provenance_defaults(row)
+    row["search_text"] = surface.canonical_historical_search_text(row)
+
+    assert row["confidence"] == "verified"
+    assert row["sources"] == "base_logs,archive_indexer"
+    assert "0.00900 ETH ($21)" in row["search_text"]
+    assert "#367/685" in row["search_text"]
+    assert "base_logs,archive_indexer" in row["search_text"]
+
+    fresh = surface.apply_historical_provenance_defaults({})
+    assert fresh == {
+        "confidence": "verified_live_base_logs",
+        "sources": "base_logs,dashboard_builder",
+    }
+    eroded = {
+        "confidence": "live_base_contract_call",
+        "sources": "base_rpc,dog_metadata_api",
+    }
+    surface.apply_historical_provenance_defaults(
+        eroded,
+        {"confidence": "verified", "sources": ["base_logs", "archive_indexer"]},
+    )
+    assert eroded == {
+        "confidence": "verified",
+        "sources": "base_logs,archive_indexer",
+    }
+
+
+def test_historical_report_latest_activity_uses_events_not_snapshot_time() -> None:
+    surface = load_module()
+    reports = [
+        {"mission": "all", "latest_activity_utc": "2026-08-20 21:37:35"},
+        {"mission": "3", "latest_activity_utc": "2026-08-20 21:37:35"},
+    ]
+    history = [
+        {
+            "mission": 1,
+            "status": "settled",
+            "winner_wallet": "0x" + "a" * 40,
+            "amount": "1 ETH",
+            "bid_count": 2,
+            "auction_created_time_utc": "2022-03-14T14:01:34Z",
+            "settled_time_utc": "2022-03-15T14:01:34Z",
+        },
+        {
+            "mission": 3,
+            "status": "ongoing",
+            "winner_wallet": "0x" + "b" * 40,
+            "amount": "0.009 ETH",
+            "bid_count": 1,
+            "auction_created_time_utc": "2026-08-20 19:57:59",
+            "settled_time_utc": "",
+        },
+    ]
+
+    output = surface.recompute_historical_report_rows(reports, history)
+    by_mission = {row["mission"]: row for row in output}
+
+    assert by_mission["all"]["latest_activity_utc"] == "2026-08-20 19:57:59"
+    assert by_mission["3"]["latest_activity_utc"] == "2026-08-20 19:57:59"
+    assert by_mission["all"]["first_auction_utc"] == "2022-03-14T14:01:34Z"
+    assert by_mission["all"]["auctions_or_records"] == 2
+    assert by_mission["all"]["unique_winners_or_high_bidders"] == 2
 
 
 def test_overlap_history_keeps_new_zero_bid_token_empty() -> None:
@@ -296,8 +759,8 @@ def test_leaderboard_delta_updates_totals_distinct_auctions_and_latest_bid() -> 
 
     assert output[0]["bids"] == 3
     assert output[0]["auctions_bid"] == 3
-    assert output[0]["bid_eth"] == "0.03"
-    assert output[0]["high_bid_eth"] == "0.015"
+    assert output[0]["bid_eth"] == 0.03
+    assert output[0]["high_bid_eth"] == 0.015
     assert output[0]["latest_bid_token_id"] == 10
     assert output[0]["bidder"] == "@alice"
 
@@ -325,7 +788,21 @@ def test_leaderboard_delta_does_not_double_count_existing_auction_membership() -
 
     assert output[0]["bids"] == 3
     assert output[0]["auctions_bid"] == 2
-    assert output[0]["high_bid_eth"] == "0.02"
+    assert output[0]["high_bid_eth"] == 0.02
+
+
+def test_leaderboard_ties_use_sql_wallet_ascending_order() -> None:
+    surface = load_module()
+    wallet_a = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    wallet_b = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    rows = [
+        {"bidder_wallet": wallet_b, "bids": 1, "bid_eth": 0.01},
+        {"bidder_wallet": wallet_a, "bids": 1, "bid_eth": 0.01},
+    ]
+
+    output = surface.apply_bidder_leaderboard_delta(rows, [], [], [], {})
+
+    assert [row["bidder_wallet"] for row in output] == [wallet_a, wallet_b]
 
 
 def test_leaderboard_removal_fails_closed_at_unpersisted_rank_boundary() -> None:
@@ -357,11 +834,11 @@ def test_daily_activity_recomputes_exact_affected_day_from_known_events() -> Non
     surface = load_module()
     known = [
         bid(9, 90, "0xolder", timestamp="2026-08-01 23:59:00"),
-        bid(10, 100, "0xa", wallet="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", amount="0.01", timestamp="2026-08-02 01:00:00"),
-        bid(10, 101, "0xb", wallet="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", amount="0.02", timestamp="2026-08-02 02:00:00"),
+        bid(10, 100, "0xa", wallet="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", amount="0.123456789123", timestamp="2026-08-02 01:00:00"),
+        bid(10, 101, "0xb", wallet="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", amount="0.000000000001", timestamp="2026-08-02 02:00:00"),
     ]
     timeline = [
-        {"token_id": 10, "start_time_utc": "2026-08-02 00:30:00", "settled_time_utc": "2026-08-02 03:00:00", "settled_eth": "0.02"},
+        {"token_id": 10, "start_time_utc": "2026-08-02 00:30:00", "settled_time_utc": "2026-08-02 03:00:00", "settled_eth": "0.123456789123"},
     ]
 
     output = surface.recompute_daily_activity([], timeline, known, {"2026-08-02"})
@@ -372,9 +849,9 @@ def test_daily_activity_recomputes_exact_affected_day_from_known_events() -> Non
         "settled_auctions": 1,
         "bids": 2,
         "unique_bidders": 2,
-        "bid_eth": "0.03",
-        "high_bid_eth": "0.02",
-        "settled_eth": "0.02",
+        "bid_eth": 0.12345679,
+        "high_bid_eth": 0.12345679,
+        "settled_eth": 0.12345679,
     }]
 
 
@@ -383,14 +860,14 @@ def test_winner_stats_recompute_from_complete_winner_table() -> None:
     wallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     leaderboard = [{"bidder_wallet": wallet, "auction_wins": 99, "winning_eth": "99"}]
     winners = [
-        {"winner_wallet": wallet, "winning_bid_eth": "0.01"},
-        {"winner_wallet": wallet, "winning_bid_eth": "0.02"},
+        {"winner_wallet": wallet, "winning_bid_eth": "0.123456789123"},
+        {"winner_wallet": wallet, "winning_bid_eth": "0.000000000001"},
     ]
 
     output = surface.apply_winner_stats_to_leaderboard(leaderboard, winners)
 
     assert output[0]["auction_wins"] == 2
-    assert output[0]["winning_eth"] == "0.03"
+    assert output[0]["winning_eth"] == 0.12345679
 
 
 def test_rarity_replaces_current_token_instead_of_scoring_phantom_supply() -> None:
@@ -698,6 +1175,102 @@ def test_full_builder_shaped_unified_rarity_is_a_byte_preserving_noop() -> None:
     assert surface.apply_unified_rarity_fields(row, rarity_row) is False
 
     assert json.dumps(row, sort_keys=True) == before
+
+
+def test_unified_current_search_preserves_canonical_source_and_trait_terms() -> None:
+    surface = load_module()
+    tx_hash = "0x" + "a" * 64
+    row = {
+        "status": "ongoing",
+        "activity_time_utc": "2026-08-20T19:58:13Z",
+        "amount": {
+            "native": "0.009",
+            "native_symbol": "ETH",
+            "raw": "9000000000000000",
+            "usd_estimate": "20.88",
+            "usd_estimate_display": "$20.88",
+        },
+        "auction_created": {"tx_hash": tx_hash},
+        "settlement": {"tx_hash": None},
+        "bid_tx_hashes": ["0x" + "b" * 64],
+        "rarity": {"display": "#367/685"},
+        "traits": [
+            {"display": "Body: Grey (13.0%)", "trait_type": "Body", "value": "Grey"},
+        ],
+        "winner_or_high_bidder": {
+            "wallet": "0x" + "c" * 40,
+            "display": "@dog",
+            "farcaster_handle": "dog",
+        },
+        "source": {
+            "sources": [
+                "base_logs",
+                "archive_indexer",
+                "generated_auction_timeline",
+                "generated_auction_feed",
+            ]
+        },
+    }
+
+    search = surface.canonical_unified_current_search_text(row, 809)
+
+    for expected in (
+        "9000000000000000",
+        "#367/685",
+        "body: grey (13.0%)",
+        "archive_indexer",
+        "generated_auction_feed",
+        tx_hash,
+    ):
+        assert expected.lower() in search
+
+
+def test_unified_current_source_repairs_bounded_writer_provenance_erosion() -> None:
+    surface = load_module()
+    source = surface.canonical_unified_source(
+        {
+            "confidence": "verified",
+            "sources": [
+                "base_logs",
+                "dashboard_builder",
+                "generated_auction_timeline",
+                "generated_auction_feed",
+            ],
+        },
+        {"confidence": "verified", "sources": ["base_logs", "archive_indexer"]},
+        settled=False,
+        baseline_exists=True,
+    )
+
+    assert source["sources"] == [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_feed",
+    ]
+
+
+def test_stale_unified_by_id_mirror_is_selected_after_master_write_crash() -> None:
+    surface = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        by_id = root / "archive" / "dogs" / "by-id"
+        by_id.mkdir(parents=True)
+        surface.ROOT = root
+        record = {"dog_id": 7, "rarity": {"display": "#1/1"}}
+        path = by_id / "007.json"
+        path.write_text(
+            json.dumps({"schema_version": 1, "record": {"dog_id": 7, "rarity": {"display": "#2/2"}}}),
+            encoding="utf-8",
+        )
+
+        assert surface.unified_by_id_mismatches([record]) == {7}
+
+        path.write_text(
+            json.dumps({"schema_version": 1, "record": record}),
+            encoding="utf-8",
+        )
+        assert surface.unified_by_id_mismatches([record]) == set()
 
 
 def test_sparse_verified_base_universe_excludes_unclaimed_history_rows() -> None:
@@ -1210,9 +1783,10 @@ def test_prior_settled_winner_block_and_historical_price_survive_fast_refresh_me
     assert settlement["block_number"] == "12345"
     assert merged["block_number"] == "12345"
     assert merged["tx_hash"] == tx_hash
-    assert merged["winning_bid_usd_at_settlement"] == "20.00"
+    assert merged["winning_bid_usd_at_settlement"] == 20.0
     assert merged["eth_usd_price_at_event"] == "2000"
     assert merged["usd_estimate_source"] == "defillama_coin_prices"
+    assert merged["usd_estimate_basis"] == "settlement_date_eth_usd"
 
 
 def test_prior_settled_winner_bid_times_survive_an_empty_rotated_ledger() -> None:
@@ -1222,7 +1796,9 @@ def test_prior_settled_winner_bid_times_survive_an_empty_rotated_ledger() -> Non
         "last_bid_utc": "2026-08-01 13:14:59",
     }
     settlement = {
+        "amount_eth": "0.01",
         "block_number": 49443635,
+        "block_time_utc": "2026-08-01 13:15:00",
         "tx_hash": "0x" + "a" * 64,
     }
     historical = {
@@ -1299,7 +1875,7 @@ def test_settled_search_amount_uses_event_time_usd_not_live_eth_price() -> None:
         historical,
     )
 
-    assert display == "0.01 ETH ($20)"
+    assert display == "0.01000 ETH ($20)"
     assert "previous_amount_eth * eth_usd" not in MODULE_PATH.read_text(encoding="utf-8")
     try:
         surface.historical_settlement_amount_display(7, surface.Decimal("0.01"), None)

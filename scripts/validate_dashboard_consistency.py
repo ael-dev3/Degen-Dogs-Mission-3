@@ -673,6 +673,159 @@ def _parity_address(value: Any, label: str) -> str:
     return normalized
 
 
+def validate_auction_extension_schedules(*, root: Path = ROOT) -> dict[str, int]:
+    """Prove every derived auction end against the raw AuctionExtended ledger."""
+
+    timeline_path = root / "generated" / "auction_timeline.json"
+    extension_path = root / "generated" / "auction_extensions.json"
+    if not timeline_path.is_file():
+        raise AssertionError("generated/auction_timeline.json is missing")
+    if not extension_path.is_file():
+        raise AssertionError("generated/auction_extensions.json is missing")
+    timeline_rows = load_json(timeline_path)
+    extension_rows = load_json(extension_path)
+    if not isinstance(timeline_rows, list) or any(not isinstance(row, dict) for row in timeline_rows):
+        raise AssertionError("generated/auction_timeline.json is not a list of objects")
+    if not isinstance(extension_rows, list) or any(not isinstance(row, dict) for row in extension_rows):
+        raise AssertionError("generated/auction_extensions.json is not a list of objects")
+
+    timeline_by_token: dict[int, dict[str, Any]] = {}
+    for row_number, row in enumerate(timeline_rows, 1):
+        token_id = _parity_int(
+            row.get("token_id"),
+            f"auction_timeline row {row_number} token id",
+        )
+        if token_id in timeline_by_token:
+            raise AssertionError(f"auction_timeline contains duplicate Dog #{token_id}")
+        timeline_by_token[token_id] = row
+
+    extensions_by_token: dict[int, list[dict[str, Any]]] = {}
+    seen_identities: set[tuple[str, int]] = set()
+    seen_positions: set[tuple[int, int]] = set()
+    for row_number, row in enumerate(extension_rows, 1):
+        token_id = _parity_int(
+            row.get("token_id"),
+            f"auction_extensions row {row_number} token id",
+        )
+        if token_id not in timeline_by_token:
+            raise AssertionError(f"auction_extensions references unknown Dog #{token_id}")
+        end_time = _parity_timestamp(
+            row.get("end_time_utc"),
+            f"Dog #{token_id} AuctionExtended end time",
+        )
+        block_number = _parity_int(
+            row.get("block_number"),
+            f"Dog #{token_id} AuctionExtended block",
+            minimum=1,
+        )
+        tx_hash = _parity_hash(
+            row.get("tx_hash"),
+            f"Dog #{token_id} AuctionExtended transaction",
+        )
+        log_index = _parity_int(
+            row.get("log_index"),
+            f"Dog #{token_id} AuctionExtended log index",
+        )
+        identity = (tx_hash, log_index)
+        position = (block_number, log_index)
+        if identity in seen_identities or position in seen_positions:
+            raise AssertionError("auction_extensions contains a duplicate canonical log")
+        seen_identities.add(identity)
+        seen_positions.add(position)
+        normalized = dict(row)
+        normalized.update(
+            {
+                "end_time_utc": end_time,
+                "block_number": block_number,
+                "tx_hash": tx_hash,
+                "log_index": log_index,
+            }
+        )
+        extensions_by_token.setdefault(token_id, []).append(normalized)
+
+    latest_fields = (
+        "latest_extension_end_time_utc",
+        "latest_extension_block",
+        "latest_extension_tx_hash",
+        "latest_extension_log_index",
+    )
+    for token_id, timeline_row in timeline_by_token.items():
+        initial_end = _parity_timestamp(
+            timeline_row.get("initial_end_time_utc"),
+            f"Dog #{token_id} initial auction end time",
+        )
+        effective_end = _parity_timestamp(
+            timeline_row.get("end_time_utc"),
+            f"Dog #{token_id} effective auction end time",
+        )
+        extension_count = _parity_int(
+            timeline_row.get("extension_count"),
+            f"Dog #{token_id} extension count",
+        )
+        rows = sorted(
+            extensions_by_token.get(token_id, []),
+            key=lambda row: (int(row["block_number"]), int(row["log_index"])),
+        )
+        if extension_count != len(rows):
+            raise AssertionError(
+                f"Dog #{token_id} auction_timeline extension count differs from auction_extensions"
+            )
+
+        previous_end = initial_end
+        for row in rows:
+            next_end = str(row["end_time_utc"])
+            if next_end <= previous_end:
+                raise AssertionError(
+                    f"Dog #{token_id} AuctionExtended end times are not strictly increasing"
+                )
+            previous_end = next_end
+        if effective_end != previous_end:
+            raise AssertionError(
+                f"Dog #{token_id} effective auction end differs from auction_extensions"
+            )
+
+        if not rows:
+            if any(field not in timeline_row or timeline_row[field] is not None for field in latest_fields):
+                raise AssertionError(
+                    f"Dog #{token_id} zero-extension timeline must use null latest provenance"
+                )
+            continue
+
+        latest = rows[-1]
+        expected_latest = {
+            "latest_extension_end_time_utc": latest["end_time_utc"],
+            "latest_extension_block": latest["block_number"],
+            "latest_extension_tx_hash": latest["tx_hash"],
+            "latest_extension_log_index": latest["log_index"],
+        }
+        actual_latest = {
+            "latest_extension_end_time_utc": _parity_timestamp(
+                timeline_row.get("latest_extension_end_time_utc"),
+                f"Dog #{token_id} latest AuctionExtended end time",
+            ),
+            "latest_extension_block": _parity_int(
+                timeline_row.get("latest_extension_block"),
+                f"Dog #{token_id} latest AuctionExtended block",
+                minimum=1,
+            ),
+            "latest_extension_tx_hash": _parity_hash(
+                timeline_row.get("latest_extension_tx_hash"),
+                f"Dog #{token_id} latest AuctionExtended transaction",
+            ),
+            "latest_extension_log_index": _parity_int(
+                timeline_row.get("latest_extension_log_index"),
+                f"Dog #{token_id} latest AuctionExtended log index",
+            ),
+        }
+        for field in latest_fields:
+            if actual_latest[field] != expected_latest[field]:
+                raise AssertionError(
+                    f"Dog #{token_id} auction_timeline {field} differs from auction_extensions"
+                )
+
+    return {"auctions": len(timeline_by_token), "extensions": len(extension_rows)}
+
+
 def validate_mission3_archive_parity(*, root: Path = ROOT) -> dict[str, int | bool]:
     """Cross-check dashboard history against the independently quorum-built archive."""
 
@@ -1517,6 +1670,7 @@ def validate_current_surface() -> dict[str, Any]:
     if not isinstance(feed_rows_raw, list):
         raise AssertionError("generated/auction_feed.json is not a list")
     feed_rows = [row for row in feed_rows_raw if isinstance(row, dict)]
+    extension_schedule = validate_auction_extension_schedules(root=ROOT)
 
     current_dog_id = dog_id(current)
     feed = find_current_feed_row(feed_rows, current_dog_id)
@@ -1890,6 +2044,7 @@ def validate_current_surface() -> dict[str, Any]:
         "historical_dog_search",
         "recent_bids",
         "recent_auction_winners",
+        "auction_extensions",
         "auction_timeline",
         "auction_daily_activity",
         "auction_bidder_leaderboard",
@@ -2149,10 +2304,11 @@ def validate_current_surface() -> dict[str, Any]:
         "bid_eth": str(expected_native.normalize()),
         "feed_rows_for_current_dog": 1,
         "refresh_status_result": text(refresh_status.get("last_refresh_result")),
+        "auction_extension_schedule": extension_schedule,
         "observed_state_check": observed_state_check,
         "mission3_archive_parity": archive_parity,
         "checked": [str(path.relative_to(ROOT)) for path in unified_paths]
-        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
+        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/auction_extensions.json", "generated/auction_timeline.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
     }
 
 

@@ -1148,6 +1148,47 @@ def test_auction_schedule_validator_rejects_getter_log_disagreement() -> None:
         raise AssertionError("expected an auction end-time disagreement")
 
 
+def test_full_builder_requires_exact_bid_extension_event_pairs() -> None:
+    dashboard = load_module()
+    bid = {
+        "token_id": 7,
+        "tx_hash": "0xpaired",
+        "block_number": 11,
+        "log_index": 4,
+        "extended": 1,
+    }
+    extension = {
+        "token_id": 7,
+        "tx_hash": "0xpaired",
+        "block_number": 11,
+        "log_index": 5,
+    }
+    dashboard.validate_auction_extension_pairs([bid], [extension])
+    second_bid = {**bid, "token_id": 8, "log_index": 6}
+    second_extension = {**extension, "token_id": 8, "log_index": 7}
+    dashboard.validate_auction_extension_pairs(
+        [bid, second_bid],
+        [extension, second_extension],
+    )
+
+    invalid_cases = [
+        ([{**bid, "extended": 2}], [extension]),
+        ([bid], []),
+        ([{**bid, "extended": 0}], [extension]),
+        ([bid, dict(bid)], [extension]),
+        ([bid], [extension, dict(extension)]),
+        ([bid], [{**extension, "token_id": 8}]),
+        ([bid], [{**extension, "log_index": 6}]),
+    ]
+    for bids, extensions in invalid_cases:
+        try:
+            dashboard.validate_auction_extension_pairs(bids, extensions)
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("malformed bid/extension pairing was accepted")
+
+
 def test_exact_wei_survives_decoder_and_published_bid_rows() -> None:
     dashboard = load_module()
     exact_wei = 123_456_789_123_456_789
@@ -2678,6 +2719,43 @@ def test_season6_three_equal_winners_split_one_third_after_third_win() -> None:
     assert by_winner[alice]["season6_raw_sup_projected_full"] == "55"
     assert by_winner[bob]["season6_raw_sup_projected_full"] == "25"
     assert by_winner[carol]["season6_raw_sup_projected_full"] == "10"
+
+
+def test_season6_outputs_are_independent_of_settlement_input_order() -> None:
+    dashboard = load_module()
+    alice = "0x00000000000000000000000000000000000000a1"
+    bob = "0x00000000000000000000000000000000000000b2"
+    settled = [
+        {"token_id": 3, "winner": alice, "amount_eth": 0.03, "block_time_utc": "2026-06-02T00:01:00Z"},
+        {"token_id": 1, "winner": bob, "amount_eth": 0.01, "block_time_utc": "2026-06-02T00:00:00Z"},
+        {"token_id": 2, "winner": alice, "amount_eth": 0.02, "block_time_utc": "2026-06-02T00:00:30Z"},
+    ]
+    kwargs = {
+        "current": {},
+        "token_stats": {
+            "sup_usd_price": "1",
+            "sup_usd_source": "unit-test",
+            "eth_usd_price": "1000",
+        },
+        "snapshot_time_utc": "2026-06-02T00:01:30Z",
+        "config": season6_test_config(
+            dashboard,
+            total="90",
+            cap="1000",
+            campaign_seconds=90,
+        ),
+    }
+
+    forward = dashboard.build_season6_sup_outputs(settled, **kwargs)
+    reversed_input = dashboard.build_season6_sup_outputs(list(reversed(settled)), **kwargs)
+
+    assert forward == reversed_input
+    alice_row = next(
+        row
+        for row in forward["season6_sup_by_winner"]
+        if row["winner_wallet"] == alice
+    )
+    assert alice_row["season6_token_ids"] == "2,3"
 
 
 def test_season6_current_bid_estimate_is_incremental_cap_aware_and_counts_prior_wins() -> None:

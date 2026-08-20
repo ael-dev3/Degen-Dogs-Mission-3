@@ -174,6 +174,15 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         validated = telemetry.validate_refresh_status(root=root)
         assert validated == status
 
+        malformed = dict(status)
+        malformed["snapshot_confirmations"] = "1"
+        write_json(root / "generated" / "refresh_status.json", malformed)
+        write_json(root / "public" / "generated" / "refresh_status.json", malformed)
+        assert_raises_contains(
+            lambda: telemetry.validate_refresh_status(root=root),
+            "integer fields have invalid JSON types",
+        )
+
 
 def test_refresh_status_preserves_and_validates_rarity_mint_extension_provenance() -> None:
     telemetry = load_module()

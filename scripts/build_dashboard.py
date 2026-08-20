@@ -2281,7 +2281,15 @@ def build_season6_sup_outputs(
     events: list[tuple[datetime, str, Decimal]] = []
     win_rows: list[dict[str, Any]] = []
     grouped: dict[str, dict[str, Any]] = {}
-    for row in settled_rows:
+    ordered_settled_rows = sorted(
+        settled_rows,
+        key=lambda row: (
+            season6_event_time(row) or datetime.max.replace(tzinfo=timezone.utc),
+            int_value(row.get("token_id"), 0),
+            normalize_address(row.get("winner") or row.get("winner_wallet")),
+        ),
+    )
+    for row in ordered_settled_rows:
         event_time = season6_event_time(row)
         wallet = normalize_address(row.get("winner") or row.get("winner_wallet"))
         if not event_time or not wallet or wallet == ZERO:
@@ -2343,9 +2351,18 @@ def build_season6_sup_outputs(
             "first_s6_win_time_utc": iso_utc_z(entry["first"]),
             "latest_s6_win_time_utc": iso_utc_z(entry["latest"]),
             "season6_wallet_note": "wallet-level estimate; cap overflow redistribution not assumed",
-            "season6_token_ids": ",".join(entry["tokens"]),
+            "season6_token_ids": ",".join(
+                sorted(entry["tokens"], key=lambda token: int(token))
+            ),
         })
-    by_winner.sort(key=lambda row: (decimal_from(row["season6_capped_sup_projected_full"]) or Decimal(0), row["season6_wins_confirmed"]), reverse=True)
+    by_winner.sort(
+        key=lambda row: (
+            -(decimal_from(row["season6_capped_sup_projected_full"]) or Decimal(0)),
+            -int(row["season6_wins_confirmed"]),
+            str(row["first_s6_win_time_utc"]),
+            str(row["winner_wallet"]),
+        )
+    )
     by_wallet = {row["winner_wallet"]: row for row in by_winner}
 
     rewards_by_auction: list[dict[str, Any]] = []
@@ -3775,6 +3792,60 @@ def validate_auction_schedules(
             f"current auction end time disagrees with AuctionCreated/AuctionExtended logs for Dog #{current_token}: "
             f"getter={current_end or '<missing>'} logs={expected_end or '<missing>'}"
         )
+
+
+def validate_auction_extension_pairs(
+    bids: list[dict[str, Any]],
+    extensions: list[dict[str, Any]],
+) -> None:
+    """Prove every extension flag has one adjacent AuctionExtended event."""
+    bids_by_position: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for row in bids:
+        extended = int_value(row.get("extended"), -1)
+        if extended not in {0, 1}:
+            raise RuntimeError("AuctionBid has a non-boolean extension flag")
+        token_id = int_value(row.get("token_id"), -1)
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        block_number = int_value(row.get("block_number"), -1)
+        log_index = int_value(row.get("log_index"), -1)
+        if token_id < 0 or not tx_hash or block_number < 0 or log_index < 0:
+            raise RuntimeError("AuctionBid is missing its canonical log identity")
+        position = (block_number, tx_hash, log_index)
+        if position in bids_by_position:
+            raise RuntimeError("auction extension transaction has duplicate bid logs")
+        bids_by_position[position] = row
+
+    extensions_by_position: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for row in extensions:
+        token_id = int_value(row.get("token_id"), -1)
+        tx_hash = str(row.get("tx_hash") or "").lower()
+        block_number = int_value(row.get("block_number"), -1)
+        log_index = int_value(row.get("log_index"), -1)
+        if token_id < 0 or not tx_hash or block_number < 0 or log_index < 0:
+            raise RuntimeError("AuctionExtended is missing its canonical log identity")
+        position = (block_number, tx_hash, log_index)
+        if position in extensions_by_position:
+            raise RuntimeError("auction extension transaction has duplicate extension logs")
+        extensions_by_position[position] = row
+
+    for position, bid in bids_by_position.items():
+        extension = extensions_by_position.get((position[0], position[1], position[2] + 1))
+        should_extend = int_value(bid.get("extended")) == 1
+        if should_extend != (
+            extension is not None
+            and int_value(extension.get("token_id"), -1)
+            == int_value(bid.get("token_id"), -1)
+        ):
+            raise RuntimeError("AuctionBid extension flags and AuctionExtended logs disagree")
+    for position, extension in extensions_by_position.items():
+        bid = bids_by_position.get((position[0], position[1], position[2] - 1))
+        if (
+            bid is None
+            or int_value(bid.get("extended"), -1) != 1
+            or int_value(bid.get("token_id"), -1)
+            != int_value(extension.get("token_id"), -1)
+        ):
+            raise RuntimeError("AuctionExtended log does not follow its paired AuctionBid")
 
 
 def validate_exact_wei_rows(
@@ -5808,6 +5879,7 @@ def main() -> None:
     progress(f"dog metadata rows={len(dog_metadata)}")
     created, bids, settled = decode_auction_logs(created_logs, bid_logs, settled_logs)
     extensions = decode_auction_extension_logs(extension_logs)
+    validate_auction_extension_pairs(bids, extensions)
     validate_auction_schedules(created, extensions, current)
     validate_exact_wei_rows(bids, wei_field="bid_wei", eth_field="bid_eth_exact", label="AuctionBid")
     validate_exact_wei_rows(settled, wei_field="amount_wei", eth_field="amount_eth_exact", label="AuctionSettled")
