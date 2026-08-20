@@ -4449,6 +4449,7 @@ def build_historical_dog_tables(
         traits = first_text(metadata.get("traits"), winner.get("traits"))
         trait_rarity = first_text(metadata.get("trait_rarity"), winner.get("trait_rarity"))
         rarity = first_text(metadata.get("rarity"), timeline.get("rarity"), winner.get("rarity"))
+        rarity_score = metadata.get("rarity_score")
 
         if mission == 3 and (timeline or winner or current):
             status = normalize_archive_status_label(first_text(current.get("auction_state"), timeline.get("auction_state"), archive_status(archive, mission)), mission)
@@ -4510,6 +4511,7 @@ def build_historical_dog_tables(
             "auction_created_time_utc": created_utc,
             "settled_time_utc": settled_utc,
             "rarity": rarity,
+            "rarity_score": rarity_score,
             "traits": traits,
             "trait_rarity": trait_rarity,
             "metadata_verification_status": first_text(
@@ -4542,6 +4544,7 @@ def build_historical_dog_tables(
         ("auction_created_time_utc", "TEXT"),
         ("settled_time_utc", "TEXT"),
         ("rarity", "TEXT"),
+        ("rarity_score", "REAL"),
         ("traits", "TEXT"),
         ("trait_rarity", "TEXT"),
         ("metadata_verification_status", "TEXT"),

@@ -582,6 +582,25 @@ def test_validate_current_surface_rejects_stale_timeline_rarity() -> None:
         )
 
 
+def test_validate_current_surface_requires_every_verified_historical_score() -> None:
+    for replacement in ("missing", None):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_fixture(root)
+            history = json.loads(
+                (root / "generated" / "historical_dog_search.json").read_text()
+            )
+            if replacement == "missing":
+                history[0].pop("rarity_score")
+            else:
+                history[0]["rarity_score"] = replacement
+            write_json(root / "generated" / "historical_dog_search.json", history)
+            assert_raises_contains(
+                lambda: run_validation(root),
+                "Dog #0 rarity score is inconsistent",
+            )
+
+
 def test_validate_current_surface_rejects_blank_winner_metadata_provenance() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)

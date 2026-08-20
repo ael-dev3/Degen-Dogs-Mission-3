@@ -1037,6 +1037,53 @@ def test_metadata_verification_status_reaches_public_sql_outputs() -> None:
     assert current_feed["metadata_verification_status"] == "unavailable"
 
 
+def test_full_builder_preserves_rarity_score_in_historical_search() -> None:
+    dashboard = load_module()
+    conn = sqlite3.connect(":memory:")
+    for table in ("auction_timeline", "auction_winners", "current_auction"):
+        dashboard.insert_rows(conn, table, [], [("token_id", "INTEGER")])
+    metadata = [
+        {
+            "token_id": 0,
+            "dog_name": "Degen Dog #0",
+            "dog_image_url": "",
+            "dog_external_url": "",
+            "dog_opensea_url": "",
+            "traits": "Background: None",
+            "trait_rarity": "Background: None (100.0%)",
+            "rarity": "#1/1",
+            "rarity_score": 46.059583,
+            "metadata_verification_status": "onchain_token_uri_verified",
+        },
+        {
+            "token_id": 1,
+            "dog_name": "Degen Dog #1",
+            "dog_image_url": "",
+            "dog_external_url": "",
+            "dog_opensea_url": "",
+            "traits": "",
+            "trait_rarity": "",
+            "rarity": "Unavailable",
+            "rarity_score": None,
+            "metadata_verification_status": "onchain_token_uri_unavailable",
+        },
+    ]
+    original_loader = dashboard.load_archive_lookup
+    try:
+        dashboard.load_archive_lookup = lambda: ({}, -1, 0)
+        dashboard.build_historical_dog_tables(conn, 2, metadata)
+    finally:
+        dashboard.load_archive_lookup = original_loader
+
+    columns, values = dashboard.fetch_table(conn, "historical_dog_search")
+    rows = dashboard.table_dicts(columns, values)
+    by_token = {row["token_id"]: row for row in rows}
+    assert "rarity_score" in columns
+    assert abs(float(by_token[0]["rarity_score"]) - 46.059583) < 1e-9
+    assert by_token[1]["rarity_score"] is None
+    conn.close()
+
+
 def test_token_uri_and_metadata_attestations_reach_mission3_metrics_sql_surface() -> None:
     dashboard = load_module()
     fixture = run_pricing_sql_fixture(dashboard, "2000")

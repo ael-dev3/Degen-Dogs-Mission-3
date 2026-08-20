@@ -570,14 +570,61 @@ def read_table(name: str) -> tuple[list[str], list[dict[str, Any]]]:
 
 
 def write_table(name: str, columns: list[str], rows: list[dict[str, Any]]) -> None:
+    projected_rows = [
+        {column: row.get(column, "") for column in columns}
+        for row in rows
+    ]
     buffer = io.StringIO(newline="")
     writer = csv.DictWriter(buffer, fieldnames=columns, extrasaction="ignore", lineterminator="\n")
     writer.writeheader()
-    writer.writerows({column: row.get(column, "") for column in columns} for row in rows)
+    writer.writerows(projected_rows)
     payload = buffer.getvalue()
     for directory in (GENERATED, PUBLIC_GENERATED):
         atomic_write_text(directory / f"{name}.csv", payload)
-    write_json(name, rows)
+    # CSV is the table schema authority. Project JSON through the same columns
+    # so bounded and full builds cannot expose different API fields.
+    write_json(name, projected_rows)
+
+
+def ensure_table_column(
+    columns: list[str],
+    column: str,
+    *,
+    after: str | None = None,
+) -> list[str]:
+    """Return a schema containing ``column`` without mutating the input list."""
+    if column in columns:
+        return list(columns)
+    migrated = list(columns)
+    if after in migrated:
+        migrated.insert(migrated.index(after) + 1, column)
+    else:
+        migrated.append(column)
+    return migrated
+
+
+def prepare_historical_rarity_table(
+    columns: list[str],
+    rows: list[dict[str, Any]],
+    rarity_universe: dict[int, dict[str, Any]],
+) -> tuple[list[str], list[dict[str, Any]]]:
+    """Migrate the historical schema and normalize every verified rarity row."""
+    migrated_columns = ensure_table_column(
+        columns,
+        "rarity_score",
+        after="rarity",
+    )
+    # JSON and CSV can be split across a hard crash because they are separate
+    # atomic files. Normalize from the independently recomputed universe every
+    # run instead of trusting either surface as the rebase signal.
+    for row in rows:
+        historical_token_id = int_value(row.get("token_id"), -1)
+        if historical_token_id in rarity_universe:
+            apply_rarity_fields(row, rarity_universe[historical_token_id])
+            row["search_text"] = " ".join(
+                str(row.get(key, "")) for key in row if key != "search_text"
+            ).lower()
+    return migrated_columns, rows
 
 
 def int_value(value: Any, default: int = 0) -> int:
@@ -1524,6 +1571,24 @@ def apply_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None
     )
 
 
+def normalize_table_rarity_rows(
+    rows: list[dict[str, Any]],
+    rarity_universe: dict[int, dict[str, Any]],
+    *,
+    token_from_dog_label: bool = False,
+) -> list[dict[str, Any]]:
+    """Normalize rarity rows independently of an earlier surface write."""
+    for row in rows:
+        if token_from_dog_label:
+            match = re.search(r"(\d+)", str(row.get("dog") or ""))
+            token_id = int(match.group(1)) if match else -1
+        else:
+            token_id = int_value(row.get("token_id"), -1)
+        if token_id in rarity_universe:
+            apply_rarity_fields(row, rarity_universe[token_id])
+    return rows
+
+
 def apply_unified_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None:
     old_rarity = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
     old_traits = row.get("traits") if isinstance(row.get("traits"), list) else []
@@ -1555,6 +1620,15 @@ def decimal_or_none(value: Any) -> Decimal | None:
     except Exception:  # noqa: BLE001
         return None
     return parsed if parsed.is_finite() else None
+
+
+def rarity_row_requires_rebase(row: dict[str, Any], rarity_row: dict[str, Any]) -> bool:
+    return (
+        str(row.get("rarity") or "") != str(rarity_row["rarity"])
+        or str(row.get("trait_rarity") or "") != str(rarity_row["trait_rarity"])
+        or decimal_or_none(row.get("rarity_score"))
+        != decimal_or_none(rarity_row.get("rarity_score"))
+    )
 
 
 def historical_usd_candidate(row: Any) -> dict[str, Any] | None:
@@ -1898,7 +1972,12 @@ def main() -> None:
             history,
             baseline_rarity_size,
             metrics_by_name["dog_base_existing_token_ids_sha256"],
-            int(metrics_by_name["latest_block"]),
+            # A failed/rolled-back generation can safely leave this private
+            # cache newer than the committed dashboard baseline. Accept only
+            # hash-valid, trait-identical records no newer than the current
+            # quorum-verified snapshot; rejecting them would force an
+            # unnecessary full rebuild after every such recovery.
+            latest_block,
         )
     metadata_token_ids = sorted({token_id, *minted_token_ids})
     current_token_uris = builder.fetch_token_uri_bindings(
@@ -2290,9 +2369,7 @@ def main() -> None:
         bool(minted_token_ids)
         or any(
             token not in historical_by_token
-            or str(historical_by_token[token].get("rarity") or "") != str(values["rarity"])
-            or str(historical_by_token[token].get("trait_rarity") or "")
-            != str(values["trait_rarity"])
+            or rarity_row_requires_rebase(historical_by_token[token], values)
             for token, values in rarity_universe.items()
         )
     )
@@ -2407,12 +2484,11 @@ def main() -> None:
     write_table("recent_bids", recent_bid_columns, recent_bid_output)
 
     feed_columns, feed_rows = read_table("auction_feed")
-    if rarity_rebase_required:
-        for row in feed_rows:
-            match = re.search(r"(\d+)", str(row.get("dog") or ""))
-            feed_token_id = int(match.group(1)) if match else -1
-            if feed_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[feed_token_id])
+    feed_rows = normalize_table_rarity_rows(
+        feed_rows,
+        rarity_universe,
+        token_from_dog_label=True,
+    )
     old_current = dict(feed_rows[0]) if feed_rows else {}
     previous_feed = next((dict(row) for row in feed_rows if int(re.sub(r"\D", "", str(row.get("dog") or "-1")) or -1) == previous_token_id), {})
     if not previous_feed and historical_snapshot:
@@ -2525,15 +2601,13 @@ def main() -> None:
     write_table("auction_feed", feed_columns, output_feed)
 
     # Add the newly minted/auctioned Dog to the unified searchable table.
-    history_columns, history_rows = read_table("historical_dog_search")
-    if rarity_rebase_required:
-        for row in history_rows:
-            historical_token_id = int_value(row.get("token_id"), -1)
-            if historical_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[historical_token_id])
-                row["search_text"] = " ".join(
-                    str(row.get(key, "")) for key in row if key != "search_text"
-                ).lower()
+    history_columns, history_rows = prepare_historical_rarity_table(
+        *read_table("historical_dog_search"),
+        rarity_universe,
+    )
+    # Older generated snapshots predate the score column. The bounded writer
+    # migrates that CSV schema before writing rebased scores; write_table
+    # deliberately ignores dictionary keys outside its explicit field list.
     history_rows = [row for row in history_rows if int_value(row.get("token_id"), -1) != token_id]
     if previous_settlement:
         previous_wallet = str(previous_settlement.get("winner") or "").lower()
@@ -2619,11 +2693,7 @@ def main() -> None:
     # Reconcile the specialized Mission 3 tables too. These are the source
     # tables used to build the unified archive rows and must move together with
     # the homepage feed when a previous auction settles.
-    if rarity_rebase_required:
-        for row in timeline_rows:
-            timeline_token_id = int_value(row.get("token_id"), -1)
-            if timeline_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[timeline_token_id])
+    timeline_rows = normalize_table_rarity_rows(timeline_rows, rarity_universe)
     timeline_rows = [row for row in timeline_rows if int_value(row.get("token_id"), -1) not in {previous_token_id, token_id}]
     if previous_settlement:
         previous_wallet = str(previous_settlement.get("winner") or "").lower()
@@ -2696,11 +2766,7 @@ def main() -> None:
     write_table("auction_daily_activity", daily_columns, daily_rows)
 
     winner_columns, winner_rows = read_table("auction_winners")
-    if rarity_rebase_required:
-        for row in winner_rows:
-            winner_token_id = int_value(row.get("token_id"), -1)
-            if winner_token_id in rarity_universe:
-                apply_rarity_fields(row, rarity_universe[winner_token_id])
+    winner_rows = normalize_table_rarity_rows(winner_rows, rarity_universe)
     winner_by_token = {int_value(row.get("token_id"), -1): dict(row) for row in winner_rows}
     replace_winner_tokens = {previous_token_id}
     if current_settlement:
@@ -2818,13 +2884,12 @@ def main() -> None:
     write_table("recent_auction_winners", recent_columns, recent_rows)
 
     unified_rows = json.loads(json.dumps(baseline_unified_rows))
-    if rarity_rebase_required:
-        for row in unified_rows:
-            if not isinstance(row, dict):
-                continue
-            unified_token_id = int_value(row.get("dog_id"), -1)
-            if unified_token_id in rarity_universe:
-                apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
+    for row in unified_rows:
+        if not isinstance(row, dict):
+            continue
+        unified_token_id = int_value(row.get("dog_id"), -1)
+        if unified_token_id in rarity_universe:
+            apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
     unified_rows = [row for row in unified_rows if not (int_value(row.get("mission"), -1) == 3 and int_value(row.get("dog_id"), -1) == token_id)]
     should_reconcile_previous_unified = (
         reconcile_previous

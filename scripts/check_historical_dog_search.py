@@ -24,6 +24,7 @@ REQUIRED_COLUMNS = {
     "dog_opensea_url",
     "traits",
     "rarity",
+    "rarity_score",
     "confidence",
     "search_text",
 }
@@ -415,6 +416,12 @@ def assert_metadata_rarity_state(
             if row.get("metadata_verification_status") == "onchain_token_uri_verified"
         ]
         assert_exact_rarity_permutation(verified_rows, rarity_universe)
+        for row in verified_rows:
+            score = decimal_value(row.get("rarity_score"))
+            if score is None or score <= 0:
+                raise AssertionError(
+                    f"Dog #{int(row['token_id'])} has no numeric rarity score"
+                )
         for row in rows:
             if row.get("metadata_verification_status") != "onchain_token_uri_verified":
                 assert_withheld_rarity(row, label=f"Dog #{int(row['token_id'])}")

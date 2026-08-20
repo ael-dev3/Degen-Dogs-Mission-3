@@ -134,6 +134,60 @@ def test_read_table_preserves_header_for_zero_row_bid_history() -> None:
     assert rows == []
 
 
+def test_write_table_projects_json_through_the_csv_schema() -> None:
+    surface = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        generated = Path(tmp) / "generated"
+        public = Path(tmp) / "public"
+        generated.mkdir()
+        public.mkdir()
+        surface.GENERATED = generated
+        surface.PUBLIC_GENERATED = public
+
+        surface.write_table(
+            "rank_only",
+            ["token_id", "rarity"],
+            [{"token_id": 7, "rarity": "#1/1", "rarity_score": 7.0}],
+        )
+
+        generated_json = json.loads((generated / "rank_only.json").read_text())
+        public_json = json.loads((public / "rank_only.json").read_text())
+        assert generated_json == [{"token_id": 7, "rarity": "#1/1"}]
+        assert public_json == generated_json
+        assert (generated / "rank_only.csv").read_text().splitlines()[0] == "token_id,rarity"
+
+
+def test_legacy_historical_schema_migrates_rarity_score_after_rarity() -> None:
+    surface = load_module()
+
+    legacy = ["token_id", "dog", "rarity", "traits"]
+    legacy_rows = [
+        {
+            "token_id": "7",
+            "dog": "Dog #7",
+            "rarity": "#1/1",
+            "traits": rarity_traits("Blue"),
+        }
+    ]
+    expected = {
+        "rarity": "#1/1",
+        "rarity_score": 7.0,
+        "traits": rarity_traits("Blue"),
+        "trait_rarity": "Body: Blue (100.0%)",
+    }
+    migrated, migrated_rows = surface.prepare_historical_rarity_table(
+        legacy,
+        legacy_rows,
+        {7: expected},
+    )
+
+    assert migrated == ["token_id", "dog", "rarity", "rarity_score", "traits"]
+    assert migrated_rows[0]["rarity_score"] == 7.0
+    assert migrated_rows[0]["metadata_verification_status"] == "onchain_token_uri_verified"
+    assert legacy == ["token_id", "dog", "rarity", "traits"]
+    assert surface.ensure_table_column(migrated, "rarity_score", after="rarity") == migrated
+
+
 def test_overlap_history_keeps_new_zero_bid_token_empty() -> None:
     surface = load_module()
     merged = surface.merge_overlap_bid_history(
@@ -487,6 +541,20 @@ def test_fast_rarity_cache_enforces_per_entry_freshness_and_trait_identity() -> 
         )
         assert set(projected) == {"0"}
 
+    # A failed publisher can roll tracked data back while leaving its private
+    # content-bound cache at a newer verified block. It remains reusable when
+    # bounded by the current snapshot and identical to the attested traits.
+    cache = {"0": record(0, verified_block=101)}
+    projected = surface.validate_fresh_rarity_cache(
+        builder,
+        history,
+        1,
+        expected_hash,
+        110,
+        observed_at=observed_at,
+    )
+    assert set(projected) == {"0"}
+
     for bad_record, expected in (
         (record(101), "expired"),
         (record(0, fetched_at="2026-08-20T12:00:01Z"), "future-dated"),
@@ -543,6 +611,69 @@ def test_rarity_history_requires_exact_verified_metadata_provenance() -> None:
     unavailable = dict(unverified)
     unavailable["metadata_verification_status"] = "onchain_token_uri_unavailable"
     assert surface.verified_rarity_history_attributes([unavailable]) == {}
+
+
+def test_rarity_rebase_detects_missing_or_stale_numeric_score() -> None:
+    surface = load_module()
+    expected = {
+        "rarity": "#3/10",
+        "rarity_score": 46.059583,
+        "trait_rarity": "Body: Grey (13.0%)",
+    }
+    matching = dict(expected)
+    assert surface.rarity_row_requires_rebase(matching, expected) is False
+    assert surface.rarity_row_requires_rebase(
+        {"rarity": expected["rarity"], "trait_rarity": expected["trait_rarity"]},
+        expected,
+    ) is True
+    stale = dict(matching, rarity_score=41.877502)
+    assert surface.rarity_row_requires_rebase(stale, expected) is True
+
+
+def test_downstream_rarity_normalization_self_heals_after_history_write() -> None:
+    surface = load_module()
+    expected = {
+        "rarity": "#3/10",
+        "rarity_score": 46.059583,
+        "traits": rarity_traits("Grey"),
+        "trait_rarity": "Body: Grey (13.0%)",
+    }
+    # Simulate a crash after history was fixed but before winner/timeline rows.
+    assert surface.rarity_row_requires_rebase(dict(expected), expected) is False
+    stale_rows = [
+        {
+            "token_id": "9",
+            "rarity": "#8/9",
+            "rarity_score": "12",
+            "traits": rarity_traits("Blue"),
+            "trait_rarity": "Body: Blue (10.0%)",
+        }
+    ]
+
+    normalized = surface.normalize_table_rarity_rows(stale_rows, {9: expected})
+
+    assert normalized[0]["rarity"] == "#3/10"
+    assert normalized[0]["rarity_score"] == 46.059583
+    assert normalized[0]["metadata_verification_status"] == "onchain_token_uri_verified"
+
+
+def test_unified_rarity_normalization_is_idempotent() -> None:
+    surface = load_module()
+    rarity_row = {
+        "rarity": "#3/10",
+        "trait_rarity": "Body: Grey (13.0%)",
+    }
+    row = {
+        "rarity": {"display": "#8/9", "rank": 8, "total": 9},
+        "traits": [{"display": "Body: Blue (10.0%)", "trait_type": "Body", "value": "Blue"}],
+        "search_text": "dog 9 #8/9 body: blue (10.0%)",
+    }
+
+    surface.apply_unified_rarity_fields(row, rarity_row)
+    once = json.loads(json.dumps(row))
+    surface.apply_unified_rarity_fields(row, rarity_row)
+
+    assert row == once
 
 
 def test_sparse_verified_base_universe_excludes_unclaimed_history_rows() -> None:

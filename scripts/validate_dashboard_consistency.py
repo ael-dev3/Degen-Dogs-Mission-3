@@ -247,10 +247,9 @@ def validate_base_rarity_universe(rows: Any, metrics: dict[str, str]) -> dict[in
         expected_display = f"#{expected_ranks[token_id]}/{universe_size}"
         if text(row.get("rarity")) != expected_display:
             raise AssertionError(f"Dog #{token_id} rarity rank is inconsistent")
-        if "rarity_score" in row:
-            raw_score = text(row.get("rarity_score"))
-            if not raw_score or abs(Decimal(raw_score) - scores[token_id]) > Decimal("0.000001"):
-                raise AssertionError(f"Dog #{token_id} rarity score is inconsistent")
+        raw_score = text(row.get("rarity_score"))
+        if not raw_score or abs(decimal_value(raw_score) - scores[token_id]) > Decimal("0.000001"):
+            raise AssertionError(f"Dog #{token_id} rarity score is inconsistent")
         expected_trait_rarity = "; ".join(
             f"{trait_type}: {trait_value} "
             f"({(Decimal(counts[(trait_type, trait_value)]) * Decimal(100) / Decimal(universe_size)):.1f}%)"
