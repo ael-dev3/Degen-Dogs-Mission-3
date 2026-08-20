@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#45/684",
+      "display": "#45/685",
       "rank": 45,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 769 dog #769 769 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.87 $17.87 2026-07-11t06:03:31z 0x095e1d5d11e59bd08478e53004aa6fa70e2a2cf2f811cc7fb66c715de6637d6c 0x45aba473ff2f7f54ccc27368a2af4f04df5983cad4c77caceb9caa10fe37ce73 #45/684 generated auction feed 0x2569d51d1a04b097bf6975661742e0ac2ae91d305539cf20aaae891a98cbe512 0xdeecb86c5a20965d885fec3a44a1534f628d0425a011ff9c65561f586ca4a38c background: halo (8.3%) background halo body: white (11.3%) body white neck: none (41.1%) neck none mouth: tongue (10.1%) mouth tongue ears: earbuds (32.5%) ears earbuds head: whitemohawk (6.9%) head whitemohawk eyes: 3dglasses (4.4%) eyes 3dglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 769 dog #769 769 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.87 $17.87 2026-07-11t06:03:31z 0x095e1d5d11e59bd08478e53004aa6fa70e2a2cf2f811cc7fb66c715de6637d6c 0x45aba473ff2f7f54ccc27368a2af4f04df5983cad4c77caceb9caa10fe37ce73 generated auction feed 0x2569d51d1a04b097bf6975661742e0ac2ae91d305539cf20aaae891a98cbe512 0xdeecb86c5a20965d885fec3a44a1534f628d0425a011ff9c65561f586ca4a38c background halo body white neck none mouth tongue ears earbuds head whitemohawk eyes 3dglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #45/685 background: halo (8.3%) body: white (11.2%) neck: none (41.0%) mouth: tongue (10.1%) ears: earbuds (32.4%) head: whitemohawk (7.0%) eyes: 3dglasses (4.4%)",
     "settlement": {
       "block_number": 48480232,
       "block_time_utc": "2026-07-11T06:03:31Z",
@@ -86,12 +86,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: White (11.3%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.0%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,12 +101,12 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: WhiteMohawk (6.9%)",
+        "display": "Head: WhiteMohawk (7.0%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },

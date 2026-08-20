@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#460/684",
-      "rank": 460,
+      "display": "#462/685",
+      "rank": 462,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 643 dog #643 643 mission 3 mission 3 base settled 0x045acd980764824b9eb6f312f0a2cdd9f3183503 @consta consta 0.0123 eth 12300000000000000 26.16 $26.16 2026-03-04t07:52:37z 0x0cda7a5577643ce286fec661e3ac09af3bad4721427431b54b5fbd71ddbd8d16 0x98ac03e19e015a5d58848994b1bfc2d9a0efbf2a030ae5620187f5447fbd24e8 #460/684 generated auction feed 0x390df301555330708cea09c4a56102614973c6439facd16591b5670b167bd6fa 0x7d5f4aa4e65e2ac7135307da97375f1bd7510e7ed0e4ab9038d3412089369119 0xb771b4a7105c672607b1f267f06f653644fe708ba8f5cbda9045a418bfe047b4 0xc2abdd9ade5c13a3bca724ce8ba08f4d99459a9d86ddbce3fbfd6fe932e3bb45 background: halo (8.3%) background halo body: brown (10.8%) body brown neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.3%) mouth none ears: none (26.0%) ears none head: none (20.0%) head none eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 643 dog #643 643 mission 3 mission 3 base settled 0x045acd980764824b9eb6f312f0a2cdd9f3183503 @consta consta 0.0123 eth 12300000000000000 26.16 $26.16 2026-03-04t07:52:37z 0x0cda7a5577643ce286fec661e3ac09af3bad4721427431b54b5fbd71ddbd8d16 0x98ac03e19e015a5d58848994b1bfc2d9a0efbf2a030ae5620187f5447fbd24e8 generated auction feed 0x390df301555330708cea09c4a56102614973c6439facd16591b5670b167bd6fa 0x7d5f4aa4e65e2ac7135307da97375f1bd7510e7ed0e4ab9038d3412089369119 0xb771b4a7105c672607b1f267f06f653644fe708ba8f5cbda9045a418bfe047b4 0xc2abdd9ade5c13a3bca724ce8ba08f4d99459a9d86ddbce3fbfd6fe932e3bb45 background halo body brown neck goldnecklace mouth none ears none head none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #462/685 background: halo (8.3%) body: brown (10.8%) neck: goldnecklace (19.3%) mouth: none (68.3%) ears: none (26.0%) head: none (20.0%) eyes: none (17.8%)",
     "settlement": {
       "block_number": 42910705,
       "block_time_utc": "2026-03-04T07:52:37Z",
@@ -93,7 +93,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

@@ -1,0 +1,128 @@
+{
+  "generated_at_utc": "2026-08-20T20:01:38Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-08-20T19:58:13Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-20",
+      "native": "0.009",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "9000000000000000",
+      "usd_estimate": "20.91280500",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$20.91",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-08-20",
+      "usd_estimate_price_usd": "2323.645",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 50233266,
+      "block_time_utc": "2026-08-20T19:57:59Z",
+      "tx_hash": "0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25",
+      "tx_url": "https://basescan.org/tx/0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-08-20T19:58:13Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x457725302c0a8ee3f01c1b119a319a0d1dca5f827172e37221ceb7e5a03f687c"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 809,
+    "dog_image_url": "https://api.degendogs.club/images/809.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/809",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25",
+      "dog_page": "https://degendogs.club/#dog809",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/809",
+      "repo_archive": "archive/dogs/by-id/809.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#367/685",
+      "rank": 367,
+      "scope": "base_existing",
+      "total": 685
+    },
+    "schema_version": 1,
+    "search_text": "dog 809 dog #809 809 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.009 eth 20.91 $20.91 2026-08-20 19:58:13 #367/685 Background: None; Body: Grey; Neck: GoldNecklace; Mouth: None; Ears: LoopEarring; Head: WhiteMohawk; Eyes: EyePatch @0xael.eth 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25 0x457725302c0a8ee3f01c1b119a319a0d1dca5f827172e37221ceb7e5a03f687c",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "dashboard_builder",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: None (91.7%)",
+        "trait_type": "Background",
+        "value": "None"
+      },
+      {
+        "display": "Body: Grey (13.0%)",
+        "trait_type": "Body",
+        "value": "Grey"
+      },
+      {
+        "display": "Neck: GoldNecklace (19.3%)",
+        "trait_type": "Neck",
+        "value": "GoldNecklace"
+      },
+      {
+        "display": "Mouth: None (68.3%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: WhiteMohawk (7.0%)",
+        "trait_type": "Head",
+        "value": "WhiteMohawk"
+      },
+      {
+        "display": "Eyes: EyePatch (7.9%)",
+        "trait_type": "Eyes",
+        "value": "EyePatch"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}
