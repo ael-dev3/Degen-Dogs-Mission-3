@@ -270,6 +270,135 @@ def validate_base_rarity_universe(rows: Any, metrics: dict[str, str]) -> dict[in
     return scores
 
 
+def resolvable_dog_id(row: dict[str, Any]) -> int | None:
+    try:
+        return dog_id(row)
+    except (AssertionError, TypeError, ValueError):
+        return None
+
+
+def validate_flat_rarity_surface(
+    label: str,
+    rows: Any,
+    historical_by_token: dict[int, dict[str, Any]],
+    expected_scores: dict[int, Decimal],
+    *,
+    fields: tuple[str, ...],
+) -> None:
+    """Compare every resolvable flat rarity row with recomputed history."""
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise AssertionError(f"{label} is not a list of objects")
+    for row in rows:
+        token_id = resolvable_dog_id(row)
+        if token_id is None:
+            continue
+        historical = historical_by_token.get(token_id)
+        if historical is None:
+            raise AssertionError(f"{label} references unknown Dog #{token_id}")
+        if "rarity" in fields and text(row.get("rarity")) != text(historical.get("rarity")):
+            raise AssertionError(f"{label} Dog #{token_id} rarity differs from validated history")
+        if "traits" in fields and text(row.get("traits")) != text(historical.get("traits")):
+            raise AssertionError(f"{label} Dog #{token_id} traits differ from validated history")
+        if "trait_rarity" in fields and text(row.get("trait_rarity")) != text(
+            historical.get("trait_rarity")
+        ):
+            raise AssertionError(
+                f"{label} Dog #{token_id} trait rarity differs from validated history"
+            )
+        if "rarity_score" in fields:
+            actual_score = text(row.get("rarity_score"))
+            expected_score = expected_scores.get(token_id)
+            if expected_score is None:
+                if actual_score:
+                    raise AssertionError(
+                        f"{label} Dog #{token_id} publishes a score without verified rarity"
+                    )
+            elif not actual_score or abs(Decimal(actual_score) - expected_score) > Decimal(
+                "0.000001"
+            ):
+                raise AssertionError(
+                    f"{label} Dog #{token_id} rarity score differs from validated history"
+                )
+        if "metadata_verification_status" in fields and text(
+            row.get("metadata_verification_status")
+        ) != text(historical.get("metadata_verification_status")):
+            raise AssertionError(
+                f"{label} Dog #{token_id} metadata verification status differs from validated history"
+            )
+
+
+def validate_unified_rarity_surface(
+    label: str,
+    rows: list[dict[str, Any]],
+    historical_by_token: dict[int, dict[str, Any]],
+) -> None:
+    """Validate structured Mission 3 rarity/trait payloads against history."""
+    for row in rows:
+        if int(row.get("mission") or 0) != 3:
+            continue
+        token_id = resolvable_dog_id(row)
+        if token_id is None:
+            continue
+        historical = historical_by_token.get(token_id)
+        if historical is None:
+            raise AssertionError(f"{label} references unknown Dog #{token_id}")
+        rarity_payload = row.get("rarity")
+        if not isinstance(rarity_payload, dict):
+            raise AssertionError(f"{label} Dog #{token_id} rarity payload is missing")
+        expected_display = text(historical.get("rarity"))
+        if text(rarity_payload.get("display")) != expected_display:
+            raise AssertionError(f"{label} Dog #{token_id} rarity differs from validated history")
+        numeric_match = re.fullmatch(r"#(\d+)/(\d+)", expected_display)
+        if numeric_match:
+            if (
+                int(rarity_payload.get("rank") or 0) != int(numeric_match.group(1))
+                or int(rarity_payload.get("total") or 0) != int(numeric_match.group(2))
+                or text(rarity_payload.get("scope")) != "base_existing"
+            ):
+                raise AssertionError(
+                    f"{label} Dog #{token_id} structured rarity differs from validated history"
+                )
+        elif rarity_payload.get("rank") not in (None, "") or rarity_payload.get("total") not in (
+            None,
+            "",
+        ):
+            raise AssertionError(
+                f"{label} Dog #{token_id} unavailable rarity has a numeric rank or denominator"
+            )
+        expected_attributes = parse_rarity_traits(historical.get("traits"), token_id)
+        expected_displays = [
+            part.strip()
+            for part in text(historical.get("trait_rarity")).split(";")
+            if part.strip()
+        ]
+        if not expected_displays:
+            expected_displays = [
+                f"{trait_type}: {trait_value}"
+                for trait_type, trait_value in expected_attributes.items()
+            ]
+        raw_traits = row.get("traits")
+        if not isinstance(raw_traits, list) or any(not isinstance(item, dict) for item in raw_traits):
+            raise AssertionError(f"{label} Dog #{token_id} structured traits are missing")
+        actual_traits = [
+            (
+                text(item.get("trait_type")),
+                text(item.get("value")),
+                text(item.get("display")),
+            )
+            for item in raw_traits
+        ]
+        expected_traits = [
+            (trait_type, trait_value, display)
+            for (trait_type, trait_value), display in zip(
+                expected_attributes.items(),
+                expected_displays,
+                strict=True,
+            )
+        ]
+        if actual_traits != expected_traits:
+            raise AssertionError(f"{label} Dog #{token_id} traits differ from validated history")
+
+
 def first_row(path: Path) -> dict[str, Any]:
     data = load_json(path)
     if not isinstance(data, list) or not data or not isinstance(data[0], dict):
@@ -1397,7 +1526,6 @@ def validate_current_surface() -> dict[str, Any]:
     refresh_status = load_refresh_telemetry().validate_refresh_status(root=ROOT)
     index = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
     readme = readme_snapshot()
-    archive_parity = validate_mission3_archive_parity(root=ROOT)
 
     if int(metrics["current_auction_token_id"]) != current_dog_id:
         raise AssertionError("mission3_metrics current_auction_token_id differs from current_auction")
@@ -1456,6 +1584,9 @@ def validate_current_surface() -> dict[str, Any]:
     incremental_continuity_status = (
         "hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation"
     )
+    extended_continuity_status = (
+        "hash_pinned_cross_provider_canonical_mint_extension_plus_no_other_rarity_mutations"
+    )
     if metrics["dog_token_uri_verification_status"] not in {
         full_token_uri_status,
         continuity_token_uri_status,
@@ -1489,14 +1620,52 @@ def validate_current_surface() -> dict[str, Any]:
             or metrics["dog_rarity_attested_block_hash"] != metrics["snapshot_block_hash"]
         ):
             raise AssertionError("mission3_metrics full rarity attestation is internally inconsistent")
-    elif continuity_status == incremental_continuity_status:
+    elif continuity_status in {incremental_continuity_status, extended_continuity_status}:
         if (
             metrics["dog_token_uri_verification_status"] != continuity_token_uri_status
             or metrics["dog_base_existence_verification_status"] != continuity_existence_status
         ):
             raise AssertionError("mission3_metrics incremental rarity continuity is internally inconsistent")
+        if continuity_status == extended_continuity_status:
+            raw_ids = metrics.get("dog_rarity_extension_mint_token_ids", "")
+            raw_count = metrics.get("dog_rarity_extension_mint_count", "")
+            if not raw_count.isdigit() or not re.fullmatch(
+                r"(?:0|[1-9][0-9]*)(?:,(?:0|[1-9][0-9]*))*",
+                raw_ids,
+            ):
+                raise AssertionError("mission3_metrics rarity mint-extension provenance is missing")
+            try:
+                extension_ids = tuple(int(value) for value in raw_ids.split(","))
+            except ValueError as exc:
+                raise AssertionError("mission3_metrics rarity mint-extension IDs are malformed") from exc
+            expected_hash = hashlib.sha256(raw_ids.encode("ascii")).hexdigest()
+            extension_count = int(raw_count)
+            extension_total_supply = int(metrics["dog_total_supply"])
+            if not extension_ids or len(extension_ids) != extension_count:
+                raise AssertionError("mission3_metrics rarity mint-extension provenance is inconsistent")
+            expected_extension_ids = tuple(
+                range(
+                    extension_total_supply - extension_count,
+                    extension_total_supply,
+                )
+            )
+            if (
+                tuple(sorted(set(extension_ids))) != extension_ids
+                or extension_ids != expected_extension_ids
+                or metrics.get("dog_rarity_extension_mint_token_ids_sha256") != expected_hash
+            ):
+                raise AssertionError("mission3_metrics rarity mint-extension provenance is inconsistent")
     else:
         raise AssertionError("mission3_metrics rarity continuity verification status is unsupported")
+    if continuity_status != extended_continuity_status and any(
+        metrics.get(key, "")
+        for key in (
+            "dog_rarity_extension_mint_count",
+            "dog_rarity_extension_mint_token_ids",
+            "dog_rarity_extension_mint_token_ids_sha256",
+        )
+    ):
+        raise AssertionError("mission3_metrics rarity mint-extension provenance contradicts its status")
     dog_total_supply = int(metrics["dog_total_supply"])
     token_uri_present = int(metrics["dog_token_uri_present_count"])
     token_uri_unavailable = int(metrics["dog_token_uri_unavailable_count"])
@@ -1647,6 +1816,45 @@ def validate_current_surface() -> dict[str, Any]:
 
     historical_rows = load_json(ROOT / "generated" / "historical_dog_search.json")
     expected_rarity_scores = validate_base_rarity_universe(historical_rows, metrics)
+    historical_by_token = {
+        dog_id(row): row
+        for row in historical_rows
+        if isinstance(row, dict)
+    }
+    flat_rarity_surfaces = {
+        "current_auction": (
+            [current],
+            ("rarity", "traits", "trait_rarity", "rarity_score", "metadata_verification_status"),
+        ),
+        "current_latest_bid": (
+            [latest],
+            ("rarity", "traits", "trait_rarity", "metadata_verification_status"),
+        ),
+        "auction_feed": (
+            feed_rows,
+            ("rarity", "traits", "trait_rarity", "metadata_verification_status"),
+        ),
+        "auction_timeline": (
+            load_json(ROOT / "generated" / "auction_timeline.json"),
+            ("rarity", "metadata_verification_status"),
+        ),
+        "auction_winners": (
+            load_json(ROOT / "generated" / "auction_winners.json"),
+            ("rarity", "traits", "trait_rarity", "rarity_score", "metadata_verification_status"),
+        ),
+        "recent_auction_winners": (
+            load_json(ROOT / "generated" / "recent_auction_winners.json"),
+            ("rarity", "metadata_verification_status"),
+        ),
+    }
+    for surface_name, (surface_rows, fields) in flat_rarity_surfaces.items():
+        validate_flat_rarity_surface(
+            surface_name,
+            surface_rows,
+            historical_by_token,
+            expected_rarity_scores,
+            fields=fields,
+        )
     historical = next(
         (row for row in historical_rows if isinstance(row, dict) and row.get("mission") == 3 and int(row.get("token_id", -1)) == current_dog_id),
         None,
@@ -1679,8 +1887,10 @@ def validate_current_surface() -> dict[str, Any]:
         "current_latest_bid",
         "current_auction_bid_history",
         "auction_feed",
+        "auction_winners",
         "historical_dog_search",
         "recent_bids",
+        "recent_auction_winners",
         "auction_timeline",
         "auction_daily_activity",
         "auction_bidder_leaderboard",
@@ -1802,6 +2012,11 @@ def validate_current_surface() -> dict[str, Any]:
         sorted_rows = sorted([row for row in unified_rows if isinstance(row, dict)], key=unified_sort_key, reverse=True)
         if unified_rows != sorted_rows:
             raise AssertionError(f"{path.relative_to(ROOT)} is not sorted with only the actual current auction prioritized")
+        validate_unified_rarity_surface(
+            str(path.relative_to(ROOT)),
+            sorted_rows,
+            historical_by_token,
+        )
         for row in sorted_rows:
             rarity_payload = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
             rarity_display = text(rarity_payload.get("display"))
@@ -1920,6 +2135,7 @@ def validate_current_surface() -> dict[str, Any]:
                     if text(feed_row.get(field)) and text(unified_amount.get(field)) == "":
                         raise AssertionError(f"{path.relative_to(ROOT)} recent archive USD event field {field} missing for Dog #{row_dog_id}")
 
+    archive_parity = validate_mission3_archive_parity(root=ROOT)
     observed_state_check: dict[str, Any] = {}
     observed_state_path = ROOT / ".local" / "mission3_onchain_tracker_state.json"
     if observed_state_path.exists():

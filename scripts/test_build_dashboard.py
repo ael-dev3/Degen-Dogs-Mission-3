@@ -1288,6 +1288,8 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
     old_log_urls = list(dashboard.LOG_RPC_URLS)
     old_from_block = dashboard.FROM_BLOCK
     archive_probes: list[str] = []
+    verified_log_urls: list[str] = []
+    fail_log_urls: set[str] = set()
 
     def fake_rpc_once(url: str, method: str, params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
         if method == "eth_chainId":
@@ -1306,6 +1308,12 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
         if method == "eth_getCode":
             return "0x60016000"
         if method == "eth_getLogs":
+            if url in fail_log_urls:
+                raise RuntimeError("log capability unavailable")
+            if url == urls[-1]:
+                # A moderately slower spare is retained inside the bounded
+                # post-quorum grace without becoming a hard requirement.
+                time.sleep(dashboard.RPC_HEAD_PROBE_GRACE_SECONDS / 2)
             return []
         raise AssertionError(method)
 
@@ -1317,6 +1325,16 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
         dashboard.LOG_RPC_URLS = urls
         dashboard.FROM_BLOCK = 10
         block, block_data, verification = dashboard.verified_snapshot()
+        verified_log_urls = list(dashboard.VERIFIED_LOG_URLS)
+
+        fail_log_urls.update(urls[1:])
+        dashboard.RPC_SLOW_UNTIL.clear()
+        try:
+            dashboard.verified_snapshot()
+        except RuntimeError as exc:
+            assert "Base RPC log quorum unavailable: healthy=1 required=2" in str(exc)
+        else:
+            raise AssertionError("one healthy log provider satisfied the required two-provider quorum")
     finally:
         dashboard._quorum_rpc_urls = old_quorum_urls
         dashboard._rpc_once = old_rpc_once
@@ -1335,6 +1353,7 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
     assert verification["rpc_quorum_size"] == "2"
     assert verification["snapshot_block_hash"] == snapshot_hash
     assert len(verification["log_rpc_quorum_providers"].split(",")) >= 2
+    assert set(verified_log_urls) == set(urls)
     assert len(set(archive_probes)) >= 2
 
 
@@ -1528,6 +1547,47 @@ def test_rpc_quorum_rejects_disagreement() -> None:
             assert "quorum disagreement" in str(exc)
         else:
             raise AssertionError("RPC quorum accepted conflicting provider results")
+    finally:
+        dashboard._rpc_once = old_rpc_once
+
+
+def test_log_quorum_canonicalizes_and_enforces_transaction_index() -> None:
+    dashboard = load_module()
+    urls = ["https://one.example", "https://two.example"]
+    canonical = {
+        "address": "0x" + "a" * 40,
+        "blockHash": "0x" + "b" * 64,
+        "blockNumber": "0x64",
+        "data": "0x",
+        "logIndex": "0x0",
+        "removed": False,
+        "topics": ["0x" + "c" * 64],
+        "transactionHash": "0x" + "d" * 64,
+        "transactionIndex": "0xA",
+    }
+    case_variant = {**canonical, "transactionIndex": "0xa"}
+    conflicting = {**canonical, "transactionIndex": "0xb"}
+    assert dashboard._canonical_rpc_result("eth_getLogs", [canonical]) == dashboard._canonical_rpc_result(
+        "eth_getLogs", [case_variant]
+    )
+    assert dashboard._canonical_rpc_result("eth_getLogs", [canonical]) != dashboard._canonical_rpc_result(
+        "eth_getLogs", [conflicting]
+    )
+
+    old_rpc_once = dashboard._rpc_once
+    answers = {urls[0]: [canonical], urls[1]: [conflicting]}
+
+    def fake_rpc_once(url: str, _method: str, _params: list[Any], *, timeout: int = 30) -> Any:  # noqa: ARG001
+        return answers[url]
+
+    try:
+        dashboard._rpc_once = fake_rpc_once
+        try:
+            dashboard.rpc_quorum("eth_getLogs", [{}], urls=urls, min_agreement=2)
+        except RuntimeError as exc:
+            assert "quorum disagreement" in str(exc)
+        else:
+            raise AssertionError("log quorum accepted conflicting transaction indexes")
     finally:
         dashboard._rpc_once = old_rpc_once
 
@@ -2119,6 +2179,39 @@ def test_head_probe_returns_after_minimum_quorum_and_grace() -> None:
         dashboard.RPC_SLOW_UNTIL.clear()
 
     assert len(results) == 2
+    assert elapsed < 0.25
+
+
+def test_preferred_probe_spare_never_forces_the_hard_deadline() -> None:
+    dashboard = load_module()
+    old_grace = dashboard.RPC_HEAD_PROBE_GRACE_SECONDS
+    old_deadline = dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://dead.example"]
+
+    def probe(url: str) -> str:
+        if url == urls[-1]:
+            time.sleep(0.8)
+        return url
+
+    try:
+        dashboard.RPC_HEAD_PROBE_GRACE_SECONDS = 0.05
+        dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS = 0.6
+        started = time.monotonic()
+        results, errors = dashboard._collect_rpc_probes(
+            urls,
+            required=2,
+            preferred=3,
+            probe=probe,
+            label="test-log-spare",
+        )
+        elapsed = time.monotonic() - started
+    finally:
+        dashboard.RPC_HEAD_PROBE_GRACE_SECONDS = old_grace
+        dashboard.RPC_HEAD_PROBE_DEADLINE_SECONDS = old_deadline
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+    assert len(results) == 2
+    assert any("deadline exceeded" in error for error in errors)
     assert elapsed < 0.25
 
 

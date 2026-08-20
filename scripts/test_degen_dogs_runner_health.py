@@ -404,6 +404,337 @@ def test_alert_state_is_atomic_private_and_rejects_untrusted_files() -> None:
                 setattr(health, name, value)
 
 
+def test_pre_publish_status_never_overrides_missing_refresh_completion() -> None:
+    originals = {
+        "REPO_DIR": health.REPO_DIR,
+        "REFRESH_LOG": health.REFRESH_LOG,
+        "REFRESH_TELEMETRY_PATH": health.REFRESH_TELEMETRY_PATH,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        generated = root / "generated"
+        generated.mkdir()
+        log_path = root / "refresh.log"
+        telemetry_path = root / "private" / "refresh_runs.jsonl"
+        telemetry_path.parent.mkdir(mode=0o700)
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        try:
+            health.REPO_DIR = root
+            health.REFRESH_LOG = log_path
+            health.REFRESH_TELEMETRY_PATH = telemetry_path
+            log_path.write_text(
+                f"[{now:%Y-%m-%dT%H:%M:%S}Z] starting hourly refresh\n",
+                encoding="utf-8",
+            )
+            status_path = generated / "refresh_status.json"
+            status_path.write_text(
+                json.dumps(
+                    {
+                        "kind": "refresh_status",
+                        "site_url": health.LIVE_URL,
+                        "last_refresh_result": "success_generated",
+                        "last_successful_refresh_time_utc": health.iso_from_ts(now.timestamp()),
+                    }
+                ),
+                encoding="utf-8",
+            )
+            telemetry_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "kind": "refresh_publish",
+                        "run_id": "crashed-before-push",
+                        "result": "success_generated",
+                        "started_at_utc": health.iso_from_ts(now.timestamp() - 60),
+                        "completed_at_utc": health.iso_from_ts(now.timestamp()),
+                        "skip_push": False,
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            telemetry_path.chmod(0o600)
+
+            details = health.parse_refresh_log_details()
+            assert details["last_finished_status"] is None
+            assert details["last_success_ts"] is None
+            assert details["last_success_source"] is None
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
+def test_refresh_log_rollover_uses_private_terminal_publish_success() -> None:
+    originals = {
+        "REPO_DIR": health.REPO_DIR,
+        "REFRESH_LOG": health.REFRESH_LOG,
+        "REFRESH_TELEMETRY_PATH": health.REFRESH_TELEMETRY_PATH,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        log_path = root / "refresh.log"
+        telemetry_path = root / "private" / "refresh_runs.jsonl"
+        telemetry_path.parent.mkdir(mode=0o700)
+        now = datetime.now(timezone.utc).replace(microsecond=0)
+        old_success = now.timestamp() - 7200
+        durable_success = now.timestamp() - 3600
+        pushed_at = durable_success - 60
+        latest_failure = now.timestamp() - 1800
+        try:
+            health.REPO_DIR = root
+            health.REFRESH_LOG = log_path
+            health.REFRESH_TELEMETRY_PATH = telemetry_path
+            log_path.write_bytes(
+                (
+                    f"[{datetime.fromtimestamp(old_success, timezone.utc):%Y-%m-%dT%H:%M:%S}Z] "
+                    "finished status=0\n"
+                ).encode("utf-8")
+                + (b"x" * 770_000)
+                + (
+                    f"\n[{datetime.fromtimestamp(latest_failure, timezone.utc):%Y-%m-%dT%H:%M:%S}Z] "
+                    "finished status=1\n"
+                ).encode("utf-8")
+            )
+            telemetry_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "kind": "refresh_publish",
+                        "run_id": "published-run",
+                        "result": "success_pushed",
+                        "started_at_utc": health.iso_from_ts(pushed_at - 300),
+                        "push_completed_at_utc": health.iso_from_ts(pushed_at),
+                        "completed_at_utc": health.iso_from_ts(durable_success),
+                        "commit_sha": "a" * 40,
+                        "skip_push": False,
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            telemetry_path.chmod(0o600)
+
+            details = health.parse_refresh_log_details()
+            assert details["last_finished_status"] == 1
+            assert details["last_finished_ts"] == latest_failure
+            assert details["last_success_ts"] == durable_success
+            assert details["last_success_source"] == "refresh_telemetry"
+
+            telemetry_path.chmod(0o666)
+            assert health.latest_authenticated_refresh_success(now.timestamp()) is None
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
+def test_refresh_log_rollover_accepts_strict_terminal_no_diff_success() -> None:
+    original_path = health.REFRESH_TELEMETRY_PATH
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        telemetry_path = root / "private" / "refresh_runs.jsonl"
+        telemetry_path.parent.mkdir(mode=0o700)
+        now = datetime.now(timezone.utc).replace(microsecond=0).timestamp()
+        try:
+            health.REFRESH_TELEMETRY_PATH = telemetry_path
+            stage_values = {
+                "data_started_at_utc": now - 80,
+                "data_completed_at_utc": now - 70,
+                "validation_started_at_utc": now - 69,
+                "validation_completed_at_utc": now - 50,
+                "build_started_at_utc": now - 49,
+                "build_completed_at_utc": now - 30,
+                "git_status_started_at_utc": now - 29,
+                "git_status_completed_at_utc": now - 10,
+            }
+            row = {
+                "schema_version": 1,
+                "kind": "refresh_publish",
+                "run_id": "validated-no-diff-run",
+                "result": "success_no_diff",
+                "started_at_utc": health.iso_from_ts(now - 90),
+                "completed_at_utc": health.iso_from_ts(now),
+                "skip_push": False,
+                **{key: health.iso_from_ts(value) for key, value in stage_values.items()},
+            }
+            telemetry_path.write_text(json.dumps(row, sort_keys=True) + "\n", encoding="utf-8")
+            telemetry_path.chmod(0o600)
+
+            assert health.latest_authenticated_refresh_success(now) == now
+
+            row["changed_files"] = ["generated/current_auction.json"]
+            telemetry_path.write_text(json.dumps(row, sort_keys=True) + "\n", encoding="utf-8")
+            telemetry_path.chmod(0o600)
+            assert health.latest_authenticated_refresh_success(now) is None
+        finally:
+            health.REFRESH_TELEMETRY_PATH = original_path
+
+
+def test_refresh_retry_backoff_is_persisted_bounded_and_fail_closed() -> None:
+    originals = {
+        "REFRESH_RETRY_STATE_PATH": health.REFRESH_RETRY_STATE_PATH,
+        "REFRESH_RETRY_BASE_SECONDS": health.REFRESH_RETRY_BASE_SECONDS,
+        "REFRESH_RETRY_MAX_SECONDS": health.REFRESH_RETRY_MAX_SECONDS,
+        "DRY_RUN": health.DRY_RUN,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        state_path = Path(directory) / "private" / "refresh-retry.json"
+        try:
+            health.REFRESH_RETRY_STATE_PATH = state_path
+            health.REFRESH_RETRY_BASE_SECONDS = 300
+            health.REFRESH_RETRY_MAX_SECONDS = 900
+            health.DRY_RUN = False
+            now = datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc).timestamp()
+            failed_at = now - 60
+
+            state = health.reconcile_refresh_retry_state(
+                {},
+                stale=False,
+                failed_last=True,
+                last_success_ts=now - 120,
+                last_finished_ts=failed_at,
+                last_finished_status=1,
+                now=now,
+            )
+            first_deadline = failed_at + 300
+            assert state["consecutive_recovery_attempts"] == 1
+            assert health.parse_iso_timestamp(state["next_retry_at_utc"]) == first_deadline
+            assert health.refresh_retry_due(state, now) is False
+
+            health.save_refresh_retry_state(state)
+            assert state_path.stat().st_mode & 0o777 == 0o600
+            assert health.load_refresh_retry_state() == state
+
+            reserved = health.reserve_refresh_retry(state, first_deadline)
+            assert reserved["consecutive_recovery_attempts"] == 2
+            assert health.parse_iso_timestamp(reserved["next_retry_at_utc"]) == first_deadline + 600
+            health.save_refresh_retry_state(reserved)
+
+            # A new failed child result belongs to the same recovery cycle and
+            # must not collapse the already-persisted delay back to five minutes.
+            next_failure = health.reconcile_refresh_retry_state(
+                health.load_refresh_retry_state(),
+                stale=False,
+                failed_last=True,
+                last_success_ts=now,
+                last_finished_ts=first_deadline + 30,
+                last_finished_status=1,
+                now=first_deadline + 60,
+            )
+            assert next_failure["consecutive_recovery_attempts"] == 2
+            assert next_failure["next_retry_at_utc"] == reserved["next_retry_at_utc"]
+            capped = health.reserve_refresh_retry(next_failure, first_deadline + 600)
+            assert capped["consecutive_recovery_attempts"] == 3
+            assert health.parse_iso_timestamp(capped["next_retry_at_utc"]) == first_deadline + 1500
+            assert health.refresh_retry_delay(64) == 900
+
+            far_future = dict(capped)
+            far_future["next_retry_at_utc"] = "2099-01-01T00:00:00Z"
+            corrected_now = first_deadline + 700
+            clock_corrected = health.reconcile_refresh_retry_state(
+                far_future,
+                stale=False,
+                failed_last=True,
+                last_success_ts=now,
+                last_finished_ts=first_deadline + 30,
+                last_finished_status=1,
+                now=corrected_now,
+            )
+            assert clock_corrected["consecutive_recovery_attempts"] == 3
+            assert health.parse_iso_timestamp(
+                clock_corrected["next_retry_at_utc"]
+            ) == corrected_now + health.REFRESH_RETRY_MAX_SECONDS
+            assert health.refresh_retry_due(clock_corrected, corrected_now) is False
+
+            assert health.reconcile_refresh_retry_state(
+                capped,
+                stale=False,
+                failed_last=False,
+                last_success_ts=now,
+                last_finished_ts=now,
+                last_finished_status=0,
+                now=now,
+            ) == {}
+
+            state_path.chmod(0o666)
+            try:
+                health.load_refresh_retry_state()
+            except PermissionError:
+                pass
+            else:
+                raise AssertionError("insecure refresh retry state was accepted")
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
+def test_failed_launchctl_dispatch_retries_at_base_delay_without_counting_attempt() -> None:
+    originals = {
+        "REFRESH_RETRY_STATE_PATH": health.REFRESH_RETRY_STATE_PATH,
+        "REFRESH_RETRY_BASE_SECONDS": health.REFRESH_RETRY_BASE_SECONDS,
+        "REFRESH_RETRY_MAX_SECONDS": health.REFRESH_RETRY_MAX_SECONDS,
+        "DRY_RUN": health.DRY_RUN,
+        "maybe_run_with_refresh_guard": health.maybe_run_with_refresh_guard,
+    }
+    with tempfile.TemporaryDirectory() as directory:
+        try:
+            health.REFRESH_RETRY_STATE_PATH = Path(directory) / "retry-state.json"
+            health.REFRESH_RETRY_BASE_SECONDS = 300
+            health.REFRESH_RETRY_MAX_SECONDS = 3600
+            health.DRY_RUN = False
+            now = datetime(2026, 8, 20, 12, 0, tzinfo=timezone.utc).timestamp()
+            state = {
+                "schema_version": health.REFRESH_RETRY_SCHEMA_VERSION,
+                "condition_id": "failed:1:2026-08-20T11:59:00Z",
+                "condition_kind": "failed",
+                "consecutive_recovery_attempts": 3,
+                "last_observed_finished_at_utc": "2026-08-20T11:59:00Z",
+                "next_retry_at_utc": health.iso_from_ts(now),
+            }
+            observed_during_dispatch: list[dict[str, object]] = []
+
+            def failed_dispatch(*_args, **_kwargs):
+                observed_during_dispatch.append(health.load_refresh_retry_state())
+                return health.Result(5, "", "launchctl rejected kickstart")
+
+            health.maybe_run_with_refresh_guard = failed_dispatch
+            lines: list[str] = []
+            deferred, result = health.kickstart_hourly_refresh_with_backoff(
+                lines,
+                state,
+                now=now,
+                reason="last status=1",
+            )
+
+            assert result.code == 5
+            assert observed_during_dispatch[0]["consecutive_recovery_attempts"] == 4
+            assert health.parse_iso_timestamp(
+                observed_during_dispatch[0]["next_retry_at_utc"]
+            ) == now + 2400
+            assert deferred["consecutive_recovery_attempts"] == 3
+            assert health.parse_iso_timestamp(deferred["next_retry_at_utc"]) == now + 300
+            assert health.load_refresh_retry_state() == deferred
+            assert any("base-delay hourly refresh retry" in line for line in lines)
+
+            def guarded_dispatch(*_args, **_kwargs):
+                return health.Result(75, "", "launchd service is running")
+
+            health.maybe_run_with_refresh_guard = guarded_dispatch
+            guarded, result = health.kickstart_hourly_refresh_with_backoff(
+                [],
+                deferred,
+                now=now + 300,
+                reason="last status=1",
+            )
+            assert result.code == 75
+            assert guarded["consecutive_recovery_attempts"] == 4
+            assert health.load_refresh_retry_state() == guarded
+        finally:
+            for name, value in originals.items():
+                setattr(health, name, value)
+
+
 def test_issue_discovery_requires_marker_and_authenticated_author() -> None:
     original_run_gh = health.run_gh
     calls: list[list[str]] = []
@@ -1288,6 +1619,11 @@ if __name__ == "__main__":
     test_active_lock_metadata_requires_a_held_flock()
     test_fresh_active_attempt_requires_new_held_bounded_run()
     test_alert_state_is_atomic_private_and_rejects_untrusted_files()
+    test_pre_publish_status_never_overrides_missing_refresh_completion()
+    test_refresh_log_rollover_uses_private_terminal_publish_success()
+    test_refresh_log_rollover_accepts_strict_terminal_no_diff_success()
+    test_refresh_retry_backoff_is_persisted_bounded_and_fail_closed()
+    test_failed_launchctl_dispatch_retries_at_base_delay_without_counting_attempt()
     test_issue_discovery_requires_marker_and_authenticated_author()
     test_issue_update_and_close_ignore_untrusted_state_ids()
     test_failed_issue_recovery_remains_active_for_retry()

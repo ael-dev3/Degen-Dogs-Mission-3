@@ -375,6 +375,15 @@ def generated_state(root: Path = ROOT) -> dict[str, Any]:
         "dog_rarity_continuity_through_block": int_or_none(metrics.get("dog_rarity_continuity_through_block")),
         "dog_rarity_continuity_through_block_hash": str(metrics.get("dog_rarity_continuity_through_block_hash") or ""),
         "dog_rarity_continuity_verification_status": str(metrics.get("dog_rarity_continuity_verification_status") or ""),
+        "dog_rarity_extension_mint_count": int_or_none(
+            metrics.get("dog_rarity_extension_mint_count")
+        ),
+        "dog_rarity_extension_mint_token_ids": str(
+            metrics.get("dog_rarity_extension_mint_token_ids") or ""
+        ),
+        "dog_rarity_extension_mint_token_ids_sha256": str(
+            metrics.get("dog_rarity_extension_mint_token_ids_sha256") or ""
+        ),
     }
 
 
@@ -583,6 +592,11 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "dog_rarity_continuity_through_block": state.get("dog_rarity_continuity_through_block"),
         "dog_rarity_continuity_through_block_hash": state.get("dog_rarity_continuity_through_block_hash"),
         "dog_rarity_continuity_verification_status": state.get("dog_rarity_continuity_verification_status"),
+        "dog_rarity_extension_mint_count": state.get("dog_rarity_extension_mint_count"),
+        "dog_rarity_extension_mint_token_ids": state.get("dog_rarity_extension_mint_token_ids"),
+        "dog_rarity_extension_mint_token_ids_sha256": state.get(
+            "dog_rarity_extension_mint_token_ids_sha256"
+        ),
     }
     clean = redact_value({key: value for key, value in status.items() if value not in (None, "", [])})
     assert_public_safe(clean)
@@ -715,6 +729,9 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
     incremental_continuity_status = (
         "hash_pinned_cross_provider_no_existence_or_token_uri_mutation_events_since_attestation"
     )
+    extended_continuity_status = (
+        "hash_pinned_cross_provider_canonical_mint_extension_plus_no_other_rarity_mutations"
+    )
     if status.get("dog_token_uri_verification_status") not in {
         full_token_uri_status,
         continuity_token_uri_status,
@@ -754,14 +771,55 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
             != str(status.get("snapshot_block_hash")).lower()
         ):
             raise AssertionError("refresh_status full rarity attestation is internally inconsistent")
-    elif continuity_status == incremental_continuity_status:
+    elif continuity_status in {incremental_continuity_status, extended_continuity_status}:
         if (
             status.get("dog_token_uri_verification_status") != continuity_token_uri_status
             or status.get("dog_base_existence_verification_status") != continuity_existence_status
         ):
             raise AssertionError("refresh_status incremental rarity continuity is internally inconsistent")
+        if continuity_status == extended_continuity_status:
+            raw_ids = str(status.get("dog_rarity_extension_mint_token_ids") or "")
+            extension_count = int_or_none(status.get("dog_rarity_extension_mint_count"))
+            if extension_count is None or not re.fullmatch(
+                r"(?:0|[1-9][0-9]*)(?:,(?:0|[1-9][0-9]*))*",
+                raw_ids,
+            ):
+                raise AssertionError("refresh_status rarity mint-extension provenance is missing")
+            try:
+                extension_ids = tuple(int(value) for value in raw_ids.split(","))
+            except ValueError as exc:
+                raise AssertionError("refresh_status rarity mint-extension IDs are malformed") from exc
+            expected_hash = hashlib.sha256(raw_ids.encode("ascii")).hexdigest()
+            extension_total_supply = int_or_none(status.get("dog_total_supply"))
+            if (
+                not extension_ids
+                or extension_total_supply is None
+                or len(extension_ids) != extension_count
+            ):
+                raise AssertionError("refresh_status rarity mint-extension provenance is inconsistent")
+            expected_extension_ids = tuple(
+                range(
+                    extension_total_supply - extension_count,
+                    extension_total_supply,
+                )
+            )
+            if (
+                tuple(sorted(set(extension_ids))) != extension_ids
+                or extension_ids != expected_extension_ids
+                or status.get("dog_rarity_extension_mint_token_ids_sha256") != expected_hash
+            ):
+                raise AssertionError("refresh_status rarity mint-extension provenance is inconsistent")
     else:
         raise AssertionError("refresh_status rarity continuity verification status is unsupported")
+    if continuity_status != extended_continuity_status and any(
+        status.get(key) not in (None, "", [])
+        for key in (
+            "dog_rarity_extension_mint_count",
+            "dog_rarity_extension_mint_token_ids",
+            "dog_rarity_extension_mint_token_ids_sha256",
+        )
+    ):
+        raise AssertionError("refresh_status rarity mint-extension provenance contradicts its status")
     dog_total_supply = int_or_none(status.get("dog_total_supply"))
     dog_id_ceiling = int_or_none(status.get("dog_id_ceiling"))
     token_uri_present = int_or_none(status.get("dog_token_uri_present_count"))
@@ -918,6 +976,14 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
     ):
         if str(status.get(key, "")) != str(state.get(key, "")):
             raise AssertionError(f"refresh_status {key} differs from mission3_metrics")
+    if continuity_status == extended_continuity_status:
+        for key in (
+            "dog_rarity_extension_mint_count",
+            "dog_rarity_extension_mint_token_ids",
+            "dog_rarity_extension_mint_token_ids_sha256",
+        ):
+            if str(status.get(key, "")) != str(state.get(key, "")):
+                raise AssertionError(f"refresh_status {key} differs from mission3_metrics")
     return status
 
 

@@ -4,7 +4,10 @@ from __future__ import annotations
 import importlib.util
 import hashlib
 import json
+import shutil
+import sys
 import tempfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -56,6 +59,28 @@ def rarity_attrs(body: str) -> dict[str, str]:
 
 def rarity_traits(body: str) -> str:
     return "; ".join(f"{trait_type}: {value}" for trait_type, value in rarity_attrs(body).items())
+
+
+def continuity_log(
+    address: str,
+    topics: list[str],
+    *,
+    block: int = 110,
+    transaction_index: int = 0,
+    log_index: int = 0,
+    data: str = "0x",
+) -> dict:
+    return {
+        "address": address,
+        "blockNumber": hex(block),
+        "blockHash": "0x" + "a" * 63 + f"{block % 16:x}",
+        "transactionHash": "0x" + "b" * 63 + f"{transaction_index % 16:x}",
+        "transactionIndex": hex(transaction_index),
+        "logIndex": hex(log_index),
+        "removed": False,
+        "data": data,
+        "topics": topics,
+    }
 
 
 def test_overlap_history_drops_reorg_orphan_before_merge() -> None:
@@ -309,9 +334,9 @@ def test_winner_stats_recompute_from_complete_winner_table() -> None:
 def test_rarity_replaces_current_token_instead_of_scoring_phantom_supply() -> None:
     surface = load_module()
     history = [
-        {"token_id": 0, "traits": rarity_traits("Common")},
-        {"token_id": 1, "traits": rarity_traits("Rare")},
-        {"token_id": 2, "traits": rarity_traits("Common")},
+        {"token_id": 0, "traits": rarity_traits("Common"), "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": 1, "traits": rarity_traits("Rare"), "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": 2, "traits": rarity_traits("Common"), "metadata_verification_status": "onchain_token_uri_verified"},
     ]
 
     rarity, score, _traits, trait_rarity = surface.build_rarity(
@@ -330,9 +355,9 @@ def test_rarity_replaces_current_token_instead_of_scoring_phantom_supply() -> No
 def test_rarity_universe_rebases_every_rank_and_denominator_after_mint() -> None:
     surface = load_module()
     history = [
-        {"token_id": 0, "traits": rarity_traits("Common")},
-        {"token_id": 1, "traits": rarity_traits("Rare")},
-        {"token_id": 2, "traits": rarity_traits("Common")},
+        {"token_id": 0, "traits": rarity_traits("Common"), "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": 1, "traits": rarity_traits("Rare"), "metadata_verification_status": "onchain_token_uri_verified"},
+        {"token_id": 2, "traits": rarity_traits("Common"), "metadata_verification_status": "onchain_token_uri_verified"},
     ]
 
     universe = surface.build_rarity_universe(history, 3, rarity_attrs("Unique"), 4)
@@ -341,6 +366,175 @@ def test_rarity_universe_rebases_every_rank_and_denominator_after_mint() -> None
     assert {row["rarity"].split("/")[1] for row in universe.values()} == {"4"}
     assert "Body: Unique (25.0%)" in universe[3]["trait_rarity"]
     assert "Body: Common (50.0%)" in universe[0]["trait_rarity"]
+
+
+def test_verified_canonical_mint_extends_sparse_cached_rarity_and_aggregate_hashes() -> None:
+    surface = load_module()
+    history = [
+        {
+            "token_id": 0,
+            "traits": rarity_traits("Rare"),
+            "metadata_verification_status": "onchain_token_uri_verified",
+        },
+        {
+            "token_id": 1,
+            "traits": "",
+            "metadata_verification_status": "onchain_token_uri_unavailable",
+        },
+        {
+            "token_id": 2,
+            "traits": rarity_traits("Common"),
+            "metadata_verification_status": "onchain_token_uri_verified",
+        },
+    ]
+    baseline_hash = hashlib.sha256(b"0,2").hexdigest()
+    metrics = [
+        {"metric": "dog_base_existing_count", "value": "2"},
+        {"metric": "dog_base_existing_token_ids_sha256", "value": baseline_hash},
+        {"metric": "dog_token_uri_present_count", "value": "2"},
+        {"metric": "dog_metadata_onchain_verified_count", "value": "2"},
+        {"metric": "dog_metadata_content_observed_count", "value": "2"},
+        {"metric": "dog_rarity_universe_count", "value": "2"},
+    ]
+
+    universe = surface.build_extended_rarity_universe(
+        history,
+        {3: rarity_attrs("Unique")},
+        (3,),
+        2,
+        baseline_hash,
+    )
+    updates = surface.extend_rarity_aggregate_metrics(metrics, (3,), set(universe))
+
+    assert set(universe) == {0, 2, 3}
+    assert {row["rarity"].split("/")[1] for row in universe.values()} == {"3"}
+    assert "Body: Unique (33.3%)" in universe[3]["trait_rarity"]
+    assert updates == {
+        "dog_token_uri_present_count": "3",
+        "dog_base_existing_count": "3",
+        "dog_base_existing_token_ids_sha256": hashlib.sha256(b"0,2,3").hexdigest(),
+        "dog_metadata_onchain_verified_count": "3",
+        "dog_metadata_content_observed_count": "3",
+        "dog_rarity_universe_count": "3",
+    }
+
+
+def test_fast_rarity_cache_enforces_per_entry_freshness_and_trait_identity() -> None:
+    surface = load_module()
+    observed_at = datetime(2026, 8, 20, 12, 0, 0, tzinfo=timezone.utc)
+    history = [
+        {
+            "token_id": 0,
+            "traits": rarity_traits("Blue"),
+            "metadata_verification_status": "onchain_token_uri_verified",
+        }
+    ]
+
+    def record(
+        age_seconds: int,
+        *,
+        body: str = "Blue",
+        fetched_at: str | None = None,
+        verified_block: int = 100,
+    ) -> dict:
+        metadata = {
+            "token_id": 0,
+            "name": "Degen Dog #0",
+            "attributes": [
+                {"trait_type": trait_type, "value": value}
+                for trait_type, value in rarity_attrs(body).items()
+            ],
+        }
+        metadata_payload = json.dumps(
+            metadata,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return {
+            "token_uri_sha256": "a" * 64,
+            "content_sha256": "b" * 64,
+            "metadata_sha256": hashlib.sha256(metadata_payload.encode("utf-8")).hexdigest(),
+            "verified_block": verified_block,
+            "fetched_at_utc": fetched_at
+            or (observed_at - timedelta(seconds=age_seconds)).isoformat().replace("+00:00", "Z"),
+            "metadata": metadata,
+        }
+
+    cache: dict[str, dict] = {}
+    builder = SimpleNamespace(
+        DOG_METADATA_CACHE_MAX_AGE_SECONDS=100,
+        load_dog_cache=lambda: cache,
+    )
+    expected_hash = surface.rarity_token_ids_sha256({0})
+    for age_seconds in (99, 100):
+        cache = {"0": record(age_seconds), "999": {"ignored": True}}
+        projected = surface.validate_fresh_rarity_cache(
+            builder,
+            history,
+            1,
+            expected_hash,
+            100,
+            observed_at=observed_at,
+        )
+        assert set(projected) == {"0"}
+
+    for bad_record, expected in (
+        (record(101), "expired"),
+        (record(0, fetched_at="2026-08-20T12:00:01Z"), "future-dated"),
+        (record(0, fetched_at="not-a-time"), "malformed observation time"),
+        (record(0, fetched_at="2026-08-20T12:00:00"), "timezone-less observation time"),
+        (record(0, body="Red"), "traits differ"),
+        (record(0, verified_block=101), "verified block is invalid"),
+    ):
+        cache = {"0": bad_record}
+        try:
+            surface.validate_fresh_rarity_cache(
+                builder,
+                history,
+                1,
+                expected_hash,
+                100,
+                observed_at=observed_at,
+            )
+        except surface.FullRefreshRequired as exc:
+            assert expected in str(exc)
+        else:
+            raise AssertionError(f"invalid cache record was accepted: {expected}")
+
+    cache = {}
+    try:
+        surface.validate_fresh_rarity_cache(
+            builder,
+            history,
+            1,
+            expected_hash,
+            100,
+            observed_at=observed_at,
+        )
+    except surface.FullRefreshRequired as exc:
+        assert "does not cover" in str(exc)
+    else:
+        raise AssertionError("missing rarity cache coverage was accepted")
+
+
+def test_rarity_history_requires_exact_verified_metadata_provenance() -> None:
+    surface = load_module()
+    unverified = {
+        "token_id": 0,
+        "traits": rarity_traits("Blue"),
+        "metadata_verification_status": "",
+    }
+    try:
+        surface.verified_rarity_history_attributes([unverified])
+    except surface.FullRefreshRequired as exc:
+        assert "without verified metadata provenance" in str(exc)
+    else:
+        raise AssertionError("traits without exact metadata provenance entered rarity scoring")
+
+    unavailable = dict(unverified)
+    unavailable["metadata_verification_status"] = "onchain_token_uri_unavailable"
+    assert surface.verified_rarity_history_attributes([unavailable]) == {}
 
 
 def test_sparse_verified_base_universe_excludes_unclaimed_history_rows() -> None:
@@ -471,13 +665,15 @@ def test_incremental_rarity_rejects_stale_metadata_supply_counts() -> None:
         raise AssertionError("stale metadata supply counts were accepted")
 
 
-def test_fast_rarity_continuity_rejects_legacy_claim_and_metadata_mutation() -> None:
+def test_fast_rarity_continuity_accepts_only_exact_canonical_mint_extension() -> None:
     surface = load_module()
     attested_hash = "0x" + "a" * 64
     latest_hash = "0x" + "b" * 64
     dog_address = "0x" + "1" * 40
+    auction_address = "0x" + "4" * 40
     code_hash = "c" * 64
     metrics = [
+        {"metric": "dog_total_supply", "value": "100"},
         {"metric": "dog_rarity_attested_block", "value": "100"},
         {"metric": "dog_rarity_attested_block_hash", "value": attested_hash},
         {"metric": "dog_rarity_continuity_through_block", "value": "100"},
@@ -491,10 +687,12 @@ def test_fast_rarity_continuity_rejects_legacy_claim_and_metadata_mutation() -> 
     ]
 
     def builder_with_logs(logs: list[dict]) -> SimpleNamespace:
-        def rpc_quorum(method: str, *_args, **_kwargs):
+        def rpc_quorum(method: str, params: list, **_kwargs):
             if method == "eth_getBlockByNumber":
+                requested_block = int(params[0], 16)
+                requested_hash = latest_hash if requested_block == 120 else attested_hash
                 return (
-                    {"number": hex(100), "hash": attested_hash},
+                    {"number": hex(requested_block), "hash": requested_hash},
                     ["https://one.example", "https://two.example"],
                 )
             if method == "eth_getLogs":
@@ -503,6 +701,7 @@ def test_fast_rarity_continuity_rejects_legacy_claim_and_metadata_mutation() -> 
 
         return SimpleNamespace(
             DEGEN_DOGS=dog_address,
+            AUCTION_HOUSE=auction_address,
             VERIFIED_LOG_URLS=["https://one.example", "https://two.example"],
             RPC_QUORUM_SIZE=2,
             LOG_RPC_TIMEOUT=20,
@@ -516,32 +715,149 @@ def test_fast_rarity_continuity_rejects_legacy_claim_and_metadata_mutation() -> 
             rpc_quorum=rpc_quorum,
         )
 
-    normal_transfer = {
-        "address": dog_address,
-        "topics": [
+    normal_transfer = continuity_log(
+        dog_address,
+        [
             surface.RARITY_MUTATION_TOPICS[0],
             "0x" + "0" * 24 + "2" * 40,
             "0x" + "0" * 24 + "3" * 40,
             "0x" + "0" * 63 + "1",
         ],
-    }
+        block=109,
+        log_index=0,
+    )
     result = surface.verify_rarity_universe_continuity(
         builder_with_logs([normal_transfer]),
         metrics,
         latest_block=120,
         latest_block_hash=latest_hash,
         latest_dog_code_sha256=code_hash,
+        latest_total_supply=100,
     )
-    assert result["dog_rarity_continuity_through_block"] == "120"
-    assert result["dog_rarity_continuity_through_block_hash"] == latest_hash
-    assert result["dog_rarity_continuity_verification_status"] == surface.INCREMENTAL_RARITY_CONTINUITY_STATUS
+    assert result["metrics"]["dog_rarity_continuity_through_block"] == "120"
+    assert result["metrics"]["dog_rarity_continuity_through_block_hash"] == latest_hash
+    assert (
+        result["metrics"]["dog_rarity_continuity_verification_status"]
+        == surface.INCREMENTAL_RARITY_CONTINUITY_STATUS
+    )
+    assert result["minted_token_ids"] == ()
 
-    legacy_claim = dict(normal_transfer)
-    legacy_claim["topics"] = list(normal_transfer["topics"])
-    legacy_claim["topics"][1] = surface.ZERO_ADDRESS_TOPIC
-    for logs, expected in (
-        ([legacy_claim], "existence set changed"),
-        ([{"address": dog_address, "topics": [surface.RARITY_MUTATION_TOPICS[1]]}], "metadata changed"),
+    canonical_mint = continuity_log(
+        dog_address,
+        [
+            surface.RARITY_MUTATION_TOPICS[0],
+            surface.ZERO_ADDRESS_TOPIC,
+            "0x" + "0" * 24 + auction_address[2:],
+            "0x" + f"{100:064x}",
+        ],
+        block=110,
+        log_index=1,
+    )
+    extended = surface.verify_rarity_universe_continuity(
+        builder_with_logs([normal_transfer, canonical_mint]),
+        metrics,
+        latest_block=120,
+        latest_block_hash=latest_hash,
+        latest_dog_code_sha256=code_hash,
+        latest_total_supply=101,
+    )
+    assert extended["minted_token_ids"] == (100,)
+    assert (
+        extended["metrics"]["dog_rarity_continuity_verification_status"]
+        == surface.EXTENDED_RARITY_CONTINUITY_STATUS
+    )
+    assert extended["metrics"]["dog_rarity_extension_mint_count"] == "1"
+    assert extended["metrics"]["dog_rarity_extension_mint_token_ids"] == "100"
+    assert extended["metrics"]["dog_rarity_extension_mint_token_ids_sha256"] == hashlib.sha256(
+        b"100"
+    ).hexdigest()
+    persisted_metrics = {row["metric"]: str(row["value"]) for row in metrics}
+    persisted_metrics.update(extended["metrics"])
+    persisted_metrics.update(
+        {
+            "dog_total_supply": "101",
+            "latest_block": "120",
+            "snapshot_block_hash": latest_hash,
+        }
+    )
+    persisted = surface.verify_rarity_universe_continuity(
+        builder_with_logs([]),
+        [{"metric": key, "value": value} for key, value in persisted_metrics.items()],
+        latest_block=120,
+        latest_block_hash=latest_hash,
+        latest_dog_code_sha256=code_hash,
+        latest_total_supply=101,
+    )
+    assert persisted["minted_token_ids"] == ()
+    assert persisted["metrics"]["dog_rarity_extension_mint_token_ids"] == "100"
+
+    non_suffix_metrics = dict(persisted_metrics)
+    non_suffix_metrics.update(
+        {
+            "dog_rarity_extension_mint_count": "1",
+            "dog_rarity_extension_mint_token_ids": "50",
+            "dog_rarity_extension_mint_token_ids_sha256": hashlib.sha256(b"50").hexdigest(),
+        }
+    )
+    try:
+        surface.verify_rarity_universe_continuity(
+            builder_with_logs([]),
+            [{"metric": key, "value": value} for key, value in non_suffix_metrics.items()],
+            latest_block=120,
+            latest_block_hash=latest_hash,
+            latest_dog_code_sha256=code_hash,
+            latest_total_supply=101,
+        )
+    except surface.FullRefreshRequired as exc:
+        assert "mint-extension provenance is inconsistent" in str(exc)
+    else:
+        raise AssertionError("expected non-suffix extension provenance to require a full refresh")
+
+    second_latest_hash = "0x" + "d" * 64
+    second_mint = continuity_log(
+        dog_address,
+        [
+            surface.RARITY_MUTATION_TOPICS[0],
+            surface.ZERO_ADDRESS_TOPIC,
+            "0x" + "0" * 24 + auction_address[2:],
+            "0x" + f"{101:064x}",
+        ],
+        block=125,
+        log_index=0,
+    )
+    second_extension = surface.verify_rarity_universe_continuity(
+        builder_with_logs([second_mint]),
+        [{"metric": key, "value": value} for key, value in persisted_metrics.items()],
+        latest_block=130,
+        latest_block_hash=second_latest_hash,
+        latest_dog_code_sha256=code_hash,
+        latest_total_supply=102,
+    )
+    assert second_extension["minted_token_ids"] == (101,)
+    assert second_extension["metrics"]["dog_rarity_extension_mint_count"] == "2"
+    assert second_extension["metrics"]["dog_rarity_extension_mint_token_ids"] == "100,101"
+
+    burn = dict(normal_transfer)
+    burn["topics"] = list(normal_transfer["topics"])
+    burn["topics"][2] = surface.ZERO_ADDRESS_TOPIC
+    noncanonical_mint = dict(canonical_mint)
+    noncanonical_mint["topics"] = list(canonical_mint["topics"])
+    noncanonical_mint["topics"][2] = "0x" + "0" * 24 + "3" * 40
+    metadata_update = continuity_log(
+        dog_address,
+        [surface.RARITY_MUTATION_TOPICS[1]],
+        block=110,
+        log_index=1,
+    )
+    malformed = dict(normal_transfer)
+    malformed.pop("blockNumber")
+    for logs, latest_supply, expected in (
+        ([burn], 100, "burn changed"),
+        ([metadata_update], 100, "metadata changed"),
+        ([noncanonical_mint], 101, "recipient is not the canonical auction house"),
+        ([canonical_mint], 102, "gapped or mismatched"),
+        ([malformed], 100, "malformed blockNumber"),
+        ([normal_transfer, normal_transfer], 100, "duplicated"),
     ):
         try:
             surface.verify_rarity_universe_continuity(
@@ -550,11 +866,12 @@ def test_fast_rarity_continuity_rejects_legacy_claim_and_metadata_mutation() -> 
                 latest_block=120,
                 latest_block_hash=latest_hash,
                 latest_dog_code_sha256=code_hash,
+                latest_total_supply=latest_supply,
             )
         except surface.FullRefreshRequired as exc:
             assert expected in str(exc)
         else:
-            raise AssertionError("rarity mutation was accepted by the fast refresh")
+            raise AssertionError("noncanonical rarity continuity was accepted by the fast refresh")
 
 
 def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None:
@@ -563,8 +880,10 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
     checkpoint_hash = "0x" + "b" * 64
     latest_hash = "0x" + "c" * 64
     dog_address = "0x" + "1" * 40
+    auction_address = "0x" + "4" * 40
     code_hash = "d" * 64
     metrics = [
+        {"metric": "dog_total_supply", "value": "100"},
         {"metric": "dog_rarity_attested_block", "value": "100"},
         {"metric": "dog_rarity_attested_block_hash", "value": attested_hash},
         {"metric": "dog_rarity_continuity_through_block", "value": "120"},
@@ -592,6 +911,7 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
 
     builder = SimpleNamespace(
         DEGEN_DOGS=dog_address,
+        AUCTION_HOUSE=auction_address,
         VERIFIED_LOG_URLS=["https://one.example", "https://two.example"],
         RPC_QUORUM_SIZE=2,
         LOG_RPC_TIMEOUT=20,
@@ -611,8 +931,9 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
         latest_block=120,
         latest_block_hash=checkpoint_hash,
         latest_dog_code_sha256=code_hash,
+        latest_total_supply=100,
     )
-    assert same_checkpoint["dog_rarity_continuity_through_block"] == "120"
+    assert same_checkpoint["metrics"]["dog_rarity_continuity_through_block"] == "120"
     assert calls == []
 
     for invalid_block, invalid_hash, expected_exception, expected in (
@@ -626,6 +947,7 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
                 latest_block=invalid_block,
                 latest_block_hash=invalid_hash,
                 latest_dog_code_sha256=code_hash,
+                latest_total_supply=100,
             )
         except expected_exception as exc:
             assert expected in str(exc)
@@ -639,6 +961,7 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
         latest_block=140,
         latest_block_hash=latest_hash,
         latest_dog_code_sha256=code_hash,
+        latest_total_supply=100,
     )
 
     assert [method for method, _params in calls] == [
@@ -656,14 +979,15 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
         (hex(128), hex(134)),
         (hex(135), hex(140)),
     ]
-    assert result["dog_rarity_attested_block"] == "100"
-    assert result["dog_rarity_attested_block_hash"] == attested_hash
-    assert result["dog_rarity_continuity_through_block"] == "140"
-    assert result["dog_rarity_continuity_through_block_hash"] == latest_hash
+    assert result["metrics"]["dog_rarity_attested_block"] == "100"
+    assert result["metrics"]["dog_rarity_attested_block_hash"] == attested_hash
+    assert result["metrics"]["dog_rarity_continuity_through_block"] == "140"
+    assert result["metrics"]["dog_rarity_continuity_through_block_hash"] == latest_hash
 
     wrong_checkpoint_hash = "0x" + "e" * 64
-    metrics[3]["value"] = wrong_checkpoint_hash
-    metrics[5]["value"] = wrong_checkpoint_hash
+    for row in metrics:
+        if row["metric"] in {"dog_rarity_continuity_through_block_hash", "snapshot_block_hash"}:
+            row["value"] = wrong_checkpoint_hash
     try:
         surface.verify_rarity_universe_continuity(
             builder,
@@ -671,6 +995,7 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
             latest_block=140,
             latest_block_hash=latest_hash,
             latest_dog_code_sha256=code_hash,
+            latest_total_supply=100,
         )
     except surface.FullRefreshRequired as exc:
         assert "checkpoint hash changed" in str(exc)
