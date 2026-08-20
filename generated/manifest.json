@@ -2,17 +2,17 @@
   {
     "table": "mission3_metrics",
     "file": "generated/mission3_metrics.csv",
-    "rows": 159
+    "rows": 162
   },
   {
     "table": "auction_feed",
     "file": "generated/auction_feed.csv",
-    "rows": 11
+    "rows": 12
   },
   {
     "table": "historical_dog_search",
     "file": "generated/historical_dog_search.csv",
-    "rows": 809
+    "rows": 810
   },
   {
     "table": "historical_dog_report",
@@ -27,7 +27,7 @@
   {
     "table": "current_auction_bid_history",
     "file": "generated/current_auction_bid_history.csv",
-    "rows": 2
+    "rows": 1
   },
   {
     "table": "recent_auction_winners",
@@ -42,7 +42,7 @@
   {
     "table": "auction_timeline",
     "file": "generated/auction_timeline.csv",
-    "rows": 219
+    "rows": 220
   },
   {
     "table": "auction_extensions",
@@ -52,7 +52,7 @@
   {
     "table": "auction_daily_activity",
     "file": "generated/auction_daily_activity.csv",
-    "rows": 223
+    "rows": 224
   },
   {
     "table": "auction_bidder_leaderboard",
@@ -82,7 +82,7 @@
   {
     "table": "season6_sup_rewards_by_auction",
     "file": "generated/season6_sup_rewards_by_auction.csv",
-    "rows": 77
+    "rows": 78
   },
   {
     "table": "season6_sup_current_bidder_status",
@@ -92,7 +92,7 @@
   {
     "table": "auction_winners",
     "file": "generated/auction_winners.csv",
-    "rows": 218
+    "rows": 219
   },
   {
     "table": "recent_bids",

@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#58/684",
+      "display": "#58/685",
       "rank": 58,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 421 dog #421 421 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 3667 degen 0xc19350aba749b83b65f565f04881f8b2545787b6a068c703c7d11adc10b16394 0xaeeffbafd0bf80c239dac6d21483abc070f6c61fc79d59cfc4afd31c6fe6c785 #58/684 background: none; body: redbrown; neck: studdedcollar; mouth: teeth; ears: loopearring; head: hoodie; eyes: vrgoggles 0xf928333a1a1bb98468c000b278699ce7f7e6ab99d47e8f5a8a7020ff051656da 0x99795ef811f3a62a7c3b11bd36ff4bb13d14b670313f70aeadf2cb79666335cb chain_logs contract_getters",
+    "search_text": "dog 421 dog #421 421 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 3667 degen 0xc19350aba749b83b65f565f04881f8b2545787b6a068c703c7d11adc10b16394 0xaeeffbafd0bf80c239dac6d21483abc070f6c61fc79d59cfc4afd31c6fe6c785 background: none; body: redbrown; neck: studdedcollar; mouth: teeth; ears: loopearring; head: hoodie; eyes: vrgoggles 0xf928333a1a1bb98468c000b278699ce7f7e6ab99d47e8f5a8a7020ff051656da 0x99795ef811f3a62a7c3b11bd36ff4bb13d14b670313f70aeadf2cb79666335cb chain_logs contract_getters #58/685 background: none (91.7%) body: redbrown (15.5%) neck: studdedcollar (10.2%) mouth: teeth (5.4%) ears: loopearring (27.3%) head: hoodie (4.8%) eyes: vrgoggles (10.7%)",
     "settlement": {
       "block_number": 26029536,
       "block_time_utc": "2025-06-29T20:08:14Z",
@@ -99,7 +99,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#417/684",
-      "rank": 417,
+      "display": "#418/685",
+      "rank": 418,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 #417/684 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters",
+    "search_text": "dog 465 dog #465 465 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b 0x30b7af568d2aedb8e0a9d3b75ea07f9af81b827d7bfbf8fb9bb827f9e1097ae2 background: none; body: orange; neck: none; mouth: none; ears: loopearring; head: headphones; eyes: bluelasereyes 0xa9c6b9d29c348208219343a24521c38e7e824f714fa53f36624b7fdde697d866 0x387254035c65af13393ae34cf505442bff08cfd29ba6608abf5b1e09b910a5a4 chain_logs contract_getters #418/685 background: none (91.7%) body: orange (8.2%) neck: none (41.0%) mouth: none (68.3%) ears: loopearring (27.3%) head: headphones (6.9%) eyes: bluelasereyes (11.2%)",
     "settlement": {
       "block_number": 26198561,
       "block_time_utc": "2025-08-21T13:28:05Z",
@@ -89,7 +89,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.0%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -109,7 +109,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.3%)",
+        "display": "Eyes: BlueLaserEyes (11.2%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

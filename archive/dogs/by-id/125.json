@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#274/684",
-      "rank": 274,
+      "display": "#276/685",
+      "rank": 276,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 125 dog #125 125 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 #274/684 background: halo; body: grey; neck: goldnecklace; mouth: none; ears: none; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 125 dog #125 125 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x48f9a82ffab509f275f061215b730cd372827e18b925df54cb9eeeedccfcacae 0x034c34f23b430cecc756ec3bfe34a48f0f942b3df1e01736c25cbf456c24f7a6 background: halo; body: grey; neck: goldnecklace; mouth: none; ears: none; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #276/685 background: halo (8.3%) body: grey (13.0%) neck: goldnecklace (19.3%) mouth: none (68.3%) ears: none (26.0%) head: stripedbeanie (7.9%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": 29279592,
       "block_time_utc": "2022-06-07T15:09:32Z",
@@ -83,12 +83,12 @@
         "value": "Halo"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (13.0%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

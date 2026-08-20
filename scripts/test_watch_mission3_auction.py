@@ -493,7 +493,7 @@ def test_log_capability_probe_keeps_slower_third_witness_within_bounded_grace():
     try:
         watcher.verified_snapshot_head = lambda _config: (
             100,
-            {"hash": block_hash},
+            {"hash": block_hash, "timestamp": hex(int(time.time()))},
             urls[:2],
         )
         watcher.rpc_quorum_call = fake_quorum
@@ -522,6 +522,7 @@ def test_log_capability_probe_keeps_slower_third_witness_within_bounded_grace():
     assert elapsed < 0.5
     assert captured_log_urls == urls
     assert len(snapshot["log_rpc_quorum_providers"]) == 3
+    assert snapshot["snapshot_block_time_unix"] > 0
 
 
 def test_preferred_probe_spare_never_forces_the_hard_deadline():
@@ -893,6 +894,247 @@ def test_auction_end_time_change_triggers_refresh_when_extension_log_is_missed()
     assert decision.reasons == ["auction_end_time_changed"]
 
 
+def test_verified_auction_end_boundary_refreshes_once_and_bypasses_cooldown():
+    watcher = load_module()
+    base_unix = int(datetime(2026, 5, 29, tzinfo=timezone.utc).timestamp())
+    end_time_unix = base_unix + 300
+    previous = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_refresh_at_utc": iso(290),
+        "last_seen_bid_log_id": "100:0xbid:1",
+        "last_seen_auction_created_log_id": "90:0xcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_start_time_unix": base_unix,
+        "last_seen_end_time_unix": end_time_unix,
+    }
+    snapshot = {
+        "latest_block": 140,
+        "token_id": 728,
+        "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "amount_wei": "100",
+        "settled": False,
+        "start_time_unix": base_unix,
+        "end_time_unix": end_time_unix,
+        "snapshot_block_time_unix": end_time_unix - 1,
+        "created_log": {"id": "90:0xcreated:1", "tx_hash": "0xcreated"},
+        "bid_log": {"id": "100:0xbid:1", "tx_hash": "0xbid"},
+        "extended_log": None,
+        "settled_log": None,
+    }
+
+    before_end = watcher.decide_refresh(
+        previous,
+        snapshot,
+        now_utc=iso(299),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert before_end.should_refresh is False
+    assert before_end.reasons == []
+
+    ended_snapshot = dict(snapshot, snapshot_block_time_unix=end_time_unix)
+    at_end = watcher.decide_refresh(
+        previous,
+        ended_snapshot,
+        now_utc=iso(300),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert at_end.should_refresh is True
+    assert at_end.bypassed_cooldown is True
+    assert at_end.reasons == ["auction_end_time_elapsed"]
+
+    pending = watcher.state_from_snapshot(
+        ended_snapshot,
+        now_utc=iso(300),
+        previous_state=previous,
+        decision=at_end,
+    )
+    completed = watcher.record_refresh_result(
+        pending,
+        status="success",
+        reasons=at_end.reasons,
+        now_utc=iso(301),
+    )
+    assert completed["last_end_boundary_refresh_token_id"] == 728
+    assert completed["last_end_boundary_refresh_end_time_unix"] == end_time_unix
+
+    after_success = watcher.decide_refresh(
+        completed,
+        dict(ended_snapshot, snapshot_block_time_unix=end_time_unix + 1),
+        now_utc=iso(302),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert after_success.should_refresh is False
+    assert after_success.reasons == []
+
+
+def test_new_end_boundary_bypasses_older_failure_backoff_only_once():
+    watcher = load_module()
+    base_unix = int(datetime(2026, 5, 29, tzinfo=timezone.utc).timestamp())
+    end_time_unix = base_unix + 300
+    backed_off = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "last_seen_amount_wei": "100",
+        "last_seen_settled": False,
+        "last_seen_start_time_unix": base_unix,
+        "last_seen_end_time_unix": end_time_unix,
+        "last_refresh_at_utc": iso(290),
+        "pending_refresh": True,
+        "pending_refresh_since_utc": iso(290),
+        "pending_refresh_reasons": ["auction_end_time_elapsed"],
+        "pending_token_id": 727,
+        "pending_end_time_unix": end_time_unix - 86_400,
+        "pending_end_boundary_token_id": 727,
+        "pending_end_boundary_end_time_unix": end_time_unix - 86_400,
+        "next_allowed_refresh_after_utc": iso(900),
+    }
+    ended_snapshot = {
+        "latest_block": 140,
+        "token_id": 728,
+        "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "amount_wei": "100",
+        "settled": False,
+        "start_time_unix": base_unix,
+        "end_time_unix": end_time_unix,
+        "snapshot_block_time_unix": end_time_unix,
+        "created_log": None,
+        "bid_log": None,
+        "extended_log": None,
+        "settled_log": None,
+    }
+
+    first_boundary_attempt = watcher.decide_refresh(
+        backed_off,
+        ended_snapshot,
+        now_utc=iso(300),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert first_boundary_attempt.should_refresh is True
+    assert first_boundary_attempt.bypassed_cooldown is True
+    assert first_boundary_attempt.reasons == [
+        "pending_refresh_after_cooldown",
+        "auction_end_time_elapsed",
+    ]
+
+    pending = watcher.state_from_snapshot(
+        ended_snapshot,
+        now_utc=iso(300),
+        previous_state=backed_off,
+        decision=first_boundary_attempt,
+    )
+    failed = watcher.record_refresh_result(
+        pending,
+        status="failure",
+        reasons=first_boundary_attempt.reasons,
+        now_utc=iso(301),
+        exit_code=1,
+    )
+    retry_during_new_backoff = watcher.decide_refresh(
+        failed,
+        dict(ended_snapshot, snapshot_block_time_unix=end_time_unix + 1),
+        now_utc=iso(302),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert retry_during_new_backoff.should_refresh is False
+    assert retry_during_new_backoff.cooldown_skip is True
+    assert retry_during_new_backoff.pending_refresh is True
+    assert retry_during_new_backoff.reasons == ["auction_end_time_elapsed"]
+
+
+def test_stale_boundary_reason_never_marks_a_new_unended_auction_as_refreshed():
+    watcher = load_module()
+    base_unix = int(datetime(2026, 5, 29, tzinfo=timezone.utc).timestamp())
+    old_end = base_unix + 100
+    new_end = base_unix + 600
+    old_boundary_pending = {
+        "last_seen_token_id": 727,
+        "last_seen_high_bidder": watcher.ZERO_ADDRESS,
+        "last_seen_amount_wei": "0",
+        "last_seen_settled": False,
+        "last_seen_start_time_unix": base_unix - 100,
+        "last_seen_end_time_unix": old_end,
+        "last_seen_auction_created_log_id": "90:0xoldcreated:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_bid_log_id": "",
+        "last_refresh_at_utc": iso(90),
+        "pending_refresh": True,
+        "pending_refresh_since_utc": iso(100),
+        "pending_refresh_reasons": ["auction_end_time_elapsed"],
+        "pending_token_id": 727,
+        "pending_end_time_unix": old_end,
+        "pending_end_boundary_token_id": 727,
+        "pending_end_boundary_end_time_unix": old_end,
+        "next_allowed_refresh_after_utc": iso(900),
+    }
+    new_snapshot = {
+        "latest_block": 150,
+        "token_id": 728,
+        "high_bidder": watcher.ZERO_ADDRESS,
+        "amount_wei": "0",
+        "settled": False,
+        "start_time_unix": base_unix + 300,
+        "end_time_unix": new_end,
+        "snapshot_block_time_unix": base_unix + 300,
+        "created_log": {"id": "150:0xnewcreated:1", "tx_hash": "0xnewcreated"},
+        "bid_log": None,
+        "extended_log": None,
+        "settled_log": None,
+    }
+
+    new_auction = watcher.decide_refresh(
+        old_boundary_pending,
+        new_snapshot,
+        now_utc=iso(300),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert new_auction.should_refresh is True
+    assert "auction_end_time_elapsed" in new_auction.reasons
+    assert "auction_created" in new_auction.reasons
+    assert "current_auction_token_changed" in new_auction.reasons
+
+    pending = watcher.state_from_snapshot(
+        new_snapshot,
+        now_utc=iso(300),
+        previous_state=old_boundary_pending,
+        decision=new_auction,
+    )
+    acknowledged = watcher.state_from_snapshot(
+        new_snapshot,
+        now_utc=iso(301),
+        previous_state=pending,
+        acknowledge=True,
+    )
+    completed = watcher.record_refresh_result(
+        acknowledged,
+        status="success",
+        reasons=new_auction.reasons,
+        now_utc=iso(301),
+    )
+    assert completed["last_end_boundary_refresh_token_id"] == 727
+    assert completed["last_end_boundary_refresh_end_time_unix"] == old_end
+
+    new_boundary = watcher.decide_refresh(
+        completed,
+        dict(new_snapshot, latest_block=160, snapshot_block_time_unix=new_end),
+        now_utc=iso(600),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert new_boundary.should_refresh is True
+    assert new_boundary.reasons == ["auction_end_time_elapsed"]
+
+
 def test_new_created_log_bypasses_cooldown():
     watcher = load_module()
     previous = {
@@ -924,6 +1166,69 @@ def test_new_created_log_bypasses_cooldown():
     assert decision.bypassed_cooldown is True
     assert "auction_created" in decision.reasons
     assert "current_auction_token_changed" in decision.reasons
+
+
+def test_pending_created_identity_survives_temporary_log_omission_during_backoff():
+    watcher = load_module()
+    created_id = "141:0xcreated2:1"
+    state = {
+        "last_seen_token_id": 728,
+        "last_seen_high_bidder": watcher.ZERO_ADDRESS,
+        "last_seen_amount_wei": "0",
+        "last_seen_settled": False,
+        "last_seen_start_time_unix": 300,
+        "last_seen_end_time_unix": 500,
+        "last_seen_auction_created_log_id": "90:0xcreated1:1",
+        "last_seen_auction_settled_log_id": "",
+        "last_seen_auction_extended_log_id": "",
+        "last_seen_bid_log_id": "",
+        "last_refresh_at_utc": iso(0),
+        "pending_refresh": True,
+        "pending_refresh_since_utc": iso(10),
+        "pending_refresh_reasons": ["auction_created"],
+        "pending_token_id": 728,
+        "pending_auction_created_log_id": created_id,
+        "next_allowed_refresh_after_utc": iso(900),
+    }
+    snapshot = {
+        "latest_block": 150,
+        "token_id": 728,
+        "high_bidder": watcher.ZERO_ADDRESS,
+        "amount_wei": "0",
+        "settled": False,
+        "start_time_unix": 300,
+        "end_time_unix": 500,
+        "snapshot_block_time_unix": 400,
+        "created_log": None,
+        "bid_log": None,
+        "extended_log": None,
+        "settled_log": None,
+    }
+
+    omitted = watcher.state_from_snapshot(
+        snapshot,
+        now_utc=iso(20),
+        previous_state=state,
+        decision=watcher.RefreshDecision(
+            False,
+            ["auction_created"],
+            cooldown_skip=True,
+            pending_refresh=True,
+        ),
+    )
+    assert omitted["pending_auction_created_log_id"] == created_id
+
+    reappeared = watcher.decide_refresh(
+        omitted,
+        dict(snapshot, created_log={"id": created_id, "tx_hash": "0xcreated2"}),
+        now_utc=iso(30),
+        cooldown_seconds=300,
+        force_after_seconds=0,
+    )
+    assert reappeared.should_refresh is False
+    assert reappeared.cooldown_skip is True
+    assert reappeared.pending_refresh is True
+    assert reappeared.reasons == ["auction_created"]
 
 
 def test_bid_change_inside_cooldown_is_deferred_not_lost():

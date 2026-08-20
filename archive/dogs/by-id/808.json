@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-08-20T18:24:25Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-19T20:23:21Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-20T19:57:59Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "22.51734614",
+      "eth_usd_price_at_event": "2251.7346140069594",
       "eth_usd_price_date_utc": "2026-08-20",
       "native": "0.01",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "23.28050000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$23.28",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "22.51734614",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$22.52",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-20",
-      "usd_estimate_price_usd": "2328.05",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "2251.7346140069594",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 50189700,
@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 2,
-      "last_bid_time_utc": "2026-08-19T20:23:21Z",
+      "last_bid_time_utc": "2026-08-19 20:23:21",
       "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
@@ -49,36 +49,37 @@
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/808",
       "repo_archive": "archive/dogs/by-id/808.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25"
     },
     "mission": 3,
     "rarity": {
-      "display": "#476/684",
+      "display": "#476/685",
       "rank": 476,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.01 eth 23.28 $23.28 2026-08-19 20:23:21 #476/684 Background: None; Body: Grey; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: MaskSnorkel @0xael.eth 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21",
+    "search_text": "dog 808 dog #808 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.01000000 eth $22.52 2026-08-20t19:57:59z #476/685 background: none (91.7%) body: grey (13.0%) neck: redcollar (29.5%) mouth: none (68.3%) ears: earbuds (32.4%) head: crazyhair (6.6%) eyes: masksnorkel (10.1%) 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 50233266,
+      "block_time_utc": "2026-08-20T19:57:59Z",
+      "settled": true,
+      "tx_hash": "0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25",
+      "tx_url": "https://basescan.org/tx/0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "dashboard_builder",
         "generated_auction_timeline",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "generated_auction_winners"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (91.7%)",
@@ -86,7 +87,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (13.0%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -101,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#7/684",
+      "display": "#7/685",
       "rank": 7,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 313 dog #313 313 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 10000 degen 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 0x1a926af3194d48f3085efa087635d0e333c623eb4826a833c91cb04be1b5c1a2 #7/684 background: none; body: alien; neck: goldnecklace; mouth: none; ears: goldearring; head: baseballcap; eyes: none 0xbcf878fd81919598b676f482ca52589591c6a29053e22f093d07815d1dcf0ea3 chain_logs contract_getters",
+    "search_text": "dog 313 dog #313 313 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 10000 degen 0xc4e6067b0fe991f7fa441e084741fab3b34068fa1892369066eea0c40ba83305 0x1a926af3194d48f3085efa087635d0e333c623eb4826a833c91cb04be1b5c1a2 background: none; body: alien; neck: goldnecklace; mouth: none; ears: goldearring; head: baseballcap; eyes: none 0xbcf878fd81919598b676f482ca52589591c6a29053e22f093d07815d1dcf0ea3 chain_logs contract_getters #7/685 background: none (91.7%) body: alien (0.9%) neck: goldnecklace (19.3%) mouth: none (68.3%) ears: goldearring (14.3%) head: baseballcap (10.2%) eyes: none (17.8%)",
     "settlement": {
       "block_number": 25595917,
       "block_time_utc": "2025-03-13T12:16:35Z",
@@ -88,7 +88,7 @@
         "value": "Alien"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

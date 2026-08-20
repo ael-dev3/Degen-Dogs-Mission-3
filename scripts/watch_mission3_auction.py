@@ -1192,6 +1192,7 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         "extended_log": latest_log_for_topic(logs, TOPIC_AUCTION_EXTENDED),
         "settled_log": latest_log_for_topic(logs, TOPIC_AUCTION_SETTLED),
         "snapshot_block_hash": str(block_data.get("hash") or "").lower(),
+        "snapshot_block_time_unix": int(str(block_data.get("timestamp") or "0x0"), 16),
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
         "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,recent_event_logs",
         "rpc_quorum_size": config.quorum_size,
@@ -1314,7 +1315,13 @@ def pending_backoff_active(state: dict[str, Any], now_utc: str) -> bool:
 
 
 BID_REFRESH_REASONS = {"auction_bid", "highest_bidder_changed", "highest_bid_amount_changed"}
-MAJOR_REFRESH_REASONS = {"auction_created", "auction_settled", "auction_settled_state_changed", "current_auction_token_changed"}
+MAJOR_REFRESH_REASONS = {
+    "auction_created",
+    "auction_end_time_elapsed",
+    "auction_settled",
+    "auction_settled_state_changed",
+    "current_auction_token_changed",
+}
 
 
 def cooldown_for_reasons(reasons: list[str], *, cooldown_seconds: int, bid_cooldown_seconds: int | None = None) -> int:
@@ -1334,6 +1341,40 @@ def _state_reasons(value: Any) -> list[str]:
     if isinstance(value, str):
         return [item.strip() for item in value.split(",") if item.strip()]
     return []
+
+
+def major_refresh_identity_is_new(
+    reason: str,
+    state: dict[str, Any],
+    snapshot: dict[str, Any],
+) -> bool:
+    token_id = int(snapshot.get("token_id") or 0)
+    pending_token_id = int(state.get("pending_token_id") or 0)
+    if reason == "auction_end_time_elapsed":
+        return (
+            token_id != int(state.get("pending_end_boundary_token_id") or 0)
+            or int(snapshot.get("end_time_unix") or 0)
+            != int(state.get("pending_end_boundary_end_time_unix") or 0)
+        )
+    if reason in {"auction_created", "current_auction_token_changed"}:
+        if token_id != pending_token_id:
+            return True
+        if reason == "auction_created":
+            created_log = get_snapshot_log(snapshot, "created_log")
+            return bool(created_log.get("id")) and created_log.get("id") != state.get(
+                "pending_auction_created_log_id", ""
+            )
+        return False
+    if reason in {"auction_settled", "auction_settled_state_changed"}:
+        if token_id != pending_token_id:
+            return True
+        if reason == "auction_settled":
+            settled_log = get_snapshot_log(snapshot, "settled_log")
+            return bool(settled_log.get("id")) and settled_log.get("id") != state.get(
+                "pending_auction_settled_log_id", ""
+            )
+        return bool(snapshot.get("settled")) != bool(state.get("pending_settled"))
+    return False
 
 
 def decide_refresh(
@@ -1371,6 +1412,23 @@ def decide_refresh(
     if int(snapshot.get("end_time_unix") or 0) != int(state.get("last_seen_end_time_unix") or 0):
         reasons.append("auction_end_time_changed")
 
+    token_id = int(snapshot.get("token_id") or 0)
+    end_time_unix = int(snapshot.get("end_time_unix") or 0)
+    snapshot_block_time_unix = int(snapshot.get("snapshot_block_time_unix") or 0)
+    boundary_already_refreshed = (
+        int(state.get("last_end_boundary_refresh_token_id") or 0) == token_id
+        and int(state.get("last_end_boundary_refresh_end_time_unix") or 0) == end_time_unix
+    )
+    if (
+        token_id > 0
+        and end_time_unix > 0
+        and snapshot_block_time_unix >= end_time_unix
+        and not bool(snapshot.get("settled"))
+        and not boundary_already_refreshed
+    ):
+        reasons.append("auction_end_time_elapsed")
+
+    pending_reasons: list[str] = []
     if state.get("pending_refresh"):
         pending_age = seconds_since(state.get("pending_refresh_since_utc"), now_utc)
         last_refresh_age = seconds_since(state.get("last_refresh_at_utc"), now_utc)
@@ -1394,6 +1452,18 @@ def decide_refresh(
         return RefreshDecision(False, [])
 
     if pending_backoff_active(state, now_utc):
+        new_major_reasons = [
+            reason
+            for reason in reasons
+            if reason in MAJOR_REFRESH_REASONS
+            and major_refresh_identity_is_new(reason, state, snapshot)
+        ]
+        if new_major_reasons:
+            retry_reasons = ["pending_refresh_after_cooldown"]
+            for reason in [*pending_reasons, *reasons]:
+                if reason not in retry_reasons:
+                    retry_reasons.append(reason)
+            return RefreshDecision(True, retry_reasons, bypassed_cooldown=True)
         return RefreshDecision(False, reasons, cooldown_skip=True, pending_refresh=True)
 
     bypassed = any(reason in MAJOR_REFRESH_REASONS for reason in reasons)
@@ -1475,6 +1545,10 @@ PENDING_REFRESH_IDENTITY_KEYS = [
     "pending_settled",
     "pending_start_time_unix",
     "pending_end_time_unix",
+    "pending_end_boundary_token_id",
+    "pending_end_boundary_end_time_unix",
+    "pending_auction_created_log_id",
+    "pending_auction_settled_log_id",
     "pending_bid_log_id",
     "pending_bid_tx",
     "pending_bid_log_index",
@@ -1495,17 +1569,39 @@ def _clear_pending_refresh_fields(state: dict[str, Any]) -> None:
 def _apply_pending_identity(state: dict[str, Any], snapshot: dict[str, Any], *, now_utc: str, reasons: list[str]) -> None:
     bid_log = get_snapshot_log(snapshot, "bid_log")
     extended_log = get_snapshot_log(snapshot, "extended_log")
+    created_log = get_snapshot_log(snapshot, "created_log")
+    settled_log = get_snapshot_log(snapshot, "settled_log")
     event = latest_activity_event(snapshot)
+    previous_pending_token_id = int(state.get("pending_token_id") or 0)
+    pending_token_id = int(snapshot.get("token_id") or 0)
     state["pending_refresh"] = True
     state.setdefault("pending_refresh_since_utc", now_utc)
     state["pending_refresh_reasons"] = reasons
-    state["pending_token_id"] = int(snapshot.get("token_id") or 0)
+    state["pending_token_id"] = pending_token_id
     state["pending_high_bidder"] = normalize_address(snapshot.get("high_bidder"))
     state["pending_bidder"] = normalize_address(bid_log.get("bidder")) or normalize_address(snapshot.get("high_bidder"))
     state["pending_amount_wei"] = str(snapshot.get("amount_wei") or bid_log.get("amount_wei") or "0")
     state["pending_settled"] = bool(snapshot.get("settled"))
     state["pending_start_time_unix"] = int(snapshot.get("start_time_unix") or 0)
     state["pending_end_time_unix"] = int(snapshot.get("end_time_unix") or extended_log.get("end_time_unix") or 0)
+    snapshot_block_time_unix = int(snapshot.get("snapshot_block_time_unix") or 0)
+    if (
+        "auction_end_time_elapsed" in reasons
+        and state["pending_token_id"] > 0
+        and state["pending_end_time_unix"] > 0
+        and snapshot_block_time_unix >= state["pending_end_time_unix"]
+        and not state["pending_settled"]
+    ):
+        state["pending_end_boundary_token_id"] = state["pending_token_id"]
+        state["pending_end_boundary_end_time_unix"] = state["pending_end_time_unix"]
+    for key, log_id in (
+        ("pending_auction_created_log_id", created_log.get("id", "")),
+        ("pending_auction_settled_log_id", settled_log.get("id", "")),
+    ):
+        if log_id:
+            state[key] = log_id
+        elif pending_token_id != previous_pending_token_id:
+            state[key] = ""
     state["pending_bid_log_id"] = bid_log.get("id", "") or state.get("pending_bid_log_id", "")
     state["pending_bid_tx"] = bid_log.get("tx_hash", "") or state.get("pending_bid_tx", "")
     state["pending_bid_log_index"] = int(bid_log.get("log_index") or state.get("pending_bid_log_index") or 0)
@@ -1712,6 +1808,16 @@ def record_refresh_result(
     state["last_refresh_status"] = status
     state["last_refresh_exit_code"] = exit_code
     if status == "success":
+        if "auction_end_time_elapsed" in reasons:
+            boundary_token_id = int(
+                state.get("pending_end_boundary_token_id") or 0
+            )
+            boundary_end_time = int(
+                state.get("pending_end_boundary_end_time_unix") or 0
+            )
+            if boundary_token_id > 0 and boundary_end_time > 0:
+                state["last_end_boundary_refresh_token_id"] = boundary_token_id
+                state["last_end_boundary_refresh_end_time_unix"] = boundary_end_time
         state["consecutive_refresh_failures"] = 0
         state.pop("last_refresh_error", None)
         state.pop("next_allowed_refresh_after_utc", None)

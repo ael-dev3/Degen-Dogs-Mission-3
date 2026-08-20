@@ -56,13 +56,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#546/684",
+      "display": "#546/685",
       "rank": 546,
       "scope": "base_existing",
-      "total": 684
+      "total": 685
     },
     "schema_version": 1,
-    "search_text": "dog 691 dog #691 691 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.02479 eth 24790000000000000 57.7 $57.70 2026-04-21t21:12:35z 0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1 0x27f8defacfefa4c153d4a58801a7deb02bdb9ae1258cbd1e82f28c3c9301975b #546/684 generated auction feed 0x72f565941ca48ff5b2fae75cf7eea22f81a42fcbb96b7df4d69f5376a4eb6729 0x1e2e3913986d51d0fc9ae855d20494bc01a98fd4cd4c2e59751090f1c5dff6d5 0xe1fc9594196d9a2645bc875a3b5786d707c152f97b86e23188db69bb54462bcf 0x27a1bf1ab3043d322b2857b6828f5493a3670c717f6e80619dca424ce91ff5b1 0x83198f7639cbaf9dba28131008fa5d49a4fde0f1a4ceb6b54ea761571a42ad5f background: none (91.7%) background none body: redbrown (15.5%) body redbrown neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: loopearring (27.2%) ears loopearring head: crazyhair (6.6%) head crazyhair eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 691 dog #691 691 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.02479 eth 24790000000000000 57.7 $57.70 2026-04-21t21:12:35z 0xa35d7bb44dd2f6ee9b8e3eed1a2cae5e0f874f27149e208de8c1fe5c93b24de1 0x27f8defacfefa4c153d4a58801a7deb02bdb9ae1258cbd1e82f28c3c9301975b generated auction feed 0x72f565941ca48ff5b2fae75cf7eea22f81a42fcbb96b7df4d69f5376a4eb6729 0x1e2e3913986d51d0fc9ae855d20494bc01a98fd4cd4c2e59751090f1c5dff6d5 0xe1fc9594196d9a2645bc875a3b5786d707c152f97b86e23188db69bb54462bcf 0x27a1bf1ab3043d322b2857b6828f5493a3670c717f6e80619dca424ce91ff5b1 0x83198f7639cbaf9dba28131008fa5d49a4fde0f1a4ceb6b54ea761571a42ad5f background none body redbrown neck redcollar mouth none ears loopearring head crazyhair eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #546/685 background: none (91.7%) body: redbrown (15.5%) neck: redcollar (29.5%) mouth: none (68.3%) ears: loopearring (27.3%) head: crazyhair (6.6%) eyes: glasses (12.6%)",
     "settlement": {
       "block_number": 45008304,
       "block_time_utc": "2026-04-21T21:12:35Z",
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

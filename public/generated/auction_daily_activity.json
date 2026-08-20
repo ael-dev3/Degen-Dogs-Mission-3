@@ -1,10 +1,20 @@
 [
   {
-    "activity_day": "2026-08-19",
+    "activity_day": "2026-08-20",
     "created_auctions": 1,
     "settled_auctions": 1,
-    "bids": 2,
-    "unique_bidders": 2,
+    "bids": 1,
+    "unique_bidders": 1,
+    "bid_eth": "0.009",
+    "high_bid_eth": "0.009",
+    "settled_eth": "0.01"
+  },
+  {
+    "activity_day": "2026-08-19",
+    "created_auctions": "1",
+    "settled_auctions": "1",
+    "bids": "2",
+    "unique_bidders": "2",
     "bid_eth": "0.011",
     "high_bid_eth": "0.01",
     "settled_eth": "0.011"
