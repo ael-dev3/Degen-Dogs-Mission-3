@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "10000000000000000",
-      "usd_estimate": "23.30910000",
+      "usd_estimate": "23.30775000",
       "usd_estimate_confidence": "live_current",
       "usd_estimate_display": "$23.31",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-20",
-      "usd_estimate_price_usd": "2330.91",
+      "usd_estimate_price_usd": "2330.775",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 684
     },
     "schema_version": 1,
-    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 23.31 $23.31 2026-08-19t20:23:21z 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d #476/684 generated auction feed 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21 background: none (91.7%) background none body: grey (12.9%) body grey neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (6.6%) head crazyhair eyes: masksnorkel (10.1%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0.01 eth 23.31 $23.31 2026-08-19 20:23:21 #476/684 Background: None; Body: Grey; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: MaskSnorkel @0xael.eth 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -72,7 +72,7 @@
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
-        "archive_indexer",
+        "dashboard_builder",
         "generated_auction_timeline",
         "generated_auction_feed"
       ]
