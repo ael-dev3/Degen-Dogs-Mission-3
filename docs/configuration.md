@@ -55,7 +55,7 @@ configured `DEGEN_DOGS_ENV_FILE` is reported as configuration drift.
 | `DOG_METADATA_CACHE_MAX_AGE_SECONDS` | Maximum reuse age for mutable offchain metadata content; default 24 hours. | no |
 | `MISSION3_LOG_CACHE` | Enable the local RPC log cache under `.cache/rpc_logs`; default on. | no |
 | `MISSION3_LOG_CACHE_OVERLAP_BLOCKS` | Re-fetch overlap when extending cached log ranges; default 100 blocks. | no |
-| `MISSION3_LOG_QUORUM_MAX_BLOCKS` | Maximum blocks per recent cross-provider log query; default 50 for the maintained public fallback set. | no |
+| `MISSION3_LOG_QUORUM_MAX_BLOCKS` | Initial blocks per recent cross-provider log query; default 500. Qualified providers negotiate the largest two-witness span and explicit range/response-size rejections halve it; generic failures never split the query. | no |
 | `MISSION3_LOG_QUORUM_WINDOW_BLOCKS` | Maximum recent window split into quorum-checked log queries; default 500. | no |
 | `MISSION3_BALANCE_CACHE` | Enable the local WOOF holder balance cache under `.cache/woof_balances.json`; default on. | no |
 | `NEYNAR_API_KEY` | Optional Farcaster profile resolution. If Neynar returns HTTP 401/403, the refresh now disables Neynar for that run after the first failed request and keeps wallet/current-miniapp fallbacks instead of spending ~25s retrying every chunk. | yes |

@@ -109,6 +109,17 @@ def write_fixture(root: Path) -> None:
     }
     write_json(root / "generated" / "current_auction.json", [current])
     write_json(root / "public" / "generated" / "current_auction.json", [current])
+    live_sources = {
+        "auction_feed.json": [{"dog": "Dog #732", "status": "ongoing"}],
+        "current_auction_bid_history.json": [],
+    }
+    for filename, payload in live_sources.items():
+        write_json(root / "generated" / filename, payload)
+        write_json(root / "public" / "generated" / filename, payload)
+    write_json(
+        root / "public" / "generated" / "unified_dog_search_index.json",
+        [{"dog_id": 732, "mission": 3}],
+    )
 
 
 def base_env(root: Path) -> dict[str, str]:
@@ -160,6 +171,12 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         assert status["dog_token_uri_present_count"] == 792
         assert status["dog_token_uri_unavailable_count"] == 0
         assert status["dog_metadata_verification_status"] == "complete_onchain_token_uri_verified"
+        assert status["live_snapshot_bundle"].startswith(
+            "live_snapshot_46822740_"
+        )
+        assert status["live_snapshot_bundle_sha256"] in status["live_snapshot_bundle"]
+        assert status["live_snapshot_bundle_bytes"] > 0
+        assert status["unified_dog_search_bytes"] > 0
         generated = telemetry.generated_state(root)
         for key in (
             "dog_token_uri_verification_status",
@@ -173,6 +190,11 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         assert "/Users/" not in json.dumps(status)
         validated = telemetry.validate_refresh_status(root=root)
         assert validated == status
+        rewritten = telemetry.write_refresh_status(env, root=root)
+        assert rewritten["live_snapshot_bundle"] == status["live_snapshot_bundle"]
+        assert rewritten["live_snapshot_bundle_sha256"] == status[
+            "live_snapshot_bundle_sha256"
+        ]
 
         malformed = dict(status)
         malformed["snapshot_confirmations"] = "1"
@@ -281,19 +303,29 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         write_fixture(root)
         env = base_env(root)
         expected = telemetry.write_refresh_status(env, root=root, prefer_current_env=True)
+        expected_bundle = (
+            root / "public" / "generated" / expected["live_snapshot_bundle"]
+        ).read_bytes()
         stale = dict(expected)
         stale["latest_generated_block"] = int(expected["latest_generated_block"]) - 1
 
-        calls = iter([0.0, 0.0, 2.0])
-        telemetry.time.monotonic = lambda: next(calls)
-        telemetry.time.sleep = lambda _seconds: None
-        fetched_urls: list[str] = []
+        clock = {"now": 0.0}
+        telemetry.time.monotonic = lambda: clock["now"]
+        telemetry.time.sleep = lambda seconds: clock.__setitem__(
+            "now",
+            clock["now"] + seconds,
+        )
+        status_urls: list[str] = []
+        bundle_urls: list[str] = []
 
         def fetch_raw_only(url: str) -> Any:
-            fetched_urls.append(url)
+            status_urls.append(url)
             return expected if "raw.githubusercontent.com" in url else stale
 
         telemetry.fetch_json = fetch_raw_only
+        telemetry.fetch_live_bytes = lambda url, **_kwargs: (
+            bundle_urls.append(url) or expected_bundle
+        )
         raw_only = telemetry.verify_live(
             env,
             root=root,
@@ -306,11 +338,22 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         assert raw_only["raw_main_verified"] is True
         assert raw_only["live_verify_source"] is None
         assert "latest_generated_block" in raw_only["error"]
-        assert any(f"/{env['DEGEN_DOGS_COMMIT_SHA']}/public/generated/refresh_status.json?" in url for url in fetched_urls)
-        assert all("/main/public/generated/refresh_status.json" not in url for url in fetched_urls)
+        assert sum("raw.githubusercontent.com" in url for url in status_urls) == 1
+        assert sum("raw.githubusercontent.com" in url for url in bundle_urls) == 1
+        assert any(
+            f"/{env['DEGEN_DOGS_COMMIT_SHA']}/public/generated/refresh_status.json?"
+            in url
+            for url in status_urls
+        )
+        assert all(
+            "/main/public/generated/refresh_status.json" not in url
+            for url in status_urls
+        )
 
+        clock["now"] = 0.0
         telemetry.time.monotonic = lambda: 0.0
         telemetry.fetch_json = lambda _url: expected
+        telemetry.fetch_live_bytes = lambda _url, **_kwargs: expected_bundle
         both = telemetry.verify_live(
             env,
             root=root,
@@ -322,24 +365,40 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         assert both["raw_commit_verified"] is True
         assert both["raw_main_verified"] is True
         assert both["live_verify_source"] == "github_pages"
+        assert both["live_snapshot_bundle_verified"] is True
 
-        # Immutable raw commit evidence remains valid once observed. A later
-        # transient raw-host failure must not erase it just as Pages catches up.
-        monotonic_calls = iter([0.0, 0.0, 0.5])
-        telemetry.time.monotonic = lambda: next(monotonic_calls)
-        responses: list[Any] = [expected, stale, RuntimeError("transient raw failure"), expected]
+        # Immutable raw status+bundle evidence is fetched once and latched
+        # while Pages status retries. Pages fetches its bundle only after its
+        # status pointer exactly matches.
+        clock["now"] = 0.0
+        telemetry.time.monotonic = lambda: clock["now"]
+        raw_status_calls = 0
+        raw_bundle_calls = 0
+        pages_status_calls = 0
+        pages_bundle_calls = 0
 
-        def fetch_with_transient_raw_failure(_url: str) -> Any:
-            response = responses.pop(0)
-            if isinstance(response, Exception):
-                raise response
-            return response
+        def fetch_latched_status(url: str) -> Any:
+            nonlocal raw_status_calls, pages_status_calls
+            if "raw.githubusercontent.com" in url:
+                raw_status_calls += 1
+                return expected
+            pages_status_calls += 1
+            return expected if pages_status_calls >= 3 else stale
 
-        telemetry.fetch_json = fetch_with_transient_raw_failure
+        def fetch_latched_bundle(url: str, **_kwargs: Any) -> bytes:
+            nonlocal raw_bundle_calls, pages_bundle_calls
+            if "raw.githubusercontent.com" in url:
+                raw_bundle_calls += 1
+            else:
+                pages_bundle_calls += 1
+            return expected_bundle
+
+        telemetry.fetch_json = fetch_latched_status
+        telemetry.fetch_live_bytes = fetch_latched_bundle
         latched = telemetry.verify_live(
             env,
             root=root,
-            timeout_seconds=1,
+            timeout_seconds=5,
             interval_seconds=1,
             base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
         )
@@ -347,7 +406,34 @@ def test_verify_live_requires_full_github_pages_status_parity() -> None:
         assert latched["raw_commit_verified"] is True
         assert latched["raw_main_verified"] is True
         assert latched["live_verify_source"] == "github_pages"
-        assert responses == []
+        assert raw_status_calls == 1
+        assert raw_bundle_calls == 1
+        assert pages_status_calls == 3
+        assert pages_bundle_calls == 1
+
+        # Exact pointer hash/size verification is fail closed even when Pages
+        # has already deployed a valid copy.
+        clock["now"] = 0.0
+        telemetry.fetch_json = lambda _url: expected
+
+        def corrupt_raw_bundle(url: str, **_kwargs: Any) -> bytes:
+            return (
+                expected_bundle[:-1] + b"x"
+                if "raw.githubusercontent.com" in url
+                else expected_bundle
+            )
+
+        telemetry.fetch_live_bytes = corrupt_raw_bundle
+        corrupt = telemetry.verify_live(
+            env,
+            root=root,
+            timeout_seconds=1,
+            interval_seconds=1,
+            base_url="https://ael-dev3.github.io/Degen-Dogs-Mission-3/",
+        )
+        assert corrupt["live_verify_result"] == "timeout"
+        assert corrupt["raw_commit_verified"] is False
+        assert corrupt["live_snapshot_bundle_verified"] is False
 
         assert telemetry.snapshot_mismatch(expected, expected) == ""
         unexpected_null = dict(expected)
@@ -481,6 +567,15 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
     commit_sha = "a" * 40
     raw_url = f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1"
     pages_url = "https://ael-dev3.github.io/Degen-Dogs-Mission-3/generated/refresh_status.json?cache_bust=1"
+    bundle_name = f"live_snapshot_123_{'b' * 64}_{'c' * 64}.json"
+    raw_bundle_url = (
+        f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/"
+        f"public/generated/{bundle_name}?cache_bust=1"
+    )
+    pages_bundle_url = (
+        f"https://ael-dev3.github.io/Degen-Dogs-Mission-3/generated/{bundle_name}"
+        "?cache_bust=1"
+    )
     payload = {"kind": "refresh_status", "latest_generated_block": 123}
     encoded = json.dumps(payload).encode()
     try:
@@ -493,6 +588,19 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
         telemetry.LIVE_STATUS_OPENER = Opener(pages_response)
         assert telemetry.fetch_json(pages_url) == payload
 
+        raw_bundle_response = Response(encoded, "text/plain; charset=utf-8")
+        telemetry.LIVE_STATUS_OPENER = Opener(raw_bundle_response)
+        assert telemetry.fetch_live_bytes(
+            raw_bundle_url,
+            max_bytes=len(encoded),
+        ) == encoded
+        pages_bundle_response = Response(encoded, "application/json; charset=utf-8")
+        telemetry.LIVE_STATUS_OPENER = Opener(pages_bundle_response)
+        assert telemetry.fetch_live_bytes(
+            pages_bundle_url,
+            max_bytes=len(encoded),
+        ) == encoded
+
         unsafe_urls = (
             f"http://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
             f"https://raw.githubusercontent.com./ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
@@ -503,6 +611,8 @@ def test_live_verify_transport_accepts_raw_text_plain_and_pages_json_only() -> N
             f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}%2fmain/public/generated/refresh_status.json?cache_bust=1",
             f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1&next=evil",
             f"https://raw.githubusercontent.com:443/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json?cache_bust=1",
+            f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/live_snapshot_attacker.json?cache_bust=1",
+            f"https://ael-dev3.github.io/Degen-Dogs-Mission-3/generated/{bundle_name}/extra?cache_bust=1",
         )
         for unsafe_url in unsafe_urls:
             try:

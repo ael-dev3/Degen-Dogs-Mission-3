@@ -96,6 +96,9 @@ REFRESH_STATUS_INTEGER_FIELDS = frozenset(
         "dog_rarity_attested_block",
         "dog_rarity_continuity_through_block",
         "dog_rarity_extension_mint_count",
+        "live_snapshot_bundle_bytes",
+        "live_snapshot_bundle_schema_version",
+        "unified_dog_search_bytes",
     }
 )
 
@@ -1966,6 +1969,7 @@ def verify_rarity_universe_continuity(
     quantity_pattern = re.compile(r"0x(?:0|[1-9a-f][0-9a-f]*)")
     observed_minted_token_ids: list[int] = []
     seen_log_identities: set[tuple[str, str, int]] = set()
+    observed_block_hashes: dict[int, str] = {}
     previous_log_position: tuple[int, int, int] | None = None
 
     def rpc_quantity(row: dict[str, Any], key: str) -> int:
@@ -1975,16 +1979,32 @@ def verify_rarity_universe_continuity(
         return int(raw, 16)
 
     start_block = continuity_through + 1
-    chunk_size = max(1, int(builder.LOG_QUORUM_MAX_BLOCKS))
+    chunk_size = max(
+        1,
+        min(
+            int(builder.LOG_QUORUM_MAX_BLOCKS),
+            int(getattr(builder, "VERIFIED_LOG_MAX_BLOCKS", builder.LOG_QUORUM_MAX_BLOCKS)),
+        ),
+    )
     while start_block <= latest_block:
         end_block = min(latest_block, start_block + chunk_size - 1)
-        result, _agreeing_urls = builder.rpc_quorum(
-            "eth_getLogs",
-            [builder.log_filter(builder.DEGEN_DOGS, list(RARITY_MUTATION_TOPICS), start_block, end_block)],
-            urls=builder.VERIFIED_LOG_URLS,
-            min_agreement=builder.RPC_QUORUM_SIZE,
-            timeout=builder.LOG_RPC_TIMEOUT,
-        )
+        try:
+            result, _agreeing_urls = builder.rpc_quorum(
+                "eth_getLogs",
+                [builder.log_filter(builder.DEGEN_DOGS, list(RARITY_MUTATION_TOPICS), start_block, end_block)],
+                urls=builder.VERIFIED_LOG_URLS,
+                min_agreement=builder.RPC_QUORUM_SIZE,
+                timeout=builder.LOG_RPC_TIMEOUT,
+            )
+        except builder.RpcLogRangeLimit:
+            # Only a typed, explicit provider range/response-size rejection is
+            # safe to amplify into smaller queries. Transport and quorum
+            # failures propagate unchanged so an outage cannot create a burst.
+            attempted_span = end_block - start_block + 1
+            if attempted_span <= 1:
+                raise
+            chunk_size = max(1, attempted_span // 2)
+            continue
         if not isinstance(result, list):
             raise FullRefreshRequired("Dog rarity continuity log quorum returned a non-list")
         for row in result:
@@ -1992,8 +2012,8 @@ def verify_rarity_universe_continuity(
                 raise FullRefreshRequired("Dog rarity continuity log is not an object")
             if str(row.get("address") or "").lower() != dog_address:
                 raise FullRefreshRequired("Dog rarity continuity log has the wrong contract address")
-            if "removed" in row and row["removed"] is not False:
-                raise FullRefreshRequired("Dog rarity continuity log is marked removed")
+            if type(row.get("removed")) is not bool or row["removed"] is not False:
+                raise FullRefreshRequired("Dog rarity continuity log has a removed or malformed flag")
             block_number = rpc_quantity(row, "blockNumber")
             transaction_index = rpc_quantity(row, "transactionIndex")
             log_index = rpc_quantity(row, "logIndex")
@@ -2005,6 +2025,9 @@ def verify_rarity_universe_continuity(
                 r"0x[0-9a-f]{64}", transaction_hash
             ):
                 raise FullRefreshRequired("Dog rarity continuity log has a malformed block or transaction hash")
+            known_block_hash = observed_block_hashes.setdefault(block_number, block_hash)
+            if known_block_hash != block_hash:
+                raise FullRefreshRequired("Dog rarity continuity logs disagree on a block hash")
             identity = (block_hash, transaction_hash, log_index)
             if identity in seen_log_identities:
                 raise FullRefreshRequired("Dog rarity continuity log is duplicated")
@@ -4183,6 +4206,12 @@ def main() -> None:
         }
     )
     write_json("refresh_status", normalize_refresh_status_integer_fields(refresh_status))
+
+    # Repoint the dashboard only after all four live source mirrors and the
+    # verified refresh status have reached the same bounded-refresh checkpoint.
+    from build_live_snapshot_bundle import build_live_snapshot_bundle
+
+    build_live_snapshot_bundle(root=ROOT)
 
     manifest_rows = []
     for name in builder.OUTPUT_TABLES:

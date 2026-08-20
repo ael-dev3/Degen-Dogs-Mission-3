@@ -26,6 +26,7 @@ chmod +x "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'npm ci --ignore-scripts' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'artifact_rel_pattern.fullmatch(rel)' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'literal-pathspecs add --pathspec-from-file' "$TEST_REPO/scripts/refresh_and_publish.sh"
+grep -q 'live_bundle_name.fullmatch(path.name)' "$TEST_REPO/scripts/refresh_and_publish.sh"
 
 printf '%s\n' '{"scripts":{"refresh:current":"node scripts/fail_generation.js"}}' > "$TEST_REPO/package.json"
 printf '%s\n' 'baseline' > "$TEST_REPO/generated/value.txt"
@@ -233,11 +234,15 @@ printf '%s\n' \
   "fs.writeFileSync('generated/auction_feed.csv', 'id\\n2\\n');" \
   "fs.writeFileSync('generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" \
   "fs.writeFileSync('public/generated/auction_feed.csv', 'id\\n2\\n');" \
-  "fs.writeFileSync('public/generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" >"$SUCCESS_REPO/scripts/success_generation.js"
+  "fs.writeFileSync('public/generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" \
+  "const liveBundle = 'live_snapshot_123_' + 'a'.repeat(64) + '_' + 'b'.repeat(64) + '.json';" \
+  "fs.writeFileSync('generated/' + liveBundle, '{\\\"fixture\\\":true}\\n');" \
+  "fs.writeFileSync('public/generated/' + liveBundle, '{\\\"fixture\\\":true}\\n');" >"$SUCCESS_REPO/scripts/success_generation.js"
 printf '%s\n' \
   "const fs = require('fs');" \
   "fs.writeFileSync(process.env.VALIDATOR_MARKER, 'validated\\n');" >"$SUCCESS_REPO/scripts/validate_marker.js"
 printf '%s\n' '# fixture compiles' >"$SUCCESS_REPO/scripts/build_dashboard.py"
+printf '%s\n' '# fixture compiles' >"$SUCCESS_REPO/scripts/build_live_snapshot_bundle.py"
 printf '%s\n' \
   '#!/usr/bin/env python3' \
   'from __future__ import annotations' \
@@ -309,6 +314,12 @@ if git -C "$SUCCESS_REPO" cat-file -e HEAD^:generated/obsolete.json 2>/dev/null 
 fi
 if git -C "$SUCCESS_REPO" cat-file -e HEAD:public/generated/obsolete.json 2>/dev/null; then
   echo "tracked public deletion was not committed" >&2
+  exit 1
+fi
+LIVE_BUNDLE_FIXTURE="live_snapshot_123_$(printf 'a%.0s' {1..64})_$(printf 'b%.0s' {1..64}).json"
+if ! git -C "$SUCCESS_REPO" cat-file -e "HEAD:generated/$LIVE_BUNDLE_FIXTURE" 2>/dev/null || \
+  ! git -C "$SUCCESS_REPO" cat-file -e "HEAD:public/generated/$LIVE_BUNDLE_FIXTURE" 2>/dev/null; then
+  echo "immutable live snapshot mirrors were not included in the publisher inventory" >&2
   exit 1
 fi
 if [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- README.md index.html generated public)" ]]; then

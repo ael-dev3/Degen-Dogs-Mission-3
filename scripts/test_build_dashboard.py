@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import time
@@ -33,6 +34,28 @@ def load_module() -> Any:
 
 def log(block: int, tx: str, index: int) -> dict[str, Any]:
     return {"blockNumber": hex(block), "transactionHash": tx, "logIndex": hex(index), "data": "0x", "topics": []}
+
+
+def canonical_log(
+    address: str,
+    topic: str,
+    block: int,
+    *,
+    transaction_index: int = 0,
+    log_index: int = 0,
+) -> dict[str, Any]:
+    seed = f"{block}:{transaction_index}:{log_index}".encode("utf-8")
+    return {
+        "address": address,
+        "blockHash": "0x" + hashlib.sha256(b"block:" + str(block).encode("ascii")).hexdigest(),
+        "blockNumber": hex(block),
+        "data": "0x",
+        "logIndex": hex(log_index),
+        "removed": False,
+        "topics": [topic],
+        "transactionHash": "0x" + hashlib.sha256(b"tx:" + seed).hexdigest(),
+        "transactionIndex": hex(transaction_index),
+    }
 
 
 def rarity_attributes(**overrides: str) -> list[dict[str, str]]:
@@ -1661,6 +1684,11 @@ def test_log_quorum_canonicalizes_and_enforces_transaction_index() -> None:
     assert dashboard._canonical_rpc_result("eth_getLogs", [canonical]) != dashboard._canonical_rpc_result(
         "eth_getLogs", [conflicting]
     )
+    missing_removed = dict(canonical)
+    missing_removed.pop("removed")
+    assert dashboard._canonical_rpc_result(
+        "eth_getLogs", [canonical]
+    ) != dashboard._canonical_rpc_result("eth_getLogs", [missing_removed])
 
     old_rpc_once = dashboard._rpc_once
     answers = {urls[0]: [canonical], urls[1]: [conflicting]}
@@ -1678,6 +1706,69 @@ def test_log_quorum_canonicalizes_and_enforces_transaction_index() -> None:
             raise AssertionError("log quorum accepted conflicting transaction indexes")
     finally:
         dashboard._rpc_once = old_rpc_once
+
+
+def test_log_quorum_never_selects_missing_removed_by_response_order() -> None:
+    dashboard = load_module()
+    address = "0x" + "a" * 40
+    topic = dashboard.TOPIC_AUCTION_CREATED
+    explicit = canonical_log(address, topic, 100)
+    missing = dict(explicit)
+    missing.pop("removed")
+    urls = [
+        "https://missing.example",
+        "https://valid-one.example",
+        "https://valid-two.example",
+    ]
+    old_call = dashboard._rpc_once_with_retry
+    try:
+        for missing_delay in (0.0, 0.03):
+            dashboard.RPC_SLOW_UNTIL.clear()
+            delays = {
+                urls[0]: missing_delay,
+                urls[1]: 0.01 if missing_delay == 0 else 0.0,
+                urls[2]: 0.02 if missing_delay == 0 else 0.0,
+            }
+
+            def fake_call(
+                url: str,
+                _method: str,
+                _params: list[Any],
+                *,
+                timeout: int = 30,  # noqa: ARG001
+            ) -> Any:
+                time.sleep(delays[url])
+                return [missing] if url == urls[0] else [explicit]
+
+            dashboard._rpc_once_with_retry = fake_call
+            result, providers = dashboard.rpc_quorum(
+                "eth_getLogs", [{}], urls=urls, min_agreement=2
+            )
+            assert result == [explicit]
+            assert len(providers) == 2
+            validated, _position = dashboard._validated_quorum_log_chunk(
+                result,
+                address=address,
+                topics=topic,
+                from_block=100,
+                to_block=100,
+                seen_identities=set(),
+                previous_position=None,
+                block_hashes={},
+            )
+            assert validated == [explicit]
+    finally:
+        dashboard._rpc_once_with_retry = old_call
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+
+def test_explicit_log_range_classifier_is_narrow() -> None:
+    dashboard = load_module()
+    assert dashboard.is_explicit_log_range_error(-32005, "maximum block range is 250") is True
+    assert dashboard.is_explicit_log_range_error(-32000, "too many results; please limit the query") is True
+    assert dashboard.is_explicit_log_range_error(-32000, "upstream timeout") is False
+    assert dashboard.is_explicit_log_range_error(-32000, "rate limit exceeded") is False
+    assert dashboard.is_explicit_log_range_error(413, "response size") is False
 
 
 def test_rpc_circuit_breaker_keeps_a_spare_provider_for_later_quorums() -> None:
@@ -2335,7 +2426,7 @@ def test_long_log_scan_always_quorum_checks_recent_tail() -> None:
         dashboard._fetch_logs_checkpointed = fake_checkpointed
         dashboard.rpc_quorum = fake_quorum
         assert dashboard._fetch_logs_verified_or_uncached(
-            "0xabc",
+            "0x" + "a" * 40,
             dashboard.TOPIC_AUCTION_CREATED,
             0,
             1000,
@@ -2349,6 +2440,258 @@ def test_long_log_scan_always_quorum_checks_recent_tail() -> None:
 
     assert prefix_calls == [(0, 500)]
     assert tail_calls == [(start, min(1000, start + 49)) for start in range(501, 1001, 50)]
+
+
+def test_adaptive_quorum_log_scan_large_range_matches_legacy_small_ranges() -> None:
+    dashboard = load_module()
+    address = "0x" + "a" * 40
+    topic = dashboard.TOPIC_AUCTION_CREATED
+    expected = [
+        canonical_log(address, topic, 520, transaction_index=1),
+        canonical_log(address, topic, 750, transaction_index=2),
+        canonical_log(address, topic, 999, transaction_index=3),
+    ]
+
+    def run_with_span(span: int) -> tuple[list[dict[str, Any]], list[tuple[int, int]]]:
+        old_verified = list(dashboard.VERIFIED_LOG_URLS)
+        old_max = dashboard.LOG_QUORUM_MAX_BLOCKS
+        old_effective = dashboard.VERIFIED_LOG_MAX_BLOCKS
+        old_window = dashboard.LOG_QUORUM_WINDOW_BLOCKS
+        old_quorum = dashboard.rpc_quorum
+        calls: list[tuple[int, int]] = []
+
+        def fake_quorum(method: str, params: list[Any], **kwargs: Any) -> tuple[list[Any], list[str]]:
+            assert method == "eth_getLogs"
+            assert kwargs["min_agreement"] == 2
+            request = params[0]
+            start = int(request["fromBlock"], 16)
+            end = int(request["toBlock"], 16)
+            calls.append((start, end))
+            return [row for row in expected if start <= int(row["blockNumber"], 16) <= end], [
+                "https://one.example",
+                "https://two.example",
+            ]
+
+        try:
+            dashboard.VERIFIED_LOG_URLS = ["https://one.example", "https://two.example"]
+            dashboard.LOG_QUORUM_MAX_BLOCKS = span
+            dashboard.VERIFIED_LOG_MAX_BLOCKS = span
+            dashboard.LOG_QUORUM_WINDOW_BLOCKS = 500
+            dashboard.rpc_quorum = fake_quorum
+            result = dashboard._fetch_logs_verified_or_uncached(address, topic, 501, 1000)
+        finally:
+            dashboard.VERIFIED_LOG_URLS = old_verified
+            dashboard.LOG_QUORUM_MAX_BLOCKS = old_max
+            dashboard.VERIFIED_LOG_MAX_BLOCKS = old_effective
+            dashboard.LOG_QUORUM_WINDOW_BLOCKS = old_window
+            dashboard.rpc_quorum = old_quorum
+        return result, calls
+
+    large_result, large_calls = run_with_span(500)
+    legacy_result, legacy_calls = run_with_span(50)
+    assert large_result == legacy_result == expected
+    assert large_calls == [(501, 1000)]
+    assert len(legacy_calls) == 10
+
+
+def test_adaptive_quorum_log_scan_splits_only_explicit_range_rejections() -> None:
+    dashboard = load_module()
+    address = "0x" + "a" * 40
+    topic = dashboard.TOPIC_AUCTION_CREATED
+    expected = [
+        canonical_log(address, topic, 520, transaction_index=1),
+        canonical_log(address, topic, 750, transaction_index=2),
+        canonical_log(address, topic, 999, transaction_index=3),
+    ]
+    old_verified = list(dashboard.VERIFIED_LOG_URLS)
+    old_max = dashboard.LOG_QUORUM_MAX_BLOCKS
+    old_effective = dashboard.VERIFIED_LOG_MAX_BLOCKS
+    old_window = dashboard.LOG_QUORUM_WINDOW_BLOCKS
+    old_quorum = dashboard.rpc_quorum
+    calls: list[tuple[int, int]] = []
+
+    def bounded_quorum(_method: str, params: list[Any], **_kwargs: Any) -> tuple[list[Any], list[str]]:
+        request = params[0]
+        start = int(request["fromBlock"], 16)
+        end = int(request["toBlock"], 16)
+        calls.append((start, end))
+        if end - start + 1 > 250:
+            raise dashboard.RpcLogRangeLimit("explicit provider range limit")
+        return [row for row in expected if start <= int(row["blockNumber"], 16) <= end], [
+            "https://one.example",
+            "https://two.example",
+        ]
+
+    try:
+        dashboard.VERIFIED_LOG_URLS = ["https://one.example", "https://two.example"]
+        dashboard.LOG_QUORUM_MAX_BLOCKS = 500
+        dashboard.VERIFIED_LOG_MAX_BLOCKS = 500
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = 500
+        dashboard.rpc_quorum = bounded_quorum
+        result = dashboard._fetch_logs_verified_or_uncached(address, topic, 501, 1000)
+    finally:
+        dashboard.VERIFIED_LOG_URLS = old_verified
+        dashboard.LOG_QUORUM_MAX_BLOCKS = old_max
+        dashboard.VERIFIED_LOG_MAX_BLOCKS = old_effective
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = old_window
+        dashboard.rpc_quorum = old_quorum
+
+    assert result == expected
+    assert calls == [(501, 1000), (501, 750), (751, 1000)]
+
+
+def test_adaptive_quorum_log_scan_does_not_split_generic_failures() -> None:
+    dashboard = load_module()
+    address = "0x" + "a" * 40
+    old_verified = list(dashboard.VERIFIED_LOG_URLS)
+    old_max = dashboard.LOG_QUORUM_MAX_BLOCKS
+    old_effective = dashboard.VERIFIED_LOG_MAX_BLOCKS
+    old_window = dashboard.LOG_QUORUM_WINDOW_BLOCKS
+    old_quorum = dashboard.rpc_quorum
+    calls = 0
+
+    def failed_quorum(*_args: Any, **_kwargs: Any) -> tuple[list[Any], list[str]]:
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("transport/quorum unavailable")
+
+    try:
+        dashboard.VERIFIED_LOG_URLS = ["https://one.example", "https://two.example"]
+        dashboard.LOG_QUORUM_MAX_BLOCKS = 500
+        dashboard.VERIFIED_LOG_MAX_BLOCKS = 500
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = 500
+        dashboard.rpc_quorum = failed_quorum
+        try:
+            dashboard._fetch_logs_verified_or_uncached(
+                address,
+                dashboard.TOPIC_AUCTION_CREATED,
+                501,
+                1000,
+            )
+        except RuntimeError as exc:
+            assert type(exc) is RuntimeError
+            assert "transport/quorum unavailable" in str(exc)
+        else:
+            raise AssertionError("generic quorum failure was amplified into smaller log queries")
+    finally:
+        dashboard.VERIFIED_LOG_URLS = old_verified
+        dashboard.LOG_QUORUM_MAX_BLOCKS = old_max
+        dashboard.VERIFIED_LOG_MAX_BLOCKS = old_effective
+        dashboard.LOG_QUORUM_WINDOW_BLOCKS = old_window
+        dashboard.rpc_quorum = old_quorum
+    assert calls == 1
+
+
+def test_verified_log_scan_rejects_out_of_range_and_malformed_rows() -> None:
+    dashboard = load_module()
+    address = "0x" + "a" * 40
+    topic = dashboard.TOPIC_AUCTION_CREATED
+    valid = canonical_log(address, topic, 550)
+    wrong_address = {**valid, "address": "0x" + "b" * 40}
+    out_of_range = {**valid, "blockNumber": hex(1001)}
+    wrong_topic = {**valid, "topics": [dashboard.TOPIC_AUCTION_BID]}
+    malformed = dict(valid)
+    malformed.pop("transactionIndex")
+    missing_removed = dict(valid)
+    missing_removed.pop("removed")
+
+    for rows, expected in (
+        ([wrong_address], "wrong contract address"),
+        ([out_of_range], "outside its requested block range"),
+        ([wrong_topic], "unexpected event topic"),
+        ([malformed], "malformed transactionIndex"),
+        ([missing_removed], "removed or malformed log"),
+        ([None], "non-object log"),
+    ):
+        try:
+            dashboard._validated_quorum_log_chunk(
+                rows,
+                address=address,
+                topics=topic,
+                from_block=501,
+                to_block=1000,
+                seen_identities=set(),
+                previous_position=None,
+                block_hashes={},
+            )
+        except dashboard.RpcLogValidationError as exc:
+            assert expected in str(exc)
+        else:
+            raise AssertionError(f"malformed quorum logs were accepted: {expected}")
+
+
+def test_log_quorum_range_classification_never_uses_generic_failures() -> None:
+    dashboard = load_module()
+    urls = ["https://one.example", "https://two.example"]
+    old_call = dashboard._rpc_once_with_retry
+
+    try:
+        dashboard._rpc_once_with_retry = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            dashboard.RpcLogRangeLimit("explicit range rejection")
+        )
+        try:
+            dashboard.rpc_quorum("eth_getLogs", [{}], urls=urls, min_agreement=2)
+        except dashboard.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("explicit two-provider range rejection was not classified")
+
+        dashboard.RPC_SLOW_UNTIL.clear()
+        dashboard._rpc_once_with_retry = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            RuntimeError("transport unavailable")
+        )
+        try:
+            dashboard.rpc_quorum("eth_getLogs", [{}], urls=urls, min_agreement=2)
+        except dashboard.RpcLogRangeLimit as exc:
+            raise AssertionError("generic provider failure was classified as a range limit") from exc
+        except RuntimeError as exc:
+            assert "quorum disagreement" in str(exc)
+        else:
+            raise AssertionError("generic provider failure unexpectedly formed quorum")
+    finally:
+        dashboard._rpc_once_with_retry = old_call
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+
+def test_log_quorum_range_rejection_does_not_wait_for_hung_spare() -> None:
+    dashboard = load_module()
+    urls = ["https://one.example", "https://two.example", "https://three.example"]
+    old_call = dashboard._rpc_once_with_retry
+    old_deadline = dashboard.RPC_QUORUM_DEADLINE_SECONDS
+
+    def fake_call(url: str, *_args: Any, **_kwargs: Any) -> Any:
+        if url == urls[-1]:
+            time.sleep(2.0)
+            return []
+        raise dashboard.RpcLogRangeLimit("explicit range rejection")
+
+    try:
+        dashboard.RPC_SLOW_UNTIL.clear()
+        dashboard.RPC_QUORUM_DEADLINE_SECONDS = 2.0
+        dashboard._rpc_once_with_retry = fake_call
+        started = time.monotonic()
+        try:
+            dashboard.rpc_quorum("eth_getLogs", [{}], urls=urls, min_agreement=2)
+        except dashboard.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("range-limited quorum unexpectedly waited for the spare")
+        elapsed = time.monotonic() - started
+        assert elapsed < 1.0, f"range split waited {elapsed:.3f}s for a hung spare"
+    finally:
+        dashboard._rpc_once_with_retry = old_call
+        dashboard.RPC_QUORUM_DEADLINE_SECONDS = old_deadline
+        dashboard.RPC_SLOW_UNTIL.clear()
+
+
+def test_log_range_error_classifier_requires_explicit_size_language() -> None:
+    dashboard = load_module()
+    assert dashboard.is_explicit_log_range_error(-32000, "maximum block range is 500")
+    assert dashboard.is_explicit_log_range_error(-32602, "block range too large")
+    assert dashboard.is_explicit_log_range_error(-32005, "query returned more than 10000 results")
+    assert not dashboard.is_explicit_log_range_error(-32000, "block range temporarily unavailable")
+    assert not dashboard.is_explicit_log_range_error(-32602, "invalid block range")
+    assert not dashboard.is_explicit_log_range_error(413, "maximum block range is 500")
 
 
 def test_snapshot_recheck_rejects_mid_refresh_reorg() -> None:
@@ -2466,7 +2809,9 @@ def test_write_html_hydrates_every_current_surface_without_overlapping_polls() -
         "data-current-rewards",
         "data-current-traits",
         "data-current-dog-stage",
-        "const LIVE_REFRESH_MS=10000",
+        "const LIVE_REFRESH_MS=5000",
+        "const LIVE_RECENT_MS=5*60*1000",
+        "const LIVE_RETRY_MAX_MS=2*60*1000",
         "const CURRENT_FETCH_TIMEOUT_MS=6000",
         "const ARCHIVE_FETCH_TIMEOUT_MS=45000",
         "const controller=new AbortController()",
@@ -2475,25 +2820,43 @@ def test_write_html_hydrates_every_current_surface_without_overlapping_polls() -
         "cache:'no-store'",
         "const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI)",
         "return [url.href]",
-        "fetchGenerated('current_auction',nextBlock)",
-        "fetchGenerated('auction_feed',nextBlock)",
-        "fetchGenerated('current_auction_bid_history',nextBlock)",
-        "fetchGenerated('mission3_metrics',nextBlock)",
+        "fetchGenerated('current_auction',block)",
+        "fetchGenerated('auction_feed',block)",
+        "fetchGenerated('current_auction_bid_history',block)",
+        "fetchGenerated('mission3_metrics',block)",
+        "const fetchVerifiedGenerated=async(filename,expectedSha,expectedBytes,maxBytes,timeoutMs)=>",
+        "crypto.subtle.digest('SHA-256',bytes)",
+        "const liveSnapshotPointer=status=>",
+        "const archivePointer=status=>",
+        "const assertLiveBundle=",
+        "const loadLiveSnapshot=async status=>",
+        "live snapshot pointer changed during verification",
+        "target.archive?await fetchVerifiedGenerated('unified_dog_search_index.json'",
         "const assertCurrentSnapshot=",
         "const assertStatusAttestation=status=>",
+        "if(!statusFreshness(status).usable)throw new Error('verified snapshot is unsuccessful or has invalid timestamps')",
         "const canonicalUint=(value,label,minimum=0)=>",
         "const assertArchiveSnapshot=",
         "const queueArchiveRefresh=context=>",
-        "if(target.key!==liveSnapshotKey)continue",
+        "if(target.key!==liveSnapshotKey||targetArchiveKey!==activeArchiveKey)continue",
         "generated snapshot is not atomic yet",
-        "hydrateCurrentCard(feed,current,historyRows,metrics)",
-        "if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context)",
-        "refreshLiveSurface().finally(scheduleLiveRefresh)",
-        "window.addEventListener('online',refreshLiveSurface)",
+        "hydrateCurrentCard(context.feed,context.current,context.history,context.metrics)",
+        "setVerificationState(status);const nextArchiveKey=",
+        "if(context&&archiveSnapshotKey!==nextArchiveKey)queueArchiveRefresh(context)",
+        "const refreshNow=async()=>",
+        "if(document.hidden)return",
+        "refreshNow();",
+        "window.addEventListener('online',refreshNow)",
+        "archiveState.columnSort=col",
+        "if(table===auctionTable)",
+        "window.requestAnimationFrame",
+        "img.fetchPriority='high'",
     ):
-        assert marker in rendered
+        assert marker in rendered, marker
     assert "setInterval(refreshLiveSurface" not in rendered
-    assert "fetchGenerated('mission3_metrics',nextBlock),fetchGenerated('unified_dog_search_index'" not in rendered
+    assert "refreshLiveSurface().finally(scheduleLiveRefresh)" not in rendered
+    assert "status.last_refresh_result!=='success_generated'||!setVerificationState(status)" not in rendered
+    assert "fetchGenerated('mission3_metrics',block),fetchGenerated('unified_dog_search_index'" not in rendered
     assert "raw.githubusercontent.com" not in rendered
     assert "rootLocal" not in rendered
     assert "const updateLiveDots=" not in rendered
@@ -2512,6 +2875,128 @@ def test_write_html_hydrates_every_current_surface_without_overlapping_polls() -
     assert "default-src 'none'" in csp
     assert "connect-src 'self'" in csp
     assert '<meta name="referrer" content="no-referrer">' in rendered
+
+
+def test_live_ui_sorts_archive_globally_and_verifies_only_complete_snapshots() -> None:
+    dashboard = load_module()
+    tables = {
+        "mission3_metrics": (
+            ["metric", "value"],
+            [("site_url", "https://example.test"), ("latest_block", "210"), ("current_auction_token_id", "11")],
+        ),
+        "auction_feed": (
+            ["status", "dog", "bid", "auction_end_utc", "dog_image_url"],
+            [("ongoing", "Dog #11", "1 ETH", "2026-06-02 04:00:00", "https://api.degendogs.club/images/11.png")],
+        ),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    script = rendered.split("<script>", 1)[1].split("</script>", 1)[0]
+    assert script.index("rows=sortRows(rows)") < script.index("const pageRows=rows.slice")
+    assert "if(table===auctionTable){" in script
+    archive_branch = script.split("if(table===auctionTable){", 1)[1].split("const tbody=table.tBodies[0]", 1)[0]
+    assert "archiveState.columnSort=col" in archive_branch
+    assert "renderArchive();return" in archive_branch
+    attestation = script.split("const assertStatusAttestation=status=>", 1)[1].split(
+        "const assertCurrentSnapshot=", 1
+    )[0]
+    assert "setVerificationState" not in attestation
+    refresh = script.split("const refreshLiveSurface=", 1)[1].split("const emptyArchiveMessage=", 1)[0]
+    assert refresh.index("assertCurrentSnapshot") < refresh.index("setVerificationState(status)")
+    assert refresh.index("loadLiveSnapshot(status)") < refresh.index("setVerificationState(status)")
+    assert "confirmedKey!==candidate.key" in refresh
+    assert "crypto.subtle.digest('SHA-256',bytes)" in script
+    assert "live_snapshot_([1-9]\\d*)_([0-9a-f]{64})_([0-9a-f]{64})" in script
+    assert "target.archive?await fetchVerifiedGenerated('unified_dog_search_index.json'" in script
+    assert "targetArchiveKey!==activeArchiveKey" in script
+    assert "if(document.hidden)return false" in script
+    assert "if(document.hidden)return" in script
+    assert "window.requestAnimationFrame" in script
+    assert 'fetchpriority="high"' in rendered
+
+
+def test_live_ui_accepts_attested_stale_snapshot_for_last_good_archive() -> None:
+    dashboard = load_module()
+    tables = {
+        "mission3_metrics": (
+            ["metric", "value"],
+            [("site_url", "https://example.test"), ("latest_block", "210")],
+        ),
+        "auction_feed": (
+            ["status", "dog", "bid", "auction_end_utc"],
+            [("ongoing", "Dog #11", "1 ETH", "2026-06-02 04:00:00")],
+        ),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        old_root = dashboard.ROOT
+        try:
+            dashboard.ROOT = Path(tmp)
+            dashboard.write_html(tables)
+            rendered = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+        finally:
+            dashboard.ROOT = old_root
+
+    script = rendered.split("<script>", 1)[1].split("</script>", 1)[0]
+    prefixes = (
+        "const LIVE_RECENT_MS=",
+        "const LIVE_STALE_MS=",
+        "const parseUtc=",
+        "const statusFreshness=",
+        "const canonicalUint=",
+        "const assertStatusAttestation=",
+    )
+    lines = script.splitlines()
+    definitions = "\n".join(next(line for line in lines if line.startswith(prefix)) for prefix in prefixes)
+    status = {
+        "last_refresh_result": "success_generated",
+        "last_successful_refresh_time_utc": "2026-06-01T00:00:00Z",
+        "latest_generated_block_time_utc": "2026-06-01T00:00:00Z",
+        "latest_generated_block": 210,
+        "snapshot_block_hash": "0x" + "a" * 64,
+        "auction_house_code_sha256": "b" * 64,
+        "dog_nft_code_sha256": "c" * 64,
+        "rpc_quorum_size": 2,
+        "rpc_quorum_agreement": "2/3",
+        "rpc_quorum_providers": "provider-a,provider-b",
+        "snapshot_confirmations": 2,
+        "onchain_chain_id": 8453,
+        "onchain_verification_scope": (
+            "snapshot_hash,contract_code,current_auction,dog_total_supply,"
+            "dog_token_uri_bindings,recent_event_logs"
+        ),
+    }
+    program = f"""
+{definitions}
+Date.now=()=>Date.parse('2026-06-03T00:00:00Z');
+const status={json.dumps(status, separators=(',', ':'))};
+const freshness=statusFreshness(status);
+if(!freshness.usable||freshness.recent||!freshness.stale)throw new Error('stale last-good classification failed');
+if(assertStatusAttestation(status)!=='210')throw new Error('stale attestation was rejected');
+const failed={{...status,last_refresh_result:'failed'}};
+let rejected=false;
+try{{assertStatusAttestation(failed);}}catch(_error){{rejected=true;}}
+if(!rejected)throw new Error('unsuccessful status was accepted');
+"""
+    result = subprocess.run(
+        ["node", "-e", program],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    refresh = script.split("const refreshLiveSurface=", 1)[1].split(
+        "const emptyArchiveMessage=", 1
+    )[0]
+    assert refresh.index("assertCurrentSnapshot") < refresh.index("queueArchiveRefresh(context)")
+    assert "verified stale last-good" in script
 
 
 
@@ -2959,9 +3444,11 @@ def test_generated_dashboard_hardens_dynamic_urls_freshness_and_archive_rows() -
         "url.protocol==='https:'",
         "url.port===''",
         "Array.isArray(record.bid_tx_hashes)?record.bid_tx_hashes:[]",
+        "const LIVE_RECENT_MS=5*60*1000",
         "const LIVE_STALE_MS=90*60*1000",
         "data-live-label",
-        "status.last_refresh_result!=='success_generated'",
+        "status?.last_refresh_result==='success_generated'",
+        "verified last-good",
         "const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI)",
     ):
         assert marker in rendered
@@ -3205,6 +3692,20 @@ def test_verified_metadata_with_invalid_trait_schema_fails_closed() -> None:
         finally:
             dashboard.DOG_METADATA_CACHE = old_cache
             dashboard.authoritative_metadata_record = old_record
+
+
+def test_full_builder_cleanup_preserves_only_canonical_live_snapshot_names() -> None:
+    dashboard = load_module()
+    valid = f"live_snapshot_123_{'a' * 64}_{'b' * 64}.json"
+    assert dashboard.is_live_snapshot_bundle_filename(valid)
+    for invalid in (
+        f"live_snapshot_0_{'a' * 64}_{'b' * 64}.json",
+        f"live_snapshot_123_{'A' * 64}_{'b' * 64}.json",
+        f"live_snapshot_123_{'a' * 63}_{'b' * 64}.json",
+        f"live_snapshot_123_{'a' * 64}_{'b' * 64}.json/extra",
+        "live_snapshot_attacker.json",
+    ):
+        assert not dashboard.is_live_snapshot_bundle_filename(invalid)
 
 
 if __name__ == "__main__":

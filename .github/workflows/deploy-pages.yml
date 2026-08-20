@@ -50,11 +50,7 @@ jobs:
         run: npm audit signatures
 
       - name: Validate generated data and dashboard
-        run: |
-          python3 -m py_compile scripts/build_dashboard.py scripts/refresh_current_surface.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/degen_dogs_runner_health.py scripts/check_remote_freshness.py
-          npm run test:dashboard
-          npm run validate:dashboard
-          npm run check:dashboard-ui
+        run: bash scripts/run_pages_validation.sh
 
       - name: Build
         run: npm run build

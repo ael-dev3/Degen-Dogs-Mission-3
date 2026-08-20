@@ -62,12 +62,23 @@ SUCCESS_RESULTS = {
     "success_pushed_live_timeout",
 }
 LIVE_STATUS_MAX_BYTES = 2 * 1024 * 1024
+LIVE_ARTIFACT_MAX_BYTES = 32 * 1024 * 1024
 RAW_STATUS_HOST = "raw.githubusercontent.com"
 RAW_STATUS_PATH = re.compile(
     r"^/ael-dev3/Degen-Dogs-Mission-3/(?P<commit>[0-9a-f]{40})/public/generated/refresh_status\.json$"
 )
+LIVE_BUNDLE_FILENAME_PATTERN = (
+    r"live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json"
+)
+RAW_BUNDLE_PATH = re.compile(
+    r"^/ael-dev3/Degen-Dogs-Mission-3/(?P<commit>[0-9a-f]{40})/"
+    rf"public/generated/(?P<filename>{LIVE_BUNDLE_FILENAME_PATTERN})$"
+)
 PAGES_STATUS_HOST = "ael-dev3.github.io"
 PAGES_STATUS_PATH = "/Degen-Dogs-Mission-3/generated/refresh_status.json"
+PAGES_BUNDLE_PATH = re.compile(
+    rf"^/Degen-Dogs-Mission-3/generated/(?P<filename>{LIVE_BUNDLE_FILENAME_PATTERN})$"
+)
 COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
 LIVE_STATUS_CACHE_BUST = re.compile(r"^cache_bust=[0-9]+$")
 REFRESH_STATUS_INTEGER_FIELDS = frozenset(
@@ -93,6 +104,9 @@ REFRESH_STATUS_INTEGER_FIELDS = frozenset(
         "dog_rarity_attested_block",
         "dog_rarity_continuity_through_block",
         "dog_rarity_extension_mint_count",
+        "live_snapshot_bundle_bytes",
+        "live_snapshot_bundle_schema_version",
+        "unified_dog_search_bytes",
     }
 )
 
@@ -629,13 +643,29 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
 
 
 def write_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_current_env: bool = False) -> dict[str, Any]:
+    previous_status = load_json(root / "generated" / "refresh_status.json", {})
+    previous_bundle = (
+        previous_status.get("live_snapshot_bundle")
+        if isinstance(previous_status, dict)
+        and isinstance(previous_status.get("live_snapshot_bundle"), str)
+        else None
+    )
     status = public_refresh_status(env, root=root, prefer_current_env=prefer_current_env)
     write_json(root / "generated" / "refresh_status.json", status)
     write_json(root / "public" / "generated" / "refresh_status.json", status)
-    return status
+    # Every public status rewrite must recompute the immutable pointer.  This
+    # includes the publisher's final telemetry rewrite after the dashboard
+    # build, preventing that final write from silently dropping attestation.
+    from build_live_snapshot_bundle import build_live_snapshot_bundle
+
+    return build_live_snapshot_bundle(root=root, previous_bundle=previous_bundle)
 
 
-def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
+def validate_refresh_status(
+    root: Path = ROOT,
+    *,
+    validate_live_snapshot: bool = True,
+) -> dict[str, Any]:
     generated = root / "generated" / "refresh_status.json"
     public = root / "public" / "generated" / "refresh_status.json"
     if not generated.exists():
@@ -710,6 +740,12 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         "dog_rarity_continuity_through_block",
         "dog_rarity_continuity_through_block_hash",
         "dog_rarity_continuity_verification_status",
+        "live_snapshot_bundle",
+        "live_snapshot_bundle_sha256",
+        "live_snapshot_bundle_bytes",
+        "live_snapshot_bundle_schema_version",
+        "unified_dog_search_sha256",
+        "unified_dog_search_bytes",
     }
     missing = sorted(key for key in required if status.get(key) in (None, "", []))
     if missing:
@@ -1019,6 +1055,10 @@ def validate_refresh_status(root: Path = ROOT) -> dict[str, Any]:
         ):
             if str(status.get(key, "")) != str(state.get(key, "")):
                 raise AssertionError(f"refresh_status {key} differs from mission3_metrics")
+    if validate_live_snapshot:
+        from build_live_snapshot_bundle import validate_live_snapshot_bundle
+
+        validate_live_snapshot_bundle(root=root, status=status)
     return status
 
 
@@ -1136,7 +1176,14 @@ def print_summary(summary: dict[str, Any]) -> None:
     print(json.dumps(summary, indent=2, sort_keys=True))
 
 
-def fetch_json(url: str, timeout: int = 15) -> Any:
+def fetch_live_bytes(
+    url: str,
+    *,
+    max_bytes: int,
+    timeout: int = 15,
+) -> bytes:
+    if type(max_bytes) is not int or max_bytes < 1 or max_bytes > LIVE_ARTIFACT_MAX_BYTES:
+        raise RuntimeError("invalid live verification response-size limit")
     try:
         parsed = urllib.parse.urlsplit(url)
         port = parsed.port
@@ -1144,7 +1191,9 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
         raise RuntimeError("invalid live verification URL") from exc
     host = parsed.hostname or ""
     raw_target = host == RAW_STATUS_HOST and RAW_STATUS_PATH.fullmatch(parsed.path)
+    raw_bundle_target = host == RAW_STATUS_HOST and RAW_BUNDLE_PATH.fullmatch(parsed.path)
     pages_target = host == PAGES_STATUS_HOST and parsed.path == PAGES_STATUS_PATH
+    pages_bundle_target = host == PAGES_STATUS_HOST and PAGES_BUNDLE_PATH.fullmatch(parsed.path)
     if (
         parsed.scheme != "https"
         or port is not None
@@ -1153,10 +1202,12 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
         or parsed.netloc != host
         or parsed.fragment
         or (parsed.query and not LIVE_STATUS_CACHE_BUST.fullmatch(parsed.query))
-        or not (raw_target or pages_target)
+        or not (raw_target or raw_bundle_target or pages_target or pages_bundle_target)
     ):
         raise RuntimeError("live verification URL is outside the fixed GitHub publication allowlist")
-    expected_content_type = "text/plain" if raw_target else "application/json"
+    expected_content_type = (
+        "text/plain" if raw_target or raw_bundle_target else "application/json"
+    )
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "degen-dogs-refresh-verify/0.1"})
     try:
         response = LIVE_STATUS_OPENER.open(req, timeout=timeout)
@@ -1180,15 +1231,24 @@ def fetch_json(url: str, timeout: int = 15) -> Any:
                     parsed_length = int(content_length)
                 except (TypeError, ValueError) as exc:
                     raise RuntimeError("live verification returned an invalid Content-Length") from exc
-                if parsed_length < 0 or parsed_length > LIVE_STATUS_MAX_BYTES:
+                if parsed_length < 0 or parsed_length > max_bytes:
                     raise RuntimeError("live verification response is too large")
-            payload = response.read(LIVE_STATUS_MAX_BYTES + 1)
-            if len(payload) > LIVE_STATUS_MAX_BYTES:
+            payload = response.read(max_bytes + 1)
+            if len(payload) > max_bytes:
                 raise RuntimeError("live verification response is too large")
     except RuntimeError:
         raise
     except Exception as exc:  # noqa: BLE001 - keep response read details out of public telemetry
         raise RuntimeError(f"live verification response read failed ({type(exc).__name__})") from None
+    return payload
+
+
+def fetch_json(url: str, timeout: int = 15) -> Any:
+    payload = fetch_live_bytes(
+        url,
+        max_bytes=LIVE_STATUS_MAX_BYTES,
+        timeout=timeout,
+    )
     try:
         return json.loads(payload.decode("utf-8", errors="strict"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -1213,6 +1273,56 @@ def snapshot_mismatch(expected: Any, actual: Any) -> str:
     return "fields=" + ",".join(differing[:12]) if differing else ""
 
 
+def live_bundle_url(status_url: str, filename: str) -> str:
+    if not isinstance(filename, str) or not re.fullmatch(
+        LIVE_BUNDLE_FILENAME_PATTERN,
+        filename,
+    ):
+        raise RuntimeError("live verification status has an unsafe bundle filename")
+    parsed = urllib.parse.urlsplit(status_url)
+    parent = parsed.path.rsplit("/", 1)[0]
+    return urllib.parse.urlunsplit(
+        (parsed.scheme, parsed.netloc, f"{parent}/{filename}", "", "")
+    )
+
+
+def fetch_verified_remote_snapshot(
+    source: str,
+    status_url: str,
+    expected_status: dict[str, Any],
+    expected_bundle: bytes,
+) -> None:
+    cache_bust = time.time_ns()
+    status = fetch_json(f"{status_url}?cache_bust={cache_bust}")
+    mismatch = snapshot_mismatch(expected_status, status)
+    if mismatch:
+        raise RuntimeError(f"{source} refresh_status mismatch {mismatch}")
+    filename = expected_status.get("live_snapshot_bundle")
+    expected_size = expected_status.get("live_snapshot_bundle_bytes")
+    expected_sha256 = expected_status.get("live_snapshot_bundle_sha256")
+    if (
+        not isinstance(filename, str)
+        or not re.fullmatch(LIVE_BUNDLE_FILENAME_PATTERN, filename)
+        or type(expected_size) is not int
+        or expected_size < 1
+        or expected_size > LIVE_ARTIFACT_MAX_BYTES
+        or not isinstance(expected_sha256, str)
+        or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256)
+    ):
+        raise RuntimeError("local refresh_status live snapshot pointer is invalid")
+    bundle_url = live_bundle_url(status_url, filename)
+    payload = fetch_live_bytes(
+        f"{bundle_url}?cache_bust={time.time_ns()}",
+        max_bytes=expected_size,
+    )
+    if len(payload) != expected_size:
+        raise RuntimeError(f"{source} live snapshot bundle size mismatch")
+    if hashlib.sha256(payload).hexdigest() != expected_sha256:
+        raise RuntimeError(f"{source} live snapshot bundle SHA256 mismatch")
+    if payload != expected_bundle:
+        raise RuntimeError(f"{source} live snapshot bundle bytes mismatch")
+
+
 def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int, interval_seconds: int, base_url: str) -> dict[str, Any]:
     started = utc_now()
     state = generated_state(root)
@@ -1228,6 +1338,19 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
         expected_status = load_json(root / "generated" / "refresh_status.json", {})
     if not isinstance(expected_status, dict) or not expected_status:
         raise RuntimeError("local refresh_status.json is missing or invalid")
+    from build_live_snapshot_bundle import validate_live_snapshot_bundle
+
+    try:
+        local_bundle = validate_live_snapshot_bundle(root=root, status=expected_status)
+    except AssertionError as exc:
+        raise RuntimeError(f"local live snapshot validation failed: {str(exc)[:260]}") from None
+    bundle_path = (
+        root
+        / "public"
+        / "generated"
+        / str(local_bundle["filename"])
+    )
+    expected_bundle = bundle_path.read_bytes()
     raw_commit_url = immutable_raw_status_url(env.get("DEGEN_DOGS_COMMIT_SHA", ""))
     status_urls = [
         ("raw_commit", raw_commit_url),
@@ -1235,30 +1358,40 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
     ]
     verified_source = ""
     raw_commit_verified = False
+    pages_bundle_verified = False
+    poll_interval_seconds = min(5, max(1, int(interval_seconds)))
     while time.monotonic() <= deadline:
-        pages_verified = False
+        pages_bundle_verified = False
         for source, status_url in status_urls:
-            url = f"{status_url}?cache_bust={time.time_ns()}"
+            if source == "raw_commit" and raw_commit_verified:
+                # The raw URL is immutable at the exact pushed commit. Once its
+                # status and pointer-target bytes verify, cache that proof for
+                # this invocation while only polling the mutable Pages edge.
+                continue
             try:
-                data = fetch_json(url)
-                mismatch = snapshot_mismatch(expected_status, data)
-                if not mismatch:
-                    if source == "raw_commit":
-                        raw_commit_verified = True
-                    elif source == "github_pages":
-                        pages_verified = True
-                else:
-                    last_error = f"{source} refresh_status mismatch {mismatch}"
+                fetch_verified_remote_snapshot(
+                    source,
+                    status_url,
+                    expected_status,
+                    expected_bundle,
+                )
+                if source == "raw_commit":
+                    raw_commit_verified = True
+                elif source == "github_pages":
+                    pages_bundle_verified = True
             except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError, OSError, RuntimeError) as exc:
                 last_error = f"{source}: {str(redact_value(str(exc)))[:260]}"
         # The immutable raw URL proves the exact pushed artifact landed; Pages
         # proves the user-facing deployment completed. Neither alone is live.
-        if raw_commit_verified and pages_verified:
+        if raw_commit_verified and pages_bundle_verified:
             result = "verified"
             verified_at = utc_now()
             verified_source = "github_pages"
             break
-        time.sleep(max(1, interval_seconds))
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        time.sleep(min(poll_interval_seconds, remaining))
     completed = verified_at or utc_now()
     push_completed = env.get("DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
     event_block_time = env.get("DEGEN_DOGS_EVENT_BLOCK_TIME_UTC")
@@ -1272,6 +1405,8 @@ def verify_live(env: dict[str, str], root: Path = ROOT, *, timeout_seconds: int,
         # Retain the old result key for existing private telemetry readers. It
         # now aliases immutable-commit verification; no mutable main URL is used.
         "raw_main_verified": raw_commit_verified,
+        "live_snapshot_bundle": expected_status.get("live_snapshot_bundle"),
+        "live_snapshot_bundle_verified": result == "verified",
         "push_to_live_seconds": seconds_between(push_completed, completed) if push_completed else None,
         "block_to_live_seconds": seconds_between(event_block_time, completed) if event_block_time else None,
         "latest_generated_block": expected_block,
@@ -1327,7 +1462,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("metrics-summary", help="Print operator refresh/watch metrics summary")
     live = sub.add_parser("verify-live", help="Poll the immutable pushed commit and GitHub Pages until both exactly match local refresh_status.json")
     live.add_argument("--timeout-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_TIMEOUT_SECONDS", "300")))
-    live.add_argument("--interval-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_INTERVAL_SECONDS", "10")))
+    live.add_argument("--interval-seconds", type=int, default=int(os.environ.get("DEGEN_DOGS_LIVE_VERIFY_INTERVAL_SECONDS", "5")))
     live.add_argument("--base-url", default=os.environ.get("DEGEN_DOGS_LIVE_VERIFY_BASE_URL", SITE_URL))
     live.add_argument("--env-file", help="Write shell exports for refresh_and_publish.sh")
     return parser

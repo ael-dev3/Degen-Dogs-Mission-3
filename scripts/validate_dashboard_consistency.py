@@ -1676,7 +1676,10 @@ def validate_current_surface() -> dict[str, Any]:
     feed = find_current_feed_row(feed_rows, current_dog_id)
     current_state = text(current.get("auction_state")).lower()
     metrics = load_metrics()
-    refresh_status = load_refresh_telemetry().validate_refresh_status(root=ROOT)
+    refresh_status = load_refresh_telemetry().validate_refresh_status(
+        root=ROOT,
+        validate_live_snapshot=False,
+    )
     index = (ROOT / "index.html").read_text(encoding="utf-8") if (ROOT / "index.html").exists() else ""
     readme = readme_snapshot()
 
@@ -2297,6 +2300,9 @@ def validate_current_surface() -> dict[str, Any]:
         if isinstance(observed_state, dict) and observed_state.get("last_observed_token_id"):
             observed_state_check = validate_current_surface_against_observed_state(observed_state, root=ROOT)
 
+    from build_live_snapshot_bundle import validate_live_snapshot_bundle
+
+    live_snapshot = validate_live_snapshot_bundle(root=ROOT, status=refresh_status)
     return {
         "current_dog": f"Dog #{current_dog_id}",
         "auction_state": current_state,
@@ -2307,8 +2313,9 @@ def validate_current_surface() -> dict[str, Any]:
         "auction_extension_schedule": extension_schedule,
         "observed_state_check": observed_state_check,
         "mission3_archive_parity": archive_parity,
+        "live_snapshot_bundle": live_snapshot,
         "checked": [str(path.relative_to(ROOT)) for path in unified_paths]
-        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/auction_extensions.json", "generated/auction_timeline.json", "generated/historical_dog_search.json", "generated/refresh_status.json"],
+        + ["generated/current_auction.json", "generated/current_latest_bid.json", "generated/auction_feed.json", "generated/current_auction_bid_history.json", "generated/mission3_metrics.json", "generated/auction_extensions.json", "generated/auction_timeline.json", "generated/historical_dog_search.json", "generated/refresh_status.json", f"generated/{live_snapshot['filename']}", f"public/generated/{live_snapshot['filename']}", "public/generated/unified_dog_search_index.json"],
     }
 
 
