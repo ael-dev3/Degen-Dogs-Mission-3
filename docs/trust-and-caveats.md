@@ -74,11 +74,17 @@ the latest continuity-checkpoint block hash and NFT bytecode and obtaining an in
 log quorum for every Dog `Transfer`, `BaseURIUpdated`, `MetadataUpdate`, and
 `BatchMetadataUpdate` event from that checkpoint through the new snapshot. Each verified
 snapshot becomes the next checkpoint, keeping refresh work bounded while its block hash
-commits the chain back to the full attestation. A mint, burn, historical claim, or URI
-mutation forces the full metadata/rank rebuild. A temporarily lagging snapshot preserves
-the newer artifacts and retries later. The published attestation block/hash and
-continuity-through block/hash make this reuse explicit instead of implying that every
-token was re-fetched.
+commits the chain back to the full attestation. The bounded path may extend the cached
+universe only for an exact contiguous suffix of canonical mints from the zero address to
+the auction house, proven by the same cross-provider log quorum. It first requires one
+unexpired, content-hash-bound metadata-cache record for every previously verified rarity
+Dog and exact trait agreement with the attested history, then quorum-fetches the new Dog
+metadata and recomputes every rank and denominator. Missing, expired, future-dated, or
+malformed cache content; a changed existing trait; a burn, historical claim, metadata/URI
+mutation, mint gap, or mismatched event forces the full metadata/rank rebuild. A
+temporarily lagging snapshot preserves the newer artifacts and retries later. The
+published attestation block/hash and continuity-through block/hash make this reuse
+explicit instead of implying that every token was re-fetched.
 
 A whole-collection rank requires reliable multi-provider historical-chain verification
 for unclaimed Polygon- and Degen-era Dogs, plus origin/Base URI and content agreement

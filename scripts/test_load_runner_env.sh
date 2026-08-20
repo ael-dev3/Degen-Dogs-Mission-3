@@ -83,7 +83,9 @@ done
 for required in MISSION3_WATCHER_TELEMETRY_PATH MISSION3_WATCHER_AUTO_PUSH MISSION3_WATCHER_REQUIRE_CLEAN_TREE MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS; do
   [[ " ${DEGEN_DOGS_RUNNER_WATCHER_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
 done
-[[ " ${DEGEN_DOGS_RUNNER_HEALTH_ENV_ALLOWLIST//$'\n'/ } " == *" DEGEN_DOGS_HEALTH_GITHUB_ALERTS "* ]]
+for required in DEGEN_DOGS_HEALTH_GITHUB_ALERTS DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS; do
+  [[ " ${DEGEN_DOGS_RUNNER_HEALTH_ENV_ALLOWLIST//$'\n'/ } " == *" ${required} "* ]]
+done
 # Only the two data workers may inherit the common provider/API configuration.
 # The independent watchdog deliberately reloads workers through their installers
 # and must never receive provider credentials in its own launchd environment.

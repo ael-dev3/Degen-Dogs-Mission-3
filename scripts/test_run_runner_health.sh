@@ -25,6 +25,9 @@ set -Eeuo pipefail
 [[ "${MISSION3_REFRESH_COMMAND:-}" == "npm run refresh:publish" ]]
 [[ "${DEGEN_DOGS_HEALTH_DRY_RUN:-}" == "1" ]]
 [[ "${DEGEN_DOGS_HEALTH_GITHUB_ALERTS:-}" == "0" ]]
+[[ "${DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH:-}" == "relative-retry-state.json" ]]
+[[ "${DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS:-}" == "600" ]]
+[[ "${DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS:-}" == "2400" ]]
 [[ "${DEGEN_DOGS_REPO_DIR:-}" == */configured-repo ]]
 [[ "${DEGEN_DOGS_ENV_FILE:-}" == */launcher/.env.local ]]
 [[ "${DEGEN_DOGS_LOG_DIR:-}" == */configured-repo/relative-logs ]]
@@ -81,6 +84,9 @@ MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1
 MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS=120
 MISSION3_REFRESH_COMMAND=npm run refresh:publish
 DEGEN_DOGS_HEALTH_GITHUB_ALERTS=0
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH=relative-retry-state.json
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS=600
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS=2400
 ENV
 chmod 600 "${LAUNCHER_REPO}/.env.local"
 

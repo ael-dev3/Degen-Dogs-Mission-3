@@ -55,6 +55,7 @@ REFRESH_LOCK_PATH="$(degen_dogs_resolve_runner_path "$REPO_DIR" "${DEGEN_DOGS_RE
 PLIST_PATH="${PLIST_DIR}/${LABEL}.plist"
 SCRIPT_PATH="${REPO_DIR}/scripts/degen_dogs_runner_health.py"
 ALERT_STATE_PATH="$(degen_dogs_resolve_runner_path "$REPO_DIR" "${DEGEN_DOGS_HEALTH_ALERT_STATE_PATH:-${LOCK_DIR}/critical-alert-state.json}")"
+REFRESH_RETRY_STATE_PATH="$(degen_dogs_resolve_runner_path "$REPO_DIR" "${DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH:-${LOCK_DIR}/refresh-retry-state.json}")"
 ALLOW_RUNNING_RESTART="${DEGEN_DOGS_INSTALL_ALLOW_RUNNING_RESTART:-0}"
 MISSION3_REFRESH_COMMAND="${MISSION3_REFRESH_COMMAND:-}"
 if [[ -z "$MISSION3_REFRESH_COMMAND" && "$WATCHER_AUTO_PUSH" == "1" ]]; then
@@ -113,6 +114,7 @@ fi
 
 degen_dogs_private_dir "$PLIST_DIR"
 degen_dogs_private_dir "$(dirname "$ALERT_STATE_PATH")"
+degen_dogs_private_dir "$(dirname "$REFRESH_RETRY_STATE_PATH")"
 degen_dogs_private_dir "$LOG_DIR"
 degen_dogs_private_dir "$LOCK_DIR"
 degen_dogs_private_dir "${REPO_DIR}/.local"
@@ -130,6 +132,7 @@ for private_log in \
 done
 degen_dogs_private_file "$REFRESH_LOCK_PATH"
 degen_dogs_private_file "$ALERT_STATE_PATH" 0
+degen_dogs_private_file "$REFRESH_RETRY_STATE_PATH" 0
 degen_dogs_private_file "$PLIST_PATH" 0
 for private_state in \
   "${REPO_DIR}/.local/mission3_onchain_tracker.lock" \
@@ -211,6 +214,9 @@ DEGEN_DOGS_HEALTH_GITHUB_REPO
 DEGEN_DOGS_HEALTH_GITHUB_ALERTS
 DEGEN_DOGS_HEALTH_DISCORD_MENTION
 DEGEN_DOGS_HEALTH_ALERT_STATE_PATH
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS
+DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS
 DEGEN_DOGS_HEALTH_CRITICAL_STALE_SECONDS
 DEGEN_DOGS_HEALTH_REPEAT_ALERT_SECONDS
 DEGEN_DOGS_HEALTH_WATCHER_STALE_SECONDS

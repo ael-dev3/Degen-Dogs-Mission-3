@@ -188,6 +188,12 @@ def write_fixture(
     write_json(root / "generated" / "mission3_metrics.json", metric_rows)
     write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
 
+    rarity_traits = "; ".join(f"{trait_type}: None" for trait_type in (
+        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
+    ))
+    rarity_percentages = "; ".join(f"{trait_type}: None (100.0%)" for trait_type in (
+        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
+    ))
     current = {
         "token_id": 729,
         "current_bid": "0.01000 ETH ($20)",
@@ -200,6 +206,9 @@ def write_fixture(
         "auction_state": "live",
         "rarity": "#1/792",
         "rarity_score": 7,
+        "traits": rarity_traits,
+        "trait_rarity": rarity_percentages,
+        "metadata_verification_status": "onchain_token_uri_verified",
         "end_time_utc": "2026-05-31 20:40:09",
         "latest_block": 46732183,
         "latest_block_time_utc": "2026-05-31 18:55:13",
@@ -263,7 +272,18 @@ def write_fixture(
     }
     write_json(root / "generated" / "refresh_status.json", refresh_status)
     write_json(root / "public" / "generated" / "refresh_status.json", refresh_status)
-    write_json(root / "generated" / "current_latest_bid.json", [{"latest_bid_eth": 0.01, "latest_bid_usd": 19.98, "bidder": "@0xael.eth", "bidder_wallet": wallet, "bid_time_utc": "2026-05-30 18:40:23"}])
+    write_json(root / "generated" / "current_latest_bid.json", [{
+        "dog": "Dog #729",
+        "latest_bid_eth": 0.01,
+        "latest_bid_usd": 19.98,
+        "bidder": "@0xael.eth",
+        "bidder_wallet": wallet,
+        "bid_time_utc": "2026-05-30 18:40:23",
+        "rarity": "#1/792",
+        "traits": rarity_traits,
+        "trait_rarity": rarity_percentages,
+        "metadata_verification_status": "onchain_token_uri_verified",
+    }])
     current_history = [{
         "token_id": 729,
         "dog": "Dog #729",
@@ -293,13 +313,11 @@ def write_fixture(
         "auction_time_utc": "2026-05-30 18:40:23",
         "auction_end_utc": "2026-05-31 20:40:09",
         "last_bid_utc": "2026-05-30 18:40:23",
+        "rarity": "#1/792",
+        "traits": rarity_traits,
+        "trait_rarity": rarity_percentages,
+        "metadata_verification_status": "onchain_token_uri_verified",
     }])
-    rarity_traits = "; ".join(f"{trait_type}: None" for trait_type in (
-        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
-    ))
-    rarity_percentages = "; ".join(f"{trait_type}: None (100.0%)" for trait_type in (
-        "Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"
-    ))
     historical_rows = [
         {
             "mission": 1 if token_id <= 200 else 2 if token_id <= 589 else 3,
@@ -339,6 +357,8 @@ def write_fixture(
         "end_time_utc": "2026-05-31 20:40:09",
         "settled_eth": "",
         "settled_time_utc": "",
+        "rarity": "#1/792",
+        "metadata_verification_status": "onchain_token_uri_verified",
         "created_tx_hash": "0x" + "2" * 64,
         "settled_tx_hash": "",
     }
@@ -456,12 +476,24 @@ def write_fixture(
         "activity_time_utc": "2026-05-30T18:40:23Z",
         "bid_stats": {"bid_count": 1, "unique_bidder_count": 1},
         "bid_tx_hashes": ["0x" + "1" * 64],
+        "rarity": {"display": "#1/792", "rank": 1, "total": 792, "scope": "base_existing"},
+        "traits": [
+            {"display": display, "trait_type": trait_type, "value": "None"}
+            for trait_type, display in zip(
+                ("Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes"),
+                rarity_percentages.split("; "),
+                strict=True,
+            )
+        ],
         "search_text": f"dog 729 {wallet} @0xael.eth 0.01 eth 19.98 $19.98 {'0x' + '1' * 64}",
     }
     write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "public" / "generated" / "unified_dog_search_index.json", [unified_row])
     write_json(root / "archive" / "data" / "identity" / "wallet_profiles.json", {})
     write_json(root / "generated" / "auction_winners.json", [])
+    write_json(root / "public" / "generated" / "auction_winners.json", [])
+    write_json(root / "generated" / "recent_auction_winners.json", [])
+    write_json(root / "public" / "generated" / "recent_auction_winners.json", [])
     archive_mission3 = root / "archive" / "mission3" / "data" / "generated"
     write_json(archive_mission3 / "mission3_auction_timeline.json", [{
         "token_id": 729,
@@ -534,6 +566,104 @@ def test_validate_current_surface_accepts_consistent_apr_fixture() -> None:
             "settlements": 0,
             "bids": 1,
         }
+
+
+def test_validate_current_surface_rejects_stale_timeline_rarity() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        timeline = json.loads((root / "generated" / "auction_timeline.json").read_text())
+        timeline[0]["rarity"] = "#2/792"
+        write_json(root / "generated" / "auction_timeline.json", timeline)
+        write_json(root / "public" / "generated" / "auction_timeline.json", timeline)
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "auction_timeline Dog #729 rarity differs from validated history",
+        )
+
+
+def test_validate_current_surface_rejects_blank_winner_metadata_provenance() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        history = json.loads((root / "generated" / "historical_dog_search.json").read_text())
+        historical = next(row for row in history if int(row["token_id"]) == 729)
+        winner = {
+            "token_id": 729,
+            "rarity": historical["rarity"],
+            "rarity_score": historical["rarity_score"],
+            "traits": historical["traits"],
+            "trait_rarity": historical["trait_rarity"],
+            "metadata_verification_status": "",
+        }
+        write_json(root / "generated" / "auction_winners.json", [winner])
+        write_json(root / "public" / "generated" / "auction_winners.json", [winner])
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "auction_winners Dog #729 metadata verification status differs from validated history",
+        )
+
+
+def test_validate_current_surface_accepts_rarity_mint_extension_provenance() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        rows = json.loads((root / "generated" / "mission3_metrics.json").read_text())
+        metrics = {str(row["metric"]): str(row["value"]) for row in rows}
+        metrics.update(
+            {
+                "dog_token_uri_verification_status": "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity",
+                "dog_base_existence_verification_status": "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity",
+                "dog_rarity_continuity_verification_status": "hash_pinned_cross_provider_canonical_mint_extension_plus_no_other_rarity_mutations",
+                "dog_rarity_extension_mint_count": "1",
+                "dog_rarity_extension_mint_token_ids": "791",
+                "dog_rarity_extension_mint_token_ids_sha256": hashlib.sha256(b"791").hexdigest(),
+            }
+        )
+        metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
+        write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(metric_rows))
+        write_json(root / "generated" / "mission3_metrics.json", metric_rows)
+        write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
+
+        status = json.loads((root / "generated" / "refresh_status.json").read_text())
+        status.update(
+            {
+                "dog_token_uri_verification_status": metrics["dog_token_uri_verification_status"],
+                "dog_base_existence_verification_status": metrics[
+                    "dog_base_existence_verification_status"
+                ],
+                "dog_rarity_continuity_verification_status": metrics[
+                    "dog_rarity_continuity_verification_status"
+                ],
+                "dog_rarity_extension_mint_count": 1,
+                "dog_rarity_extension_mint_token_ids": "791",
+                "dog_rarity_extension_mint_token_ids_sha256": metrics[
+                    "dog_rarity_extension_mint_token_ids_sha256"
+                ],
+            }
+        )
+        write_json(root / "generated" / "refresh_status.json", status)
+        write_json(root / "public" / "generated" / "refresh_status.json", status)
+
+        result = run_validation(root)
+        assert result["current_dog"] == "Dog #729"
+
+        metrics["dog_rarity_extension_mint_token_ids"] = "50"
+        metrics["dog_rarity_extension_mint_token_ids_sha256"] = hashlib.sha256(b"50").hexdigest()
+        metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
+        write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(metric_rows))
+        write_json(root / "generated" / "mission3_metrics.json", metric_rows)
+        write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
+        status["dog_rarity_extension_mint_token_ids"] = "50"
+        status["dog_rarity_extension_mint_token_ids_sha256"] = metrics[
+            "dog_rarity_extension_mint_token_ids_sha256"
+        ]
+        write_json(root / "generated" / "refresh_status.json", status)
+        write_json(root / "public" / "generated" / "refresh_status.json", status)
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "rarity mint-extension provenance is inconsistent",
+        )
 
 
 def test_mission3_archive_parity_accepts_exact_history_and_rejects_drift() -> None:
@@ -843,6 +973,16 @@ def test_validator_catches_recent_settled_unified_row_missing_usd() -> None:
             "auction_time_utc": "2026-06-07 20:10:25",
             "settled_time_utc": "2026-06-07 20:10:25",
             "last_bid_utc": "2026-06-07 20:02:17",
+            "rarity": "#1/792",
+            "traits": "; ".join(
+                f"{trait_type}: None"
+                for trait_type in ("Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes")
+            ),
+            "trait_rarity": "; ".join(
+                f"{trait_type}: None (100.0%)"
+                for trait_type in ("Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes")
+            ),
+            "metadata_verification_status": "onchain_token_uri_verified",
         })
         write_json(root / "generated" / "auction_feed.json", feed)
         stale_unified_row = {
@@ -859,6 +999,15 @@ def test_validator_catches_recent_settled_unified_row_missing_usd() -> None:
                 "usd_estimate_confidence": "missing",
             },
             "activity_time_utc": "2026-06-07T20:10:25Z",
+            "rarity": {"display": "#1/792", "rank": 1, "total": 792, "scope": "base_existing"},
+            "traits": [
+                {
+                    "display": f"{trait_type}: None (100.0%)",
+                    "trait_type": trait_type,
+                    "value": "None",
+                }
+                for trait_type in ("Background", "Body", "Neck", "Mouth", "Ears", "Head", "Eyes")
+            ],
             "search_text": "dog 728 @settled 0.02662 eth",
         }
         for rel in [

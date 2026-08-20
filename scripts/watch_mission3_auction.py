@@ -680,6 +680,7 @@ def canonical_rpc_result(method: str, value: Any) -> str:
                     "removed": bool(item.get("removed", False)),
                     "topics": [str(topic).lower() for topic in item.get("topics") or []],
                     "transactionHash": str(item.get("transactionHash") or "").lower(),
+                    "transactionIndex": str(item.get("transactionIndex") or "").lower(),
                 }
                 for item in value
                 if isinstance(item, dict)
@@ -784,11 +785,17 @@ def collect_rpc_probes(
     urls: list[str],
     *,
     required: int,
+    preferred: int | None = None,
     probe: Any,
     label: str,
 ) -> tuple[list[Any], list[str]]:
     scope = f"probe:{label}"
     active_urls = responsive_rpc_urls(urls, required, scope)
+    preferred_target = (
+        None
+        if preferred is None
+        else max(required, min(len(active_urls), preferred))
+    )
     responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
 
     def worker(index: int, url: str) -> None:
@@ -812,6 +819,8 @@ def collect_rpc_probes(
     quorum_deadline: float | None = None
     while pending_indexes:
         now = time.monotonic()
+        if preferred_target is not None and len(results) >= preferred_target:
+            break
         if len(results) >= required and quorum_deadline is None:
             quorum_deadline = now + RPC_HEAD_PROBE_GRACE_SECONDS
         deadline = min(hard_deadline, quorum_deadline) if quorum_deadline is not None else hard_deadline
@@ -1144,9 +1153,11 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         return url
 
     log_candidates = independent_rpc_urls([*config.log_rpc_urls, *call_urls])
+    log_capability_target = min(len(log_candidates), config.quorum_size + 1)
     verified_log_urls, log_errors = collect_rpc_probes(
         log_candidates,
         required=config.quorum_size,
+        preferred=log_capability_target,
         probe=verify_log_url,
         label="log-capability",
     )
@@ -1686,7 +1697,15 @@ def record_rpc_error(path: Path, state: dict[str, Any], error: Exception, now_ut
     save_state(path, state)
 
 
-def record_refresh_result(state: dict[str, Any], *, status: str, reasons: list[str], now_utc: str, exit_code: int = 0) -> dict[str, Any]:
+def record_refresh_result(
+    state: dict[str, Any],
+    *,
+    status: str,
+    reasons: list[str],
+    now_utc: str,
+    exit_code: int = 0,
+    error: str | None = None,
+) -> dict[str, Any]:
     state = dict(state)
     state["last_refresh_at_utc"] = now_utc
     state["last_refresh_reason"] = ",".join(reasons)
@@ -1694,6 +1713,7 @@ def record_refresh_result(state: dict[str, Any], *, status: str, reasons: list[s
     state["last_refresh_exit_code"] = exit_code
     if status == "success":
         state["consecutive_refresh_failures"] = 0
+        state.pop("last_refresh_error", None)
         state.pop("next_allowed_refresh_after_utc", None)
         _clear_pending_refresh_fields(state)
     else:
@@ -1705,6 +1725,8 @@ def record_refresh_result(state: dict[str, Any], *, status: str, reasons: list[s
         state["pending_refresh"] = True
         state.setdefault("pending_refresh_since_utc", now_utc)
         state["pending_refresh_reasons"] = reasons
+        current_error = error or f"refresh command exited with status {exit_code}"
+        state["last_refresh_error"] = redact_rpc_text(current_error)[:500]
     return state
 
 
@@ -2032,8 +2054,15 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
             log(config, f"refresh_lock_skip pending=1: {exc}; {summary}")
             return 0
         except Exception as exc:  # noqa: BLE001
-            new_state = record_refresh_result(new_state, status="failure", reasons=decision.reasons, now_utc=utc_now(), exit_code=1)
-            new_state["last_refresh_error"] = str(exc)[:500]
+            refresh_error = redact_rpc_text(exc)[:500]
+            new_state = record_refresh_result(
+                new_state,
+                status="failure",
+                reasons=decision.reasons,
+                now_utc=utc_now(),
+                exit_code=1,
+                error=refresh_error,
+            )
             if not dry_run:
                 save_state(config.state_path, new_state)
             completed = utc_now()
@@ -2046,12 +2075,12 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
                     "pending_refresh": True,
                     "refresh_status": "failure",
                     "refresh_exit_code": 1,
-                    "error": str(exc)[:500],
+                    "error": refresh_error,
                     "dry_run": dry_run,
                     "force_refresh": force_refresh,
                 },
             )
-            log(config, f"refresh_error: {exc}; {summary}")
+            log(config, f"refresh_error: {refresh_error}; {summary}")
             return 2
         new_state = state_from_snapshot(snapshot, now_utc=utc_now(), previous_state=new_state, acknowledge=status in {"success", "dry_run"})
         new_state = record_refresh_result(new_state, status=status, reasons=decision.reasons, now_utc=utc_now(), exit_code=exit_code)

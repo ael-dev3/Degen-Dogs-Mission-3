@@ -322,6 +322,47 @@ def test_block_quorum_ignores_optional_provider_fields_but_enforces_header():
         watcher.rpc_call_with_retry = original
 
 
+def test_log_quorum_canonicalizes_and_enforces_transaction_index():
+    watcher = load_module()
+    urls = ["https://one.example", "https://two.example"]
+    canonical = {
+        "address": "0x" + "a" * 40,
+        "blockHash": "0x" + "b" * 64,
+        "blockNumber": "0x64",
+        "data": "0x",
+        "logIndex": "0x0",
+        "removed": False,
+        "topics": ["0x" + "c" * 64],
+        "transactionHash": "0x" + "d" * 64,
+        "transactionIndex": "0xA",
+    }
+    case_variant = {**canonical, "transactionIndex": "0xa"}
+    conflicting = {**canonical, "transactionIndex": "0xb"}
+    assert watcher.canonical_rpc_result("eth_getLogs", [canonical]) == watcher.canonical_rpc_result(
+        "eth_getLogs", [case_variant]
+    )
+    assert watcher.canonical_rpc_result("eth_getLogs", [canonical]) != watcher.canonical_rpc_result(
+        "eth_getLogs", [conflicting]
+    )
+
+    original = watcher.rpc_call_with_retry
+    answers = {urls[0]: [canonical], urls[1]: [conflicting]}
+
+    def fake_call(_method, _params, *, url, timeout=30):  # noqa: ARG001
+        return answers[url], url
+
+    try:
+        watcher.rpc_call_with_retry = fake_call
+        try:
+            watcher.rpc_quorum_call("eth_getLogs", [{}], urls=urls, required=2)
+        except RuntimeError as exc:
+            assert "votes=[1, 1]" in str(exc)
+        else:
+            raise AssertionError("watcher log quorum accepted conflicting transaction indexes")
+    finally:
+        watcher.rpc_call_with_retry = original
+
+
 def test_rpc_quorum_returns_without_waiting_for_decisive_straggler():
     watcher = load_module()
     original = watcher.rpc_call_with_retry
@@ -388,6 +429,132 @@ def auction_raw(token_id: int, amount_wei: int, start_ts: int, end_ts: int, bidd
         address_word(bidder),
         word(settled),
     ])
+
+
+def test_log_capability_probe_keeps_slower_third_witness_within_bounded_grace():
+    watcher = load_module()
+    urls = [
+        "https://one.example",
+        "https://two.example",
+        "https://three.example",
+    ]
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": ",".join(urls),
+        "BASE_LOG_RPC_URLS": ",".join(urls),
+        "BASE_RPC_QUORUM_SIZE": "2",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    block_hash = "0x" + ("a" * 64)
+    captured_log_urls: list[str] = []
+    fail_log_urls: set[str] = set()
+    originals = {
+        "verified_snapshot_head": watcher.verified_snapshot_head,
+        "rpc_quorum_call": watcher.rpc_quorum_call,
+        "rpc_call_with_retry": watcher.rpc_call_with_retry,
+        "fetch_logs": watcher.fetch_logs,
+        "RPC_HEAD_PROBE_GRACE_SECONDS": watcher.RPC_HEAD_PROBE_GRACE_SECONDS,
+        "RPC_HEAD_PROBE_DEADLINE_SECONDS": watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS,
+    }
+
+    def fake_quorum(method, _params, *, urls, required, timeout=30):  # noqa: ARG001
+        assert required == 2
+        if method == "eth_getCode":
+            return "0x6000", list(urls[:2])
+        if method == "eth_call":
+            return auction_raw(
+                808,
+                10**16,
+                1,
+                2,
+                "0x1111111111111111111111111111111111111111",
+                0,
+            ), list(urls[:2])
+        if method == "eth_getBlockByNumber":
+            return {"hash": block_hash}, list(urls[:2])
+        raise AssertionError(f"unexpected quorum method: {method}")
+
+    def fake_endpoint_call(method, _params, *, url, timeout=30):  # noqa: ARG001
+        if method == "eth_chainId":
+            return hex(watcher.CHAIN_ID), url
+        if method == "eth_getBlockByNumber":
+            return {"hash": block_hash}, url
+        if method == "eth_getLogs":
+            if url in fail_log_urls:
+                raise RuntimeError("log capability unavailable")
+            if url == urls[-1]:
+                time.sleep(0.12)
+            return [], url
+        raise AssertionError(f"unexpected endpoint method: {method}")
+
+    def fake_fetch_logs(log_config, _from_block, _to_block):
+        captured_log_urls.extend(log_config.log_rpc_urls)
+        return []
+
+    try:
+        watcher.verified_snapshot_head = lambda _config: (
+            100,
+            {"hash": block_hash},
+            urls[:2],
+        )
+        watcher.rpc_quorum_call = fake_quorum
+        watcher.rpc_call_with_retry = fake_endpoint_call
+        watcher.fetch_logs = fake_fetch_logs
+        watcher.RPC_HEAD_PROBE_GRACE_SECONDS = 0.2
+        watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS = 1.0
+        started = time.monotonic()
+        snapshot = watcher.fetch_snapshot(config, {})
+        elapsed = time.monotonic() - started
+
+        fail_log_urls.update(urls[1:])
+        watcher.RPC_SLOW_UNTIL.clear()
+        try:
+            watcher.fetch_snapshot(config, {})
+        except RuntimeError as exc:
+            assert "Base RPC log quorum unavailable healthy=1 required=2" in str(exc)
+        else:
+            raise AssertionError("one healthy log provider satisfied the required two-provider quorum")
+    finally:
+        for name, value in originals.items():
+            setattr(watcher, name, value)
+        watcher.RPC_SLOW_UNTIL.clear()
+
+    assert elapsed >= 0.08
+    assert elapsed < 0.5
+    assert captured_log_urls == urls
+    assert len(snapshot["log_rpc_quorum_providers"]) == 3
+
+
+def test_preferred_probe_spare_never_forces_the_hard_deadline():
+    watcher = load_module()
+    urls = ["https://fast-one.example", "https://fast-two.example", "https://dead.example"]
+    original_grace = watcher.RPC_HEAD_PROBE_GRACE_SECONDS
+    original_deadline = watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS
+
+    def probe(url):
+        if url == urls[-1]:
+            time.sleep(0.8)
+        return url
+
+    try:
+        watcher.RPC_HEAD_PROBE_GRACE_SECONDS = 0.05
+        watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS = 0.6
+        started = time.monotonic()
+        results, errors = watcher.collect_rpc_probes(
+            urls,
+            required=2,
+            preferred=3,
+            probe=probe,
+            label="test-log-spare",
+        )
+        elapsed = time.monotonic() - started
+    finally:
+        watcher.RPC_HEAD_PROBE_GRACE_SECONDS = original_grace
+        watcher.RPC_HEAD_PROBE_DEADLINE_SECONDS = original_deadline
+        watcher.RPC_SLOW_UNTIL.clear()
+
+    assert len(results) == 2
+    assert any("deadline exceeded" in error for error in errors)
+    assert elapsed < 0.25
 
 
 def event_log(
@@ -861,6 +1028,7 @@ def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cu
             "last_seen_auction_settled_log_id": "",
             "last_seen_auction_extended_log_id": "",
             "last_refresh_at_utc": iso(0),
+            "last_refresh_error": "stale dirty-tree failure from an older publisher",
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
         state_path.chmod(0o600)
@@ -905,6 +1073,7 @@ def test_refresh_failure_keeps_unpublished_bid_pending_without_advancing_seen_cu
         assert saved["last_seen_amount_wei"] == original_state["last_seen_amount_wei"]
         assert saved["last_seen_high_bidder"] == original_state["last_seen_high_bidder"]
         assert saved["last_seen_bid_log_id"] == original_state["last_seen_bid_log_id"]
+        assert saved["last_refresh_error"] == "refresh command exited with status 1"
 
 
 def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_without_advancing_seen_cursor():
@@ -921,6 +1090,7 @@ def test_guarded_dirty_tree_refresh_refusal_keeps_unpublished_bid_pending_withou
             "last_seen_auction_settled_log_id": "",
             "last_seen_auction_extended_log_id": "",
             "last_refresh_at_utc": iso(0),
+            "last_refresh_error": "stale provider error from an older publisher",
         }
         state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
         state_path.chmod(0o600)
@@ -983,6 +1153,7 @@ def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
             "last_refresh_at_utc": iso(0),
             "pending_refresh": True,
             "pending_bid_log_id": "130:0xnewbid:4",
+            "last_refresh_error": "stale provider error from an older publisher",
         }, sort_keys=True), encoding="utf-8")
         state_path.chmod(0o600)
         snapshot = {
@@ -1023,6 +1194,7 @@ def test_refresh_success_acknowledges_pending_bid_and_clears_pending_identity():
         assert saved["last_seen_bid_log_id"] == "130:0xnewbid:4"
         assert "pending_refresh" not in saved
         assert "pending_bid_log_id" not in saved
+        assert "last_refresh_error" not in saved
 
 
 def test_new_settlement_bypasses_cooldown():

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import tempfile
@@ -172,6 +173,57 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         assert "/Users/" not in json.dumps(status)
         validated = telemetry.validate_refresh_status(root=root)
         assert validated == status
+
+
+def test_refresh_status_preserves_and_validates_rarity_mint_extension_provenance() -> None:
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        rows = json.loads((root / "generated" / "mission3_metrics.json").read_text())
+        metrics = {str(row["metric"]): str(row["value"]) for row in rows}
+        metrics.update(
+            {
+                "dog_token_uri_verification_status": "baseline_hash_pinned_quorum_plus_cross_provider_rarity_event_continuity",
+                "dog_base_existence_verification_status": "baseline_exists_token_uri_quorum_plus_cross_provider_rarity_event_continuity",
+                "dog_rarity_continuity_verification_status": "hash_pinned_cross_provider_canonical_mint_extension_plus_no_other_rarity_mutations",
+                "dog_rarity_extension_mint_count": "1",
+                "dog_rarity_extension_mint_token_ids": "791",
+                "dog_rarity_extension_mint_token_ids_sha256": hashlib.sha256(b"791").hexdigest(),
+            }
+        )
+        metric_rows = [{"metric": key, "value": value} for key, value in metrics.items()]
+        write_json(root / "generated" / "mission3_metrics.json", metric_rows)
+        write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
+        (root / "generated" / "mission3_metrics.csv").write_text(
+            "metric,value\n" + "".join(f"{key},{value}\n" for key, value in metrics.items()),
+            encoding="utf-8",
+        )
+
+        status = telemetry.write_refresh_status(base_env(root), root=root)
+        assert status["dog_rarity_extension_mint_token_ids"] == "791"
+        assert telemetry.validate_refresh_status(root=root) == status
+
+        non_suffix = dict(status)
+        non_suffix["dog_rarity_extension_mint_token_ids"] = "50"
+        non_suffix["dog_rarity_extension_mint_token_ids_sha256"] = hashlib.sha256(
+            b"50"
+        ).hexdigest()
+        write_json(root / "generated" / "refresh_status.json", non_suffix)
+        write_json(root / "public" / "generated" / "refresh_status.json", non_suffix)
+        assert_raises_contains(
+            lambda: telemetry.validate_refresh_status(root=root),
+            "mint-extension provenance is inconsistent",
+        )
+
+        broken = dict(status)
+        broken["dog_rarity_extension_mint_token_ids_sha256"] = "0" * 64
+        write_json(root / "generated" / "refresh_status.json", broken)
+        write_json(root / "public" / "generated" / "refresh_status.json", broken)
+        assert_raises_contains(
+            lambda: telemetry.validate_refresh_status(root=root),
+            "mint-extension provenance is inconsistent",
+        )
 
 
 def test_refresh_outcome_rows_cover_no_diff_failure_and_live_timeout() -> None:

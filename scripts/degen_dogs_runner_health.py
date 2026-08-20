@@ -62,6 +62,17 @@ WATCHER_LOCK_PATH = Path(
     os.environ.get("MISSION3_WATCHER_LOCK_PATH", str(REPO_DIR / ".local" / "mission3_onchain_tracker.lock"))
 ).expanduser()
 REFRESH_LOG = LOG_DIR / "refresh.log"
+_REFRESH_TELEMETRY_CONFIG = Path(
+    os.environ.get(
+        "DEGEN_DOGS_REFRESH_TELEMETRY_PATH",
+        str(REPO_DIR / ".local" / "refresh_runs.jsonl"),
+    )
+).expanduser()
+REFRESH_TELEMETRY_PATH = (
+    _REFRESH_TELEMETRY_CONFIG
+    if _REFRESH_TELEMETRY_CONFIG.is_absolute()
+    else REPO_DIR / _REFRESH_TELEMETRY_CONFIG
+)
 REFRESH_SCRIPT = REPO_DIR / "scripts" / "refresh_and_publish.sh"
 WATCHER_SCRIPT = REPO_DIR / "scripts" / "watch_mission3_onchain_activity.py"
 HOURLY_INSTALL_SCRIPT = REPO_DIR / "scripts" / "install_hourly_refresh_launchd.sh"
@@ -84,6 +95,12 @@ TRUSTED_STATE_KEY = "_degen_dogs_health_state_trusted"
 DISCORD_MENTION = os.environ.get("DEGEN_DOGS_HEALTH_DISCORD_MENTION", "@Ael")
 ALERT_STATE_PATH = Path(
     os.environ.get("DEGEN_DOGS_HEALTH_ALERT_STATE_PATH", str(CACHE_DIR / "critical-alert-state.json"))
+).expanduser()
+REFRESH_RETRY_STATE_PATH = Path(
+    os.environ.get(
+        "DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH",
+        str(CACHE_DIR / "refresh-retry-state.json"),
+    )
 ).expanduser()
 EXPECTED_INTERVAL_SECONDS = int(os.environ.get("DEGEN_DOGS_REFRESH_INTERVAL_SECONDS", "3600"))
 WATCHER_INTERVAL_SECONDS = int(os.environ.get("MISSION3_WATCHER_INTERVAL_SECONDS", "15"))
@@ -186,6 +203,21 @@ WATCHER_ACTIVE_GRACE_SECONDS = max(
     30,
     int(os.environ.get("DEGEN_DOGS_HEALTH_WATCHER_ACTIVE_GRACE_SECONDS", "90")),
 )
+REFRESH_RETRY_BASE_SECONDS = min(
+    3600,
+    max(300, int(os.environ.get("DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS", "300"))),
+)
+REFRESH_RETRY_MAX_SECONDS = min(
+    24 * 3600,
+    max(
+        REFRESH_RETRY_BASE_SECONDS,
+        int(os.environ.get("DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS", "3600")),
+    ),
+)
+REFRESH_RETRY_SCHEMA_VERSION = 1
+PUBLISHED_REFRESH_RESULTS = frozenset({"success_pushed", "success_pushed_live_timeout"})
+NO_DIFF_REFRESH_RESULT = "success_no_diff"
+COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 
 SECRET_PATTERNS = [
     re.compile(r"gh[pousr]_[A-Za-z0-9_]{20,}"),
@@ -345,6 +377,7 @@ def private_runner_files() -> tuple[Path, ...]:
         _absolute_runner_path(WATCHER_LOCK_PATH),
         _absolute_runner_path(REFRESH_LOCK_PATH),
         _absolute_runner_path(ALERT_STATE_PATH),
+        _absolute_runner_path(REFRESH_RETRY_STATE_PATH),
         plist_dir / f"{HOURLY_LABEL}.plist",
         plist_dir / f"{WATCHER_LABEL}.plist",
         plist_dir / "com.ael.degendogs.mission3.health.plist",
@@ -795,19 +828,130 @@ def age_minutes(now: float, ts: float | None) -> int | None:
     return max(0, int((now - ts) / 60))
 
 
+def authenticated_terminal_refresh_success_timestamp(
+    row: Any,
+    *,
+    now: float,
+) -> float | None:
+    """Accept only strict terminal private telemetry proving completed work."""
+    if not isinstance(row, dict):
+        return None
+    result = row.get("result")
+    if (
+        row.get("schema_version") != 1
+        or row.get("kind") != "refresh_publish"
+        or not isinstance(result, str)
+        or result not in {*PUBLISHED_REFRESH_RESULTS, NO_DIFF_REFRESH_RESULT}
+        or row.get("skip_push") is not False
+    ):
+        return None
+    run_id = row.get("run_id")
+    if (
+        not isinstance(run_id, str)
+        or not run_id
+        or len(run_id) > 128
+    ):
+        return None
+    completed_ts = parse_iso_timestamp(row.get("completed_at_utc"))
+    started_ts = parse_iso_timestamp(row.get("started_at_utc"))
+    if (
+        completed_ts is None
+        or started_ts is None
+        or completed_ts > now + 300
+        or completed_ts + 5 < started_ts
+    ):
+        return None
+    if result == NO_DIFF_REFRESH_RESULT:
+        if (
+            row.get("commit_sha") not in (None, "")
+            or row.get("push_completed_at_utc") not in (None, "")
+            or row.get("changed_files") not in (None, [])
+        ):
+            return None
+        ordered_stage_keys = (
+            "data_started_at_utc",
+            "data_completed_at_utc",
+            "validation_started_at_utc",
+            "validation_completed_at_utc",
+            "build_started_at_utc",
+            "build_completed_at_utc",
+            "git_status_started_at_utc",
+            "git_status_completed_at_utc",
+        )
+        stage_timestamps = [parse_iso_timestamp(row.get(key)) for key in ordered_stage_keys]
+        if any(value is None for value in stage_timestamps):
+            return None
+        ordered = [started_ts, *stage_timestamps, completed_ts]
+        if any((later or 0) + 5 < (earlier or 0) for earlier, later in zip(ordered, ordered[1:])):
+            return None
+        return completed_ts
+
+    commit_sha = row.get("commit_sha")
+    pushed_ts = parse_iso_timestamp(row.get("push_completed_at_utc"))
+    if (
+        not isinstance(commit_sha, str)
+        or COMMIT_SHA_PATTERN.fullmatch(commit_sha) is None
+        or pushed_ts is None
+        or pushed_ts > completed_ts + 5
+        or pushed_ts + 5 < started_ts
+    ):
+        return None
+    if result == "success_pushed_live_timeout" and row.get("raw_commit_verified") is not True:
+        return None
+    return completed_ts
+
+
+def latest_authenticated_refresh_success(now: float | None = None) -> float | None:
+    """Read bounded, descriptor-safe private telemetry for log-rollover recovery."""
+    now = time.time() if now is None else now
+    try:
+        descriptor = open_existing_private_file(REFRESH_TELEMETRY_PATH)
+    except (FileNotFoundError, OSError, SecurePathError):
+        return None
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_SH)
+        details = os.fstat(descriptor)
+        offset = max(0, details.st_size - 768_000)
+        os.lseek(descriptor, offset, os.SEEK_SET)
+        data = os.read(descriptor, 768_000)
+    except OSError:
+        return None
+    finally:
+        os.close(descriptor)
+    lines = data.decode("utf-8", errors="replace").splitlines()
+    # The bounded read may begin inside an otherwise valid JSON row. Never
+    # interpret that unauthenticated fragment as a complete telemetry record.
+    if offset > 0 and lines:
+        lines = lines[1:]
+    successes: list[float] = []
+    for line in lines:
+        try:
+            row = json.loads(line)
+        except (json.JSONDecodeError, RecursionError):
+            continue
+        success_ts = authenticated_terminal_refresh_success_timestamp(row, now=now)
+        if success_ts is not None:
+            successes.append(success_ts)
+    return max(successes) if successes else None
+
+
 def parse_refresh_log_details() -> dict[str, Any]:
     details: dict[str, Any] = {
         "last_success_ts": None,
+        "last_success_source": None,
         "last_finished_ts": None,
         "last_finished_status": None,
         "last_started_ts": None,
         "last_error": None,
         "recent_signals": [],
     }
-    if not REFRESH_LOG.exists():
-        return details
-    # Keep parsing bounded even if the log grows large.
-    data = REFRESH_LOG.read_bytes()[-768_000:].decode("utf-8", errors="replace")
+    # Keep parsing bounded even if the log grows large. Private terminal publish
+    # telemetry below preserves a completed post-push success after its raw log
+    # line leaves this tail (or when the log has just been compacted).
+    try:
+        data = REFRESH_LOG.read_bytes()[-768_000:].decode("utf-8", errors="replace")
+    except FileNotFoundError:
+        data = ""
     signal_needles = (
         "tracked working tree changes exist",
         "refusing to refresh",
@@ -833,6 +977,7 @@ def parse_refresh_log_details() -> dict[str, Any]:
             details["last_finished_status"] = status
             if status == 0:
                 details["last_success_ts"] = ts
+                details["last_success_source"] = "refresh_log"
                 details["last_error"] = None
                 recent_signals = []
         lower = line.lower()
@@ -844,6 +989,13 @@ def parse_refresh_log_details() -> dict[str, Any]:
                 details["last_error"] = clean
     if details["last_finished_status"] == 0:
         details["last_error"] = None
+    durable_success_ts = latest_authenticated_refresh_success()
+    if durable_success_ts is not None and (
+        details["last_success_ts"] is None
+        or durable_success_ts > details["last_success_ts"]
+    ):
+        details["last_success_ts"] = durable_success_ts
+        details["last_success_source"] = "refresh_telemetry"
     details["recent_signals"] = recent_signals[-12:]
     return details
 
@@ -1171,6 +1323,205 @@ def parse_iso_timestamp(value: Any) -> float | None:
         return datetime.fromisoformat(text).astimezone(timezone.utc).timestamp()
     except ValueError:
         return None
+
+
+def validate_refresh_retry_state(state: Any) -> dict[str, Any]:
+    """Validate the private recovery schedule before it can gate a repair."""
+    if state == {}:
+        return {}
+    if not isinstance(state, dict):
+        raise ValueError("refresh retry state is not a JSON object")
+    allowed_keys = {
+        "schema_version",
+        "condition_id",
+        "condition_kind",
+        "consecutive_recovery_attempts",
+        "last_observed_finished_at_utc",
+        "last_retry_dispatched_at_utc",
+        "next_retry_at_utc",
+    }
+    if set(state) - allowed_keys:
+        raise ValueError("refresh retry state contains unsupported fields")
+    if state.get("schema_version") != REFRESH_RETRY_SCHEMA_VERSION:
+        raise ValueError("refresh retry state schema is unsupported")
+    condition_id = state.get("condition_id")
+    if not isinstance(condition_id, str) or not condition_id or len(condition_id) > 256:
+        raise ValueError("refresh retry condition id is invalid")
+    if state.get("condition_kind") not in {"failed", "stale"}:
+        raise ValueError("refresh retry condition kind is invalid")
+    attempts = state.get("consecutive_recovery_attempts")
+    if isinstance(attempts, bool) or not isinstance(attempts, int) or not 0 <= attempts <= 64:
+        raise ValueError("refresh retry attempt count is invalid")
+    for key in (
+        "last_observed_finished_at_utc",
+        "last_retry_dispatched_at_utc",
+        "next_retry_at_utc",
+    ):
+        value = state.get(key)
+        if value is not None and parse_iso_timestamp(value) is None:
+            raise ValueError(f"refresh retry timestamp is invalid: {key}")
+    if parse_iso_timestamp(state.get("next_retry_at_utc")) is None:
+        raise ValueError("refresh retry next-at timestamp is missing")
+    return dict(state)
+
+
+def load_refresh_retry_state() -> dict[str, Any]:
+    """Load the retry schedule fail-closed if an existing file is untrusted."""
+    try:
+        fd = open_existing_private_file(REFRESH_RETRY_STATE_PATH)
+    except FileNotFoundError:
+        return {}
+    except (OSError, SecurePathError) as exc:
+        raise PermissionError(f"refresh retry state is unsafe: {exc}") from exc
+    try:
+        details = os.fstat(fd)
+        if details.st_size > 65_536:
+            raise ValueError("refresh retry state exceeds 64 KiB")
+        with os.fdopen(fd, "r", encoding="utf-8") as handle:
+            fd = -1
+            try:
+                state = json.load(handle)
+            except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as exc:
+                raise ValueError("refresh retry state is invalid JSON") from exc
+    finally:
+        if fd >= 0:
+            os.close(fd)
+    return validate_refresh_retry_state(state)
+
+
+def save_refresh_retry_state(state: dict[str, Any]) -> None:
+    """Atomically persist the bounded recovery schedule in a mode-0600 file."""
+    if DRY_RUN:
+        return
+    validated = validate_refresh_retry_state(state)
+    try:
+        secure_private_directory(REFRESH_RETRY_STATE_PATH.parent)
+    except SecurePathError as exc:
+        raise PermissionError(
+            "refusing to write refresh retry state in an unprotected directory: "
+            f"{REFRESH_RETRY_STATE_PATH.parent}: {exc}"
+        ) from exc
+    payload = (json.dumps(validated, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    temporary = Path(
+        create_private_temp(
+            REFRESH_RETRY_STATE_PATH.parent / f".{REFRESH_RETRY_STATE_PATH.name}"
+        )
+    )
+    fd = open_existing_private_file(temporary, writable=True)
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            fd = -1
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        replace_private_file(temporary, REFRESH_RETRY_STATE_PATH)
+    finally:
+        if fd >= 0:
+            os.close(fd)
+        unlink_private_file(temporary, missing_ok=True)
+
+
+def refresh_retry_delay(attempts: int) -> int:
+    """Return exponential retry delay without ever constructing a huge power."""
+    delay = REFRESH_RETRY_BASE_SECONDS
+    for _ in range(min(63, max(1, attempts) - 1)):
+        delay = min(REFRESH_RETRY_MAX_SECONDS, delay * 2)
+        if delay >= REFRESH_RETRY_MAX_SECONDS:
+            break
+    return delay
+
+
+def reconcile_refresh_retry_state(
+    state: dict[str, Any],
+    *,
+    stale: bool,
+    failed_last: bool,
+    last_success_ts: float | None,
+    last_finished_ts: float | None,
+    last_finished_status: int | None,
+    now: float,
+) -> dict[str, Any]:
+    """Carry one bounded recovery cycle across watchdog and machine restarts."""
+    if not stale and not failed_last:
+        return {}
+
+    previous = validate_refresh_retry_state(state)
+    finished_at = iso_from_ts(last_finished_ts)
+    condition_kind = "failed" if failed_last else "stale"
+    if failed_last:
+        condition_id = f"failed:{last_finished_status}:{finished_at or 'unknown'}"
+    else:
+        condition_id = f"stale:{iso_from_ts(last_success_ts) or 'none'}"
+
+    confirmed_new_success = (
+        bool(previous)
+        and last_finished_status == 0
+        and finished_at is not None
+        and finished_at != previous.get("last_observed_finished_at_utc")
+    )
+    if not previous or confirmed_new_success:
+        attempts = 1 if failed_last else 0
+        if failed_last:
+            anchor = min(now, last_finished_ts) if last_finished_ts is not None else now
+            next_retry_ts = anchor + refresh_retry_delay(1)
+        else:
+            # A missed/stale successful schedule gets one immediate recovery.
+            next_retry_ts = now
+    else:
+        attempts = int(previous["consecutive_recovery_attempts"])
+        next_retry_ts = parse_iso_timestamp(previous.get("next_retry_at_utc"))
+        if next_retry_ts is None:  # Defensive; validation above normally rejects this.
+            next_retry_ts = now
+        # A reservation written while the wall clock was incorrectly ahead must
+        # not suppress recovery for longer than the configured hard ceiling once
+        # NTP (or an operator) corrects the clock.
+        next_retry_ts = min(next_retry_ts, now + REFRESH_RETRY_MAX_SECONDS)
+
+    reconciled: dict[str, Any] = {
+        "schema_version": REFRESH_RETRY_SCHEMA_VERSION,
+        "condition_id": condition_id,
+        "condition_kind": condition_kind,
+        "consecutive_recovery_attempts": attempts,
+        "next_retry_at_utc": iso_from_ts(next_retry_ts),
+    }
+    if finished_at is not None:
+        reconciled["last_observed_finished_at_utc"] = finished_at
+    if previous.get("last_retry_dispatched_at_utc") and not confirmed_new_success:
+        reconciled["last_retry_dispatched_at_utc"] = previous[
+            "last_retry_dispatched_at_utc"
+        ]
+    return validate_refresh_retry_state(reconciled)
+
+
+def refresh_retry_due(state: dict[str, Any], now: float) -> bool:
+    validated = validate_refresh_retry_state(state)
+    if not validated:
+        return True
+    next_retry_ts = parse_iso_timestamp(validated["next_retry_at_utc"])
+    return next_retry_ts is None or now >= next_retry_ts
+
+
+def reserve_refresh_retry(state: dict[str, Any], now: float) -> dict[str, Any]:
+    """Persist the next deadline before dispatch, preventing crash-loop repeats."""
+    reserved = validate_refresh_retry_state(state)
+    if not reserved:
+        raise ValueError("cannot reserve an empty refresh retry state")
+    attempts = min(64, int(reserved["consecutive_recovery_attempts"]) + 1)
+    reserved["consecutive_recovery_attempts"] = attempts
+    reserved["last_retry_dispatched_at_utc"] = iso_from_ts(now)
+    reserved["next_retry_at_utc"] = iso_from_ts(now + refresh_retry_delay(attempts))
+    return validate_refresh_retry_state(reserved)
+
+
+def defer_refresh_retry_after_dispatch_failure(
+    state: dict[str, Any], now: float
+) -> dict[str, Any]:
+    """Retry a failed launchctl dispatch at the base delay without counting it."""
+    deferred = validate_refresh_retry_state(state)
+    if not deferred:
+        raise ValueError("cannot defer an empty refresh retry state")
+    deferred["next_retry_at_utc"] = iso_from_ts(now + refresh_retry_delay(1))
+    return validate_refresh_retry_state(deferred)
 
 
 def inspect_watcher_state(now: float | None = None, path: Path | None = None) -> tuple[list[str], dict[str, Any]]:
@@ -1906,6 +2257,45 @@ def maybe_run_with_refresh_guard(
         release_refresh_mutation_lock(lock_fd)
 
 
+def kickstart_hourly_refresh_with_backoff(
+    lines: list[str],
+    state: dict[str, Any],
+    *,
+    now: float,
+    reason: str,
+) -> tuple[dict[str, Any], Result]:
+    """Durably reserve, dispatch, and account for one health recovery attempt."""
+    previous = validate_refresh_retry_state(state)
+    reserved = reserve_refresh_retry(previous, now)
+    # Persist before dispatch so a watchdog or machine crash cannot turn a
+    # successful launchctl handoff into a five-minute dispatch loop.
+    save_refresh_retry_state(reserved)
+    result = maybe_run_with_refresh_guard(
+        lines,
+        f"kickstart hourly refresh agent ({reason})",
+        ["launchctl", "kickstart", launch_target(HOURLY_LABEL)],
+        cwd=None,
+        timeout=30,
+        require_idle_label=HOURLY_LABEL,
+        release_before_run=True,
+    )
+    if result.code not in {0, 75}:
+        # launchctl definitively rejected/failed the handoff, so this was not a
+        # recovery attempt. Revert the attempt count and try again at the base
+        # delay instead of backing off exponentially without a running worker.
+        deferred = defer_refresh_retry_after_dispatch_failure(previous, now)
+        save_refresh_retry_state(deferred)
+        append_fix(
+            lines,
+            "scheduled a base-delay hourly refresh retry after launchctl dispatch failure "
+            f"at {deferred['next_retry_at_utc']}",
+        )
+        return deferred, result
+    # Status 75 is a fresh lock/running-service race. The reserved deadline is
+    # retained because another real recovery attempt is already in progress.
+    return reserved, result
+
+
 def ensure_launchd_service(lines: list[str], spec: LaunchdSpec, *, allow_repair: bool = True) -> str:
     reinstall_reasons: list[str] = []
     if plist_needs_reinstall(reinstall_reasons, spec):
@@ -2143,6 +2533,24 @@ def main() -> int:
     stale = last_success_ts is None or (now - last_success_ts) > STALE_SUCCESS_SECONDS
     critical_stale = last_success_ts is None or (now - last_success_ts) > CRITICAL_STALE_SECONDS
     failed_last = last_finished_status is not None and last_finished_status != 0
+    refresh_retry_state: dict[str, Any] = {}
+    refresh_retry_state_error: str | None = None
+    try:
+        loaded_refresh_retry_state = load_refresh_retry_state()
+        refresh_retry_state = reconcile_refresh_retry_state(
+            loaded_refresh_retry_state,
+            stale=stale,
+            failed_last=failed_last,
+            last_success_ts=last_success_ts,
+            last_finished_ts=log_details.get("last_finished_ts"),
+            last_finished_status=last_finished_status,
+            now=now,
+        )
+        if refresh_retry_state != loaded_refresh_retry_state:
+            save_refresh_retry_state(refresh_retry_state)
+    except (OSError, SecurePathError, ValueError) as exc:
+        refresh_retry_state_error = f"{type(exc).__name__}: {sanitize(str(exc), 180)}"
+        append_issue(lines, f"refresh retry state unsafe/unreadable: {refresh_retry_state_error}")
     effective_critical_stale = critical_stale and not refresh_attempt_active
     effective_failed_last = failed_last and not refresh_attempt_active
     if effective_critical_stale:
@@ -2164,19 +2572,34 @@ def main() -> int:
             append_issue(lines, "refresh appears stale/failed, but tracked worktree changes still block safe kickstart")
         elif service_is_running(print_output):
             append_issue(lines, "refresh appears stale/failed, but launchd job is currently running; left it alone")
+        elif refresh_retry_state_error is not None:
+            append_issue(lines, "hourly refresh kickstart deferred until its private retry state is safe")
+        elif not refresh_retry_due(refresh_retry_state, now):
+            next_retry_at = refresh_retry_state.get("next_retry_at_utc") or "a later health check"
+            next_retry_ts = parse_iso_timestamp(next_retry_at)
+            wait_seconds = max(1, int((next_retry_ts or now) - now))
+            append_fix(
+                lines,
+                "deferred hourly refresh kickstart by persisted retry backoff "
+                f"until {next_retry_at} ({(wait_seconds + 59) // 60}m)",
+            )
         else:
             reason = "no successful refresh found" if last_success_ts is None else f"last successful refresh age={int((now - last_success_ts) / 60)}m"
             if failed_last:
                 reason += f", last status={last_finished_status}"
-            maybe_run_with_refresh_guard(
-                lines,
-                f"kickstart hourly refresh agent ({reason})",
-                ["launchctl", "kickstart", launch_target(HOURLY_LABEL)],
-                cwd=None,
-                timeout=30,
-                require_idle_label=HOURLY_LABEL,
-                release_before_run=True,
-            )
+            try:
+                refresh_retry_state, _dispatch_result = kickstart_hourly_refresh_with_backoff(
+                    lines,
+                    refresh_retry_state,
+                    now=now,
+                    reason=reason,
+                )
+            except (OSError, SecurePathError, ValueError) as exc:
+                append_issue(
+                    lines,
+                    "hourly refresh recovery retry-state operation failed: "
+                    f"{type(exc).__name__}: {sanitize(str(exc), 180)}",
+                )
 
     metrics = load_metrics()
     ok, live_msg = live_site_ok(load_local_refresh_status())

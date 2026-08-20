@@ -43,6 +43,16 @@ reorg-overlapped and cross-table validated; identities, metadata hosting, price 
 and reward projections are source-attributed offchain inputs and are not mislabeled as
 cross-provider onchain facts.
 
+The bounded rarity path can extend the cached verified universe only for a
+contiguous canonical mint proved across independent log providers. Every
+baseline rarity Dog must also have a content-bound local metadata-cache record
+that is still inside `DOG_METADATA_CACHE_MAX_AGE_SECONDS` (24 hours by default)
+and whose traits exactly match the attested historical row. The new/current
+Dog is fetched from its hash-pinned onchain tokenURI and its full verified cache
+record is retained for the next run. A missing, expired, future-dated,
+malformed, or trait-mismatched entry—and any burn, metadata event, or mint
+gap—fails closed to the full rebuild instead of extending stale rarity data.
+
 ## Baseline hourly reconcile
 
 Keep the hourly refresh as the safety baseline:
@@ -273,6 +283,18 @@ bash scripts/install_runner_health_launchd.sh
 ```
 
 Both worker LaunchAgents share `refresh.lock`, so an hourly refresh and an event-triggered refresh cannot run at the same time. The watcher LaunchAgent runs `--once` every `MISSION3_WATCHER_INTERVAL_SECONDS` seconds; this is preferred over a long-running launchd loop because failures are visible in launchd logs. The installed default is 15 seconds. The health LaunchAgent runs every five minutes, repairs plist/service drift, kickstarts stale workers, validates watcher state/failure counters, and checks the live cache-busted refresh-status sidecar.
+
+Failed health-triggered refreshes use a private persisted exponential schedule at
+`~/Library/Caches/degen-dogs-mission3/refresh-retry-state.json`. The default retry
+delay grows from five minutes to a one-hour ceiling, survives watchdog or machine
+restarts, and resets after a successful refresh. Override the path or bounds with
+`DEGEN_DOGS_HEALTH_REFRESH_RETRY_STATE_PATH`,
+`DEGEN_DOGS_HEALTH_REFRESH_RETRY_BASE_SECONDS`, and
+`DEGEN_DOGS_HEALTH_REFRESH_RETRY_MAX_SECONDS`. When log compaction moves a raw
+completion outside the bounded tail, the watchdog accepts only a protected terminal
+refresh-telemetry row with a completed push or a fully validated empty artifact set;
+the pre-publish
+`generated/refresh_status.json` timestamp is never treated as runner completion.
 
 The health pass also bounds launchd, runner, watcher, and local JSONL telemetry logs.
 It preserves launchd file inodes, retains complete newest lines, and checks free bytes

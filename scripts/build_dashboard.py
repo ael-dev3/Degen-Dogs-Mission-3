@@ -963,6 +963,7 @@ def _canonical_rpc_result(method: str, value: Any) -> str:
                     "removed": bool(item.get("removed", False)),
                     "topics": [str(topic).lower() for topic in item.get("topics") or []],
                     "transactionHash": str(item.get("transactionHash") or "").lower(),
+                    "transactionIndex": str(item.get("transactionIndex") or "").lower(),
                 }
                 for item in value
                 if isinstance(item, dict)
@@ -1062,12 +1063,18 @@ def _collect_rpc_probes(
     urls: list[str],
     *,
     required: int,
+    preferred: int | None = None,
     probe: Callable[[str], Any],
     label: str,
 ) -> tuple[list[Any], list[str]]:
-    """Collect a minimum independent probe set without waiting for stragglers."""
+    """Collect a minimum probe set and briefly wait for an optional spare."""
     scope = f"probe:{label}"
     active_urls = _responsive_rpc_urls(urls, required, scope)
+    preferred_target = (
+        None
+        if preferred is None
+        else max(required, min(len(active_urls), preferred))
+    )
     responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
 
     def worker(index: int, url: str) -> None:
@@ -1091,6 +1098,8 @@ def _collect_rpc_probes(
     quorum_deadline: float | None = None
     while pending_indexes:
         now = time.monotonic()
+        if preferred_target is not None and len(results) >= preferred_target:
+            break
         if len(results) >= required and quorum_deadline is None:
             quorum_deadline = now + RPC_HEAD_PROBE_GRACE_SECONDS
         deadline = min(hard_deadline, quorum_deadline) if quorum_deadline is not None else hard_deadline
@@ -1328,9 +1337,16 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
         return url
 
     log_candidates = _independent_rpc_urls([*LOG_RPC_URLS, *qualified_snapshot_urls, *_quorum_rpc_urls()])
+    # Keep one independently operated spare when it responds within the bounded
+    # post-quorum grace. A two-of-two log pool is accurate while both endpoints
+    # are healthy, but one transient timeout leaves no way to distinguish an
+    # outage from an empty security-critical result. The spare is preferred,
+    # never required: two healthy witnesses still avoid the hard probe deadline.
+    log_probe_target = min(len(log_candidates), required + 1)
     verified_log_urls, log_errors = _collect_rpc_probes(
         log_candidates,
         required=required,
+        preferred=log_probe_target,
         probe=endpoint_log_capability,
         label="log-capability",
     )
