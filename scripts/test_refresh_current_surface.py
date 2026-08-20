@@ -101,6 +101,14 @@ def test_overlap_history_drops_reorg_orphan_before_merge() -> None:
     assert [row["tx_hash"] for row in merged] == ["0xkeep", "0xcanonical"]
 
 
+def test_auction_feed_status_uses_the_canonical_pending_settlement_label() -> None:
+    surface = load_module()
+
+    assert surface.auction_feed_status("live") == "ongoing"
+    assert surface.auction_feed_status("ended_unsettled") == "ended pending settlement"
+    assert surface.auction_feed_status("settled") == "settled"
+
+
 def test_current_bid_history_public_rows_are_high_bid_first() -> None:
     surface = load_module()
     rows = [

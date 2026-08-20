@@ -82,6 +82,13 @@ class TransientSnapshotLag(RuntimeError):
     """Raised when the verified RPC tip is older than the persisted checkpoint."""
 
 
+def auction_feed_status(auction_state: str) -> str:
+    return {
+        "live": "ongoing",
+        "ended_unsettled": "ended pending settlement",
+    }.get(auction_state, auction_state)
+
+
 def bid_tx_hash(row: dict[str, Any]) -> str:
     return str(row.get("tx_hash") or row.get("transaction_hash") or "").strip().lower()
 
@@ -2237,7 +2244,7 @@ def main() -> None:
         state = "live"
     else:
         state = "ended_unsettled"
-    surface_status = "ongoing" if state == "live" else state
+    surface_status = auction_feed_status(state)
     bid_text = f"{format_eth_amount(amount_eth)} ETH (${amount_usd:,.0f})"
     bid_time = current_bids[-1].get("bid_time_utc") if current_bids else current.get("start_time_utc") or latest_time
     dog_attrs = verified_rarity_attrs[token_id]
@@ -2579,6 +2586,7 @@ def main() -> None:
             "auction_created_time_utc": current.get("start_time_utc", ""),
             "settled_time_utc": (current_settlement or {}).get("block_time_utc", "") if state == "settled" else "",
             "rarity": rarity,
+            "rarity_score": rarity_score,
             "traits": traits,
             "trait_rarity": trait_rarity,
             "metadata_verification_status": "onchain_token_uri_verified",
