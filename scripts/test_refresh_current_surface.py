@@ -669,11 +669,35 @@ def test_unified_rarity_normalization_is_idempotent() -> None:
         "search_text": "dog 9 #8/9 body: blue (10.0%)",
     }
 
-    surface.apply_unified_rarity_fields(row, rarity_row)
+    assert surface.apply_unified_rarity_fields(row, rarity_row) is True
     once = json.loads(json.dumps(row))
-    surface.apply_unified_rarity_fields(row, rarity_row)
+    assert surface.apply_unified_rarity_fields(row, rarity_row) is False
 
     assert row == once
+
+
+def test_full_builder_shaped_unified_rarity_is_a_byte_preserving_noop() -> None:
+    surface = load_module()
+    rarity_row = {
+        "rarity": "#367/685",
+        "trait_rarity": "Body: Grey (13.0%); Eyes: EyePatch (7.9%)",
+    }
+    row = {
+        "dog_id": 809,
+        "rarity": {
+            "display": "#367/685",
+            "rank": 367,
+            "scope": "base_existing",
+            "total": 685,
+        },
+        "traits": surface.unified_trait_items(rarity_row["trait_rarity"]),
+        "search_text": "dog 809 #367/685 body: grey (13.0%) eyes: eyepatch (7.9%) base_logs",
+    }
+    before = json.dumps(row, sort_keys=True)
+
+    assert surface.apply_unified_rarity_fields(row, rarity_row) is False
+
+    assert json.dumps(row, sort_keys=True) == before
 
 
 def test_sparse_verified_base_universe_excludes_unclaimed_history_rows() -> None:

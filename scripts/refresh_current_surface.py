@@ -1589,26 +1589,36 @@ def normalize_table_rarity_rows(
     return rows
 
 
-def apply_unified_rarity_fields(row: dict[str, Any], rarity_row: dict[str, Any]) -> None:
+def apply_unified_rarity_fields(
+    row: dict[str, Any],
+    rarity_row: dict[str, Any],
+) -> bool:
     old_rarity = row.get("rarity") if isinstance(row.get("rarity"), dict) else {}
     old_traits = row.get("traits") if isinstance(row.get("traits"), list) else []
+    structured_traits = unified_trait_items(str(rarity_row["trait_rarity"]))
+    expected_rarity = {
+        "display": rarity_row["rarity"],
+        "rank": int(str(rarity_row["rarity"]).split("/", 1)[0].lstrip("#")),
+        "total": int(str(rarity_row["rarity"]).split("/", 1)[1]),
+        "scope": "base_existing",
+    }
+    # The canonical full builder already embeds the authoritative structured
+    # fields in its own search-text order. Preserve that byte-for-byte so a
+    # no-change bounded refresh cannot create master/by-id divergence.
+    if old_rarity == expected_rarity and old_traits == structured_traits:
+        return False
     search_text = str(row.get("search_text") or "")
     stale_terms = [str(old_rarity.get("display") or "")]
     stale_terms.extend(str(item.get("display") or "") for item in old_traits if isinstance(item, dict))
     for term in stale_terms:
         if term:
             search_text = re.sub(re.escape(term), " ", search_text, flags=re.IGNORECASE)
-    structured_traits = unified_trait_items(str(rarity_row["trait_rarity"]))
-    row["rarity"] = {
-        "display": rarity_row["rarity"],
-        "rank": int(str(rarity_row["rarity"]).split("/", 1)[0].lstrip("#")),
-        "total": int(str(rarity_row["rarity"]).split("/", 1)[1]),
-        "scope": "base_existing",
-    }
+    row["rarity"] = expected_rarity
     row["traits"] = structured_traits
     fresh_terms = [str(rarity_row["rarity"]), *(str(item.get("display") or "") for item in structured_traits)]
     row["search_text"] = " ".join([search_text, *fresh_terms]).lower().split()
     row["search_text"] = " ".join(row["search_text"])
+    return True
 
 
 def decimal_or_none(value: Any) -> Decimal | None:
@@ -2884,12 +2894,16 @@ def main() -> None:
     write_table("recent_auction_winners", recent_columns, recent_rows)
 
     unified_rows = json.loads(json.dumps(baseline_unified_rows))
+    changed_unified_tokens: set[int] = set()
     for row in unified_rows:
         if not isinstance(row, dict):
             continue
         unified_token_id = int_value(row.get("dog_id"), -1)
-        if unified_token_id in rarity_universe:
-            apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
+        if (
+            unified_token_id in rarity_universe
+            and apply_unified_rarity_fields(row, rarity_universe[unified_token_id])
+        ):
+            changed_unified_tokens.add(unified_token_id)
     unified_rows = [row for row in unified_rows if not (int_value(row.get("mission"), -1) == 3 and int_value(row.get("dog_id"), -1) == token_id)]
     should_reconcile_previous_unified = (
         reconcile_previous
@@ -3122,11 +3136,7 @@ def main() -> None:
     # Mission 2 has a small set of metadata-only Dogs with no unified/by-id
     # record. Rebase every record that actually exists without inventing a
     # synthetic auction record for those sparse IDs.
-    affected_unified_tokens = (
-        set(rarity_universe) & unified_record_ids
-        if rarity_rebase_required
-        else {token_id}
-    )
+    affected_unified_tokens = {token_id, *changed_unified_tokens}
     if should_reconcile_previous_unified:
         affected_unified_tokens.add(previous_token_id)
     write_unified_by_id_records(unified_rows, affected_unified_tokens)
