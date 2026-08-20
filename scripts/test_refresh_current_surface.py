@@ -168,13 +168,15 @@ def test_numeric_helpers_match_sqlite_real_rounding_and_printf() -> None:
         expected_eth_tie = formatter.execute(
             "SELECT printf('%.5f', ?)", (float("1.234565"),)
         ).fetchone()[0]
-        expected_usd_tie = formatter.execute(
-            "SELECT printf('%.0f', ?)", (float("1000.5"),)
-        ).fetchone()[0]
+        expected_usd = {
+            value: formatter.execute(
+                "SELECT printf('%.0f', ?)", (float(value),)
+            ).fetchone()[0]
+            for value in ("1000.4", "1000.5", "1000.6")
+        }
     assert surface.format_eth_5("1.234565") == expected_eth_tie
-    assert surface.format_usd_0("1000.5") == expected_usd_tie
-    assert surface.format_usd_0("1000.4") == "1000"
-    assert surface.format_usd_0("1000.6") == "1001"
+    for value, expected in expected_usd.items():
+        assert surface.format_usd_0(value) == expected
     assert surface.numeric_usd_2("0.00002", "2250") == 0.05
     assert surface.format_usd_product_0("0.00002", "2250") == "0"
     surface.require_exact_8_decimal_amount("0.12345678", "test")
