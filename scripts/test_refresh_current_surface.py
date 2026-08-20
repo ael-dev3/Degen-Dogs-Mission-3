@@ -1599,12 +1599,21 @@ def test_fast_rarity_continuity_accepts_only_exact_canonical_mint_extension() ->
     )
     malformed = dict(normal_transfer)
     malformed.pop("blockNumber")
+    missing_removed = dict(normal_transfer)
+    missing_removed.pop("removed")
+    malformed_removed = dict(normal_transfer)
+    malformed_removed["removed"] = "false"
+    out_of_range = dict(normal_transfer)
+    out_of_range["blockNumber"] = hex(121)
     for logs, latest_supply, expected in (
         ([burn], 100, "burn changed"),
         ([metadata_update], 100, "metadata changed"),
         ([noncanonical_mint], 101, "recipient is not the canonical auction house"),
         ([canonical_mint], 102, "gapped or mismatched"),
         ([malformed], 100, "malformed blockNumber"),
+        ([missing_removed], 100, "removed or malformed flag"),
+        ([malformed_removed], 100, "removed or malformed flag"),
+        ([out_of_range], 100, "outside its requested block range"),
         ([normal_transfer, normal_transfer], 100, "duplicated"),
     ):
         try:
@@ -1749,6 +1758,125 @@ def test_fast_rarity_continuity_advances_from_verified_checkpoint_only() -> None
         assert "checkpoint hash changed" in str(exc)
     else:
         raise AssertionError("a changed continuity checkpoint hash was accepted")
+
+
+def test_fast_rarity_continuity_adapts_explicit_limits_without_changing_results() -> None:
+    surface = load_module()
+
+    class ExplicitRangeLimit(RuntimeError):
+        pass
+
+    checkpoint_hash = "0x" + "a" * 64
+    latest_hash = "0x" + "b" * 64
+    dog_address = "0x" + "1" * 40
+    auction_address = "0x" + "4" * 40
+    code_hash = "c" * 64
+    metrics = [
+        {"metric": "dog_total_supply", "value": "100"},
+        {"metric": "dog_rarity_attested_block", "value": "100"},
+        {"metric": "dog_rarity_attested_block_hash", "value": checkpoint_hash},
+        {"metric": "dog_rarity_continuity_through_block", "value": "100"},
+        {"metric": "dog_rarity_continuity_through_block_hash", "value": checkpoint_hash},
+        {"metric": "latest_block", "value": "100"},
+        {"metric": "snapshot_block_hash", "value": checkpoint_hash},
+        {"metric": "dog_token_uri_verification_status", "value": surface.FULL_TOKEN_URI_VERIFICATION_STATUS},
+        {"metric": "dog_base_existence_verification_status", "value": surface.FULL_EXISTENCE_VERIFICATION_STATUS},
+        {"metric": "dog_rarity_continuity_verification_status", "value": surface.FULL_RARITY_CONTINUITY_STATUS},
+        {"metric": "dog_nft_code_sha256", "value": code_hash},
+    ]
+    canonical_mint = continuity_log(
+        dog_address,
+        [
+            surface.RARITY_MUTATION_TOPICS[0],
+            surface.ZERO_ADDRESS_TOPIC,
+            "0x" + "0" * 24 + auction_address[2:],
+            "0x" + f"{100:064x}",
+        ],
+        block=400,
+        log_index=0,
+    )
+
+    def bounded_builder(limit: int, *, generic_failure: bool = False) -> tuple[SimpleNamespace, list[tuple[int, int]]]:
+        ranges: list[tuple[int, int]] = []
+
+        def rpc_quorum(method: str, params: list, **_kwargs):
+            if method == "eth_getBlockByNumber":
+                return (
+                    {"number": hex(100), "hash": checkpoint_hash},
+                    ["https://one.example", "https://two.example"],
+                )
+            if method != "eth_getLogs":
+                raise AssertionError(f"unexpected RPC method {method}")
+            request = params[0]
+            start = int(request["fromBlock"], 16)
+            end = int(request["toBlock"], 16)
+            ranges.append((start, end))
+            if generic_failure:
+                raise RuntimeError("transport/quorum unavailable")
+            if end - start + 1 > limit:
+                raise ExplicitRangeLimit("explicit provider range limit")
+            logs = [canonical_mint] if start <= 400 <= end else []
+            return logs, ["https://one.example", "https://two.example"]
+
+        return SimpleNamespace(
+            DEGEN_DOGS=dog_address,
+            AUCTION_HOUSE=auction_address,
+            VERIFIED_LOG_URLS=["https://one.example", "https://two.example"],
+            RPC_QUORUM_SIZE=2,
+            LOG_RPC_TIMEOUT=20,
+            LOG_QUORUM_MAX_BLOCKS=500,
+            VERIFIED_LOG_MAX_BLOCKS=500,
+            RpcLogRangeLimit=ExplicitRangeLimit,
+            log_filter=lambda address, topics, start, end: {
+                "address": address,
+                "topics": [topics],
+                "fromBlock": hex(start),
+                "toBlock": hex(end),
+            },
+            rpc_quorum=rpc_quorum,
+        ), ranges
+
+    large_builder, large_ranges = bounded_builder(500)
+    split_builder, split_ranges = bounded_builder(250)
+    large = surface.verify_rarity_universe_continuity(
+        large_builder,
+        metrics,
+        latest_block=600,
+        latest_block_hash=latest_hash,
+        latest_dog_code_sha256=code_hash,
+        latest_total_supply=101,
+    )
+    split = surface.verify_rarity_universe_continuity(
+        split_builder,
+        metrics,
+        latest_block=600,
+        latest_block_hash=latest_hash,
+        latest_dog_code_sha256=code_hash,
+        latest_total_supply=101,
+    )
+    assert large == split
+    assert large["minted_token_ids"] == (100,)
+    assert large_ranges == [(101, 600)]
+    assert split_ranges == [(101, 600), (101, 350), (351, 600)]
+
+    failed_builder, failed_ranges = bounded_builder(500, generic_failure=True)
+    try:
+        surface.verify_rarity_universe_continuity(
+            failed_builder,
+            metrics,
+            latest_block=600,
+            latest_block_hash=latest_hash,
+            latest_dog_code_sha256=code_hash,
+            latest_total_supply=101,
+        )
+    except ExplicitRangeLimit as exc:
+        raise AssertionError("generic rarity quorum failure was classified as a range limit") from exc
+    except RuntimeError as exc:
+        assert type(exc) is RuntimeError
+        assert "transport/quorum unavailable" in str(exc)
+    else:
+        raise AssertionError("generic rarity quorum failure unexpectedly succeeded")
+    assert failed_ranges == [(101, 600)]
 
 
 def test_prior_settled_winner_block_and_historical_price_survive_fast_refresh_merge() -> None:

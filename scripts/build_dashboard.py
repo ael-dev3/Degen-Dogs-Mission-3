@@ -35,6 +35,15 @@ ROOT = Path(__file__).resolve().parents[1]
 SQL_PATH = ROOT / "sql" / "mission3_dashboard.sql"
 GENERATED = ROOT / "generated"
 PUBLIC_GENERATED = ROOT / "public" / "generated"
+LIVE_SNAPSHOT_BUNDLE_FILENAME_RE = re.compile(
+    r"^live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json$"
+)
+
+
+def is_live_snapshot_bundle_filename(filename: str) -> bool:
+    return bool(LIVE_SNAPSHOT_BUNDLE_FILENAME_RE.fullmatch(filename))
+
+
 CACHE_DIR = ROOT / ".cache"
 LOG_CACHE_DIR = CACHE_DIR / "rpc_logs"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
@@ -143,7 +152,7 @@ BLOCK_TIME_RPC_TIMEOUT = max(10, min(int(os.environ.get("BASE_BLOCK_TIME_RPC_TIM
 LOG_CACHE_OVERLAP_BLOCKS = max(1, min(int(os.environ.get("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "100")), 500))
 RPC_QUORUM_SIZE = max(2, min(int(os.environ.get("BASE_RPC_QUORUM_SIZE", "2")), 3))
 SNAPSHOT_CONFIRMATIONS = max(1, min(int(os.environ.get("BASE_SNAPSHOT_CONFIRMATIONS", "1")), 64))
-LOG_QUORUM_MAX_BLOCKS = max(1, min(int(os.environ.get("MISSION3_LOG_QUORUM_MAX_BLOCKS", "50")), 10000))
+LOG_QUORUM_MAX_BLOCKS = max(1, min(int(os.environ.get("MISSION3_LOG_QUORUM_MAX_BLOCKS", "500")), 10000))
 LOG_QUORUM_WINDOW_BLOCKS = max(
     LOG_QUORUM_MAX_BLOCKS,
     min(int(os.environ.get("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "500")), 10000),
@@ -206,6 +215,10 @@ DASHBOARD_IMAGE_HOSTS = frozenset({"api.degendogs.club", "degendogs.club", "ipfs
 # agree across the same independent RPC quorum before data is publishable.
 VERIFIED_SNAPSHOT_URLS: list[str] = []
 VERIFIED_LOG_URLS: list[str] = []
+# Largest range that at least RPC_QUORUM_SIZE qualified log providers proved
+# they can serve during this process. Adaptive fetches can still shrink below
+# it when log density causes an explicit response-size rejection.
+VERIFIED_LOG_MAX_BLOCKS = LOG_QUORUM_MAX_BLOCKS
 RPC_SLOW_UNTIL: dict[tuple[str, str], float] = {}
 
 
@@ -592,7 +605,7 @@ CONFIGURATION_ENV_VARS = [
     ("DOG_METADATA_CACHE_MAX_AGE_SECONDS", "Maximum reuse age for offchain metadata whose onchain tokenURI is unchanged; defaults to 24 hours."),
     ("MISSION3_LOG_CACHE", "Enables local RPC log caching under `.cache/rpc_logs`; defaults on."),
     ("MISSION3_LOG_CACHE_OVERLAP_BLOCKS", "Re-fetch overlap when extending cached log ranges; defaults to 100 blocks."),
-    ("MISSION3_LOG_QUORUM_MAX_BLOCKS", "Maximum block span per recent cross-provider eth_getLogs request; defaults to 50 for public-fallback compatibility."),
+    ("MISSION3_LOG_QUORUM_MAX_BLOCKS", "Initial block span per recent cross-provider eth_getLogs request; defaults to 500 and halves only after an explicit provider range/response-size rejection."),
     ("MISSION3_LOG_QUORUM_WINDOW_BLOCKS", "Maximum total recent window split into quorum-checked log requests; defaults to 500."),
     ("MISSION3_BALANCE_CACHE", "Enables local WOOF holder balance caching under `.cache/woof_balances.json`; defaults on."),
     ("WOOF_HOLDER_DISCOVERY_URL", "Blockscout Base token-holder endpoint used only to discover candidate WOOF addresses; host and path are pinned, while balances and completeness remain quorum-verified onchain."),
@@ -711,6 +724,39 @@ class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
         )
 
 
+class RpcLogRangeLimit(RuntimeError):
+    """An explicit eth_getLogs range/response-size limit, safe to retry smaller."""
+
+
+class RpcLogValidationError(RuntimeError):
+    """A malformed or out-of-scope quorum log response that must fail closed."""
+
+
+def is_explicit_log_range_error(code: int, message: str) -> bool:
+    """Recognize only provider errors that explicitly ask for a smaller log query."""
+    if code >= 0:
+        return False
+    normalized = message.casefold()
+    return any(
+        marker in normalized
+        for marker in (
+            "block range too",
+            "block range is too",
+            "block range exceeds",
+            "maximum block range",
+            "max block range",
+            "range limit",
+            "range is too",
+            "maximum range",
+            "max range",
+            "too many results",
+            "response size",
+            "query returned more than",
+            "please limit the query",
+        )
+    )
+
+
 def open_no_redirect(req: urllib.request.Request, *, timeout: int) -> Any:
     return urllib.request.build_opener(NoRedirectHandler()).open(req, timeout=timeout)
 
@@ -736,6 +782,7 @@ def validate_rpc_url(url: str) -> None:
 
 def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url: str) -> Any:
     validate_rpc_url(url)
+    is_log_request = isinstance(payload, dict) and payload.get("method") == "eth_getLogs"
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url,
@@ -750,6 +797,8 @@ def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url:
     try:
         response = open_no_redirect(req, timeout=timeout)
     except urllib.error.HTTPError as exc:
+        if is_log_request and exc.code == 413:
+            raise RpcLogRangeLimit("eth_getLogs request exceeded the provider range/size limit") from None
         raise RuntimeError(f"HTTP {exc.code}") from None
     except Exception as exc:  # noqa: BLE001 - never expose credential-bearing URLs in transport errors
         raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
@@ -764,7 +813,14 @@ def post_json(payload: dict[str, Any] | list[dict[str, Any]], timeout: int, url:
             content_type = str(headers.get("Content-Type") or "").split(";", 1)[0].strip().lower() if headers else ""
             if content_type != "application/json" and not content_type.endswith("+json"):
                 raise RuntimeError("RPC response returned an unexpected content type")
-            return read_bounded_json_response(response, RPC_MAX_RESPONSE_BYTES, "JSON-RPC")
+            try:
+                return read_bounded_json_response(response, RPC_MAX_RESPONSE_BYTES, "JSON-RPC")
+            except RuntimeError as exc:
+                if is_log_request and str(exc) == f"JSON-RPC response exceeds {RPC_MAX_RESPONSE_BYTES} bytes":
+                    raise RpcLogRangeLimit(
+                        "eth_getLogs response exceeded the configured byte limit"
+                    ) from None
+                raise
     except RuntimeError:
         raise
     except Exception as exc:  # noqa: BLE001 - keep provider-controlled read details out of logs
@@ -899,6 +955,8 @@ def _rpc_once(url: str, method: str, params: list[Any], *, timeout: int = 30) ->
             or not isinstance(error.get("message"), str)
         ):
             raise RuntimeError(f"malformed JSON-RPC error envelope for {method}")
+        if method == "eth_getLogs" and is_explicit_log_range_error(error["code"], error["message"]):
+            raise RpcLogRangeLimit("eth_getLogs provider range/response limit")
         raise RuntimeError(f"JSON-RPC error code={error['code']} for {method}")
     return data["result"]
 
@@ -910,6 +968,10 @@ def _rpc_once_with_retry(url: str, method: str, params: list[Any], *, timeout: i
         candidate = operator_urls[attempt % len(operator_urls)]
         try:
             return _rpc_once(candidate, method, params, timeout=timeout)
+        except RpcLogRangeLimit:
+            # Retrying the same rejected span against aliases operated by the
+            # same provider only adds load. Let the range scheduler halve it.
+            raise
         except Exception as exc:  # noqa: BLE001
             message = str(exc)
             permanent = any(code in message for code in ("HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "-32600", "-32601", "-32602"))
@@ -952,28 +1014,32 @@ def _canonical_rpc_result(method: str, value: Any) -> str:
             separators=(",", ":"),
         )
     if method == "eth_getLogs" and isinstance(value, list):
-        normalized = sorted(
-            (
+        normalized: list[Any] = []
+        for item in value:
+            if not isinstance(item, dict):
+                # Keep malformed entries in the vote key. Silently dropping
+                # them could make a poisoned response agree with an empty one.
+                normalized.append({"invalid_log_type": type(item).__name__})
+                continue
+            normalized.append(
                 {
                     "address": str(item.get("address") or "").lower(),
                     "blockHash": str(item.get("blockHash") or "").lower(),
                     "blockNumber": str(item.get("blockNumber") or "").lower(),
                     "data": str(item.get("data") or "").lower(),
                     "logIndex": str(item.get("logIndex") or "").lower(),
-                    "removed": bool(item.get("removed", False)),
-                    "topics": [str(topic).lower() for topic in item.get("topics") or []],
+                    # A missing ``removed`` field is malformed, not equivalent
+                    # to the canonical ``false`` value. Preserve that
+                    # distinction in the vote key so response ordering cannot
+                    # decide whether a quorum result later passes validation.
+                    "removed": item.get("removed"),
+                    "topics": [str(topic).lower() for topic in item.get("topics") or []]
+                    if isinstance(item.get("topics") or [], list)
+                    else {"invalid_topics_type": type(item.get("topics")).__name__},
                     "transactionHash": str(item.get("transactionHash") or "").lower(),
                     "transactionIndex": str(item.get("transactionIndex") or "").lower(),
                 }
-                for item in value
-                if isinstance(item, dict)
-            ),
-            key=lambda item: (
-                str(item.get("blockHash") or "").lower(),
-                str(item.get("transactionHash") or "").lower(),
-                int(str(item.get("logIndex") or "0x0"), 16),
-            ),
-        )
+            )
         return json.dumps(normalized, sort_keys=True, separators=(",", ":")).lower()
     if isinstance(value, str):
         return value.lower()
@@ -1001,6 +1067,7 @@ def rpc_quorum(
         )
     grouped: dict[str, list[tuple[str, Any]]] = defaultdict(list)
     errors: list[str] = []
+    range_limit_errors = 0
     responses: queue.Queue[tuple[int, str, Any, Exception | None]] = queue.Queue()
 
     def worker(index: int, url: str) -> None:
@@ -1034,6 +1101,8 @@ def rpc_quorum(
         if error is None:
             grouped[_canonical_rpc_result(method, value)].append((url, value))
         else:
+            if isinstance(error, RpcLogRangeLimit):
+                range_limit_errors += 1
             errors.append(f"{_redact_rpc_url(url)}: {error}")
         pending = len(pending_indexes)
         ordered = sorted(grouped.values(), key=len, reverse=True)
@@ -1043,6 +1112,19 @@ def rpc_quorum(
         if len(winner) >= required and len(winner) > runner_up_votes + pending:
             _mark_rpc_pending_slow([active_urls[item] for item in pending_indexes], method)
             return winner[0][1], [winner_url for winner_url, _value in winner]
+        # If completed explicit range rejections could join the strongest vote
+        # at a smaller span, but every still-pending provider is insufficient
+        # to form quorum at this span, downshift immediately. A hung spare must
+        # not add the full quorum deadline to every adaptive split.
+        if (
+            method == "eth_getLogs"
+            and range_limit_errors > 0
+            and len(winner) + range_limit_errors >= required
+            and len(winner) + pending < required
+        ):
+            raise RpcLogRangeLimit(
+                "eth_getLogs range was rejected by the independent RPC quorum"
+            )
 
     if pending_indexes:
         pending_urls = [active_urls[item] for item in pending_indexes]
@@ -1053,6 +1135,16 @@ def rpc_quorum(
         )
 
     vote_sizes = sorted((len(group) for group in grouped.values()), reverse=True)
+    top_votes = vote_sizes[0] if vote_sizes else 0
+    if (
+        method == "eth_getLogs"
+        and range_limit_errors > 0
+        # A smaller range is useful only if explicit range rejections could
+        # join the strongest completed answer and form the required quorum.
+        # Generic transport/disagreement failures alone never trigger splits.
+        and top_votes + range_limit_errors >= required
+    ):
+        raise RpcLogRangeLimit("eth_getLogs range was rejected by the independent RPC quorum")
     detail = f" votes={vote_sizes}" if vote_sizes else ""
     if errors:
         detail += f" errors={'; '.join(errors[:3])}"
@@ -1135,7 +1227,7 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
     configurable confirmation margin. Every published current-auction read is
     pinned to this block and checked by at least two independent RPC operators.
     """
-    global VERIFIED_LOG_URLS, VERIFIED_SNAPSHOT_URLS
+    global VERIFIED_LOG_MAX_BLOCKS, VERIFIED_LOG_URLS, VERIFIED_SNAPSHOT_URLS
 
     urls = _quorum_rpc_urls()
     required = RPC_QUORUM_SIZE
@@ -1284,7 +1376,7 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
         )
     VERIFIED_SNAPSHOT_URLS = qualified_snapshot_urls
 
-    def endpoint_log_capability(url: str) -> str:
+    def endpoint_log_capability(url: str) -> tuple[str, int]:
         chain_id = int(str(_rpc_once_with_retry(url, "eth_chainId", [], timeout=15)), 16)
         if chain_id != 8453:
             raise RuntimeError(f"wrong chain id {chain_id}; expected 8453")
@@ -1324,17 +1416,28 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
                 or archive_timestamp <= 0
             ):
                 raise RuntimeError("historical block capability check returned a mismatched block envelope")
-        sample_from = max(FROM_BLOCK, snapshot_block - LOG_QUORUM_WINDOW_BLOCKS + 1)
-        sample_to = min(snapshot_block, sample_from + max(1, LOG_QUORUM_MAX_BLOCKS) - 1)
-        sample = _rpc_once_with_retry(
-            url,
-            "eth_getLogs",
-            [log_filter(AUCTION_HOUSE, [TOPIC_AUCTION_CREATED], sample_from, sample_to)],
-            timeout=LOG_RPC_TIMEOUT,
+        sample_from = min(
+            snapshot_block,
+            max(FROM_BLOCK, snapshot_block - LOG_QUORUM_WINDOW_BLOCKS + 1),
         )
-        if not isinstance(sample, list):
-            raise RuntimeError("eth_getLogs capability check did not return a list")
-        return url
+        supported_span = min(LOG_QUORUM_MAX_BLOCKS, snapshot_block - sample_from + 1)
+        while True:
+            sample_to = min(snapshot_block, sample_from + supported_span - 1)
+            try:
+                sample = _rpc_once_with_retry(
+                    url,
+                    "eth_getLogs",
+                    [log_filter(AUCTION_HOUSE, [TOPIC_AUCTION_CREATED], sample_from, sample_to)],
+                    timeout=LOG_RPC_TIMEOUT,
+                )
+            except RpcLogRangeLimit:
+                if supported_span <= 1:
+                    raise
+                supported_span = max(1, supported_span // 2)
+                continue
+            if not isinstance(sample, list):
+                raise RuntimeError("eth_getLogs capability check did not return a list")
+            return url, supported_span
 
     log_candidates = _independent_rpc_urls([*LOG_RPC_URLS, *qualified_snapshot_urls, *_quorum_rpc_urls()])
     # Keep one independently operated spare when it responds within the bounded
@@ -1343,18 +1446,24 @@ def verified_snapshot() -> tuple[int, dict[str, Any], dict[str, str]]:
     # outage from an empty security-critical result. The spare is preferred,
     # never required: two healthy witnesses still avoid the hard probe deadline.
     log_probe_target = min(len(log_candidates), required + 1)
-    verified_log_urls, log_errors = _collect_rpc_probes(
+    verified_log_capabilities, log_errors = _collect_rpc_probes(
         log_candidates,
         required=required,
         preferred=log_probe_target,
         probe=endpoint_log_capability,
         label="log-capability",
     )
-    if len(verified_log_urls) < required:
+    if len(verified_log_capabilities) < required:
         raise RuntimeError(
-            f"Base RPC log quorum unavailable: healthy={len(verified_log_urls)} required={required}; "
+            f"Base RPC log quorum unavailable: healthy={len(verified_log_capabilities)} required={required}; "
             + "; ".join(log_errors[:3])
         )
+    verified_log_urls = [url for url, _span in verified_log_capabilities]
+    # Use the largest range supported by at least the required number of
+    # independent witnesses. A slower spare with a smaller limit remains
+    # useful: an explicit rejection will safely downshift if a primary fails.
+    supported_spans = sorted((span for _url, span in verified_log_capabilities), reverse=True)
+    VERIFIED_LOG_MAX_BLOCKS = supported_spans[required - 1]
     VERIFIED_LOG_URLS = verified_log_urls
     providers = sorted({_rpc_provider_key(url) for url in qualified_snapshot_urls})
     log_providers = sorted({_rpc_provider_key(url) for url in verified_log_urls})
@@ -1687,6 +1796,133 @@ def _block_number(item: dict[str, Any]) -> int:
         return 0
 
 
+def _canonical_log_quantity(item: dict[str, Any], key: str) -> int:
+    raw = item.get(key)
+    if not isinstance(raw, str):
+        raise RpcLogValidationError(f"eth_getLogs returned a malformed {key}")
+    normalized = raw.lower()
+    if not re.fullmatch(r"0x(?:0|[1-9a-f][0-9a-f]*)", normalized):
+        raise RpcLogValidationError(f"eth_getLogs returned a malformed {key}")
+    return int(normalized, 16)
+
+
+def _validated_quorum_log_chunk(
+    result: Any,
+    *,
+    address: str,
+    topics: str | list[str],
+    from_block: int,
+    to_block: int,
+    seen_identities: set[tuple[str, str, int]],
+    previous_position: tuple[int, int, int] | None,
+    block_hashes: dict[int, str],
+) -> tuple[list[dict[str, Any]], tuple[int, int, int] | None]:
+    """Validate the exact canonical envelope before any quorum log is consumed."""
+    expected_address = str(address).lower()
+    expected_topics = set(_canonical_topics(topics))
+    if not re.fullmatch(r"0x[0-9a-f]{40}", expected_address):
+        raise RpcLogValidationError("eth_getLogs expected contract address is malformed")
+    if not expected_topics or any(
+        not re.fullmatch(r"0x[0-9a-f]{64}", topic) for topic in expected_topics
+    ):
+        raise RpcLogValidationError("eth_getLogs expected event topics are malformed")
+    if not isinstance(result, list):
+        raise RpcLogValidationError("eth_getLogs quorum returned a non-list")
+
+    validated: list[dict[str, Any]] = []
+    for item in result:
+        if not isinstance(item, dict):
+            raise RpcLogValidationError("eth_getLogs returned a non-object log")
+        observed_address = str(item.get("address") or "").lower()
+        if observed_address != expected_address:
+            raise RpcLogValidationError("eth_getLogs returned a log for the wrong contract address")
+        if type(item.get("removed")) is not bool or item["removed"] is not False:
+            raise RpcLogValidationError("eth_getLogs returned a removed or malformed log")
+
+        block_number = _canonical_log_quantity(item, "blockNumber")
+        transaction_index = _canonical_log_quantity(item, "transactionIndex")
+        log_index = _canonical_log_quantity(item, "logIndex")
+        if not from_block <= block_number <= to_block:
+            raise RpcLogValidationError("eth_getLogs returned a log outside its requested block range")
+
+        block_hash = str(item.get("blockHash") or "").lower()
+        transaction_hash = str(item.get("transactionHash") or "").lower()
+        if not re.fullmatch(r"0x[0-9a-f]{64}", block_hash) or not re.fullmatch(
+            r"0x[0-9a-f]{64}", transaction_hash
+        ):
+            raise RpcLogValidationError("eth_getLogs returned a malformed canonical log identity")
+        known_block_hash = block_hashes.setdefault(block_number, block_hash)
+        if known_block_hash != block_hash:
+            raise RpcLogValidationError("eth_getLogs returned conflicting hashes for one block")
+        identity = (block_hash, transaction_hash, log_index)
+        if identity in seen_identities:
+            raise RpcLogValidationError("eth_getLogs returned a duplicate canonical log identity")
+        seen_identities.add(identity)
+
+        position = (block_number, transaction_index, log_index)
+        if previous_position is not None and position <= previous_position:
+            raise RpcLogValidationError("eth_getLogs logs are not in canonical chain order")
+        previous_position = position
+
+        observed_topics = item.get("topics")
+        if not isinstance(observed_topics, list) or not observed_topics:
+            raise RpcLogValidationError("eth_getLogs returned malformed topics")
+        normalized_topics = [str(topic).lower() for topic in observed_topics]
+        if any(not re.fullmatch(r"0x[0-9a-f]{64}", topic) for topic in normalized_topics):
+            raise RpcLogValidationError("eth_getLogs returned a malformed topic")
+        if normalized_topics[0] not in expected_topics:
+            raise RpcLogValidationError("eth_getLogs returned an unexpected event topic")
+        data = str(item.get("data") or "").lower()
+        if not re.fullmatch(r"0x(?:[0-9a-f]{2})*", data):
+            raise RpcLogValidationError("eth_getLogs returned malformed event data")
+        validated.append(item)
+    return validated, previous_position
+
+
+def iter_adaptive_quorum_log_chunks(
+    address: str,
+    topics: str | list[str],
+    from_block: int,
+    to_block: int,
+):
+    """Yield strictly validated quorum log chunks, shrinking only on explicit limits."""
+    chunk_size = min(LOG_QUORUM_MAX_BLOCKS, VERIFIED_LOG_MAX_BLOCKS)
+    if chunk_size < 1:
+        raise RuntimeError("verified log collection requires a positive quorum chunk size")
+    seen_identities: set[tuple[str, str, int]] = set()
+    block_hashes: dict[int, str] = {}
+    previous_position: tuple[int, int, int] | None = None
+    start = from_block
+    while start <= to_block:
+        end = min(to_block, start + chunk_size - 1)
+        try:
+            result, _agreeing_urls = rpc_quorum(
+                "eth_getLogs",
+                [log_filter(address, topics, start, end)],
+                urls=VERIFIED_LOG_URLS,
+                min_agreement=RPC_QUORUM_SIZE,
+                timeout=LOG_RPC_TIMEOUT,
+            )
+        except RpcLogRangeLimit:
+            attempted_span = end - start + 1
+            if attempted_span <= 1:
+                raise
+            chunk_size = max(1, attempted_span // 2)
+            continue
+        validated, previous_position = _validated_quorum_log_chunk(
+            result,
+            address=address,
+            topics=topics,
+            from_block=start,
+            to_block=end,
+            seen_identities=seen_identities,
+            previous_position=previous_position,
+            block_hashes=block_hashes,
+        )
+        yield end, validated
+        start = end + 1
+
+
 def _fetch_logs_uncached(address: str, topics: str | list[str], from_block: int, to_block: int) -> list[dict[str, Any]]:
     logs: list[dict[str, Any]] = []
     topic_filter: str | list[str] = topics
@@ -1773,27 +2009,16 @@ def _fetch_logs_verified_or_uncached(
                 checkpoint,
             )
         )
-    start = quorum_from
-    while start <= to_block:
-        end = min(to_block, start + LOG_QUORUM_MAX_BLOCKS - 1)
-        result, _agreeing_urls = rpc_quorum(
-            "eth_getLogs",
-            [log_filter(address, topics, start, end)],
-            urls=VERIFIED_LOG_URLS,
-            min_agreement=RPC_QUORUM_SIZE,
-            timeout=LOG_RPC_TIMEOUT,
-        )
-        if not isinstance(result, list):
-            raise RuntimeError(f"unexpected quorum eth_getLogs response: {result!r}")
-        logs.extend(
-            item
-            for item in result
-            if isinstance(item, dict) and not bool(item.get("removed", False))
-        )
+    for end, result in iter_adaptive_quorum_log_chunks(
+        address,
+        topics,
+        quorum_from,
+        to_block,
+    ):
+        logs.extend(result)
         logs.sort(key=_log_sort_key)
         if checkpoint is not None:
             checkpoint(end, logs)
-        start = end + 1
     return logs
 
 
@@ -5394,7 +5619,10 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
     image = safe_dashboard_image(current.get("dog_image_url", ""))
     image_html = ""
     if image:
-        image_html = f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image">'
+        image_html = (
+            f'<img src="{html.escape(image, quote=True)}" alt="{html.escape(dog, quote=True)} image" '
+            'width="330" height="330" fetchpriority="high" decoding="async">'
+        )
     rarity = current.get("rarity", "")
     rarity_universe = str(metrics.get("dog_rarity_universe_count", "")).strip()
     rarity_excluded = str(metrics.get("dog_rarity_excluded_nonexistent_count", "")).strip()
@@ -5435,9 +5663,10 @@ a:hover{color:var(--accent2)}
 .eyebrow{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .dot{width:10px;height:10px;background:#8a8178;border:2px solid var(--ink);display:inline-block;box-shadow:none}
 .dot--live{background:var(--calm);animation:liveDotPulse 1.7s ease-in-out infinite;box-shadow:0 0 0 0 rgba(85,166,83,.42)}
+.dot--delayed{background:var(--warning)}
 .dot--idle{background:#8a8178}
 .top-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;max-width:min(100%,760px)}
-.utility-chip,.credit-trigger{appearance:none;font-family:inherit;display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;border:2px solid var(--ink);background:var(--ink);color:white;padding:6px 10px;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;line-height:1;box-shadow:3px 3px 0 var(--accent2);white-space:nowrap}
+.utility-chip,.credit-trigger{appearance:none;font-family:inherit;display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;min-height:44px;border:2px solid var(--ink);background:var(--ink);color:white;padding:6px 10px;font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;line-height:1;box-shadow:3px 3px 0 var(--accent2);white-space:nowrap}
 .utility-chip::after{content:'↗';color:#ffccd2;font-size:.85em;line-height:1}
 .utility-chip:hover,.credit-trigger:hover,.credit-menu:focus-within .credit-trigger{background:white;color:var(--accent2);border-color:var(--accent2);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--accent2)}
 .utility-chip:hover::after{color:var(--accent2)}
@@ -5525,13 +5754,13 @@ a:hover{color:var(--accent2)}
 .toolbar-field{display:flex;flex-direction:column;gap:3px}
 .toolbar-group{display:flex;align-items:end;gap:6px;flex-wrap:wrap}
 .toolbar label,.toolbar-legend{font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.toolbar input,.toolbar select{border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:8px 10px;font:inherit;font-size:12px;font-weight:850;outline:none;box-shadow:3px 3px 0 var(--ink)}
+.toolbar input,.toolbar select{min-height:44px;border:2px solid var(--ink);background:var(--panel);color:var(--ink);padding:8px 10px;font:inherit;font-size:12px;font-weight:850;outline:none;box-shadow:3px 3px 0 var(--ink)}
 .toolbar input{width:100%}
-.toolbar select{min-height:36px;cursor:pointer}
+.toolbar select{cursor:pointer}
 .toolbar input:focus,.toolbar select:focus{border-color:var(--accent2);box-shadow:3px 3px 0 var(--accent2)}
 .mission-group{align-items:flex-end}
 .mission-toggle{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap}
-.mission-toggle button,.page-btn{appearance:none;border:2px solid var(--ink);background:var(--panel2);color:var(--ink);padding:8px 9px;font:inherit;font-size:11px;font-weight:950;line-height:1;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+.mission-toggle button,.page-btn{appearance:none;border:2px solid var(--ink);background:var(--panel2);color:var(--ink);min-height:44px;padding:8px 9px;font:inherit;font-size:11px;font-weight:950;line-height:1;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
 .mission-toggle button[aria-pressed="true"]{background:var(--ink);color:#fff;box-shadow:2px 2px 0 var(--accent2)}
 .mission-toggle button:focus-visible,.page-btn:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
 .page-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
@@ -5605,7 +5834,8 @@ const currentTraits=document.querySelector('[data-current-traits]');
 const currentDogStage=document.querySelector('[data-current-dog-stage]');
 const liveLabel=document.querySelector('[data-live-label]');
 const defaultRows=auctionBody?[...auctionBody.rows].map(row=>row.cloneNode(true)):[];
-const archiveState={query:'',mission:'all',sortMode:'newest',pageSize:10,currentPage:1};
+const archiveState={query:'',mission:'all',sortMode:'newest',columnSort:null,columnDirection:'asc',pageSize:10,currentPage:1};
+const archiveSearchCache=new WeakMap();
 let unifiedRecords=[];
 let unifiedReady=false;
 let unifiedSnapshotBlock='';
@@ -5616,10 +5846,19 @@ let liveRefreshPromise=null;
 let archiveSnapshotKey='';
 let archiveRefreshPromise=null;
 let pendingArchiveContext=null;
-const LIVE_REFRESH_MS=10000;
+let filterRenderFrame=0;
+let liveRefreshTimer=0;
+let liveRefreshFailures=0;
+const LIVE_REFRESH_MS=5000;
+const LIVE_RECENT_MS=5*60*1000;
 const LIVE_STALE_MS=90*60*1000;
+const LIVE_RETRY_MAX_MS=2*60*1000;
 const CURRENT_FETCH_TIMEOUT_MS=6000;
 const ARCHIVE_FETCH_TIMEOUT_MS=45000;
+const LIVE_BUNDLE_MAX_BYTES=32*1024*1024;
+const ARCHIVE_MAX_BYTES=128*1024*1024;
+const SHA256_PATTERN=/^[0-9a-f]{64}$/;
+const LIVE_BUNDLE_FILENAME_PATTERN=/^live_snapshot_([1-9]\d*)_([0-9a-f]{64})_([0-9a-f]{64})\.json$/;
 const key=v=>{const s=v.trim().replaceAll(',','').replace(/[()$]/g,'');const n=Number(s.split(' ')[0]);return s!==''&&Number.isFinite(n)?n:v.trim().toLowerCase();};
 const parseUtc=value=>{const raw=String(value||'').trim();if(!raw)return NaN;const iso=raw.includes('T')?raw:raw.replace(' ','T');return Date.parse(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso)?iso:`${iso}Z`);};
 const formatDuration=seconds=>{const s=Math.max(0,Math.floor(seconds));const d=Math.floor(s/86400);const h=Math.floor((s%86400)/3600);const m=Math.floor((s%3600)/60);const sec=s%60;const clock=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;return d>0?`${d}d ${clock}`:clock;};
@@ -5641,8 +5880,9 @@ const exactDogQuery=q=>{const dog=q.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/
 const SAFE_LINK_HOSTS=new Set(['basescan.org','degendogs.club','explorer.degen.tips','farcaster.xyz','opensea.io','polygonscan.com']);
 const SAFE_IMAGE_HOSTS=new Set(['api.degendogs.club','degendogs.club','ipfs.io']);
 const safeUrl=(value,hosts=SAFE_LINK_HOSTS)=>{try{const raw=String(value||'').trim();if(!raw||/[\u0000-\u0020\u007f]/.test(raw))return '';const url=new URL(raw,document.baseURI);const host=url.hostname.toLowerCase().replace(/\.$/,'');return url.protocol==='https:'&&url.port===''&&!url.username&&!url.password&&hosts.has(host)?url.href:'';}catch(_){return '';}};
-const setVerificationState=(status,retrying=false)=>{const verifiedAt=parseUtc(status?.last_successful_refresh_time_utc);const blockAt=parseUtc(status?.latest_generated_block_time_utc);const now=Date.now();const refreshAge=Number.isFinite(verifiedAt)?now-verifiedAt:Infinity;const blockAge=Number.isFinite(blockAt)?now-blockAt:Infinity;const verified=!retrying&&status?.last_refresh_result==='success_generated'&&refreshAge>=0&&refreshAge<=LIVE_STALE_MS&&blockAge>=-60000&&blockAge<=LIVE_STALE_MS;const dot=document.querySelector('[data-live-dot]');if(dot){dot.classList.toggle('dot--live',verified);dot.classList.toggle('dot--idle',!verified);dot.title=retrying?'Snapshot update retrying':verified?'Onchain snapshot cross-checked':'Snapshot verification is stale';}if(liveLabel){if(!retrying)delete liveLabel.dataset.liveError;const stamp=Number.isFinite(verifiedAt)?new Date(verifiedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'unavailable';liveLabel.textContent=retrying?`Mission 3 auction feed · update retrying · last verified ${stamp}`:verified?`Mission 3 auction feed · verified ${stamp}`:'Mission 3 auction feed · verification stale';}return verified;};
-const rowSearchText=record=>{const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};const bidHashes=Array.isArray(record.bid_tx_hashes)?record.bid_tx_hashes:[];return [record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.amount_usd_at_event,amount.usd_estimate_display,usdDisplay(record),amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...bidHashes].filter(Boolean).join(' ').toLowerCase();};
+const statusFreshness=status=>{const verifiedAt=parseUtc(status?.last_successful_refresh_time_utc);const blockAt=parseUtc(status?.latest_generated_block_time_utc);const now=Date.now();const refreshAge=Number.isFinite(verifiedAt)?now-verifiedAt:Infinity;const blockAge=Number.isFinite(blockAt)?now-blockAt:Infinity;const usable=status?.last_refresh_result==='success_generated'&&Number.isFinite(verifiedAt)&&Number.isFinite(blockAt)&&refreshAge>=0&&blockAge>=-60000;const recent=usable&&refreshAge<=LIVE_RECENT_MS&&blockAge<=LIVE_RECENT_MS;const stale=usable&&(refreshAge>LIVE_STALE_MS||blockAge>LIVE_STALE_MS);return {verifiedAt,usable,recent,stale};};
+const setVerificationState=(status,retrying=false)=>{const freshness=statusFreshness(status);const verified=!retrying&&freshness.usable;const recent=verified&&freshness.recent;const stale=verified&&freshness.stale;const delayed=verified&&!recent;const dot=document.querySelector('[data-live-dot]');if(dot){dot.classList.toggle('dot--live',recent);dot.classList.toggle('dot--delayed',delayed);dot.classList.toggle('dot--idle',!verified);dot.title=retrying?'Snapshot update retrying':recent?'Recent onchain snapshot cross-checked':stale?'Verified stale last-good snapshot; live publication is delayed':delayed?'Verified last-good snapshot; awaiting a newer publication':'Snapshot verification is unavailable';}if(liveLabel){if(!retrying)delete liveLabel.dataset.liveError;const stamp=Number.isFinite(freshness.verifiedAt)?new Date(freshness.verifiedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'unavailable';liveLabel.textContent=retrying?`Mission 3 auction feed · update retrying · last verified ${stamp}`:recent?`Mission 3 auction feed · verified recent snapshot ${stamp}`:stale?`Mission 3 auction feed · verified stale last-good ${stamp}`:delayed?`Mission 3 auction feed · verified last-good ${stamp}`:'Mission 3 auction feed · verification unavailable';}return verified;};
+const rowSearchText=record=>{const cached=archiveSearchCache.get(record);if(cached!==undefined)return cached;const amount=record.amount||{};const who=record.winner_or_high_bidder||{};const created=record.auction_created||{};const settled=record.settlement||{};const bidHashes=Array.isArray(record.bid_tx_hashes)?record.bid_tx_hashes:[];const text=[record.search_text,`dog #${record.dog_id}`,`dog ${record.dog_id}`,record.dog_id,`mission ${record.mission}`,record.era_label,record.chain,record.chain_id,record.status,who.wallet,who.display,who.farcaster_handle,who.farcaster_fid,amount.native,amount.native_symbol,amount.usd_estimate,amount.amount_usd_at_event,amount.usd_estimate_display,usdDisplay(record),amount.usd_estimate_price_date_utc,amount.usd_estimate_source,created.tx_hash,settled.tx_hash,...bidHashes].filter(Boolean).join(' ').toLowerCase();archiveSearchCache.set(record,text);return text;};
 const statusCell=status=>{const text=String(status||'unknown');const lower=text.toLowerCase();const tone=lower.includes('ongoing')||lower==='live'?'ongoing':(lower.includes('settled')?'settled':'neutral');return `<span class="status-pill ${tone}">${escapeHtml(text)}</span>`;};
 const dogCell=record=>{const dog=`Dog #${record.dog_id}`;const image=safeUrl(record.dog_image_url,SAFE_IMAGE_HOSTS);const img=image?`<img class="dog-thumb" src="${attr(image)}" alt="${attr(dog)} image" loading="lazy">`:'';const links=record.links||{};const item=safeUrl(record.dog_item_url||links.item||links.dog_page);const imgHtml=img&&item?`<a class="dog-image-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${img}</a>`:img;const label=item?`<a class="dog-link" href="${attr(item)}" target="_blank" rel="noopener noreferrer">${escapeHtml(dog)}</a>`:`<span>${escapeHtml(dog)}</span>`;return `<span class="dog-cell">${imgHtml}${label}</span>`;};
 const identityCell=record=>{const who=record.winner_or_high_bidder||{};const label=who.display||shortAddress(who.wallet)||'';if(!label)return '';const url=safeUrl(who.profile_url||who.wallet_explorer_url||record.links?.explorer);return url?`<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`:escapeHtml(label);};
@@ -5651,10 +5891,13 @@ const bidCell=record=>{const amount=record.amount||{};if(!amount.native)return a
 const timeCell=record=>{const status=String(record.status||'').toLowerCase();const label=status.includes('settled')?'Settled':(record.activity_time_basis==='last_bid_block_time'?'Last bid':'Activity');const value=record.activity_time_utc||'';return value?`<span class="time-cell"><b>${label}</b>${escapeHtml(value.replace('T',' ').replace('Z',''))}</span>`:'';};
 const rarityCell=record=>escapeHtml(record.rarity?.display||'');
 const unifiedRowHtml=record=>{const statusLabel=`${record.era_label||`Mission ${record.mission}`} · ${record.status||''}`;return `<tr data-search="${attr(rowSearchText(record))}"><td class="state" data-label="status">${statusCell(statusLabel)}</td><td class="dog-col" data-label="dog">${dogCell(record)}</td><td class="identity" data-label="high bidder / winner">${identityCell(record)}</td><td class="" data-label="bid">${bidCell(record)}</td><td class="time" data-label="last bid / settled">${timeCell(record)}</td><td class="num" data-label="rarity">${rarityCell(record)}</td></tr>`;};
-const isDefaultArchiveState=()=>archiveState.query===''&&archiveState.mission==='all'&&archiveState.sortMode==='newest'&&archiveState.pageSize===10&&archiveState.currentPage===1;
-const syncControls=()=>{if(filter&&filter.value!==archiveState.query)filter.value=archiveState.query;missionButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.missionFilter===archiveState.mission)));if(sortSelect)sortSelect.value=archiveState.sortMode;if(pageSizeSelect)pageSizeSelect.value=String(archiveState.pageSize);};
+const isDefaultArchiveState=()=>archiveState.query===''&&archiveState.mission==='all'&&archiveState.sortMode==='newest'&&archiveState.columnSort===null&&archiveState.pageSize===10&&archiveState.currentPage===1;
+const syncArchiveHeaderSort=()=>{auctionTable?.querySelectorAll('th').forEach(th=>{const button=th.querySelector('button');const selected=button&&Number(button.dataset.col)===archiveState.columnSort;if(button){if(selected)button.dataset.dir=archiveState.columnDirection;else delete button.dataset.dir;}th.setAttribute('aria-sort',selected?(archiveState.columnDirection==='asc'?'ascending':'descending'):'none');});};
+const syncControls=()=>{if(filter&&filter.value!==archiveState.query)filter.value=archiveState.query;missionButtons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.missionFilter===archiveState.mission)));if(sortSelect)sortSelect.value=archiveState.sortMode;if(pageSizeSelect)pageSizeSelect.value=String(archiveState.pageSize);syncArchiveHeaderSort();};
 const generatedUrls=(name,version)=>{const url=new URL(`generated/${name}.json`,document.baseURI);url.searchParams.set('v',String(version||'latest'));url.searchParams.set('watch',String(Date.now()));return [url.href];};
 const fetchGenerated=async(name,version)=>{let lastError;const timeoutMs=name==='unified_dog_search_index'?ARCHIVE_FETCH_TIMEOUT_MS:CURRENT_FETCH_TIMEOUT_MS;for(const url of generatedUrls(name,version)){const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{cache:'no-store',headers:{accept:'application/json'},signal:controller.signal});if(!response.ok)throw new Error(`${name} unavailable (${response.status})`);const type=(response.headers.get('content-type')||'').split(';',1)[0].trim().toLowerCase();if(type&&type!=='application/json'&&!type.endsWith('+json'))throw new Error(`${name} returned ${type}`);return await response.json();}catch(error){lastError=error;}finally{window.clearTimeout(timeout);}}throw lastError||new Error(`${name} unavailable`);};
+const sha256Hex=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(value=>value.toString(16).padStart(2,'0')).join('');
+const fetchVerifiedGenerated=async(filename,expectedSha,expectedBytes,maxBytes,timeoutMs)=>{const bundleMatch=LIVE_BUNDLE_FILENAME_PATTERN.exec(filename);if(filename!=='unified_dog_search_index.json'&&!bundleMatch)throw new Error('verified artifact filename is unsafe');if(!SHA256_PATTERN.test(expectedSha))throw new Error('verified artifact SHA256 is invalid');const size=canonicalUint(expectedBytes,'verified artifact byte size',1);if(size>maxBytes)throw new Error('verified artifact exceeds its safety limit');if(bundleMatch&&bundleMatch[3]!==expectedSha)throw new Error('live snapshot filename digest disagrees');const url=new URL(`generated/${filename}`,document.baseURI);url.searchParams.set('v',expectedSha);const controller=new AbortController();const timeout=window.setTimeout(()=>controller.abort(),timeoutMs);try{const response=await fetch(url,{cache:bundleMatch?'force-cache':'no-store',headers:{accept:'application/json'},signal:controller.signal});if(!response.ok)throw new Error(`${filename} unavailable (${response.status})`);const type=(response.headers.get('content-type')||'').split(';',1)[0].trim().toLowerCase();if(type&&type!=='application/json'&&!type.endsWith('+json'))throw new Error(`${filename} returned ${type}`);const bytes=await response.arrayBuffer();if(bytes.byteLength!==size)throw new Error(`${filename} byte size disagrees`);if(await sha256Hex(bytes)!==expectedSha)throw new Error(`${filename} SHA256 disagrees`);let value;try{value=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch(_){throw new Error(`${filename} is not valid UTF-8 JSON`);}return value;}finally{window.clearTimeout(timeout);}};
 const asRows=value=>Array.isArray(value)?value.filter(row=>row&&typeof row==='object'):[];
 const metricRowsToMap=rows=>Object.fromEntries(asRows(rows).map(row=>[String(row.metric||''),String(row.value??'')]));
 const dogToken=row=>{const match=String(row?.dog||row?.dog_name||'').match(/#(\d+)/);return match?Number(match[1]):Number(row?.token_id);};
@@ -5668,41 +5911,49 @@ const metricNumber=(metrics,key)=>toNumber(metrics[key]);
 const metricAmount=(metrics,key,places,suffix)=>{const value=metricNumber(metrics,key);return value===null?'':`${value.toLocaleString(undefined,{minimumFractionDigits:places,maximumFractionDigits:places})}${suffix}`;};
 const rewardTile=(label,value,note,title='')=>value?`<span class="reward-tile"${title?` title="${attr(title)}"`:''}><b>${escapeHtml(label)}</b><strong>${value}</strong><em>${escapeHtml(note)}</em>${title?`<small class="reward-caveat sr-only">${escapeHtml(title)}</small>`:''}</span>`:'';
 const renderRewards=metrics=>{if(!currentRewards)return;const woof=metricAmount(metrics,'reward_woof_per_dog_per_day',2,' WOOF/day');const woofUsd=metricAmount(metrics,'reward_woof_per_dog_usd_per_day',2,'/day');const sup=metricAmount(metrics,'reward_sup_per_dog_per_day',2,' SUP/day');const supUsd=metricAmount(metrics,'reward_sup_per_dog_usd_per_day',2,'/day');const total=metricAmount(metrics,'reward_total_per_dog_usd_per_day',2,'/day');const tiles=[rewardTile('WOOF / Dog',woof?`${escapeHtml(woof)}${woofUsd?` <span>($${escapeHtml(woofUsd)})</span>`:''}`:'','Observed stream'),rewardTile('SUP / Dog',sup?`${escapeHtml(sup)}${supUsd?` <span>($${escapeHtml(supUsd)})</span>`:''}`:'','Observed stream'),rewardTile('Total / Dog',total?`$${escapeHtml(total)}`:'','WOOF + SUP')];const s6Enabled=/^(true|1|yes|live_estimate)$/i.test(metrics.season6_sup_enabled||metrics.season6_sup_status||'');const currentWallet=String(metrics.current_bidder_wallet||'').toLowerCase();const s6Wallet=String(metrics.season6_sup_current_bidder_wallet||'').toLowerCase();const s6Aligned=!s6Wallet||s6Wallet===currentWallet;if(s6Enabled&&s6Aligned){const noBid=metrics.season6_sup_estimate_status==='no_current_bid'||(!metrics.season6_sup_current_bidder_wallet&&!metrics.season6_sup_current_bid_estimated_cap_aware_sup);const supEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_sup');const usdEstimate=metricNumber(metrics,'season6_sup_current_bid_estimated_cap_aware_usd');const main=noBid?'Bid to estimate S6 SUP':`≈${(supEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})} SUP`;const secondary=noBid?'Current high bidder needed':`≈$${(usdEstimate??0).toLocaleString(undefined,{maximumFractionDigits:0})}`;tiles.push(`<span class="reward-tile season6-sup-estimate"><b>Season 6 if bid wins</b><strong>${escapeHtml(main)}</strong><em>${escapeHtml(secondary)} · Wallet-level estimate</em></span>`);}const days=metricNumber(metrics,'reward_current_bid_payback_days');const apr=metrics.reward_current_bid_apr_display||'';const payback=days&&days>0?(days<1?'&lt;1 day':`≈${days<10?days.toFixed(1):days.toFixed(0)} days`):(metrics.reward_current_bid_payback_days?'N/A':'');if(payback||apr){const caveat='Simple APR estimate from the current bid and observed per-Dog daily reward flow; not guaranteed future return.';tiles.push(rewardTile('Bid payback',`<span class="payback-days">${payback}</span><span class="payback-apr">${escapeHtml(apr)}</span>`,'Current bid / observed per-Dog flow',caveat));}const body=tiles.filter(Boolean).join('');currentRewards.innerHTML=body?`<section class="reward-strip" aria-label="Per-Dog reward estimate">${body}</section>`:'';};
-const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const rarityUniverse=String(metrics.dog_rarity_universe_count||'');const rarityExcluded=String(metrics.dog_rarity_excluded_nonexistent_count||'');const rarityTitle=/^\d+$/.test(rarityUniverse)&&/^\d+$/.test(rarityExcluded)?`Ranked across ${rarityUniverse} Base-existing Dogs; ${rarityExcluded} canonically nonexistent Base IDs excluded`:'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"${rarityTitle?` title="${attr(rarityTitle)}"`:''}><b>Base rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url,SAFE_IMAGE_HOSTS);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;currentDogStage.appendChild(img);}}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
+const hydrateCurrentCard=(feed,current,history,metrics)=>{const dog=feed.dog||String(current.dog_name||'').replace(/^Degen\s+/,'')||`Dog #${current.token_id??''}`;const dogUrl=safeUrl(feed.dog_opensea_url||feed.dog_external_url||current.dog_opensea_url||current.dog_external_url);if(currentDogHeading){currentDogHeading.innerHTML=dogUrl?`<a class="current-dog-link" href="${attr(dogUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${attr(dog)}" title="Open ${attr(dog)}">${escapeHtml(dog)}</a>`:escapeHtml(dog);}const status=feed.status||current.auction_state||'';const bid=feed.bid||current.current_bid||`${current.current_bid_eth??metrics.current_bid_eth??0} ETH`;const bidder=feed.bidder_winner||current.bidder||metrics.current_bidder||'';const bidderUrl=safeUrl(feed.bidder_winner_url||current.bidder_url);const end=feed.auction_end_utc||current.end_time_utc||metrics.current_auction_end_utc||'';const time=feed.time_remaining||current.time_remaining||'';const rarity=feed.rarity||current.rarity||'';const rarityUniverse=String(metrics.dog_rarity_universe_count||'');const rarityExcluded=String(metrics.dog_rarity_excluded_nonexistent_count||'');const rarityTitle=/^\d+$/.test(rarityUniverse)&&/^\d+$/.test(rarityExcluded)?`Ranked across ${rarityUniverse} Base-existing Dogs; ${rarityExcluded} canonically nonexistent Base IDs excluded`:'';const state=timerState(Math.max(0,Math.floor((parseUtc(end)-Date.now())/1000)),String(status).toLowerCase().includes('settled')||String(status).toLowerCase().includes('ended'));const wasOpen=Boolean(currentDetail?.querySelector('.bid-history-menu[open]'));const parts=[status?`<span class="detail-status"><b>Status</b>${escapeHtml(status)}</span>`:'',bid?`<span class="detail-bid"><b>Bid</b>${escapeHtml(bid)}</span>`:'',time||end?`<span class="detail-time timer-card timer-card--${state}" data-auction-status="${attr(String(status).toLowerCase())}"><b class="timer-label">Time left</b><span class="countdown timer-value countdown--${state}" data-countdown-end="${attr(end)}" data-auction-status="${attr(String(status).toLowerCase())}">${escapeHtml(time||'')}</span></span>`:'',rarity?`<span class="detail-rarity"${rarityTitle?` title="${attr(rarityTitle)}"`:''}><b>Base rarity</b>${escapeHtml(rarity)}</span>`:'',bidder?`<span class="detail-bidder"><b>High bidder</b>${bidderUrl?`<a href="${attr(bidderUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(bidder)}</a>`:escapeHtml(bidder)}</span>`:'',historyMenuHtml(history,wasOpen)];if(currentDetail)currentDetail.innerHTML=parts.join('');const image=safeUrl(feed.dog_image_url||current.dog_image_url,SAFE_IMAGE_HOSTS);if(currentDogStage){currentDogStage.href=dogUrl||'#';currentDogStage.setAttribute('aria-label',dogUrl?`Open ${dog}`:dog);currentDogStage.replaceChildren();if(image){const img=document.createElement('img');img.src=image;img.alt=`${dog} image`;img.width=330;img.height=330;img.fetchPriority='high';img.decoding='async';currentDogStage.appendChild(img);}}renderTraits({...current,...feed});renderRewards(metrics);updateCountdowns();};
 const normalizedState=value=>{const state=String(value||'').toLowerCase();return state==='live'||state.includes('ongoing')?'live':state.includes('settled')||state.includes('ended')?'ended':state;};
 const assertSame=(label,values,normalize=value=>String(value))=>{const present=values.filter(value=>value!==null&&value!==undefined&&String(value)!=='').map(normalize);if(new Set(present).size>1)throw new Error(`${label} datasets disagree`);};
 const canonicalUint=(value,label,minimum=0)=>{const text=String(value??'').trim();if(!/^(0|[1-9]\d*)$/.test(text))throw new Error(`${label} is not a canonical integer`);const number=Number(text);if(!Number.isSafeInteger(number)||number<minimum)throw new Error(`${label} is out of range`);return number;};
 const normalizedAmount=value=>{const text=String(value??'').trim();const number=Number(text);if(!text||!Number.isFinite(number)||number<0)throw new Error('amount is not finite and nonnegative');return number.toFixed(12);};
-const assertStatusAttestation=status=>{const blockNumber=canonicalUint(status.latest_generated_block,'snapshot block',1);if(status.last_refresh_result!=='success_generated'||!setVerificationState(status))throw new Error('verified snapshot is stale or unsuccessful');if(!/^0x[0-9a-f]{64}$/i.test(String(status.snapshot_block_hash||'')))throw new Error('verified snapshot hash is invalid');for(const key of ['auction_house_code_sha256','dog_nft_code_sha256'])if(!/^[0-9a-f]{64}$/i.test(String(status[key]||'')))throw new Error(`verified ${key} is invalid`);const quorum=canonicalUint(status.rpc_quorum_size,'RPC quorum size',2);const agreement=String(status.rpc_quorum_agreement||'').match(/^(\d+)\/(\d+)$/);if(!agreement||canonicalUint(agreement[1],'RPC agreement',quorum)>canonicalUint(agreement[2],'RPC responders',quorum))throw new Error('verified RPC agreement is invalid');const providers=new Set(String(status.rpc_quorum_providers||'').split(',').map(value=>value.trim()).filter(Boolean));if(providers.size<quorum)throw new Error('verified RPC provider set is incomplete');if(canonicalUint(status.snapshot_confirmations,'snapshot confirmations',1)<1)throw new Error('snapshot is unconfirmed');if(canonicalUint(status.onchain_chain_id,'onchain chain ID',8453)!==8453)throw new Error('snapshot is not Base mainnet');const scope=new Set(String(status.onchain_verification_scope||'').split(',').map(value=>value.trim()).filter(Boolean));for(const required of ['snapshot_hash','contract_code','current_auction','dog_total_supply','dog_token_uri_bindings','recent_event_logs'])if(!scope.has(required))throw new Error(`verified snapshot scope is missing ${required}`);return String(blockNumber);};
+const assertStatusAttestation=status=>{const blockNumber=canonicalUint(status.latest_generated_block,'snapshot block',1);if(!statusFreshness(status).usable)throw new Error('verified snapshot is unsuccessful or has invalid timestamps');if(!/^0x[0-9a-f]{64}$/i.test(String(status.snapshot_block_hash||'')))throw new Error('verified snapshot hash is invalid');for(const key of ['auction_house_code_sha256','dog_nft_code_sha256'])if(!/^[0-9a-f]{64}$/i.test(String(status[key]||'')))throw new Error(`verified ${key} is invalid`);const quorum=canonicalUint(status.rpc_quorum_size,'RPC quorum size',2);const agreement=String(status.rpc_quorum_agreement||'').match(/^(\d+)\/(\d+)$/);if(!agreement||canonicalUint(agreement[1],'RPC agreement',quorum)>canonicalUint(agreement[2],'RPC responders',quorum))throw new Error('verified RPC agreement is invalid');const providers=new Set(String(status.rpc_quorum_providers||'').split(',').map(value=>value.trim()).filter(Boolean));if(providers.size<quorum)throw new Error('verified RPC provider set is incomplete');if(canonicalUint(status.snapshot_confirmations,'snapshot confirmations',1)<1)throw new Error('snapshot is unconfirmed');if(canonicalUint(status.onchain_chain_id,'onchain chain ID',8453)!==8453)throw new Error('snapshot is not Base mainnet');const scope=new Set(String(status.onchain_verification_scope||'').split(',').map(value=>value.trim()).filter(Boolean));for(const required of ['snapshot_hash','contract_code','current_auction','dog_total_supply','dog_token_uri_bindings','recent_event_logs'])if(!scope.has(required))throw new Error(`verified snapshot scope is missing ${required}`);return String(blockNumber);};
+const liveSnapshotPointer=status=>{const fields=['live_snapshot_bundle','live_snapshot_bundle_sha256','live_snapshot_bundle_bytes','live_snapshot_bundle_schema_version'];const present=fields.filter(field=>status[field]!==undefined&&status[field]!==null&&status[field]!=='');if(!present.length)return null;if(present.length!==fields.length)throw new Error('live snapshot pointer is incomplete');const filename=String(status.live_snapshot_bundle);const match=LIVE_BUNDLE_FILENAME_PATTERN.exec(filename);if(!match)throw new Error('live snapshot filename is unsafe');const block=canonicalUint(status.latest_generated_block,'snapshot block',1);const bytes=canonicalUint(status.live_snapshot_bundle_bytes,'live snapshot byte size',1);const schema=canonicalUint(status.live_snapshot_bundle_schema_version,'live snapshot schema',1);const sha=String(status.live_snapshot_bundle_sha256);if(schema!==1||bytes>LIVE_BUNDLE_MAX_BYTES||!SHA256_PATTERN.test(sha))throw new Error('live snapshot pointer is invalid');if(Number(match[1])!==block||`0x${match[2]}`!==String(status.snapshot_block_hash).toLowerCase()||match[3]!==sha)throw new Error('live snapshot filename is not bound to status');return {filename,sha,bytes,schema,key:sha};};
+const archivePointer=status=>{const fields=['unified_dog_search_sha256','unified_dog_search_bytes'];const present=fields.filter(field=>status[field]!==undefined&&status[field]!==null&&status[field]!=='');if(!present.length){if(liveSnapshotPointer(status))throw new Error('archive revision pointer is missing');return null;}if(present.length!==fields.length)throw new Error('archive revision pointer is incomplete');const sha=String(status.unified_dog_search_sha256);const bytes=canonicalUint(status.unified_dog_search_bytes,'archive byte size',1);if(!SHA256_PATTERN.test(sha)||bytes>ARCHIVE_MAX_BYTES)throw new Error('archive revision pointer is invalid');return {sha,bytes,key:sha};};
+const snapshotKey=status=>liveSnapshotPointer(status)?.key||`${canonicalUint(status.latest_generated_block,'snapshot block',1)}:${status.last_successful_refresh_time_utc||''}`;
+const assertLiveBundle=(status,pointer,bundle)=>{const fields=['schema_version','kind','latest_generated_block','snapshot_block_hash','current_auction','auction_feed','current_auction_bid_history','mission3_metrics'];if(!bundle||typeof bundle!=='object'||Array.isArray(bundle)||Object.keys(bundle).length!==fields.length||fields.some(field=>!Object.prototype.hasOwnProperty.call(bundle,field)))throw new Error('live snapshot bundle schema is invalid');if(bundle.schema_version!==pointer.schema||bundle.kind!=='degen_dogs_live_snapshot')throw new Error('live snapshot bundle identity is invalid');if(canonicalUint(bundle.latest_generated_block,'bundle block',1)!==canonicalUint(status.latest_generated_block,'snapshot block',1)||String(bundle.snapshot_block_hash).toLowerCase()!==String(status.snapshot_block_hash).toLowerCase())throw new Error('live snapshot bundle checkpoint disagrees');for(const field of fields.slice(4))if(!Array.isArray(bundle[field]))throw new Error(`live snapshot bundle ${field} is invalid`);return bundle;};
 const assertCurrentSnapshot=(status,current,feed,history,metrics)=>{const block=assertStatusAttestation(status);if(String(current.latest_block||'')!==block||String(metrics.latest_block||'')!==block)throw new Error('generated snapshot is not atomic yet');if(canonicalUint(metrics.onchain_chain_id,'metrics chain ID',8453)!==8453)throw new Error('metrics are not Base mainnet');const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');if(canonicalUint(current.token_id,'current auction token')!==token||canonicalUint(dogToken(feed),'auction feed token')!==token||canonicalUint(metrics.current_auction_token_id,'metrics auction token')!==token)throw new Error('current auction datasets disagree');assertSame('auction state',[status.current_auction_status,current.auction_state,feed.status,metrics.current_auction_status],normalizedState);assertSame('high bidder',[status.current_high_bidder_wallet,current.bidder_wallet,feed.bidder_winner_wallet,metrics.current_bidder_wallet],value=>String(value).toLowerCase());assertSame('current bid',[status.current_bid_eth,current.current_bid_eth,feed.amount_eth,metrics.current_bid_eth],normalizedAmount);const hashes=[status.snapshot_block_hash,metrics.snapshot_block_hash].filter(Boolean);if(hashes.length!==2)throw new Error('verified snapshot hash is missing');assertSame('snapshot hash',hashes,value=>String(value).toLowerCase());const verification=[status.onchain_verification_status,metrics.onchain_verification_status].filter(Boolean);if(verification.length!==2||verification.some(value=>value!=='current_snapshot_cross_provider_verified'))throw new Error('current snapshot is not cross-provider verified');const topBid=bidHistoryHighFirst(history)[0];if(topBid){if(canonicalUint(topBid.token_id,'current bid history token')!==token)throw new Error('current bid history token disagrees');assertSame('bid history bidder',[current.bidder_wallet,topBid.bidder_wallet],value=>String(value).toLowerCase());assertSame('bid history amount',[current.current_bid_eth,topBid.bid_eth],normalizedAmount);}return {block,token};};
+const loadLiveSnapshot=async status=>{const pointer=liveSnapshotPointer(status);let currentRows,feedRows,historyRows,metricRows;if(pointer){const bundle=assertLiveBundle(status,pointer,await fetchVerifiedGenerated(pointer.filename,pointer.sha,pointer.bytes,LIVE_BUNDLE_MAX_BYTES,CURRENT_FETCH_TIMEOUT_MS));({current_auction:currentRows,auction_feed:feedRows,current_auction_bid_history:historyRows,mission3_metrics:metricRows}=bundle);}else{const block=canonicalUint(status.latest_generated_block,'snapshot block',1);[currentRows,feedRows,historyRows,metricRows]=await Promise.all([fetchGenerated('current_auction',block),fetchGenerated('auction_feed',block),fetchGenerated('current_auction_bid_history',block),fetchGenerated('mission3_metrics',block)]);}const current=asRows(currentRows)[0];if(!current)throw new Error('current auction unavailable');const metrics=metricRowsToMap(metricRows);const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');const feed=currentFeedRow(feedRows,token);const snapshot=assertCurrentSnapshot(status,current,feed,historyRows,metrics);return {...snapshot,key:pointer?.key||snapshotKey(status),status,current,feed,history:historyRows,metrics,archive:archivePointer(status)};};
 const assertArchiveSnapshot=(context,records)=>{const unified=asRows(records).find(row=>Number(row.mission)===3&&Number(row.dog_id)===context.token);if(!unified)throw new Error('archive index is behind current auction');assertSame('archive state',[context.status.current_auction_status,context.current.auction_state,context.feed.status,context.metrics.current_auction_status,unified.status],normalizedState);assertSame('archive high bidder',[context.status.current_high_bidder_wallet,context.current.bidder_wallet,context.feed.bidder_winner_wallet,context.metrics.current_bidder_wallet,unified.winner_or_high_bidder?.wallet],value=>String(value).toLowerCase());assertSame('archive current bid',[context.status.current_bid_eth,context.current.current_bid_eth,context.feed.amount_eth,context.metrics.current_bid_eth,unified.amount?.native],normalizedAmount);};
-const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=await fetchGenerated('unified_dog_search_index',target.block);if(target.key!==liveSnapshotKey)continue;assertArchiveSnapshot(target,records);const nextRecords=asRows(records);const previousRecords=unifiedRecords;const previousReady=unifiedReady;unifiedRecords=nextRecords;unifiedReady=true;try{renderArchive();}catch(error){unifiedRecords=previousRecords;unifiedReady=previousReady;throw error;}unifiedSnapshotBlock=target.block;archiveSnapshotKey=target.key;}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
-const refreshLiveSurface=()=>liveRefreshPromise||(liveRefreshPromise=(async()=>{const status=await fetchGenerated('refresh_status',Date.now());const nextBlock=assertStatusAttestation(status);const nextKey=`${nextBlock}:${status.last_successful_refresh_time_utc||''}`;if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))throw new Error('verified snapshot block regressed');let context=liveSnapshotContext;if(nextKey!==liveSnapshotKey){const [currentRows,feedRows,historyRows,metricRows]=await Promise.all([fetchGenerated('current_auction',nextBlock),fetchGenerated('auction_feed',nextBlock),fetchGenerated('current_auction_bid_history',nextBlock),fetchGenerated('mission3_metrics',nextBlock)]);const current=asRows(currentRows)[0];if(!current)throw new Error('current auction unavailable');const metrics=metricRowsToMap(metricRows);const token=canonicalUint(status.current_dog_token_id??current.token_id,'current dog token');const feed=currentFeedRow(feedRows,token);const snapshot=assertCurrentSnapshot(status,current,feed,historyRows,metrics);context={...snapshot,key:nextKey,status,current,feed,history:historyRows,metrics};hydrateCurrentCard(feed,current,historyRows,metrics);liveSnapshotContext=context;liveSnapshotBlock=snapshot.block;liveSnapshotKey=nextKey;}else{if(!context)throw new Error('verified snapshot context is unavailable');assertCurrentSnapshot(status,context.current,context.feed,context.history,context.metrics);context={...context,status};liveSnapshotContext=context;}if(context&&archiveSnapshotKey!==nextKey)queueArchiveRefresh(context);})().catch(error=>{const message=error instanceof Error?error.message:'unknown error';console.warn('Live dashboard refresh failed:',message);setVerificationState(liveSnapshotContext?.status,true);if(liveLabel)liveLabel.dataset.liveError=message;if(!unifiedReady)fallbackAuctionRows();}).finally(()=>{liveRefreshPromise=null;}));
+const queueArchiveRefresh=context=>{pendingArchiveContext=context;if(archiveRefreshPromise)return archiveRefreshPromise;archiveRefreshPromise=(async()=>{while(pendingArchiveContext){const target=pendingArchiveContext;pendingArchiveContext=null;try{const records=target.archive?await fetchVerifiedGenerated('unified_dog_search_index.json',target.archive.sha,target.archive.bytes,ARCHIVE_MAX_BYTES,ARCHIVE_FETCH_TIMEOUT_MS):await fetchGenerated('unified_dog_search_index',target.block);const targetArchiveKey=target.archive?.key||target.key;const activeArchiveKey=liveSnapshotContext?.archive?.key||liveSnapshotContext?.key;if(target.key!==liveSnapshotKey||targetArchiveKey!==activeArchiveKey)continue;assertArchiveSnapshot(target,records);const nextRecords=asRows(records);const previousRecords=unifiedRecords;const previousReady=unifiedReady;unifiedRecords=nextRecords;unifiedReady=true;try{renderArchive();}catch(error){unifiedRecords=previousRecords;unifiedReady=previousReady;throw error;}unifiedSnapshotBlock=target.block;archiveSnapshotKey=targetArchiveKey;}catch(_){if(!unifiedReady)fallbackAuctionRows();}}})().finally(()=>{archiveRefreshPromise=null;});return archiveRefreshPromise;};
+const refreshLiveSurface=()=>liveRefreshPromise||(liveRefreshPromise=(async()=>{let status=await fetchGenerated('refresh_status',Date.now());let nextBlock=assertStatusAttestation(status);let nextKey=snapshotKey(status);if(liveSnapshotBlock&&Number(nextBlock)<Number(liveSnapshotBlock))throw new Error('verified snapshot block regressed');let context=liveSnapshotContext;if(nextKey!==liveSnapshotKey){for(let attempt=0;attempt<2;attempt+=1){const candidate=await loadLiveSnapshot(status);const confirmedStatus=await fetchGenerated('refresh_status',Date.now());const confirmedBlock=assertStatusAttestation(confirmedStatus);const confirmedKey=snapshotKey(confirmedStatus);if(liveSnapshotBlock&&Number(confirmedBlock)<Number(liveSnapshotBlock))throw new Error('verified snapshot block regressed');if(confirmedKey!==candidate.key){if(attempt===0){status=confirmedStatus;nextBlock=confirmedBlock;nextKey=confirmedKey;continue;}throw new Error('live snapshot pointer changed during verification');}assertCurrentSnapshot(confirmedStatus,candidate.current,candidate.feed,candidate.history,candidate.metrics);context={...candidate,status:confirmedStatus,archive:archivePointer(confirmedStatus)};status=confirmedStatus;nextBlock=confirmedBlock;nextKey=confirmedKey;break;}if(!context||context.key!==nextKey)throw new Error('verified snapshot context is unavailable');hydrateCurrentCard(context.feed,context.current,context.history,context.metrics);liveSnapshotContext=context;liveSnapshotBlock=context.block;liveSnapshotKey=context.key;}else{if(!context)throw new Error('verified snapshot context is unavailable');assertCurrentSnapshot(status,context.current,context.feed,context.history,context.metrics);context={...context,status,archive:archivePointer(status)};liveSnapshotContext=context;}setVerificationState(status);const nextArchiveKey=context?.archive?.key||context?.key;if(context&&archiveSnapshotKey!==nextArchiveKey)queueArchiveRefresh(context);return true;})().catch(error=>{const message=error instanceof Error?error.message:'unknown error';console.warn('Live dashboard refresh failed:',message);setVerificationState(liveSnapshotContext?.status,true);if(liveLabel)liveLabel.dataset.liveError=message;if(!unifiedReady)fallbackAuctionRows();return false;}).finally(()=>{liveRefreshPromise=null;}));
 const emptyArchiveMessage=()=>archiveState.mission!=='all'&&!archiveState.query?`No verified Mission ${archiveState.mission} auction rows are available yet.`:'No auctions found for this search.';
 const setAuctionRows=(records,label,total=records.length)=>{if(!auctionBody)return;auctionBody.innerHTML=records.length?records.map(unifiedRowHtml).join(''):`<tr><td colspan="6">${escapeHtml(emptyArchiveMessage())}</td></tr>`;if(auctionTotal){auctionTotal.dataset.total=String(total);auctionTotal.textContent=label||`${total} rows`;}};
 const filteredRows=()=>{let rows=unifiedRecords;if(archiveState.mission!=='all')rows=rows.filter(record=>String(record.mission)===archiveState.mission);const q=archiveState.query;if(q)rows=rows.filter(record=>matchesQuery(record,q));return rows;};
-const sortRows=rows=>{const dogQuery=exactDogQuery(archiveState.query);rows=[...rows];if(archiveState.sortMode==='highest_usd'){return rows.sort((a,b)=>{const av=getUsdSortValue(a);const bv=getUsdSortValue(b);const aMissing=av===null||Number.isNaN(av);const bMissing=bv===null||Number.isNaN(bv);if(aMissing&&bMissing)return compareNewest(a,b);if(aMissing)return 1;if(bMissing)return -1;return bv-av||compareNewest(a,b);});}return rows.sort((a,b)=>{if(dogQuery!==null){const ae=Number(a.dog_id)===dogQuery;const be=Number(b.dog_id)===dogQuery;if(ae!==be)return ae?-1:1;}return compareNewest(a,b);});};
+const archiveColumnValue=(record,column)=>{const who=record.winner_or_high_bidder||{};if(column===0)return `${record.era_label||`Mission ${record.mission}`} ${record.status||''}`.toLowerCase();if(column===1)return Number(record.dog_id);if(column===2)return String(who.display||who.wallet||'').toLowerCase();if(column===3)return toNumber(record.amount?.native);if(column===4)return parseUtc(record.activity_time_utc);if(column===5){const match=String(record.rarity?.display||'').match(/^#(\d+)\/(\d+)$/);return match?Number(match[1]):null;}return null;};
+const compareArchiveColumn=(a,b,column)=>{const av=archiveColumnValue(a,column);const bv=archiveColumnValue(b,column);const aMissing=av===null||av===undefined||Number.isNaN(av)||av==='';const bMissing=bv===null||bv===undefined||Number.isNaN(bv)||bv==='';if(aMissing&&bMissing)return compareNewest(a,b);if(aMissing)return 1;if(bMissing)return -1;const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return (archiveState.columnDirection==='asc'?cmp:-cmp)||compareNewest(a,b);};
+const sortRows=rows=>{const dogQuery=exactDogQuery(archiveState.query);rows=[...rows];if(archiveState.columnSort!==null)return rows.sort((a,b)=>compareArchiveColumn(a,b,archiveState.columnSort));if(archiveState.sortMode==='highest_usd'){return rows.sort((a,b)=>{const av=getUsdSortValue(a);const bv=getUsdSortValue(b);const aMissing=av===null||Number.isNaN(av);const bMissing=bv===null||Number.isNaN(bv);if(aMissing&&bMissing)return compareNewest(a,b);if(aMissing)return 1;if(bMissing)return -1;return bv-av||compareNewest(a,b);});}return rows.sort((a,b)=>{if(dogQuery!==null){const ae=Number(a.dog_id)===dogQuery;const be=Number(b.dog_id)===dogQuery;if(ae!==be)return ae?-1:1;}return compareNewest(a,b);});};
 const renderPagination=(total,totalPages,start,count)=>{const end=count?start+count:0;if(showingLabel)showingLabel.textContent=total?`Showing ${start+1}–${end} of ${total}`:'Showing 0 of 0';if(pageLabel)pageLabel.textContent=`Page ${archiveState.currentPage} of ${totalPages}`;if(pagePrev)pagePrev.disabled=archiveState.currentPage<=1;if(pageNext)pageNext.disabled=archiveState.currentPage>=totalPages;if(archiveCaveat)archiveCaveat.textContent=archiveState.sortMode==='highest_usd'?'USD values are historical estimates where available. Missing estimates sort last.':'';};
 const renderArchive=()=>{if(!auctionBody||!unifiedReady)return;syncControls();let rows=filteredRows();rows=sortRows(rows);const total=rows.length;const totalPages=Math.max(1,Math.ceil(total/archiveState.pageSize));archiveState.currentPage=Math.min(Math.max(1,archiveState.currentPage),totalPages);const start=(archiveState.currentPage-1)*archiveState.pageSize;const pageRows=rows.slice(start,start+archiveState.pageSize);const label=isDefaultArchiveState()?'Latest 10 archive records':`${total} archive ${total===1?'match':'matches'}`;setAuctionRows(pageRows,label,total);renderPagination(total,totalPages,start,pageRows.length);updateCounts();};
-const restoreAuctionRows=()=>{archiveState.query='';archiveState.mission='all';archiveState.sortMode='newest';archiveState.pageSize=10;archiveState.currentPage=1;renderArchive();};
+const restoreAuctionRows=()=>{archiveState.query='';archiveState.mission='all';archiveState.sortMode='newest';archiveState.columnSort=null;archiveState.columnDirection='asc';archiveState.pageSize=10;archiveState.currentPage=1;renderArchive();};
 const matchesQuery=(record,q)=>{let remaining=q;const missionMatch=remaining.match(/(?:^|\s)mission\s*:?\s*([123])(?=\s|$)/);if(missionMatch&&Number(record.mission)!==Number(missionMatch[1]))return false;remaining=remaining.replace(/(?:^|\s)mission\s*:?\s*[123](?=\s|$)/g,' ');const dogMatch=remaining.match(/(?:^|\s)dog\s*#?\s*(\d{1,4})(?=\s|$)/);if(dogMatch&&Number(record.dog_id)!==Number(dogMatch[1]))return false;remaining=remaining.replace(/(?:^|\s)dog\s*#?\s*\d{1,4}(?=\s|$)/g,' ');const terms=remaining.split(/\s+/).filter(Boolean);const haystack=rowSearchText(record);return terms.every(term=>haystack.includes(term));};
 const fallbackAuctionRows=()=>{if(!auctionBody)return;const rows=defaultRows.slice(0,10);auctionBody.replaceChildren(...rows.map(row=>row.cloneNode(true)));if(auctionTotal){auctionTotal.dataset.total=String(rows.length);auctionTotal.textContent='Latest 10 archive records';}renderPagination(rows.length,1,0,rows.length);updateCounts();};
-filter?.addEventListener('input',()=>{archiveState.query=filter.value.trim().toLowerCase();archiveState.currentPage=1;renderArchive();});
+filter?.addEventListener('input',()=>{archiveState.query=filter.value.trim().toLowerCase();archiveState.currentPage=1;if(filterRenderFrame)window.cancelAnimationFrame(filterRenderFrame);filterRenderFrame=window.requestAnimationFrame(()=>{filterRenderFrame=0;renderArchive();});});
 missionButtons.forEach(button=>button.addEventListener('click',()=>{archiveState.mission=button.dataset.missionFilter||'all';archiveState.currentPage=1;renderArchive();}));
-sortSelect?.addEventListener('change',()=>{archiveState.sortMode=sortSelect.value||'newest';archiveState.currentPage=1;renderArchive();});
+sortSelect?.addEventListener('change',()=>{archiveState.sortMode=sortSelect.value||'newest';archiveState.columnSort=null;archiveState.columnDirection='asc';archiveState.currentPage=1;renderArchive();});
 pageSizeSelect?.addEventListener('change',()=>{archiveState.pageSize=Math.min(100,Math.max(10,Number(pageSizeSelect.value)||10));archiveState.currentPage=1;renderArchive();});
 pagePrev?.addEventListener('click',()=>{archiveState.currentPage=Math.max(1,archiveState.currentPage-1);renderArchive();});
 pageNext?.addEventListener('click',()=>{archiveState.currentPage+=1;renderArchive();});
 const updateCountdowns=()=>{const now=Date.now();document.querySelectorAll('[data-countdown-end]').forEach(el=>{const end=parseUtc(el.dataset.countdownEnd);if(!Number.isFinite(end))return;const box=el.closest('.timer-card');const status=String(el.dataset.auctionStatus||box?.dataset.auctionStatus||'').toLowerCase();const forceEnded=status.includes('settled')||status.includes('ended');const seconds=forceEnded?0:Math.max(0,Math.floor((end-now)/1000));const state=timerState(seconds,forceEnded);el.textContent=state==='ended'?'ended':formatDuration(seconds);applyTimerState(el,state);});};
 const updateCounts=()=>{document.querySelectorAll('table').forEach(table=>{if(!table.tBodies.length)return;const rows=[...table.tBodies[0].rows];const visible=rows.filter(row=>!row.hidden).length;const total=table.caption?.querySelector('[data-total]');if(total&&!table.matches('[data-table="auction_feed"]')){const suffix=visible===Number(total.dataset.total)?' rows':` / ${total.dataset.total} rows`;total.textContent=`${visible}${suffix}`;}});};
-document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const tbody=table.tBodies[0];const col=Number(button.dataset.col);const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
+document.querySelectorAll('th button').forEach(button=>{button.addEventListener('click',()=>{const table=button.closest('table');const col=Number(button.dataset.col);if(table===auctionTable){const same=archiveState.columnSort===col;archiveState.columnSort=col;archiveState.columnDirection=same&&archiveState.columnDirection==='asc'?'desc':'asc';archiveState.currentPage=1;renderArchive();return;}const tbody=table.tBodies[0];const next=button.dataset.dir==='asc'?'desc':'asc';table.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');if(b)delete b.dataset.dir;th.setAttribute('aria-sort','none');});button.dataset.dir=next;button.closest('th').setAttribute('aria-sort',next==='asc'?'ascending':'descending');const rows=[...tbody.rows].sort((a,b)=>{const av=key(a.cells[col]?.textContent||'');const bv=key(b.cells[col]?.textContent||'');const cmp=typeof av==='number'&&typeof bv==='number'?av-bv:String(av).localeCompare(String(bv));return next==='asc'?cmp:-cmp;});rows.forEach(row=>tbody.appendChild(row));});});
 updateCounts();
 updateCountdowns();
 setInterval(updateCountdowns,1000);
-const scheduleLiveRefresh=()=>window.setTimeout(async()=>{await refreshLiveSurface();scheduleLiveRefresh();},LIVE_REFRESH_MS);
-refreshLiveSurface().finally(scheduleLiveRefresh);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLiveSurface();});
-window.addEventListener('online',refreshLiveSurface);
+const scheduleLiveRefresh=()=>{if(liveRefreshTimer)window.clearTimeout(liveRefreshTimer);liveRefreshTimer=0;if(document.hidden)return;const backoff=Math.min(LIVE_RETRY_MAX_MS,LIVE_REFRESH_MS*(2**Math.min(liveRefreshFailures,4)));const jitter=liveRefreshFailures?Math.floor(Math.random()*Math.min(2000,backoff/5)):0;liveRefreshTimer=window.setTimeout(async()=>{liveRefreshTimer=0;const ok=await refreshLiveSurface();liveRefreshFailures=ok?0:liveRefreshFailures+1;scheduleLiveRefresh();},backoff+jitter);};
+const refreshNow=async()=>{if(liveRefreshTimer)window.clearTimeout(liveRefreshTimer);liveRefreshTimer=0;if(document.hidden)return false;const ok=await refreshLiveSurface();liveRefreshFailures=ok?0:liveRefreshFailures+1;scheduleLiveRefresh();return ok;};
+refreshNow();
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(liveRefreshTimer)window.clearTimeout(liveRefreshTimer);liveRefreshTimer=0;}else refreshNow();});
+window.addEventListener('online',refreshNow);
 """.strip()
     style_hash = base64.b64encode(hashlib.sha256(css.encode("utf-8")).digest()).decode("ascii")
     script_hash = base64.b64encode(hashlib.sha256(script.encode("utf-8")).digest()).decode("ascii")
@@ -5946,7 +6197,11 @@ def main() -> None:
         expected_public_files.add(f"{table}.csv")
         expected_public_files.add(f"{table}.json")
     for stale in PUBLIC_GENERATED.glob("*"):
-        if stale.is_file() and stale.name not in expected_public_files:
+        if (
+            stale.is_file()
+            and stale.name not in expected_public_files
+            and not is_live_snapshot_bundle_filename(stale.name)
+        ):
             stale.unlink()
     write_html(tables)
 

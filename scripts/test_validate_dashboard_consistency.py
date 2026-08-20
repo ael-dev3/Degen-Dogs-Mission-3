@@ -12,6 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts" / "validate_dashboard_consistency.py"
+BUNDLE_MODULE_PATH = ROOT / "scripts" / "build_live_snapshot_bundle.py"
 
 
 def load_module() -> Any:
@@ -20,6 +21,17 @@ def load_module() -> Any:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def rebuild_live_bundle(root: Path) -> dict[str, Any]:
+    spec = importlib.util.spec_from_file_location(
+        "build_live_snapshot_bundle",
+        BUNDLE_MODULE_PATH,
+    )
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_live_snapshot_bundle(root=root)
 
 
 def write_json(path: Path, data: Any) -> None:
@@ -214,6 +226,7 @@ def write_fixture(
         "latest_block_time_utc": "2026-05-31 18:55:13",
     }
     write_json(root / "generated" / "current_auction.json", [current])
+    write_json(root / "public" / "generated" / "current_auction.json", [current])
     refresh_status = {
         "schema_version": 1,
         "kind": "refresh_status",
@@ -302,7 +315,7 @@ def write_fixture(
     }]
     write_json(root / "generated" / "current_auction_bid_history.json", current_history)
     write_json(root / "public" / "generated" / "current_auction_bid_history.json", current_history)
-    write_json(root / "generated" / "auction_feed.json", [{
+    auction_feed = [{
         "status": "ongoing",
         "dog": "Dog #729",
         "bidder_winner": feed_bidder,
@@ -317,7 +330,9 @@ def write_fixture(
         "traits": rarity_traits,
         "trait_rarity": rarity_percentages,
         "metadata_verification_status": "onchain_token_uri_verified",
-    }])
+    }]
+    write_json(root / "generated" / "auction_feed.json", auction_feed)
+    write_json(root / "public" / "generated" / "auction_feed.json", auction_feed)
     historical_rows = [
         {
             "mission": 1 if token_id <= 200 else 2 if token_id <= 589 else 3,
@@ -543,6 +558,7 @@ def write_fixture(
     )
     write_text(root / "index.html", index)
     write_text(root / "README.md", """# Fixture\n\n## Current snapshot\n\n| Field | Value |\n| --- | --- |\n| Snapshot block | 46732183 |\n| Snapshot time UTC | 2026-05-31 18:55:13 |\n| Current Dog | Dog #729 |\n| Current status | live |\n| Current bid | 0.01 ETH ($19.98) |\n| Current high bidder | @0xael.eth |\n| Bid payback / APR | ≈187 days / ≈196% APR |\n| Season 6 SUP estimate if current bid wins | ≈1,000 SUP / ≈$2,000 |\n\n## Next\n""")
+    rebuild_live_bundle(root)
 
 
 def run_validation(root: Path) -> dict[str, Any]:
@@ -835,6 +851,7 @@ def test_validate_current_surface_accepts_rarity_mint_extension_provenance() -> 
         write_json(root / "generated" / "refresh_status.json", status)
         write_json(root / "public" / "generated" / "refresh_status.json", status)
 
+        rebuild_live_bundle(root)
         result = run_validation(root)
         assert result["current_dog"] == "Dog #729"
 
@@ -1175,6 +1192,7 @@ def test_validator_catches_recent_settled_unified_row_missing_usd() -> None:
             "metadata_verification_status": "onchain_token_uri_verified",
         })
         write_json(root / "generated" / "auction_feed.json", feed)
+        write_json(root / "public" / "generated" / "auction_feed.json", feed)
         stale_unified_row = {
             "mission": 3,
             "dog_id": 728,
@@ -1345,6 +1363,39 @@ def test_validator_catches_refresh_status_block_mismatch() -> None:
         write_json(root / "generated" / "refresh_status.json", status)
         write_json(root / "public" / "generated" / "refresh_status.json", status)
         assert_raises_contains(lambda: run_validation(root), "rarity attestation block range")
+
+
+def test_validator_catches_tampered_immutable_live_snapshot_bundle() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        status = json.loads(
+            (root / "generated" / "refresh_status.json").read_text(encoding="utf-8")
+        )
+        bundle = root / "public" / "generated" / status["live_snapshot_bundle"]
+        bundle.write_text("{}\n", encoding="utf-8")
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "public live snapshot bundle differs from generated bundle",
+        )
+
+
+def test_validator_catches_unified_archive_revision_mismatch() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        unified = root / "public" / "generated" / "unified_dog_search_index.json"
+        rows = json.loads(unified.read_text(encoding="utf-8"))
+        rows[0]["search_text"] += " tampered"
+        for path in (
+            unified,
+            root / "archive" / "data" / "generated" / "unified_dog_search_index.json",
+        ):
+            write_json(path, rows)
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "unified dog search SHA256 differs from refresh_status",
+        )
 
 
 def test_validator_rejects_missing_cross_provider_verification() -> None:

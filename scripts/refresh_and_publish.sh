@@ -886,7 +886,7 @@ export DEGEN_DOGS_DATA_COMPLETED_AT_UTC="$(utc_stamp)"
 
 log "validating generated artifacts"
 export DEGEN_DOGS_VALIDATION_STARTED_AT_UTC="$(utc_stamp)"
-python3 -m py_compile scripts/build_dashboard.py
+python3 -m py_compile scripts/build_dashboard.py scripts/build_live_snapshot_bundle.py
 python3 - <<'PY'
 from __future__ import annotations
 
@@ -1041,6 +1041,7 @@ archive_public = Path("public/generated/mission3")
 archive_generated = Path("archive/mission3/data/generated")
 unified_archive = Path("archive/data/generated")
 unified_public = Path("public/generated")
+live_bundle_directories = (Path("generated"), Path("public/generated"))
 identity_path = Path("archive/data/identity/wallet_profiles.json")
 dog_archive = Path("archive/dogs")
 price_generated = Path("archive/prices/data/generated")
@@ -1054,6 +1055,16 @@ if unified_archive.exists():
     paths.extend(str(path) for path in sorted(unified_archive.glob("unified_dog_search_*.json")))
 if unified_public.exists():
     paths.extend(str(path) for path in sorted(unified_public.glob("unified_dog_search_*.json")))
+live_bundle_name = re.compile(
+    r"^live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json$"
+)
+for directory in live_bundle_directories:
+    if not directory.exists():
+        continue
+    for path in sorted(directory.glob("live_snapshot_*.json")):
+        if not live_bundle_name.fullmatch(path.name):
+            raise SystemExit(f"refusing unsafe live snapshot artifact name: {path}")
+        paths.append(str(path))
 if identity_path.exists():
     paths.append(str(identity_path))
 if dog_archive.exists():

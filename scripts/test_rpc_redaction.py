@@ -206,16 +206,38 @@ def test_refresh_telemetry_custom_rpc_redaction_covers_returned_and_logged_rows(
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
+        bundle_module = load_module("build_live_snapshot_bundle")
+        bundle_name = f"live_snapshot_1_{'a' * 64}_{'b' * 64}.json"
+        bundle_bytes = b"{}\n"
         status_path = root / "public" / "generated" / "refresh_status.json"
         status_path.parent.mkdir(parents=True)
-        status_path.write_text('{"status":"expected"}\n', encoding="utf-8")
-        monotonic_values = iter((0.0, 0.0, 2.0))
+        status_path.write_text(
+            json.dumps(
+                {
+                    "status": "expected",
+                    "live_snapshot_bundle": bundle_name,
+                    "live_snapshot_bundle_bytes": len(bundle_bytes),
+                    "live_snapshot_bundle_sha256": "b" * 64,
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        (status_path.parent / bundle_name).write_bytes(bundle_bytes)
+        clock = {"now": 0.0}
         original_monotonic = telemetry.time.monotonic
         original_sleep = telemetry.time.sleep
         original_fetch_json = telemetry.fetch_json
-        telemetry.time.monotonic = lambda: next(monotonic_values)
-        telemetry.time.sleep = lambda _seconds: None
+        original_validate_bundle = bundle_module.validate_live_snapshot_bundle
+        telemetry.time.monotonic = lambda: clock["now"]
+        telemetry.time.sleep = lambda seconds: clock.__setitem__(
+            "now",
+            clock["now"] + seconds,
+        )
         telemetry.fetch_json = lambda _url: (_ for _ in ()).throw(OSError(CUSTOM_RPC_URL))
+        bundle_module.validate_live_snapshot_bundle = lambda **_kwargs: {
+            "filename": bundle_name
+        }
         try:
             result = telemetry.verify_live(
                 {"DEGEN_DOGS_COMMIT_SHA": "a" * 40},
@@ -228,6 +250,7 @@ def test_refresh_telemetry_custom_rpc_redaction_covers_returned_and_logged_rows(
             telemetry.time.monotonic = original_monotonic
             telemetry.time.sleep = original_sleep
             telemetry.fetch_json = original_fetch_json
+            bundle_module.validate_live_snapshot_bundle = original_validate_bundle
         assert result["live_verify_result"] == "timeout"
         assert_custom_url_redacted(result["error"])
 
