@@ -59,13 +59,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#521/685",
-      "rank": 521,
+      "display": "#518/686",
+      "rank": 518,
       "scope": "base_existing",
-      "total": 685
+      "total": 686
     },
     "schema_version": 1,
-    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.13 $19.13 2026-06-21t23:51:37z 0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86 0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671 #521/685 generated auction feed 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5 background: halo (8.3%) background halo body: brown (10.8%) body brown neck: redcollar (29.5%) neck redcollar mouth: none (68.3%) mouth none ears: loopearring (27.3%) ears loopearring head: none (20.0%) head none eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 750 dog #750 750 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.13 $19.13 2026-06-21t23:51:37z 0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86 0xc96ed34b6e1c03c8a3488293cb9cf09e904d39a08372bcbdcd9f1498af848671 generated auction feed 0x685358d5b2402465a0fc4ede3070ae091e00f7fa3545fdba86a587de865a98b1 0x7d25a281acf6f19ad761a81af39eaf40482a5ca15a4adbca71536323b7d272f7 0x12c5c5563ef0a1ee0735fe1370f583469a882782e258d8148b551e99e95c78e2 0xbf5d1e9c7f296f2a5f112564be5cc3b65f017cda3eeeaa66ca991264af1c3e8c 0x5a4ab1279fa5bbccdde65200187450de7e9182ba63740bff2d836fe8288ec5a4 0xd8a591694a8f23da481bc014219ee282073c4577b92c6f05a578c0338ee52fa5 0xf75b71e3f17d334d90f4bb5a00c6a094536c96adeedecdd89dc611c31d9f8f7b 0x4d6053b0f501dfba0f226d0555ab49439f3068ea49d3fea0376ee6de41926fb5 background halo body brown neck redcollar mouth none ears loopearring head none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #518/686 background: halo (8.3%) body: brown (10.8%) neck: redcollar (29.4%) mouth: none (68.4%) ears: loopearring (27.3%) head: none (20.0%) eyes: none (17.8%)",
     "settlement": {
       "block_number": 47648275,
       "block_time_utc": "2026-06-21T23:51:37Z",
@@ -97,12 +97,12 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },

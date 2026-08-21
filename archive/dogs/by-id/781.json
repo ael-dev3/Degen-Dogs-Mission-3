@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#571/685",
+      "display": "#571/686",
       "rank": 571,
       "scope": "base_existing",
-      "total": 685
+      "total": 686
     },
     "schema_version": 1,
-    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a #571/685 generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 background: none (91.7%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.3%) mouth none ears: none (26.0%) ears none head: stripedbeanie (7.9%) head stripedbeanie eyes: sunglasses (13.3%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 781 dog #781 781 mission 3 mission 3 base settled 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.00991 eth 9910000000000000 19.16 $19.16 2026-07-23t20:00:49z 0x30d888a4ef19c3a2c5b60bfe71f3f264ed79df6f2caa2b4aaafd2ceb0353072d 0x303b9eb444e869018cabc40ef307db251fab9175df2c8eb5f6b672c206d7522a generated auction feed 0x9f3138c53fdf7e8a49ca464448d278e8e338738ea006f030cf8a28ff697b3b69 0x9e4660ecc8783ff89302be2ed42eafdb0fbfc5a5d90a513062177a7a3a645020 0x03d84edaba3ac72aa46bc37f361aa50a8ec9026f7c34a443f9053646d57c7132 background none body redbrown neck goldnecklace mouth none ears none head stripedbeanie eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #571/686 background: none (91.7%) body: redbrown (15.5%) neck: goldnecklace (19.2%) mouth: none (68.4%) ears: none (25.9%) head: stripedbeanie (7.9%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": 49023751,
       "block_time_utc": "2026-07-23T20:00:49Z",
@@ -92,17 +92,17 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.2%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },

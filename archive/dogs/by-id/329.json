@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#174/685",
-      "rank": 174,
+      "display": "#172/686",
+      "rank": 172,
       "scope": "base_existing",
-      "total": 685
+      "total": 686
     },
     "schema_version": 1,
-    "search_text": "dog 329 dog #329 329 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 6111 degen 0xa610c89463e0df0a48df9a2334fa4854f12b959d47817da44aa0b2e68295f4e0 0x355b40dc5b6767dfcbbae68e7e156947323e3cd8dc3d0c1da986a877b85283fb #174/685 background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: headphones; eyes: redlasereyes 0xfadbaa5aad499e400b727a44162a480f65fda2b1af4f366ec9142e022f75f440 0x7780baec19c9c03fc5f05be171d0106e487fa4d1b09cec91a536a2880168d7a1 chain_logs contract_getters",
+    "search_text": "dog 329 dog #329 329 mission 2 mission 2 degen chain settled 0x6506e31b88422251354d9deb63a904d90acd8996 0x6506…8996 6111 degen 0xa610c89463e0df0a48df9a2334fa4854f12b959d47817da44aa0b2e68295f4e0 0x355b40dc5b6767dfcbbae68e7e156947323e3cd8dc3d0c1da986a877b85283fb background: none; body: dalmation; neck: redcollar; mouth: none; ears: earbuds; head: headphones; eyes: redlasereyes 0xfadbaa5aad499e400b727a44162a480f65fda2b1af4f366ec9142e022f75f440 0x7780baec19c9c03fc5f05be171d0106e487fa4d1b09cec91a536a2880168d7a1 chain_logs contract_getters #172/686 background: none (91.7%) body: dalmation (9.0%) neck: redcollar (29.4%) mouth: none (68.4%) ears: earbuds (32.4%) head: headphones (6.9%) eyes: redlasereyes (4.8%)",
     "settlement": {
       "block_number": 25654309,
       "block_time_utc": "2025-03-28T17:52:34Z",
@@ -84,17 +84,17 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.1%)",
+        "display": "Body: Dalmation (9.0%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },

@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#278/685",
-      "rank": 278,
+      "display": "#281/686",
+      "rank": 281,
       "scope": "base_existing",
-      "total": 685
+      "total": 686
     },
     "schema_version": 1,
-    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.97 $17.97 2026-07-07t02:32:27z 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f #278/685 generated auction feed 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 background: none (91.7%) background none body: orange (8.2%) body orange neck: none (41.0%) neck none mouth: none (68.3%) mouth none ears: loopearring (27.3%) ears loopearring head: unicorn (4.7%) head unicorn eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.97 $17.97 2026-07-07t02:32:27z 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f generated auction feed 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 background none body orange neck none mouth none ears loopearring head unicorn eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #281/686 background: none (91.7%) body: orange (8.3%) neck: none (41.1%) mouth: none (68.4%) ears: loopearring (27.3%) head: unicorn (4.7%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 48301100,
       "block_time_utc": "2026-07-07T02:32:27Z",
@@ -87,17 +87,17 @@
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.2%)",
+        "display": "Body: Orange (8.3%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.0%)",
+        "display": "Neck: None (41.1%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -112,7 +112,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Glasses (12.6%)",
+        "display": "Eyes: Glasses (12.5%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

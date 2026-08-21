@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#188/685",
-      "rank": 188,
+      "display": "#193/686",
+      "rank": 193,
       "scope": "base_existing",
-      "total": 685
+      "total": 686
     },
     "schema_version": 1,
-    "search_text": "dog 487 dog #487 487 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 2445 degen 0x50be61efdc77f2c290ea30922aa5464299b933879ab6252e6dd49d1bcf21c5bb 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 #188/685 background: none; body: orange; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes 0x40af2b8f729d416476d207efd42f2aa24c59ab0f11afef72e6031d61c5408753 0x3911339e7745ff7e1f2f85f958228b776d72142fcfeb8511a7870dec24af9898 chain_logs contract_getters",
+    "search_text": "dog 487 dog #487 487 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 2445 degen 0x50be61efdc77f2c290ea30922aa5464299b933879ab6252e6dd49d1bcf21c5bb 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 background: none; body: orange; neck: redcollar; mouth: none; ears: none; head: partyhat; eyes: bluelasereyes 0x40af2b8f729d416476d207efd42f2aa24c59ab0f11afef72e6031d61c5408753 0x3911339e7745ff7e1f2f85f958228b776d72142fcfeb8511a7870dec24af9898 chain_logs contract_getters #193/686 background: none (91.7%) body: orange (8.3%) neck: redcollar (29.4%) mouth: none (68.4%) ears: none (25.9%) head: partyhat (4.2%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 26255444,
       "block_time_utc": "2025-09-14T15:17:46Z",
@@ -84,22 +84,22 @@
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.2%)",
+        "display": "Body: Orange (8.3%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (29.5%)",
+        "display": "Neck: RedCollar (29.4%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -109,7 +109,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.2%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }
