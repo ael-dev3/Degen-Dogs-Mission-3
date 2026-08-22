@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#470/686",
-      "rank": 470,
+      "display": "#468/687",
+      "rank": 468,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 109 dog #109 109 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x022d2ac993818a8429188a9f3236de87b37fc18d56c36bf978007a3a2594995a 0x90f691651b0596db8a6b3c356b500a0705f8ffd6de5e8e8753a45f73f7f540cb #470/686 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 109 dog #109 109 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x022d2ac993818a8429188a9f3236de87b37fc18d56c36bf978007a3a2594995a 0x90f691651b0596db8a6b3c356b500a0705f8ffd6de5e8e8753a45f73f7f540cb background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #468/687 background: none (91.7%) body: redbrown (15.4%) neck: studdedcollar (10.2%) mouth: none (68.3%) ears: earbuds (32.3%) head: stripedbeanie (7.9%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": 28585864,
       "block_time_utc": "2022-05-21T10:57:20Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -93,12 +93,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: Sunglasses (13.3%)",
+        "display": "Eyes: Sunglasses (13.2%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#311/686",
-      "rank": 311,
+      "display": "#316/687",
+      "rank": 316,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 530 dog #530 530 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 1234 degen 0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3 0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d #311/686 background: none; body: black; neck: redcollar; mouth: pizza; ears: loopearring; head: headphones; eyes: glasses 0x45e426c8ea7ea9e1f3e15878a2746120a96fd7053aa81cd68294e983f36802e3 chain_logs contract_getters",
+    "search_text": "dog 530 dog #530 530 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 1234 degen 0xe2e11ab76607bbf7f41df7150c260c53b0023ca3cdc80763f1b2fb6fd02e14e3 0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d background: none; body: black; neck: redcollar; mouth: pizza; ears: loopearring; head: headphones; eyes: glasses 0x45e426c8ea7ea9e1f3e15878a2746120a96fd7053aa81cd68294e983f36802e3 chain_logs contract_getters #316/687 background: none (91.7%) body: black (11.6%) neck: redcollar (29.4%) mouth: pizza (11.1%) ears: loopearring (27.4%) head: headphones (6.8%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 26440108,
       "block_time_utc": "2025-11-08T00:05:34Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
@@ -93,17 +93,17 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (11.1%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.4%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.9%)",
+        "display": "Head: Headphones (6.8%)",
         "trait_type": "Head",
         "value": "Headphones"
       },

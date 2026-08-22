@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#513/686",
-      "rank": 513,
+      "display": "#517/687",
+      "rank": 517,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 383 dog #383 383 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x5dada2cadc5a04d615f3a36742dc0fe316d444f53841d47d5d3b55c9c4ef0ab8 0x04e64b7c6226b2319c92ec9a34b86692f24f47fc25fec32b67cda503e6f35fac #513/686 background: none; body: black; neck: none; mouth: none; ears: earbuds; head: headphones; eyes: vrgoggles 0x9f072743decc038e841456d44fffc0ad296d75a51213f790eab0544df4241917 chain_logs contract_getters",
+    "search_text": "dog 383 dog #383 383 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x5dada2cadc5a04d615f3a36742dc0fe316d444f53841d47d5d3b55c9c4ef0ab8 0x04e64b7c6226b2319c92ec9a34b86692f24f47fc25fec32b67cda503e6f35fac background: none; body: black; neck: none; mouth: none; ears: earbuds; head: headphones; eyes: vrgoggles 0x9f072743decc038e841456d44fffc0ad296d75a51213f790eab0544df4241917 chain_logs contract_getters #517/687 background: none (91.7%) body: black (11.6%) neck: none (41.2%) mouth: none (68.3%) ears: earbuds (32.3%) head: headphones (6.8%) eyes: vrgoggles (10.8%)",
     "settlement": {
       "block_number": 25882250,
       "block_time_utc": "2025-05-18T23:39:31Z",
@@ -83,32 +83,32 @@
         "value": "None"
       },
       {
-        "display": "Body: Black (11.7%)",
+        "display": "Body: Black (11.6%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Headphones (6.9%)",
+        "display": "Head: Headphones (6.8%)",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: VRGoggles (10.6%)",
+        "display": "Eyes: VRGoggles (10.8%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

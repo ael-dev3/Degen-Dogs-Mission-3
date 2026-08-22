@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#163/686",
-      "rank": 163,
+      "display": "#162/687",
+      "rank": 162,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 #163/686 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters",
+    "search_text": "dog 311 dog #311 311 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a 0xe15251ad74da08558d4b5f9871c60d8e3b5143ba1c025fc8143442c363a600d5 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: 3dglasses 0x9bf15955c7ef462eeb92340640071fc5133686562d1398a55942ab77e60cb056 chain_logs contract_getters #162/687 background: none (91.7%) body: blue (8.7%) neck: redcollar (29.4%) mouth: none (68.3%) ears: earbuds (32.3%) head: stripedbeanie (7.9%) eyes: 3dglasses (4.4%)",
     "settlement": {
       "block_number": 25585600,
       "block_time_utc": "2025-03-11T06:17:43Z",
@@ -93,12 +93,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

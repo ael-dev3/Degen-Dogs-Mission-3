@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#380/686",
-      "rank": 380,
+      "display": "#379/687",
+      "rank": 379,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 #380/686 generated auction feed 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 background: none (91.7%) background none body: sugarskull (6.4%) body sugarskull neck: redcollar (29.4%) neck redcollar mouth: tongue (10.1%) mouth tongue ears: earbuds (32.4%) ears earbuds head: none (20.0%) head none eyes: sunglasses (13.3%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 778 dog #778 778 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.01091 eth 10910000000000000 20.76 $20.76 2026-07-20t13:12:49z 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 generated auction feed 0x3ead773603f30910557bd3bdca9349bc2116f61acf4193f5817ca7c79d6bda1f 0x302e7c3866ead903b8dbec1060d6361261a0a3ea588daf5729463a600ae0448f 0x6a0d522fbf15fc5338b780962a26080d30114a1d9d0097c7c477f77dd112b631 background none body sugarskull neck redcollar mouth tongue ears earbuds head none eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #379/687 background: none (91.7%) body: sugarskull (6.4%) neck: redcollar (29.4%) mouth: tongue (10.0%) ears: earbuds (32.3%) head: none (19.9%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": 48881911,
       "block_time_utc": "2026-07-20T13:12:49Z",
@@ -97,22 +97,22 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (10.1%)",
+        "display": "Mouth: Tongue (10.0%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.0%)",
+        "display": "Head: None (19.9%)",
         "trait_type": "Head",
         "value": "None"
       },
       {
-        "display": "Eyes: Sunglasses (13.3%)",
+        "display": "Eyes: Sunglasses (13.2%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

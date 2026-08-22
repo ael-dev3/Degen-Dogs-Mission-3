@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#562/686",
-      "rank": 562,
+      "display": "#561/687",
+      "rank": 561,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 635 dog #635 635 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.01111 eth 11110000000000000 20.61 $20.61 2026-02-24t06:30:03z 0x3e731e292ebeb6be2322ff4e1d80ad6f9c646e66b596a79c96104bb2eefaee91 0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a #562/686 generated auction feed 0x6a441c5d5e68c918ebad2f5275bc7a8ad2dc97b712dc1d8ba7a2eabbae36e3cd background: none (91.7%) background none body: dalmation (9.0%) body dalmation neck: none (41.1%) neck none mouth: none (68.4%) mouth none ears: none (25.9%) ears none head: blackcap (7.6%) head blackcap eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 635 dog #635 635 mission 3 mission 3 base settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 0.01111 eth 11110000000000000 20.61 $20.61 2026-02-24t06:30:03z 0x3e731e292ebeb6be2322ff4e1d80ad6f9c646e66b596a79c96104bb2eefaee91 0xc107ca5fa97c6e6f33b398e4bf5a94815393403bb3b4fec068b9e192b8ca890a generated auction feed 0x6a441c5d5e68c918ebad2f5275bc7a8ad2dc97b712dc1d8ba7a2eabbae36e3cd background none body dalmation neck none mouth none ears none head blackcap eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #561/687 background: none (91.7%) body: dalmation (9.0%) neck: none (41.2%) mouth: none (68.3%) ears: none (25.9%) head: blackcap (7.6%) eyes: none (17.8%)",
     "settlement": {
       "block_number": 42562628,
       "block_time_utc": "2026-02-24T06:30:03Z",
@@ -90,12 +90,12 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.1%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },

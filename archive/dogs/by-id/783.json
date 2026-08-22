@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#501/686",
-      "rank": 501,
+      "display": "#500/687",
+      "rank": 500,
       "scope": "base_existing",
-      "total": 686
+      "total": 687
     },
     "schema_version": 1,
-    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.56 $18.56 2026-07-25t23:05:51z 0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859 0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7 #501/686 generated auction feed 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c background: none (91.7%) background none body: redbrown (15.5%) body redbrown neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.4%) mouth none ears: loopearring (27.3%) ears loopearring head: redmohawk (7.6%) head redmohawk eyes: masksnorkel (10.1%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 783 dog #783 783 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00991 eth 9910000000000000 18.56 $18.56 2026-07-25t23:05:51z 0xcc38bc09d7bee39f0c736d2b64a806692d70c6e5048e0a3f0d6efe616fd57859 0xdb1d5240404b12a1a4b21047e8db731f5af14e16f5dc59e437ba47febd448cb7 generated auction feed 0xad0dffd42798bdf44f2427eda5ec2cf59b7591177e1bcdfeef4b8800f3180e55 0x43382ea1bf880f0ffbc190bb5723243f4f39bbd00e372c4dd0c8c558b352bd56 0x17b4a59317a0d7629a5f5f36ac088ab2bf8cd936e6f855d72036b036a4b926a0 0xe2b45d77cba9d353d5ed326c1da2528fdf8d4a25dffcfb5149a11d064066890c background none body redbrown neck goldnecklace mouth none ears loopearring head redmohawk eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners #500/687 background: none (91.7%) body: redbrown (15.4%) neck: goldnecklace (19.2%) mouth: none (68.3%) ears: loopearring (27.4%) head: redmohawk (7.6%) eyes: masksnorkel (10.0%)",
     "settlement": {
       "block_number": 49115702,
       "block_time_utc": "2026-07-25T23:05:51Z",
@@ -88,7 +88,7 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -98,12 +98,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.3%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.4%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -113,7 +113,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: MaskSnorkel (10.1%)",
+        "display": "Eyes: MaskSnorkel (10.0%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }
