@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#686/687",
-      "rank": 686,
+      "display": "#687/688",
+      "rank": 687,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 484 dog #484 484 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 #686/687 background: none; body: redbrown; neck: none; mouth: none; ears: earbuds; head: none; eyes: glasses 0x7acfe488169333c81c2bc3d5003b8e7b108a2d2d8025e224bf1c97e9cda6170d chain_logs contract_getters",
+    "search_text": "dog 484 dog #484 484 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xde3801455d39e5cb5f6536f60a30a96866c4e7417558aa2c34f0b734741139b0 0xe4d882d9decace548a3221b5c050caeb7be3583b43cd11f656a2acf9b5f3eac7 background: none; body: redbrown; neck: none; mouth: none; ears: earbuds; head: none; eyes: glasses 0x7acfe488169333c81c2bc3d5003b8e7b108a2d2d8025e224bf1c97e9cda6170d chain_logs contract_getters #687/688 background: none (91.7%) body: redbrown (15.4%) neck: none (41.3%) mouth: none (68.3%) ears: earbuds (32.3%) head: none (20.1%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 26250494,
       "block_time_utc": "2025-09-11T14:19:26Z",
@@ -88,7 +88,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (19.9%)",
+        "display": "Head: None (20.1%)",
         "trait_type": "Head",
         "value": "None"
       },

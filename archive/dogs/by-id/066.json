@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#410/687",
+      "display": "#410/688",
       "rank": 410,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 66 dog #66 66 mission 1 mission 1 polygon no auction dogmaster reward weth #410/687 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 66 dog #66 66 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: beanie; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #410/688 background: none (91.7%) body: brown (10.9%) neck: none (41.3%) mouth: none (68.3%) ears: earbuds (32.3%) head: beanie (5.4%) eyes: bluelasereyes (11.3%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,7 +81,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.4%)",
+        "display": "Eyes: BlueLaserEyes (11.3%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

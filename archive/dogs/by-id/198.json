@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#262/687",
+      "display": "#262/688",
       "rank": 262,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth #262/687 background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #262/688 background: none (91.7%) body: black (11.6%) neck: studdedcollar (10.2%) mouth: pizza (11.0%) ears: loopearring (27.3%) head: redmohawk (7.6%) eyes: none (17.7%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -86,12 +86,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Pizza (11.1%)",
+        "display": "Mouth: Pizza (11.0%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.4%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -101,7 +101,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#446/687",
+      "display": "#446/688",
       "rank": 446,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 121 dog #121 121 mission 1 mission 1 polygon no auction dogmaster reward weth #446/687 background: none; body: orange; neck: none; mouth: pizza; ears: earbuds; head: baseballcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 121 dog #121 121 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: orange; neck: none; mouth: pizza; ears: earbuds; head: baseballcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #446/688 background: none (91.7%) body: orange (8.3%) neck: none (41.3%) mouth: pizza (11.0%) ears: earbuds (32.3%) head: baseballcap (10.3%) eyes: none (17.7%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,12 +81,12 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (11.1%)",
+        "display": "Mouth: Pizza (11.0%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
@@ -101,7 +101,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

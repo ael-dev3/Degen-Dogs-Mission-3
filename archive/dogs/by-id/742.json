@@ -59,13 +59,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#255/687",
-      "rank": 255,
+      "display": "#254/688",
+      "rank": 254,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.02996 eth 29960000000000000 49.88 $49.88 2026-06-13t21:37:25z 0xada3a1c3bb70bc482da450e40bf806ee96e7b60025ffe4fff1ed9618017af9f6 0x046eada99fa3f17b70beb4f1d7656542840d39946fe013118aafb7823b74d45e #255/687 generated auction feed 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0x9c714b1d9b3f46ac51864f11862eb391087fbfb58ec3ef36e53c6e0723562771 0xb7177621400289fc1d8ae7b246d6c4203eab2f8b3c341717133a5c1642edf9cd 0x1c638afff00dc7bf4c9259ba56ff9b3410320b5069800dd3d15f90fab58e98fc 0xd1962fbb06aef5cc1664a86ae630211dca54b4b30a770ca2032c3fdc00395ddd 0x8a3d995c3d2cf2b74afa0c3c5a4748d6dd561b29b000239271f106004747ff83 background: none (91.7%) background none body: rainbow (4.4%) body rainbow neck: redcollar (29.4%) neck redcollar mouth: none (68.3%) mouth none ears: none (25.9%) ears none head: none (19.9%) head none eyes: monocle (7.3%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 742 dog #742 742 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.02996 eth 29960000000000000 49.88 $49.88 2026-06-13t21:37:25z 0xada3a1c3bb70bc482da450e40bf806ee96e7b60025ffe4fff1ed9618017af9f6 0x046eada99fa3f17b70beb4f1d7656542840d39946fe013118aafb7823b74d45e generated auction feed 0x8e83a99d8d33a6c29c064cce1bfb8593d239f27ac1c4e6de0d69cea92020e124 0xcd07f66375dc7e8a7f584dc7b3314b088242ea24d4ad1b8181ba0dc1714b9ce0 0xf31e076b504b93510eeb6ec999aa977cc08715d2e527014ba64d74c2c41b29b4 0x9c714b1d9b3f46ac51864f11862eb391087fbfb58ec3ef36e53c6e0723562771 0xb7177621400289fc1d8ae7b246d6c4203eab2f8b3c341717133a5c1642edf9cd 0x1c638afff00dc7bf4c9259ba56ff9b3410320b5069800dd3d15f90fab58e98fc 0xd1962fbb06aef5cc1664a86ae630211dca54b4b30a770ca2032c3fdc00395ddd 0x8a3d995c3d2cf2b74afa0c3c5a4748d6dd561b29b000239271f106004747ff83 background none body rainbow neck redcollar mouth none ears none head none eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners #254/688 background: none (91.7%) body: rainbow (4.4%) neck: redcollar (29.4%) mouth: none (68.3%) ears: none (26.0%) head: none (20.1%) eyes: monocle (7.3%)",
     "settlement": {
       "block_number": 47298649,
       "block_time_utc": "2026-06-13T21:37:25Z",
@@ -107,12 +107,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: None (19.9%)",
+        "display": "Head: None (20.1%)",
         "trait_type": "Head",
         "value": "None"
       },

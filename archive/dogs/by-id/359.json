@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#486/687",
-      "rank": 486,
+      "display": "#489/688",
+      "rank": 489,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 359 dog #359 359 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff 0xbebe4a5f5419161d0506a325dcb1a39e55da70dfd1db8ad6620b98e82788f810 #486/687 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: toque; eyes: masksnorkel 0x5e6f6a9c6690c03c9a6c563ae54d6a7e59263152356b9e04ef5304c0d683f879 0x32bd12d418a80f01417ecff978ee10cc0e21d83bb42ba09bfdb656ce2356aa9a chain_logs contract_getters",
+    "search_text": "dog 359 dog #359 359 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 4444 degen 0xe5fca391bd935a209edb48604cda9974b359d2bbfc012e04b3308f0d29f3b2ff 0xbebe4a5f5419161d0506a325dcb1a39e55da70dfd1db8ad6620b98e82788f810 background: none; body: white; neck: none; mouth: none; ears: loopearring; head: toque; eyes: masksnorkel 0x5e6f6a9c6690c03c9a6c563ae54d6a7e59263152356b9e04ef5304c0d683f879 0x32bd12d418a80f01417ecff978ee10cc0e21d83bb42ba09bfdb656ce2356aa9a chain_logs contract_getters #489/688 background: none (91.7%) body: white (11.2%) neck: none (41.3%) mouth: none (68.3%) ears: loopearring (27.3%) head: toque (7.1%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": 25795177,
       "block_time_utc": "2025-04-26T01:34:44Z",
@@ -89,7 +89,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.4%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -109,7 +109,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: MaskSnorkel (10.0%)",
+        "display": "Eyes: MaskSnorkel (10.2%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#509/687",
-      "rank": 509,
+      "display": "#507/688",
+      "rank": 507,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 149 dog #149 149 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 0xebaa4ba7e1e318811a4e365806bf88b64f7d312304f056e4a3d5ec5d1ff5114f #509/687 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 149 dog #149 149 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x4fb7f39cd5a0735afaf6b54142e8e254f7f146250155f371643a300d33a90fd1 0xebaa4ba7e1e318811a4e365806bf88b64f7d312304f056e4a3d5ec5d1ff5114f background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #507/688 background: none (91.7%) body: blue (8.7%) neck: redcollar (29.4%) mouth: none (68.3%) ears: earbuds (32.3%) head: stripedbeanie (7.8%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": 31019539,
       "block_time_utc": "2022-07-22T17:33:34Z",
@@ -103,7 +103,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (7.9%)",
+        "display": "Head: StripedBeanie (7.8%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

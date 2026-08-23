@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#326/687",
+      "display": "#326/688",
       "rank": 326,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 #326/687 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 200 dog #200 200 mission 1 mission 1 polygon ended pending settlement weth 0xfff49e7c61c0077a6018fd8250b21b9e544dd2e64896be3bca1f6fe9b711ac53 background: none; body: dalmation; neck: goldnecklace; mouth: none; ears: goldearring; head: headphones; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #326/688 background: none (91.7%) body: dalmation (9.2%) neck: goldnecklace (19.2%) mouth: none (68.3%) ears: goldearring (14.4%) head: headphones (6.8%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -76,7 +76,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.0%)",
+        "display": "Body: Dalmation (9.2%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },

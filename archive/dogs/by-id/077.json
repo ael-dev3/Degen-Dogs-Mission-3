@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#160/687",
-      "rank": 160,
+      "display": "#165/688",
+      "rank": 165,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 77 dog #77 77 mission 1 mission 1 polygon no auction dogmaster reward weth #160/687 background: none; body: dalmation; neck: none; mouth: tongue; ears: earbuds; head: beanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 77 dog #77 77 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: dalmation; neck: none; mouth: tongue; ears: earbuds; head: beanie; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #165/688 background: none (91.7%) body: dalmation (9.2%) neck: none (41.3%) mouth: tongue (10.0%) ears: earbuds (32.3%) head: beanie (5.4%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -76,12 +76,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.0%)",
+        "display": "Body: Dalmation (9.2%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: MaskSnorkel (10.0%)",
+        "display": "Eyes: MaskSnorkel (10.2%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

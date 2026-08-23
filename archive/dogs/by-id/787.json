@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#385/687",
-      "rank": 385,
+      "display": "#384/688",
+      "rank": 384,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 787 dog #787 787 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.00991 eth 9910000000000000 18.91 $18.91 2026-07-30t07:13:57z 0xd717fe3449c4fd9aa9d14accc23cf031ffb4fa3bc0a13f2222c177949489832b 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 #385/687 generated auction feed 0x0a92391612b12f2c88fb1250bcdaeb8e0799199939c5b0cba397bb892bc03f7f 0xf1207bc75ba18840489c27f6ac519420475a4d782cb51ff3cfbd61f2dd2d6f8b 0xa336bff16db808a28eaa40564987cb3abaa0d1a0c0798e90ddb5eca295918f16 background: none (91.7%) background none body: redbrown (15.4%) body redbrown neck: redcollar (29.4%) neck redcollar mouth: none (68.3%) mouth none ears: none (25.9%) ears none head: partyhat (4.2%) head partyhat eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 787 dog #787 787 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.00991 eth 9910000000000000 18.91 $18.91 2026-07-30t07:13:57z 0xd717fe3449c4fd9aa9d14accc23cf031ffb4fa3bc0a13f2222c177949489832b 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 generated auction feed 0x0a92391612b12f2c88fb1250bcdaeb8e0799199939c5b0cba397bb892bc03f7f 0xf1207bc75ba18840489c27f6ac519420475a4d782cb51ff3cfbd61f2dd2d6f8b 0xa336bff16db808a28eaa40564987cb3abaa0d1a0c0798e90ddb5eca295918f16 background none body redbrown neck redcollar mouth none ears none head partyhat eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #384/688 background: none (91.7%) body: redbrown (15.4%) neck: redcollar (29.4%) mouth: none (68.3%) ears: none (26.0%) head: partyhat (4.2%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 49303145,
       "block_time_utc": "2026-07-30T07:13:57Z",
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -112,7 +112,7 @@
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

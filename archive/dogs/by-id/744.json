@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#555/687",
-      "rank": 555,
+      "display": "#553/688",
+      "rank": 553,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 744 dog #744 744 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.0258 eth 25800000000000000 46.32 $46.32 2026-06-15t23:27:09z 0x369575f08715525c9abe7377c6ba6f6e43efe25556e593e1c437bc4e35108a4f 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 #555/687 generated auction feed 0x2a3c196ce324cf6e8c3bb743efb9acd4607dabae5a2fb26c8687d88968f0c9a8 0x8d94092230716648f9633b4e84be9acfec8496d69bbbb83053f127da88e21788 background: none (91.7%) background none body: grey (13.0%) body grey neck: none (41.2%) neck none mouth: none (68.3%) mouth none ears: earbuds (32.3%) ears earbuds head: toque (7.1%) head toque eyes: vrgoggles (10.8%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 744 dog #744 744 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.0258 eth 25800000000000000 46.32 $46.32 2026-06-15t23:27:09z 0x369575f08715525c9abe7377c6ba6f6e43efe25556e593e1c437bc4e35108a4f 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 generated auction feed 0x2a3c196ce324cf6e8c3bb743efb9acd4607dabae5a2fb26c8687d88968f0c9a8 0x8d94092230716648f9633b4e84be9acfec8496d69bbbb83053f127da88e21788 background none body grey neck none mouth none ears earbuds head toque eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners #553/688 background: none (91.7%) body: grey (12.9%) neck: none (41.3%) mouth: none (68.3%) ears: earbuds (32.3%) head: toque (7.1%) eyes: vrgoggles (10.8%)",
     "settlement": {
       "block_number": 47388341,
       "block_time_utc": "2026-06-15T23:27:09Z",
@@ -86,12 +86,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (13.0%)",
+        "display": "Body: Grey (12.9%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },

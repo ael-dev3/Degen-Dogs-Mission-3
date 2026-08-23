@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#271/687",
-      "rank": 271,
+      "display": "#270/688",
+      "rank": 270,
       "scope": "base_existing",
-      "total": 687
+      "total": 688
     },
     "schema_version": 1,
-    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.73 $44.73 2026-06-11t21:16:27z 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 0x76e2dcf7e8e958ec13d559b6c2dd74e49fc7e12a94b0ac2cf5d91c6a2c40c0e6 #271/687 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background: none (91.7%) background none body: grey (13.0%) body grey neck: none (41.2%) neck none mouth: tongue (10.0%) mouth tongue ears: earbuds (32.3%) ears earbuds head: hoodie (4.8%) head hoodie eyes: none (17.8%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 740 dog #740 740 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.0276 eth 27600000000000000 44.73 $44.73 2026-06-11t21:16:27z 0xb3fb7233efcbcce6930ac3f71193b168172c2a1c4aaf3bf9024004da3d248aa4 0x76e2dcf7e8e958ec13d559b6c2dd74e49fc7e12a94b0ac2cf5d91c6a2c40c0e6 generated auction feed 0x5920e2ae38505a47c9ae746fd948a12da28c84bccf0fab1f0ff874dc15d612e0 background none body grey neck none mouth tongue ears earbuds head hoodie eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #270/688 background: none (91.7%) body: grey (12.9%) neck: none (41.3%) mouth: tongue (10.0%) ears: earbuds (32.3%) head: hoodie (4.8%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 47211620,
       "block_time_utc": "2026-06-11T21:16:27Z",
@@ -85,12 +85,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (13.0%)",
+        "display": "Body: Grey (12.9%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: None (17.8%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }
