@@ -689,6 +689,19 @@
     "latest_bid_utc": "2026-06-24 23:44:11"
   },
   {
+    "bidder": "@kzl27.eth",
+    "bidder_url": "https://farcaster.xyz/kzl27.eth",
+    "bidder_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "bids": 12,
+    "auctions_bid": 7,
+    "bid_eth": 0.08135,
+    "high_bid_eth": 0.0202,
+    "auction_wins": 3,
+    "winning_eth": 0.02632,
+    "latest_bid_token_id": 812,
+    "latest_bid_utc": "2026-08-23 21:33:09"
+  },
+  {
     "bidder": "0xe048…8846",
     "bidder_url": "https://basescan.org/address/0xe04885c3f1419c6e8495c33bdcf5f8387cd88846",
     "bidder_wallet": "0xe04885c3f1419c6e8495c33bdcf5f8387cd88846",
@@ -700,19 +713,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 701,
     "latest_bid_utc": "2026-05-01 21:59:47"
-  },
-  {
-    "bidder": "@kzl27.eth",
-    "bidder_url": "https://farcaster.xyz/kzl27.eth",
-    "bidder_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "bids": 11,
-    "auctions_bid": 7,
-    "bid_eth": 0.07474,
-    "high_bid_eth": 0.0202,
-    "auction_wins": 3,
-    "winning_eth": 0.02632,
-    "latest_bid_token_id": 812,
-    "latest_bid_utc": "2026-08-23 20:37:25"
   },
   {
     "bidder": "@biang-kerok.eth",
