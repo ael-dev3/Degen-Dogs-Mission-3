@@ -22745,13 +22745,13 @@
     "dog_external_url": "https://degendogs.club/#dog812",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/812",
     "status": "live",
-    "winner": "@kzl27.eth",
-    "winner_url": "https://farcaster.xyz/kzl27.eth",
-    "winner_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "amount": "0.00100 ETH ($2)",
-    "amount_raw": "1000000000000000",
-    "bid_count": 1,
-    "unique_bidder_count": 1,
+    "winner": "@0xael.eth",
+    "winner_url": "https://farcaster.xyz/0xael.eth",
+    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "amount": "0.00600 ETH ($15)",
+    "amount_raw": "6000000000000000",
+    "bid_count": 2,
+    "unique_bidder_count": 2,
     "auction_created_time_utc": "2026-08-23 20:35:51",
     "settled_time_utc": "",
     "rarity": "#637/688",
@@ -22761,6 +22761,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 812 Dog #812 https://api.degendogs.club/images/812.png https://degendogs.club/#dog812 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/812 live @kzl27.eth https://farcaster.xyz/kzl27.eth 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 0.00100 ETH ($2) 1000000000000000 1 1 2026-08-23 20:35:51 #637/688 34.554987 Background: None; Body: Dalmation; Neck: None; Mouth: None; Ears: None; Head: None; Eyes: MaskSnorkel Background: None (91.7%); Body: Dalmation (9.2%); Neck: None (41.3%); Mouth: None (68.3%); Ears: None (26.0%); Head: None (20.1%); Eyes: MaskSnorkel (10.2%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 812 Dog #812 https://api.degendogs.club/images/812.png https://degendogs.club/#dog812 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/812 live @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00600 ETH ($15) 6000000000000000 2 2 2026-08-23 20:35:51 #637/688 34.554987 Background: None; Body: Dalmation; Neck: None; Mouth: None; Ears: None; Head: None; Eyes: MaskSnorkel Background: None (91.7%); Body: Dalmation (9.2%); Neck: None (41.3%); Mouth: None (68.3%); Ears: None (26.0%); Head: None (20.1%); Eyes: MaskSnorkel (10.2%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
