@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#358/688",
-      "rank": 358,
+      "display": "#359/689",
+      "rank": 359,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 464 dog #464 464 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0xfce674213afa3689f604a5173a60cba588f7e1045f97c425d3e7c3c9a8794c37 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b #358/688 background: none; body: white; neck: studdedcollar; mouth: none; ears: earbuds; head: toque; eyes: glasses 0xbe4b3d32713cfc376b78499e7224b8d9db8c8303134a66be02eedc8b941e4218 0xa321338add60a2c75c4895382759f8a340c8a51cb56c86ee404f28a7c0477249 chain_logs contract_getters",
+    "search_text": "dog 464 dog #464 464 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 5555 degen 0xfce674213afa3689f604a5173a60cba588f7e1045f97c425d3e7c3c9a8794c37 0x933202411378b5c397471131ebe0ef49d5b85db92606efaf3a2508d161bd0a5b background: none; body: white; neck: studdedcollar; mouth: none; ears: earbuds; head: toque; eyes: glasses 0xbe4b3d32713cfc376b78499e7224b8d9db8c8303134a66be02eedc8b941e4218 0xa321338add60a2c75c4895382759f8a340c8a51cb56c86ee404f28a7c0477249 chain_logs contract_getters #359/689 background: none (91.7%) body: white (11.2%) neck: studdedcollar (10.2%) mouth: none (68.4%) ears: earbuds (32.4%) head: toque (7.1%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 26195765,
       "block_time_utc": "2025-08-20T13:19:36Z",
@@ -94,12 +94,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.3%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

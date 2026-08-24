@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#656/688",
-      "rank": 656,
+      "display": "#657/689",
+      "rank": 657,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 175 dog #175 175 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x888ec515b3f1d21c773e450ce8a07f031afed1e35f2067d1612ee2e13ea06a19 0xabf87917b607f776213b08f2136ca01de68f23f5a9ab1236d1a86ef9603fa32c #656/688 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: none; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 175 dog #175 175 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x888ec515b3f1d21c773e450ce8a07f031afed1e35f2067d1612ee2e13ea06a19 0xabf87917b607f776213b08f2136ca01de68f23f5a9ab1236d1a86ef9603fa32c background: none; body: dalmation; neck: none; mouth: none; ears: none; head: none; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #657/689 background: none (91.7%) body: dalmation (9.1%) neck: none (41.2%) mouth: none (68.4%) ears: none (26.0%) head: none (20.0%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": 35229842,
       "block_time_utc": "2022-11-05T11:43:28Z",
@@ -83,17 +83,17 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.2%)",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.0%)",
         "trait_type": "Head",
         "value": "None"
       },

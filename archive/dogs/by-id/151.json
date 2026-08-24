@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#599/688",
-      "rank": 599,
+      "display": "#600/689",
+      "rank": 600,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 151 dog #151 151 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c #599/688 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: none; head: blackcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 151 dog #151 151 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x5bbd4f40ed634853a4c1c0399cc556e4834cc307da161ad450bc5f1b59817872 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: none; head: blackcap; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #600/689 background: none (91.7%) body: redbrown (15.4%) neck: goldnecklace (19.2%) mouth: none (68.4%) ears: none (26.0%) head: blackcap (7.5%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 31407196,
       "block_time_utc": "2022-08-01T20:46:27Z",
@@ -93,7 +93,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Head: BlackCap (7.6%)",
+        "display": "Head: BlackCap (7.5%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },

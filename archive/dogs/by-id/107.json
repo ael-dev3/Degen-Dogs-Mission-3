@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#274/688",
-      "rank": 274,
+      "display": "#275/689",
+      "rank": 275,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d #274/688 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #275/689 background: none (91.7%) body: dalmation (9.1%) neck: studdedcollar (10.2%) mouth: none (68.4%) ears: goldearring (14.4%) head: headphones (6.8%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 28503384,
       "block_time_utc": "2022-05-19T09:42:57Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.2%)",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
@@ -93,7 +93,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },

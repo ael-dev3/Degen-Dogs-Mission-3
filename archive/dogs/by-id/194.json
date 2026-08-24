@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#179/688",
-      "rank": 179,
+      "display": "#194/689",
+      "rank": 194,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 194 dog #194 194 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x9addcf10e22ac8a8571722a29f1bb990bcb3087a6283519de3f3b53b944a8aa2 0xddf8170dd42dbdaad4374096cfaebe5025b6a38b36063355c01fa40d4d9910b0 #179/688 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: whitemohawk; eyes: redlasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 194 dog #194 194 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x9addcf10e22ac8a8571722a29f1bb990bcb3087a6283519de3f3b53b944a8aa2 0xddf8170dd42dbdaad4374096cfaebe5025b6a38b36063355c01fa40d4d9910b0 background: none; body: dalmation; neck: none; mouth: none; ears: none; head: whitemohawk; eyes: redlasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #194/689 background: none (91.7%) body: dalmation (9.1%) neck: none (41.2%) mouth: none (68.4%) ears: none (26.0%) head: whitemohawk (7.0%) eyes: redlasereyes (4.9%)",
     "settlement": {
       "block_number": 45832344,
       "block_time_utc": "2023-08-02T20:28:08Z",
@@ -83,17 +83,17 @@
         "value": "None"
       },
       {
-        "display": "Body: Dalmation (9.2%)",
+        "display": "Body: Dalmation (9.1%)",
         "trait_type": "Body",
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.3%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: RedLaserEyes (4.8%)",
+        "display": "Eyes: RedLaserEyes (4.9%)",
         "trait_type": "Eyes",
         "value": "RedLaserEyes"
       }

@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#75/688",
-      "rank": 75,
+      "display": "#77/689",
+      "rank": 77,
       "scope": "base_existing",
-      "total": 688
+      "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 488 dog #488 488 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 0x4caca32396eae01bf16fbc82dc7be0ed05767fffb8d62dcc0cc43e5cee48c55c #75/688 background: none; body: blue; neck: none; mouth: teeth; ears: none; head: unicorn; eyes: sunglasses 0x24bdfd4814815623c7dc9c8eaef4a7d76c00c63439a428dafcf83789fc9f269b chain_logs contract_getters",
+    "search_text": "dog 488 dog #488 488 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 2222 degen 0xe65b38f57e7338df3e329bdb77095cc549f3adebe59da0ec4c680d7f57e785b2 0x4caca32396eae01bf16fbc82dc7be0ed05767fffb8d62dcc0cc43e5cee48c55c background: none; body: blue; neck: none; mouth: teeth; ears: none; head: unicorn; eyes: sunglasses 0x24bdfd4814815623c7dc9c8eaef4a7d76c00c63439a428dafcf83789fc9f269b chain_logs contract_getters #77/689 background: none (91.7%) body: blue (8.9%) neck: none (41.2%) mouth: teeth (5.4%) ears: none (26.0%) head: unicorn (4.6%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": 26257264,
       "block_time_utc": "2025-09-15T15:51:08Z",
@@ -83,12 +83,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (8.7%)",
+        "display": "Body: Blue (8.9%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.2%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,7 +103,7 @@
         "value": "None"
       },
       {
-        "display": "Head: Unicorn (4.7%)",
+        "display": "Head: Unicorn (4.6%)",
         "trait_type": "Head",
         "value": "Unicorn"
       },
