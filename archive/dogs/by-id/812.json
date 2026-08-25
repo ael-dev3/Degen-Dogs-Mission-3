@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 3,
-      "last_bid_time_utc": "2026-08-23 21:33:09",
+      "last_bid_time_utc": "2026-08-23T21:33:09Z",
       "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
@@ -60,7 +60,7 @@
       "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 812 dog #812 mission 3 base settled @kzl27.eth 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 0.00661000 eth $16.28 2026-08-24t20:58:23z #638/689 background: none (91.7%) body: dalmation (9.1%) neck: none (41.2%) mouth: none (68.4%) ears: none (26.0%) head: none (20.0%) eyes: masksnorkel (10.2%) 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62",
+    "search_text": "dog 812 dog #812 812 mission 3 mission 3 base settled 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00661 eth 6610000000000000 16.28 $16.28 2026-08-24t20:58:23z 0x098de1109dff400406abe4a7571b87bd66a36e78c8b4f0e3b2930924d7ffc360 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #638/689 generated auction feed 0x2f452d08676c61ccf4aec42711743831ab7ddff73a6f4c88027883f5725729e9 0x169a8d864b2275bf36a18990dc01038fd806c08d95079103d46a6ef0ddb79d4b 0x01e94a7c25c864b702e48d055c4f36496fcb1384f231548965c4825c3d3df3b5 background: none (91.7%) background none body: dalmation (9.1%) body dalmation neck: none (41.2%) neck none mouth: none (68.4%) mouth none ears: none (26.0%) ears none head: none (20.0%) head none eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 50407878,
       "block_time_utc": "2026-08-24T20:58:23Z",
@@ -70,15 +70,14 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
