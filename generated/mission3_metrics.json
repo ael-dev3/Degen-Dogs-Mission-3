@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50443968"
+    "value": "50445818"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-25 17:01:23"
+    "value": "2026-08-25 18:03:03"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x7e0065ed9aa0ff3207863354df491ce8d7f92f2132e9a44fa681450e6a0bdace"
+    "value": "0x796e93401578a3bcdfcf1c7d79a4725746aaa18d654da6a2a2a9391bbeb58b4e"
   },
   {
     "metric": "snapshot_confirmations",
@@ -41,15 +41,15 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "5/5"
+    "value": "4/4"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "alchemy,base.org,publicnode.com,rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb"
+    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb"
   },
   {
     "metric": "log_rpc_quorum_providers",
-    "value": "base.org,rpc-host-6dea8b229ba1,rpc-host-a0d298ecc6bb"
+    "value": "base.org,rpc-host-a0d298ecc6bb"
   },
   {
     "metric": "auction_house_code_sha256",
@@ -169,11 +169,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50443968"
+    "value": "50445818"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x7e0065ed9aa0ff3207863354df491ce8d7f92f2132e9a44fa681450e6a0bdace"
+    "value": "0x796e93401578a3bcdfcf1c7d79a4725746aaa18d654da6a2a2a9391bbeb58b4e"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2469.555"
+    "value": "2472.5"
   },
   {
     "metric": "eth_usd_source",
@@ -349,15 +349,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "176.37"
+    "value": "176.58"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.567"
+    "value": "0.5663"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "206.95"
+    "value": "206.71"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -393,7 +393,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "17.29"
+    "value": "17.31"
   },
   {
     "metric": "current_bidder",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "6.29"
+    "value": "6.25"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "231707.003495"
+    "value": "231825.282647"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
