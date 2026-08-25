@@ -1,13 +1,13 @@
 {
   "counts": {
     "auctions_created": "224",
-    "bids": "1624",
+    "bids": "1626",
     "current_snapshots": "1",
     "extensions": "345",
-    "latest_indexed_block": "50424340",
-    "latest_indexed_block_time_utc": "2026-08-25T06:07:07Z",
-    "latest_run_at_utc": "2026-08-25T06:07:10Z",
-    "raw_logs": "2416",
+    "latest_indexed_block": "50425538",
+    "latest_indexed_block_time_utc": "2026-08-25T06:47:03Z",
+    "latest_run_at_utc": "2026-08-25T06:47:06Z",
+    "raw_logs": "2418",
     "settlements": "223",
     "status": "success",
     "unresolved_gaps": "0"
@@ -31,15 +31,15 @@
     {
       "name": "mission3_auction_bids",
       "path": "archive/mission3/data/generated/mission3_auction_bids.csv",
-      "rows": 1624,
-      "sha256": "5d7fda97522d4161674f2dccc874e5223de8cdba6a2808571e85126891c1638f",
+      "rows": 1626,
+      "sha256": "3a7ef30640b8bece39b10e2dea83641685390b193a48be28c1f9bb17552654e5",
       "type": "csv"
     },
     {
       "name": "mission3_auction_bids",
       "path": "archive/mission3/data/generated/mission3_auction_bids.json",
-      "rows": 1624,
-      "sha256": "f1acb00e676153a91b8b26cc78e19d4057a86ed3e8a8cd00ca7234bd2b279724",
+      "rows": 1626,
+      "sha256": "7624a99306819b462cf36aa0eadb854054583f598daa00d5e90c87c60695ee34",
       "type": "json"
     },
     {
@@ -87,88 +87,88 @@
     {
       "name": "mission3_recent_bids",
       "path": "archive/mission3/data/generated/mission3_recent_bids.csv",
-      "rows": 1624,
-      "sha256": "550b51adffc7e2a678455e644bfc68fb2e330c1ab17d71a1772e39eb70ca6987",
+      "rows": 1626,
+      "sha256": "8b29f90de96ae8b7104ff951294fec56e097cce3ef0c9ade1037104f18a97816",
       "type": "csv"
     },
     {
       "name": "mission3_recent_bids",
       "path": "archive/mission3/data/generated/mission3_recent_bids.json",
-      "rows": 1624,
-      "sha256": "21e48d1576f024e1ad0537d3fcff544507bd8ecb5de18889057a96b8a4a9719a",
+      "rows": 1626,
+      "sha256": "7e3fd067447484656f280b9ef09f92c3610007082fb82cc589b7eded88bdbf4a",
       "type": "json"
     },
     {
       "name": "mission3_bidder_leaderboard",
       "path": "archive/mission3/data/generated/mission3_bidder_leaderboard.csv",
       "rows": 149,
-      "sha256": "d9001525c4ceb5a82954a5672569c8a460663718cbe79245e3019d763b028b79",
+      "sha256": "bc2062a4d40a51b65f3478e004c559f9b265cf8a1bd5a190cc7063cffd8b918b",
       "type": "csv"
     },
     {
       "name": "mission3_bidder_leaderboard",
       "path": "archive/mission3/data/generated/mission3_bidder_leaderboard.json",
       "rows": 149,
-      "sha256": "b8be5f448019d87b0f0476599169dbd4714abe11941d8839eb887670cad986cc",
+      "sha256": "17d714b69947ba76973624545ad3228123b920353f78f93c4a0e10dfee4dbb05",
       "type": "json"
     },
     {
       "name": "mission3_auction_timeline",
       "path": "archive/mission3/data/generated/mission3_auction_timeline.csv",
       "rows": 224,
-      "sha256": "268ddb8119beda58f45d11fd14cfa12859af45aee1d894e0e2213b3918f86209",
+      "sha256": "e9263ae0cae5c05fd73d237e18988ca80d48e919435bb9a0be7e6d42d452f0e3",
       "type": "csv"
     },
     {
       "name": "mission3_auction_timeline",
       "path": "archive/mission3/data/generated/mission3_auction_timeline.json",
       "rows": 224,
-      "sha256": "822a737d3ce31f32f971d2f0e32e4127f92ccedfd8bab0f5a30d584848535e11",
+      "sha256": "60f973dc50504a1d895f060bfd8b7d7554f21830dd174abb94afad9d7f80e732",
       "type": "json"
     },
     {
       "name": "mission3_daily_activity",
       "path": "archive/mission3/data/generated/mission3_daily_activity.csv",
       "rows": 229,
-      "sha256": "9e653fd15dde10bf5c18bcaa2e8a71db2af593cdf2811262ebdc6eea94d4d2bb",
+      "sha256": "1fc70872b60acc830f7b517c5514dd27ef01b9f66821cddefab72219b4b4f58b",
       "type": "csv"
     },
     {
       "name": "mission3_daily_activity",
       "path": "archive/mission3/data/generated/mission3_daily_activity.json",
       "rows": 229,
-      "sha256": "54d5f313d2b35d523508d97d10903c9e8610be1a9dd9ef9297d35781f3996d83",
+      "sha256": "afb028b4cd06086fe1602d05d98d96731223a6a59b44f077f9f91802eeee72ce",
       "type": "json"
     },
     {
       "name": "mission3_dog_search_index",
       "path": "archive/mission3/data/generated/mission3_dog_search_index.json",
       "rows": 224,
-      "sha256": "755c64b873214920758a414df58025cf57f8a8498dea97c8a155608f3a9fc65d",
+      "sha256": "2f555d603ca9342fe3b4f4c0033ad3ec205245bbc3005f2752aed6cd72c9bfa3",
       "type": "json"
     },
     {
       "name": "mission3_archive_metrics",
       "path": "archive/mission3/data/generated/mission3_archive_metrics.json",
       "rows": 12,
-      "sha256": "0dadde5dfd1ba3114c2159040718613518ac5a47d95cf46b795eec88829862b9",
+      "sha256": "53a52db0ecbd5625ae32c4b73ce93fc90a8cd6ed8f5673b2b5d2d962f2469443",
       "type": "json"
     }
   ],
-  "generated_at_utc": "2026-08-25T06:07:11Z",
+  "generated_at_utc": "2026-08-25T06:47:06Z",
   "index_state": {
     "auction_house": "0x8f34fe11ce28893dea6a802c8d0b3d0ffc7f5cea",
     "chain_id": 8453,
     "error": null,
     "from_block": 40500000,
     "id": "mission3",
-    "latest_indexed_block": 50424340,
-    "latest_indexed_block_time_utc": "2026-08-25T06:07:07Z",
-    "latest_run_at_utc": "2026-08-25T06:07:10Z",
+    "latest_indexed_block": 50425538,
+    "latest_indexed_block_time_utc": "2026-08-25T06:47:03Z",
+    "latest_run_at_utc": "2026-08-25T06:47:06Z",
     "status": "success"
   },
   "mission": 3,
   "raw_logs_ndjson": "archive/mission3/data/raw/mission3_raw_logs.ndjson",
-  "raw_logs_sha256": "6571317df3c7d06ce03747bde3336000fc97775b1e75aa65f701970972eeccf3",
+  "raw_logs_sha256": "1df4559bc4313f0c87481544bb318bb64823ce8fbdb78fd4484963afeba0164a",
   "schema_version": 1
 }
