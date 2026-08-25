@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "550000000000000",
-      "usd_estimate": "1.38451775",
+      "usd_estimate": "1.37495325",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.38",
+      "usd_estimate_display": "$1.37",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-25",
-      "usd_estimate_price_usd": "2517.305",
+      "usd_estimate_price_usd": "2499.915",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 813 dog #813 813 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0xbdd8…bb72 0.00055 eth 550000000000000 1.38000000 $1.38 2026-08-25t00:33:59z 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #171/689 generated auction feed 0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1 0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded background: none (91.7%) background none body: blue (8.9%) body blue neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: earbuds (32.4%) ears earbuds head: crazyhair (6.7%) head crazyhair eyes: redlasereyes (4.9%) eyes redlasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 813 dog #813 813 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0xbdd8…bb72 0.00055 eth 550000000000000 1.37000000 $1.37 2026-08-25t00:33:59z 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #171/689 generated auction feed 0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1 0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded background: none (91.7%) background none body: blue (8.9%) body blue neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: earbuds (32.4%) ears earbuds head: crazyhair (6.7%) head crazyhair eyes: redlasereyes (4.9%) eyes redlasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
