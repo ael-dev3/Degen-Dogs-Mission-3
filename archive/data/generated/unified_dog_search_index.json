@@ -1,21 +1,21 @@
 [
   {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-25T06:40:35Z",
+    "activity_time_utc": "2026-08-25T09:39:45Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-08-25",
-      "native": "0.00075",
+      "native": "0.007",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "750000000000000",
-      "usd_estimate": "1.86322875",
+      "raw": "7000000000000000",
+      "usd_estimate": "17.37421000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.86",
+      "usd_estimate_display": "$17.37",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-25",
-      "usd_estimate_price_usd": "2484.305",
+      "usd_estimate_price_usd": "2482.03",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -28,16 +28,17 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 5,
-      "last_bid_time_utc": "2026-08-25T06:40:35Z",
-      "unique_bidder_count": 4
+      "bid_count": 6,
+      "last_bid_time_utc": "2026-08-25T09:39:45Z",
+      "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
       "0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1",
       "0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded",
       "0x71c6a0bb8a68c2809791e66bd0f9d2ac6216aa66c9cb9e99d8204274aa7ab41d",
       "0x33fa3048a8625507c1ed0f91081b546bba384237ca722f1bfeb87ef8c5b46287",
-      "0x05f042331c2c06353cfeaef386e4ffcc3108c6f0dd6d077c7b8294d82e770ce3"
+      "0x05f042331c2c06353cfeaef386e4ffcc3108c6f0dd6d077c7b8294d82e770ce3",
+      "0x38f8f12b69ce49fef695ece8b4ef8dc1ee65030bd85fbd34fcbb72d783c610c6"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -48,7 +49,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62",
       "dog_page": "https://degendogs.club/#dog813",
-      "explorer": "https://basescan.org/address/0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/813",
       "repo_archive": "archive/dogs/by-id/813.json",
       "settlement_tx": null
@@ -61,7 +62,7 @@
       "total": 689
     },
     "schema_version": 1,
-    "search_text": "dog 813 dog #813 813 mission 3 mission 3 base ongoing 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00075 eth 750000000000000 1.86000000 $1.86 2026-08-25t06:40:35z 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #171/689 generated auction feed 0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1 0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded 0x71c6a0bb8a68c2809791e66bd0f9d2ac6216aa66c9cb9e99d8204274aa7ab41d 0x33fa3048a8625507c1ed0f91081b546bba384237ca722f1bfeb87ef8c5b46287 0x05f042331c2c06353cfeaef386e4ffcc3108c6f0dd6d077c7b8294d82e770ce3 background: none (91.7%) background none body: blue (8.9%) body blue neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: earbuds (32.4%) ears earbuds head: crazyhair (6.7%) head crazyhair eyes: redlasereyes (4.9%) eyes redlasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 813 dog #813 813 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 17.37000000 $17.37 2026-08-25t09:39:45z 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #171/689 generated auction feed 0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1 0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded 0x71c6a0bb8a68c2809791e66bd0f9d2ac6216aa66c9cb9e99d8204274aa7ab41d 0x33fa3048a8625507c1ed0f91081b546bba384237ca722f1bfeb87ef8c5b46287 0x05f042331c2c06353cfeaef386e4ffcc3108c6f0dd6d077c7b8294d82e770ce3 0x38f8f12b69ce49fef695ece8b4ef8dc1ee65030bd85fbd34fcbb72d783c610c6 background: none (91.7%) background none body: blue (8.9%) body blue neck: redcollar (29.5%) neck redcollar mouth: none (68.4%) mouth none ears: earbuds (32.4%) ears earbuds head: crazyhair (6.7%) head crazyhair eyes: redlasereyes (4.9%) eyes redlasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -119,12 +120,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@kzl27.eth",
+      "display": "@0xael.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "kzl27.eth",
-      "profile_url": "https://farcaster.xyz/kzl27.eth",
-      "wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-      "wallet_explorer_url": "https://basescan.org/address/0x13dbc7d5ace21d1eeb5f884666e284138fbff620"
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
   },
   {
