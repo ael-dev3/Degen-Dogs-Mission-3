@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#231/689",
-      "rank": 231,
+      "display": "#234/690",
+      "rank": 234,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 136 dog #136 136 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x858de7f074c9be08b3c090d89a806557b7e847d280ec0de43810af9fb0a45e48 0xf22dc42da8007e7a40f112a0f91ba41b79bd4f5d3803e9060d1fcac6ca1c1295 #231/689 background: none; body: blue; neck: none; mouth: tongue; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 136 dog #136 136 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x858de7f074c9be08b3c090d89a806557b7e847d280ec0de43810af9fb0a45e48 0xf22dc42da8007e7a40f112a0f91ba41b79bd4f5d3803e9060d1fcac6ca1c1295 background: none; body: blue; neck: none; mouth: tongue; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #234/690 background: none (91.7%) body: blue (9.0%) neck: none (41.3%) mouth: tongue (10.0%) ears: loopearring (27.2%) head: beanie (5.4%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 29746541,
       "block_time_utc": "2022-06-19T08:11:46Z",
@@ -83,12 +83,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Blue (8.9%)",
+        "display": "Body: Blue (9.0%)",
         "trait_type": "Body",
         "value": "Blue"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

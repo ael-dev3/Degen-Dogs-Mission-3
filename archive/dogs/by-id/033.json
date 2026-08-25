@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#181/689",
-      "rank": 181,
+      "display": "#180/690",
+      "rank": 180,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 33 dog #33 33 mission 1 mission 1 polygon no auction dogmaster reward weth #181/689 background: none; body: black; neck: goldnecklace; mouth: tongue; ears: earbuds; head: toque; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 33 dog #33 33 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: black; neck: goldnecklace; mouth: tongue; ears: earbuds; head: toque; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #180/690 background: none (91.7%) body: black (11.6%) neck: goldnecklace (19.1%) mouth: tongue (10.0%) ears: earbuds (32.5%) head: toque (7.1%) eyes: eyepatch (7.8%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,7 +81,7 @@
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.1%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -91,7 +91,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

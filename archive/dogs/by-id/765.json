@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#277/689",
+      "display": "#277/690",
       "rank": 277,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.97 $17.97 2026-07-07t02:32:27z 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f #277/689 generated auction feed 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 background: none (91.7%) background none body: orange (8.3%) body orange neck: none (41.2%) neck none mouth: none (68.4%) mouth none ears: loopearring (27.3%) ears loopearring head: unicorn (4.6%) head unicorn eyes: glasses (12.5%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 765 dog #765 765 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.97 $17.97 2026-07-07t02:32:27z 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b 0x831477171c3078bbd26fa363ccdf7e94ef7f054876e9e51457f2fd2e1437511f generated auction feed 0x4a247d366a55d4f4e3305b56cab41569b44665c48d383566928a3deca18adc4c 0x5193adc818ba476dbc63b0dc2947ff5888cb2a9dd4b152a8692f0265a49e66ff 0x881c81f4612383b6a66c5c8120263a729571dbb70a24cecb12fc56c699f2d108 background none body orange neck none mouth none ears loopearring head unicorn eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #277/690 background: none (91.7%) body: orange (8.3%) neck: none (41.3%) mouth: none (68.4%) ears: loopearring (27.2%) head: unicorn (4.6%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 48301100,
       "block_time_utc": "2026-07-07T02:32:27Z",
@@ -92,7 +92,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

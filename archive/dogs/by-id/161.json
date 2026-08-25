@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#470/689",
-      "rank": 470,
+      "display": "#468/690",
+      "rank": 468,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 161 dog #161 161 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x8cd76353d00c490febad1a571f829f1df6702d36cf055a4fdae7ab12323e7f46 0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6 #470/689 background: none; body: dalmation; neck: none; mouth: pizza; ears: none; head: none; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 161 dog #161 161 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x8cd76353d00c490febad1a571f829f1df6702d36cf055a4fdae7ab12323e7f46 0xa5b47da50da52a43d8ca136dcee542c1cc752316e2634b9ca7f6ed360516baf6 background: none; body: dalmation; neck: none; mouth: pizza; ears: none; head: none; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #468/690 background: none (91.7%) body: dalmation (9.1%) neck: none (41.3%) mouth: pizza (11.0%) ears: none (25.9%) head: none (20.0%) eyes: masksnorkel (10.1%)",
     "settlement": {
       "block_number": 32268023,
       "block_time_utc": "2022-08-24T12:57:20Z",
@@ -88,7 +88,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: MaskSnorkel (10.2%)",
+        "display": "Eyes: MaskSnorkel (10.1%)",
         "trait_type": "Eyes",
         "value": "MaskSnorkel"
       }

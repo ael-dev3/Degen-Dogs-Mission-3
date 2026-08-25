@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#483/689",
-      "rank": 483,
+      "display": "#482/690",
+      "rank": 482,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 157 dog #157 157 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xa275222d6cbf13948754add1dd553b86fcb142d01ff6c6e84c6a36b8e9aef9f4 0x6a953c20e3b40bab8467c62c17d97bb84ba59332e367511417f90df68d0c52c0 #483/689 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: toque; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 157 dog #157 157 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xa275222d6cbf13948754add1dd553b86fcb142d01ff6c6e84c6a36b8e9aef9f4 0x6a953c20e3b40bab8467c62c17d97bb84ba59332e367511417f90df68d0c52c0 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: earbuds; head: toque; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #482/690 background: none (91.7%) body: redbrown (15.4%) neck: studdedcollar (10.1%) mouth: none (68.4%) ears: earbuds (32.5%) head: toque (7.1%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 31766635,
       "block_time_utc": "2022-08-11T11:25:17Z",
@@ -88,7 +88,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: StuddedCollar (10.2%)",
+        "display": "Neck: StuddedCollar (10.1%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

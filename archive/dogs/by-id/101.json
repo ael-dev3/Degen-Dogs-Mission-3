@@ -52,13 +52,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#660/689",
+      "display": "#660/690",
       "rank": 660,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 101 dog #101 101 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.05 weth 0xb27f0566c6d1eafaf080aef9d59e0615be45841ef6db2a1950a5289c4530fe18 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a #660/689 background: none; body: white; neck: none; mouth: none; ears: none; head: none; eyes: vrgoggles 0x0f739cc9656e8b0558940b8f7d9614f5dd2e87d8ba8657a269a2879b0e5aab2e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 101 dog #101 101 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.05 weth 0xb27f0566c6d1eafaf080aef9d59e0615be45841ef6db2a1950a5289c4530fe18 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a background: none; body: white; neck: none; mouth: none; ears: none; head: none; eyes: vrgoggles 0x0f739cc9656e8b0558940b8f7d9614f5dd2e87d8ba8657a269a2879b0e5aab2e polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #660/690 background: none (91.7%) body: white (11.2%) neck: none (41.3%) mouth: none (68.4%) ears: none (25.9%) head: none (20.0%) eyes: vrgoggles (10.7%)",
     "settlement": {
       "block_number": 28236055,
       "block_time_utc": "2022-05-12T17:16:02Z",
@@ -90,7 +90,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },

@@ -61,13 +61,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#63/689",
-      "rank": 63,
+      "display": "#62/690",
+      "rank": 62,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base settled 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.01111 eth 11110000000000000 19.0 $19.00 2026-06-20t23:46:57z 0x443718ae7bd0fb61d8c769e23c51bcb7c210b1314dbdeafbfb42d18acc5452e1 0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86 #63/689 generated auction feed 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5 0x892e088aef37daa3feda387277b1da63e640c6ae3a59a72df3e285ba80439b70 0xbff41ce6ee3cc9a54ceac57972131df8d7eb9e0de4fd9a03e9e534e46403a1b7 background: none (91.7%) background none body: sugarskull (6.4%) body sugarskull neck: studdedcollar (10.2%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: none (26.0%) ears none head: toque (7.1%) head toque eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 749 dog #749 749 mission 3 mission 3 base settled 0xea89fa73f8e6283c37a72267290bc7829464893f @zenonseeker zenonseeker 0.01111 eth 11110000000000000 19.0 $19.00 2026-06-20t23:46:57z 0x443718ae7bd0fb61d8c769e23c51bcb7c210b1314dbdeafbfb42d18acc5452e1 0x06a2638c8a99093b7b94876cfd9dea8b8afee0987b547f4f2c582fe6997a9c86 generated auction feed 0x3087891742fd55deaa73d0f1bd345ab778dcc119e049957c8a90b5de2e563ae1 0x1e138aec43ea0f21aead49561c0ac16309e324791cfcecd68f97233d0e28eff1 0xc00190e4ee5cbe7316d8f46f8776c8855d466e20c7344af33ae9d68a5b63be24 0x71f2573f1bcb7e8489bbd871346b1270eaa4bc898285e807bd90afdf8af9b563 0x57a1ec041d7b6c73ed16ca840234b3d6d45e3e3bf08b7f20f19694dd02806494 0xc4cdef6df86130dab7052647350cb3a76c2fa8b0cdb7b8b8d5e7c218e9a4f4ed 0x5e75d1863a38636a52881982aa0d9e556e97167ae4e364c45cf89bc45a7f2505 0x5f045314c163443e3b4692fb3fc2ec17c12947756dd7bba9ff0c6a787186eba5 0x892e088aef37daa3feda387277b1da63e640c6ae3a59a72df3e285ba80439b70 0xbff41ce6ee3cc9a54ceac57972131df8d7eb9e0de4fd9a03e9e534e46403a1b7 background none body sugarskull neck studdedcollar mouth teeth ears none head toque eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #62/690 background: none (91.7%) body: sugarskull (6.4%) neck: studdedcollar (10.1%) mouth: teeth (5.4%) ears: none (25.9%) head: toque (7.1%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 47604935,
       "block_time_utc": "2026-06-20T23:46:57Z",
@@ -99,7 +99,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: StuddedCollar (10.2%)",
+        "display": "Neck: StuddedCollar (10.1%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
@@ -109,7 +109,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },

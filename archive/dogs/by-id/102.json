@@ -54,13 +54,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#48/689",
+      "display": "#48/690",
       "rank": 48,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 102 dog #102 102 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.07 weth 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d #48/689 background: none; body: rainbow; neck: goldnecklace; mouth: teeth; ears: earbuds; head: redmohawk; eyes: glasses 0xaf8a241ead5bb113ec7b194e9a20c9b6d20819d761d676f4c340266c85cf3faa 0xcd8f527ea531902dd4287882871f29880cf9955fcd2c2df704575890facac4df 0x50fa3d5d8d01314d202cb6f601dc972081da427b34939bd511d5fd034631ad61 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 102 dog #102 102 mission 1 mission 1 polygon settled 0xbd819b297e4f42d595b17f3e565896ab31867488 0xbd81…7488 0.07 weth 0x493e44d9d53d35908fcd33eb976ecdeb68af84cf6553322be4688910e4eb9f2a 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d background: none; body: rainbow; neck: goldnecklace; mouth: teeth; ears: earbuds; head: redmohawk; eyes: glasses 0xaf8a241ead5bb113ec7b194e9a20c9b6d20819d761d676f4c340266c85cf3faa 0xcd8f527ea531902dd4287882871f29880cf9955fcd2c2df704575890facac4df 0x50fa3d5d8d01314d202cb6f601dc972081da427b34939bd511d5fd034631ad61 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #48/690 background: none (91.7%) body: rainbow (4.3%) neck: goldnecklace (19.1%) mouth: teeth (5.4%) ears: earbuds (32.5%) head: redmohawk (7.5%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": 28275685,
       "block_time_utc": "2022-05-13T17:25:01Z",
@@ -87,12 +87,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Rainbow (4.4%)",
+        "display": "Body: Rainbow (4.3%)",
         "trait_type": "Body",
         "value": "Rainbow"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.1%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -102,7 +102,7 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

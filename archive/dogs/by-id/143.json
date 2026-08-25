@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#542/689",
-      "rank": 542,
+      "display": "#555/690",
+      "rank": 555,
       "scope": "base_existing",
-      "total": 689
+      "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 143 dog #143 143 mission 1 mission 1 polygon no auction dogmaster reward weth #542/689 background: none; body: white; neck: none; mouth: none; ears: earbuds; head: crazyhair; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 143 dog #143 143 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: white; neck: none; mouth: none; ears: earbuds; head: crazyhair; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #555/690 background: none (91.7%) body: white (11.2%) neck: none (41.3%) mouth: none (68.4%) ears: earbuds (32.5%) head: crazyhair (6.8%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,7 +81,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.2%)",
+        "display": "Neck: None (41.3%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -91,17 +91,17 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: CrazyHair (6.7%)",
+        "display": "Head: CrazyHair (6.8%)",
         "trait_type": "Head",
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: Sunglasses (13.2%)",
+        "display": "Eyes: Sunglasses (13.3%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
