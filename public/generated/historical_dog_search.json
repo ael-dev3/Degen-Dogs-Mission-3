@@ -22773,13 +22773,13 @@
     "dog_external_url": "https://degendogs.club/#dog813",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/813",
     "status": "live",
-    "winner": "0xbdd8…bb72",
-    "winner_url": "https://explorer.degen.tips/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
-    "winner_wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
-    "amount": "0.00055 ETH ($1)",
-    "amount_raw": "550000000000000",
-    "bid_count": 2,
-    "unique_bidder_count": 2,
+    "winner": "@kzl27.eth",
+    "winner_url": "https://farcaster.xyz/kzl27.eth",
+    "winner_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "amount": "0.00061 ETH ($2)",
+    "amount_raw": "610000000000000",
+    "bid_count": 3,
+    "unique_bidder_count": 3,
     "auction_created_time_utc": "2026-08-24 20:58:23",
     "settled_time_utc": "",
     "rarity": "#171/689",
@@ -22789,6 +22789,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 813 Dog #813 https://api.degendogs.club/images/813.png https://degendogs.club/#dog813 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/813 live 0xbdd8…bb72 https://explorer.degen.tips/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0.00055 ETH ($1) 550000000000000 2 2 2026-08-24 20:58:23 #171/689 55.574858 Background: None; Body: Blue; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: RedLaserEyes Background: None (91.7%); Body: Blue (8.9%); Neck: RedCollar (29.5%); Mouth: None (68.4%); Ears: Earbuds (32.4%); Head: CrazyHair (6.7%); Eyes: RedLaserEyes (4.9%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 813 Dog #813 https://api.degendogs.club/images/813.png https://degendogs.club/#dog813 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/813 live @kzl27.eth https://farcaster.xyz/kzl27.eth 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 0.00061 ETH ($2) 610000000000000 3 3 2026-08-24 20:58:23 #171/689 55.574858 Background: None; Body: Blue; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: RedLaserEyes Background: None (91.7%); Body: Blue (8.9%); Neck: RedCollar (29.5%); Mouth: None (68.4%); Ears: Earbuds (32.4%); Head: CrazyHair (6.7%); Eyes: RedLaserEyes (4.9%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
