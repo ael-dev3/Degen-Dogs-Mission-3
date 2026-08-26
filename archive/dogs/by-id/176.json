@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#338/690",
-      "rank": 338,
+      "display": "#336/691",
+      "rank": 336,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 176 dog #176 176 mission 1 mission 1 polygon no auction dogmaster reward weth #338/690 background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: goldearring; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 176 dog #176 176 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: redbrown; neck: redcollar; mouth: teeth; ears: goldearring; head: none; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #336/691 background: none (91.8%) body: redbrown (15.3%) neck: redcollar (29.4%) mouth: teeth (5.4%) ears: goldearring (14.3%) head: none (20.0%) eyes: none (17.7%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,12 +71,12 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },

@@ -7,8 +7,8 @@
     "auctions_bid": 141,
     "bid_eth": 4.64461,
     "high_bid_eth": 0.16455,
-    "auction_wins": 37,
-    "winning_eth": 0.79123,
+    "auction_wins": 38,
+    "winning_eth": 0.79723,
     "latest_bid_token_id": 814,
     "latest_bid_utc": "2026-08-25 20:59:21"
   },
@@ -692,14 +692,14 @@
     "bidder": "@kzl27.eth",
     "bidder_url": "https://farcaster.xyz/kzl27.eth",
     "bidder_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "bids": 14,
-    "auctions_bid": 8,
-    "bid_eth": 0.08271,
+    "bids": 15,
+    "auctions_bid": 9,
+    "bid_eth": 0.08321,
     "high_bid_eth": 0.0202,
     "auction_wins": 4,
     "winning_eth": 0.03293,
-    "latest_bid_token_id": 813,
-    "latest_bid_utc": "2026-08-25 06:40:35"
+    "latest_bid_token_id": 815,
+    "latest_bid_utc": "2026-08-26 21:46:49"
   },
   {
     "bidder": "0xe048…8846",
@@ -806,6 +806,19 @@
     "latest_bid_utc": "2026-07-03 18:17:33"
   },
   {
+    "bidder": "0xa9b0…03e3",
+    "bidder_url": "https://basescan.org/address/0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
+    "bidder_wallet": "0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
+    "bids": 2,
+    "auctions_bid": 2,
+    "bid_eth": 0.03686,
+    "high_bid_eth": 0.03631,
+    "auction_wins": 1,
+    "winning_eth": 0.03631,
+    "latest_bid_token_id": 815,
+    "latest_bid_utc": "2026-08-26 21:55:21"
+  },
+  {
     "bidder": "0x9c1b…ff91",
     "bidder_url": "https://basescan.org/address/0x9c1bd1b58ba842c9f5687adc3e37bdff50edff91",
     "bidder_wallet": "0x9c1bd1b58ba842c9f5687adc3e37bdff50edff91",
@@ -817,19 +830,6 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 603,
     "latest_bid_utc": "2026-01-22 02:02:41"
-  },
-  {
-    "bidder": "0xa9b0…03e3",
-    "bidder_url": "https://basescan.org/address/0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
-    "bidder_wallet": "0xa9b0ff77f30d9876378a94155d2153caa68e03e3",
-    "bids": 1,
-    "auctions_bid": 1,
-    "bid_eth": 0.03631,
-    "high_bid_eth": 0.03631,
-    "auction_wins": 1,
-    "winning_eth": 0.03631,
-    "latest_bid_token_id": 737,
-    "latest_bid_utc": "2026-06-08 20:09:45"
   },
   {
     "bidder": "0xfcd8…6a24",

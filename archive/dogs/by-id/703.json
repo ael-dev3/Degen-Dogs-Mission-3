@@ -58,13 +58,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#14/690",
+      "display": "#14/691",
       "rank": 14,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 703 dog #703 703 mission 3 mission 3 base settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 0.02486 eth 24860000000000000 57.59 $57.59 2026-05-03t22:32:07z 0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b 0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46 #14/690 generated auction feed 0xb86e6d118fbecd5a99c96ef10d6ede55266977f89e46735e2c1b87971a389216 0x741de65cb01fc6b8ccb785a89fd125eb41fdeb6e033d0169485d860237f1b212 0x0f3de1586ec27e55e83bcd584fe87895f92e4ad5aa29cf0dd1901c218707a55a 0x6b27ab86084600caac9dbc5c637e25b0196fd93763f46661e459bdc1dfd2168f 0x6cb683e0921ad698809f3b976dfd22e81c31e732c8630375ca5d911eddb6b552 0x52f795c8de0d2301ef31c195521e797799174ab0e8cedaa8e8bc3ee12e138222 0x764bb77bbdcd6155843b852c3616f3379b661503263d902ff52878b7fb46b8ee background: halo (8.3%) background halo body: dalmation (9.1%) body dalmation neck: none (41.3%) neck none mouth: coin (2.6%) mouth coin ears: none (25.9%) ears none head: blackcap (7.5%) head blackcap eyes: masksnorkel (10.1%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 703 dog #703 703 mission 3 mission 3 base settled 0x43f8c3e0c0ab23f0a8660f3ea3ce1a7016f96a33 @ajrony ajrony 0.02486 eth 24860000000000000 57.59 $57.59 2026-05-03t22:32:07z 0x74276d032ef740c74187f00ba5afc17492f6cf79bc048f18eef69c4f8dedb40b 0x581eef048d77317186446342d285033b86aed31249dab94c9dcf881b807a4a46 generated auction feed 0xb86e6d118fbecd5a99c96ef10d6ede55266977f89e46735e2c1b87971a389216 0x741de65cb01fc6b8ccb785a89fd125eb41fdeb6e033d0169485d860237f1b212 0x0f3de1586ec27e55e83bcd584fe87895f92e4ad5aa29cf0dd1901c218707a55a 0x6b27ab86084600caac9dbc5c637e25b0196fd93763f46661e459bdc1dfd2168f 0x6cb683e0921ad698809f3b976dfd22e81c31e732c8630375ca5d911eddb6b552 0x52f795c8de0d2301ef31c195521e797799174ab0e8cedaa8e8bc3ee12e138222 0x764bb77bbdcd6155843b852c3616f3379b661503263d902ff52878b7fb46b8ee background halo body dalmation neck none mouth coin ears none head blackcap eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners #14/691 background: halo (8.2%) body: dalmation (9.1%) neck: none (41.4%) mouth: coin (2.6%) ears: none (25.9%) head: blackcap (7.5%) eyes: masksnorkel (10.1%)",
     "settlement": {
       "block_number": 45529090,
       "block_time_utc": "2026-05-03T22:32:07Z",
@@ -86,7 +86,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.3%)",
+        "display": "Background: Halo (8.2%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -96,7 +96,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },

@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#362/690",
+      "display": "#362/691",
       "rank": 362,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 809 dog #809 809 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 20.94 $20.94 2026-08-21t20:02:25z 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25 0xf266e5138494270375eedc50e38c2d9a66a1f3386b8a6ee03869763ffc10ab05 #362/690 generated auction feed 0x457725302c0a8ee3f01c1b119a319a0d1dca5f827172e37221ceb7e5a03f687c background: none (91.7%) background none body: grey (12.9%) body grey neck: goldnecklace (19.1%) neck goldnecklace mouth: none (68.4%) mouth none ears: loopearring (27.2%) ears loopearring head: whitemohawk (7.0%) head whitemohawk eyes: eyepatch (7.8%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 809 dog #809 809 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 20.94 $20.94 2026-08-21t20:02:25z 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25 0xf266e5138494270375eedc50e38c2d9a66a1f3386b8a6ee03869763ffc10ab05 generated auction feed 0x457725302c0a8ee3f01c1b119a319a0d1dca5f827172e37221ceb7e5a03f687c background none body grey neck goldnecklace mouth none ears loopearring head whitemohawk eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #362/691 background: none (91.8%) body: grey (12.9%) neck: goldnecklace (19.1%) mouth: none (68.5%) ears: loopearring (27.2%) head: whitemohawk (6.9%) eyes: eyepatch (7.8%)",
     "settlement": {
       "block_number": 50276599,
       "block_time_utc": "2026-08-21T20:02:25Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -106,7 +106,7 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: WhiteMohawk (7.0%)",
+        "display": "Head: WhiteMohawk (6.9%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },

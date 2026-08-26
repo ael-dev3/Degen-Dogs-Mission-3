@@ -56,13 +56,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#413/690",
-      "rank": 413,
+      "display": "#412/691",
+      "rank": 412,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 805 dog #805 805 mission 3 mission 3 base settled 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00771 eth 7710000000000000 14.45 $14.45 2026-08-17t17:48:07z 0x55ae544798c956842c95c10b045b20db05f8c0507f37f428f2c85bf9d9862aaf 0x900d52d7424eaff253899239034fd897d4e225e44ec585515d0979f2ff24aa4e #413/690 generated auction feed 0x2522330e0e2e95b928342472d71f26ad81c06dc4f4aedfe01bc868847f5be62f 0x80d53e35d2797a91270a9362f5194de4dfe39776d646d7c91c21e5febe72877f 0x5e732b36920397c4014a3cdf9e04f8b21aea439d6fcba59bb286cd5cec75e27f 0x31bfaa6999275a7a65dfce3e95b73bb40b40236fab5e1c41e1c29c3fd0976627 0xab89e292071ea36f6adad89638afaa72b21c458f04ccc73318c69925c1b39585 background: none (91.7%) background none body: white (11.2%) body white neck: goldnecklace (19.1%) neck goldnecklace mouth: none (68.4%) mouth none ears: none (25.9%) ears none head: crazyhair (6.8%) head crazyhair eyes: vrgoggles (10.7%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 805 dog #805 805 mission 3 mission 3 base settled 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00771 eth 7710000000000000 14.45 $14.45 2026-08-17t17:48:07z 0x55ae544798c956842c95c10b045b20db05f8c0507f37f428f2c85bf9d9862aaf 0x900d52d7424eaff253899239034fd897d4e225e44ec585515d0979f2ff24aa4e generated auction feed 0x2522330e0e2e95b928342472d71f26ad81c06dc4f4aedfe01bc868847f5be62f 0x80d53e35d2797a91270a9362f5194de4dfe39776d646d7c91c21e5febe72877f 0x5e732b36920397c4014a3cdf9e04f8b21aea439d6fcba59bb286cd5cec75e27f 0x31bfaa6999275a7a65dfce3e95b73bb40b40236fab5e1c41e1c29c3fd0976627 0xab89e292071ea36f6adad89638afaa72b21c458f04ccc73318c69925c1b39585 background none body white neck goldnecklace mouth none ears none head crazyhair eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #412/691 background: none (91.8%) body: white (11.1%) neck: goldnecklace (19.1%) mouth: none (68.5%) ears: none (25.9%) head: crazyhair (6.8%) eyes: vrgoggles (10.7%)",
     "settlement": {
       "block_number": 50099770,
       "block_time_utc": "2026-08-17T17:48:07Z",
@@ -85,12 +85,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.2%)",
+        "display": "Body: White (11.1%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -100,7 +100,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },

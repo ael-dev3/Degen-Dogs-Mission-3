@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#135/690",
-      "rank": 135,
+      "display": "#137/691",
+      "rank": 137,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 584 dog #584 584 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 16666 degen 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 0x6939fb55e3ad2476cb7cb44be14b0555fd0a3223538bb5c56afa585cc5ce8edf #135/690 background: halo; body: orange; neck: none; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xa4dd527836b4b733890c19e4604be48b0726eb0308ef161d0ff99a1dfc8745ff chain_logs contract_getters",
+    "search_text": "dog 584 dog #584 584 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 16666 degen 0x0ccac2c194efe6d802e17d6ef551f09d74074615d627b49f60959c0d263519f3 0x6939fb55e3ad2476cb7cb44be14b0555fd0a3223538bb5c56afa585cc5ce8edf background: halo; body: orange; neck: none; mouth: none; ears: none; head: beanie; eyes: sunglasses 0xa4dd527836b4b733890c19e4604be48b0726eb0308ef161d0ff99a1dfc8745ff chain_logs contract_getters #137/691 background: halo (8.2%) body: orange (8.4%) neck: none (41.4%) mouth: none (68.5%) ears: none (25.9%) head: beanie (5.4%) eyes: sunglasses (13.5%)",
     "settlement": {
       "block_number": 26615094,
       "block_time_utc": "2026-01-01T07:59:54Z",
@@ -78,22 +78,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.3%)",
+        "display": "Background: Halo (8.2%)",
         "trait_type": "Background",
         "value": "Halo"
       },
       {
-        "display": "Body: Orange (8.3%)",
+        "display": "Body: Orange (8.4%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: Sunglasses (13.3%)",
+        "display": "Eyes: Sunglasses (13.5%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

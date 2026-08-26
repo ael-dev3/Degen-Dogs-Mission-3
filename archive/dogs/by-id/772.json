@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#577/690",
-      "rank": 577,
+      "display": "#576/691",
+      "rank": 576,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51 $19.51 2026-07-14t08:09:49z 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a #577/690 generated auction feed 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c background: none (91.7%) background none body: redbrown (15.4%) body redbrown neck: redcollar (29.4%) neck redcollar mouth: none (68.4%) mouth none ears: goldearring (14.3%) ears goldearring head: none (20.0%) head none eyes: monocle (7.2%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 772 dog #772 772 mission 3 mission 3 base settled 0xf0807da85b2af462edd8a1855f4d301fba1f74ae 0xf080…74ae 0.011 eth 11000000000000000 19.51 $19.51 2026-07-14t08:09:49z 0x6e3a7d2b67efefbeaf5a8e4deec6613a7345149d19a7fb85c670a99b19924047 0x52d795a2d9a33b52f0abf4edd396ee10994f66ff90d51098836524dacd43732a generated auction feed 0xb7cbc477eec10c099dc671f12c5729046c599286edacd7a9615d199721f8130b 0x78004d79dd8fd0ef75d147f9e3fa3e69ee4aff9aa84b6e98779aa0049af253c1 0x21a0c11cb4193f023a6329f69a4b3c5c24c418b7556b9a0b6dd97469612854b1 0x88792dc50b461a8e5ec9ee0856ec2277c2606f650c51bb6fa115f48de5e6557c background none body redbrown neck redcollar mouth none ears goldearring head none eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners #576/691 background: none (91.8%) body: redbrown (15.3%) neck: redcollar (29.4%) mouth: none (68.5%) ears: goldearring (14.3%) head: none (20.0%) eyes: monocle (7.2%)",
     "settlement": {
       "block_number": 48613621,
       "block_time_utc": "2026-07-14T08:09:49Z",
@@ -83,12 +83,12 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.4%)",
+        "display": "Body: RedBrown (15.3%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
@@ -98,7 +98,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },

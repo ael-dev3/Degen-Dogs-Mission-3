@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#593/690",
+      "display": "#593/691",
       "rank": 593,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 384 dog #384 384 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x04e64b7c6226b2319c92ec9a34b86692f24f47fc25fec32b67cda503e6f35fac 0xc7f8b743180771216e7548fb2b1b5684325fd4293ba48a10c416e2ee82fa7669 #593/690 background: none; body: grey; neck: goldnecklace; mouth: none; ears: goldearring; head: none; eyes: masksnorkel 0x04e20f3f4b908b1b945fe288f3a71e3b35a48a97e61324b0eab6bbeeb522f7ac 0xecf4d4b56cc0976a021d165b90b3ec073d7c798cbd43877098828d795fce29f3 0x3464821d91f5dc0edaaedf0f080a7c52579be2941bd5e0f65754abce88804a22 chain_logs contract_getters",
+    "search_text": "dog 384 dog #384 384 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x04e64b7c6226b2319c92ec9a34b86692f24f47fc25fec32b67cda503e6f35fac 0xc7f8b743180771216e7548fb2b1b5684325fd4293ba48a10c416e2ee82fa7669 background: none; body: grey; neck: goldnecklace; mouth: none; ears: goldearring; head: none; eyes: masksnorkel 0x04e20f3f4b908b1b945fe288f3a71e3b35a48a97e61324b0eab6bbeeb522f7ac 0xecf4d4b56cc0976a021d165b90b3ec073d7c798cbd43877098828d795fce29f3 0x3464821d91f5dc0edaaedf0f080a7c52579be2941bd5e0f65754abce88804a22 chain_logs contract_getters #593/691 background: none (91.8%) body: grey (12.9%) neck: goldnecklace (19.1%) mouth: none (68.5%) ears: goldearring (14.3%) head: none (20.0%) eyes: masksnorkel (10.1%)",
     "settlement": {
       "block_number": 25886069,
       "block_time_utc": "2025-05-19T23:40:10Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -95,7 +95,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },

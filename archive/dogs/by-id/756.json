@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#499/690",
-      "rank": 499,
+      "display": "#498/691",
+      "rank": 498,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 756 dog #756 756 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0121 eth 12100000000000000 19.02 $19.02 2026-06-28t00:20:29z 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 #499/690 generated auction feed 0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08 0x5e6ca96d4c7dc5669c9c45ff29330e1722ae8ba98a5cbd443191c4e20d225462 0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57 background: none (91.7%) background none body: brown (10.9%) body brown neck: goldnecklace (19.1%) neck goldnecklace mouth: none (68.4%) mouth none ears: none (25.9%) ears none head: headphones (6.8%) head headphones eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 756 dog #756 756 mission 3 mission 3 base settled 0xd1ab146981d50adcfe18433500e852af396ea7b1 @pare pare 0.0121 eth 12100000000000000 19.02 $19.02 2026-06-28t00:20:29z 0x385cd68c920993b203f468de8d664a906a09842b9069badd2f7d25d880fa3ecb 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 generated auction feed 0xaae97e9fc41d5483ebbfdac738c7a162139fba6be050538c16b72dc937d07c08 0x5e6ca96d4c7dc5669c9c45ff29330e1722ae8ba98a5cbd443191c4e20d225462 0xe58d7eff8040d0d6f80de6418d9337837951ab591192b0682238b235fabc3b57 background none body brown neck goldnecklace mouth none ears none head headphones eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #498/691 background: none (91.8%) body: brown (10.9%) neck: goldnecklace (19.1%) mouth: none (68.5%) ears: none (25.9%) head: headphones (6.8%) eyes: none (17.7%)",
     "settlement": {
       "block_number": 47908341,
       "block_time_utc": "2026-06-28T00:20:29Z",
@@ -82,7 +82,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -97,7 +97,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },

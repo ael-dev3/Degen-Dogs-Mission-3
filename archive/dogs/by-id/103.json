@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#328/690",
-      "rank": 328,
+      "display": "#327/691",
+      "rank": 327,
       "scope": "base_existing",
-      "total": 690
+      "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 103 dog #103 103 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d 0xc5a80d00bdc272e7ab705fd5128eb79fa40aa43caa19b7683161b7ea19eeb770 #328/690 background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 103 dog #103 103 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x56e4d2b043577aa647f2331468a251424e40f75dd5634e6705c42a04b0caaa2d 0xc5a80d00bdc272e7ab705fd5128eb79fa40aa43caa19b7683161b7ea19eeb770 background: none; body: brown; neck: redcollar; mouth: none; ears: earbuds; head: unicorn; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #327/691 background: none (91.8%) body: brown (10.9%) neck: redcollar (29.4%) mouth: none (68.5%) ears: earbuds (32.6%) head: unicorn (4.6%) eyes: glasses (12.4%)",
     "settlement": {
       "block_number": 28327523,
       "block_time_utc": "2022-05-15T00:14:26Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.7%)",
+        "display": "Background: None (91.8%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,12 +93,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.6%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: Glasses (12.5%)",
+        "display": "Eyes: Glasses (12.4%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }
