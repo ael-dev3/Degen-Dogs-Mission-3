@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 6,
-      "last_bid_time_utc": "2026-08-25 09:39:45",
+      "last_bid_time_utc": "2026-08-25T09:39:45Z",
       "unique_bidder_count": 5
     },
     "bid_tx_hashes": [
@@ -63,7 +63,7 @@
       "total": 690
     },
     "schema_version": 1,
-    "search_text": "dog 813 dog #813 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00700000 eth $17.37 2026-08-25t20:59:03z #175/690 background: none (91.7%) body: blue (9.0%) neck: redcollar (29.4%) mouth: none (68.4%) ears: earbuds (32.5%) head: crazyhair (6.8%) eyes: redlasereyes (4.9%) 0x60755d8f27c1d2e333fd000ff57c2b0abbaeec41e76857929d7e03c2118ed4c8",
+    "search_text": "dog 813 dog #813 813 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 17.37 $17.37 2026-08-25t20:59:03z 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 0x60755d8f27c1d2e333fd000ff57c2b0abbaeec41e76857929d7e03c2118ed4c8 #175/690 generated auction feed 0x691d15f4d0944e59d7fe2a5a1bd9c986b30e6fd7a97141b1b86f637dd116cfe1 0x457d63294f70c004648155dd4f4192358d181f0ff33f9c68ec224684a9cf5ded 0x71c6a0bb8a68c2809791e66bd0f9d2ac6216aa66c9cb9e99d8204274aa7ab41d 0x33fa3048a8625507c1ed0f91081b546bba384237ca722f1bfeb87ef8c5b46287 0x05f042331c2c06353cfeaef386e4ffcc3108c6f0dd6d077c7b8294d82e770ce3 0x38f8f12b69ce49fef695ece8b4ef8dc1ee65030bd85fbd34fcbb72d783c610c6 background: none (91.7%) background none body: blue (9.0%) body blue neck: redcollar (29.4%) neck redcollar mouth: none (68.4%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (6.8%) head crazyhair eyes: redlasereyes (4.9%) eyes redlasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 50451098,
       "block_time_utc": "2026-08-25T20:59:03Z",
@@ -73,15 +73,14 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
