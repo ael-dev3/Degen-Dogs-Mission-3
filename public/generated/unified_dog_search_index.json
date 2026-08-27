@@ -5,17 +5,17 @@
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-08-26",
+      "eth_usd_price_date_utc": "2026-08-27",
       "native": "0.005",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "5000000000000000",
-      "usd_estimate": "12.49760000",
+      "usd_estimate": "12.49382500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$12.50",
+      "usd_estimate_display": "$12.49",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-08-26",
-      "usd_estimate_price_usd": "2499.52",
+      "usd_estimate_price_date_utc": "2026-08-27",
+      "usd_estimate_price_usd": "2498.765",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 691
     },
     "schema_version": 1,
-    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.50000000 $12.50 2026-08-26t22:04:59z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 #531/691 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d background: none (91.8%) background none body: orange (8.4%) body orange neck: none (41.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.6%) ears earbuds head: stripedbeanie (8.0%) head stripedbeanie eyes: sunglasses (13.5%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.49000000 $12.49 2026-08-26t22:04:59z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 #531/691 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d background: none (91.8%) background none body: orange (8.4%) body orange neck: none (41.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.6%) ears earbuds head: stripedbeanie (8.0%) head stripedbeanie eyes: sunglasses (13.5%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
