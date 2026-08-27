@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-08-26T21:56:51Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-08-26T22:04:59Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-08-27T21:47:45Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "13.78488708",
+      "eth_usd_price_at_event": "2506.3431057180687",
       "eth_usd_price_date_utc": "2026-08-27",
-      "native": "0.005",
+      "native": "0.0055",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "5000000000000000",
-      "usd_estimate": "12.49620000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$12.50",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "raw": "5500000000000000",
+      "usd_estimate": "13.78488708",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$13.78",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-08-27",
-      "usd_estimate_price_usd": "2499.24",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "2506.3431057180687",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 50495696,
@@ -29,14 +29,15 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 3,
-      "last_bid_time_utc": "2026-08-26T22:04:59Z",
-      "unique_bidder_count": 3
+      "bid_count": 4,
+      "last_bid_time_utc": "2026-08-27T02:30:13Z",
+      "unique_bidder_count": 4
     },
     "bid_tx_hashes": [
       "0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee",
       "0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad",
-      "0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d"
+      "0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d",
+      "0x2e090ecef7b5dbef16f135d864206dc7e209f1052e86728858890adfc1dc77a4"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -47,26 +48,26 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9",
       "dog_page": "https://degendogs.club/#dog815",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0x437be13e57f822167a3206c6744d03bcd6b499ee",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/815",
       "repo_archive": "archive/dogs/by-id/815.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1"
     },
     "mission": 3,
     "rarity": {
-      "display": "#531/691",
-      "rank": 531,
+      "display": "#532/692",
+      "rank": 532,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.50000000 $12.50 2026-08-26t22:04:59z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 #531/691 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d background: none (91.8%) background none body: orange (8.4%) body orange neck: none (41.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.6%) ears earbuds head: stripedbeanie (8.0%) head stripedbeanie eyes: sunglasses (13.5%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base settled 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.0055 eth 5500000000000000 13.78 $13.78 2026-08-27t21:47:45z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 #532/692 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d 0x2e090ecef7b5dbef16f135d864206dc7e209f1052e86728858890adfc1dc77a4 background: none (91.6%) background none body: orange (8.4%) body orange neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.5%) ears earbuds head: stripedbeanie (7.9%) head stripedbeanie eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 50538959,
+      "block_time_utc": "2026-08-27T21:47:45Z",
+      "settled": true,
+      "tx_hash": "0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1",
+      "tx_url": "https://basescan.org/tx/0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1"
     },
     "source": {
       "confidence": "verified",
@@ -76,13 +77,14 @@
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.8%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -92,7 +94,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -102,28 +104,28 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (8.0%)",
+        "display": "Head: StripedBeanie (7.9%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: Sunglasses (13.5%)",
+        "display": "Eyes: Sunglasses (13.4%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@kunon",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "kunon",
+      "profile_url": "https://farcaster.xyz/kunon",
+      "wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
+      "wallet_explorer_url": "https://basescan.org/address/0x437be13e57f822167a3206c6744d03bcd6b499ee"
     }
   },
   "schema_version": 1

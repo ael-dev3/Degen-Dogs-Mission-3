@@ -55,13 +55,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#519/691",
-      "rank": 519,
+      "display": "#523/692",
+      "rank": 523,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 266 dog #266 266 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7000 degen 0x00ec2fe119e981a9756ad4deab478bf75966943074bef3204c31237aff403177 0xdc589aaf5a4cdc10f24a5d16b1e332862fa51623a735f52e60fb40c4e8dae22a background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: crazyhair; eyes: bluelasereyes 0xceef4d43687eec6d8745b4a199eef1a20bbbba0907f6fea433171c290c483b38 0x68ff16a8015964e50d463a1361f04ce8452f2307bdbb9ddd778d9a1495fec563 0xba9e8ac4e35fbf52d39917227757a315dd1fc9b9bd4ac500ca5399a1b8fa0383 0x8b1a752a721b96e4d2f89c33b02b3c4e0e8093f84bc7c944b90d6349b37edf4b chain_logs contract_getters #519/691 background: none (91.8%) body: grey (12.9%) neck: redcollar (29.4%) mouth: none (68.5%) ears: earbuds (32.6%) head: crazyhair (6.8%) eyes: bluelasereyes (11.3%)",
+    "search_text": "dog 266 dog #266 266 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 7000 degen 0x00ec2fe119e981a9756ad4deab478bf75966943074bef3204c31237aff403177 0xdc589aaf5a4cdc10f24a5d16b1e332862fa51623a735f52e60fb40c4e8dae22a #523/692 background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: crazyhair; eyes: bluelasereyes 0xceef4d43687eec6d8745b4a199eef1a20bbbba0907f6fea433171c290c483b38 0x68ff16a8015964e50d463a1361f04ce8452f2307bdbb9ddd778d9a1495fec563 0xba9e8ac4e35fbf52d39917227757a315dd1fc9b9bd4ac500ca5399a1b8fa0383 0x8b1a752a721b96e4d2f89c33b02b3c4e0e8093f84bc7c944b90d6349b37edf4b chain_logs contract_getters",
     "settlement": {
       "block_number": 25348683,
       "block_time_utc": "2025-01-26T13:30:25Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.8%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (29.4%)",
+        "display": "Neck: RedCollar (29.3%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -111,7 +111,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.3%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

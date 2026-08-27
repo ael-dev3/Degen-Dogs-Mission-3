@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#432/691",
-      "rank": 432,
+      "display": "#434/692",
+      "rank": 434,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #432/691 background: none (91.8%) body: brown (10.9%) neck: goldnecklace (19.1%) mouth: none (68.5%) ears: none (25.9%) head: crazyhair (6.8%) eyes: glasses (12.4%)",
+    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth #434/692 background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,12 +71,12 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.8%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },

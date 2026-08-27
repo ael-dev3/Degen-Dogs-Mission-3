@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#100/691",
+      "display": "#100/692",
       "rank": 100,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 531 dog #531 531 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 background: halo; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: bluelasereyes 0x4433075d808212cb66bd0b6cc49d8d9435ec718ee6744479ff1dd90bcfbe518d 0xd817c6ea2024da5d56f8e2d417f36950de02845ef62d5529bb6cceccae3874c7 0x163d0fcac5bd819189c92389272942ae7706485a0a0c2fe7d2414721a7636af0 chain_logs contract_getters #100/691 background: halo (8.2%) body: sugarskull (6.4%) neck: none (41.4%) mouth: none (68.5%) ears: goldearring (14.3%) head: crazyhair (6.8%) eyes: bluelasereyes (11.3%)",
+    "search_text": "dog 531 dog #531 531 mission 2 mission 2 degen chain settled 0xc421401af43d217d8bf16f18ffd076f3c84219d9 @vorcha vorcha 2445 degen 0x61307af4095d7a2582b2788031ecf44d674922462c1b918a69e22e89a08dd78d 0x17c0f1b8a65c130e17c8fe9a12cb2e0f012836ca9e10238b6e8cb2125fc6d4c6 #100/692 background: halo; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: crazyhair; eyes: bluelasereyes 0x4433075d808212cb66bd0b6cc49d8d9435ec718ee6744479ff1dd90bcfbe518d 0xd817c6ea2024da5d56f8e2d417f36950de02845ef62d5529bb6cceccae3874c7 0x163d0fcac5bd819189c92389272942ae7706485a0a0c2fe7d2414721a7636af0 chain_logs contract_getters",
     "settlement": {
       "block_number": 26444727,
       "block_time_utc": "2025-11-09T00:11:11Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.2%)",
+        "display": "Background: Halo (8.4%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -90,7 +90,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.3%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

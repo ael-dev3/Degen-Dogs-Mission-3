@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#615/691",
+      "display": "#615/692",
       "rank": 615,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 310 dog #310 310 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x2de4d8ade84461ad625ed74bf34337fe88c1cf1e5b4c59ec91085aaccdc421b4 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a background: none; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: none 0xd395879c10877c34f871692c2a7ec49611c8b00fd966ded59615c17cd74ff34d chain_logs contract_getters #615/691 background: none (91.8%) body: redbrown (15.3%) neck: redcollar (29.4%) mouth: none (68.5%) ears: loopearring (27.2%) head: whitemohawk (6.9%) eyes: none (17.7%)",
+    "search_text": "dog 310 dog #310 310 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x2de4d8ade84461ad625ed74bf34337fe88c1cf1e5b4c59ec91085aaccdc421b4 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a #615/692 background: none; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: none 0xd395879c10877c34f871692c2a7ec49611c8b00fd966ded59615c17cd74ff34d chain_logs contract_getters",
     "settlement": {
       "block_number": 25579991,
       "block_time_utc": "2025-03-10T04:00:07Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.8%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,7 +88,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (29.4%)",
+        "display": "Neck: RedCollar (29.3%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -108,7 +108,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.6%)",
         "trait_type": "Eyes",
         "value": "None"
       }

@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#277/691",
-      "rank": 277,
+      "display": "#275/692",
+      "rank": 275,
       "scope": "base_existing",
-      "total": 691
+      "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 404 dog #404 404 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x5366a0f1e097fd7d28d90cbb5e4b6f0652baead5b77b81794bb300d39bb0a641 0x92add0fcb30dfbda1c2c04892e8642a0330db69688e2a0a27d4ecb6ca5195b5c background: none; body: brown; neck: none; mouth: tongue; ears: none; head: whitemohawk; eyes: vrgoggles 0x8dca7ea2acd6012da693fe56f0369b633407e46d2652abab37691cb49120a336 0x0948896105e5099b6cb6d82576eb7018879f38e5093e025e50f9d3c04a0cb698 chain_logs contract_getters #277/691 background: none (91.8%) body: brown (10.9%) neck: none (41.4%) mouth: tongue (10.0%) ears: none (25.9%) head: whitemohawk (6.9%) eyes: vrgoggles (10.7%)",
+    "search_text": "dog 404 dog #404 404 mission 2 mission 2 degen chain settled 0x4f44ebe3404bc6e91fe5c7fb4569807bd7266408 0x4f44…6408 2445 degen 0x5366a0f1e097fd7d28d90cbb5e4b6f0652baead5b77b81794bb300d39bb0a641 0x92add0fcb30dfbda1c2c04892e8642a0330db69688e2a0a27d4ecb6ca5195b5c #275/692 background: none; body: brown; neck: none; mouth: tongue; ears: none; head: whitemohawk; eyes: vrgoggles 0x8dca7ea2acd6012da693fe56f0369b633407e46d2652abab37691cb49120a336 0x0948896105e5099b6cb6d82576eb7018879f38e5093e025e50f9d3c04a0cb698 chain_logs contract_getters",
     "settlement": {
       "block_number": 25955200,
       "block_time_utc": "2025-06-07T13:55:05Z",
@@ -79,17 +79,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.8%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.9%)",
+        "display": "Body: Brown (10.8%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -99,7 +99,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
