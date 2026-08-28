@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#522/692",
-      "rank": 522,
+      "display": "#523/693",
+      "rank": 523,
       "scope": "base_existing",
-      "total": 692
+      "total": 693
     },
     "schema_version": 1,
-    "search_text": "dog 803 dog #803 803 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 13.16 $13.16 2026-08-15t17:34:41z 0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a 0xff4851ba4318d1a221f6f92f52048690ff494a398f8cb896c49ea9ae1a7cfbdb #522/692 generated auction feed 0xa0dc9a1e6e4969eb9a98fffa46eae3adb0e316fe79bae864fbd39fa00d44fd4c background: none (91.6%) background none body: grey (12.9%) body grey neck: redcollar (29.3%) neck redcollar mouth: none (68.5%) mouth none ears: loopearring (27.2%) ears loopearring head: toque (7.1%) head toque eyes: bluelasereyes (11.4%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 803 dog #803 803 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 13.16 $13.16 2026-08-15t17:34:41z 0x33dd9e51627f5ec5b6fdb45769352b4a527eb1fbf2b1ad36fd1de6e5ebb6bc4a 0xff4851ba4318d1a221f6f92f52048690ff494a398f8cb896c49ea9ae1a7cfbdb generated auction feed 0xa0dc9a1e6e4969eb9a98fffa46eae3adb0e316fe79bae864fbd39fa00d44fd4c background none body grey neck redcollar mouth none ears loopearring head toque eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners #523/693 background: none (91.6%) body: grey (12.8%) neck: redcollar (29.3%) mouth: none (68.5%) ears: loopearring (27.3%) head: toque (7.1%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 50012967,
       "block_time_utc": "2026-08-15T17:34:41Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (12.8%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -100,7 +100,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

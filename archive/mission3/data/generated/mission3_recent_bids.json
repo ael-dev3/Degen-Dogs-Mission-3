@@ -1,5 +1,60 @@
 [
   {
+    "amount_eth": "0.002",
+    "amount_raw": "2000000000000000",
+    "bidder": "0x46e9beef5dc68dff095eca56dadf90247f1af7ef",
+    "block_number": 50582522,
+    "block_time_utc": "2026-08-28T21:59:51Z",
+    "extended": 0,
+    "log_index": 191,
+    "token_id": 817,
+    "transaction_hash": "0x220466245246c188c02fa20faeddd112c7beb95167c6eb745a8f25769ff77074"
+  },
+  {
+    "amount_eth": "0.00647",
+    "amount_raw": "6470000000000000",
+    "bidder": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "block_number": 50582004,
+    "block_time_utc": "2026-08-28T21:42:35Z",
+    "extended": 0,
+    "log_index": 496,
+    "token_id": 816,
+    "transaction_hash": "0x14dac754c66daa5d8247355cb46e06cd9fa31ba27599b11b2c75dc773920d9d2"
+  },
+  {
+    "amount_eth": "0.00588",
+    "amount_raw": "5880000000000000",
+    "bidder": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "block_number": 50581463,
+    "block_time_utc": "2026-08-28T21:24:33Z",
+    "extended": 0,
+    "log_index": 416,
+    "token_id": 816,
+    "transaction_hash": "0xbe574104798575e78852b0b1eb579cdfd2a3377074ca3269c664774e4cdcb757"
+  },
+  {
+    "amount_eth": "0.00534",
+    "amount_raw": "5340000000000000",
+    "bidder": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "block_number": 50580508,
+    "block_time_utc": "2026-08-28T20:52:43Z",
+    "extended": 0,
+    "log_index": 381,
+    "token_id": 816,
+    "transaction_hash": "0x12784da9de0522b388e00490fc50230524afa0abeb170e025640d88b82194b6a"
+  },
+  {
+    "amount_eth": "0.00485",
+    "amount_raw": "4850000000000000",
+    "bidder": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "block_number": 50580364,
+    "block_time_utc": "2026-08-28T20:47:55Z",
+    "extended": 0,
+    "log_index": 334,
+    "token_id": 816,
+    "transaction_hash": "0x1cff010341ac49c86e2643b38d44c476614d813aee5d3489fbf933eaf6a3d80e"
+  },
+  {
     "amount_eth": "0.0044",
     "amount_raw": "4400000000000000",
     "bidder": "0xd29c790466675153a50df7860b9efdb689a21cde",

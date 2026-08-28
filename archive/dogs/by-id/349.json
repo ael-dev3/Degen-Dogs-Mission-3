@@ -55,13 +55,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#682/692",
-      "rank": 682,
+      "display": "#683/693",
+      "rank": 683,
       "scope": "base_existing",
-      "total": 692
+      "total": 693
     },
     "schema_version": 1,
-    "search_text": "dog 349 dog #349 349 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8500 degen 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f 0xa61e0b0192baf088e9f5fa969be28c24af514cd41ba101e3f2ff39900d6306d2 #682/692 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xc89af47508bdfed3626418e7b79148e1c8c7d3f9bdea02b3f31a017475fbf345 0xfbe595273ca5c96fb485cd62ae9f391918f47449a6409b8890129b9e9a2bf7c1 0x80e1189850073dfb5e98362ee931eb4fa1f0c3bac53b0e86d29093870c5e480b 0x6e2d753b499dfb62b7400ac650b039a3cbddc6e8473f42b9530bc022deec899e chain_logs contract_getters",
+    "search_text": "dog 349 dog #349 349 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 8500 degen 0xaf83acad93a8c0356737b40b9b0c343921765a1ca9e9c0a2fd77ad26c8b5657f 0xa61e0b0192baf088e9f5fa969be28c24af514cd41ba101e3f2ff39900d6306d2 background: none; body: grey; neck: none; mouth: none; ears: loopearring; head: none; eyes: bluelasereyes 0xc89af47508bdfed3626418e7b79148e1c8c7d3f9bdea02b3f31a017475fbf345 0xfbe595273ca5c96fb485cd62ae9f391918f47449a6409b8890129b9e9a2bf7c1 0x80e1189850073dfb5e98362ee931eb4fa1f0c3bac53b0e86d29093870c5e480b 0x6e2d753b499dfb62b7400ac650b039a3cbddc6e8473f42b9530bc022deec899e chain_logs contract_getters #683/693 background: none (91.6%) body: grey (12.8%) neck: none (41.4%) mouth: none (68.5%) ears: loopearring (27.3%) head: none (20.1%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 25726693,
       "block_time_utc": "2025-04-16T12:05:53Z",
@@ -86,12 +86,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (12.8%)",
         "trait_type": "Body",
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

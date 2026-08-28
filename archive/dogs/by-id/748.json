@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#528/692",
-      "rank": 528,
+      "display": "#534/693",
+      "rank": 534,
       "scope": "base_existing",
-      "total": 692
+      "total": 693
     },
     "schema_version": 1,
-    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0121 eth 12100000000000000 20.69 $20.69 2026-06-19t23:46:43z 0xd97500777959b9bf1c95f1830c1ebb1f35c97ab8b5c0663556a286366962355d 0x443718ae7bd0fb61d8c769e23c51bcb7c210b1314dbdeafbfb42d18acc5452e1 #528/692 generated auction feed 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f background: none (91.6%) background none body: brown (10.8%) body brown neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: goldearring (14.3%) ears goldearring head: blackcap (7.5%) head blackcap eyes: none (17.6%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 748 dog #748 748 mission 3 mission 3 base settled 0x4119cfa20129f9ea739590ea914cdfbc0c0772cb @i-am-rael.eth i-am-rael.eth 0.0121 eth 12100000000000000 20.69 $20.69 2026-06-19t23:46:43z 0xd97500777959b9bf1c95f1830c1ebb1f35c97ab8b5c0663556a286366962355d 0x443718ae7bd0fb61d8c769e23c51bcb7c210b1314dbdeafbfb42d18acc5452e1 generated auction feed 0xb2d75bce487962af87f0f1a5aa2429451f8aa90e2d43575c61aab6862857cab0 0xbfcfcffbef78976ed88aa5954b3a1d223c9462fca7f43c782448e678b3c1e1b6 0xb3657af930d9844c76ffbd7043925f09b6e75fb52ccff637672d574e213959ba 0x6a5e7c92fb1bed050c515b8e135eaa67cbe6231ffbe0f2cc05f264155600c14f background none body brown neck none mouth none ears goldearring head blackcap eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #534/693 background: none (91.6%) body: brown (10.8%) neck: none (41.4%) mouth: none (68.5%) ears: goldearring (14.3%) head: blackcap (7.6%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 47561728,
       "block_time_utc": "2026-06-19T23:46:43Z",
@@ -93,7 +93,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: BlackCap (7.5%)",
+        "display": "Head: BlackCap (7.6%)",
         "trait_type": "Head",
         "value": "BlackCap"
       },
