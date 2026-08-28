@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50572048"
+    "value": "50573891"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-08-28 16:10:43"
+    "value": "2026-08-28 17:12:09"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xdbc1bcc47002ebe56b94b5e0fa6253bf2ef0c83c0b047df0f371f2a49c7c3a58"
+    "value": "0x1d36d5092a3bc3d2f9e2e92e294c1227528645cff543532ff319151f7c635bed"
   },
   {
     "metric": "snapshot_confirmations",
@@ -169,11 +169,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50572048"
+    "value": "50573891"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xdbc1bcc47002ebe56b94b5e0fa6253bf2ef0c83c0b047df0f371f2a49c7c3a58"
+    "value": "0x1d36d5092a3bc3d2f9e2e92e294c1227528645cff543532ff319151f7c635bed"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -237,7 +237,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2455.815"
+    "value": "2444.035"
   },
   {
     "metric": "eth_usd_source",
@@ -349,19 +349,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "113.73"
+    "value": "113.1"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.8793"
+    "value": "0.8842"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "320.93"
+    "value": "322.72"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈321% APR"
+    "value": "≈323% APR"
   },
   {
     "metric": "woof_holders",
@@ -393,7 +393,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "10.81"
+    "value": "10.75"
   },
   {
     "metric": "current_bidder",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_days_remaining",
-    "value": "3.33"
+    "value": "3.28"
   },
   {
     "metric": "season6_sup_enabled",
@@ -561,7 +561,7 @@
   },
   {
     "metric": "season6_sup_raw_allocated_to_date",
-    "value": "239895.756853"
+    "value": "240013.588462"
   },
   {
     "metric": "season6_sup_raw_projected_full_allocated",
