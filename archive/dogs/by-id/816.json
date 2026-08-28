@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "4400000000000000",
-      "usd_estimate": "11.02510200",
+      "usd_estimate": "10.80558600",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$11.03",
+      "usd_estimate_display": "$10.81",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-08-28",
-      "usd_estimate_price_usd": "2505.705",
+      "usd_estimate_price_usd": "2455.815",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -60,7 +60,7 @@
       "total": 692
     },
     "schema_version": 1,
-    "search_text": "dog 816 dog #816 816 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.0044 eth 4400000000000000 11.03000000 $11.03 2026-08-28t08:09:07z 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 #423/692 generated auction feed 0xcc9e5e11c524ad49c31aa59ea70f1ee1f03ba9a48a5292e2b67df6af6afc8fdc 0x2bbc7e29706a8fb25fb6ec6ed95cf296ef24f5bf364008735e722d8f76e1e350 0xac7ce3062bfe3417bfed38dccac8988507d6bf0c94675ec923ac5062657ab811 background: halo (8.4%) background halo body: dalmation (9.2%) body dalmation neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: none (26.0%) ears none head: none (20.1%) head none eyes: bluelasereyes (11.4%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 816 dog #816 816 mission 3 mission 3 base ongoing 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.0044 eth 4400000000000000 10.81000000 $10.81 2026-08-28t08:09:07z 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 #423/692 generated auction feed 0xcc9e5e11c524ad49c31aa59ea70f1ee1f03ba9a48a5292e2b67df6af6afc8fdc 0x2bbc7e29706a8fb25fb6ec6ed95cf296ef24f5bf364008735e722d8f76e1e350 0xac7ce3062bfe3417bfed38dccac8988507d6bf0c94675ec923ac5062657ab811 background: halo (8.4%) background halo body: dalmation (9.2%) body dalmation neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: none (26.0%) ears none head: none (20.1%) head none eyes: bluelasereyes (11.4%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
