@@ -267,6 +267,25 @@ def test_refresh_outcome_rows_cover_no_diff_failure_and_live_timeout() -> None:
         assert no_diff["result"] == "success_no_diff"
         assert no_diff["reasons"] == ["auction_bid", "highest_bid_amount_changed"]
 
+        superseded = telemetry.build_refresh_row(
+            env, result="success_superseded_by_peer", root=root
+        )
+        assert superseded["result"] == "success_superseded_by_peer"
+        assert superseded["commit_sha"] == "a" * 40
+        assert "success_superseded_by_peer" in telemetry.SUCCESS_RESULTS
+        original_read_jsonl = telemetry.read_jsonl
+        telemetry.read_jsonl = (
+            lambda path, limit=1000: [superseded]
+            if Path(path).name == "refresh_runs.jsonl"
+            else []
+        )
+        try:
+            latest_success = telemetry.latest_successful_refresh_row(env, root=root)
+            assert latest_success["result"] == "success_superseded_by_peer"
+            assert telemetry.metrics_summary(env, root=root)["last_pushed_commit"] == "a" * 40
+        finally:
+            telemetry.read_jsonl = original_read_jsonl
+
         failed = telemetry.build_refresh_row(env, result="failed", error="password=hunter2", root=root)
         assert failed["result"] == "failed"
         assert "hunter2" not in json.dumps(failed)
