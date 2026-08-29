@@ -1222,6 +1222,19 @@
     "latest_bid_utc": "2026-01-15 01:17:41"
   },
   {
+    "bidder": "@kunon",
+    "bidder_url": "https://farcaster.xyz/kunon",
+    "bidder_wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
+    "bids": 3,
+    "auctions_bid": 3,
+    "bid_eth": 0.0087,
+    "high_bid_eth": 0.0055,
+    "auction_wins": 1,
+    "winning_eth": 0.0055,
+    "latest_bid_token_id": 817,
+    "latest_bid_utc": "2026-08-28 23:19:43"
+  },
+  {
     "bidder": "0x8368…9a9f",
     "bidder_url": "https://basescan.org/address/0x836882194209e16929c1c1b3817bc6d9d7fd9a9f",
     "bidder_wallet": "0x836882194209e16929c1c1b3817bc6d9d7fd9a9f",
@@ -1285,18 +1298,5 @@
     "winning_eth": 0.0,
     "latest_bid_token_id": 595,
     "latest_bid_utc": "2026-01-14 03:11:47"
-  },
-  {
-    "bidder": "0x0592…5404",
-    "bidder_url": "https://basescan.org/address/0x05929a613ff148b1f78f0ff7738bd47d316f5404",
-    "bidder_wallet": "0x05929a613ff148b1f78f0ff7738bd47d316f5404",
-    "bids": 1,
-    "auctions_bid": 1,
-    "bid_eth": 0.0067,
-    "high_bid_eth": 0.0067,
-    "auction_wins": 0,
-    "winning_eth": 0.0,
-    "latest_bid_token_id": 595,
-    "latest_bid_utc": "2026-01-14 05:19:21"
   }
 ]
