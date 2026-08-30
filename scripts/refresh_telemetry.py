@@ -57,6 +57,7 @@ SUCCESS_RESULTS = {
     "success",
     "success_generated",
     "success_no_diff",
+    "success_superseded_by_peer",
     "success_skip_push",
     "success_pushed",
     "success_pushed_live_timeout",

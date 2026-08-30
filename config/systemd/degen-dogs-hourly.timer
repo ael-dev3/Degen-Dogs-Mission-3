@@ -1,0 +1,15 @@
+[Unit]
+Description=Run the Windows/WSL reconcile between the Mac mini hourly cycles
+
+[Timer]
+OnBootSec=3min
+# The observed Mac mini publisher begins near minute 29. Minute 59 gives the
+# pair an approximately 30-minute aggregate reconciliation cadence.
+OnCalendar=*-*-* *:59:00
+AccuracySec=15s
+RandomizedDelaySec=30s
+Persistent=true
+Unit=degen-dogs-hourly.service
+
+[Install]
+WantedBy=timers.target

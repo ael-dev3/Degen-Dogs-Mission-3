@@ -3,7 +3,7 @@ set -Eeuo pipefail
 umask 077
 
 # Refresh Degen Dogs Mission 3 cached blockchain data locally and publish it to GitHub Pages.
-# Intended to run from launchd on the private Mac mini runner.
+# Intended to run from a supervised private macOS or Linux runner.
 
 PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PATH
@@ -53,6 +53,37 @@ GIT_RETRY_ATTEMPTS="${DEGEN_DOGS_GIT_RETRY_ATTEMPTS:-4}"
 GIT_RETRY_BASE_SECONDS="${DEGEN_DOGS_GIT_RETRY_BASE_SECONDS:-2}"
 GIT_RETRY_MAX_SECONDS="${DEGEN_DOGS_GIT_RETRY_MAX_SECONDS:-30}"
 GIT_RETRY_JITTER_SECONDS="${DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS:-3}"
+SUPERSESSION_RETRY_COUNT="${DEGEN_DOGS_SUPERSESSION_RETRY_COUNT:-0}"
+RUNNER_ID="${DEGEN_DOGS_RUNNER_ID:-}"
+ORIGINAL_ARGS=("$@")
+derive_run_scope() {
+  if [[ "$RUN_MISSION3_ARCHIVE" == "1" && "$FULL_REFRESH" == "1" ]]; then
+    printf '%s\n' "archive_full"
+  elif [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
+    printf '%s\n' "archive"
+  elif [[ "$FULL_REFRESH" == "1" ]]; then
+    printf '%s\n' "full"
+  else
+    printf '%s\n' "current"
+  fi
+}
+
+RUN_SCOPE="$(derive_run_scope)"
+export DEGEN_DOGS_RUN_SCOPE="$RUN_SCOPE"
+
+if [[ -z "$RUNNER_ID" ]]; then
+  RUNNER_ID="$(python3 - <<'PY'
+from __future__ import annotations
+
+import hashlib
+import socket
+
+identity = socket.gethostname().encode("utf-8", errors="surrogateescape")
+print("runner-" + hashlib.sha256(identity).hexdigest()[:12])
+PY
+)"
+fi
+export DEGEN_DOGS_RUNNER_ID="$RUNNER_ID"
 
 # shellcheck source=runner_permissions.sh
 source "${REPO_DIR}/scripts/runner_permissions.sh"
@@ -74,17 +105,21 @@ BASELINE_HEAD=""
 MUTATION_STARTED=0
 RUNNER_COMMIT_HEAD=""
 RUNNER_COMMIT_RUN_ID=""
+RUNNER_COMMIT_RUNNER_ID=""
+RUNNER_COMMIT_SCOPE=""
 ARTIFACT_LIST=""
 LIVE_VERIFY_ENV=""
 LOCAL_AHEAD_COUNT=0
 QUARANTINE_DIR=""
 RECOVERY_JOURNAL="${RECOVERY_STATE_DIR}/publisher-recovery.json"
+RECOVERY_SUPERSEDED=0
+PUSH_REMOTE_HEAD=""
 
 utc_stamp() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
 }
 
-export DEGEN_DOGS_REFRESH_RUN_ID="${DEGEN_DOGS_REFRESH_RUN_ID:-refresh-$(date -u '+%Y%m%dT%H%M%SZ')-$$}"
+export DEGEN_DOGS_REFRESH_RUN_ID="${DEGEN_DOGS_REFRESH_RUN_ID:-refresh-${RUNNER_ID}-$(date -u '+%Y%m%dT%H%M%SZ')-$$}"
 export DEGEN_DOGS_REFRESH_QUEUED_AT_UTC="${DEGEN_DOGS_REFRESH_QUEUED_AT_UTC:-$(utc_stamp)}"
 export DEGEN_DOGS_REFRESH_TRIGGER="${DEGEN_DOGS_REFRESH_TRIGGER:-hourly_refresh}"
 export DEGEN_DOGS_REFRESH_TELEMETRY_PATH="${DEGEN_DOGS_REFRESH_TELEMETRY_PATH:-${REPO_DIR}/.local/refresh_runs.jsonl}"
@@ -185,7 +220,7 @@ PY
 }
 
 write_recovery_journal() {
-  export RECOVERY_JOURNAL REPO_DIR BRANCH BASELINE_HEAD DEGEN_DOGS_REFRESH_RUN_ID
+  export RECOVERY_JOURNAL REPO_DIR BRANCH BASELINE_HEAD DEGEN_DOGS_REFRESH_RUN_ID DEGEN_DOGS_RUNNER_ID DEGEN_DOGS_RUN_SCOPE
   python3 - "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
 
@@ -205,6 +240,8 @@ payload = {
     "branch": os.environ["BRANCH"],
     "baseline_head": os.environ["BASELINE_HEAD"],
     "run_id": os.environ["DEGEN_DOGS_REFRESH_RUN_ID"],
+    "runner_id": os.environ["DEGEN_DOGS_RUNNER_ID"],
+    "run_scope": os.environ["DEGEN_DOGS_RUN_SCOPE"],
     "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "publish_paths": list(sys.argv[1:]),
 }
@@ -262,6 +299,11 @@ if not isinstance(payload, dict) or payload.get("schema_version") != 1:
     raise SystemExit("publisher recovery journal schema is invalid")
 baseline = payload.get("baseline_head")
 run_id = payload.get("run_id")
+runner_id = payload.get("runner_id")
+run_scope = payload.get("run_scope")
+alignment_runner_commit = payload.get("alignment_runner_commit", "-")
+alignment_remote_head = payload.get("alignment_remote_head", "-")
+alignment_result = payload.get("alignment_result", "-")
 if (
     payload.get("repo_realpath") != expected_repo
     or payload.get("branch") != expected_branch
@@ -270,9 +312,167 @@ if (
     or re.fullmatch(r"[0-9a-f]{40}", baseline) is None
     or not isinstance(run_id, str)
     or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", run_id) is None
+    or not isinstance(runner_id, str)
+    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", runner_id) is None
+    or run_scope not in {"current", "full", "archive", "archive_full"}
 ):
     raise SystemExit("publisher recovery journal provenance is invalid")
-print(f"{baseline}\t{run_id}")
+alignment_values = (alignment_runner_commit, alignment_remote_head, alignment_result)
+if alignment_values != ("-", "-", "-") and (
+    not isinstance(alignment_runner_commit, str)
+    or re.fullmatch(r"[0-9a-f]{40}", alignment_runner_commit) is None
+    or not isinstance(alignment_remote_head, str)
+    or re.fullmatch(r"[0-9a-f]{40}", alignment_remote_head) is None
+    or alignment_result not in {"peer_supersedes", "regenerate"}
+):
+    raise SystemExit("publisher recovery journal alignment state is invalid")
+print(
+    f"{baseline}\t{run_id}\t{runner_id}\t{run_scope}\t{alignment_runner_commit}"
+    f"\t{alignment_remote_head}\t{alignment_result}"
+)
+PY
+}
+
+update_recovery_run_scope() {
+  local run_scope="$1"
+  python3 - "$RECOVERY_JOURNAL" "$REPO_DIR" "$BRANCH" "$BASELINE_HEAD" \
+    "$DEGEN_DOGS_REFRESH_RUN_ID" "$run_scope" "${PUBLISH_PATHS[@]}" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import stat
+import sys
+import tempfile
+from pathlib import Path
+
+journal_name, repo_name, branch, baseline, run_id, run_scope, *publish_paths = sys.argv[1:]
+path = Path(journal_name)
+flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+descriptor = os.open(path, flags)
+details = os.fstat(descriptor)
+if (
+    not stat.S_ISREG(details.st_mode)
+    or details.st_uid != os.getuid()
+    or details.st_nlink != 1
+    or stat.S_IMODE(details.st_mode) != 0o600
+    or details.st_size > 16_384
+):
+    os.close(descriptor)
+    raise SystemExit("publisher recovery journal is not a private owned regular file")
+with os.fdopen(descriptor, encoding="utf-8") as handle:
+    payload = json.load(handle)
+if (
+    not isinstance(payload, dict)
+    or payload.get("schema_version") != 1
+    or payload.get("repo_realpath") != str(Path(repo_name).resolve())
+    or payload.get("branch") != branch
+    or payload.get("baseline_head") != baseline
+    or payload.get("run_id") != run_id
+    or payload.get("publish_paths") != publish_paths
+    or run_scope not in {"full", "archive", "archive_full"}
+):
+    raise SystemExit("publisher recovery journal cannot be attributed to this scope update")
+payload["run_scope"] = run_scope
+descriptor, temporary_name = tempfile.mkstemp(prefix=".publisher-recovery.", suffix=".tmp", dir=path.parent)
+temporary = Path(temporary_name)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, sort_keys=True, separators=(",", ":"))
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+    os.chmod(path, 0o600)
+    directory = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+finally:
+    temporary.unlink(missing_ok=True)
+PY
+}
+
+write_recovery_alignment() {
+  local runner_commit="$1"
+  local remote_head="$2"
+  local alignment_result="$3"
+  python3 - "$RECOVERY_JOURNAL" "$REPO_DIR" "$BRANCH" "$BASELINE_HEAD" \
+    "$RUNNER_COMMIT_RUN_ID" "$runner_commit" "$remote_head" "$alignment_result" \
+    "${PUBLISH_PATHS[@]}" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import re
+import stat
+import sys
+import tempfile
+from pathlib import Path
+
+(
+    journal_name,
+    repo_name,
+    branch,
+    baseline,
+    run_id,
+    runner_commit,
+    remote_head,
+    alignment_result,
+    *publish_paths,
+) = sys.argv[1:]
+path = Path(journal_name)
+flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+descriptor = os.open(path, flags)
+details = os.fstat(descriptor)
+if (
+    not stat.S_ISREG(details.st_mode)
+    or details.st_uid != os.getuid()
+    or details.st_nlink != 1
+    or stat.S_IMODE(details.st_mode) != 0o600
+    or details.st_size > 16_384
+):
+    os.close(descriptor)
+    raise SystemExit("publisher recovery journal is not a private owned regular file")
+with os.fdopen(descriptor, encoding="utf-8") as handle:
+    payload = json.load(handle)
+sha = re.compile(r"[0-9a-f]{40}")
+if (
+    not isinstance(payload, dict)
+    or payload.get("schema_version") != 1
+    or payload.get("repo_realpath") != str(Path(repo_name).resolve())
+    or payload.get("branch") != branch
+    or payload.get("baseline_head") != baseline
+    or payload.get("run_id") != run_id
+    or payload.get("publish_paths") != publish_paths
+    or sha.fullmatch(runner_commit) is None
+    or sha.fullmatch(remote_head) is None
+    or alignment_result not in {"peer_supersedes", "regenerate"}
+):
+    raise SystemExit("publisher recovery journal cannot be attributed to this alignment")
+payload["alignment_runner_commit"] = runner_commit
+payload["alignment_remote_head"] = remote_head
+payload["alignment_result"] = alignment_result
+descriptor, temporary_name = tempfile.mkstemp(prefix=".publisher-recovery.", suffix=".tmp", dir=path.parent)
+temporary = Path(temporary_name)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, sort_keys=True, separators=(",", ":"))
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, path)
+    os.chmod(path, 0o600)
+    directory = os.open(path.parent, os.O_RDONLY)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+finally:
+    temporary.unlink(missing_ok=True)
 PY
 }
 
@@ -280,7 +480,9 @@ validate_runner_commit() {
   local commit="$1"
   local baseline="$2"
   local run_id="$3"
-  python3 - "$commit" "$baseline" "$run_id" <<'PY'
+  local runner_id="$4"
+  local run_scope="$5"
+  python3 - "$commit" "$baseline" "$run_id" "$runner_id" "$run_scope" <<'PY'
 from __future__ import annotations
 
 import os
@@ -288,9 +490,15 @@ import re
 import subprocess
 import sys
 
-commit, baseline, run_id = sys.argv[1:]
+commit, baseline, run_id, runner_id, run_scope = sys.argv[1:]
 sha = re.compile(r"[0-9a-f]{40}")
-if not sha.fullmatch(commit) or not sha.fullmatch(baseline):
+if (
+    not sha.fullmatch(commit)
+    or not sha.fullmatch(baseline)
+    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", run_id) is None
+    or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", runner_id) is None
+    or run_scope not in {"current", "full", "archive", "archive_full"}
+):
     raise SystemExit("runner commit identity is invalid")
 
 history = subprocess.check_output(
@@ -301,8 +509,14 @@ if history != [commit, baseline]:
     raise SystemExit("runner commit is not the single expected child of the refresh baseline")
 
 message = subprocess.check_output(["git", "show", "-s", "--format=%B", commit], text=True)
-if message.splitlines().count(f"Refresh-Run-ID: {run_id}") != 1:
-    raise SystemExit("runner commit refresh-run attribution is missing or ambiguous")
+def exact_trailer(prefix: str, expected: str, pattern: str | None = None) -> None:
+    values = [line[len(prefix):] for line in message.splitlines() if line.startswith(prefix)]
+    if len(values) != 1 or values[0] != expected or (pattern and re.fullmatch(pattern, values[0]) is None):
+        raise SystemExit(f"runner commit {prefix[:-2].lower()} attribution is missing, conflicting, or ambiguous")
+
+exact_trailer("Refresh-Run-ID: ", run_id, r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}")
+exact_trailer("Refresh-Runner-ID: ", runner_id, r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
+exact_trailer("Refresh-Run-Scope: ", run_scope)
 
 raw = subprocess.check_output(
     ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "-z", commit]
@@ -337,9 +551,233 @@ if not changed or unexpected:
 PY
 }
 
+runner_commit_run_id() {
+  local commit="$1"
+  python3 - "$commit" <<'PY'
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+
+message = subprocess.check_output(["git", "show", "-s", "--format=%B", sys.argv[1]], text=True)
+prefix = "Refresh-Run-ID: "
+values = [line[len(prefix):] for line in message.splitlines() if line.startswith(prefix)]
+if len(values) != 1 or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", values[0]) is None:
+    raise SystemExit(1)
+print(values[0])
+PY
+}
+
+runner_commit_runner_id() {
+  local commit="$1"
+  python3 - "$commit" <<'PY'
+from __future__ import annotations
+
+import re
+import subprocess
+import sys
+
+message = subprocess.check_output(["git", "show", "-s", "--format=%B", sys.argv[1]], text=True)
+prefix = "Refresh-Runner-ID: "
+values = [line[len(prefix):] for line in message.splitlines() if line.startswith(prefix)]
+if len(values) != 1 or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", values[0]) is None:
+    raise SystemExit(1)
+print(values[0])
+PY
+}
+
+runner_commit_scope() {
+  local commit="$1"
+  python3 - "$commit" <<'PY'
+from __future__ import annotations
+
+import subprocess
+import sys
+
+message = subprocess.check_output(["git", "show", "-s", "--format=%B", sys.argv[1]], text=True)
+prefix = "Refresh-Run-Scope: "
+values = [line[len(prefix):] for line in message.splitlines() if line.startswith(prefix)]
+if len(values) != 1 or values[0] not in {"current", "full", "archive", "archive_full"}:
+    raise SystemExit(1)
+print(values[0])
+PY
+}
+
+remote_head_is_valid_runner_commit() {
+  local baseline="$1"
+  local remote_head="$2"
+  local record=""
+  local parent=""
+  local run_id=""
+  local runner_id=""
+  local run_scope=""
+
+  git merge-base --is-ancestor "$baseline" "$remote_head" || return 1
+  record="$(git rev-list --parents -n 1 "$remote_head")" || return 1
+  # Only the current remote HEAD may authorize a no-op success. A historical
+  # runner commit followed by an arbitrary commit must be aligned and rebuilt.
+  [[ "$record" =~ ^[0-9a-f]{40}[[:space:]]([0-9a-f]{40})$ ]] || return 1
+  parent="${BASH_REMATCH[1]}"
+  [[ "$parent" == "$baseline" ]] || return 1
+  run_id="$(runner_commit_run_id "$remote_head" 2>/dev/null)" || return 1
+  runner_id="$(runner_commit_runner_id "$remote_head" 2>/dev/null)" || return 1
+  run_scope="$(runner_commit_scope "$remote_head" 2>/dev/null)" || return 1
+  [[ -n "$runner_id" ]] || return 1
+  [[ -n "$run_scope" ]] || return 1
+  validate_runner_commit "$remote_head" "$parent" "$run_id" "$runner_id" "$run_scope" >/dev/null 2>&1
+}
+
+validate_committed_refresh_snapshot() {
+  local commit="$1"
+  export RECOVERY_STATE_DIR REPO_DIR
+  python3 - "$commit" "${REPO_DIR}/scripts/refresh_telemetry.py" <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+commit, telemetry_name = sys.argv[1:]
+status = json.loads(
+    subprocess.check_output(
+        ["git", "show", f"{commit}:generated/refresh_status.json"],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    )
+)
+if not isinstance(status, dict):
+    raise ValueError("refresh status is not an object")
+live_bundle = status.get("live_snapshot_bundle")
+if not isinstance(live_bundle, str) or re.fullmatch(
+    r"live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json",
+    live_bundle,
+) is None:
+    raise ValueError("refresh status has an unsafe live snapshot bundle")
+paths = (
+    "generated/current_auction.json",
+    "public/generated/current_auction.json",
+    "generated/auction_feed.json",
+    "public/generated/auction_feed.json",
+    "generated/current_auction_bid_history.json",
+    "public/generated/current_auction_bid_history.json",
+    "generated/mission3_metrics.json",
+    "public/generated/mission3_metrics.json",
+    "generated/refresh_status.json",
+    "public/generated/refresh_status.json",
+    f"generated/{live_bundle}",
+    f"public/generated/{live_bundle}",
+    "public/generated/unified_dog_search_index.json",
+)
+try:
+    with tempfile.TemporaryDirectory(
+        prefix="peer-snapshot-validation.",
+        dir=os.environ["RECOVERY_STATE_DIR"],
+    ) as temporary_name:
+        root = Path(temporary_name)
+        for relative in paths:
+            payload = subprocess.check_output(
+                ["git", "show", f"{commit}:{relative}"],
+                stderr=subprocess.DEVNULL,
+            )
+            destination = root / relative
+            destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+            destination.write_bytes(payload)
+        subprocess.run(
+            [sys.executable, telemetry_name, "--root", str(root), "validate-status"],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+except (OSError, ValueError, json.JSONDecodeError, subprocess.CalledProcessError):
+    raise SystemExit(1)
+PY
+}
+
+remote_snapshot_supersedes_local_commit() {
+  local local_commit="$1"
+  local remote_head="$2"
+  local local_scope=""
+  local remote_scope=""
+  local_scope="$(runner_commit_scope "$local_commit" 2>/dev/null)" || return 1
+  remote_scope="$(runner_commit_scope "$remote_head" 2>/dev/null)" || return 1
+  # Archive/full reconciliation can carry offchain or historical deltas that a
+  # newer current-auction block does not prove. Always rerun those scopes after
+  # alignment; only an effectively bounded current request is eligible for a
+  # peer no-op, even when the interrupted commit itself was current-scoped.
+  [[ "$RUN_SCOPE" == "current" ]] || return 1
+  [[ "$local_scope" == "current" ]] || return 1
+  [[ -n "$remote_scope" ]] || return 1
+  validate_committed_refresh_snapshot "$local_commit" || return 1
+  validate_committed_refresh_snapshot "$remote_head" || return 1
+  python3 - "$local_commit" "$remote_head" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+
+def load_status(commit: str, relative: str) -> dict[str, object]:
+    raw = subprocess.check_output(
+        ["git", "show", f"{commit}:{relative}"],
+        text=True,
+        stderr=subprocess.DEVNULL,
+    )
+    value = json.loads(raw)
+    if not isinstance(value, dict):
+        raise ValueError("refresh status is not an object")
+    return value
+
+
+try:
+    local = load_status(sys.argv[1], "generated/refresh_status.json")
+    local_public = load_status(sys.argv[1], "public/generated/refresh_status.json")
+    remote = load_status(sys.argv[2], "generated/refresh_status.json")
+    remote_public = load_status(sys.argv[2], "public/generated/refresh_status.json")
+    local_block = int(local.get("latest_generated_block") or 0)
+    remote_block = int(remote.get("latest_generated_block") or 0)
+except (KeyError, TypeError, ValueError, json.JSONDecodeError, subprocess.CalledProcessError):
+    raise SystemExit(1)
+
+if (
+    local_block <= 0
+    or remote_block < local_block
+    or local != local_public
+    or remote != remote_public
+):
+    raise SystemExit(1)
+
+if remote_block == local_block:
+    exact_keys = (
+        "snapshot_block_hash",
+        "current_dog_token_id",
+        "current_bid_eth",
+        "current_high_bidder_wallet",
+        "current_auction_status",
+        "current_auction_end_time_utc",
+        "live_snapshot_bundle_sha256",
+        "unified_dog_search_sha256",
+    )
+    if any(local.get(key) != remote.get(key) for key in exact_keys):
+        raise SystemExit(1)
+
+raise SystemExit(0)
+PY
+}
+
 cleanup_partial_generation() {
+  local preserve_journal="${1:-0}"
   local tracked_changes=""
   local path=""
+  if [[ "$preserve_journal" != "0" && "$preserve_journal" != "1" ]]; then
+    log "warning: invalid cleanup journal-preservation mode"
+    return 1
+  fi
   if [[ "$MUTATION_STARTED" != "1" || -z "$BASELINE_HEAD" ]]; then
     return 0
   fi
@@ -363,7 +801,7 @@ cleanup_partial_generation() {
       return 1
     fi
     if [[ -z "$RUNNER_COMMIT_RUN_ID" ]] || \
-      ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$RUNNER_COMMIT_RUN_ID"; then
+      ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$RUNNER_COMMIT_RUN_ID" "$RUNNER_COMMIT_RUNNER_ID" "$RUNNER_COMMIT_SCOPE"; then
       log "warning: refusing to rewind runner commit with an unsafe path set"
       return 1
     fi
@@ -374,6 +812,8 @@ cleanup_partial_generation() {
     log "rewound unpushed runner commit ${RUNNER_COMMIT_HEAD} to ${BASELINE_HEAD}"
     RUNNER_COMMIT_HEAD=""
     RUNNER_COMMIT_RUN_ID=""
+    RUNNER_COMMIT_RUNNER_ID=""
+    RUNNER_COMMIT_SCOPE=""
   fi
 
   log "rolling back partial generated artifacts to ${BASELINE_HEAD}"
@@ -394,44 +834,210 @@ cleanup_partial_generation() {
   # existed before this run, but a same-user process could still create a file
   # concurrently; quarantine keeps recovery possible without poisoning the
   # next scheduled run.
-  QUARANTINE_DIR="${RECOVERY_STATE_DIR}/recovery/${DEGEN_DOGS_REFRESH_RUN_ID}"
-  export QUARANTINE_DIR REPO_DIR
-  python3 - "${PUBLISH_PATHS[@]}" <<'PY' || {
+  QUARANTINE_DIR=""
+  export REPO_DIR
+  if ! QUARANTINE_DIR="$(python3 - "$RECOVERY_STATE_DIR" "$DEGEN_DOGS_REFRESH_RUN_ID" "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
 
+import errno
 import os
-import shutil
+import secrets
+import stat as stat_module
 import subprocess
 import sys
 from pathlib import Path
 
-repo = Path(os.environ["REPO_DIR"]).resolve()
-recovery = Path(os.environ["QUARANTINE_DIR"]).expanduser()
-paths = sys.argv[1:]
-status = subprocess.check_output(
-    ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", *paths],
-    cwd=repo,
-)
-untracked = [entry[3:] for entry in status.split(b"\0") if entry.startswith(b"?? ") and entry[3:]]
-if not untracked:
-    raise SystemExit(0)
-recovery.mkdir(mode=0o700, parents=True, exist_ok=True)
-os.chmod(recovery, 0o700)
-for raw in untracked:
-    relative = Path(os.fsdecode(raw))
-    if relative.is_absolute() or ".." in relative.parts:
-        raise SystemExit(f"refusing to quarantine unsafe repository path: {relative}")
-    source = repo / relative
-    if not source.exists() and not source.is_symlink():
-        continue
-    destination = recovery / relative
-    destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    shutil.move(os.fspath(source), os.fspath(destination))
-    print(f"quarantined untracked artifact: {relative}")
+repo = Path(os.path.abspath(os.path.expanduser(os.environ["REPO_DIR"])))
+state_root = Path(os.path.abspath(os.path.expanduser(sys.argv[1])))
+run_id = sys.argv[2]
+paths = sys.argv[3:]
+directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+
+
+def open_absolute_directory(path: Path) -> int:
+    if not path.is_absolute():
+        raise SystemExit(f"directory path is not absolute: {path}")
+    descriptor = os.open(path.anchor, directory_flags)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, directory_flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def require_private_directory(descriptor: int, display: Path) -> None:
+    details = os.fstat(descriptor)
+    if (
+        not stat_module.S_ISDIR(details.st_mode)
+        or details.st_uid != os.getuid()
+        or (details.st_mode & 0o777) != 0o700
+    ):
+        raise SystemExit(f"unsafe recovery directory: {display}")
+
+
+def open_private_child(parent_fd: int, name: str, display: Path, *, create: bool) -> int:
+    if create:
+        try:
+            os.mkdir(name, mode=0o700, dir_fd=parent_fd)
+        except FileExistsError:
+            pass
+    try:
+        descriptor = os.open(name, directory_flags, dir_fd=parent_fd)
+    except FileNotFoundError:
+        raise SystemExit(f"missing authenticated recovery directory: {display}") from None
+    try:
+        require_private_directory(descriptor, display)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def open_relative_directory(
+    base_fd: int,
+    parts: tuple[str, ...],
+    display_root: Path,
+    *,
+    create_private: bool,
+) -> int:
+    descriptor = os.dup(base_fd)
+    cursor = display_root
+    try:
+        for part in parts:
+            cursor /= part
+            if create_private:
+                try:
+                    os.mkdir(part, mode=0o700, dir_fd=descriptor)
+                except FileExistsError:
+                    pass
+            child = os.open(part, directory_flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+            if create_private:
+                require_private_directory(descriptor, cursor)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+repo_fd = open_absolute_directory(repo)
+state_root_fd = open_absolute_directory(state_root)
+recovery_root_fd = -1
+recovery_fd = -1
+try:
+    # The state root was authenticated at startup. Do not traverse any recovery
+    # or repository component through a symlink between validation and use.
+    require_private_directory(state_root_fd, state_root)
+    recovery_root = state_root / "recovery"
+    recovery_root_fd = open_private_child(
+        state_root_fd,
+        "recovery",
+        recovery_root,
+        create=True,
+    )
+    status = subprocess.check_output(
+        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", *paths],
+        cwd=repo,
+    )
+    untracked = [
+        entry[3:]
+        for entry in status.split(b"\0")
+        if entry.startswith(b"?? ") and entry[3:]
+    ]
+    if not untracked:
+        raise SystemExit(0)
+
+    # Never reuse a run-id path. Create the quarantine directory relative to
+    # the already-open recovery root so a renamed path cannot redirect it.
+    for _ in range(128):
+        recovery_name = f"{run_id}.{secrets.token_hex(8)}"
+        try:
+            os.mkdir(recovery_name, mode=0o700, dir_fd=recovery_root_fd)
+        except FileExistsError:
+            continue
+        break
+    else:
+        raise SystemExit("could not allocate a unique recovery quarantine")
+    recovery = recovery_root / recovery_name
+    recovery_fd = open_private_child(
+        recovery_root_fd,
+        recovery_name,
+        recovery,
+        create=False,
+    )
+
+    for raw in untracked:
+        relative = Path(os.fsdecode(raw))
+        if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+            raise SystemExit(f"refusing to quarantine unsafe repository path: {relative}")
+        source_parent_fd = open_relative_directory(
+            repo_fd,
+            tuple(relative.parts[:-1]),
+            repo,
+            create_private=False,
+        )
+        try:
+            source_name = relative.parts[-1]
+            try:
+                os.stat(source_name, dir_fd=source_parent_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                continue
+            destination_parent_fd = open_relative_directory(
+                recovery_fd,
+                tuple(relative.parts[:-1]),
+                recovery,
+                create_private=True,
+            )
+            try:
+                destination_name = relative.parts[-1]
+                try:
+                    os.stat(
+                        destination_name,
+                        dir_fd=destination_parent_fd,
+                        follow_symlinks=False,
+                    )
+                except FileNotFoundError:
+                    pass
+                else:
+                    raise SystemExit(
+                        f"refusing to overwrite quarantine destination: {recovery / relative}"
+                    )
+                try:
+                    os.rename(
+                        source_name,
+                        destination_name,
+                        src_dir_fd=source_parent_fd,
+                        dst_dir_fd=destination_parent_fd,
+                    )
+                except OSError as exc:
+                    if exc.errno == errno.EXDEV:
+                        raise SystemExit(
+                            f"refusing cross-device quarantine move for {relative}"
+                        ) from None
+                    raise
+                print(f"quarantined untracked artifact: {relative}", file=sys.stderr)
+            finally:
+                os.close(destination_parent_fd)
+        finally:
+            os.close(source_parent_fd)
+    print(recovery)
+finally:
+    if recovery_fd >= 0:
+        os.close(recovery_fd)
+    if recovery_root_fd >= 0:
+        os.close(recovery_root_fd)
+    os.close(state_root_fd)
+    os.close(repo_fd)
 PY
+  )"; then
     log "warning: could not quarantine runner-created untracked artifacts"
     return 1
-  }
+  fi
   if [[ -d "$QUARANTINE_DIR" ]]; then
     log "untracked artifacts preserved under ${QUARANTINE_DIR}"
   fi
@@ -440,12 +1046,186 @@ PY
     git status --short --untracked-files=all -- "${PUBLISH_PATHS[@]}"
     return 1
   fi
-  remove_recovery_journal || {
-    log "warning: could not remove the authenticated publisher recovery journal"
+  if [[ "$preserve_journal" != "1" ]]; then
+    remove_recovery_journal || {
+      log "warning: could not remove the authenticated publisher recovery journal"
+      return 1
+    }
+    MUTATION_STARTED=0
+  fi
+  log "partial generated artifacts rolled back"
+}
+
+align_local_runner_commit_to_remote() {
+  local remote_head="$1"
+  local context="$2"
+  local peer_snapshot_covers="$3"
+  local alignment_result="regenerate"
+  local current_head=""
+
+  current_head="$(git rev-parse HEAD)" || return 1
+  if [[ -z "$RUNNER_COMMIT_HEAD" || -z "$RUNNER_COMMIT_RUN_ID" || \
+    "$current_head" != "$RUNNER_COMMIT_HEAD" ]]; then
+    log "warning: refusing ${context} alignment without the authenticated local runner commit"
+    return 1
+  fi
+  validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$RUNNER_COMMIT_RUN_ID" "$RUNNER_COMMIT_RUNNER_ID" "$RUNNER_COMMIT_SCOPE" || {
+    log "warning: refusing ${context} alignment for an invalid local runner commit"
     return 1
   }
+  if ! git merge-base --is-ancestor "$BASELINE_HEAD" "$remote_head"; then
+    log "warning: refusing ${context} alignment because remote ${remote_head} is not a descendant of baseline ${BASELINE_HEAD}"
+    return 1
+  fi
+
+  if [[ "$peer_snapshot_covers" == "1" ]]; then
+    alignment_result="peer_supersedes"
+  fi
+  write_recovery_alignment \
+    "$RUNNER_COMMIT_HEAD" "$remote_head" "$alignment_result" || {
+    log "warning: could not persist crash-safe ${context} alignment state"
+    return 1
+  }
+  # Keep the journal armed while HEAD crosses from the losing child through
+  # its baseline to the remote descendant. Recovery understands every state.
+  cleanup_partial_generation 1 || return 1
+  git merge --ff-only "$remote_head" || {
+    log "warning: could not fast-forward the clean baseline to competing remote ${remote_head}"
+    return 1
+  }
+  if [[ "$(git rev-parse HEAD)" != "$remote_head" ]] || \
+    [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+    MUTATION_STARTED=0
+    log "warning: remote supersession alignment did not leave the expected clean publish snapshot"
+    return 1
+  fi
+  if ! remove_recovery_journal; then
+    # HEAD now names the exact journaled remote target. Preserve both so the
+    # next invocation can finish the alignment without guessing provenance.
+    MUTATION_STARTED=0
+    log "warning: aligned remote snapshot but could not clear its recovery journal"
+    return 1
+  fi
+  BASELINE_HEAD=""
+  RUNNER_COMMIT_HEAD=""
+  RUNNER_COMMIT_RUN_ID=""
+  RUNNER_COMMIT_RUNNER_ID=""
+  RUNNER_COMMIT_SCOPE=""
   MUTATION_STARTED=0
-  log "partial generated artifacts rolled back"
+  log "aligned local ${BRANCH} to competing remote descendant ${remote_head} during ${context}"
+}
+
+reconcile_remote_descendant() {
+  local remote_head="$1"
+  local context="$2"
+  local peer_snapshot_covers=0
+
+  if remote_head_is_valid_runner_commit "$BASELINE_HEAD" "$remote_head" && \
+    remote_snapshot_supersedes_local_commit "$RUNNER_COMMIT_HEAD" "$remote_head"; then
+    peer_snapshot_covers=1
+  fi
+  align_local_runner_commit_to_remote "$remote_head" "$context" "$peer_snapshot_covers" || return 1
+  if [[ "$peer_snapshot_covers" == "1" ]]; then
+    return 0
+  fi
+  return 75
+}
+
+complete_peer_supersession() {
+  local remote_head="$1"
+  local context="$2"
+  export DEGEN_DOGS_REFRESH_RESULT="success_superseded_by_peer"
+  export DEGEN_DOGS_COMMIT_SHA="$remote_head"
+  unset DEGEN_DOGS_PUSH_COMPLETED_AT_UTC
+  log "peer publisher already committed an equal-or-newer verified snapshot at ${remote_head}; ${context} completed by supersession"
+  exit 0
+}
+
+restart_after_remote_advance() {
+  local remote_head="$1"
+  local context="$2"
+  if (( SUPERSESSION_RETRY_COUNT < 1 )); then
+    export DEGEN_DOGS_SUPERSESSION_RETRY_COUNT="$((SUPERSESSION_RETRY_COUNT + 1))"
+    unset \
+      DEGEN_DOGS_COMMIT_SHA \
+      DEGEN_DOGS_COMMIT_STARTED_AT_UTC \
+      DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC \
+      DEGEN_DOGS_PUSH_STARTED_AT_UTC \
+      DEGEN_DOGS_PUSH_COMPLETED_AT_UTC \
+      DEGEN_DOGS_LIVE_VERIFY_STARTED_AT_UTC \
+      DEGEN_DOGS_LIVE_VERIFIED_AT_UTC \
+      DEGEN_DOGS_LIVE_VERIFY_RESULT \
+      DEGEN_DOGS_RAW_COMMIT_VERIFIED \
+      DEGEN_DOGS_LIVE_VERIFY_ERROR
+    log "remote advanced to ${remote_head} without a provably covering peer snapshot; restarting once from the new baseline after ${context}"
+    exec "$0" "${ORIGINAL_ARGS[@]}"
+  fi
+  fail "remote advanced again during the bounded supersession retry (${context}); local branch is safely aligned and a later watcher run will retry"
+}
+
+handle_remote_advance_after_local_commit() {
+  local remote_head="$1"
+  local context="$2"
+  local reconcile_status=0
+
+  if ! git merge-base --is-ancestor "$BASELINE_HEAD" "$remote_head"; then
+    MUTATION_STARTED=0
+    fail "remote changed non-linearly after ${context}; preserving authenticated recovery journal"
+  fi
+  if reconcile_remote_descendant "$remote_head" "$context"; then
+    complete_peer_supersession "$remote_head" "$context"
+  else
+    reconcile_status=$?
+  fi
+  if [[ "$reconcile_status" == "75" ]]; then
+    restart_after_remote_advance "$remote_head" "$context"
+  fi
+  fail "could not safely reconcile competing remote descendant ${remote_head} after ${context}"
+}
+
+push_with_compare_and_swap() {
+  local attempt=1
+  local push_status=1
+  local delay=0
+  local remote_head=""
+  local lease="refs/heads/${BRANCH}:${BASELINE_HEAD}"
+
+  while (( attempt <= GIT_RETRY_ATTEMPTS )); do
+    log "git push compare-and-swap attempt=${attempt}/${GIT_RETRY_ATTEMPTS} baseline=${BASELINE_HEAD}"
+    if git push --porcelain --force-with-lease="$lease" "$REMOTE" "${RUNNER_COMMIT_HEAD}:refs/heads/${BRANCH}"; then
+      return 0
+    else
+      push_status=$?
+    fi
+
+    # Every failed push is ambiguous until a fresh fetch classifies the remote.
+    # Never blindly retry a rejected non-fast-forward update from the same base.
+    if ! run_with_retry "git fetch after failed compare-and-swap push" git fetch "$REMOTE" "$BRANCH"; then
+      MUTATION_STARTED=0
+      fail "compare-and-swap push failed and remote state could not be reconciled; preserving authenticated recovery journal"
+    fi
+    remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || {
+      MUTATION_STARTED=0
+      fail "compare-and-swap push failed and reconciled remote ref could not be resolved"
+    }
+    if [[ "$remote_head" == "$RUNNER_COMMIT_HEAD" ]]; then
+      log "push command reported failure, but immutable publisher commit is confirmed on the remote"
+      return 0
+    fi
+    if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
+      PUSH_REMOTE_HEAD="$remote_head"
+      return 75
+    fi
+    if (( attempt == GIT_RETRY_ATTEMPTS )); then
+      log "git push compare-and-swap failed after ${attempt} attempts status=${push_status}; remote remains at baseline"
+      return "$push_status"
+    fi
+    delay="$(retry_delay_seconds "$attempt")"
+    log "git push compare-and-swap retrying in ${delay}s after status=${push_status}; remote still equals baseline"
+    sleep "$delay"
+    attempt=$((attempt + 1))
+  done
+  return "$push_status"
 }
 
 portable_stat_value() {
@@ -518,24 +1298,142 @@ recover_interrupted_generation() {
   local journal_record
   local journal_baseline
   local journal_run_id
+  local journal_runner_id
+  local journal_run_scope
+  local alignment_runner_commit
+  local alignment_remote_head
+  local alignment_result
+  local journaled_alignment_head
+  local latest_alignment_result
   local current_branch
   local current_head
+  local current_run_scope
   local remote_head
+  local reconcile_status=0
 
   [[ -e "$RECOVERY_JOURNAL" || -L "$RECOVERY_JOURNAL" ]] || return 0
   journal_record="$(read_recovery_journal_baseline)" || fail "publisher recovery journal could not be authenticated"
-  IFS=$'\t' read -r journal_baseline journal_run_id <<<"$journal_record"
+  IFS=$'\t' read -r journal_baseline journal_run_id journal_runner_id journal_run_scope alignment_runner_commit \
+    alignment_remote_head alignment_result <<<"$journal_record"
+  RUNNER_COMMIT_RUNNER_ID="$journal_runner_id"
+  RUNNER_COMMIT_SCOPE="$journal_run_scope"
   current_branch="$(git branch --show-current)" || fail "could not resolve branch during interrupted-run recovery"
   current_head="$(git rev-parse HEAD)" || fail "could not resolve HEAD during interrupted-run recovery"
   if [[ "$current_branch" != "$BRANCH" ]]; then
     fail "authenticated publisher recovery journal belongs to ${BRANCH}, but worktree is on ${current_branch:-detached}"
   fi
 
+  # Recovery must never downgrade either the caller's requested work or the
+  # interrupted job's journaled work.  Union the two dimensions, then derive
+  # the canonical trailer scope exactly once.
+  if [[ "$journal_run_scope" == "archive" || "$journal_run_scope" == "archive_full" ]]; then
+    RUN_MISSION3_ARCHIVE=1
+  fi
+  if [[ "$journal_run_scope" == "full" || "$journal_run_scope" == "archive_full" ]]; then
+    FULL_REFRESH=1
+  fi
+  RUN_SCOPE="$(derive_run_scope)"
+  export DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$RUN_MISSION3_ARCHIVE"
+  export DEGEN_DOGS_FULL_REFRESH="$FULL_REFRESH"
+  export DEGEN_DOGS_RUN_SCOPE="$RUN_SCOPE"
+
+  if [[ "$alignment_remote_head" != "-" ]]; then
+    validate_runner_commit "$alignment_runner_commit" "$journal_baseline" "$journal_run_id" "$journal_runner_id" "$journal_run_scope" || \
+      fail "publisher alignment journal no longer identifies its losing runner commit"
+    current_run_scope="$(runner_commit_scope "$alignment_runner_commit" 2>/dev/null || true)"
+    if [[ "$current_run_scope" != "$journal_run_scope" ]]; then
+      fail "publisher alignment journal scope differs from its losing runner commit"
+    fi
+    run_with_retry "git fetch for interrupted remote alignment" git fetch "$REMOTE" "$BRANCH"
+    remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || \
+      fail "could not resolve remote during interrupted alignment"
+    journaled_alignment_head="$alignment_remote_head"
+    git merge-base --is-ancestor "$journal_baseline" "$alignment_remote_head" || \
+      fail "interrupted publisher alignment target is no longer a baseline descendant"
+    git merge-base --is-ancestor "$journaled_alignment_head" "$remote_head" || \
+      fail "remote changed non-linearly beyond the interrupted publisher alignment target"
+
+    latest_alignment_result="regenerate"
+    if remote_head_is_valid_runner_commit "$journal_baseline" "$remote_head" && \
+      remote_snapshot_supersedes_local_commit "$alignment_runner_commit" "$remote_head"; then
+      latest_alignment_result="peer_supersedes"
+    fi
+    if [[ "$remote_head" != "$journaled_alignment_head" || \
+      "$alignment_result" != "$latest_alignment_result" ]]; then
+      # Advance the private journal before moving HEAD again. A second crash can
+      # therefore resume from any clean remote-line prefix through this target.
+      BASELINE_HEAD="$journal_baseline"
+      RUNNER_COMMIT_HEAD="$alignment_runner_commit"
+      RUNNER_COMMIT_RUN_ID="$journal_run_id"
+      write_recovery_alignment \
+        "$alignment_runner_commit" "$remote_head" "$latest_alignment_result" || \
+        fail "could not advance interrupted publisher alignment journal to latest remote"
+      BASELINE_HEAD=""
+      RUNNER_COMMIT_HEAD=""
+      RUNNER_COMMIT_RUN_ID=""
+      alignment_remote_head="$remote_head"
+      alignment_result="$latest_alignment_result"
+      log "advanced interrupted publisher alignment target from ${journaled_alignment_head} to ${remote_head}"
+    fi
+
+    if [[ "$current_head" == "$alignment_runner_commit" ]]; then
+      # The process stopped before the journaled rewind. The normal local-child
+      # path below can repeat reconciliation against the latest remote safely.
+      :
+    elif git merge-base --is-ancestor "$journal_baseline" "$current_head" && \
+      git merge-base --is-ancestor "$current_head" "$alignment_remote_head"; then
+      BASELINE_HEAD="$journal_baseline"
+      MUTATION_STARTED=1
+      if [[ "$current_head" == "$journal_baseline" ]]; then
+        cleanup_partial_generation 1 || \
+          fail "could not finish the journaled baseline cleanup before remote alignment"
+      elif [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+        MUTATION_STARTED=0
+        fail "interrupted publisher alignment prefix has dirty publish artifacts"
+      fi
+      if [[ "$current_head" != "$alignment_remote_head" ]]; then
+        if ! git merge --ff-only "$alignment_remote_head"; then
+          MUTATION_STARTED=0
+          fail "could not resume interrupted fast-forward to latest competing remote"
+        fi
+      fi
+      current_head="$(git rev-parse HEAD)" || fail "could not resolve resumed alignment HEAD"
+    else
+      fail "worktree HEAD does not match any crash-safe publisher alignment phase"
+    fi
+
+    if [[ "$current_head" == "$alignment_remote_head" ]]; then
+      if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+        MUTATION_STARTED=0
+        fail "interrupted publisher alignment reached remote HEAD with dirty publish artifacts"
+      fi
+      if ! remove_recovery_journal; then
+        MUTATION_STARTED=0
+        fail "could not clear completed remote-alignment recovery journal"
+      fi
+      BASELINE_HEAD=""
+      RUNNER_COMMIT_HEAD=""
+      RUNNER_COMMIT_RUN_ID=""
+      RUNNER_COMMIT_RUNNER_ID=""
+      RUNNER_COMMIT_SCOPE=""
+      MUTATION_STARTED=0
+      if [[ "$alignment_result" == "peer_supersedes" ]]; then
+        RECOVERY_SUPERSEDED=1
+      fi
+      log "completed interrupted publisher alignment to remote ${alignment_remote_head}"
+      return 0
+    fi
+  fi
+
   if [[ "$current_head" == "$journal_baseline" ]]; then
     log "recovering interrupted generated artifacts from baseline ${journal_baseline}"
   else
-    validate_runner_commit "$current_head" "$journal_baseline" "$journal_run_id" || \
+    validate_runner_commit "$current_head" "$journal_baseline" "$journal_run_id" "$journal_runner_id" "$journal_run_scope" || \
       fail "refusing to attribute an unsafe or different commit to the interrupted publisher"
+    current_run_scope="$(runner_commit_scope "$current_head" 2>/dev/null || true)"
+    if [[ "$current_run_scope" != "$journal_run_scope" ]]; then
+      fail "interrupted publisher commit scope differs from its recovery journal"
+    fi
 
     run_with_retry "git fetch for interrupted publisher recovery" git fetch "$REMOTE" "$BRANCH"
     remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || fail "could not resolve remote during interrupted publisher recovery"
@@ -549,8 +1447,31 @@ recover_interrupted_generation() {
       log "reconciled publisher commit ${current_head} that landed before the interruption"
       return 0
     fi
-    [[ "$remote_head" == "$journal_baseline" ]] || fail "remote changed across interrupted publisher recovery"
-    log "recovering unpushed interrupted publisher commit ${current_head}"
+    if [[ "$remote_head" == "$journal_baseline" ]]; then
+      log "recovering unpushed interrupted publisher commit ${current_head}"
+    elif git merge-base --is-ancestor "$journal_baseline" "$remote_head"; then
+      # Another writer may have won after this process pushed ambiguously or
+      # crashed. Authenticate our local child first, then either acknowledge a
+      # covering peer snapshot or fast-forward and regenerate on the new base.
+      BASELINE_HEAD="$journal_baseline"
+      RUNNER_COMMIT_HEAD="$current_head"
+      RUNNER_COMMIT_RUN_ID="$journal_run_id"
+      MUTATION_STARTED=1
+      if reconcile_remote_descendant "$remote_head" "interrupted publisher recovery"; then
+        RECOVERY_SUPERSEDED=1
+        log "interrupted publisher was safely superseded by peer commit ${remote_head}"
+        return 0
+      else
+        reconcile_status=$?
+      fi
+      if [[ "$reconcile_status" == "75" ]]; then
+        log "interrupted publisher aligned to remote ${remote_head}; regenerating because peer coverage was not proven"
+        return 0
+      fi
+      fail "could not safely align interrupted publisher state to remote descendant ${remote_head}"
+    else
+      fail "remote changed non-linearly across interrupted publisher recovery"
+    fi
   fi
 
   # Arm EXIT rollback only after every provenance/history/remote check passes.
@@ -566,6 +1487,8 @@ recover_interrupted_generation() {
   BASELINE_HEAD=""
   RUNNER_COMMIT_HEAD=""
   RUNNER_COMMIT_RUN_ID=""
+  RUNNER_COMMIT_RUNNER_ID=""
+  RUNNER_COMMIT_SCOPE=""
   log "interrupted publisher recovery completed"
 }
 
@@ -577,7 +1500,9 @@ commit_refresh_snapshot() {
     -m "$commit_message" \
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
-    -m "Automated refresh from the private Mac mini runner." \
+    -m "Automated refresh from runner ${RUNNER_ID}." \
+    -m "Refresh-Runner-ID: ${RUNNER_ID}" \
+    -m "Refresh-Run-Scope: ${RUN_SCOPE}" \
     -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}" 2>&1)"; then
     printf '%s\n' "$commit_output"
     return 0
@@ -595,7 +1520,9 @@ commit_refresh_snapshot() {
     -m "$commit_message" \
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
-    -m "Automated refresh from the private Mac mini runner." \
+    -m "Automated refresh from runner ${RUNNER_ID}." \
+    -m "Refresh-Runner-ID: ${RUNNER_ID}" \
+    -m "Refresh-Run-Scope: ${RUN_SCOPE}" \
     -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}"
 }
 
@@ -636,8 +1563,15 @@ validate_name() {
 
 validate_name "remote" "$REMOTE"
 validate_name "branch" "$BRANCH"
+if [[ ! "$RUNNER_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
+  fail "invalid DEGEN_DOGS_RUNNER_ID"
+fi
 if [[ ! "$DEGEN_DOGS_REFRESH_RUN_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$ ]]; then
   fail "invalid refresh run ID"
+fi
+validate_nonnegative_integer "DEGEN_DOGS_SUPERSESSION_RETRY_COUNT" "$SUPERSESSION_RETRY_COUNT"
+if (( SUPERSESSION_RETRY_COUNT > 1 )); then
+  fail "DEGEN_DOGS_SUPERSESSION_RETRY_COUNT must be 0 or 1"
 fi
 validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_ATTEMPTS" "$GIT_RETRY_ATTEMPTS"
 validate_nonnegative_integer "DEGEN_DOGS_GIT_RETRY_BASE_SECONDS" "$GIT_RETRY_BASE_SECONDS"
@@ -770,6 +1704,9 @@ if ! git check-ref-format --branch "$BRANCH" >/dev/null 2>&1; then
 fi
 clear_stale_git_index_lock "publisher preflight" || fail "git index lock is active, recent, or unsafe"
 recover_interrupted_generation
+if [[ "$RECOVERY_SUPERSEDED" == "1" ]]; then
+  complete_peer_supersession "$(git rev-parse HEAD)" "interrupted recovery"
+fi
 
 current_branch="$(git branch --show-current)"
 if [[ "$current_branch" != "$BRANCH" ]]; then
@@ -875,6 +1812,19 @@ else
   else
     current_refresh_status=$?
     if [[ "$current_refresh_status" == "75" ]]; then
+      FULL_REFRESH=1
+      export DEGEN_DOGS_FULL_REFRESH=1
+      if [[ "$RUN_SCOPE" == "current" ]]; then
+        RUN_SCOPE="full"
+        export DEGEN_DOGS_RUN_SCOPE="full"
+        update_recovery_run_scope "full" || \
+          fail "could not promote publisher recovery journal to full-refresh scope"
+      elif [[ "$RUN_SCOPE" == "archive" ]]; then
+        RUN_SCOPE="archive_full"
+        export DEGEN_DOGS_RUN_SCOPE="archive_full"
+        update_recovery_run_scope "archive_full" || \
+          fail "could not promote archive recovery journal to archive/full scope"
+      fi
       log "bounded current refresh requires full reconciliation; falling back to npm run data"
       npm run data
     else
@@ -1200,9 +2150,14 @@ export DEGEN_DOGS_COMMIT_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_COMMIT_SHA="$(git rev-parse HEAD)"
 RUNNER_COMMIT_HEAD="$DEGEN_DOGS_COMMIT_SHA"
 RUNNER_COMMIT_RUN_ID="$DEGEN_DOGS_REFRESH_RUN_ID"
+RUNNER_COMMIT_RUNNER_ID="$RUNNER_ID"
+RUNNER_COMMIT_SCOPE="$RUN_SCOPE"
 if [[ "$(git rev-parse HEAD)" != "$RUNNER_COMMIT_HEAD" ]] || \
-  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID"; then
+  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID" "$RUNNER_ID" "$RUN_SCOPE"; then
   fail "publisher commit identity, parent, attribution, or exact path set failed validation"
+fi
+if [[ "$(runner_commit_scope "$RUNNER_COMMIT_HEAD" 2>/dev/null || true)" != "$RUN_SCOPE" ]]; then
+  fail "publisher commit scope differs from the completed generation scope"
 fi
 
 if [[ "$SKIP_PUSH" == "1" ]]; then
@@ -1210,6 +2165,8 @@ if [[ "$SKIP_PUSH" == "1" ]]; then
   MUTATION_STARTED=0
   RUNNER_COMMIT_HEAD=""
   RUNNER_COMMIT_RUN_ID=""
+  RUNNER_COMMIT_RUNNER_ID=""
+  RUNNER_COMMIT_SCOPE=""
   remove_recovery_journal || fail "could not clear publisher recovery journal after skip-push refresh"
   export DEGEN_DOGS_REFRESH_RESULT="success_skip_push"
   exit 0
@@ -1217,39 +2174,27 @@ fi
 
 log "pushing generated data refresh"
 export DEGEN_DOGS_PUSH_STARTED_AT_UTC="$(utc_stamp)"
+if [[ "$(git rev-parse HEAD)" != "$RUNNER_COMMIT_HEAD" ]] || \
+  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID" "$RUNNER_ID" "$RUN_SCOPE"; then
+  fail "local branch changed after publisher commit; refusing to push a moving branch ref"
+fi
+if [[ "$(runner_commit_scope "$RUNNER_COMMIT_HEAD" 2>/dev/null || true)" != "$RUN_SCOPE" ]]; then
+  fail "publisher commit scope changed before push"
+fi
 run_with_retry "git fetch before push" git fetch "$REMOTE" "$BRANCH"
 remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")"
 if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
-  fail "${REMOTE}/${BRANCH} changed during refresh; refusing a divergent push (remote=${remote_head} baseline=${BASELINE_HEAD})"
-fi
-if [[ "$(git rev-parse HEAD)" != "$RUNNER_COMMIT_HEAD" ]] || \
-  ! validate_runner_commit "$RUNNER_COMMIT_HEAD" "$BASELINE_HEAD" "$DEGEN_DOGS_REFRESH_RUN_ID"; then
-  fail "local branch changed after publisher commit; refusing to push a moving branch ref"
+  handle_remote_advance_after_local_commit "$remote_head" "pre-push fetch"
 fi
 push_status=0
-if run_with_retry "git push" git push "$REMOTE" "${RUNNER_COMMIT_HEAD}:refs/heads/${BRANCH}"; then
+if push_with_compare_and_swap; then
   :
 else
   push_status=$?
-  if ! run_with_retry "git fetch after ambiguous push failure" git fetch "$REMOTE" "$BRANCH"; then
-    # A transport failure can hide a push that actually landed. Preserve the
-    # authenticated commit and journal for the next locked recovery instead of
-    # rewinding a potentially published snapshot.
-    MUTATION_STARTED=0
-    fail "push failed and remote state could not be reconciled; preserving authenticated recovery journal"
+  if [[ "$push_status" == "75" && -n "$PUSH_REMOTE_HEAD" ]]; then
+    handle_remote_advance_after_local_commit "$PUSH_REMOTE_HEAD" "compare-and-swap push"
   fi
-  remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || {
-    MUTATION_STARTED=0
-    fail "push failed and reconciled remote ref could not be resolved"
-  }
-  if [[ "$remote_head" == "$RUNNER_COMMIT_HEAD" ]]; then
-    log "push command reported failure, but immutable publisher commit is confirmed on the remote"
-  elif [[ "$remote_head" == "$BASELINE_HEAD" ]]; then
-    fail "immutable publisher push failed with status ${push_status} and did not land"
-  else
-    MUTATION_STARTED=0
-    fail "remote changed unexpectedly after ambiguous push failure; preserving authenticated recovery journal"
-  fi
+  fail "immutable compare-and-swap publisher push failed with status ${push_status} and did not land"
 fi
 # From this point the immutable commit is known to have landed. Never let a
 # later diagnostic or Pages failure rewind it locally.
@@ -1261,6 +2206,8 @@ export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
 RUNNER_COMMIT_HEAD=""
 RUNNER_COMMIT_RUN_ID=""
+RUNNER_COMMIT_RUNNER_ID=""
+RUNNER_COMMIT_SCOPE=""
 remove_recovery_journal || fail "could not clear publisher recovery journal after push"
 
 verify_live_deployment
