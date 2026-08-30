@@ -222,6 +222,8 @@ def test() -> None:
     powershell = text("scripts/install_wsl_startup_task.ps1")
     assert not powershell.startswith("#Requires -RunAsAdministrator")
     assert "function Assert-WslRunnerInvocationPolicy" in powershell
+    assert "function Get-WslRunnerGitPath" in powershell
+    assert "$gitPath = Get-WslRunnerGitPath" in powershell
     policy_gate = powershell.rindex("Assert-WslRunnerInvocationPolicy `")
     source_attestation = powershell.index(
         "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"

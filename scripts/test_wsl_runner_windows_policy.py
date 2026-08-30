@@ -52,6 +52,7 @@ $requiredFunctions = @(
     'Exit-WslRunnerDistroLock',
     'Get-WslRunnerImportArguments',
     'Get-WslRunnerImportAttemptFromRegistration',
+    'Get-WslRunnerGitPath',
     'Get-WslRunnerImageSpec',
     'Get-WslRunnerKnownLocalAppData',
     'Get-WslRunnerOwnershipMarkerValue',
@@ -147,6 +148,40 @@ if ($image.Sha256 -ne '9b2f7730dc68227dd04a9f3e5eab86ad85caf556b8606ad94f1f29ff5
 Write-Output 'invocation-policy-checked'
 """,
         "invocation-policy-checked",
+    )
+
+
+def test_git_command_resolution_is_deterministic() -> None:
+    assert_harness(
+        r"""
+$firstPath = [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetTempPath()) 'git-first.exe'))
+$secondPath = [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetTempPath()) 'git-second.exe'))
+$resolved = Get-WslRunnerGitPath -ResolveAction {
+    @(
+        [PSCustomObject]@{ Source = $firstPath },
+        [PSCustomObject]@{ Source = $secondPath }
+    )
+}
+if (-not [String]::Equals($resolved, $firstPath, [StringComparison]::Ordinal)) {
+    throw "Git resolution did not select the first PATH candidate: $resolved"
+}
+
+foreach ($badResolver in @(
+    { @() },
+    { @([PSCustomObject]@{ Source = '' }) }
+)) {
+    $rejected = $false
+    try {
+        Get-WslRunnerGitPath -ResolveAction $badResolver | Out-Null
+    }
+    catch {
+        $rejected = $true
+    }
+    if (-not $rejected) { throw 'invalid Git command resolution was accepted' }
+}
+Write-Output 'git-command-resolution-checked'
+""",
+        "git-command-resolution-checked",
     )
 
 
@@ -1114,6 +1149,7 @@ Write-Output 'windows-task-round-trip-checked'
 
 def main() -> None:
     test_invocation_policy_and_trigger_selection()
+    test_git_command_resolution_is_deterministic()
     test_task_plan_and_import_command_are_mode_complete()
     test_verified_import_orders_hash_before_import_and_cleans_up()
     test_wsl_inventory_fails_closed()
@@ -1125,7 +1161,7 @@ def main() -> None:
     test_task_isolation_does_not_short_circuit_or_touch_foreign_tasks()
     test_task_xml_attestation_rejects_privilege_and_trigger_mutations()
     test_real_windows_task_scheduler_round_trip()
-    print("wsl_runner_windows_policy_tests=pass count=12")
+    print("wsl_runner_windows_policy_tests=pass count=13")
 
 
 if __name__ == "__main__":

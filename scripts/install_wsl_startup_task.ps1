@@ -999,11 +999,29 @@ function Invoke-CheckedGit {
     return $output
 }
 
+function Get-WslRunnerGitPath {
+    param([scriptblock]$ResolveAction)
+
+    $commands = if ($ResolveAction) {
+        @(& $ResolveAction)
+    }
+    else {
+        @(Get-Command git.exe -CommandType Application -All -ErrorAction Stop)
+    }
+    if ($commands.Count -eq 0) {
+        throw 'git.exe is unavailable.'
+    }
+    $source = [string]$commands[0].Source
+    if ([String]::IsNullOrWhiteSpace($source)) {
+        throw 'The selected git.exe command has no executable source path.'
+    }
+    return [IO.Path]::GetFullPath($source)
+}
+
 function Assert-TrustedBootstrapSource {
     param([Parameter(Mandatory)][string]$Commit)
 
-    $gitCommand = Get-Command git.exe -CommandType Application -ErrorAction Stop
-    $gitPath = $gitCommand.Source
+    $gitPath = Get-WslRunnerGitPath
     $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
     $stageName = 'degen-dogs-bootstrap-source-' + [Guid]::NewGuid().ToString('N')
     $stage = [IO.Path]::GetFullPath((Join-Path $temporaryRoot $stageName))
