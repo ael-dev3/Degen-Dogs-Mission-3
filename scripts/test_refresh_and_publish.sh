@@ -94,6 +94,24 @@ grep -q 'Refresh-Runner-ID: ${RUNNER_ID}' "$TEST_REPO/scripts/refresh_and_publis
 grep -q 'Refresh-Run-Scope: ${RUN_SCOPE}' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'update_recovery_run_scope "full"' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'live_bundle_name.fullmatch(path.name)' "$TEST_REPO/scripts/refresh_and_publish.sh"
+python3 - "$TEST_REPO/scripts/refresh_and_publish.sh" <<'PY'
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1]).read_text(encoding="utf-8")
+required = (
+    "os.O_DIRECTORY | os.O_NOFOLLOW",
+    "follow_symlinks=False",
+    "src_dir_fd=source_parent_fd",
+    "dst_dir_fd=destination_parent_fd",
+)
+missing = [fragment for fragment in required if fragment not in source]
+if missing or "shutil.move(" in source:
+    raise SystemExit(
+        "quarantine must use no-follow directory descriptors and fd-relative rename; "
+        f"missing={missing!r} path_move={'shutil.move(' in source}"
+    )
+PY
 
 printf '%s\n' '{"scripts":{"refresh:current":"node scripts/fail_generation.js"}}' > "$TEST_REPO/package.json"
 printf '%s\n' 'baseline' > "$TEST_REPO/generated/value.txt"
@@ -613,7 +631,17 @@ fi
 
 git -C "$SUCCESS_REPO" commit --amend -q \
   -m "[cron] simulated interrupted publisher commit" \
+  -m "Refresh-Runner-ID: fixture-local" \
+  -m "Refresh-Run-Scope: current" \
   -m "Refresh-Run-ID: post-commit-crash-fixture"
+
+RECOVERY_COMMIT_MESSAGE="$(git -C "$SUCCESS_REPO" show -s --format=%B HEAD)"
+if [[ "$(grep -Fxc 'Refresh-Run-ID: post-commit-crash-fixture' <<<"$RECOVERY_COMMIT_MESSAGE")" != "1" ]] || \
+  [[ "$(grep -Fxc 'Refresh-Runner-ID: fixture-local' <<<"$RECOVERY_COMMIT_MESSAGE")" != "1" ]] || \
+  [[ "$(grep -Fxc 'Refresh-Run-Scope: current' <<<"$RECOVERY_COMMIT_MESSAGE")" != "1" ]]; then
+  echo "amended recovery fixture does not have exactly one canonical provenance trailer of each kind" >&2
+  exit 1
+fi
 
 HOME="$TEST_ROOT/home" \
 VALIDATOR_MARKER="$SUCCESS_MARKER" \
@@ -702,6 +730,82 @@ if ! grep -q "interrupted publisher was safely superseded by peer commit" "$TEST
   echo "authenticated peer recovery supersession was not logged" >&2
   exit 1
 fi
+
+# A current-scope interrupted commit is only eligible for a peer no-op when the
+# effective caller+journal scope remains current. A stronger full or archive
+# caller must align to the peer and regenerate the requested wider surface.
+for STRONGER_SCOPE in full archive; do
+  STRONGER_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+  touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-18T20:02:30Z"
+  git -C "$SUCCESS_REPO" add generated public/generated
+  git -C "$SUCCESS_REPO" commit -qm "[cron] interrupted current publisher before ${STRONGER_SCOPE} caller" \
+    -m "Refresh-Runner-ID: fixture-local" \
+    -m "Refresh-Run-Scope: current" \
+    -m "Refresh-Run-ID: current-journal-${STRONGER_SCOPE}-local"
+  STRONGER_LOCAL_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+  STRONGER_LOCKS="$TEST_ROOT/current-journal-${STRONGER_SCOPE}-locks"
+  write_fixture_recovery_journal \
+    "$STRONGER_LOCKS/publisher-recovery.json" \
+    "$SUCCESS_REPO" \
+    "$STRONGER_BASELINE" \
+    "current-journal-${STRONGER_SCOPE}-local"
+
+  STRONGER_PEER_REPO="$TEST_ROOT/current-journal-${STRONGER_SCOPE}-peer-repo"
+  git clone -q --branch main "$REJECT_REMOTE" "$STRONGER_PEER_REPO"
+  git -C "$STRONGER_PEER_REPO" config user.name "Degen Dogs Stronger Scope Peer"
+  git -C "$STRONGER_PEER_REPO" config user.email "degen-dogs-stronger-peer@example.invalid"
+  touch_valid_refresh_status "$STRONGER_PEER_REPO" "2026-08-18T20:02:45Z"
+  git -C "$STRONGER_PEER_REPO" add generated public/generated
+  git -C "$STRONGER_PEER_REPO" commit -qm "[cron] bounded peer before ${STRONGER_SCOPE} recovery" \
+    -m "Refresh-Runner-ID: fixture-peer" \
+    -m "Refresh-Run-Scope: current" \
+    -m "Refresh-Run-ID: current-journal-${STRONGER_SCOPE}-peer"
+  STRONGER_PEER_COMMIT="$(git -C "$STRONGER_PEER_REPO" rev-parse HEAD)"
+  git -C "$STRONGER_PEER_REPO" push -q origin main
+
+  rm -f -- "$SUCCESS_MARKER"
+  STRONGER_RESULT="$TEST_ROOT/current-journal-${STRONGER_SCOPE}-result"
+  STRONGER_LOGS="$TEST_ROOT/current-journal-${STRONGER_SCOPE}-logs"
+  if [[ "$STRONGER_SCOPE" == "full" ]]; then
+    STRONGER_ENV=(DEGEN_DOGS_FULL_REFRESH=1)
+  else
+    STRONGER_ENV=(DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1)
+  fi
+  env \
+    HOME="$TEST_ROOT/home" \
+    VALIDATOR_MARKER="$SUCCESS_MARKER" \
+    FIXTURE_RESULT_MARKER="$STRONGER_RESULT" \
+    DEGEN_DOGS_RUNNER_ID="fixture-local" \
+    DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+    DEGEN_DOGS_LOG_DIR="$STRONGER_LOGS" \
+    DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/current-journal-${STRONGER_SCOPE}-config-locks" \
+    DEGEN_DOGS_REFRESH_LOCK_PATH="$STRONGER_LOCKS/refresh.lock" \
+    DEGEN_DOGS_SKIP_PULL=1 \
+    DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
+    DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+    DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+    DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+    DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+    "${STRONGER_ENV[@]}" \
+    "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+
+  STRONGER_REPAIR_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+  if [[ "$STRONGER_REPAIR_COMMIT" == "$STRONGER_PEER_COMMIT" ]] || \
+    [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$STRONGER_REPAIR_COMMIT" ]] || \
+    [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD^)" != "$STRONGER_PEER_COMMIT" ]] || \
+    [[ "$(git -C "$SUCCESS_REPO" show -s --format=%B HEAD)" != *"Refresh-Run-Scope: ${STRONGER_SCOPE}"* ]] || \
+    [[ "$(sed -n '1p' "$STRONGER_RESULT")" != "success_pushed" ]] || \
+    [[ ! -e "$SUCCESS_MARKER" ]] || \
+    [[ -e "$STRONGER_LOCKS/publisher-recovery.json" ]]; then
+    echo "current journal plus ${STRONGER_SCOPE} caller was incorrectly superseded or scope-downgraded" >&2
+    echo "local_interrupted_commit=${STRONGER_LOCAL_COMMIT}" >&2
+    exit 1
+  fi
+  if ! grep -q "regenerating because peer coverage was not proven" "$STRONGER_LOGS/refresh.log"; then
+    echo "current journal plus ${STRONGER_SCOPE} caller did not align before wider regeneration" >&2
+    exit 1
+  fi
+done
 
 # Simulate a hard interruption after the losing child was rewound and the
 # remote winner was fast-forwarded, but before the alignment journal could be
@@ -885,6 +989,99 @@ if [[ "$INVALID_REPAIR_COMMIT" == "$INVALID_PEER_COMMIT" ]] || \
 fi
 if ! grep -q "regenerating because peer coverage was not proven" "$TEST_ROOT/invalid-peer-logs/refresh.log"; then
   echo "invalid peer snapshot did not take the regeneration path" >&2
+  exit 1
+fi
+
+# Equal block height alone is not peer coverage. Build a fully self-consistent
+# peer snapshot at the same block whose auction feed changes its immutable live
+# bundle digest; recovery must align and regenerate rather than return a no-op.
+DIGEST_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-18T20:06:30Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] interrupted local before digest-divergent peer" \
+  -m "Refresh-Runner-ID: fixture-local" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: digest-peer-local"
+DIGEST_LOCAL_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DIGEST_LOCKS="$TEST_ROOT/digest-peer-locks"
+write_fixture_recovery_journal \
+  "$DIGEST_LOCKS/publisher-recovery.json" \
+  "$SUCCESS_REPO" \
+  "$DIGEST_BASELINE" \
+  "digest-peer-local"
+
+DIGEST_PEER_REPO="$TEST_ROOT/digest-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DIGEST_PEER_REPO"
+git -C "$DIGEST_PEER_REPO" config user.name "Degen Dogs Digest Peer"
+git -C "$DIGEST_PEER_REPO" config user.email "degen-dogs-digest-peer@example.invalid"
+printf '%s\n' 'id' '77' >"$DIGEST_PEER_REPO/generated/auction_feed.csv"
+printf '%s\n' '[{"id":77}]' >"$DIGEST_PEER_REPO/generated/auction_feed.json"
+cp "$DIGEST_PEER_REPO/generated/auction_feed.csv" "$DIGEST_PEER_REPO/public/generated/auction_feed.csv"
+cp "$DIGEST_PEER_REPO/generated/auction_feed.json" "$DIGEST_PEER_REPO/public/generated/auction_feed.json"
+touch_valid_refresh_status "$DIGEST_PEER_REPO" "2026-08-18T20:06:45Z"
+git -C "$DIGEST_PEER_REPO" add generated public/generated
+git -C "$DIGEST_PEER_REPO" commit -qm "[cron] self-consistent equal-block digest-divergent peer" \
+  -m "Refresh-Runner-ID: fixture-peer" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: digest-peer-winner"
+DIGEST_PEER_COMMIT="$(git -C "$DIGEST_PEER_REPO" rev-parse HEAD)"
+python3 - "$SUCCESS_REPO" "$DIGEST_LOCAL_COMMIT" "$DIGEST_PEER_REPO" "$DIGEST_PEER_COMMIT" <<'PY'
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+
+
+def status(repo: str, commit: str) -> dict[str, object]:
+    return json.loads(
+        subprocess.check_output(
+            ["git", "-C", repo, "show", f"{commit}:generated/refresh_status.json"],
+            text=True,
+        )
+    )
+
+
+local = status(sys.argv[1], sys.argv[2])
+peer = status(sys.argv[3], sys.argv[4])
+if local["latest_generated_block"] != peer["latest_generated_block"]:
+    raise SystemExit("digest-divergent fixture does not use an equal block")
+if local["live_snapshot_bundle_sha256"] == peer["live_snapshot_bundle_sha256"]:
+    raise SystemExit("digest-divergent fixture did not change the live bundle digest")
+PY
+git -C "$DIGEST_PEER_REPO" push -q origin main
+
+rm -f -- "$SUCCESS_MARKER"
+DIGEST_RESULT="$TEST_ROOT/digest-peer-result"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$DIGEST_RESULT" \
+DEGEN_DOGS_RUNNER_ID="fixture-local" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/digest-peer-logs" \
+DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/digest-peer-config-locks" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$DIGEST_LOCKS/refresh.lock" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+
+DIGEST_REPAIR_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+if [[ "$DIGEST_REPAIR_COMMIT" == "$DIGEST_PEER_COMMIT" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$DIGEST_REPAIR_COMMIT" ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD^)" != "$DIGEST_PEER_COMMIT" ]] || \
+  [[ "$(sed -n '1p' "$DIGEST_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$SUCCESS_MARKER" ]] || \
+  [[ -e "$DIGEST_LOCKS/publisher-recovery.json" ]]; then
+  echo "equal-block digest-divergent peer was acknowledged instead of regenerated" >&2
+  echo "local_interrupted_commit=${DIGEST_LOCAL_COMMIT}" >&2
+  exit 1
+fi
+if ! grep -q "regenerating because peer coverage was not proven" "$TEST_ROOT/digest-peer-logs/refresh.log"; then
+  echo "equal-block digest-divergent peer did not take the regeneration path" >&2
   exit 1
 fi
 
@@ -1120,14 +1317,12 @@ CAS_PEER_REPO="$TEST_ROOT/cas-peer-repo"
 git clone -q --branch main "$REJECT_REMOTE" "$CAS_PEER_REPO"
 git -C "$CAS_PEER_REPO" config user.name "Degen Dogs CAS Peer"
 git -C "$CAS_PEER_REPO" config user.email "degen-dogs-cas-peer@example.invalid"
-touch_valid_refresh_status "$CAS_PEER_REPO" "2026-08-18T20:04:00Z"
 printf '%s\n' 'id' '3' >"$CAS_PEER_REPO/generated/auction_feed.csv"
 printf '%s\n' '[{"id":3}]' >"$CAS_PEER_REPO/generated/auction_feed.json"
 cp "$CAS_PEER_REPO/generated/auction_feed.csv" "$CAS_PEER_REPO/public/generated/auction_feed.csv"
 cp "$CAS_PEER_REPO/generated/auction_feed.json" "$CAS_PEER_REPO/public/generated/auction_feed.json"
-git -C "$CAS_PEER_REPO" add generated/refresh_status.json public/generated/refresh_status.json \
-  generated/auction_feed.csv generated/auction_feed.json \
-  public/generated/auction_feed.csv public/generated/auction_feed.json
+touch_valid_refresh_status "$CAS_PEER_REPO" "2026-08-18T20:04:00Z"
+git -C "$CAS_PEER_REPO" add generated public/generated
 git -C "$CAS_PEER_REPO" commit -qm "[cron] CAS peer publisher winner" \
   -m "Refresh-Runner-ID: fixture-peer" \
   -m "Refresh-Run-Scope: current" \

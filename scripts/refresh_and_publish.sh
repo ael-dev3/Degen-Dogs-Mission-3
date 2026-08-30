@@ -707,7 +707,9 @@ remote_snapshot_supersedes_local_commit() {
   remote_scope="$(runner_commit_scope "$remote_head" 2>/dev/null)" || return 1
   # Archive/full reconciliation can carry offchain or historical deltas that a
   # newer current-auction block does not prove. Always rerun those scopes after
-  # alignment; only the bounded current surface is eligible for peer no-op.
+  # alignment; only an effectively bounded current request is eligible for a
+  # peer no-op, even when the interrupted commit itself was current-scoped.
+  [[ "$RUN_SCOPE" == "current" ]] || return 1
   [[ "$local_scope" == "current" ]] || return 1
   [[ -n "$remote_scope" ]] || return 1
   validate_committed_refresh_snapshot "$local_commit" || return 1
@@ -837,76 +839,200 @@ cleanup_partial_generation() {
   if ! QUARANTINE_DIR="$(python3 - "$RECOVERY_STATE_DIR" "$DEGEN_DOGS_REFRESH_RUN_ID" "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
 
+import errno
 import os
-import shutil
+import secrets
+import stat as stat_module
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
-repo = Path(os.environ["REPO_DIR"]).resolve()
-state_root = Path(sys.argv[1]).expanduser()
+repo = Path(os.path.abspath(os.path.expanduser(os.environ["REPO_DIR"])))
+state_root = Path(os.path.abspath(os.path.expanduser(sys.argv[1])))
 run_id = sys.argv[2]
 paths = sys.argv[3:]
+directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
 
 
-def owned_private_directory(path: Path, *, create: bool = False) -> None:
+def open_absolute_directory(path: Path) -> int:
+    if not path.is_absolute():
+        raise SystemExit(f"directory path is not absolute: {path}")
+    descriptor = os.open(path.anchor, directory_flags)
     try:
-        details = path.lstat()
-    except FileNotFoundError:
-        if not create:
-            raise SystemExit(f"missing authenticated recovery directory: {path}")
-        path.mkdir(mode=0o700)
-        details = path.lstat()
+        for part in path.parts[1:]:
+            child = os.open(part, directory_flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def require_private_directory(descriptor: int, display: Path) -> None:
+    details = os.fstat(descriptor)
     if (
-        path.is_symlink()
-        or not path.is_dir()
+        not stat_module.S_ISDIR(details.st_mode)
         or details.st_uid != os.getuid()
         or (details.st_mode & 0o777) != 0o700
     ):
-        raise SystemExit(f"unsafe recovery directory: {path}")
+        raise SystemExit(f"unsafe recovery directory: {display}")
 
 
-# The state root was authenticated at startup.  Do not traverse a preexisting
-# recovery component unless it has the same private-directory invariants.
-owned_private_directory(state_root)
-recovery_root = state_root / "recovery"
-owned_private_directory(recovery_root, create=True)
-status = subprocess.check_output(
-    ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", *paths],
-    cwd=repo,
-)
-untracked = [entry[3:] for entry in status.split(b"\0") if entry.startswith(b"?? ") and entry[3:]]
-if not untracked:
-    raise SystemExit(0)
-# Never reuse a run-id path: an interrupted cleanup or a same-user attacker
-# must not select where a later rollback moves artifacts.  mkdtemp gives this
-# cleanup an owned, private, non-symlink destination under the authenticated
-# recovery root.
-recovery = Path(tempfile.mkdtemp(prefix=f"{run_id}.", dir=recovery_root))
-owned_private_directory(recovery)
-for raw in untracked:
-    relative = Path(os.fsdecode(raw))
-    if relative.is_absolute() or ".." in relative.parts:
-        raise SystemExit(f"refusing to quarantine unsafe repository path: {relative}")
-    source = repo / relative
-    if not source.exists() and not source.is_symlink():
-        continue
-    destination = recovery / relative
-    destination.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    cursor = recovery
-    for part in relative.parts[:-1]:
-        cursor = cursor / part
-        owned_private_directory(cursor)
+def open_private_child(parent_fd: int, name: str, display: Path, *, create: bool) -> int:
+    if create:
+        try:
+            os.mkdir(name, mode=0o700, dir_fd=parent_fd)
+        except FileExistsError:
+            pass
     try:
-        destination.lstat()
+        descriptor = os.open(name, directory_flags, dir_fd=parent_fd)
     except FileNotFoundError:
-        pass
+        raise SystemExit(f"missing authenticated recovery directory: {display}") from None
+    try:
+        require_private_directory(descriptor, display)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def open_relative_directory(
+    base_fd: int,
+    parts: tuple[str, ...],
+    display_root: Path,
+    *,
+    create_private: bool,
+) -> int:
+    descriptor = os.dup(base_fd)
+    cursor = display_root
+    try:
+        for part in parts:
+            cursor /= part
+            if create_private:
+                try:
+                    os.mkdir(part, mode=0o700, dir_fd=descriptor)
+                except FileExistsError:
+                    pass
+            child = os.open(part, directory_flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+            if create_private:
+                require_private_directory(descriptor, cursor)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+repo_fd = open_absolute_directory(repo)
+state_root_fd = open_absolute_directory(state_root)
+recovery_root_fd = -1
+recovery_fd = -1
+try:
+    # The state root was authenticated at startup. Do not traverse any recovery
+    # or repository component through a symlink between validation and use.
+    require_private_directory(state_root_fd, state_root)
+    recovery_root = state_root / "recovery"
+    recovery_root_fd = open_private_child(
+        state_root_fd,
+        "recovery",
+        recovery_root,
+        create=True,
+    )
+    status = subprocess.check_output(
+        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all", "--", *paths],
+        cwd=repo,
+    )
+    untracked = [
+        entry[3:]
+        for entry in status.split(b"\0")
+        if entry.startswith(b"?? ") and entry[3:]
+    ]
+    if not untracked:
+        raise SystemExit(0)
+
+    # Never reuse a run-id path. Create the quarantine directory relative to
+    # the already-open recovery root so a renamed path cannot redirect it.
+    for _ in range(128):
+        recovery_name = f"{run_id}.{secrets.token_hex(8)}"
+        try:
+            os.mkdir(recovery_name, mode=0o700, dir_fd=recovery_root_fd)
+        except FileExistsError:
+            continue
+        break
     else:
-        raise SystemExit(f"refusing to overwrite quarantine destination: {destination}")
-    shutil.move(os.fspath(source), os.fspath(destination))
-    print(f"quarantined untracked artifact: {relative}", file=sys.stderr)
-print(recovery)
+        raise SystemExit("could not allocate a unique recovery quarantine")
+    recovery = recovery_root / recovery_name
+    recovery_fd = open_private_child(
+        recovery_root_fd,
+        recovery_name,
+        recovery,
+        create=False,
+    )
+
+    for raw in untracked:
+        relative = Path(os.fsdecode(raw))
+        if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+            raise SystemExit(f"refusing to quarantine unsafe repository path: {relative}")
+        source_parent_fd = open_relative_directory(
+            repo_fd,
+            tuple(relative.parts[:-1]),
+            repo,
+            create_private=False,
+        )
+        try:
+            source_name = relative.parts[-1]
+            try:
+                os.stat(source_name, dir_fd=source_parent_fd, follow_symlinks=False)
+            except FileNotFoundError:
+                continue
+            destination_parent_fd = open_relative_directory(
+                recovery_fd,
+                tuple(relative.parts[:-1]),
+                recovery,
+                create_private=True,
+            )
+            try:
+                destination_name = relative.parts[-1]
+                try:
+                    os.stat(
+                        destination_name,
+                        dir_fd=destination_parent_fd,
+                        follow_symlinks=False,
+                    )
+                except FileNotFoundError:
+                    pass
+                else:
+                    raise SystemExit(
+                        f"refusing to overwrite quarantine destination: {recovery / relative}"
+                    )
+                try:
+                    os.rename(
+                        source_name,
+                        destination_name,
+                        src_dir_fd=source_parent_fd,
+                        dst_dir_fd=destination_parent_fd,
+                    )
+                except OSError as exc:
+                    if exc.errno == errno.EXDEV:
+                        raise SystemExit(
+                            f"refusing cross-device quarantine move for {relative}"
+                        ) from None
+                    raise
+                print(f"quarantined untracked artifact: {relative}", file=sys.stderr)
+            finally:
+                os.close(destination_parent_fd)
+        finally:
+            os.close(source_parent_fd)
+    print(recovery)
+finally:
+    if recovery_fd >= 0:
+        os.close(recovery_fd)
+    if recovery_root_fd >= 0:
+        os.close(recovery_root_fd)
+    os.close(state_root_fd)
+    os.close(repo_fd)
 PY
   )"; then
     log "warning: could not quarantine runner-created untracked artifacts"
