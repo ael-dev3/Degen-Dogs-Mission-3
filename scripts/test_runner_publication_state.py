@@ -686,7 +686,186 @@ def test_pending_compare_and_swap_requires_the_exact_generation_and_commit() -> 
         assert not state.cas_write_pending(root, 99, "a" * 40, replacement, lock_context=FakeLock())
         assert state.cas_write_pending(root, queued.generation, "a" * 40, replacement, lock_context=FakeLock())
         assert not state.cas_clear_pending(root, queued.generation, "c" * 40, lock_context=FakeLock())
+        assert not state.cas_clear_pending(root, queued.generation, "a" * 40, lock_context=FakeLock())
+        assert state.finalize_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            lock_context=FakeLock(),
+        )
         assert state.cas_clear_pending(root, queued.generation, "a" * 40, lock_context=FakeLock())
+
+
+def test_pending_clear_waits_for_authenticated_journal_finalization_and_fails_on_conflict() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+
+        assert not state.cas_clear_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            lock_context=FakeLock(),
+        ), "verifier cleared pending before Task 4 finalized its matching journal"
+        assert paths.pending.exists() and paths.journal.exists()
+
+        durable_journal = state._validate_journal(state._read_json(paths.journal))
+        conflicting_journal = dict(durable_journal)
+        conflicting_journal["queue_digest"] = "f" * 64
+        state.atomic_write_record(paths.journal, conflicting_journal)
+        expect_invalid(
+            lambda: state.cas_clear_pending(
+                root,
+                queued.generation,
+                "a" * 40,
+                lock_context=FakeLock(),
+            ),
+            "same-generation conflicting journal/pending identity did not fail closed",
+        )
+
+        state.atomic_write_record(paths.journal, durable_journal)
+        assert state.finalize_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            lock_context=FakeLock(),
+        )
+        assert not paths.journal.exists() and paths.pending.exists()
+        assert state.cas_clear_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+
+
+def test_pushed_finalization_authenticates_raw_proof_checkpoint_and_retry_progress() -> None:
+    # A push-ready journal alone cannot authenticate fabricated pending and
+    # checkpoint files, even when their coarse generation/commit identity fits.
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.atomic_write_record(paths.pending, pending)
+        state.atomic_write_record(paths.checkpoint, checkpoint)
+        expect_invalid(
+            lambda: state.finalize_pushed_handoff(
+                root,
+                queued.generation,
+                queued.digest,
+                lock_context=FakeLock(),
+            ),
+            "push-ready journal finalized fabricated handoff records",
+        )
+        assert paths.journal.exists() and paths.latest.exists()
+
+    for target, key, wrong in (
+        ("pending", "expected_bundle_sha256", "c" * 64),
+        ("pending", "retry_deadline_utc", "2026-08-30T12:40:00Z"),
+        ("checkpoint", "push_completed_at_utc", "2026-08-30T12:36:00Z"),
+    ):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+            paths = state.state_paths(root)
+            state.atomic_write_record(paths.journal, journal)
+            state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+            path = getattr(paths, target)
+            value = state._read_json(path)
+            value[key] = wrong
+            state.atomic_write_record(path, value)
+            expect_invalid(
+                lambda: state.finalize_pushed_handoff(
+                    root,
+                    queued.generation,
+                    queued.digest,
+                    lock_context=FakeLock(),
+                ),
+                f"finalization accepted divergent {target} field {key}",
+            )
+            assert paths.journal.exists() and paths.latest.exists()
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        advanced = dict(pending)
+        advanced["retry_count"] = 4
+        advanced["retry_deadline_utc"] = "2026-08-30T13:15:00Z"
+        assert state.cas_write_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            advanced,
+            lock_context=FakeLock(),
+        )
+        assert state.finalize_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            lock_context=FakeLock(),
+        )
+        assert not paths.journal.exists() and paths.pending.exists()
+
+
+def test_prepare_pushed_handoff_rejects_checkpoint_not_derived_from_raw_proof() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        checkpoint["push_completed_at_utc"] = "2026-08-30T12:36:00Z"
+        expect_invalid(
+            lambda: state.prepare_pushed_handoff(
+                root,
+                journal,
+                pending,
+                checkpoint,
+                lock_context=FakeLock(),
+            ),
+            "prepare accepted checkpoint push time divergent from proven pending",
+        )
+        persisted = state._validate_journal(state._read_json(paths.journal))
+        assert persisted["handoff_phase"] == "push_ready"
+        assert not paths.pending.exists() and not paths.checkpoint.exists()
+
+
+def test_terminal_finalization_requires_the_exact_reconstructed_checkpoint() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, _pending, checkpoint = handoff_records(
+            queued.generation,
+            queued.digest,
+            outcome="no_diff",
+        )
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.record_terminal_outcome(root, journal, checkpoint, lock_context=FakeLock())
+        fabricated = dict(checkpoint)
+        fabricated["commit_sha"] = "c" * 40
+        state.atomic_write_record(paths.checkpoint, fabricated)
+        expect_invalid(
+            lambda: state.finalize_pushed_handoff(
+                root,
+                queued.generation,
+                queued.digest,
+                lock_context=FakeLock(),
+            ),
+            "terminal finalization accepted a checkpoint not reconstructed from its journal",
+        )
+        assert paths.journal.exists() and paths.latest.exists()
 
 
 def test_pending_compare_and_swap_preserves_immutable_proof_and_monotonic_retry_state() -> None:
@@ -818,6 +997,117 @@ def test_alignment_cannot_erase_a_pushed_handoff_phase() -> None:
                 ),
                 f"alignment erased {phase} pushed handoff state",
             )
+
+
+def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identity() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        state.create_deferred_recovery_journal(
+            root,
+            generating_journal(queued.generation, queued.digest),
+            lock_context=FakeLock(),
+        )
+        armed = state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        for generation, digest, runner_commit in (
+            (queued.generation + 1, queued.digest, "a" * 40),
+            (queued.generation, "f" * 64, "a" * 40),
+            (queued.generation, queued.digest, "d" * 40),
+        ):
+            expect_invalid(
+                lambda generation=generation, digest=digest, runner_commit=runner_commit: (
+                    state.record_deferred_push_rejected_alignment(
+                        root,
+                        generation,
+                        digest,
+                        runner_commit,
+                        "c" * 40,
+                        "regenerate",
+                        lock_context=FakeLock(),
+                    )
+                ),
+                "rejected-push transition accepted non-exact push-ready identity",
+            )
+            assert state.read_deferred_recovery_journal(root) == armed
+
+        updated = state.record_deferred_push_rejected_alignment(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            "c" * 40,
+            "peer_supersedes",
+            lock_context=FakeLock(),
+        )
+        assert updated["handoff_phase"] == "terminal"
+        assert updated["terminal_outcome"] == "peer_superseded"
+        assert updated["alignment_runner_commit"] == "a" * 40
+        assert updated["alignment_remote_head"] == "c" * 40
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        state.create_deferred_recovery_journal(
+            root,
+            generating_journal(queued.generation, queued.digest),
+            lock_context=FakeLock(),
+        )
+        state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        updated = state.record_deferred_push_rejected_alignment(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            "c" * 40,
+            "regenerate",
+            lock_context=FakeLock(),
+        )
+        assert updated["handoff_phase"] == "generating"
+        assert updated["terminal_outcome"] is None
+        assert updated["remote_commit"] is None
+        assert updated["alignment_result"] == "regenerate"
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        state.create_deferred_recovery_journal(
+            root,
+            generating_journal(queued.generation, queued.digest),
+            lock_context=FakeLock(),
+        )
+        armed = state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        _journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        state.prepare_pushed_handoff(root, armed, pending, checkpoint, lock_context=FakeLock())
+        expect_invalid(
+            lambda: state.record_deferred_push_rejected_alignment(
+                root,
+                queued.generation,
+                queued.digest,
+                "a" * 40,
+                "c" * 40,
+                "regenerate",
+                lock_context=FakeLock(),
+            ),
+            "rejected-push transition erased durable raw proof",
+        )
 
 
 def test_recovery_requires_independent_immutable_commit_confirmation() -> None:

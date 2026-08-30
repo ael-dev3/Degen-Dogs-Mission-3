@@ -252,6 +252,19 @@ if phase == "raw_proven":
         "push_completed_at_utc": "2026-08-30T12:50:00Z",
     }
     state.prepare_pushed_handoff(lock_dir, journal, pending, checkpoint)
+elif phase == "terminal_no_diff":
+    terminal = dict(journal)
+    terminal["terminal_outcome"] = "no_diff"
+    terminal["handoff_phase"] = "terminal"
+    checkpoint = {
+        "schema_version": 1,
+        "outcome": "no_diff",
+        "generation": generation,
+        "queue_digest": digest,
+        "commit_sha": None,
+        "push_completed_at_utc": None,
+    }
+    state.record_terminal_outcome(lock_dir, terminal, checkpoint)
 elif phase != "generating" and phase != "push_ready":
     raise SystemExit(f"unsupported fixture handoff phase: {phase}")
 PY
@@ -2244,6 +2257,78 @@ PY
   finalize_fixture_publication "$NPLUS_LOCKS" "$NPLUS_GENERATION" "$NPLUS_DIGEST"
 done
 
+# Missing latest.json is evidence of Task 4 queue CAS only after the journal
+# has durable handoff state. Generating and push-ready journals must fail
+# before repository or journal mutation; raw-proven and terminal remain valid.
+MISSING_GENERATING_LOCKS="$TEST_ROOT/missing-latest-generating-locks"
+MISSING_GENERATING_DIGEST="$(write_fixture_publication_latest "$MISSING_GENERATING_LOCKS" 72)"
+MISSING_GENERATING_HEAD="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+write_fixture_deferred_journal \
+  "$MISSING_GENERATING_LOCKS" "$SUCCESS_REPO" "$MISSING_GENERATING_HEAD" \
+  72 "$MISSING_GENERATING_DIGEST" "missing-latest-generating" generating
+rm -- "$MISSING_GENERATING_LOCKS/publication/latest.json"
+if run_deferred_fixture \
+  "$MISSING_GENERATING_LOCKS" 72 "$MISSING_GENERATING_DIGEST" \
+  "$TEST_ROOT/missing-latest-generating-logs" "$TEST_ROOT/missing-latest-generating-result"; then
+  echo "missing latest was accepted for a generating deferred journal" >&2
+  exit 1
+fi
+python3 - "$MISSING_GENERATING_LOCKS" "$MISSING_GENERATING_HEAD" "$SUCCESS_REPO" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert journal["handoff_phase"] == "generating"
+assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=sys.argv[3], text=True).strip() == sys.argv[2]
+assert not (root / "publication/pushed.json").exists()
+PY
+
+MISSING_PUSH_READY_LOCKS="$TEST_ROOT/missing-latest-push-ready-locks"
+MISSING_PUSH_READY_DIGEST="$(write_fixture_publication_latest "$MISSING_PUSH_READY_LOCKS" 73)"
+write_fixture_deferred_journal \
+  "$MISSING_PUSH_READY_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_BASELINE" \
+  73 "$MISSING_PUSH_READY_DIGEST" "nplus-landed" push_ready "$NPLUS_PUSH_COMMIT"
+rm -- "$MISSING_PUSH_READY_LOCKS/publication/latest.json"
+if run_deferred_fixture \
+  "$MISSING_PUSH_READY_LOCKS" 73 "$MISSING_PUSH_READY_DIGEST" \
+  "$TEST_ROOT/missing-latest-push-ready-logs" "$TEST_ROOT/missing-latest-push-ready-result"; then
+  echo "missing latest was accepted for a push-ready deferred journal" >&2
+  exit 1
+fi
+python3 - "$MISSING_PUSH_READY_LOCKS" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert journal["handoff_phase"] == "push_ready"
+assert not (root / "publication/pending.json").exists()
+assert not (root / "publication/pushed.json").exists()
+PY
+
+MISSING_TERMINAL_LOCKS="$TEST_ROOT/missing-latest-terminal-locks"
+MISSING_TERMINAL_RESULT="$TEST_ROOT/missing-latest-terminal-result"
+MISSING_TERMINAL_DIGEST="$(write_fixture_publication_latest "$MISSING_TERMINAL_LOCKS" 74)"
+write_fixture_deferred_journal \
+  "$MISSING_TERMINAL_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_COMMIT" \
+  74 "$MISSING_TERMINAL_DIGEST" "missing-latest-terminal" terminal_no_diff
+rm -- "$MISSING_TERMINAL_LOCKS/publication/latest.json" "$MISSING_TERMINAL_LOCKS/publication/pushed.json"
+run_deferred_fixture \
+  "$MISSING_TERMINAL_LOCKS" 74 "$MISSING_TERMINAL_DIGEST" \
+  "$TEST_ROOT/missing-latest-terminal-logs" "$MISSING_TERMINAL_RESULT"
+if [[ "$(sed -n '1p' "$MISSING_TERMINAL_RESULT")" != "success_no_diff" ]] || \
+  [[ ! -e "$MISSING_TERMINAL_LOCKS/publication/pushed.json" ]] || \
+  [[ ! -e "$MISSING_TERMINAL_LOCKS/publisher-recovery.json" ]] || \
+  [[ -e "$MISSING_TERMINAL_LOCKS/publication/latest.json" ]]; then
+  echo "missing latest prevented durable terminal deferred recovery" >&2
+  exit 1
+fi
+finalize_fixture_publication "$MISSING_TERMINAL_LOCKS" 74 "$MISSING_TERMINAL_DIGEST"
+
 # Once Task 4 has CAS-cleared generation N from latest.json, the retained
 # authenticated journal must still be sufficient to finish an interrupted N
 # handoff. Re-prove the exact commit and reconstruct the missing checkpoint.
@@ -2439,6 +2524,154 @@ if [[ "$AMBIGUOUS_PUBLISHER" != "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" ]] ||
   exit 1
 fi
 finalize_fixture_publication "$AMBIGUOUS_LOCKS" 67 "$AMBIGUOUS_DIGEST"
+
+# Once push_ready is durable, termination while git push is still blocking is
+# ambiguous. The hook lands the exact commit, terminates the publisher before
+# the outer push returns, and a fresh invocation must classify/prove it.
+git -C "$SUCCESS_REPO" fetch -q origin main
+git -C "$SUCCESS_REPO" merge -q --ff-only origin/main
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T13:31:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "fixture: force push-time termination publication"
+git -C "$SUCCESS_REPO" push -q
+TERMINATE_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+TERMINATE_HOOK_MARKER="$TEST_ROOT/terminate-after-accept-hook"
+: >"$TERMINATE_HOOK_MARKER"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'set -eu' \
+  'if [[ -e "$FIXTURE_TERMINATE_HOOK_MARKER" ]]; then' \
+  '  rm -- "$FIXTURE_TERMINATE_HOOK_MARKER"' \
+  '  runner_commit="$(git rev-parse HEAD)"' \
+  '  git push --no-verify --force-with-lease="refs/heads/main:${FIXTURE_TERMINATE_BASELINE}" origin "${runner_commit}:refs/heads/main"' \
+  '  publisher_pid="$(ps -o ppid= -p "$PPID" | tr -d "[:space:]")"' \
+  '  kill -TERM "$publisher_pid"' \
+  '  sleep 1' \
+  '  exit 1' \
+  'fi' \
+  >"$SUCCESS_REPO/.git/hooks/pre-push"
+chmod +x "$SUCCESS_REPO/.git/hooks/pre-push"
+TERMINATE_LOCKS="$TEST_ROOT/terminate-after-accept-locks"
+TERMINATE_RESULT="$TEST_ROOT/terminate-after-accept-result"
+TERMINATE_RAW="$TEST_ROOT/terminate-after-accept-raw"
+TERMINATE_PAGES="$TEST_ROOT/terminate-after-accept-pages"
+TERMINATE_DIGEST="$(write_fixture_publication_latest "$TERMINATE_LOCKS" 75)"
+export FIXTURE_TERMINATE_HOOK_MARKER="$TERMINATE_HOOK_MARKER"
+export FIXTURE_TERMINATE_BASELINE="$TERMINATE_BASELINE"
+if run_deferred_fixture \
+  "$TERMINATE_LOCKS" 75 "$TERMINATE_DIGEST" \
+  "$TEST_ROOT/terminate-after-accept-logs" "$TERMINATE_RESULT" \
+  "$TERMINATE_RAW" "$TERMINATE_PAGES"; then
+  echo "publisher unexpectedly returned success after forced push-time termination" >&2
+  exit 1
+fi
+unset FIXTURE_TERMINATE_HOOK_MARKER FIXTURE_TERMINATE_BASELINE
+rm -- "$SUCCESS_REPO/.git/hooks/pre-push"
+TERMINATE_LANDED="$(git --git-dir="$REJECT_REMOTE" rev-parse main)"
+TERMINATE_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+if [[ "$TERMINATE_LOCAL" == "$TERMINATE_BASELINE" ]] || \
+  [[ "$TERMINATE_LOCAL" != "$TERMINATE_LANDED" ]] || \
+  [[ ! -e "$TERMINATE_LOCKS/publisher-recovery.json" ]]; then
+  echo "ambiguous push-time termination rewound the landed commit or removed push-ready evidence" >&2
+  exit 1
+fi
+python3 - "$TERMINATE_LOCKS" "$TERMINATE_BASELINE" "$TERMINATE_LANDED" "$SUCCESS_REPO" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=sys.argv[4], text=True).strip()
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert head == sys.argv[3] and head != sys.argv[2]
+assert journal["handoff_phase"] == "push_ready"
+assert journal["remote_commit"] == head
+assert not (root / "publication/pending.json").exists()
+assert not (root / "publication/pushed.json").exists()
+PY
+run_deferred_fixture \
+  "$TERMINATE_LOCKS" 75 "$TERMINATE_DIGEST" \
+  "$TEST_ROOT/terminate-recovery-logs" "$TERMINATE_RESULT" \
+  "$TERMINATE_RAW" "$TERMINATE_PAGES"
+if [[ "$(sed -n '1p' "$TERMINATE_RESULT")" != "success_pushed" ]] || \
+  [[ "$(sed -n '2p' "$TERMINATE_RESULT")" != "$TERMINATE_LANDED" ]] || \
+  [[ ! -e "$TERMINATE_RAW" || -e "$TERMINATE_PAGES" ]]; then
+  echo "fresh recovery did not prove the exact commit after push-time termination" >&2
+  exit 1
+fi
+finalize_fixture_publication "$TERMINATE_LOCKS" 75 "$TERMINATE_DIGEST"
+
+# Deferred mode must also classify an ordinary sibling CAS winner after the
+# rejected push. The explicit push-rejected transition is the only state path
+# allowed to move push_ready into peer alignment/terminal evidence.
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T13:32:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "fixture: prepare deferred CAS collision baseline"
+git -C "$SUCCESS_REPO" push -q
+DEFERRED_CAS_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFERRED_CAS_PEER_REPO="$TEST_ROOT/deferred-cas-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DEFERRED_CAS_PEER_REPO"
+git -C "$DEFERRED_CAS_PEER_REPO" config user.name "Degen Dogs Deferred CAS Peer"
+git -C "$DEFERRED_CAS_PEER_REPO" config user.email "degen-dogs-deferred-cas-peer@example.invalid"
+touch_valid_refresh_status "$DEFERRED_CAS_PEER_REPO" "2026-08-30T20:12:00Z"
+git -C "$DEFERRED_CAS_PEER_REPO" add generated public/generated
+git -C "$DEFERRED_CAS_PEER_REPO" commit -qm "[cron] deferred CAS peer winner" \
+  -m "Refresh-Runner-ID: fixture-peer" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-cas-peer-winner"
+DEFERRED_CAS_PEER="$(git -C "$DEFERRED_CAS_PEER_REPO" rev-parse HEAD)"
+git -C "$DEFERRED_CAS_PEER_REPO" push -q origin \
+  "${DEFERRED_CAS_PEER}:refs/heads/deferred-cas-peer-fixture"
+DEFERRED_CAS_HOOK_MARKER="$TEST_ROOT/deferred-cas-hook"
+: >"$DEFERRED_CAS_HOOK_MARKER"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'set -eu' \
+  'if [[ -e "$FIXTURE_DEFERRED_CAS_HOOK_MARKER" ]]; then' \
+  '  rm -- "$FIXTURE_DEFERRED_CAS_HOOK_MARKER"' \
+  '  git --git-dir="$FIXTURE_DEFERRED_CAS_REMOTE" update-ref refs/heads/main "$FIXTURE_DEFERRED_CAS_PEER" "$FIXTURE_DEFERRED_CAS_BASELINE"' \
+  'fi' \
+  >"$SUCCESS_REPO/.git/hooks/pre-push"
+chmod +x "$SUCCESS_REPO/.git/hooks/pre-push"
+DEFERRED_CAS_LOCKS="$TEST_ROOT/deferred-cas-collision-locks"
+DEFERRED_CAS_RESULT="$TEST_ROOT/deferred-cas-collision-result"
+DEFERRED_CAS_PAGES="$TEST_ROOT/deferred-cas-collision-pages"
+DEFERRED_CAS_DIGEST="$(write_fixture_publication_latest "$DEFERRED_CAS_LOCKS" 76)"
+export FIXTURE_DEFERRED_CAS_HOOK_MARKER="$DEFERRED_CAS_HOOK_MARKER"
+export FIXTURE_DEFERRED_CAS_REMOTE="$REJECT_REMOTE"
+export FIXTURE_DEFERRED_CAS_PEER="$DEFERRED_CAS_PEER"
+export FIXTURE_DEFERRED_CAS_BASELINE="$DEFERRED_CAS_BASELINE"
+run_deferred_fixture \
+  "$DEFERRED_CAS_LOCKS" 76 "$DEFERRED_CAS_DIGEST" \
+  "$TEST_ROOT/deferred-cas-collision-logs" "$DEFERRED_CAS_RESULT" \
+  "" "$DEFERRED_CAS_PAGES"
+unset FIXTURE_DEFERRED_CAS_HOOK_MARKER FIXTURE_DEFERRED_CAS_REMOTE \
+  FIXTURE_DEFERRED_CAS_PEER FIXTURE_DEFERRED_CAS_BASELINE
+rm -- "$SUCCESS_REPO/.git/hooks/pre-push"
+python3 - "$DEFERRED_CAS_LOCKS" "$DEFERRED_CAS_PEER" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["handoff_phase"] == "terminal"
+assert journal["terminal_outcome"] == checkpoint["outcome"] == "peer_superseded"
+assert journal["remote_commit"] == checkpoint["commit_sha"] == sys.argv[2]
+assert not (root / "publication/pending.json").exists()
+PY
+if [[ -e "$DEFERRED_CAS_HOOK_MARKER" ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFERRED_CAS_PEER" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$DEFERRED_CAS_PEER" ]] || \
+  [[ "$(sed -n '1p' "$DEFERRED_CAS_RESULT")" != "success_superseded_by_peer" ]] || \
+  [[ "$(sed -n '2p' "$DEFERRED_CAS_RESULT")" != "$DEFERRED_CAS_PEER" ]] || \
+  [[ -e "$DEFERRED_CAS_PAGES" ]]; then
+  echo "deferred sibling CAS collision was not durably classified as peer supersession" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DEFERRED_CAS_LOCKS" 76 "$DEFERRED_CAS_DIGEST"
 
 # Legacy inline journals must retain their original fail-closed shape. Fields
 # that are present but null/empty are malformed, not equivalent to absence.

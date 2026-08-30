@@ -131,6 +131,7 @@ RECOVERY_SUPERSEDED=0
 RECOVERY_DEFERRED_HANDOFF=0
 RECOVERY_JOURNAL_DEFERRED=0
 PUSH_REMOTE_HEAD=""
+DEFERRED_PUSH_REJECTED_ALIGNMENT=0
 
 utc_stamp() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
@@ -501,24 +502,44 @@ write_recovery_alignment() {
   local alignment_result="$3"
   if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
     python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" \
-      "$runner_commit" "$remote_head" "$alignment_result" <<'PY'
+      "$runner_commit" "$remote_head" "$alignment_result" \
+      "$DEFERRED_PUSH_REJECTED_ALIGNMENT" <<'PY'
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-lock_dir, repo, generation, digest, runner_commit, remote_head, alignment_result = sys.argv[1:]
-sys.path.insert(0, str(Path(repo) / "scripts"))
-import runner_publication_state as state
-
-state.update_deferred_alignment(
+(
     lock_dir,
-    int(generation),
+    repo,
+    generation,
     digest,
     runner_commit,
     remote_head,
     alignment_result,
-)
+    rejected_push,
+) = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+if rejected_push == "1":
+    state.record_deferred_push_rejected_alignment(
+        lock_dir,
+        int(generation),
+        digest,
+        runner_commit,
+        remote_head,
+        alignment_result,
+    )
+else:
+    state.update_deferred_alignment(
+        lock_dir,
+        int(generation),
+        digest,
+        runner_commit,
+        remote_head,
+        alignment_result,
+    )
 PY
     return
   fi
@@ -1384,6 +1405,12 @@ align_local_runner_commit_to_remote() {
     log "warning: could not persist crash-safe ${context} alignment state"
     return 1
   }
+  if [[ "$DEFERRED_PUSH_REJECTED_ALIGNMENT" == "1" ]]; then
+    # The explicit transition replaced ambiguous push_ready evidence with a
+    # freshly classified sibling alignment target. Cleanup is safe again.
+    DEFERRED_PUSH_REJECTED_ALIGNMENT=0
+    MUTATION_STARTED=1
+  fi
   # Keep the journal armed while HEAD crosses from the losing child through
   # its baseline to the remote descendant. Recovery understands every state.
   cleanup_partial_generation 1 || return 1
@@ -1983,7 +2010,10 @@ if journal is None:
 else:
     if journal["publication_generation"] != generation_value or journal["queue_digest"] != digest:
         raise SystemExit("deferred recovery environment differs from its authenticated journal")
-    if latest is not None:
+    if latest is None:
+        if journal["handoff_phase"] not in {"raw_proven", "terminal"}:
+            raise SystemExit("missing latest queue record is invalid before a durable deferred handoff")
+    else:
         record, actual_digest = latest
         if record["generation"] < generation_value:
             raise SystemExit("latest queue generation predates the authenticated recovery journal")
@@ -2635,6 +2665,10 @@ if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
 fi
 if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
   arm_deferred_pushed_handoff || fail "could not arm the authenticated deferred pre-push journal"
+  # push_ready is the durable ambiguity boundary. A signal or nonzero exit
+  # while git push is blocking must leave the exact local commit and journal
+  # for the next locked invocation to classify against a freshly fetched ref.
+  MUTATION_STARTED=0
 fi
 push_status=0
 if push_with_compare_and_swap; then
@@ -2642,6 +2676,15 @@ if push_with_compare_and_swap; then
 else
   push_status=$?
   if [[ "$push_status" == "75" && -n "$PUSH_REMOTE_HEAD" ]]; then
+    if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+      if git merge-base --is-ancestor "$RUNNER_COMMIT_HEAD" "$PUSH_REMOTE_HEAD"; then
+        fail "rejected deferred push was misclassified despite remote containing the publisher commit"
+      fi
+      # push_with_compare_and_swap set PUSH_REMOTE_HEAD only after a fresh
+      # fetch classified a non-ancestor sibling. Permit exactly one narrow
+      # push-ready transition before the ordinary alignment machinery runs.
+      DEFERRED_PUSH_REJECTED_ALIGNMENT=1
+    fi
     handle_remote_advance_after_local_commit "$PUSH_REMOTE_HEAD" "compare-and-swap push"
   fi
   fail "immutable compare-and-swap publisher push failed with status ${push_status} and did not land"
