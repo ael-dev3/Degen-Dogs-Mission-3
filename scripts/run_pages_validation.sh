@@ -78,6 +78,7 @@ run_group() {
         npm:test:runner-env
         npm:test:runner-permissions
         npm:test:wsl-runner-assets
+        npm:test:wsl-windows-policy
       )
       ;;
     validation)
