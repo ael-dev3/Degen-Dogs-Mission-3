@@ -358,6 +358,15 @@ Get-ScheduledTaskInfo -TaskName 'Degen Dogs WSL Runner'
 wsl.exe -d DegenDogsRunner -u root -- systemctl list-timers 'degen-dogs-*'
 ```
 
+The five-minute watchdog deliberately uses `MultipleInstances=IgnoreNew`. Treat
+Task Scheduler result `0x800710E0` as `watchdog launch suppressed (healthy)`
+only when the exact task is enabled and `Running`, its `IgnoreNew` policy has
+passed XML attestation, Task Scheduler reports exactly one running instance,
+and the Linux anchor, activation marker, and timers have all passed the final
+liveness check. The installer prints that classification only after proving all
+of those conditions. If any proof is missing, it leaves the raw result
+unsuppressed; do not add a second task or weaken the single-instance policy.
+
 From WSL:
 
 ```bash
