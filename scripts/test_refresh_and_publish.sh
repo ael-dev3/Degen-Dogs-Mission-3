@@ -49,7 +49,8 @@ write_fixture_recovery_journal() {
   local baseline="$3"
   local run_id="$4"
   local run_scope="${5:-current}"
-  python3 - "$path" "$repo" "$baseline" "$run_id" "$run_scope" <<'PY'
+  local runner_id="${6:-fixture-local}"
+  python3 - "$path" "$repo" "$baseline" "$run_id" "$run_scope" "$runner_id" <<'PY'
 from __future__ import annotations
 
 import json
@@ -65,7 +66,7 @@ payload = {
     "baseline_head": sys.argv[3],
     "run_id": sys.argv[4],
     "run_scope": sys.argv[5],
-    "runner_id": "fixture-local",
+    "runner_id": sys.argv[6],
     "created_at_utc": "2026-08-18T20:00:00Z",
     "publish_paths": [
         "README.md", "index.html", "generated", "public",
@@ -181,11 +182,16 @@ if [[ "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]]; then
   exit 1
 fi
 
+QUARANTINE_ATTACK_TARGET="$TEST_ROOT/quarantine-attack-target"
+mkdir -p "$TEST_ROOT/locks/recovery" "$QUARANTINE_ATTACK_TARGET"
+chmod 700 "$TEST_ROOT/locks/recovery" "$QUARANTINE_ATTACK_TARGET"
+ln -s "$QUARANTINE_ATTACK_TARGET" "$TEST_ROOT/locks/recovery/fixture-quarantine"
 set +e
 HOME="$TEST_ROOT/home" \
 DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
 DEGEN_DOGS_LOG_DIR="$TEST_ROOT/logs" \
 DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/locks" \
+DEGEN_DOGS_REFRESH_RUN_ID="fixture-quarantine" \
 DEGEN_DOGS_SKIP_PULL=1 \
 DEGEN_DOGS_SKIP_PUSH=1 \
 "$TEST_REPO/scripts/refresh_and_publish.sh"
@@ -202,6 +208,10 @@ if [[ "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]]; then
 fi
 if [[ -e "$TEST_REPO/generated/runner-created.json" ]]; then
   echo "runner-created untracked artifact was not removed" >&2
+  exit 1
+fi
+if [[ -e "$QUARANTINE_ATTACK_TARGET/generated/runner-created.json" ]]; then
+  echo "predictable quarantine run-id symlink received a runner artifact" >&2
   exit 1
 fi
 if [[ -z "$(find "$TEST_ROOT/locks/recovery" -type f -path '*/generated/runner-created.json' -print -quit)" ]]; then
@@ -292,6 +302,7 @@ chmod +x "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
 printf '%s\n' \
   '{"scripts":{' \
   '"refresh:current":"node scripts/success_generation.js && python3 scripts/build_live_snapshot_bundle.py",' \
+  '"data":"node scripts/success_generation.js && python3 scripts/build_live_snapshot_bundle.py",' \
   '"archive:mission3:index":"node scripts/archive_generation.js",' \
   '"archive:mission3:health":"node -e \"\"",' \
   '"validate:dashboard":"node scripts/validate_marker.js",' \
@@ -309,10 +320,7 @@ printf '%s\n' \
   "fs.writeFileSync('public/generated/auction_feed.json', '[{\\\"id\\\":2}]\\n');" \
   "const validStatus = fs.readFileSync('scripts/fixture_valid_refresh_status.json');" \
   "fs.writeFileSync('generated/refresh_status.json', validStatus);" \
-  "fs.writeFileSync('public/generated/refresh_status.json', validStatus);" \
-  "const liveBundle = 'live_snapshot_123_' + 'a'.repeat(64) + '_' + 'b'.repeat(64) + '.json';" \
-  "fs.writeFileSync('generated/' + liveBundle, '{\"fixture\":true}\\n');" \
-  "fs.writeFileSync('public/generated/' + liveBundle, '{\"fixture\":true}\\n');" >"$SUCCESS_REPO/scripts/success_generation.js"
+  "fs.writeFileSync('public/generated/refresh_status.json', validStatus);" >"$SUCCESS_REPO/scripts/success_generation.js"
 printf '%s\n' \
   "const fs = require('fs');" \
   "fs.mkdirSync('archive/mission3/data/generated', {recursive:true});" \
@@ -359,6 +367,7 @@ cp "$SOURCE_DIR/../public/generated/current_auction_bid_history.json" "$SUCCESS_
 cp "$SOURCE_DIR/../generated/auction_feed.json" "$SUCCESS_REPO/generated/auction_feed.json"
 cp "$SOURCE_DIR/../public/generated/auction_feed.json" "$SUCCESS_REPO/public/generated/auction_feed.json"
 cp "$SOURCE_DIR/../generated/mission3_metrics.json" "$SUCCESS_REPO/generated/mission3_metrics.json"
+cp "$SOURCE_DIR/../public/generated/mission3_metrics.json" "$SUCCESS_REPO/public/generated/mission3_metrics.json"
 cp "$SOURCE_DIR/../generated/refresh_status.json" "$SUCCESS_REPO/scripts/fixture_valid_refresh_status.json"
 cp "$SOURCE_DIR/../public/generated/unified_dog_search_index.json" "$SUCCESS_REPO/public/generated/unified_dog_search_index.json"
 cp "$SOURCE_DIR"/../generated/live_snapshot_*.json "$SUCCESS_REPO/generated/"
@@ -419,10 +428,21 @@ if git -C "$SUCCESS_REPO" cat-file -e HEAD:public/generated/obsolete.json 2>/dev
   echo "tracked public deletion was not committed" >&2
   exit 1
 fi
-LIVE_BUNDLE_FIXTURE="live_snapshot_123_$(printf 'a%.0s' {1..64})_$(printf 'b%.0s' {1..64}).json"
+LIVE_BUNDLE_FIXTURE="$(python3 - "$SUCCESS_REPO/generated/refresh_status.json" <<'PY'
+import json
+import sys
+
+print(json.load(open(sys.argv[1], encoding="utf-8"))["live_snapshot_bundle"])
+PY
+)"
 if ! git -C "$SUCCESS_REPO" cat-file -e "HEAD:generated/$LIVE_BUNDLE_FIXTURE" 2>/dev/null || \
   ! git -C "$SUCCESS_REPO" cat-file -e "HEAD:public/generated/$LIVE_BUNDLE_FIXTURE" 2>/dev/null; then
-  echo "immutable live snapshot mirrors were not included in the publisher inventory" >&2
+  echo "status-referenced immutable live snapshot mirrors were not included in the publisher inventory" >&2
+  exit 1
+fi
+if ! git -C "$SUCCESS_REPO" cat-file -e HEAD:generated/mission3_metrics.json 2>/dev/null || \
+  ! git -C "$SUCCESS_REPO" cat-file -e HEAD:public/generated/mission3_metrics.json 2>/dev/null; then
+  echo "peer-validation fixture omitted a mission3_metrics mirror" >&2
   exit 1
 fi
 if [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- README.md index.html generated public)" ]]; then
@@ -464,6 +484,8 @@ payload = {
     "branch": "main",
     "baseline_head": sys.argv[3],
     "run_id": "crash-fixture",
+    "runner_id": "fixture-local",
+    "run_scope": "current",
     "created_at_utc": "2026-08-09T00:00:00Z",
     "publish_paths": [
         "README.md",
@@ -526,7 +548,10 @@ printf '%s\n' '[{"id":99}]' >"$SUCCESS_REPO/generated/auction_feed.json"
 printf '%s\n' '[{"id":99}]' >"$SUCCESS_REPO/public/generated/auction_feed.json"
 git -C "$SUCCESS_REPO" add generated/auction_feed.json public/generated/auction_feed.json
 git -C "$SUCCESS_REPO" commit -qm "[cron] simulated interrupted publisher commit" \
-  -m "Refresh-Run-ID: unrelated-run"
+  -m "Refresh-Run-ID: post-commit-crash-fixture" \
+  -m "Refresh-Runner-ID: fixture-local" \
+  -m "Refresh-Runner-ID: fixture-conflict" \
+  -m "Refresh-Run-Scope: current"
 python3 - "$CRASH_LOCK_DIR/publisher-recovery.json" "$SUCCESS_REPO" "$INTERRUPTED_COMMIT_BASELINE" <<'PY'
 from __future__ import annotations
 
@@ -542,6 +567,8 @@ payload = {
     "branch": "main",
     "baseline_head": sys.argv[3],
     "run_id": "post-commit-crash-fixture",
+    "runner_id": "fixture-local",
+    "run_scope": "current",
     "created_at_utc": "2026-08-09T00:00:00Z",
     "publish_paths": [
         "README.md", "index.html", "generated", "public",
@@ -678,9 +705,9 @@ fi
 
 # Simulate a hard interruption after the losing child was rewound and the
 # remote winner was fast-forwarded, but before the alignment journal could be
-# removed. Then let a second publisher advance main again. Recovery must
-# advance the journal to that descendant before moving HEAD, reclassify the
-# latest HEAD, and finish without regeneration or a permanent recovery wedge.
+# removed. Then an arbitrary commit must intervene before a runner-labeled
+# descendant advances main. Recovery must align to that descendant and rebuild
+# from it; it must not accept the labeled descendant as peer supersession.
 ALIGN_REMOTE="$TEST_ROOT/alignment-remote.git"
 git clone -q --bare "$REJECT_REMOTE" "$ALIGN_REMOTE"
 ALIGN_REPO="$TEST_ROOT/alignment-repo"
@@ -733,17 +760,22 @@ PY
 git -C "$ALIGN_REPO" update-ref refs/heads/main "$ALIGN_BASELINE" "$ALIGN_LOCAL_COMMIT"
 git -C "$ALIGN_REPO" restore --source="$ALIGN_BASELINE" --staged --worktree -- .
 git -C "$ALIGN_REPO" merge -q --ff-only "$ALIGN_PEER_COMMIT"
+printf '%s\n' 'uninspected intervening history' >"$ALIGN_PEER_REPO/uninspected-intervening.txt"
+git -C "$ALIGN_PEER_REPO" add uninspected-intervening.txt
+git -C "$ALIGN_PEER_REPO" commit -qm "manual intervening history"
+ALIGN_INTERVENING_COMMIT="$(git -C "$ALIGN_PEER_REPO" rev-parse HEAD)"
 touch_valid_refresh_status "$ALIGN_PEER_REPO" "2026-08-18T20:05:00Z"
 git -C "$ALIGN_PEER_REPO" add generated/refresh_status.json public/generated/refresh_status.json
-git -C "$ALIGN_PEER_REPO" commit -qm "[cron] second alignment peer winner" \
+git -C "$ALIGN_PEER_REPO" commit -qm "[cron] labeled peer after intervening history" \
   -m "Refresh-Runner-ID: fixture-peer-2" \
   -m "Refresh-Run-Scope: current" \
   -m "Refresh-Run-ID: alignment-peer-latest"
-ALIGN_LATEST_COMMIT="$(git -C "$ALIGN_PEER_REPO" rev-parse HEAD)"
+ALIGN_LABELED_DESCENDANT_COMMIT="$(git -C "$ALIGN_PEER_REPO" rev-parse HEAD)"
 git -C "$ALIGN_PEER_REPO" push -q origin main
 
 ALIGN_RESULT="$TEST_ROOT/alignment-result"
 HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
 FIXTURE_RESULT_MARKER="$ALIGN_RESULT" \
 DEGEN_DOGS_RUNNER_ID="fixture-local" \
 DEGEN_DOGS_REPO_DIR="$ALIGN_REPO" \
@@ -758,18 +790,21 @@ DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
 DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
 "$ALIGN_REPO/scripts/refresh_and_publish.sh"
 
-if [[ "$(git -C "$ALIGN_REPO" rev-parse HEAD)" != "$ALIGN_LATEST_COMMIT" ]] || \
-  [[ "$(git --git-dir="$ALIGN_REMOTE" rev-parse main)" != "$ALIGN_LATEST_COMMIT" ]] || \
+ALIGN_RESTART_COMMIT="$(git -C "$ALIGN_REPO" rev-parse HEAD)"
+if [[ "$ALIGN_RESTART_COMMIT" == "$ALIGN_LABELED_DESCENDANT_COMMIT" ]] || \
+  [[ "$(git --git-dir="$ALIGN_REMOTE" rev-parse main)" != "$ALIGN_RESTART_COMMIT" ]] || \
+  [[ "$(git -C "$ALIGN_REPO" rev-parse HEAD^)" != "$ALIGN_LABELED_DESCENDANT_COMMIT" ]] || \
+  [[ "$(git -C "$ALIGN_PEER_REPO" rev-parse "$ALIGN_LABELED_DESCENDANT_COMMIT^")" != "$ALIGN_INTERVENING_COMMIT" ]] || \
   [[ -e "$ALIGN_LOCKS/publisher-recovery.json" ]] || \
-  [[ "$(sed -n '1p' "$ALIGN_RESULT")" != "success_superseded_by_peer" ]] || \
-  [[ "$(sed -n '2p' "$ALIGN_RESULT")" != "$ALIGN_LATEST_COMMIT" ]]; then
-  echo "interrupted remote alignment did not advance to the latest descendant" >&2
+  [[ "$(sed -n '1p' "$ALIGN_RESULT")" != "success_pushed" ]] || \
+  [[ "$(sed -n '2p' "$ALIGN_RESULT")" != "$ALIGN_RESTART_COMMIT" ]]; then
+  echo "labeled descendant after intervening history was accepted as peer supersession" >&2
   exit 1
 fi
-if ! grep -q "advanced interrupted publisher alignment target from ${ALIGN_PEER_COMMIT} to ${ALIGN_LATEST_COMMIT}" \
+if ! grep -q "advanced interrupted publisher alignment target from ${ALIGN_PEER_COMMIT} to ${ALIGN_LABELED_DESCENDANT_COMMIT}" \
   "$TEST_ROOT/alignment-logs/refresh.log" || \
   ! grep -q "completed interrupted publisher alignment" "$TEST_ROOT/alignment-logs/refresh.log"; then
-  echo "interrupted remote descendant alignment was not fully logged" >&2
+  echo "interrupted remote descendant did not align before bounded regeneration" >&2
   exit 1
 fi
 
@@ -855,7 +890,7 @@ fi
 
 # An interrupted archive/full-surface job may contain valid offchain deltas
 # that a newer bounded current snapshot does not cover. Its journaled scope
-# must survive recovery on a watcher invocation, force archive regeneration,
+# must union with a caller full request, force archive/full regeneration,
 # and publish a child instead of reporting peer supersession.
 ARCHIVE_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
 mkdir -p "$SUCCESS_REPO/archive/mission3/data/generated"
@@ -875,7 +910,8 @@ write_fixture_recovery_journal \
   "$SUCCESS_REPO" \
   "$ARCHIVE_BASELINE" \
   "archive-peer-local" \
-  "archive"
+  "archive" \
+  "fixture-archive"
 
 ARCHIVE_PEER_REPO="$TEST_ROOT/archive-peer-repo"
 git clone -q --branch main "$REJECT_REMOTE" "$ARCHIVE_PEER_REPO"
@@ -900,6 +936,7 @@ DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
 DEGEN_DOGS_LOG_DIR="$TEST_ROOT/archive-peer-logs" \
 DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/archive-peer-config-locks" \
 DEGEN_DOGS_REFRESH_LOCK_PATH="$ARCHIVE_LOCKS/refresh.lock" \
+DEGEN_DOGS_FULL_REFRESH=1 \
 DEGEN_DOGS_SKIP_PULL=1 \
 DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
 DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
@@ -912,16 +949,79 @@ ARCHIVE_REPAIR_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
 if [[ "$ARCHIVE_REPAIR_COMMIT" == "$ARCHIVE_PEER_COMMIT" ]] || \
   [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$ARCHIVE_REPAIR_COMMIT" ]] || \
   [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD^)" != "$ARCHIVE_PEER_COMMIT" ]] || \
-  [[ "$(git -C "$SUCCESS_REPO" show -s --format=%B HEAD)" != *"Refresh-Run-Scope: archive"* ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" show -s --format=%B HEAD)" != *"Refresh-Run-Scope: archive_full"* ]] || \
   [[ "$(<"$SUCCESS_REPO/archive/mission3/data/generated/archive_scope_fixture.json")" != '{"state":"regenerated"}' ]] || \
   [[ "$(sed -n '1p' "$ARCHIVE_RESULT")" != "success_pushed" ]] || \
   [[ -e "$ARCHIVE_LOCKS/publisher-recovery.json" ]]; then
-  echo "archive-scoped interrupted delta was silently superseded instead of regenerated" >&2
+  echo "archive/full interrupted delta was silently superseded or scope-downgraded" >&2
   echo "local_interrupted_commit=${ARCHIVE_LOCAL_COMMIT}" >&2
   exit 1
 fi
 if ! grep -q "running Mission 3 archive incremental index" "$TEST_ROOT/archive-peer-logs/refresh.log"; then
   echo "archive scope was not restored from the interrupted publisher journal" >&2
+  exit 1
+fi
+
+# Scope union is symmetric: a full interrupted run recovered by an archive
+# caller must also publish archive_full, while validating the old full commit
+# against the journal's original runner identity and scope.
+FULL_JOURNAL_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-18T20:09:00Z"
+git -C "$SUCCESS_REPO" add generated/refresh_status.json public/generated/refresh_status.json
+git -C "$SUCCESS_REPO" commit -qm "[cron] interrupted full publisher" \
+  -m "Refresh-Runner-ID: fixture-full" \
+  -m "Refresh-Run-Scope: full" \
+  -m "Refresh-Run-ID: full-archive-union-local"
+FULL_JOURNAL_LOCAL_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+FULL_JOURNAL_LOCKS="$TEST_ROOT/full-archive-union-locks"
+write_fixture_recovery_journal \
+  "$FULL_JOURNAL_LOCKS/publisher-recovery.json" \
+  "$SUCCESS_REPO" \
+  "$FULL_JOURNAL_BASELINE" \
+  "full-archive-union-local" \
+  "full" \
+  "fixture-full"
+
+FULL_JOURNAL_PEER_REPO="$TEST_ROOT/full-archive-union-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$FULL_JOURNAL_PEER_REPO"
+git -C "$FULL_JOURNAL_PEER_REPO" config user.name "Degen Dogs Current Peer"
+git -C "$FULL_JOURNAL_PEER_REPO" config user.email "degen-dogs-current-peer@example.invalid"
+touch_valid_refresh_status "$FULL_JOURNAL_PEER_REPO" "2026-08-18T20:10:00Z"
+git -C "$FULL_JOURNAL_PEER_REPO" add generated/refresh_status.json public/generated/refresh_status.json
+git -C "$FULL_JOURNAL_PEER_REPO" commit -qm "[cron] bounded current peer" \
+  -m "Refresh-Runner-ID: fixture-peer" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: full-archive-union-peer"
+FULL_JOURNAL_PEER_COMMIT="$(git -C "$FULL_JOURNAL_PEER_REPO" rev-parse HEAD)"
+git -C "$FULL_JOURNAL_PEER_REPO" push -q origin main
+
+FULL_JOURNAL_RESULT="$TEST_ROOT/full-archive-union-result"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$FULL_JOURNAL_RESULT" \
+DEGEN_DOGS_RUNNER_ID="fixture-local" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/full-archive-union-logs" \
+DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/full-archive-union-config-locks" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$FULL_JOURNAL_LOCKS/refresh.lock" \
+DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1 \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+
+FULL_JOURNAL_REPAIR_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+if [[ "$FULL_JOURNAL_REPAIR_COMMIT" == "$FULL_JOURNAL_PEER_COMMIT" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$FULL_JOURNAL_REPAIR_COMMIT" ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD^)" != "$FULL_JOURNAL_PEER_COMMIT" ]] || \
+  [[ "$(git -C "$SUCCESS_REPO" show -s --format=%B HEAD)" != *"Refresh-Run-Scope: archive_full"* ]] || \
+  [[ "$(sed -n '1p' "$FULL_JOURNAL_RESULT")" != "success_pushed" ]] || \
+  [[ -e "$FULL_JOURNAL_LOCKS/publisher-recovery.json" ]]; then
+  echo "full/archive recovery did not preserve the unioned archive_full scope" >&2
+  echo "local_interrupted_commit=${FULL_JOURNAL_LOCAL_COMMIT}" >&2
   exit 1
 fi
 
