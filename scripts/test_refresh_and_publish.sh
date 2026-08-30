@@ -2254,7 +2254,7 @@ CAS_CLEARED_PAGES="$TEST_ROOT/cas-cleared-recovery-pages"
 CAS_CLEARED_DIGEST="$(write_fixture_publication_latest "$CAS_CLEARED_LOCKS" 68)"
 write_fixture_deferred_journal \
   "$CAS_CLEARED_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_BASELINE" \
-  68 "$CAS_CLEARED_DIGEST" "cas-cleared-landed" raw_proven "$NPLUS_PUSH_COMMIT"
+  68 "$CAS_CLEARED_DIGEST" "nplus-landed" raw_proven "$NPLUS_PUSH_COMMIT"
 rm -- "$CAS_CLEARED_LOCKS/publication/latest.json" "$CAS_CLEARED_LOCKS/publication/pushed.json"
 run_deferred_fixture \
   "$CAS_CLEARED_LOCKS" 68 "$CAS_CLEARED_DIGEST" \
