@@ -77,6 +77,7 @@ run_group() {
         npm:test:runner-health-env
         npm:test:runner-env
         npm:test:runner-permissions
+        npm:test:wsl-runner-assets
       )
       ;;
     validation)
