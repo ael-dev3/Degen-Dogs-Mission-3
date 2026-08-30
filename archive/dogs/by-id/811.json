@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#414/694",
+      "display": "#414/695",
       "rank": 414,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 811 dog #811 811 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 16.96 $16.96 2026-08-23t20:35:51z 0x948fefb9c3abff43138de97d9ec460d60fd4b11de4f776b814bf49808305e8ef 0x098de1109dff400406abe4a7571b87bd66a36e78c8b4f0e3b2930924d7ffc360 #414/694 generated auction feed 0xa1bb467fbc6f978a2f4efaceccee59449af22cebf211c09c2b1d6ca9527f075b background: none (91.6%) background none body: brown (10.8%) body brown neck: none (41.5%) neck none mouth: pizza (11.0%) mouth pizza ears: loopearring (27.2%) ears loopearring head: baseballcap (10.2%) head baseballcap eyes: vrgoggles (10.7%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 811 dog #811 811 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.007 eth 7000000000000000 16.96 $16.96 2026-08-23t20:35:51z 0x948fefb9c3abff43138de97d9ec460d60fd4b11de4f776b814bf49808305e8ef 0x098de1109dff400406abe4a7571b87bd66a36e78c8b4f0e3b2930924d7ffc360 generated auction feed 0xa1bb467fbc6f978a2f4efaceccee59449af22cebf211c09c2b1d6ca9527f075b background none body brown neck none mouth pizza ears loopearring head baseballcap eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #414/695 background: none (91.5%) body: brown (10.8%) neck: none (41.4%) mouth: pizza (10.9%) ears: loopearring (27.3%) head: baseballcap (10.2%) eyes: vrgoggles (10.6%)",
     "settlement": {
       "block_number": 50364002,
       "block_time_utc": "2026-08-23T20:35:51Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,17 +91,17 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Pizza (11.0%)",
+        "display": "Mouth: Pizza (10.9%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -111,7 +111,7 @@
         "value": "BaseballCap"
       },
       {
-        "display": "Eyes: VRGoggles (10.7%)",
+        "display": "Eyes: VRGoggles (10.6%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#511/694",
+      "display": "#511/695",
       "rank": 511,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 817 dog #817 817 mission 3 mission 3 base settled 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.0055 eth 5500000000000000 13.43 $13.43 2026-08-29t21:51:31z 0x6095cdac770a695c5eeb28b7bb0578803f3da32af8896dbeaaaa1b99e75e1a9c 0xc4e4b085256f180d634fb5c4199edeeaaad033799c7bcb6e88edfe68a05dd653 #511/694 generated auction feed 0x220466245246c188c02fa20faeddd112c7beb95167c6eb745a8f25769ff77074 0xf868cd64ab96aac12a81ba2e95394a6615c00cfeb5687379b5077efe3a613fd8 0x92639d17c583c207858f8d4703b7ddad1919a4b8875f2ebc39c6670759f0cf83 0xbbeb946826a2f415ec940ef0d86915aaed71ebb1ef6ea40ecca38e1fddefa0be background: none (91.6%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.6%) mouth none ears: loopearring (27.2%) ears loopearring head: blackcap (7.6%) head blackcap eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 817 dog #817 817 mission 3 mission 3 base settled 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.0055 eth 5500000000000000 13.43 $13.43 2026-08-29t21:51:31z 0x6095cdac770a695c5eeb28b7bb0578803f3da32af8896dbeaaaa1b99e75e1a9c 0xc4e4b085256f180d634fb5c4199edeeaaad033799c7bcb6e88edfe68a05dd653 generated auction feed 0x220466245246c188c02fa20faeddd112c7beb95167c6eb745a8f25769ff77074 0xf868cd64ab96aac12a81ba2e95394a6615c00cfeb5687379b5077efe3a613fd8 0x92639d17c583c207858f8d4703b7ddad1919a4b8875f2ebc39c6670759f0cf83 0xbbeb946826a2f415ec940ef0d86915aaed71ebb1ef6ea40ecca38e1fddefa0be background none body redbrown neck goldnecklace mouth none ears loopearring head blackcap eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #511/695 background: none (91.5%) body: redbrown (15.4%) neck: goldnecklace (19.3%) mouth: none (68.6%) ears: loopearring (27.3%) head: blackcap (7.6%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": 50625472,
       "block_time_utc": "2026-08-29T21:51:31Z",
@@ -84,7 +84,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

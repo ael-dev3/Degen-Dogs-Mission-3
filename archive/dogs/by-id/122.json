@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#184/694",
-      "rank": 184,
+      "display": "#183/695",
+      "rank": 183,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 122 dog #122 122 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 0x39897e5e1fc8af3428a3dc2d16d1eb08c0c1c0b16bde6772c2796318483ba33c #184/694 background: none; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 122 dog #122 122 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbf88daf99425c90471bb116d95916edc4395b5d96a76f3626c7afbfddbeaec20 0x39897e5e1fc8af3428a3dc2d16d1eb08c0c1c0b16bde6772c2796318483ba33c background: none; body: sugarskull; neck: none; mouth: none; ears: goldearring; head: unicorn; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #183/695 background: none (91.5%) body: sugarskull (6.5%) neck: none (41.4%) mouth: none (68.6%) ears: goldearring (14.2%) head: unicorn (4.6%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 29050498,
       "block_time_utc": "2022-06-01T23:01:00Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,7 +88,7 @@
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: GoldEarring (14.3%)",
+        "display": "Ears: GoldEarring (14.2%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },

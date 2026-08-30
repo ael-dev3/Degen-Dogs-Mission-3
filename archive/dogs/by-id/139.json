@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#454/694",
-      "rank": 454,
+      "display": "#457/695",
+      "rank": 457,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 #454/694 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #457/695 background: none (91.5%) body: black (11.7%) neck: redcollar (29.2%) mouth: none (68.6%) ears: loopearring (27.3%) head: beanie (5.3%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 29902006,
       "block_time_utc": "2022-06-23T09:49:25Z",
@@ -78,17 +78,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.5%)",
+        "display": "Body: Black (11.7%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (29.3%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

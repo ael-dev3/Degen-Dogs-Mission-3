@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#128/694",
+      "display": "#128/695",
       "rank": 128,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.62 $19.62 2026-07-06t02:22:31z 0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b #128/694 generated auction feed 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b background: none (91.6%) background none body: blue (8.9%) body blue neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.3%) mouth teeth ears: earbuds (32.6%) ears earbuds head: none (20.2%) head none eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 764 dog #764 764 mission 3 mission 3 base settled 0x7732f594c38d4940e1076aa9f6f53065b7915953 @bitcoinvestor bitcoinvestor 0.011 eth 11000000000000000 19.62 $19.62 2026-07-06t02:22:31z 0x10f7632974ebe67d07e3d55c8ee1525470c58bf928edf18c116b74489d0d1813 0x42b12171c799122e0875a6b8ad1de8baa324d585ed86d850d4b967669767c38b generated auction feed 0xab9eb6d3b9fe14f47bdaac1dddfebbe2b69867a165a8c48f7b134643d5457579 0x23bead9ca093ef9bea5d49f79e61281b6d6da38585023fd9427845ec6071ee44 0x71e351ddb1c367e5f46efd9793cecc7a30daf0b2955b5761cf972ec7eac18c2e 0xe9f06b6d80c4250478ee730e019f79a06d7757b2214fa7140aee8b0d8763bd5b background none body blue neck studdedcollar mouth teeth ears earbuds head none eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners #128/695 background: none (91.5%) body: blue (8.9%) neck: studdedcollar (10.1%) mouth: teeth (5.3%) ears: earbuds (32.5%) head: none (20.1%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": 48257602,
       "block_time_utc": "2026-07-06T02:22:31Z",
@@ -83,7 +83,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.1%)",
         "trait_type": "Head",
         "value": "None"
       },

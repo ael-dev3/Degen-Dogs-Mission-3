@@ -52,13 +52,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#202/694",
-      "rank": 202,
+      "display": "#201/695",
+      "rank": 201,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 94 dog #94 94 mission 1 mission 1 polygon settled 0x09a900eb2ff6e9aca12d4d1a396ddc9be0307661 0x09a9…7661 0.05 weth 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c #202/694 background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: goldearring; head: hoodie; eyes: none 0x1090e46f5f474fa98c894464e543d7d6d17bdf5ee8b66b18a914e1de200b661c polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 94 dog #94 94 mission 1 mission 1 polygon settled 0x09a900eb2ff6e9aca12d4d1a396ddc9be0307661 0x09a9…7661 0.05 weth 0x5fb6d6f6b0cb75a1e7d86b075e8c4da833d41b793f6734ea444efcd5176400e1 0x92b30eb3d8d7fd5e99a54ef61089a3c58d3ede351bc6a8b1c275cd2c1e48814c background: none; body: redbrown; neck: redcollar; mouth: pizza; ears: goldearring; head: hoodie; eyes: none 0x1090e46f5f474fa98c894464e543d7d6d17bdf5ee8b66b18a914e1de200b661c polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #201/695 background: none (91.5%) body: redbrown (15.4%) neck: redcollar (29.2%) mouth: pizza (10.9%) ears: goldearring (14.2%) head: hoodie (4.7%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 27995510,
       "block_time_utc": "2022-05-06T15:00:39Z",
@@ -80,7 +80,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,22 +90,22 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (29.3%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Pizza (11.0%)",
+        "display": "Mouth: Pizza (10.9%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: GoldEarring (14.3%)",
+        "display": "Ears: GoldEarring (14.2%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
       {
-        "display": "Head: Hoodie (4.8%)",
+        "display": "Head: Hoodie (4.7%)",
         "trait_type": "Head",
         "value": "Hoodie"
       },
