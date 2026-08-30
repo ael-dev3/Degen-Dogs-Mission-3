@@ -1018,6 +1018,68 @@ function Get-WslRunnerGitPath {
     return [IO.Path]::GetFullPath($source)
 }
 
+function Remove-WslRunnerTemporaryGitDirectory {
+    param(
+        [Parameter(Mandatory)][string]$TemporaryRoot,
+        [Parameter(Mandatory)][string]$Stage
+    )
+
+    $temporaryRootPath = [IO.Path]::GetFullPath($TemporaryRoot).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $stagePath = [IO.Path]::GetFullPath($Stage).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $stageParent = [IO.Path]::GetFullPath((Split-Path -Parent $stagePath)).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $stageLeaf = Split-Path -Leaf $stagePath
+    if (-not [String]::Equals(
+        $stageParent,
+        $temporaryRootPath,
+        [StringComparison]::OrdinalIgnoreCase
+    ) -or $stageLeaf -cnotmatch '^degen-dogs-bootstrap-source-[0-9a-f]{32}$') {
+        throw 'Refusing to remove a Git source stage outside the exact bounded temporary path.'
+    }
+    if (-not [IO.Directory]::Exists($stagePath)) {
+        return
+    }
+    $stageItem = Get-Item -LiteralPath $stagePath -Force
+    if (-not $stageItem.PSIsContainer -or
+        ($stageItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'Refusing to remove a Git source stage that is not an ordinary directory.'
+    }
+    $entries = @(Get-ChildItem -LiteralPath $stagePath -Force -Recurse -ErrorAction Stop)
+    if (@($entries | Where-Object {
+        $_.Attributes -band [IO.FileAttributes]::ReparsePoint
+    }).Count -ne 0) {
+        throw 'Refusing to remove a Git source stage containing a reparse point.'
+    }
+    foreach ($entry in @($entries) + @($stageItem)) {
+        if ($entry.Attributes -band [IO.FileAttributes]::ReadOnly) {
+            $attributes = [IO.FileAttributes]([int]$entry.Attributes -band
+                (-bnot [int][IO.FileAttributes]::ReadOnly))
+            [IO.File]::SetAttributes($entry.FullName, $attributes)
+        }
+    }
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        if (-not [IO.Directory]::Exists($stagePath)) {
+            return
+        }
+        try {
+            [IO.Directory]::Delete($stagePath, $true)
+            return
+        }
+        catch {
+            if ($attempt -eq 3) { throw }
+            Start-Sleep -Milliseconds (100 * $attempt)
+        }
+    }
+}
+
 function Assert-TrustedBootstrapSource {
     param([Parameter(Mandatory)][string]$Commit)
 
@@ -1119,9 +1181,9 @@ function Assert-TrustedBootstrapSource {
         }
     }
     finally {
-        if ([IO.Directory]::Exists($stage)) {
-            [IO.Directory]::Delete($stage, $true)
-        }
+        Remove-WslRunnerTemporaryGitDirectory `
+            -TemporaryRoot $temporaryRoot `
+            -Stage $stage
     }
 }
 
