@@ -3682,6 +3682,195 @@ def test_queue_observation_uses_null_event_fields_when_only_state_changed():
     assert observation["event_block_time_utc"] is None
 
 
+def test_queue_selects_an_event_only_when_its_identity_triggered_the_decision():
+    watcher = load_module()
+    snapshot = {
+        "created_log": None,
+        "bid_log": {"event_name": "AuctionBid", "block_number": 110, "log_index": 4},
+        "extended_log": None,
+        "settled_log": None,
+    }
+    assert watcher.event_for_decision(snapshot, ["auction_end_time_elapsed"]) == {}
+    assert watcher.event_for_decision(snapshot, ["auction_bid"]) == snapshot["bid_log"]
+
+
+def test_queue_state_only_boundary_omits_historical_event_and_is_not_requeued():
+    watcher = load_module()
+    setattr(watcher, "refresh_telemetry", load_telemetry_module())
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        telemetry_path = tmp_path / "watcher.jsonl"
+        state = {
+            "last_seen_token_id": 727,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "200",
+            "last_seen_bid_log_id": "100:0x" + "a" * 64 + ":1",
+            "last_seen_auction_created_log_id": "90:0x" + "a" * 64 + ":1",
+            "last_seen_auction_extended_log_id": "",
+            "last_seen_auction_settled_log_id": "",
+            "last_checked_block": 110,
+            "last_verified_block_hash": "0x" + "a" * 64,
+        }
+        state_path.write_text(json.dumps(state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
+        snapshot = {
+            "latest_block": 111,
+            "checked_from_block": 100,
+            "checked_to_block": 111,
+            "snapshot_block_hash": "0x" + "b" * 64,
+            "snapshot_block_time_unix": 120,
+            "token_id": 727,
+            "high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "amount_wei": "200",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 100,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0x" + "a" * 64 + ":1", "tx_hash": "0x" + "a" * 64, "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "100:0x" + "a" * 64 + ":1", "tx_hash": "0x" + "a" * 64, "block_number": 100, "block_hash": "0x" + "a" * 64, "log_index": 1, "event_name": "AuctionBid", "token_id": 727, "amount_wei": "200", "bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "BASE_RPC_URLS": "https://one.example,https://two.example",
+            "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(tmp_path / "locks" / "refresh.lock"),
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:publish",
+            "MISSION3_WATCHER_PUBLICATION_MODE": "queue",
+            "DEGEN_DOGS_RUNNER_ID": "windows-wsl",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        setattr(watcher, "enrich_event_with_quorum_header", lambda *_args: (_ for _ in ()).throw(AssertionError("historical event was selected")))
+        calls = []
+
+        class EnqueueResult:
+            action = "enqueued"
+            generation = 7
+            digest = "d" * 64
+
+        original_enqueue = watcher.runner_publication_state.enqueue_latest_observation
+        watcher.runner_publication_state.enqueue_latest_observation = lambda _lock_dir, observation, **_kwargs: calls.append(observation) or EnqueueResult()
+        old_telemetry_path = os.environ.get("MISSION3_WATCHER_TELEMETRY_PATH")
+        os.environ["MISSION3_WATCHER_TELEMETRY_PATH"] = str(telemetry_path)
+        try:
+            assert watcher.run_once(config) == 0
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.runner_publication_state.enqueue_latest_observation = original_enqueue
+            if old_telemetry_path is None:
+                os.environ.pop("MISSION3_WATCHER_TELEMETRY_PATH", None)
+            else:
+                os.environ["MISSION3_WATCHER_TELEMETRY_PATH"] = old_telemetry_path
+        assert len(calls) == 1
+        assert all(calls[0][key] is None for key in ("event_name", "event_tx_hash", "event_log_index", "event_block_number", "event_block_hash", "event_block_time_utc"))
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["last_end_boundary_refresh_token_id"] == 727
+        assert saved["last_end_boundary_refresh_end_time_unix"] == 100
+        rows = [json.loads(line) for line in telemetry_path.read_text(encoding="utf-8").splitlines() if line]
+        assert all(rows[0][key] is None for key in ("event_name", "event_tx_hash", "event_log_index", "event_block_number", "event_block_hash", "event_block_time_utc"))
+
+
+def test_stale_queue_result_retains_pending_state_and_does_not_start_cooldown():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        original_state = {
+            "last_seen_token_id": 727,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "100",
+            "last_seen_bid_log_id": "100:0x" + "a" * 64 + ":1",
+            "last_seen_auction_created_log_id": "90:0x" + "a" * 64 + ":1",
+            "last_refresh_at_utc": iso(0),
+        }
+        state_path.write_text(json.dumps(original_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
+        snapshot = {
+            "latest_block": 130, "checked_from_block": 100, "checked_to_block": 130,
+            "snapshot_block_hash": "0x" + "b" * 64, "snapshot_block_time_unix": 1_700_000_030,
+            "token_id": 727, "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "amount_wei": "200", "settled": False,
+            "start_time_unix": 1, "end_time_unix": 2, "checked_log_count": 1,
+            "created_log": {"id": "90:0x" + "a" * 64 + ":1", "tx_hash": "0x" + "a" * 64, "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0x" + "c" * 64 + ":4", "tx_hash": "0x" + "c" * 64, "block_number": 130, "block_hash": "0x" + "b" * 64, "block_time_utc": "2023-11-14T22:13:20Z", "log_index": 4, "event_name": "AuctionBid", "token_id": 727, "amount_wei": "200", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None, "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "BASE_RPC_URLS": "https://one.example,https://two.example", "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+            "MISSION3_WATCHER_STATE_PATH": str(state_path), "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"), "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(tmp_path / "locks" / "refresh.lock"), "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:publish", "MISSION3_WATCHER_PUBLICATION_MODE": "queue",
+        })
+        setattr(watcher, "fetch_snapshot", lambda *_args: snapshot)
+        setattr(watcher, "enrich_event_with_quorum_header", lambda _config, event: event)
+
+        class StaleResult:
+            action = "stale"
+            generation = 9
+            digest = "e" * 64
+
+        original_enqueue = watcher.runner_publication_state.enqueue_latest_observation
+        watcher.runner_publication_state.enqueue_latest_observation = lambda *_args, **_kwargs: StaleResult()
+        try:
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.runner_publication_state.enqueue_latest_observation = original_enqueue
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["last_seen_amount_wei"] == "100"
+        assert saved["last_refresh_at_utc"] == original_state["last_refresh_at_utc"]
+        assert saved["pending_refresh"] is True
+        assert saved["pending_bid_log_id"] == "130:0x" + "c" * 64 + ":4"
+
+
+def test_queue_records_observation_after_header_validation_and_acknowledges_after_enqueue():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        state_path.write_text(json.dumps({"last_seen_token_id": 727, "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "last_seen_amount_wei": "100", "last_seen_bid_log_id": "100:0x" + "a" * 64 + ":1", "last_seen_auction_created_log_id": "90:0x" + "a" * 64 + ":1"}), encoding="utf-8")
+        state_path.chmod(0o600)
+        snapshot = {
+            "latest_block": 130, "checked_from_block": 100, "checked_to_block": 130, "snapshot_block_hash": "0x" + "b" * 64, "snapshot_block_time_unix": 1_700_000_030,
+            "token_id": 727, "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "amount_wei": "200", "settled": False, "start_time_unix": 1, "end_time_unix": 2, "checked_log_count": 1,
+            "created_log": {"id": "90:0x" + "a" * 64 + ":1", "tx_hash": "0x" + "a" * 64, "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0x" + "c" * 64 + ":4", "tx_hash": "0x" + "c" * 64, "block_number": 130, "block_hash": "0x" + "b" * 64, "log_index": 4, "event_name": "AuctionBid", "token_id": 727, "amount_wei": "200", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}, "extended_log": None, "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "BASE_RPC_URLS": "https://one.example,https://two.example", "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+            "MISSION3_WATCHER_STATE_PATH": str(state_path), "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"), "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(tmp_path / "locks" / "refresh.lock"), "MISSION3_WATCHER_AUTO_PUSH": "1", "MISSION3_REFRESH_COMMAND": "npm run refresh:publish", "MISSION3_WATCHER_PUBLICATION_MODE": "queue",
+        })
+        ticks = [iso(offset) for offset in range(11)]
+        original_now = watcher.utc_now
+        watcher.utc_now = lambda: ticks.pop(0)
+        setattr(watcher, "fetch_snapshot", lambda *_args: snapshot)
+        header_times = []
+        def header_after_time_passes(_config, event):  # noqa: ANN001, ANN202
+            header_times.append(watcher.utc_now())
+            return {**event, "block_time_utc": "2023-11-14T22:13:20Z"}
+        setattr(watcher, "enrich_event_with_quorum_header", header_after_time_passes)
+        captured = {}
+        class Enqueued:
+            action = "enqueued"
+            generation = 1
+            digest = "f" * 64
+        original_enqueue = watcher.runner_publication_state.enqueue_latest_observation
+        watcher.runner_publication_state.enqueue_latest_observation = lambda *_args, **kwargs: captured.update(kwargs) or Enqueued()
+        try:
+            assert watcher.run_once(config) == 0
+        finally:
+            watcher.utc_now = original_now
+            watcher.runner_publication_state.enqueue_latest_observation = original_enqueue
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert header_times == [iso(2)], header_times
+        assert captured["created_at_utc"] == iso(3)
+        assert saved["last_refresh_at_utc"] == iso(4)
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

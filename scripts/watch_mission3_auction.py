@@ -1573,6 +1573,28 @@ def latest_activity_event(snapshot: dict[str, Any]) -> dict[str, Any]:
     return max(events, key=lambda item: (int(item.get("block_number") or 0), int(item.get("log_index") or 0)))
 
 
+EVENT_IDENTITY_REASON_BY_SNAPSHOT_KEY = {
+    "created_log": "auction_created",
+    "bid_log": "auction_bid",
+    "extended_log": "auction_extended",
+    "settled_log": "auction_settled",
+}
+
+
+def event_for_decision(snapshot: dict[str, Any], reasons: list[str]) -> dict[str, Any]:
+    """Return only an event whose identity, not incidental lookback, caused work."""
+    candidates = [
+        event
+        for key, reason in EVENT_IDENTITY_REASON_BY_SNAPSHOT_KEY.items()
+        if reason in reasons
+        for event in [get_snapshot_log(snapshot, key)]
+        if event
+    ]
+    if not candidates:
+        return {}
+    return max(candidates, key=lambda item: (int(item.get("block_number") or 0), int(item.get("log_index") or 0)))
+
+
 def queue_observation_from_snapshot(
     snapshot: dict[str, Any],
     event: dict[str, Any],
@@ -2249,9 +2271,9 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
         f"logs={snapshot.get('checked_log_count')} reasons={','.join(decision.reasons) or 'none'}"
     )
     activity_event = latest_activity_event(snapshot)
+    queue_event = event_for_decision(snapshot, decision.reasons)
 
     if decision.should_refresh and config.publication_mode == "queue":
-        queue_created_at = utc_now()
         if dry_run:
             completed = utc_now()
             record_watcher_telemetry(
@@ -2261,6 +2283,12 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
                     "result": "queue_dry_run",
                     "reasons": decision.reasons,
                     "publication_mode": "queue",
+                    "event_name": queue_event.get("event_name") or None,
+                    "event_block_number": queue_event.get("block_number") or None,
+                    "event_tx_hash": queue_event.get("tx_hash") or None,
+                    "event_log_index": queue_event.get("log_index") if queue_event else None,
+                    "event_block_hash": None,
+                    "event_block_time_utc": None,
                     "dry_run": True,
                     "force_refresh": force_refresh,
                 },
@@ -2272,41 +2300,46 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
                 raise RuntimeError("queue publication state module is unavailable")
             if config.refresh_lock_path is None:
                 raise RuntimeError("queue publication requires the fixed refresh lock path")
-            selected_event = enrich_event_with_quorum_header(config, activity_event) if activity_event else {}
+            selected_event = enrich_event_with_quorum_header(config, queue_event) if queue_event else {}
             observation = queue_observation_from_snapshot(
                 snapshot,
                 selected_event,
                 previous_state=state,
             )
+            observation_created_at = utc_now()
             enqueue_result = runner_publication_state.enqueue_latest_observation(
                 config.refresh_lock_path.parent,
                 observation,
                 runner_id=config.runner_id,
                 run_scope="current",
-                created_at_utc=queue_created_at,
+                created_at_utc=observation_created_at,
                 canonical_reorg_quorum=observation["canonical_reorg_from_hash"] is not None,
             )
-            # A stale result is still an acknowledgement: a newer durable,
-            # quorum-validated observation is already the queue head.
-            # Durable enqueue is the acknowledgement boundary. In particular,
-            # bid cooldown is not advanced by a failed or skipped queue write.
-            new_state = state_from_snapshot(
-                snapshot,
-                now_utc=queue_created_at,
-                previous_state=new_state,
-                acknowledge=True,
-            )
-            new_state.update({
-                "last_refresh_at_utc": queue_created_at,
-                "last_refresh_status": "queued",
+            queue_metadata = {
                 "last_queue_generation": enqueue_result.generation,
                 "last_queue_digest": enqueue_result.digest,
                 "last_queue_outcome": enqueue_result.action,
-                "consecutive_refresh_failures": 0,
-            })
-            new_state.pop("last_refresh_error", None)
-            new_state.pop("next_allowed_refresh_after_utc", None)
-            _clear_pending_refresh_fields(new_state)
+            }
+            acknowledged_actions = {"enqueued", "replaced", "reorg_replaced", "coalesced"}
+            acknowledged = enqueue_result.action in acknowledged_actions
+            if acknowledged:
+                acknowledgement_at = utc_now()
+                # Use the same success transition as inline mode, including
+                # end-boundary bookkeeping before pending fields are cleared.
+                new_state = state_from_snapshot(
+                    snapshot,
+                    now_utc=acknowledgement_at,
+                    previous_state=new_state,
+                    acknowledge=True,
+                )
+                new_state = record_refresh_result(
+                    new_state,
+                    status="success",
+                    reasons=decision.reasons,
+                    now_utc=acknowledgement_at,
+                    exit_code=0,
+                )
+            new_state.update(queue_metadata)
             if not dry_run:
                 save_state(config.state_path, new_state)
         except Exception as exc:  # noqa: BLE001
@@ -2319,6 +2352,12 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
                     "result": "queue_failed",
                     "reasons": decision.reasons,
                     "error": queue_error,
+                    "event_name": queue_event.get("event_name") or None,
+                    "event_block_number": queue_event.get("block_number") or None,
+                    "event_tx_hash": queue_event.get("tx_hash") or None,
+                    "event_log_index": queue_event.get("log_index") if queue_event else None,
+                    "event_block_hash": None,
+                    "event_block_time_utc": None,
                     "dry_run": dry_run,
                     "force_refresh": force_refresh,
                 },
@@ -2330,12 +2369,16 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
             config,
             {
                 **telemetry_base_row(check_started, completed, snapshot),
-                "result": "queue_dry_run" if dry_run else "queued",
+                "result": "queued" if acknowledged else "queue_stale",
                 "reasons": decision.reasons,
                 "pending_refresh": bool(new_state.get("pending_refresh")),
                 "publication_mode": "queue",
-                "observation_created_at_utc": queue_created_at,
-                "event_to_observation_seconds": seconds_since(selected_event.get("block_time_utc"), queue_created_at) if selected_event else None,
+                "observation_created_at_utc": observation_created_at,
+                "event_to_observation_seconds": seconds_since(selected_event.get("block_time_utc"), observation_created_at) if selected_event else None,
+                "event_name": selected_event.get("event_name") or None,
+                "event_block_number": selected_event.get("block_number") or None,
+                "event_tx_hash": selected_event.get("tx_hash") or None,
+                "event_log_index": selected_event.get("log_index") if selected_event else None,
                 "event_block_hash": selected_event.get("block_hash") if selected_event else None,
                 "event_block_time_utc": selected_event.get("block_time_utc") if selected_event else None,
                 "queue_generation": enqueue_result.generation,
