@@ -192,6 +192,24 @@ def test_atomic_writer_retries_short_writes_until_the_full_record_is_durable() -
         assert state.read_latest_with_digest(root)[0] == record
 
 
+def test_atomic_writer_rejects_zero_progress_without_installing_a_partial_target() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        path = state.state_paths(root).latest
+        record = state.latest_record(1, "windows-wsl", "current", "2026-08-30T12:34:56Z", observation())
+        original_write = state.os.write
+        state.os.write = lambda _descriptor, _data: 0
+        try:
+            expect_invalid(
+                lambda: state.atomic_write_record(path, record),
+                "atomic writer accepted a zero-progress write",
+            )
+        finally:
+            state.os.write = original_write
+        assert not path.exists(), "zero-progress write installed a partial target"
+        assert not list(path.parent.glob(f".{path.name}.*.tmp")), "zero-progress write leaked a temporary file"
+
+
 def test_enqueue_is_latest_wins_but_chain_correct() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
