@@ -1025,6 +1025,27 @@ $valid = @"
 "@
 Assert-WslRunnerScheduledTaskXml -XmlText $valid -ExpectedUserSid $sid -ExpectedLogonType 'InteractiveToken' -ExpectedWslPath $wslPath -ExpectedArguments $arguments -AtLogOnOnly $true -ExpectedEnabled $false
 
+# Task Scheduler canonicalizes an enabled task by omitting Settings/Enabled,
+# because the task-schema default is true. The attestor must accept that exact
+# representation when enabled while continuing to require an explicit false
+# node for the pre-activation state.
+$enabledByDefault = $valid.Replace('<Enabled>false</Enabled></Settings>', '</Settings>')
+Assert-WslRunnerScheduledTaskXml -XmlText $enabledByDefault -ExpectedUserSid $sid -ExpectedLogonType 'InteractiveToken' -ExpectedWslPath $wslPath -ExpectedArguments $arguments -AtLogOnOnly $true -ExpectedEnabled $true
+Assert-WslRunnerManagedTaskXml -XmlText $enabledByDefault -ExpectedUserSid $sid -ExpectedWslPath $wslPath -ExpectedArguments $arguments -ExpectedEnabled $true
+
+foreach ($unsafeEnabledExpectation in @(
+    [PSCustomObject]@{ Xml = $enabledByDefault; Expected = $false },
+    [PSCustomObject]@{ Xml = $valid; Expected = $true }
+)) {
+    $unsafeEnabledAccepted = $false
+    try {
+        Assert-WslRunnerScheduledTaskXml -XmlText $unsafeEnabledExpectation.Xml -ExpectedUserSid $sid -ExpectedLogonType 'InteractiveToken' -ExpectedWslPath $wslPath -ExpectedArguments $arguments -AtLogOnOnly $true -ExpectedEnabled ([bool]$unsafeEnabledExpectation.Expected)
+        $unsafeEnabledAccepted = $true
+    }
+    catch {}
+    if ($unsafeEnabledAccepted) { throw 'unsafe task enabled-state representation was accepted' }
+}
+
 $mutations = @(
     $valid.Replace('</Triggers>', '<BootTrigger><Enabled>true</Enabled></BootTrigger></Triggers>'),
     $valid.Replace('<LogonTrigger><Enabled>true</Enabled>', '<LogonTrigger><Enabled>false</Enabled>'),
@@ -1155,6 +1176,20 @@ try {
         -ExpectedArguments $plan.Arguments `
         -AtLogOnOnly $true `
         -ExpectedEnabled $false
+    $registered | Enable-ScheduledTask | Out-Null
+    $enabledTask = Get-ExactScheduledTask -Name $taskName
+    if ($null -eq $enabledTask -or -not [bool]$enabledTask.Settings.Enabled) {
+        throw 'disposable task did not become enabled'
+    }
+    $enabledXml = Export-ScheduledTask -TaskName $taskName -TaskPath '\'
+    Assert-WslRunnerScheduledTaskXml `
+        -XmlText $enabledXml `
+        -ExpectedUserSid $sid `
+        -ExpectedLogonType 'InteractiveToken' `
+        -ExpectedWslPath $plan.Executable `
+        -ExpectedArguments $plan.Arguments `
+        -AtLogOnOnly $true `
+        -ExpectedEnabled $true
     $isolation = Invoke-WslRunnerTaskIsolation `
         -Remove $true `
         -ResolveExactTaskAction {

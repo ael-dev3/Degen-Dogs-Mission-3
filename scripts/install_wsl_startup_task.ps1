@@ -901,7 +901,16 @@ function Assert-WslRunnerScheduledTaskXml {
         throw 'The scheduled task does not have an unlimited execution time.'
     }
     $expectedEnabledText = if ($ExpectedEnabled) { 'true' } else { 'false' }
-    if (-not $enabled -or $enabled.InnerText -ne $expectedEnabledText) {
+    # Task Scheduler omits Settings/Enabled when a task is enabled because
+    # `true` is the task-schema default. Disabled tasks must remain explicit so
+    # an absent node can never satisfy the fail-closed pre-activation check.
+    $enabledStateMatches = if ($ExpectedEnabled) {
+        -not $enabled -or $enabled.InnerText -eq 'true'
+    }
+    else {
+        $enabled -and $enabled.InnerText -eq 'false'
+    }
+    if (-not $enabledStateMatches) {
         throw "The scheduled-task enabled state is not $expectedEnabledText."
     }
 }
