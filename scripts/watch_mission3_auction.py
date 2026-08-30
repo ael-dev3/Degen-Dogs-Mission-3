@@ -139,6 +139,11 @@ try:
 except Exception:  # pragma: no cover - watcher still works without telemetry helper on ad-hoc copies.
     refresh_telemetry = None  # type: ignore[assignment]
 
+try:
+    import runner_publication_state
+except Exception:  # pragma: no cover - inline mode must not depend on the WSL queue module.
+    runner_publication_state = None  # type: ignore[assignment]
+
 
 class Config(NamedTuple):
     rpc_urls: list[str]
@@ -160,6 +165,8 @@ class Config(NamedTuple):
     timeout_seconds: int
     quorum_size: int
     confirmations: int
+    publication_mode: str
+    runner_id: str
 
 
 class RefreshDecision(NamedTuple):
@@ -241,6 +248,13 @@ def env_int_any(
     if maximum is not None:
         value = min(value, maximum)
     return value
+
+
+def publication_mode_from_env(env: dict[str, str]) -> str:
+    mode = str(env.get("MISSION3_WATCHER_PUBLICATION_MODE", "inline")).strip()
+    if mode not in {"inline", "queue"}:
+        raise SystemExit("MISSION3_WATCHER_PUBLICATION_MODE must be exactly 'inline' or 'queue'")
+    return mode
 
 
 def parse_url_list(env: dict[str, str], name: str, default_urls: list[str]) -> list[str]:
@@ -357,6 +371,7 @@ def optional_path_from_env(env: dict[str, str], name: str, default: Path | None)
 
 def config_from_env(env: dict[str, str] | None = None) -> Config:
     env = dict(os.environ if env is None else env)
+    publication_mode = publication_mode_from_env(env)
     explicit_rpc = any(env.get(name, "").strip() for name in ("BASE_RPC_URL", "BASE_RPC_URLS", "BASE_LOG_RPC_URLS"))
     include_public_fallbacks = env_bool(env, "BASE_INCLUDE_PUBLIC_FALLBACKS", not explicit_rpc)
     rpc_candidates: list[str] = []
@@ -396,6 +411,7 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
     )
     if auto_push and refresh_lock_path is None:
         raise SystemExit("MISSION3_REFRESH_LOCK_PATH cannot be disabled when auto-push is enabled")
+    runner_id = str(env.get("DEGEN_DOGS_RUNNER_ID", "windows-wsl")).strip()
 
     return Config(
         rpc_urls=rpc_urls,
@@ -417,6 +433,8 @@ def config_from_env(env: dict[str, str] | None = None) -> Config:
         timeout_seconds=env_int(env, "MISSION3_WATCHER_REFRESH_TIMEOUT_SECONDS", 1800, minimum=60),
         quorum_size=env_int(env, "BASE_RPC_QUORUM_SIZE", 2, minimum=2, maximum=3),
         confirmations=env_int(env, "BASE_SNAPSHOT_CONFIRMATIONS", 1, minimum=1, maximum=64),
+        publication_mode=publication_mode,
+        runner_id=runner_id,
     )
 
 
@@ -1049,6 +1067,7 @@ def compact_event_log(item: dict[str, Any] | None) -> dict[str, Any] | None:
     result: dict[str, Any] = {
         "id": log_identity(item),
         "block_number": int(str(item.get("blockNumber", "0x0")), 16),
+        "block_hash": str(item.get("blockHash") or "").lower(),
         "tx_hash": str(item.get("transactionHash") or ""),
         "log_index": int(str(item.get("logIndex", "0x0")), 16),
         "topic0": topic0,
@@ -1086,6 +1105,54 @@ def compact_event_log(item: dict[str, Any] | None) -> dict[str, Any] | None:
         if amount is not None:
             result["amount_wei"] = str(amount)
     return result
+
+
+def utc_from_unix(value: Any, *, label: str) -> str:
+    try:
+        timestamp = int(value)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(f"{label} timestamp is malformed") from exc
+    if timestamp < 0:
+        raise RuntimeError(f"{label} timestamp is malformed")
+    return datetime.fromtimestamp(timestamp, timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def enrich_event_with_quorum_header(config: Config, event: dict[str, Any]) -> dict[str, Any]:
+    """Bind a selected log to a quorum-verified block hash and timestamp."""
+    if not event:
+        return {}
+    try:
+        block_number = int(event["block_number"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError("selected event has an invalid block number") from exc
+    expected_hash = str(event.get("block_hash") or "").lower()
+    if not re.fullmatch(r"0x[0-9a-f]{64}", expected_hash):
+        raise RuntimeError("selected event is missing a canonical block hash")
+    header, header_urls = rpc_quorum_call(
+        "eth_getBlockByNumber",
+        [hex(block_number), False],
+        urls=config.log_rpc_urls,
+        required=config.quorum_size,
+        timeout=30,
+    )
+    if not isinstance(header, dict):
+        raise RuntimeError("selected event quorum header is malformed")
+    observed_hash = str(header.get("hash") or "").lower()
+    try:
+        observed_number = int(str(header.get("number") or ""), 16)
+        block_time_utc = utc_from_unix(int(str(header.get("timestamp") or ""), 16), label="selected event quorum header")
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("selected event quorum header is malformed") from exc
+    if observed_number != block_number:
+        raise RuntimeError(f"selected event header number mismatch expected={block_number} observed={observed_number}")
+    if observed_hash != expected_hash:
+        raise RuntimeError(f"selected event header hash mismatch expected={expected_hash} observed={observed_hash or 'missing'}")
+    return {
+        **event,
+        "block_hash": observed_hash,
+        "block_time_utc": block_time_utc,
+        "header_quorum_providers": sorted({rpc_provider_key(url) for url in header_urls}),
+    }
 
 
 def latest_log_for_topic(logs: list[dict[str, Any]], topic: str) -> dict[str, Any] | None:
@@ -1199,6 +1266,7 @@ def fetch_snapshot(config: Config, state: dict[str, Any]) -> dict[str, Any]:
         "rpc_quorum_providers": providers,
         "log_rpc_quorum_providers": log_providers,
         "rpc_urls": [redact_url(url) for url in call_urls],
+        "provider_failures": log_errors[:3],
     }
     return snapshot
 
@@ -1503,6 +1571,52 @@ def latest_activity_event(snapshot: dict[str, Any]) -> dict[str, Any]:
     if not events:
         return {}
     return max(events, key=lambda item: (int(item.get("block_number") or 0), int(item.get("log_index") or 0)))
+
+
+def queue_observation_from_snapshot(
+    snapshot: dict[str, Any],
+    event: dict[str, Any],
+    *,
+    previous_state: dict[str, Any],
+) -> dict[str, Any]:
+    """Translate an already-quorum-validated snapshot into Task 1's exact schema."""
+    confirmed_hash = str(snapshot.get("snapshot_block_hash") or "").lower()
+    confirmed_block = int(snapshot.get("latest_block") or 0)
+    observation: dict[str, Any] = {
+        "confirmed_block_number": confirmed_block,
+        "confirmed_block_hash": confirmed_hash,
+        "confirmed_block_time_utc": utc_from_unix(snapshot.get("snapshot_block_time_unix"), label="confirmed snapshot"),
+        "token_id": str(int(snapshot.get("token_id") or 0)),
+        "amount_wei": str(snapshot.get("amount_wei") or "0"),
+        "start_time_unix": str(int(snapshot.get("start_time_unix") or 0)),
+        "end_time_unix": str(int(snapshot.get("end_time_unix") or 0)),
+        "bidder_wallet": normalize_address(snapshot.get("high_bidder")),
+        "settled": bool(snapshot.get("settled")),
+        "event_name": None,
+        "event_tx_hash": None,
+        "event_log_index": None,
+        "event_block_number": None,
+        "event_block_hash": None,
+        "event_block_time_utc": None,
+        "canonical_reorg_from_hash": None,
+    }
+    if event:
+        observation.update({
+            "event_name": event.get("event_name"),
+            "event_tx_hash": event.get("tx_hash"),
+            "event_log_index": event.get("log_index"),
+            "event_block_number": event.get("block_number"),
+            "event_block_hash": event.get("block_hash"),
+            "event_block_time_utc": event.get("block_time_utc"),
+        })
+    previous_hash = str(previous_state.get("last_verified_block_hash") or "").lower()
+    try:
+        previous_block = int(previous_state.get("last_checked_block") or 0)
+    except (TypeError, ValueError):
+        previous_block = 0
+    if previous_block == confirmed_block and previous_hash and previous_hash != confirmed_hash:
+        observation["canonical_reorg_from_hash"] = previous_hash
+    return observation
 
 
 def telemetry_base_row(started_at_utc: str, completed_at_utc: str, snapshot: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -2063,7 +2177,7 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
     check_started = utc_now()
     now = check_started
     state = load_state(config.state_path)
-    if not dry_run and config.auto_push:
+    if not dry_run and config.auto_push and config.publication_mode == "inline":
         try:
             publisher_active = refresh_lock_is_active(config)
         except Exception as exc:  # noqa: BLE001
@@ -2135,6 +2249,105 @@ def run_once_locked(config: Config, *, dry_run: bool = False, force_refresh: boo
         f"logs={snapshot.get('checked_log_count')} reasons={','.join(decision.reasons) or 'none'}"
     )
     activity_event = latest_activity_event(snapshot)
+
+    if decision.should_refresh and config.publication_mode == "queue":
+        queue_created_at = utc_now()
+        if dry_run:
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed, snapshot),
+                    "result": "queue_dry_run",
+                    "reasons": decision.reasons,
+                    "publication_mode": "queue",
+                    "dry_run": True,
+                    "force_refresh": force_refresh,
+                },
+            )
+            log(config, f"queue_dry_run; {summary}")
+            return 0
+        try:
+            if runner_publication_state is None:
+                raise RuntimeError("queue publication state module is unavailable")
+            if config.refresh_lock_path is None:
+                raise RuntimeError("queue publication requires the fixed refresh lock path")
+            selected_event = enrich_event_with_quorum_header(config, activity_event) if activity_event else {}
+            observation = queue_observation_from_snapshot(
+                snapshot,
+                selected_event,
+                previous_state=state,
+            )
+            enqueue_result = runner_publication_state.enqueue_latest_observation(
+                config.refresh_lock_path.parent,
+                observation,
+                runner_id=config.runner_id,
+                run_scope="current",
+                created_at_utc=queue_created_at,
+                canonical_reorg_quorum=observation["canonical_reorg_from_hash"] is not None,
+            )
+            # A stale result is still an acknowledgement: a newer durable,
+            # quorum-validated observation is already the queue head.
+            # Durable enqueue is the acknowledgement boundary. In particular,
+            # bid cooldown is not advanced by a failed or skipped queue write.
+            new_state = state_from_snapshot(
+                snapshot,
+                now_utc=queue_created_at,
+                previous_state=new_state,
+                acknowledge=True,
+            )
+            new_state.update({
+                "last_refresh_at_utc": queue_created_at,
+                "last_refresh_status": "queued",
+                "last_queue_generation": enqueue_result.generation,
+                "last_queue_digest": enqueue_result.digest,
+                "last_queue_outcome": enqueue_result.action,
+                "consecutive_refresh_failures": 0,
+            })
+            new_state.pop("last_refresh_error", None)
+            new_state.pop("next_allowed_refresh_after_utc", None)
+            _clear_pending_refresh_fields(new_state)
+            if not dry_run:
+                save_state(config.state_path, new_state)
+        except Exception as exc:  # noqa: BLE001
+            queue_error = redact_rpc_text(exc)[:500]
+            completed = utc_now()
+            record_watcher_telemetry(
+                config,
+                {
+                    **telemetry_base_row(check_started, completed, snapshot),
+                    "result": "queue_failed",
+                    "reasons": decision.reasons,
+                    "error": queue_error,
+                    "dry_run": dry_run,
+                    "force_refresh": force_refresh,
+                },
+            )
+            log(config, f"queue_error: {queue_error}; {summary}")
+            return 1
+        completed = utc_now()
+        record_watcher_telemetry(
+            config,
+            {
+                **telemetry_base_row(check_started, completed, snapshot),
+                "result": "queue_dry_run" if dry_run else "queued",
+                "reasons": decision.reasons,
+                "pending_refresh": bool(new_state.get("pending_refresh")),
+                "publication_mode": "queue",
+                "observation_created_at_utc": queue_created_at,
+                "event_to_observation_seconds": seconds_since(selected_event.get("block_time_utc"), queue_created_at) if selected_event else None,
+                "event_block_hash": selected_event.get("block_hash") if selected_event else None,
+                "event_block_time_utc": selected_event.get("block_time_utc") if selected_event else None,
+                "queue_generation": enqueue_result.generation,
+                "queue_digest": enqueue_result.digest,
+                "queue_outcome": enqueue_result.action,
+                "provider_failures": snapshot.get("provider_failures") or [],
+                "dry_run": dry_run,
+                "force_refresh": force_refresh,
+            },
+        )
+        log(config, f"queued generation={enqueue_result.generation} outcome={enqueue_result.action}; {summary}")
+        return 0
 
     if decision.should_refresh:
         try:

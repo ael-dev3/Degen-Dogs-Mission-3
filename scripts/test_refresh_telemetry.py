@@ -768,6 +768,46 @@ def test_metrics_summary_includes_pending_metadata_and_speed_percentiles() -> No
         assert summary["last_refresh_result"] == "success_pushed"
 
 
+def test_queue_latency_and_provider_failure_telemetry_is_redacted_and_measurable() -> None:
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        env.update({
+            "DEGEN_DOGS_OBSERVED_AT_UTC": iso(0),
+            "DEGEN_DOGS_EVENT_BLOCK_TIME_UTC": iso(-10),
+            "DEGEN_DOGS_PUBLICATION_GENERATION": "42",
+            "DEGEN_DOGS_PUBLICATION_DIGEST": "a" * 64,
+            "DEGEN_DOGS_QUEUE_OUTCOME": "pushed",
+        })
+        refresh = telemetry.build_refresh_row(env, result="success_pushed", root=root)
+        assert refresh["observation_to_push_seconds"] == 17
+        assert refresh["queue_generation"] == 42
+        assert refresh["queue_digest"] == "a" * 64
+        assert refresh["queue_outcome"] == "pushed"
+        row = telemetry.record_watcher_check(
+            {
+                "started_at_utc": iso(0),
+                "completed_at_utc": iso(2),
+                "event_block_time_utc": iso(-10),
+                "event_block_hash": "0x" + "b" * 64,
+                "observation_created_at_utc": iso(2),
+                "queue_generation": 42,
+                "queue_digest": "a" * 64,
+                "queue_outcome": "enqueued",
+                "provider_failures": ["https://rpc.example/private-key?token=secret C:\\Users\\operator\\repo"],
+            },
+            env=env,
+            root=root,
+        )
+        assert row["event_to_observation_seconds"] == 12
+        rendered = json.dumps(row)
+        assert "private-key" not in rendered
+        assert "token=secret" not in rendered
+        assert "C:\\Users\\operator\\repo" not in rendered
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

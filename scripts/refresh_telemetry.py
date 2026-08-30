@@ -42,6 +42,7 @@ PRIVATE_PATH_PATTERNS = [
     re.compile(r"/Users/[^\s\"']+"),
     re.compile(r"/var/folders/[^\s\"']+"),
     re.compile(r"/tmp/[^\s\"']+"),
+    re.compile(r"(?i)\b[A-Z]:\\[^\s\"']+"),
 ]
 PUBLIC_URL_HOSTNAMES = frozenset(
     {
@@ -231,6 +232,8 @@ def redact_value(value: Any) -> Any:
         text = text.replace(url, redact_url(url))
     for pattern in SECRET_PATTERNS:
         text = pattern.sub(lambda m: f"{m.group(1)}=<redacted>" if m.groups() else "<redacted-secret>", text)
+    for pattern in PRIVATE_PATH_PATTERNS:
+        text = pattern.sub("<redacted-path>", text)
     return text
 
 
@@ -456,6 +459,7 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
     lock_acquired = env_timestamp(env, "DEGEN_DOGS_LOCK_ACQUIRED_AT_UTC") or env_timestamp(env, "DEGEN_DOGS_REFRESH_LOCK_ACQUIRED_AT_UTC")
     pushed = env_timestamp(env, "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
     detected = env_timestamp(env, "DEGEN_DOGS_DETECTED_AT_UTC")
+    observed = env_timestamp(env, "DEGEN_DOGS_OBSERVED_AT_UTC") or detected
     event_block_time = env_timestamp(env, "DEGEN_DOGS_EVENT_BLOCK_TIME_UTC")
     raw_commit_verified = str(env.get("DEGEN_DOGS_RAW_COMMIT_VERIFIED") or "").strip().lower()
     row: dict[str, Any] = {
@@ -470,6 +474,7 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "event_tx_hash": env.get("DEGEN_DOGS_EVENT_TX_HASH") or None,
         "event_log_index": int_or_none(env.get("DEGEN_DOGS_EVENT_LOG_INDEX")),
         "detected_at_utc": detected,
+        "observed_at_utc": observed,
         "queued_at_utc": queued,
         "lock_acquired_at_utc": lock_acquired,
         "lock_wait_seconds": seconds_between(queued, lock_acquired) if lock_acquired else None,
@@ -499,7 +504,12 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "push_duration_seconds": env_duration(env, "DEGEN_DOGS_PUSH_STARTED_AT_UTC", "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC"),
         "upload_completed_at_utc": pushed,
         "detect_to_push_seconds": seconds_between(detected, pushed) if detected and pushed else None,
+        "event_to_observation_seconds": seconds_between(event_block_time, observed) if event_block_time and observed else None,
+        "observation_to_push_seconds": seconds_between(observed, pushed) if observed and pushed else None,
         "block_to_push_seconds": seconds_between(event_block_time, pushed) if event_block_time and pushed else None,
+        "queue_generation": int_or_none(env.get("DEGEN_DOGS_PUBLICATION_GENERATION")),
+        "queue_digest": env.get("DEGEN_DOGS_PUBLICATION_DIGEST") or None,
+        "queue_outcome": env.get("DEGEN_DOGS_QUEUE_OUTCOME") or None,
         "result": result,
         "commit_sha": env.get("DEGEN_DOGS_COMMIT_SHA") or None,
         "branch": env.get("DEGEN_DOGS_BRANCH") or None,
@@ -543,11 +553,13 @@ def watcher_path_from_env(env: dict[str, str], root: Path = ROOT) -> Path:
 
 def record_watcher_check(row: dict[str, Any], env: dict[str, str] | None = None, *, root: Path = ROOT) -> dict[str, Any]:
     env = dict(os.environ if env is None else env)
-    out = dict(row)
+    out = redact_value(dict(row))
     out.setdefault("schema_version", SCHEMA_VERSION)
     out.setdefault("kind", "watcher_check")
     if out.get("started_at_utc") and out.get("completed_at_utc") and out.get("duration_seconds") is None:
         out["duration_seconds"] = seconds_between(out["started_at_utc"], out["completed_at_utc"])
+    if out.get("event_block_time_utc") and out.get("observation_created_at_utc") and out.get("event_to_observation_seconds") is None:
+        out["event_to_observation_seconds"] = seconds_between(out["event_block_time_utc"], out["observation_created_at_utc"])
     append_jsonl(watcher_path_from_env(env, root=root), out)
     return out
 

@@ -3520,6 +3520,168 @@ def test_run_once_writes_structured_watcher_telemetry():
         assert row["duration_seconds"] >= 0
 
 
+def test_publication_mode_defaults_to_inline_and_rejects_invalid_values():
+    watcher = load_module()
+    config = watcher.config_from_env({"MISSION3_WATCHER_LOG_PATH": "-"})
+    assert config.publication_mode == "inline"
+    try:
+        watcher.config_from_env({
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_WATCHER_PUBLICATION_MODE": "background",
+        })
+    except SystemExit as exc:
+        assert "MISSION3_WATCHER_PUBLICATION_MODE" in str(exc)
+    else:
+        raise AssertionError("invalid watcher publication mode was accepted")
+
+
+def test_event_header_quorum_enrichment_requires_the_log_block_hash():
+    watcher = load_module()
+    config = watcher.config_from_env({
+        "BASE_RPC_URLS": "https://one.example,https://two.example",
+        "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+        "MISSION3_WATCHER_LOG_PATH": "-",
+    })
+    event = {
+        "event_name": "AuctionBid",
+        "block_number": 123,
+        "block_hash": "0x" + "b" * 64,
+        "tx_hash": "0x" + "c" * 64,
+        "log_index": 4,
+    }
+    original_quorum = watcher.rpc_quorum_call
+    watcher.rpc_quorum_call = lambda *_args, **_kwargs: (
+        {"number": hex(123), "hash": "0x" + "b" * 64, "timestamp": hex(1_700_000_000)},
+        ["https://one.example", "https://two.example"],
+    )
+    try:
+        enriched = watcher.enrich_event_with_quorum_header(config, event)
+        assert enriched["block_hash"] == "0x" + "b" * 64
+        assert enriched["block_time_utc"] == "2023-11-14T22:13:20Z"
+        watcher.rpc_quorum_call = lambda *_args, **_kwargs: (
+            {"number": hex(123), "hash": "0x" + "d" * 64, "timestamp": hex(1_700_000_000)},
+            ["https://one.example", "https://two.example"],
+        )
+        try:
+            watcher.enrich_event_with_quorum_header(config, event)
+        except RuntimeError as exc:
+            assert "hash mismatch" in str(exc)
+        else:
+            raise AssertionError("event header disagreement was accepted")
+    finally:
+        watcher.rpc_quorum_call = original_quorum
+
+
+def test_queue_mode_persists_before_acknowledging_while_publisher_lock_is_active():
+    watcher = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        state_path = tmp_path / "state.json"
+        initial_state = {
+            "last_seen_token_id": 727,
+            "last_seen_high_bidder": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "last_seen_amount_wei": "100",
+            "last_seen_bid_log_id": "100:0x" + "a" * 64 + ":1",
+            "last_seen_auction_created_log_id": "90:0x" + "a" * 64 + ":1",
+            "last_refresh_at_utc": iso(0),
+            "last_verified_block_hash": "0x" + "a" * 64,
+        }
+        state_path.write_text(json.dumps(initial_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
+        snapshot = {
+            "latest_block": 130,
+            "checked_from_block": 100,
+            "checked_to_block": 130,
+            "snapshot_block_hash": "0x" + "b" * 64,
+            "snapshot_block_time_unix": 1_700_000_030,
+            "token_id": 727,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "amount_wei": "200",
+            "settled": False,
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "checked_log_count": 1,
+            "created_log": {"id": "90:0x" + "a" * 64 + ":1", "tx_hash": "0x" + "a" * 64, "block_number": 90, "log_index": 1, "event_name": "AuctionCreated"},
+            "bid_log": {"id": "130:0x" + "c" * 64 + ":4", "tx_hash": "0x" + "c" * 64, "block_number": 130, "block_hash": "0x" + "b" * 64, "block_time_utc": "2023-11-14T22:13:20Z", "log_index": 4, "event_name": "AuctionBid", "token_id": 727, "amount_wei": "200", "bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+            "extended_log": None,
+            "settled_log": None,
+        }
+        config = watcher.config_from_env({
+            "BASE_RPC_URLS": "https://one.example,https://two.example",
+            "BASE_LOG_RPC_URLS": "https://one.example,https://two.example",
+            "MISSION3_WATCHER_STATE_PATH": str(state_path),
+            "MISSION3_WATCHER_LOCK_PATH": str(tmp_path / "watcher.lock"),
+            "MISSION3_WATCHER_LOG_PATH": "-",
+            "MISSION3_REFRESH_LOCK_PATH": str(tmp_path / "locks" / "refresh.lock"),
+            "MISSION3_WATCHER_AUTO_PUSH": "1",
+            "MISSION3_REFRESH_COMMAND": "npm run refresh:publish",
+            "MISSION3_WATCHER_PUBLICATION_MODE": "queue",
+            "DEGEN_DOGS_RUNNER_ID": "windows-wsl",
+        })
+        setattr(watcher, "fetch_snapshot", lambda _config, _state: snapshot)
+        setattr(watcher, "enrich_event_with_quorum_header", lambda _config, event: event)
+        setattr(watcher, "refresh_lock_is_active", lambda _config: True)
+        calls: list[dict[str, object]] = []
+
+        class FakeLock:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+        original_enqueue = watcher.runner_publication_state.enqueue_latest_observation
+
+        def enqueue(lock_dir, observation, **kwargs):  # noqa: ANN001, ANN202
+            calls.append(dict(observation))
+            return original_enqueue(
+                lock_dir, observation, lock_context=FakeLock(), **kwargs
+            )
+
+        watcher.runner_publication_state.enqueue_latest_observation = enqueue
+        setattr(watcher, "run_refresh", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("queue mode spawned a publisher")))
+        assert watcher.run_once(config) == 0
+        assert len(calls) == 1
+        assert calls[0]["event_block_hash"] == "0x" + "b" * 64
+        assert calls[0]["event_block_time_utc"] == "2023-11-14T22:13:20Z"
+        saved = json.loads(state_path.read_text(encoding="utf-8"))
+        assert saved["last_seen_amount_wei"] == "200"
+        latest = tmp_path / "locks" / "publication" / "latest.json"
+        assert latest.exists()
+        state_path.write_text(json.dumps(initial_state, sort_keys=True), encoding="utf-8")
+        state_path.chmod(0o600)
+        original_save_state = watcher.save_state
+        watcher.save_state = lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("state disk is full"))
+        try:
+            assert watcher.run_once(config) == 1
+        finally:
+            watcher.save_state = original_save_state
+        assert latest.exists(), "a durable queue write was lost after state acknowledgement failed"
+        assert json.loads(state_path.read_text(encoding="utf-8")) == initial_state
+
+
+def test_queue_observation_uses_null_event_fields_when_only_state_changed():
+    watcher = load_module()
+    observation = watcher.queue_observation_from_snapshot(
+        {
+            "latest_block": 123,
+            "snapshot_block_hash": "0x" + "a" * 64,
+            "snapshot_block_time_unix": 1_700_000_000,
+            "token_id": 727,
+            "amount_wei": "200",
+            "start_time_unix": 1,
+            "end_time_unix": 2,
+            "high_bidder": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "settled": False,
+        },
+        {},
+        previous_state={},
+    )
+    assert observation["event_name"] is None
+    assert observation["event_block_hash"] is None
+    assert observation["event_block_time_utc"] is None
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

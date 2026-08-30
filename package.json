@@ -52,6 +52,7 @@
     "test:historical-checker": "python3 scripts/test_check_historical_dog_search.py",
     "test:validator": "python3 scripts/test_validate_dashboard_consistency.py",
     "test:refresh-telemetry": "python3 scripts/test_refresh_telemetry.py",
+    "test:watcher-telemetry": "npm run test:watcher && npm run test:refresh-telemetry",
     "test:live-snapshot": "python3 scripts/test_build_live_snapshot_bundle.py",
     "test:rpc-redaction": "python3 scripts/test_rpc_redaction.py",
     "test:runner-health": "python3 scripts/test_degen_dogs_runner_health.py",
