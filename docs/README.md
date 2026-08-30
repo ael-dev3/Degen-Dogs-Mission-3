@@ -14,6 +14,7 @@ Start here for deeper Degen Dogs Mission 3 dashboard docs.
 - [Local development](local-development.md)
 - [Configuration](configuration.md)
 - [Refresh runner](refresh-runner.md)
+- [Windows WSL2 publisher runner](windows-wsl-runner.md)
 - [Contracts](contracts.md)
 - [Trust and caveats](trust-and-caveats.md)
 - [License](../LICENSE)

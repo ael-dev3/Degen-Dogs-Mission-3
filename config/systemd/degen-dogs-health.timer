@@ -1,0 +1,13 @@
+[Unit]
+Description=Run the Degen Dogs WSL health probe every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=5min
+AccuracySec=15s
+RandomizedDelaySec=15s
+Persistent=true
+Unit=degen-dogs-health.service
+
+[Install]
+WantedBy=timers.target

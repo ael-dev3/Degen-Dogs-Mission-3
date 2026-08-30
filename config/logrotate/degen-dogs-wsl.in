@@ -1,0 +1,11 @@
+@LOG_DIR@/*.log @REPO_DIR@/.local/*.jsonl @REPO_DIR@/logs/*.jsonl {
+    su @RUNNER_USER@ @RUNNER_GROUP@
+    size 8M
+    rotate 8
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    create 0600 @RUNNER_USER@ @RUNNER_GROUP@
+}
