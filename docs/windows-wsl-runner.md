@@ -7,7 +7,7 @@ publisher. It is a local data producer, not a GitHub Actions self-hosted runner:
 Windows Task Scheduler keepalive
   -> isolated WSL2 Ubuntu distro with systemd
      -> 15-second event watcher (bounded current refresh, no archive)
-     -> staggered hourly publisher (incremental archive + bounded refresh)
+     -> staggered hourly publisher (bounded refresh, optional incremental archive)
      -> five-minute local/live health probe
         -> Git push to main
            -> existing CI and GitHub Pages deployment
@@ -63,7 +63,7 @@ exact immutable `--force-with-lease=<ref>:<baseline>` compare-and-swap; changing
 that expected baseline can replace newer verified data with an older snapshot.
 
 The PC watcher runs at seconds `07,22,37,52`, offset from the other host's usual
-15-second cycle. The hourly/archive job runs at minute `59`; the observed Mac
+15-second cycle. The hourly job runs at minute `59`; the observed Mac
 publisher starts near minute `29`, producing an approximately 30-minute
 aggregate baseline. This staggering is only a best-effort reduction in duplicate
 work because the Mac schedule can drift; compare-and-swap remains the correctness
@@ -239,6 +239,16 @@ Start from `config/wsl-runner.env.template`. Use separate PC provider keys or
 quotas where possible; reusing the Mac's exact quotas makes both runners fail
 together under rate limiting.
 
+The hourly launcher accepts only `DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0` or `1` from
+that protected file. Its absent-key fallback remains `1` for backward
+compatibility, but the fresh WSL template explicitly sets `0` because a new
+clone does not contain the ignored Mission 3 SQLite/raw archive. Keep `0` for a
+latency-only peer; change it to `1` only after seeding an archive-capable runner
+that is responsible for incremental archive freshness. The 15-second watcher
+always forces archive work off regardless of this setting, and the launcher
+continues to pin the Git remote, branch, pull, and push policy after loading
+local configuration.
+
 After the race-safe code is on `main`, RPCs are configured, and the public key
 has write access, activate with a Windows credential. Task Scheduler stores the
 credential securely so the same Windows account that owns the WSL distro can
@@ -334,7 +344,8 @@ for install, activation, and trusted-bundle upgrades.
 The systemd assets are:
 
 - `degen-dogs-watcher.service` / `.timer`: one-shot check every 15 seconds;
-- `degen-dogs-hourly.service` / `.timer`: minute-59 archive/reconcile;
+- `degen-dogs-hourly.service` / `.timer`: minute-59 bounded reconcile, with
+  optional incremental archive maintenance;
 - `degen-dogs-health.service` / `.timer`: five-minute health and freshness;
 - `degen-dogs-runner.target`: boot grouping for all three timers.
 
@@ -344,8 +355,9 @@ access only to the clone, log directory, and cache/lock directory. The watcher
 does not self-restart or use a service start limit: its 15-second timer is the
 single retry owner, so repeated successful checks cannot suppress later event
 checks. The hourly and health services retain bounded retry backoff. Event
-refreshes keep archive work off for latency; the staggered hourly job maintains
-the archive.
+refreshes keep archive work off for latency. On a seeded archive-capable runner,
+the staggered hourly job also maintains the archive; a latency-only peer may opt
+out as described above.
 
 ## Verify operation
 

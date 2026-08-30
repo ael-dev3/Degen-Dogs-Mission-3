@@ -301,6 +301,112 @@ command rm -rf -- "$test_root"
     health_timer_activation_regression("0", 1)
 
 
+def test_wsl_launcher_policy(launcher: str, env_loader: str) -> None:
+    regression = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+repo_dir="$test_root/repo"
+runner_home="$test_root/home"
+mkdir -p "$repo_dir/scripts/runtime-bin" "$runner_home/.ssh" "$test_root/log" "$test_root/lock"
+
+cat >"$repo_dir/scripts/run_wsl_runner_job.sh" <<'LAUNCHER'
+''' + launcher + r'''
+LAUNCHER
+cat >"$repo_dir/scripts/load_runner_env.sh" <<'ENV_LOADER'
+''' + env_loader + r'''
+ENV_LOADER
+cat >"$repo_dir/scripts/runtime-bin/git" <<'FAKE_GIT'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+case "$*" in
+  'branch --show-current') printf 'main\n' ;;
+  'remote get-url origin'|'remote get-url --push --all origin')
+    printf 'git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git\n'
+    ;;
+  'config --local --get-all remote.origin.pushurl') ;;
+  'config --local --get core.sshCommand')
+    printf 'ssh -F %s/.ssh/degen_dogs_config\n' "$HOME"
+    ;;
+  'config --local --get core.hooksPath') printf '/dev/null\n' ;;
+  *) printf 'unexpected git call: %s\n' "$*" >&2; exit 97 ;;
+esac
+FAKE_GIT
+cat >"$repo_dir/scripts/refresh_and_publish.sh" <<'FAKE_PUBLISHER'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+printf 'hourly|%s|%s|%s|%s|%s\n' \
+  "$DEGEN_DOGS_RUN_MISSION3_ARCHIVE" \
+  "$DEGEN_DOGS_REMOTE" \
+  "$DEGEN_DOGS_BRANCH" \
+  "$DEGEN_DOGS_SKIP_PUSH" \
+  "$DEGEN_DOGS_SKIP_PULL"
+FAKE_PUBLISHER
+cat >"$repo_dir/scripts/watch_mission3_onchain_activity.py" <<'FAKE_WATCHER'
+import os
+
+print(
+    "watcher|{}|{}|{}|{}|{}".format(
+        os.environ["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"],
+        os.environ["DEGEN_DOGS_REMOTE"],
+        os.environ["DEGEN_DOGS_BRANCH"],
+        os.environ["DEGEN_DOGS_SKIP_PUSH"],
+        os.environ["DEGEN_DOGS_SKIP_PULL"],
+    )
+)
+FAKE_WATCHER
+chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh" "$repo_dir/scripts/runtime-bin/git"
+
+write_env() {
+  cat >"$repo_dir/.env.local" <<'COMMON_ENV'
+BASE_RPC_URLS=https://rpc-one.invalid,https://rpc-two.invalid
+BASE_LOG_RPC_URLS=https://logs-one.invalid,https://logs-two.invalid
+BASE_RPC_QUORUM_SIZE=2
+DEGEN_DOGS_REMOTE=attacker
+DEGEN_DOGS_BRANCH=attacker
+DEGEN_DOGS_SKIP_PUSH=1
+DEGEN_DOGS_SKIP_PULL=1
+COMMON_ENV
+  if (( $# > 0 )); then
+    printf '%s\n' "$1" >>"$repo_dir/.env.local"
+  fi
+  chmod 0600 "$repo_dir/.env.local"
+}
+
+run_job() {
+  env -u DEGEN_DOGS_RUN_MISSION3_ARCHIVE \
+    HOME="$runner_home" \
+    DEGEN_DOGS_REPO_DIR="$repo_dir" \
+    DEGEN_DOGS_LOG_DIR="$test_root/log" \
+    DEGEN_DOGS_LOCK_DIR="$test_root/lock" \
+    DEGEN_DOGS_ENV_FILE="$repo_dir/.env.local" \
+    /bin/bash -p "$repo_dir/scripts/run_wsl_runner_job.sh" "$1"
+}
+
+write_env 'DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0'
+test "$(run_job hourly)" = 'hourly|0|origin|main|0|0'
+
+write_env
+test "$(run_job hourly)" = 'hourly|1|origin|main|0|0'
+
+for invalid_value in 2 ''; do
+  write_env "DEGEN_DOGS_RUN_MISSION3_ARCHIVE=$invalid_value"
+  set +e
+  invalid_output=$(run_job hourly 2>&1)
+  invalid_status=$?
+  set -e
+  test "$invalid_status" = 78
+  test "$invalid_output" = 'error: DEGEN_DOGS_RUN_MISSION3_ARCHIVE must be 0 or 1'
+done
+
+write_env 'DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1'
+test "$(run_job watcher)" = 'watcher|0|origin|main|0|0'
+printf 'wsl-launcher-policy-checked\n'
+'''
+    result = run_bash(regression)
+    assert result.stdout == b"wsl-launcher-policy-checked\n"
+
+
 def test() -> None:
     required = (
         ".gitattributes",
@@ -362,7 +468,6 @@ def test() -> None:
     launcher = text("scripts/run_wsl_runner_job.sh")
     assert "MISSION3_WATCHER_AUTO_PUSH=1" in launcher
     assert "DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0" in launcher
-    assert "DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1" in launcher
     assert "preflight_wsl_rpc.py" in launcher
     assert "MISSION3_WATCHER_LOG_PATH=-" in launcher
     assert "DEGEN_DOGS_REFRESH_LOCK_PATH" in launcher
@@ -373,6 +478,10 @@ def test() -> None:
     assert "export DEGEN_DOGS_SKIP_PULL=0" in launcher
     assert 'export DEGEN_DOGS_RUNNER_ID="${DEGEN_DOGS_RUNNER_ID:-windows-wsl}"' in launcher
     assert "remote.origin.pushurl" in launcher
+    test_wsl_launcher_policy(
+        launcher,
+        text("scripts/load_runner_env.sh"),
+    )
 
     installer = text("scripts/install_wsl_runner.sh")
     assert "Usage: /usr/local/libexec/degen-dogs-wsl-installer" in installer
@@ -894,6 +1003,7 @@ exit "$status"
 
     runner_env = text("config/wsl-runner.env.template")
     assert "MISSION3_LOG_QUORUM_MAX_BLOCKS=500" in runner_env
+    assert re.search(r"(?m)^DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0$", runner_env)
 
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     scripts = package["scripts"]
