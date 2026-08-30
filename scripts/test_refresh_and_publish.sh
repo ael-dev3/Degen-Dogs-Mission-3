@@ -156,6 +156,153 @@ if not state.finalize_pushed_handoff(Path(sys.argv[2]), int(sys.argv[3]), sys.ar
 PY
 }
 
+write_fixture_deferred_journal() {
+  local lock_dir="$1"
+  local repo="$2"
+  local baseline="$3"
+  local generation="$4"
+  local digest="$5"
+  local run_id="$6"
+  local phase="$7"
+  local commit="${8:-}"
+  python3 - "$SOURCE_DIR/runner_publication_state.py" "$lock_dir" "$repo" "$baseline" \
+    "$generation" "$digest" "$run_id" "$phase" "$commit" <<'PY'
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+module_path, lock_name, repo_name, baseline, generation_raw, digest, run_id, phase, commit = sys.argv[1:]
+spec = importlib.util.spec_from_file_location("runner_publication_state_fixture", Path(module_path))
+assert spec and spec.loader
+state = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = state
+spec.loader.exec_module(state)
+lock_dir = Path(lock_name)
+repo = Path(repo_name)
+generation = int(generation_raw)
+journal = {
+    "schema_version": 1,
+    "repo_realpath": str(repo.resolve()),
+    "branch": "main",
+    "baseline_head": baseline,
+    "run_id": run_id,
+    "runner_id": "windows-wsl",
+    "run_scope": "current",
+    "created_at_utc": "2026-08-30T12:49:00Z",
+    "publish_paths": [
+        "README.md", "index.html", "generated", "public",
+        "archive/mission3/data/generated", "archive/data/generated",
+        "archive/data/identity/wallet_profiles.json", "archive/dogs",
+        "archive/prices/data/generated", "archive/prices/data/raw",
+    ],
+    "alignment_runner_commit": None,
+    "alignment_remote_head": None,
+    "alignment_result": None,
+    "publication_generation": generation,
+    "queue_digest": digest,
+    "terminal_outcome": None,
+    "handoff_phase": "generating",
+    "remote_commit": None,
+    "raw_status_path": None,
+    "raw_bundle_path": None,
+    "expected_bundle_sha256": None,
+    "expected_bundle_bytes": None,
+    "expected_block_number": None,
+    "expected_block_hash": None,
+    "push_completed_at_utc": None,
+    "retry_deadline_utc": None,
+    "retry_count": None,
+}
+state.create_deferred_recovery_journal(lock_dir, journal)
+if phase in {"push_ready", "raw_proven"}:
+    journal = state.arm_deferred_pushed_handoff(lock_dir, generation, digest, commit)
+if phase == "raw_proven":
+    status_path = "public/generated/refresh_status.json"
+    status = json.loads(subprocess.check_output(["git", "show", f"{commit}:{status_path}"], cwd=repo))
+    bundle_path = f"public/generated/{status['live_snapshot_bundle']}"
+    bundle = subprocess.check_output(["git", "show", f"{commit}:{bundle_path}"], cwd=repo)
+    assert len(bundle) == status["live_snapshot_bundle_bytes"]
+    assert hashlib.sha256(bundle).hexdigest() == status["live_snapshot_bundle_sha256"]
+    pending = {
+        "schema_version": 1,
+        "generation": generation,
+        "queue_digest": digest,
+        "commit_sha": commit,
+        "raw_status_path": status_path,
+        "raw_bundle_path": bundle_path,
+        "expected_bundle_sha256": status["live_snapshot_bundle_sha256"],
+        "expected_bundle_bytes": status["live_snapshot_bundle_bytes"],
+        "expected_block_number": status["latest_generated_block"],
+        "expected_block_hash": status["snapshot_block_hash"],
+        "push_completed_at_utc": "2026-08-30T12:50:00Z",
+        "retry_deadline_utc": "2026-08-30T13:00:00Z",
+        "retry_count": 0,
+    }
+    checkpoint = {
+        "schema_version": 1,
+        "outcome": "pushed",
+        "generation": generation,
+        "queue_digest": digest,
+        "commit_sha": commit,
+        "push_completed_at_utc": "2026-08-30T12:50:00Z",
+    }
+    state.prepare_pushed_handoff(lock_dir, journal, pending, checkpoint)
+elif phase != "generating" and phase != "push_ready":
+    raise SystemExit(f"unsupported fixture handoff phase: {phase}")
+PY
+}
+
+run_deferred_fixture() {
+  local lock_dir="$1"
+  local generation="$2"
+  local digest="$3"
+  local log_dir="$4"
+  local result_marker="$5"
+  local raw_marker="${6:-}"
+  local pages_marker="${7:-}"
+  local refresh_lock="$lock_dir/refresh.lock"
+  local status=0
+  mkdir -m 700 -p "$lock_dir"
+  : >"$refresh_lock"
+  chmod 600 "$refresh_lock"
+  exec {FIXTURE_DEFERRED_FD}<>"$refresh_lock"
+  flock -n "$FIXTURE_DEFERRED_FD"
+  if HOME="$TEST_ROOT/home" \
+    VALIDATOR_MARKER="$SUCCESS_MARKER" \
+    FIXTURE_RESULT_MARKER="$result_marker" \
+    FIXTURE_RAW_VERIFY_MARKER="$raw_marker" \
+    FIXTURE_PAGES_VERIFY_MARKER="$pages_marker" \
+    FIXTURE_RAW_VERIFY_FAIL="${FIXTURE_RAW_VERIFY_FAIL:-0}" \
+    DEGEN_DOGS_RUNNER_ID="windows-wsl" \
+    DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+    DEGEN_DOGS_LOG_DIR="$log_dir" \
+    DEGEN_DOGS_LOCK_DIR="$lock_dir" \
+    DEGEN_DOGS_REFRESH_LOCK_PATH="$refresh_lock" \
+    DEGEN_DOGS_LOCK_HELD=1 \
+    DEGEN_DOGS_LOCK_FD="$FIXTURE_DEFERRED_FD" \
+    DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
+    DEGEN_DOGS_PUBLICATION_GENERATION="$generation" \
+    DEGEN_DOGS_PUBLICATION_DIGEST="$digest" \
+    DEGEN_DOGS_SKIP_PULL=1 \
+    DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+    DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+    DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+    DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+    "$SUCCESS_REPO/scripts/refresh_and_publish.sh"; then
+    status=0
+  else
+    status=$?
+  fi
+  flock -u "$FIXTURE_DEFERRED_FD"
+  exec {FIXTURE_DEFERRED_FD}>&-
+  return "$status"
+}
+
 mkdir -p "$TEST_REPO/scripts" "$TEST_REPO/generated" "$TEST_REPO/node_modules" "$TEST_ROOT/home"
 cp "$SOURCE_DIR/refresh_and_publish.sh" "$TEST_REPO/scripts/refresh_and_publish.sh"
 cp "$SOURCE_DIR/runner_publication_state.py" "$TEST_REPO/scripts/runner_publication_state.py"
@@ -489,6 +636,8 @@ printf '%s\n' \
   'def fetch_verified_remote_snapshot(source: str, status_url: str, expected_status: dict[str, object], expected_bundle: bytes) -> None:' \
   '    if source != "raw_commit" or not expected_bundle or not isinstance(expected_status, dict):' \
   '        raise RuntimeError("fixture raw proof received invalid exact content")' \
+  '    if os.environ.get("FIXTURE_RAW_VERIFY_FAIL") == "1":' \
+  '        raise RuntimeError("fixture forced immutable raw proof failure")' \
   '    marker = os.environ.get("FIXTURE_RAW_VERIFY_MARKER")' \
   '    if marker:' \
   '        Path(marker).write_text(status_url + "\n" + str(expected_status.get("live_snapshot_bundle")) + "\n", encoding="utf-8")' \
@@ -1951,6 +2100,384 @@ if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFER_PEER_COMMIT" ]] || \
   exit 1
 fi
 finalize_fixture_publication "$DEFER_PEER_LOCKS" 43 "$DEFER_PEER_DIGEST"
+
+# A landed deferred push is not a successful publication until exact raw proof
+# and both durable handoff records exist. Force the raw boundary to fail and
+# assert telemetry remains non-success while the commit/journal stay recoverable.
+python3 - "$SUCCESS_REPO/package.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["scripts"]["refresh:current"] = "node scripts/success_generation.js && python3 scripts/build_live_snapshot_bundle.py"
+path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+PY
+git -C "$SUCCESS_REPO" add package.json
+git -C "$SUCCESS_REPO" commit -qm "fixture: prepare deferred raw-proof failure"
+git -C "$SUCCESS_REPO" push -q
+DEFER_RAW_FAIL_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFER_RAW_FAIL_LOCKS="$TEST_ROOT/deferred-raw-fail-locks"
+DEFER_RAW_FAIL_RESULT="$TEST_ROOT/deferred-raw-fail-result"
+DEFER_RAW_FAIL_RAW="$TEST_ROOT/deferred-raw-fail-raw"
+DEFER_RAW_FAIL_PAGES="$TEST_ROOT/deferred-raw-fail-pages"
+DEFER_RAW_FAIL_DIGEST="$(write_fixture_publication_latest "$DEFER_RAW_FAIL_LOCKS" 50)"
+if FIXTURE_RAW_VERIFY_FAIL=1 run_deferred_fixture \
+  "$DEFER_RAW_FAIL_LOCKS" 50 "$DEFER_RAW_FAIL_DIGEST" \
+  "$TEST_ROOT/deferred-raw-fail-logs" "$DEFER_RAW_FAIL_RESULT" \
+  "$DEFER_RAW_FAIL_RAW" "$DEFER_RAW_FAIL_PAGES"; then
+  echo "forced deferred raw-proof failure returned success" >&2
+  exit 1
+fi
+DEFER_RAW_FAIL_LANDED="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+python3 - "$DEFER_RAW_FAIL_LOCKS" "$DEFER_RAW_FAIL_LANDED" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert journal["handoff_phase"] == "push_ready"
+assert journal["remote_commit"] == sys.argv[2]
+assert not (root / "publication/pending.json").exists()
+assert not (root / "publication/pushed.json").exists()
+assert (root / "publication/latest.json").exists()
+PY
+if [[ "$DEFER_RAW_FAIL_LANDED" == "$DEFER_RAW_FAIL_BASELINE" ]] || \
+  [[ "$DEFER_RAW_FAIL_LANDED" != "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" ]] || \
+  [[ "$(sed -n '1p' "$DEFER_RAW_FAIL_RESULT")" == "success_pushed" ]] || \
+  [[ -e "$DEFER_RAW_FAIL_RAW" || -e "$DEFER_RAW_FAIL_PAGES" ]]; then
+  echo "failed deferred raw proof reported success, rewound the landed commit, or lost recovery state" >&2
+  exit 1
+fi
+
+# A newer queue observation may arrive while generation N is still recovering.
+# The child must authenticate N from its fixed journal, recover N first, and
+# leave N+1 in latest.json for the drainer's next iteration.
+NPLUS_GENERATING_LOCKS="$TEST_ROOT/nplus-generating-locks"
+NPLUS_GENERATING_RESULT="$TEST_ROOT/nplus-generating-result"
+NPLUS_GENERATING_DIGEST="$(write_fixture_publication_latest "$NPLUS_GENERATING_LOCKS" 60)"
+write_fixture_deferred_journal \
+  "$NPLUS_GENERATING_LOCKS" "$SUCCESS_REPO" "$DEFER_RAW_FAIL_LANDED" \
+  60 "$NPLUS_GENERATING_DIGEST" "nplus-generating" generating
+NPLUS_GENERATING_NEW_DIGEST="$(write_fixture_publication_latest "$NPLUS_GENERATING_LOCKS" 61)"
+run_deferred_fixture \
+  "$NPLUS_GENERATING_LOCKS" 60 "$NPLUS_GENERATING_DIGEST" \
+  "$TEST_ROOT/nplus-generating-logs" "$NPLUS_GENERATING_RESULT"
+python3 - "$NPLUS_GENERATING_LOCKS" "$NPLUS_GENERATING_DIGEST" "$NPLUS_GENERATING_NEW_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+latest = json.loads((root / "publication/latest.json").read_text(encoding="utf-8"))
+assert journal["publication_generation"] == checkpoint["generation"] == 60
+assert journal["queue_digest"] == checkpoint["queue_digest"] == sys.argv[2]
+assert checkpoint["outcome"] == "no_diff"
+assert latest["generation"] == 61
+PY
+if [[ "$(sed -n '1p' "$NPLUS_GENERATING_RESULT")" != "success_no_diff" ]]; then
+  echo "newer latest prevented authenticated generating-phase recovery" >&2
+  exit 1
+fi
+finalize_fixture_publication "$NPLUS_GENERATING_LOCKS" 60 "$NPLUS_GENERATING_DIGEST"
+
+NPLUS_PUSH_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T13:10:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] N+1 recovery landed commit" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: nplus-landed"
+NPLUS_PUSH_COMMIT="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+git -C "$SUCCESS_REPO" push -q
+
+for NPLUS_PHASE in push_ready raw_proven; do
+  if [[ "$NPLUS_PHASE" == "push_ready" ]]; then
+    NPLUS_GENERATION=62
+    NPLUS_NEW_GENERATION=63
+  else
+    NPLUS_GENERATION=64
+    NPLUS_NEW_GENERATION=65
+  fi
+  NPLUS_LOCKS="$TEST_ROOT/nplus-${NPLUS_PHASE}-locks"
+  NPLUS_RESULT="$TEST_ROOT/nplus-${NPLUS_PHASE}-result"
+  NPLUS_RAW="$TEST_ROOT/nplus-${NPLUS_PHASE}-raw"
+  NPLUS_PAGES="$TEST_ROOT/nplus-${NPLUS_PHASE}-pages"
+  NPLUS_DIGEST="$(write_fixture_publication_latest "$NPLUS_LOCKS" "$NPLUS_GENERATION")"
+  write_fixture_deferred_journal \
+    "$NPLUS_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_BASELINE" \
+    "$NPLUS_GENERATION" "$NPLUS_DIGEST" "nplus-landed" \
+    "$NPLUS_PHASE" "$NPLUS_PUSH_COMMIT"
+  if [[ "$NPLUS_PHASE" == "raw_proven" ]]; then
+    rm -- "$NPLUS_LOCKS/publication/pushed.json"
+  fi
+  write_fixture_publication_latest "$NPLUS_LOCKS" "$NPLUS_NEW_GENERATION" >/dev/null
+  run_deferred_fixture \
+    "$NPLUS_LOCKS" "$NPLUS_GENERATION" "$NPLUS_DIGEST" \
+    "$TEST_ROOT/nplus-${NPLUS_PHASE}-logs" "$NPLUS_RESULT" "$NPLUS_RAW" "$NPLUS_PAGES"
+  python3 - "$NPLUS_LOCKS" "$NPLUS_GENERATION" "$NPLUS_NEW_GENERATION" "$NPLUS_PUSH_COMMIT" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+generation = int(sys.argv[2])
+new_generation = int(sys.argv[3])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+latest = json.loads((root / "publication/latest.json").read_text(encoding="utf-8"))
+assert journal["publication_generation"] == pending["generation"] == checkpoint["generation"] == generation
+assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"] == sys.argv[4]
+assert journal["handoff_phase"] == "raw_proven"
+assert latest["generation"] == new_generation
+PY
+  if [[ "$(sed -n '1p' "$NPLUS_RESULT")" != "success_pushed" ]] || \
+    [[ ! -e "$NPLUS_RAW" || -e "$NPLUS_PAGES" ]]; then
+    echo "newer latest prevented ${NPLUS_PHASE} landed-handoff recovery" >&2
+    exit 1
+  fi
+  finalize_fixture_publication "$NPLUS_LOCKS" "$NPLUS_GENERATION" "$NPLUS_DIGEST"
+done
+
+# Once Task 4 has CAS-cleared generation N from latest.json, the retained
+# authenticated journal must still be sufficient to finish an interrupted N
+# handoff. Re-prove the exact commit and reconstruct the missing checkpoint.
+CAS_CLEARED_LOCKS="$TEST_ROOT/cas-cleared-recovery-locks"
+CAS_CLEARED_RESULT="$TEST_ROOT/cas-cleared-recovery-result"
+CAS_CLEARED_RAW="$TEST_ROOT/cas-cleared-recovery-raw"
+CAS_CLEARED_PAGES="$TEST_ROOT/cas-cleared-recovery-pages"
+CAS_CLEARED_DIGEST="$(write_fixture_publication_latest "$CAS_CLEARED_LOCKS" 68)"
+write_fixture_deferred_journal \
+  "$CAS_CLEARED_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_BASELINE" \
+  68 "$CAS_CLEARED_DIGEST" "cas-cleared-landed" raw_proven "$NPLUS_PUSH_COMMIT"
+rm -- "$CAS_CLEARED_LOCKS/publication/latest.json" "$CAS_CLEARED_LOCKS/publication/pushed.json"
+run_deferred_fixture \
+  "$CAS_CLEARED_LOCKS" 68 "$CAS_CLEARED_DIGEST" \
+  "$TEST_ROOT/cas-cleared-recovery-logs" "$CAS_CLEARED_RESULT" \
+  "$CAS_CLEARED_RAW" "$CAS_CLEARED_PAGES"
+if [[ "$(sed -n '1p' "$CAS_CLEARED_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$CAS_CLEARED_LOCKS/publication/pushed.json" ]] || \
+  [[ ! -e "$CAS_CLEARED_LOCKS/publisher-recovery.json" ]] || \
+  [[ -e "$CAS_CLEARED_LOCKS/publication/latest.json" ]] || \
+  [[ ! -e "$CAS_CLEARED_RAW" || -e "$CAS_CLEARED_PAGES" ]]; then
+  echo "missing latest after queue CAS prevented exact deferred recovery" >&2
+  exit 1
+fi
+finalize_fixture_publication "$CAS_CLEARED_LOCKS" 68 "$CAS_CLEARED_DIGEST"
+
+# A journal is authoritative only for its exact generation/digest. A same-
+# generation different latest record or an older latest record is evidence of
+# corruption/stale orchestration and must fail before mutating the repository.
+CONFLICT_LOCKS="$TEST_ROOT/same-generation-conflict-locks"
+CONFLICT_DIGEST="$(write_fixture_publication_latest "$CONFLICT_LOCKS" 69)"
+write_fixture_deferred_journal \
+  "$CONFLICT_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_COMMIT" \
+  69 "$CONFLICT_DIGEST" "same-generation-conflict" generating
+python3 - "$SOURCE_DIR/runner_publication_state.py" "$CONFLICT_LOCKS" <<'PY'
+import importlib.util
+import sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("runner_publication_state_conflict", Path(sys.argv[1]))
+assert spec and spec.loader
+state = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = state
+spec.loader.exec_module(state)
+paths = state.state_paths(sys.argv[2])
+latest = state.validate_latest(state._read_json(paths.latest))
+latest["created_at_utc"] = "2026-08-30T12:35:00Z"
+state.atomic_write_record(paths.latest, latest)
+PY
+if run_deferred_fixture \
+  "$CONFLICT_LOCKS" 69 "$CONFLICT_DIGEST" \
+  "$TEST_ROOT/same-generation-conflict-logs" "$TEST_ROOT/same-generation-conflict-result"; then
+  echo "same-generation conflicting latest was accepted during journal recovery" >&2
+  exit 1
+fi
+if [[ ! -e "$CONFLICT_LOCKS/publisher-recovery.json" || \
+  -e "$CONFLICT_LOCKS/publication/pushed.json" ]]; then
+  echo "same-generation latest conflict mutated deferred recovery state" >&2
+  exit 1
+fi
+
+OLDER_LOCKS="$TEST_ROOT/older-latest-conflict-locks"
+OLDER_DIGEST="$(write_fixture_publication_latest "$OLDER_LOCKS" 71)"
+write_fixture_deferred_journal \
+  "$OLDER_LOCKS" "$SUCCESS_REPO" "$NPLUS_PUSH_COMMIT" \
+  71 "$OLDER_DIGEST" "older-latest-conflict" generating
+write_fixture_publication_latest "$OLDER_LOCKS" 70 >/dev/null
+if run_deferred_fixture \
+  "$OLDER_LOCKS" 71 "$OLDER_DIGEST" \
+  "$TEST_ROOT/older-latest-conflict-logs" "$TEST_ROOT/older-latest-conflict-result"; then
+  echo "older latest was accepted during journal recovery" >&2
+  exit 1
+fi
+if [[ ! -e "$OLDER_LOCKS/publisher-recovery.json" || \
+  -e "$OLDER_LOCKS/publication/pushed.json" ]]; then
+  echo "older latest conflict mutated deferred recovery state" >&2
+  exit 1
+fi
+
+# A journaled commit remains landed when the remote advances to any descendant.
+# Interrupted recovery must prove the exact journal commit rather than
+# classifying the descendant as a competing alignment target.
+DESCENDANT_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T13:20:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred commit before descendant" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: descendant-landed"
+DESCENDANT_LANDED="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+git -C "$SUCCESS_REPO" push -q
+DESCENDANT_PEER_REPO="$TEST_ROOT/descendant-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DESCENDANT_PEER_REPO"
+git -C "$DESCENDANT_PEER_REPO" config user.name "Degen Dogs Descendant"
+git -C "$DESCENDANT_PEER_REPO" config user.email "degen-dogs-descendant@example.invalid"
+printf '%s\n' 'remote descendant' >"$DESCENDANT_PEER_REPO/descendant-fixture.txt"
+git -C "$DESCENDANT_PEER_REPO" add descendant-fixture.txt
+git -C "$DESCENDANT_PEER_REPO" commit -qm "fixture: remote descendant after landed publication"
+DESCENDANT_REMOTE="$(git -C "$DESCENDANT_PEER_REPO" rev-parse HEAD)"
+git -C "$DESCENDANT_PEER_REPO" push -q origin main
+
+DESCENDANT_LOCKS="$TEST_ROOT/descendant-recovery-locks"
+DESCENDANT_RESULT="$TEST_ROOT/descendant-recovery-result"
+DESCENDANT_RAW="$TEST_ROOT/descendant-recovery-raw"
+DESCENDANT_PAGES="$TEST_ROOT/descendant-recovery-pages"
+DESCENDANT_DIGEST="$(write_fixture_publication_latest "$DESCENDANT_LOCKS" 66)"
+write_fixture_deferred_journal \
+  "$DESCENDANT_LOCKS" "$SUCCESS_REPO" "$DESCENDANT_BASELINE" \
+  66 "$DESCENDANT_DIGEST" "descendant-landed" push_ready "$DESCENDANT_LANDED"
+run_deferred_fixture \
+  "$DESCENDANT_LOCKS" 66 "$DESCENDANT_DIGEST" \
+  "$TEST_ROOT/descendant-recovery-logs" "$DESCENDANT_RESULT" \
+  "$DESCENDANT_RAW" "$DESCENDANT_PAGES"
+python3 - "$DESCENDANT_LOCKS" "$DESCENDANT_LANDED" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"] == sys.argv[2]
+assert journal["handoff_phase"] == "raw_proven"
+PY
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DESCENDANT_LANDED" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$DESCENDANT_REMOTE" ]] || \
+  [[ "$(sed -n '1p' "$DESCENDANT_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$DESCENDANT_RAW" || -e "$DESCENDANT_PAGES" ]]; then
+  echo "remote-descendant interrupted recovery did not preserve and prove the exact landed commit" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DESCENDANT_LOCKS" 66 "$DESCENDANT_DIGEST"
+
+# Exercise the same descendant classification inside an ambiguous push: the
+# pre-push hook lands the publisher commit, advances main by one descendant,
+# and lets the outer CAS report failure. Fresh ancestry plus raw proof must
+# complete the exact publisher handoff.
+git -C "$SUCCESS_REPO" fetch -q origin main
+git -C "$SUCCESS_REPO" merge -q --ff-only origin/main
+AMBIGUOUS_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+AMBIGUOUS_HOOK_MARKER="$TEST_ROOT/ambiguous-descendant-hook"
+AMBIGUOUS_REMOTE_SHA_FILE="$TEST_ROOT/ambiguous-descendant-remote-sha"
+: >"$AMBIGUOUS_HOOK_MARKER"
+printf '%s\n' \
+  '#!/usr/bin/env bash' \
+  'set -eu' \
+  'if [[ -e "$FIXTURE_AMBIGUOUS_HOOK_MARKER" ]]; then' \
+  '  rm -- "$FIXTURE_AMBIGUOUS_HOOK_MARKER"' \
+  '  runner_commit="$(git rev-parse HEAD)"' \
+  '  git push --no-verify --force-with-lease="refs/heads/main:${FIXTURE_AMBIGUOUS_BASELINE}" origin "${runner_commit}:refs/heads/main"' \
+  '  tree="$(git rev-parse "${runner_commit}^{tree}")"' \
+  '  descendant="$(printf "%s\n" "fixture: descendant after ambiguous landed push" | git commit-tree "$tree" -p "$runner_commit")"' \
+  '  git push --no-verify origin "${descendant}:refs/heads/main"' \
+  '  printf "%s\n" "$descendant" >"$FIXTURE_AMBIGUOUS_REMOTE_SHA_FILE"' \
+  'fi' \
+  >"$SUCCESS_REPO/.git/hooks/pre-push"
+chmod +x "$SUCCESS_REPO/.git/hooks/pre-push"
+AMBIGUOUS_LOCKS="$TEST_ROOT/ambiguous-descendant-locks"
+AMBIGUOUS_RESULT="$TEST_ROOT/ambiguous-descendant-result"
+AMBIGUOUS_RAW="$TEST_ROOT/ambiguous-descendant-raw"
+AMBIGUOUS_PAGES="$TEST_ROOT/ambiguous-descendant-pages"
+AMBIGUOUS_DIGEST="$(write_fixture_publication_latest "$AMBIGUOUS_LOCKS" 67)"
+export FIXTURE_AMBIGUOUS_HOOK_MARKER="$AMBIGUOUS_HOOK_MARKER"
+export FIXTURE_AMBIGUOUS_BASELINE="$AMBIGUOUS_BASELINE"
+export FIXTURE_AMBIGUOUS_REMOTE_SHA_FILE="$AMBIGUOUS_REMOTE_SHA_FILE"
+run_deferred_fixture \
+  "$AMBIGUOUS_LOCKS" 67 "$AMBIGUOUS_DIGEST" \
+  "$TEST_ROOT/ambiguous-descendant-logs" "$AMBIGUOUS_RESULT" \
+  "$AMBIGUOUS_RAW" "$AMBIGUOUS_PAGES"
+unset FIXTURE_AMBIGUOUS_HOOK_MARKER FIXTURE_AMBIGUOUS_BASELINE FIXTURE_AMBIGUOUS_REMOTE_SHA_FILE
+rm -- "$SUCCESS_REPO/.git/hooks/pre-push"
+AMBIGUOUS_PUBLISHER="$(sed -n '2p' "$AMBIGUOUS_RESULT")"
+AMBIGUOUS_REMOTE="$(<"$AMBIGUOUS_REMOTE_SHA_FILE")"
+python3 - "$AMBIGUOUS_LOCKS" "$AMBIGUOUS_PUBLISHER" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"] == sys.argv[2]
+assert journal["handoff_phase"] == "raw_proven"
+PY
+if [[ "$AMBIGUOUS_PUBLISHER" != "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" ]] || \
+  [[ "$AMBIGUOUS_REMOTE" != "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" ]] || \
+  ! git --git-dir="$REJECT_REMOTE" merge-base --is-ancestor "$AMBIGUOUS_PUBLISHER" "$AMBIGUOUS_REMOTE" || \
+  [[ "$(sed -n '1p' "$AMBIGUOUS_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$AMBIGUOUS_RAW" || -e "$AMBIGUOUS_PAGES" ]]; then
+  echo "ambiguous landed push was not recovered from its remote descendant" >&2
+  exit 1
+fi
+finalize_fixture_publication "$AMBIGUOUS_LOCKS" 67 "$AMBIGUOUS_DIGEST"
+
+# Legacy inline journals must retain their original fail-closed shape. Fields
+# that are present but null/empty are malformed, not equivalent to absence.
+git -C "$SUCCESS_REPO" fetch -q origin main
+git -C "$SUCCESS_REPO" merge -q --ff-only origin/main
+LEGACY_NULL_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+LEGACY_NULL_LOCKS="$TEST_ROOT/legacy-null-alignment-locks"
+LEGACY_NULL_JOURNAL="$LEGACY_NULL_LOCKS/publisher-recovery.json"
+write_fixture_recovery_journal \
+  "$LEGACY_NULL_JOURNAL" "$SUCCESS_REPO" "$LEGACY_NULL_BASELINE" "legacy-null-alignment"
+python3 - "$LEGACY_NULL_JOURNAL" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["alignment_runner_commit"] = None
+value["alignment_remote_head"] = ""
+value["alignment_result"] = None
+path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+os.chmod(path, 0o600)
+PY
+set +e
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/legacy-null-alignment-logs" \
+DEGEN_DOGS_LOCK_DIR="$LEGACY_NULL_LOCKS" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_SKIP_PUSH=1 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+status=$?
+set -e
+if [[ "$status" == "0" || ! -e "$LEGACY_NULL_JOURNAL" ]]; then
+  echo "legacy null/empty alignment fields were normalized into an absent alignment" >&2
+  exit 1
+fi
 
 # A caller cannot bypass the shared lock with a trusted-looking environment
 # flag unless it also supplies the inherited, matching locked descriptor.

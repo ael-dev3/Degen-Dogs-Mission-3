@@ -387,9 +387,17 @@ baseline = payload.get("baseline_head")
 run_id = payload.get("run_id")
 runner_id = payload.get("runner_id")
 run_scope = payload.get("run_scope")
-alignment_runner_commit = payload.get("alignment_runner_commit") or "-"
-alignment_remote_head = payload.get("alignment_remote_head") or "-"
-alignment_result = payload.get("alignment_result") or "-"
+if deferred:
+    alignment_runner_commit = payload.get("alignment_runner_commit") or "-"
+    alignment_remote_head = payload.get("alignment_remote_head") or "-"
+    alignment_result = payload.get("alignment_result") or "-"
+else:
+    # Legacy journals use field presence as part of their authenticated shape.
+    # A present-but-empty value is malformed and must not be normalized into
+    # the sentinel used for an absent optional alignment section.
+    alignment_runner_commit = payload.get("alignment_runner_commit", "-")
+    alignment_remote_head = payload.get("alignment_remote_head", "-")
+    alignment_result = payload.get("alignment_result", "-")
 publication_generation = payload.get("publication_generation", "-")
 queue_digest = payload.get("queue_digest", "-")
 terminal_outcome = payload.get("terminal_outcome") or "-"
@@ -1490,6 +1498,7 @@ push_with_compare_and_swap() {
   while (( attempt <= GIT_RETRY_ATTEMPTS )); do
     log "git push compare-and-swap attempt=${attempt}/${GIT_RETRY_ATTEMPTS} baseline=${BASELINE_HEAD}"
     if git push --porcelain --force-with-lease="$lease" "$REMOTE" "${RUNNER_COMMIT_HEAD}:refs/heads/${BRANCH}"; then
+      MUTATION_STARTED=0
       return 0
     else
       push_status=$?
@@ -1506,7 +1515,15 @@ push_with_compare_and_swap() {
       fail "compare-and-swap push failed and reconciled remote ref could not be resolved"
     }
     if [[ "$remote_head" == "$RUNNER_COMMIT_HEAD" ]]; then
+      MUTATION_STARTED=0
       log "push command reported failure, but immutable publisher commit is confirmed on the remote"
+      return 0
+    fi
+    if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] && \
+      git merge-base --is-ancestor "$RUNNER_COMMIT_HEAD" "$remote_head"; then
+      MUTATION_STARTED=0
+      PUSH_REMOTE_HEAD="$remote_head"
+      log "push command reported failure, but the remote descendant contains the immutable publisher commit"
       return 0
     fi
     if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
@@ -1774,28 +1791,31 @@ PY
 
     run_with_retry "git fetch for interrupted publisher recovery" git fetch "$REMOTE" "$BRANCH"
     remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || fail "could not resolve remote during interrupted publisher recovery"
-    if [[ "$remote_head" == "$current_head" ]]; then
+    if [[ "$journal_deferred" == "1" && \
+      "$journal_terminal_outcome" == "pushed" && \
+      ( "$journal_handoff_phase" == "push_ready" || "$journal_handoff_phase" == "raw_proven" ) && \
+      "$journal_remote_commit" == "$current_head" ]] && \
+      git merge-base --is-ancestor "$journal_remote_commit" "$remote_head"; then
       if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
         fail "interrupted publisher commit reached the remote but publish artifacts are unexpectedly dirty"
       fi
-      if [[ "$journal_deferred" == "1" ]]; then
-        [[ "$journal_terminal_outcome" == "pushed" && \
-          ( "$journal_handoff_phase" == "push_ready" || "$journal_handoff_phase" == "raw_proven" ) && \
-          "$journal_remote_commit" == "$current_head" ]] || \
-          fail "landed deferred publisher journal is not armed for the exact remote commit"
-        export DEGEN_DOGS_COMMIT_SHA="$current_head"
-        prepare_deferred_pushed_handoff "$current_head" || \
-          fail "could not recover exact immutable raw proof and deferred handoff"
-        export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
-        RECOVERY_DEFERRED_HANDOFF=1
-        BASELINE_HEAD=""
-        RUNNER_COMMIT_HEAD=""
-        RUNNER_COMMIT_RUN_ID=""
-        RUNNER_COMMIT_RUNNER_ID=""
-        RUNNER_COMMIT_SCOPE=""
-        MUTATION_STARTED=0
-        log "recovered deferred publisher commit ${current_head} that landed before the interruption"
-        return 0
+      MUTATION_STARTED=0
+      export DEGEN_DOGS_COMMIT_SHA="$journal_remote_commit"
+      prepare_deferred_pushed_handoff "$journal_remote_commit" || \
+        fail "could not recover exact immutable raw proof and deferred handoff"
+      export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
+      RECOVERY_DEFERRED_HANDOFF=1
+      BASELINE_HEAD=""
+      RUNNER_COMMIT_HEAD=""
+      RUNNER_COMMIT_RUN_ID=""
+      RUNNER_COMMIT_RUNNER_ID=""
+      RUNNER_COMMIT_SCOPE=""
+      log "recovered deferred publisher commit ${journal_remote_commit} contained by remote ${remote_head}"
+      return 0
+    fi
+    if [[ "$remote_head" == "$current_head" ]]; then
+      if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
+        fail "interrupted publisher commit reached the remote but publish artifacts are unexpectedly dirty"
       fi
       remove_recovery_journal || fail "could not clear landed publisher recovery journal"
       BASELINE_HEAD=""
@@ -1936,12 +1956,39 @@ import runner_publication_state as state
 paths = state.state_paths(lock_dir)
 if paths.journal != Path(journal_path):
     raise SystemExit("deferred publisher journal is not the fixed lock-directory record")
+PY
+}
+
+validate_deferred_queue_identity() {
+  [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || return 0
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+lock_dir, repo, generation, digest = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+generation_value = int(generation)
+journal = state.read_deferred_recovery_journal(lock_dir)
 latest = state.read_latest_with_digest(lock_dir)
-if latest is None:
-    raise SystemExit("deferred publisher has no canonical latest queue record")
-record, actual_digest = latest
-if record["generation"] != int(generation) or actual_digest != digest:
-    raise SystemExit("deferred publisher generation/digest differs from latest queue state")
+if journal is None:
+    if latest is None:
+        raise SystemExit("deferred publisher has no canonical latest queue record")
+    record, actual_digest = latest
+    if record["generation"] != generation_value or actual_digest != digest:
+        raise SystemExit("new deferred publisher generation/digest differs from latest queue state")
+else:
+    if journal["publication_generation"] != generation_value or journal["queue_digest"] != digest:
+        raise SystemExit("deferred recovery environment differs from its authenticated journal")
+    if latest is not None:
+        record, actual_digest = latest
+        if record["generation"] < generation_value:
+            raise SystemExit("latest queue generation predates the authenticated recovery journal")
+        if record["generation"] == generation_value and actual_digest != digest:
+            raise SystemExit("same-generation latest queue digest conflicts with recovery journal")
 PY
 }
 
@@ -2093,6 +2140,7 @@ if ! git check-ref-format --branch "$BRANCH" >/dev/null 2>&1; then
   fail "invalid git branch ref: ${BRANCH}"
 fi
 validate_deferred_publication_context
+validate_deferred_queue_identity
 clear_stale_git_index_lock "publisher preflight" || fail "git index lock is active, recent, or unsafe"
 recover_interrupted_generation
 if [[ "$RECOVERY_DEFERRED_HANDOFF" == "1" ]]; then
@@ -2602,13 +2650,18 @@ fi
 # later diagnostic or Pages failure rewind it locally.
 MUTATION_STARTED=0
 if [[ "$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" != "$RUNNER_COMMIT_HEAD" ]]; then
-  fail "remote-tracking ref did not confirm the immutable publisher commit after push"
+  landed_remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")"
+  if [[ "$DEFER_PAGES_VERIFICATION" != "1" ]] || \
+    ! git merge-base --is-ancestor "$RUNNER_COMMIT_HEAD" "$landed_remote_head"; then
+    fail "remote-tracking ref did not contain the immutable publisher commit after push"
+  fi
+  log "remote advanced to descendant ${landed_remote_head} after landing publisher commit ${RUNNER_COMMIT_HEAD}"
 fi
 export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
-export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
 if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
   prepare_deferred_pushed_handoff "$RUNNER_COMMIT_HEAD" || \
     fail "exact immutable raw proof or deferred handoff preparation failed"
+  export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
   RUNNER_COMMIT_HEAD=""
   RUNNER_COMMIT_RUN_ID=""
   RUNNER_COMMIT_RUNNER_ID=""
@@ -2616,6 +2669,7 @@ if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
   log "prepared deferred publication handoff generation=${PUBLICATION_GENERATION} commit=${DEGEN_DOGS_COMMIT_SHA}"
   exit 0
 fi
+export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
 RUNNER_COMMIT_HEAD=""
 RUNNER_COMMIT_RUN_ID=""
 RUNNER_COMMIT_RUNNER_ID=""

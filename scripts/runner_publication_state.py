@@ -421,7 +421,7 @@ def cas_write_pending(
     *,
     lock_context: Any | None = None,
 ) -> bool:
-    """Replace pending only if the currently authenticated identity still matches."""
+    """Advance retry state only if the authenticated immutable proof still matches."""
     paths = state_paths(lock_dir)
     replacement = _validate_pending(replacement)
     with _lock(paths, lock_context):
@@ -431,6 +431,13 @@ def cas_write_pending(
             return False
         if current["generation"] != expected_generation or current["commit_sha"] != expected_commit_sha:
             return False
+        if not _same_pending_immutable(current, replacement):
+            raise StateValidationError("pending replacement changes immutable publication proof")
+        if (
+            replacement["retry_count"] < current["retry_count"]
+            or replacement["retry_deadline_utc"] < current["retry_deadline_utc"]
+        ):
+            raise StateValidationError("pending replacement regresses retry state")
         atomic_write_record(paths.pending, replacement)
         return True
 
@@ -467,6 +474,13 @@ _JOURNAL_PROOF_KEYS = {
 _JOURNAL_DEFERRED_KEYS = _JOURNAL_BASE_KEYS | _JOURNAL_ALIGNMENT_KEYS | _JOURNAL_PROOF_KEYS | {
     "publication_generation", "queue_digest", "terminal_outcome", "handoff_phase", "remote_commit",
 }
+_PENDING_KEYS = {
+    "schema_version", "generation", "queue_digest", "commit_sha", "raw_status_path", "raw_bundle_path",
+    "expected_bundle_sha256", "expected_bundle_bytes", "expected_block_number", "expected_block_hash",
+    "push_completed_at_utc", "retry_deadline_utc", "retry_count",
+}
+_PENDING_MUTABLE_KEYS = {"retry_deadline_utc", "retry_count"}
+_PENDING_IMMUTABLE_KEYS = _PENDING_KEYS - _PENDING_MUTABLE_KEYS
 
 
 def _validate_journal(value: Any) -> dict[str, Any]:
@@ -551,8 +565,7 @@ def _validate_journal(value: Any) -> dict[str, Any]:
 def _validate_pending(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise StateValidationError("pending record must be an object")
-    keys = {"schema_version", "generation", "queue_digest", "commit_sha", "raw_status_path", "raw_bundle_path", "expected_bundle_sha256", "expected_bundle_bytes", "expected_block_number", "expected_block_hash", "push_completed_at_utc", "retry_deadline_utc", "retry_count"}
-    _require_exact_keys(value, keys, "pending record")
+    _require_exact_keys(value, _PENDING_KEYS, "pending record")
     if value["schema_version"] != SCHEMA_VERSION:
         raise StateValidationError("pending record schema version is invalid")
     _integer(value["generation"], "pending generation", minimum=1)
@@ -572,6 +585,10 @@ def _validate_pending(value: Any) -> dict[str, Any]:
     _utc(value["retry_deadline_utc"], "pending retry deadline")
     _integer(value["retry_count"], "pending retry count")
     return value
+
+
+def _same_pending_immutable(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    return all(left[key] == right[key] for key in _PENDING_IMMUTABLE_KEYS)
 
 
 def _validate_checkpoint(value: Any) -> dict[str, Any]:
@@ -687,6 +704,8 @@ def update_deferred_alignment(
     paths = state_paths(lock_dir)
     with _lock(paths, lock_context):
         journal = _validate_journal(_read_json(paths.journal))
+        if journal["handoff_phase"] in {"push_ready", "raw_proven"}:
+            raise StateValidationError("alignment cannot erase a pushed handoff phase")
         if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
             raise StateValidationError("alignment identity differs from queued publication")
         if not _SHA_40.fullmatch(runner_commit) or not _SHA_40.fullmatch(remote_head):
@@ -746,14 +765,46 @@ def _checkpoint_from_journal(journal: dict[str, Any]) -> dict[str, Any]:
     })
 
 
-def _install_exact_if_missing(path: Path, record: dict[str, Any], validator: Callable[[Any], dict[str, Any]], label: str) -> None:
+def _install_generation_record(
+    path: Path,
+    record: dict[str, Any],
+    validator: Callable[[Any], dict[str, Any]],
+    label: str,
+    *,
+    preserve_pending_retry: bool = False,
+) -> None:
     try:
         existing = validator(_read_json(path))
     except FileNotFoundError:
         atomic_write_record(path, record)
         return
-    if _canonical_bytes(existing) != _canonical_bytes(record):
-        raise StateValidationError(f"existing {label} conflicts with authenticated handoff")
+    existing_generation = existing["generation"]
+    record_generation = record["generation"]
+    if existing_generation < record_generation:
+        atomic_write_record(path, record)
+        return
+    if existing_generation > record_generation:
+        raise StateValidationError(f"existing {label} is newer than authenticated handoff")
+    if not preserve_pending_retry:
+        if _canonical_bytes(existing) != _canonical_bytes(record):
+            raise StateValidationError(f"existing {label} conflicts with authenticated handoff")
+        return
+    if not _same_pending_immutable(existing, record):
+        raise StateValidationError(f"existing {label} immutable proof conflicts with authenticated handoff")
+    existing_dominates = (
+        existing["retry_count"] >= record["retry_count"]
+        and existing["retry_deadline_utc"] >= record["retry_deadline_utc"]
+    )
+    record_dominates = (
+        record["retry_count"] >= existing["retry_count"]
+        and record["retry_deadline_utc"] >= existing["retry_deadline_utc"]
+    )
+    if existing_dominates:
+        return
+    if record_dominates:
+        atomic_write_record(path, record)
+        return
+    raise StateValidationError(f"existing {label} retry state is not monotonic")
 
 
 def _prepare_pushed_handoff_locked(
@@ -774,8 +825,14 @@ def _prepare_pushed_handoff_locked(
             raise StateValidationError("durable raw proof differs from reconstructed handoff")
     else:
         raise StateValidationError("pushed handoff journal is not push-ready or raw-proven")
-    _install_exact_if_missing(paths.pending, pending, _validate_pending, "pending record")
-    _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
+    _install_generation_record(
+        paths.pending,
+        pending,
+        _validate_pending,
+        "pending record",
+        preserve_pending_retry=True,
+    )
+    _install_generation_record(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
 
 
 def prepare_pushed_handoff(lock_dir: os.PathLike[str] | str, journal: dict[str, Any], pending: dict[str, Any], checkpoint: dict[str, Any], *, lock_context: Any | None = None) -> None:
@@ -815,7 +872,7 @@ def record_terminal_outcome(lock_dir: os.PathLike[str] | str, journal: dict[str,
             ):
                 raise StateValidationError("recovery journal changed before terminal outcome recording")
             atomic_write_record(paths.journal, journal)
-        _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
+        _install_generation_record(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
 
 
 def finalize_pushed_handoff(lock_dir: os.PathLike[str] | str, generation: int, digest: str, *, lock_context: Any | None = None) -> bool:
@@ -890,5 +947,5 @@ def recover_deferred_handoff(lock_dir: os.PathLike[str] | str, immutable_commit_
                 raise StateValidationError("supplied checkpoint differs from terminal journal")
             checkpoint = reconstructed_checkpoint
             _same_identity(journal, checkpoint, "checkpoint record")
-            _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
+            _install_generation_record(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
         return True

@@ -322,6 +322,33 @@ def generating_journal(generation: int, digest: str) -> dict[str, object]:
     return journal
 
 
+def prepare_and_finalize_generation(root: Path, queued: Any, outcome: str) -> None:
+    """Test-only full handoff used to exercise retained cross-generation state."""
+    state.create_deferred_recovery_journal(
+        root,
+        generating_journal(queued.generation, queued.digest),
+        lock_context=FakeLock(),
+    )
+    journal, pending, checkpoint = handoff_records(queued.generation, queued.digest, outcome=outcome)
+    if outcome == "pushed":
+        journal = state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+    else:
+        state.record_terminal_outcome(root, journal, checkpoint, lock_context=FakeLock())
+    assert state.finalize_pushed_handoff(
+        root,
+        queued.generation,
+        queued.digest,
+        lock_context=FakeLock(),
+    )
+
+
 def test_deferred_journal_creation_and_push_arm_use_only_fixed_authenticated_state() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
@@ -438,6 +465,71 @@ def test_terminal_outcomes_checkpoint_before_finalization_and_no_diff_invents_no
             assert state.read_latest_with_digest(root) is not None
             if outcome == "no_diff":
                 assert journal["remote_commit"] is None and checkpoint["commit_sha"] is None
+
+
+def test_retained_handoff_records_advance_across_every_sequential_outcome_pair() -> None:
+    # Removing generation-aware replacement makes pending.json/pushed.json
+    # one-shot records because successful finalization intentionally retains
+    # them for verifier and health consumers.
+    outcome_pairs = (
+        ("pushed", "pushed"),
+        ("pushed", "no_diff"),
+        ("pushed", "peer_superseded"),
+        ("no_diff", "pushed"),
+        ("no_diff", "no_diff"),
+        ("no_diff", "peer_superseded"),
+        ("peer_superseded", "pushed"),
+        ("peer_superseded", "no_diff"),
+        ("peer_superseded", "peer_superseded"),
+    )
+    for first_outcome, second_outcome in outcome_pairs:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            first = enqueue(root, observation())
+            prepare_and_finalize_generation(root, first, first_outcome)
+            second = enqueue(root, observation(block=101, block_hash="0x" + "c" * 64))
+            assert second.generation == first.generation + 1
+            prepare_and_finalize_generation(root, second, second_outcome)
+
+            paths = state.state_paths(root)
+            checkpoint = state._validate_checkpoint(state._read_json(paths.checkpoint))
+            assert checkpoint["generation"] == second.generation
+            assert checkpoint["outcome"] == second_outcome
+            if second_outcome == "pushed":
+                pending = state._validate_pending(state._read_json(paths.pending))
+                assert pending["generation"] == second.generation
+
+    # Generation-aware replacement must still fail closed when an existing
+    # record is the same generation with different proof, or is newer.
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+
+        conflicting = dict(pending)
+        conflicting["expected_bundle_sha256"] = "c" * 64
+        state.atomic_write_record(paths.pending, conflicting)
+        expect_invalid(
+            lambda: state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock()),
+            "same-generation immutable pending conflict was replaced",
+        )
+
+    for target_name in ("pending", "checkpoint"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+            paths = state.state_paths(root)
+            state.atomic_write_record(paths.journal, journal)
+            newer = dict(pending if target_name == "pending" else checkpoint)
+            newer["generation"] = queued.generation + 1
+            state.atomic_write_record(getattr(paths, target_name), newer)
+            expect_invalid(
+                lambda: state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock()),
+                f"newer existing {target_name} record was replaced by an older handoff",
+            )
 
 
 def test_finalization_crashes_leave_queue_and_journal_in_a_retryable_order() -> None:
@@ -595,6 +687,137 @@ def test_pending_compare_and_swap_requires_the_exact_generation_and_commit() -> 
         assert state.cas_write_pending(root, queued.generation, "a" * 40, replacement, lock_context=FakeLock())
         assert not state.cas_clear_pending(root, queued.generation, "c" * 40, lock_context=FakeLock())
         assert state.cas_clear_pending(root, queued.generation, "a" * 40, lock_context=FakeLock())
+
+
+def test_pending_compare_and_swap_preserves_immutable_proof_and_monotonic_retry_state() -> None:
+    immutable_mutations: tuple[tuple[str, object], ...] = (
+        ("generation", 2),
+        ("queue_digest", "f" * 64),
+        ("commit_sha", "c" * 40),
+        ("raw_status_path", "public/generated/other-status.json"),
+        ("raw_bundle_path", "public/generated/other-bundle.json"),
+        ("expected_bundle_sha256", "c" * 64),
+        ("expected_bundle_bytes", 3),
+        ("expected_block_number", 101),
+        ("expected_block_hash", "0x" + "c" * 64),
+        ("push_completed_at_utc", "2026-08-30T12:36:00Z"),
+    )
+    for key, wrong in immutable_mutations:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+            state.atomic_write_record(state.state_paths(root).journal, journal)
+            state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+            replacement = dict(pending)
+            replacement[key] = wrong
+            expect_invalid(
+                lambda: state.cas_write_pending(
+                    root,
+                    queued.generation,
+                    "a" * 40,
+                    replacement,
+                    lock_context=FakeLock(),
+                ),
+                f"pending CAS changed immutable field {key}",
+            )
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        advanced = dict(pending)
+        advanced["retry_count"] = 2
+        advanced["retry_deadline_utc"] = "2026-08-30T12:55:00Z"
+        assert state.cas_write_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            advanced,
+            lock_context=FakeLock(),
+        )
+        for key, regressed in (
+            ("retry_count", 1),
+            ("retry_deadline_utc", "2026-08-30T12:50:00Z"),
+        ):
+            replacement = dict(advanced)
+            replacement[key] = regressed
+            expect_invalid(
+                lambda replacement=replacement: state.cas_write_pending(
+                    root,
+                    queued.generation,
+                    "a" * 40,
+                    replacement,
+                    lock_context=FakeLock(),
+                ),
+                f"pending CAS regressed {key}",
+            )
+
+
+def test_recovery_after_pending_retry_preserves_retry_progress_and_recreates_checkpoint() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        retried = dict(pending)
+        retried["retry_count"] = 3
+        retried["retry_deadline_utc"] = "2026-08-30T13:00:00Z"
+        assert state.cas_write_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            retried,
+            lock_context=FakeLock(),
+        )
+        paths.checkpoint.unlink()
+
+        assert state.recover_deferred_handoff(
+            root,
+            lambda commit: commit == "a" * 40,
+            lock_context=FakeLock(),
+        )
+        assert state._validate_pending(state._read_json(paths.pending)) == retried
+        assert state._validate_checkpoint(state._read_json(paths.checkpoint)) == checkpoint
+
+
+def test_alignment_cannot_erase_a_pushed_handoff_phase() -> None:
+    for phase in ("push_ready", "raw_proven"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            state.create_deferred_recovery_journal(
+                root,
+                generating_journal(queued.generation, queued.digest),
+                lock_context=FakeLock(),
+            )
+            journal = state.arm_deferred_pushed_handoff(
+                root,
+                queued.generation,
+                queued.digest,
+                "a" * 40,
+                lock_context=FakeLock(),
+            )
+            if phase == "raw_proven":
+                _unused, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+                state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+            expect_invalid(
+                lambda: state.update_deferred_alignment(
+                    root,
+                    queued.generation,
+                    queued.digest,
+                    "a" * 40,
+                    "c" * 40,
+                    "regenerate",
+                    lock_context=FakeLock(),
+                ),
+                f"alignment erased {phase} pushed handoff state",
+            )
 
 
 def test_recovery_requires_independent_immutable_commit_confirmation() -> None:
