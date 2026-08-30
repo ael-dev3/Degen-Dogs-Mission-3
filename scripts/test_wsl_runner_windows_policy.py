@@ -67,6 +67,7 @@ $requiredFunctions = @(
     'New-WslRunnerImportAttempt',
     'New-WslRunnerTaskPlan',
     'Remove-BoundedWslImportDirectory',
+    'Remove-WslRunnerTemporaryGitDirectory',
     'Resolve-WslRunnerUserSid',
     'Test-WslRunnerImportReceipt',
     'Test-WslDistroRegistrationMatches',
@@ -182,6 +183,53 @@ foreach ($badResolver in @(
 Write-Output 'git-command-resolution-checked'
 """,
         "git-command-resolution-checked",
+    )
+
+
+def test_temporary_git_cleanup_is_bounded_and_handles_read_only_pack_files() -> None:
+    assert_harness(
+        r"""
+$temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$stage = Join-Path $temporaryRoot ('degen-dogs-bootstrap-source-' + [Guid]::NewGuid().ToString('N'))
+$foreign = Join-Path $temporaryRoot ('foreign-bootstrap-source-' + [Guid]::NewGuid().ToString('N'))
+try {
+    $packDirectory = Join-Path $stage 'objects\pack'
+    [IO.Directory]::CreateDirectory($packDirectory) | Out-Null
+    $packFile = Join-Path $packDirectory 'pack-test.idx'
+    [IO.File]::WriteAllText($packFile, 'read-only pack index')
+    [IO.File]::SetAttributes($packFile, [IO.FileAttributes]::ReadOnly)
+    Remove-WslRunnerTemporaryGitDirectory `
+        -TemporaryRoot $temporaryRoot `
+        -Stage $stage
+    if ([IO.Directory]::Exists($stage)) {
+        throw 'bounded Git stage with a read-only pack file was not removed'
+    }
+
+    [IO.Directory]::CreateDirectory($foreign) | Out-Null
+    [IO.File]::WriteAllText((Join-Path $foreign 'keep.txt'), 'preserve')
+    $foreignRejected = $false
+    try {
+        Remove-WslRunnerTemporaryGitDirectory `
+            -TemporaryRoot $temporaryRoot `
+            -Stage $foreign
+    }
+    catch {
+        $foreignRejected = $true
+    }
+    if (-not $foreignRejected -or -not [IO.File]::Exists((Join-Path $foreign 'keep.txt'))) {
+        throw 'temporary Git cleanup crossed its exact stage-name boundary'
+    }
+}
+finally {
+    if ([IO.Directory]::Exists($stage)) {
+        Get-ChildItem -LiteralPath $stage -Force -Recurse | ForEach-Object { $_.IsReadOnly = $false }
+        [IO.Directory]::Delete($stage, $true)
+    }
+    if ([IO.Directory]::Exists($foreign)) { [IO.Directory]::Delete($foreign, $true) }
+}
+Write-Output 'temporary-git-cleanup-checked'
+""",
+        "temporary-git-cleanup-checked",
     )
 
 
@@ -1150,6 +1198,7 @@ Write-Output 'windows-task-round-trip-checked'
 def main() -> None:
     test_invocation_policy_and_trigger_selection()
     test_git_command_resolution_is_deterministic()
+    test_temporary_git_cleanup_is_bounded_and_handles_read_only_pack_files()
     test_task_plan_and_import_command_are_mode_complete()
     test_verified_import_orders_hash_before_import_and_cleans_up()
     test_wsl_inventory_fails_closed()
@@ -1161,7 +1210,7 @@ def main() -> None:
     test_task_isolation_does_not_short_circuit_or_touch_foreign_tasks()
     test_task_xml_attestation_rejects_privilege_and_trigger_mutations()
     test_real_windows_task_scheduler_round_trip()
-    print("wsl_runner_windows_policy_tests=pass count=13")
+    print("wsl_runner_windows_policy_tests=pass count=14")
 
 
 if __name__ == "__main__":

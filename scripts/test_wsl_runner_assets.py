@@ -224,6 +224,8 @@ def test() -> None:
     assert "function Assert-WslRunnerInvocationPolicy" in powershell
     assert "function Get-WslRunnerGitPath" in powershell
     assert "$gitPath = Get-WslRunnerGitPath" in powershell
+    assert "function Remove-WslRunnerTemporaryGitDirectory" in powershell
+    assert "Remove-WslRunnerTemporaryGitDirectory `" in powershell
     policy_gate = powershell.rindex("Assert-WslRunnerInvocationPolicy `")
     source_attestation = powershell.index(
         "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"
