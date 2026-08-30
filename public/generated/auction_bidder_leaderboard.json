@@ -663,6 +663,19 @@
     "latest_bid_utc": "2026-03-30 17:00:09"
   },
   {
+    "bidder": "@kzl27.eth",
+    "bidder_url": "https://farcaster.xyz/kzl27.eth",
+    "bidder_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "bids": 18,
+    "auctions_bid": 11,
+    "bid_eth": 0.09509,
+    "high_bid_eth": 0.0202,
+    "auction_wins": 4,
+    "winning_eth": 0.03293,
+    "latest_bid_token_id": 818,
+    "latest_bid_utc": "2026-08-30 09:18:03"
+  },
+  {
     "bidder": "@kidmyr.eth",
     "bidder_url": "https://farcaster.xyz/kidmyr.eth",
     "bidder_wallet": "0xee2bb96a633e50de9cbc8b4229b07cef9a008852",
@@ -687,19 +700,6 @@
     "winning_eth": 0.05572,
     "latest_bid_token_id": 753,
     "latest_bid_utc": "2026-06-24 23:44:11"
-  },
-  {
-    "bidder": "@kzl27.eth",
-    "bidder_url": "https://farcaster.xyz/kzl27.eth",
-    "bidder_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
-    "bids": 17,
-    "auctions_bid": 11,
-    "bid_eth": 0.08959,
-    "high_bid_eth": 0.0202,
-    "auction_wins": 4,
-    "winning_eth": 0.03293,
-    "latest_bid_token_id": 818,
-    "latest_bid_utc": "2026-08-30 08:25:33"
   },
   {
     "bidder": "0xe048…8846",
@@ -988,6 +988,19 @@
     "latest_bid_utc": "2026-05-05 21:52:39"
   },
   {
+    "bidder": "@kunon",
+    "bidder_url": "https://farcaster.xyz/kunon",
+    "bidder_wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
+    "bids": 5,
+    "auctions_bid": 4,
+    "bid_eth": 0.0192,
+    "high_bid_eth": 0.0055,
+    "auction_wins": 2,
+    "winning_eth": 0.011,
+    "latest_bid_token_id": 818,
+    "latest_bid_utc": "2026-08-30 09:08:21"
+  },
+  {
     "bidder": "0xfa3c…69e6",
     "bidder_url": "https://basescan.org/address/0xfa3ce274f05bb01b8dc85a9dff96cae8c5c869e6",
     "bidder_wallet": "0xfa3ce274f05bb01b8dc85a9dff96cae8c5c869e6",
@@ -1038,19 +1051,6 @@
     "winning_eth": 0.013,
     "latest_bid_token_id": 789,
     "latest_bid_utc": "2026-08-01 13:07:23"
-  },
-  {
-    "bidder": "@kunon",
-    "bidder_url": "https://farcaster.xyz/kunon",
-    "bidder_wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
-    "bids": 4,
-    "auctions_bid": 3,
-    "bid_eth": 0.0142,
-    "high_bid_eth": 0.0055,
-    "auction_wins": 2,
-    "winning_eth": 0.011,
-    "latest_bid_token_id": 817,
-    "latest_bid_utc": "2026-08-29 20:37:59"
   },
   {
     "bidder": "0x8847…fe0a",
