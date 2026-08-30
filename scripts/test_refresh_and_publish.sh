@@ -1292,11 +1292,11 @@ printf '%s\n' \
   '    Path("generated/refresh_status.json"),' \
   '    Path("public/generated/refresh_status.json"),' \
   '):' \
-  '    path.write_text(json.dumps(status, sort_keys=True) + "\\n", encoding="utf-8")' \
+  '    path.write_text(json.dumps(status, sort_keys=True) + "\n", encoding="utf-8")' \
   'for path in (Path("generated/auction_feed.csv"), Path("public/generated/auction_feed.csv")):' \
-  '    path.write_text("id\\n3\\n", encoding="utf-8")' \
+  '    path.write_text("id\n3\n", encoding="utf-8")' \
   'for path in (Path("generated/auction_feed.json"), Path("public/generated/auction_feed.json")):' \
-  '    path.write_text("[{\\"id\\":3}]\\n", encoding="utf-8")' \
+  '    path.write_text("[{\"id\":3}]\n", encoding="utf-8")' \
   'build_live_snapshot_bundle()' \
   >"$SUCCESS_REPO/scripts/race_generation.py"
 chmod +x "$SUCCESS_REPO/scripts/race_generation.py"
