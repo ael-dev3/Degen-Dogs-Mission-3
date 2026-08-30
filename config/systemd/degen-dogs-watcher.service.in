@@ -3,8 +3,7 @@ Description=Degen Dogs Mission 3 event watcher and publisher
 Wants=network-online.target
 After=network-online.target
 ConditionPathExists=/run/degen-dogs/activation-enabled
-StartLimitIntervalSec=15min
-StartLimitBurst=4
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
@@ -22,8 +21,6 @@ ExecStart=/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh watcher
 TimeoutStartSec=35min
 TimeoutStopSec=30s
 KillMode=control-group
-Restart=on-failure
-RestartSec=30s
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict

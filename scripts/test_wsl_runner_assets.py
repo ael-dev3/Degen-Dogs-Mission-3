@@ -94,9 +94,16 @@ def test() -> None:
         assert "ProtectSystem=strict" in service
         assert "ProtectHome=read-only" in service
         assert "CapabilityBoundingSet=" in service
-        assert "Restart=on-failure" in service
         assert "@LOCK_DIR@" in service
         assert "ConditionPathExists=/run/degen-dogs/activation-enabled" in service
+
+    watcher_service = text("config/systemd/degen-dogs-watcher.service.in")
+    assert "Restart=" not in watcher_service
+    assert "RestartSec=" not in watcher_service
+    assert "StartLimitIntervalSec=0" in watcher_service
+    assert "StartLimitBurst=" not in watcher_service
+    assert "Restart=on-failure" in text("config/systemd/degen-dogs-hourly.service.in")
+    assert "Restart=on-failure" in text("config/systemd/degen-dogs-health.service.in")
 
     launcher = text("scripts/run_wsl_runner_job.sh")
     assert "MISSION3_WATCHER_AUTO_PUSH=1" in launcher
@@ -133,6 +140,9 @@ def test() -> None:
     assert '"%" in value' in installer
     assert "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU" in installer
     assert "validate_runner_git_destination" in installer
+    publisher = text("scripts/refresh_and_publish.sh")
+    assert 'QUARANTINE_STATE_DIR="${REPO_DIR}/.local"' in publisher
+    assert 'degen_dogs_private_dir "$QUARANTINE_STATE_DIR"' in publisher
     skip_deploy_marker = installer.index('if [[ "$skip_deploy_key" != "1" ]]')
     assert installer.index("config --unset-all remote.origin.pushurl") > skip_deploy_marker
     deploy_key_block = installer.split('if [[ "$skip_deploy_key" != "1" ]]', 1)[1]

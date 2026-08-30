@@ -338,11 +338,14 @@ The systemd assets are:
 - `degen-dogs-health.service` / `.timer`: five-minute health and freshness;
 - `degen-dogs-runner.target`: boot grouping for all three timers.
 
-Services use bounded timeouts, control-group termination, retry backoff, a
-narrow runtime PATH, empty capability sets, read-only system/home mounts, and
-explicit write access only to the clone, log directory, and cache/lock
-directory. Event refreshes keep archive work off for latency; the staggered
-hourly job maintains the archive.
+Services use bounded timeouts, control-group termination, a narrow runtime
+PATH, empty capability sets, read-only system/home mounts, and explicit write
+access only to the clone, log directory, and cache/lock directory. The watcher
+does not self-restart or use a service start limit: its 15-second timer is the
+single retry owner, so repeated successful checks cannot suppress later event
+checks. The hourly and health services retain bounded retry backoff. Event
+refreshes keep archive work off for latency; the staggered hourly job maintains
+the archive.
 
 ## Verify operation
 

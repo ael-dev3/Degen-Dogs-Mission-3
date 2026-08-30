@@ -6,6 +6,7 @@ set -Eeuo pipefail
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_ROOT="$(mktemp -d -t degen-dogs-refresh-test.XXXXXX)"
 TEST_REPO="${TEST_ROOT}/repo"
+CROSS_DEVICE_ROOT=""
 
 cleanup() {
   local status=$?
@@ -14,6 +15,11 @@ cleanup() {
   fi
   if [[ -n "${TEST_ROOT:-}" && -d "$TEST_ROOT" && "$(basename "$TEST_ROOT")" == degen-dogs-refresh-test.* ]]; then
     rm -rf -- "$TEST_ROOT"
+  fi
+  if [[ -n "${CROSS_DEVICE_ROOT:-}" && -d "$CROSS_DEVICE_ROOT" &&
+    "$(dirname "$CROSS_DEVICE_ROOT")" == "/dev/shm" &&
+    "$(basename "$CROSS_DEVICE_ROOT")" == degen-dogs-refresh-cross-device.* ]]; then
+    rm -rf -- "$CROSS_DEVICE_ROOT"
   fi
 }
 trap cleanup EXIT
@@ -201,9 +207,9 @@ if [[ "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]]; then
 fi
 
 QUARANTINE_ATTACK_TARGET="$TEST_ROOT/quarantine-attack-target"
-mkdir -p "$TEST_ROOT/locks/recovery" "$QUARANTINE_ATTACK_TARGET"
-chmod 700 "$TEST_ROOT/locks/recovery" "$QUARANTINE_ATTACK_TARGET"
-ln -s "$QUARANTINE_ATTACK_TARGET" "$TEST_ROOT/locks/recovery/fixture-quarantine"
+mkdir -p "$TEST_REPO/.local/recovery" "$QUARANTINE_ATTACK_TARGET"
+chmod 700 "$TEST_REPO/.local" "$TEST_REPO/.local/recovery" "$QUARANTINE_ATTACK_TARGET"
+ln -s "$QUARANTINE_ATTACK_TARGET" "$TEST_REPO/.local/recovery/fixture-quarantine"
 set +e
 HOME="$TEST_ROOT/home" \
 DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
@@ -232,7 +238,7 @@ if [[ -e "$QUARANTINE_ATTACK_TARGET/generated/runner-created.json" ]]; then
   echo "predictable quarantine run-id symlink received a runner artifact" >&2
   exit 1
 fi
-if [[ -z "$(find "$TEST_ROOT/locks/recovery" -type f -path '*/generated/runner-created.json' -print -quit)" ]]; then
+if [[ -z "$(find "$TEST_REPO/.local/recovery" -type f -path '*/generated/runner-created.json' -print -quit)" ]]; then
   echo "runner-created untracked artifact was not preserved in recovery quarantine" >&2
   exit 1
 fi
@@ -283,9 +289,57 @@ if [[ -e "$TEST_REPO/generated/runner-created.json" || -e "$TEST_REPO/generated/
   echo "runner-created artifacts remain after full-builder fallback failure" >&2
   exit 1
 fi
-if [[ "$(find "$TEST_ROOT/locks/recovery" -type f -name '*.json' | wc -l | tr -d ' ')" -lt 3 ]]; then
+if [[ "$(find "$TEST_REPO/.local/recovery" -type f -name '*.json' | wc -l | tr -d ' ')" -lt 3 ]]; then
   echo "full-fallback untracked artifacts were not preserved in recovery quarantine" >&2
   exit 1
+fi
+
+# systemd exposes the repository and lock/cache directory as separate writable
+# bind mounts. A failing generator must still quarantine its untracked output
+# atomically on the repository mount while keeping the recovery journal on the
+# independent cache mount.
+if [[ -d /dev/shm && -w /dev/shm ]]; then
+  CROSS_DEVICE_ROOT="$(mktemp -d /dev/shm/degen-dogs-refresh-cross-device.XXXXXX)"
+  chmod 700 "$CROSS_DEVICE_ROOT"
+  if python3 - "$TEST_REPO" "$CROSS_DEVICE_ROOT" <<'PY'
+import os
+import sys
+
+raise SystemExit(0 if os.stat(sys.argv[1]).st_dev != os.stat(sys.argv[2]).st_dev else 1)
+PY
+  then
+    set +e
+    HOME="$TEST_ROOT/home" \
+    DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
+    DEGEN_DOGS_LOG_DIR="$TEST_ROOT/cross-device-logs" \
+    DEGEN_DOGS_LOCK_DIR="$CROSS_DEVICE_ROOT" \
+    DEGEN_DOGS_REFRESH_RUN_ID="cross-device-fixture" \
+    DEGEN_DOGS_SKIP_PULL=1 \
+    DEGEN_DOGS_SKIP_PUSH=1 \
+    "$TEST_REPO/scripts/refresh_and_publish.sh"
+    status=$?
+    set -e
+    if [[ "$status" == "0" ]]; then
+      echo "expected the cross-device fixture generator to fail" >&2
+      exit 1
+    fi
+    if [[ "$(<"$TEST_REPO/generated/value.txt")" != "baseline" ]] || \
+      [[ -e "$TEST_REPO/generated/runner-created.json" ]] || \
+      [[ -e "$CROSS_DEVICE_ROOT/publisher-recovery.json" ]]; then
+      echo "cross-device rollback did not restore a clean baseline" >&2
+      exit 1
+    fi
+    if [[ -z "$(find "$TEST_REPO/.local/recovery" -type f \
+      -path '*/cross-device-fixture.*/generated/runner-created.json' -print -quit)" ]]; then
+      echo "cross-device rollback did not preserve the runner-created artifact on the repository mount" >&2
+      exit 1
+    fi
+    if grep -q "refusing cross-device quarantine move" "$TEST_ROOT/cross-device-logs/refresh.log" || \
+      ! grep -q "partial generated artifacts rolled back" "$TEST_ROOT/cross-device-logs/refresh.log"; then
+      echo "cross-device rollback did not complete without an EXDEV warning" >&2
+      exit 1
+    fi
+  fi
 fi
 if [[ -n "$(git -C "$TEST_REPO" status --porcelain --untracked-files=all -- generated)" ]]; then
   echo "generated path remains dirty after full-builder fallback rollback" >&2
@@ -541,7 +595,7 @@ if [[ -e "$CRASH_LOCK_DIR/publisher-recovery.json" ]] || \
   exit 1
 fi
 if ! grep -q "interrupted publisher recovery completed" "$TEST_ROOT/crash-recovery-logs/refresh.log" || \
-  ! find "$CRASH_LOCK_DIR/recovery" -type f -name crash-only.json -print -quit | grep -q .; then
+  ! find "$SUCCESS_REPO/.local/recovery" -type f -name crash-only.json -print -quit | grep -q .; then
   echo "interrupted-generation recovery was not logged or quarantined" >&2
   exit 1
 fi
