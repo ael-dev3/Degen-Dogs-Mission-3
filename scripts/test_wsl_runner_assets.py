@@ -443,6 +443,9 @@ def test() -> None:
     hourly_timer = text("config/systemd/degen-dogs-hourly.timer")
     assert "OnCalendar=*-*-* *:59:00" in hourly_timer
     assert "Persistent=true" in hourly_timer
+    health_timer = text("config/systemd/degen-dogs-health.timer")
+    assert re.search(r"(?m)^OnActiveSec=5min$", health_timer)
+    assert re.search(r"(?m)^OnUnitInactiveSec=5min$", health_timer)
 
     for relative in (
         "config/systemd/degen-dogs-watcher.service.in",
