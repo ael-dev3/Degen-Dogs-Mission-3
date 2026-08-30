@@ -41,6 +41,7 @@ print(os.path.abspath(os.path.expanduser(sys.argv[1])))
 PY
 )"
 RECOVERY_STATE_DIR="$(dirname "$REFRESH_LOCK_PATH")"
+QUARANTINE_STATE_DIR="${REPO_DIR}/.local"
 REMOTE="${DEGEN_DOGS_REMOTE:-origin}"
 BRANCH="${DEGEN_DOGS_BRANCH:-main}"
 COMMIT_PREFIX="${DEGEN_DOGS_COMMIT_PREFIX:-[cron]}"
@@ -128,6 +129,7 @@ export DEGEN_DOGS_REFRESH_METRICS_PATH="${DEGEN_DOGS_REFRESH_METRICS_PATH:-${REP
 degen_dogs_private_dir "$LOG_DIR"
 degen_dogs_private_dir "$LOCK_DIR"
 degen_dogs_private_dir "$RECOVERY_STATE_DIR"
+degen_dogs_private_dir "$QUARANTINE_STATE_DIR"
 LOG_FILE="${LOG_FILE:-${LOG_DIR}/refresh.log}"
 degen_dogs_private_file "$LOG_FILE"
 exec >>"$LOG_FILE" 2>&1
@@ -836,7 +838,7 @@ cleanup_partial_generation() {
   # next scheduled run.
   QUARANTINE_DIR=""
   export REPO_DIR
-  if ! QUARANTINE_DIR="$(python3 - "$RECOVERY_STATE_DIR" "$DEGEN_DOGS_REFRESH_RUN_ID" "${PUBLISH_PATHS[@]}" <<'PY'
+  if ! QUARANTINE_DIR="$(python3 - "$QUARANTINE_STATE_DIR" "$DEGEN_DOGS_REFRESH_RUN_ID" "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
 
 import errno
