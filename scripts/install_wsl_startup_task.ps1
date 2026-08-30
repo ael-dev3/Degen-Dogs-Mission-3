@@ -10,6 +10,7 @@ param(
     [ValidatePattern('^/[A-Za-z0-9._/-]+$')]
     [string]$RepoDir = '/srv/degen-dogs/repo',
 
+    [ValidatePattern('^[A-Za-z0-9](?:[A-Za-z0-9 ._-]{0,62}[A-Za-z0-9_-])?$')]
     [string]$TaskName = 'Degen Dogs WSL Runner',
 
     [string]$TrustedInstallerCommit = '',
@@ -40,6 +41,146 @@ if ($UpgradeTrustedBundle -and -not $TrustedInstallerCommit) {
 }
 if ($TaskName -match '[\x00-\x1f]') {
     throw 'TaskName contains a control character.'
+}
+
+function Invoke-CheckedGit {
+    param(
+        [Parameter(Mandatory)][string]$GitPath,
+        [Parameter(Mandatory)][string[]]$Arguments,
+        [switch]$SingleLine
+    )
+
+    $output = @(& $GitPath @Arguments 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        $detail = ($output | ForEach-Object { $_.ToString() }) -join "`n"
+        throw "Git source verification failed (exit=$LASTEXITCODE): $detail"
+    }
+    if ($SingleLine) {
+        $lines = @(
+            $output |
+                ForEach-Object { $_.ToString().Trim() } |
+                Where-Object { $_ }
+        )
+        if ($lines.Count -ne 1) {
+            throw "Git source verification expected exactly one output line, found $($lines.Count)."
+        }
+        return $lines[0]
+    }
+    return $output
+}
+
+function Assert-TrustedBootstrapSource {
+    param([Parameter(Mandatory)][string]$Commit)
+
+    $gitCommand = Get-Command git.exe -CommandType Application -ErrorAction Stop
+    $gitPath = $gitCommand.Source
+    $temporaryRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+    $stageName = 'degen-dogs-bootstrap-source-' + [Guid]::NewGuid().ToString('N')
+    $stage = [IO.Path]::GetFullPath((Join-Path $temporaryRoot $stageName))
+    if (-not $stage.StartsWith(
+        (Join-Path $temporaryRoot 'degen-dogs-bootstrap-source-'),
+        [StringComparison]::OrdinalIgnoreCase
+    )) {
+        throw 'Could not construct a bounded temporary source-verification directory.'
+    }
+    [IO.Directory]::CreateDirectory($stage) | Out-Null
+    try {
+        Invoke-CheckedGit -GitPath $gitPath -Arguments @('init', '--bare', '--quiet', $stage) | Out-Null
+        Invoke-CheckedGit -GitPath $gitPath -Arguments @(
+            "--git-dir=$stage",
+            'fetch',
+            '--quiet',
+            '--no-tags',
+            '--force',
+            'https://github.com/ael-dev3/Degen-Dogs-Mission-3.git',
+            'refs/heads/main:refs/remotes/origin/main'
+        ) | Out-Null
+
+        $resolvedCommit = Invoke-CheckedGit `
+            -GitPath $gitPath `
+            -Arguments @("--git-dir=$stage", 'rev-parse', '--verify', "${Commit}^{commit}") `
+            -SingleLine
+        if (-not [String]::Equals($resolvedCommit, $Commit, [StringComparison]::Ordinal)) {
+            throw 'TrustedInstallerCommit did not resolve to the exact requested commit object.'
+        }
+        Invoke-CheckedGit -GitPath $gitPath -Arguments @(
+            "--git-dir=$stage",
+            'merge-base',
+            '--is-ancestor',
+            $Commit,
+            'refs/remotes/origin/main'
+        ) | Out-Null
+
+        $scriptObject = Invoke-CheckedGit `
+            -GitPath $gitPath `
+            -Arguments @(
+                "--git-dir=$stage",
+                'rev-parse',
+                '--verify',
+                "${Commit}:scripts/install_wsl_startup_task.ps1"
+            ) `
+            -SingleLine
+        $scriptObjectType = Invoke-CheckedGit `
+            -GitPath $gitPath `
+            -Arguments @("--git-dir=$stage", 'cat-file', '-t', $scriptObject) `
+            -SingleLine
+        if (-not [String]::Equals($scriptObjectType, 'blob', [StringComparison]::Ordinal)) {
+            throw 'The reviewed bootstrap path is not a Git blob.'
+        }
+        $localScriptObject = Invoke-CheckedGit `
+            -GitPath $gitPath `
+            -Arguments @('hash-object', '--no-filters', '--', $PSCommandPath) `
+            -SingleLine
+        if (-not [String]::Equals($localScriptObject, $scriptObject, [StringComparison]::Ordinal)) {
+            throw 'The elevated bootstrap bytes do not match TrustedInstallerCommit.'
+        }
+
+        $scriptDirectory = Split-Path -Parent $PSCommandPath
+        $localRootOutput = @(& $gitPath -C $scriptDirectory rev-parse --show-toplevel 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $localRootOutput.Count -eq 1) {
+            $localRoot = [IO.Path]::GetFullPath($localRootOutput[0].ToString().Trim())
+            $expectedScriptPath = [IO.Path]::GetFullPath(
+                (Join-Path $localRoot 'scripts\install_wsl_startup_task.ps1')
+            )
+            $actualScriptPath = [IO.Path]::GetFullPath($PSCommandPath)
+            if (-not [String]::Equals(
+                $actualScriptPath,
+                $expectedScriptPath,
+                [StringComparison]::OrdinalIgnoreCase
+            )) {
+                throw 'The bootstrap must run from its tracked repository path or a verified archive.'
+            }
+            $localHead = Invoke-CheckedGit `
+                -GitPath $gitPath `
+                -Arguments @('-C', $localRoot, 'rev-parse', '--verify', 'HEAD') `
+                -SingleLine
+            if (-not [String]::Equals($localHead, $Commit, [StringComparison]::Ordinal)) {
+                throw 'The local bootstrap checkout HEAD is not TrustedInstallerCommit.'
+            }
+            $trackedStatus = @(
+                & $gitPath -C $localRoot status --porcelain=v1 --untracked-files=no 2>&1 |
+                    ForEach-Object { $_.ToString() } |
+                    Where-Object { $_ }
+            )
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Could not verify that the local bootstrap checkout is clean.'
+            }
+            if ($trackedStatus.Count -ne 0) {
+                throw 'The local bootstrap checkout has tracked changes; use an exact detached checkout or verified archive.'
+            }
+        }
+    }
+    finally {
+        if ([IO.Directory]::Exists($stage)) {
+            [IO.Directory]::Delete($stage, $true)
+        }
+    }
+}
+
+if ($TrustedInstallerCommit) {
+    # This detects accidental checkout/argument mismatches before host state is
+    # changed. It cannot make already-malicious local PowerShell trustworthy.
+    Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit
 }
 
 $wsl = Join-Path $env:SystemRoot 'System32\wsl.exe'
@@ -77,12 +218,40 @@ function Assert-CurrentAccountCredential {
     }
 }
 
+function Get-ExactScheduledTask {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $escapedName = [WildcardPattern]::Escape($Name)
+    $candidateTasks = @(
+        Get-ScheduledTask `
+            -TaskName $escapedName `
+            -TaskPath '\' `
+            -ErrorAction SilentlyContinue
+    )
+    $exactTasks = @(
+        $candidateTasks | Where-Object {
+            [String]::Equals($_.TaskName, $Name, [StringComparison]::Ordinal) -and
+            [String]::Equals($_.TaskPath, '\', [StringComparison]::Ordinal)
+        }
+    )
+    if ($candidateTasks.Count -ne $exactTasks.Count) {
+        throw "Task Scheduler returned a non-exact root match for '$Name'."
+    }
+    if ($exactTasks.Count -gt 1) {
+        throw "Multiple exact root Task Scheduler objects unexpectedly matched '$Name'."
+    }
+    if ($exactTasks.Count -eq 1) {
+        return $exactTasks[0]
+    }
+    return $null
+}
+
 if ($Uninstall) {
-    $task = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+    $task = Get-ExactScheduledTask -Name $TaskName
     if ($task) {
-        Disable-ScheduledTask -TaskName $TaskName | Out-Null
-        Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
-        Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+        $task | Disable-ScheduledTask | Out-Null
+        $task | Stop-ScheduledTask -ErrorAction SilentlyContinue
+        $task | Unregister-ScheduledTask -Confirm:$false
     }
     if ((Get-WslDistros) -contains $DistroName) {
         $uninstallScript = @'
@@ -136,10 +305,10 @@ if ($trustedBundleExists -and $TrustedInstallerCommit -and -not $UpgradeTrustedB
 
 # Stop any previous keepalive before changing WSL units. Otherwise its
 # one-minute repair loop could restart timers while a new preflight is running.
-$existingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+$existingTask = Get-ExactScheduledTask -Name $TaskName
 if ($existingTask) {
-    Disable-ScheduledTask -TaskName $TaskName | Out-Null
-    Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+    $existingTask | Disable-ScheduledTask | Out-Null
+    $existingTask | Stop-ScheduledTask -ErrorAction SilentlyContinue
 }
 
 if (-not $distroAlreadyExists) {
@@ -384,25 +553,28 @@ $settings = New-ScheduledTaskSettingsSet `
     -ExecutionTimeLimit ([TimeSpan]::Zero)
 
 if ($Activate) {
+    $registeredTask = $null
     if ($AtLogOnOnly) {
         $principal = New-ScheduledTaskPrincipal `
             -UserId "$env:USERDOMAIN\$env:USERNAME" `
             -LogonType Interactive `
             -RunLevel Limited
-        Register-ScheduledTask `
+        $registeredTask = Register-ScheduledTask `
             -TaskName $TaskName `
+            -TaskPath '\' `
             -Action $action `
             -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
             -Settings $settings `
             -Principal $principal `
             -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.' `
-            -Force | Out-Null
+            -Force
     }
     else {
         $plainPassword = $Credential.GetNetworkCredential().Password
         try {
-            Register-ScheduledTask `
+            $registeredTask = Register-ScheduledTask `
                 -TaskName $TaskName `
+                -TaskPath '\' `
                 -Action $action `
                 -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
                 -Settings $settings `
@@ -410,7 +582,7 @@ if ($Activate) {
                 -Password $plainPassword `
                 -RunLevel Limited `
                 -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.' `
-                -Force | Out-Null
+                -Force
         }
         finally {
             $plainPassword = $null
@@ -427,11 +599,15 @@ $runtimeStage
 stage_runtime_and_install --skip-bootstrap --enable-now
 "@
         Invoke-WslRoot -Script $activation
-        Enable-ScheduledTask -TaskName $TaskName | Out-Null
-        Start-ScheduledTask -TaskName $TaskName
+        $registeredTask | Enable-ScheduledTask | Out-Null
+        $registeredTask | Start-ScheduledTask
         $taskDeadline = (Get-Date).AddSeconds(30)
         do {
-            $taskState = (Get-ScheduledTask -TaskName $TaskName).State
+            $currentTask = Get-ExactScheduledTask -Name $TaskName
+            if (-not $currentTask) {
+                throw "The exact root WSL keepalive task '$TaskName' disappeared during activation."
+            }
+            $taskState = $currentTask.State
             if ($taskState -eq 'Running') {
                 break
             }
@@ -485,7 +661,11 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         if (-not $publisherReady) {
             throw 'The activation marker or publisher timers did not become healthy within 30 seconds.'
         }
-        Get-ScheduledTaskInfo -TaskName $TaskName | Format-List LastRunTime,LastTaskResult,NextRunTime
+        $currentTask = Get-ExactScheduledTask -Name $TaskName
+        if (-not $currentTask) {
+            throw "The exact root WSL keepalive task '$TaskName' disappeared after activation."
+        }
+        $currentTask | Get-ScheduledTaskInfo | Format-List LastRunTime,LastTaskResult,NextRunTime
     }
     catch {
         $activationError = $_
@@ -495,8 +675,11 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         catch {
             Write-Warning 'Activation rollback could not remove WSL markers; disabling the Windows keepalive next.'
         }
-        Disable-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue | Out-Null
-        Stop-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+        $rollbackTask = Get-ExactScheduledTask -Name $TaskName
+        if ($rollbackTask) {
+            $rollbackTask | Disable-ScheduledTask -ErrorAction SilentlyContinue | Out-Null
+            $rollbackTask | Stop-ScheduledTask -ErrorAction SilentlyContinue
+        }
         try {
             Invoke-WslRoot -Script 'systemctl disable --now degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer >/dev/null 2>&1 || true'
             Invoke-WslRoot -Script 'systemctl stop degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service >/dev/null 2>&1 || true'
@@ -512,15 +695,16 @@ else {
         -UserId "$env:USERDOMAIN\$env:USERNAME" `
         -LogonType Interactive `
         -RunLevel Limited
-    Register-ScheduledTask `
+    $registeredTask = Register-ScheduledTask `
         -TaskName $TaskName `
+        -TaskPath '\' `
         -Action $action `
         -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
         -Settings $settings `
         -Principal $principal `
         -Description 'Disabled until the peer-aware publisher, RPC quorum, and GitHub deploy key pass preflight.' `
-        -Force | Out-Null
-    Disable-ScheduledTask -TaskName $TaskName | Out-Null
+        -Force
+    $registeredTask | Disable-ScheduledTask | Out-Null
     Write-Host "Bootstrap complete. The systemd units and Windows task are disabled."
     Write-Host "Add the displayed public deploy key to GitHub with write access, fill $RepoDir/.env.local, then rerun with -Activate."
 }

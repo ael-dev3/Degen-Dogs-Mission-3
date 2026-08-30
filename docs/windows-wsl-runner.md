@@ -116,7 +116,7 @@ The observed battery policy sleeps after ten minutes. Change it only if this is
 a laptop that must publish while unplugged; otherwise keep the safer battery
 policy.
 
-## One-command bootstrap, disabled by default
+## Exact-commit bootstrap, disabled by default
 
 The PowerShell bootstrap installs an isolated `Ubuntu-24.04` WSL2 distro,
 enables systemd, installs Node 22/Python/Git/runtime packages, creates the
@@ -126,21 +126,48 @@ dependencies, generates a unique deploy key, and registers a **disabled**
 Windows keepalive task.
 
 Choose the exact 40-character commit containing the reviewed runner assets,
-then run the first bootstrap from elevated PowerShell. Do not substitute a
-branch name or `HEAD`:
+then make a separate detached checkout for that object in an elevated
+PowerShell window. Run the bootstrap from that checkout and treat it as
+read-only; do not run a convenient copy from a development worktree. Do not
+substitute a branch name or `HEAD`:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
 $trustedCommit = '<reviewed-40-character-commit-on-main>'
-.\scripts\install_wsl_startup_task.ps1 -TrustedInstallerCommit $trustedCommit
+$bootstrapRoot = Join-Path $env:TEMP (
+  'DegenDogsBootstrap-' + [Guid]::NewGuid().ToString('N')
+)
+git clone --filter=blob:none --no-checkout `
+  https://github.com/ael-dev3/Degen-Dogs-Mission-3.git $bootstrapRoot
+git -C $bootstrapRoot checkout --detach $trustedCommit
+if ((git -C $bootstrapRoot rev-parse HEAD) -cne $trustedCommit) {
+  throw 'Detached bootstrap checkout does not equal the reviewed commit.'
+}
+if (git -C $bootstrapRoot status --porcelain=v1 --untracked-files=no) {
+  throw 'Detached bootstrap checkout has tracked changes.'
+}
+$bootstrapScript = Join-Path $bootstrapRoot 'scripts\install_wsl_startup_task.ps1'
+(Get-Item -LiteralPath $bootstrapScript).IsReadOnly = $true
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit
 ```
 
-The script fetches that exact commit into a root-only bare repository, verifies
-that it is on the public repository's `main` history, archives only the
-privileged asset allowlist, and records SHA-256 hashes. Ordinary bootstrap and
-`-Activate` runs use this frozen bundle and never replace it from floating
-`main`. Runtime dashboard code may fast-forward as the unprivileged user, but it
-is never executed by root.
+An independently verified read-only `git archive` of the same commit is also
+acceptable. Before any WSL, Task Scheduler, or package mutation, the script
+fetches public `main` into a temporary bare repository, proves the supplied
+commit is an ancestor, and requires its own unfiltered Git blob ID to equal the
+script blob at that exact commit. When it detects a surrounding Git checkout,
+it additionally requires exact `HEAD` equality and no tracked changes. It then
+fetches that exact commit inside WSL into a root-only bare repository, archives
+only the privileged asset allowlist, and records SHA-256 hashes. Ordinary
+bootstrap and `-Activate` runs use this frozen bundle and never replace it from
+floating `main`. Runtime dashboard code may fast-forward as the unprivileged
+user, but it is never executed by root.
+
+This source self-check prevents accidental commit/checkout mismatch. It is not
+a malware boundary: a malicious local PowerShell file, Git executable,
+administrator, network trust store, or already-compromised host can lie about
+or remove its own checks. Review the bootstrap before elevation and keep the
+detached checkout isolated until installation and activation finish.
 
 The script prints only the public deploy key. Add that public key at:
 
@@ -171,14 +198,14 @@ start it before interactive login:
 
 ```powershell
 $credential = Get-Credential "$env:USERDOMAIN\$env:USERNAME"
-.\scripts\install_wsl_startup_task.ps1 -Activate -Credential $credential
+& $bootstrapScript -Activate -Credential $credential
 ```
 
 If the Windows account uses Windows Hello without a reusable password, a
 reduced-uptime fallback is available:
 
 ```powershell
-.\scripts\install_wsl_startup_task.ps1 -Activate -AtLogOnOnly
+& $bootstrapScript -Activate -AtLogOnOnly
 ```
 
 That mode cannot start WSL until the user logs on after a reboot. Prefer the
@@ -193,13 +220,30 @@ directory.
 
 Updating privileged assets is a separate reviewed operation. Supply the new
 exact commit and activate in the same run so a healthy old runner is not left
-intentionally quiesced:
+intentionally quiesced. Create a new isolated detached checkout using the same
+verification block above, set `$newBootstrapScript` to its read-only script, and
+then run:
 
 ```powershell
+$newTrustedCommit = '<new-reviewed-40-character-commit-on-main>'
+$newBootstrapRoot = Join-Path $env:TEMP (
+  'DegenDogsBootstrap-' + [Guid]::NewGuid().ToString('N')
+)
+git clone --filter=blob:none --no-checkout `
+  https://github.com/ael-dev3/Degen-Dogs-Mission-3.git $newBootstrapRoot
+git -C $newBootstrapRoot checkout --detach $newTrustedCommit
+if ((git -C $newBootstrapRoot rev-parse HEAD) -cne $newTrustedCommit) {
+  throw 'Detached upgrade checkout does not equal the reviewed commit.'
+}
+if (git -C $newBootstrapRoot status --porcelain=v1 --untracked-files=no) {
+  throw 'Detached upgrade checkout has tracked changes.'
+}
+$newBootstrapScript = Join-Path $newBootstrapRoot 'scripts\install_wsl_startup_task.ps1'
+(Get-Item -LiteralPath $newBootstrapScript).IsReadOnly = $true
 $credential = Get-Credential "$env:USERDOMAIN\$env:USERNAME"
-.\scripts\install_wsl_startup_task.ps1 `
+& $newBootstrapScript `
   -UpgradeTrustedBundle `
-  -TrustedInstallerCommit '<new-reviewed-40-character-commit>' `
+  -TrustedInstallerCommit $newTrustedCommit `
   -Activate `
   -Credential $credential
 ```
@@ -296,11 +340,39 @@ stale.
 Stop the Windows keepalive before deliberately disabling timers; the anchor
 repairs stopped timers once per minute.
 
+### Deploy-key and pinned-key rotation
+
+Rotate the PC deploy key during a planned maintenance window; never overwrite
+the active private key while a publisher can run. Use the exact detached
+bootstrap script above to uninstall the task/services (the distro, repository,
+configuration, and keys are preserved), generate a new ED25519 key at a
+temporary sibling path as `degendogs`, and add only its public half to GitHub as
+a second write-enabled deploy key. Test that candidate with the pinned
+`degen_dogs_known_hosts` file, `IdentitiesOnly=yes`, `BatchMode=yes`, strict
+host-key checking, no proxy, `git ls-remote`, and a push dry-run. Only after
+those checks pass should the operator atomically move the old fixed-path key to
+a private backup and the candidate into
+`~/.ssh/degen_dogs_windows_ed25519`, then rerun the exact-commit bootstrap and
+activation. Verify a publication from `windows-wsl`; only then delete the old
+GitHub deploy key and its private backup. Never put either private key or its
+backup in the repository, terminal transcript, or ticket.
+
+Upstream authentication-key changes require code review, not a live fallback.
+For a GitHub SSH host-key rotation, verify the new key and full fingerprint in
+GitHub's official fingerprint documentation, update the byte-exact managed
+`known_hosts` content and fingerprint regression together, and deploy that
+reviewed exact commit. Never replace the pin with `ssh-keyscan`. For a
+NodeSource signing-key rotation, obtain the key from its official HTTPS source,
+independently verify the full primary fingerprint, update the pinned fingerprint
+and regression in one reviewed commit, and use `-UpgradeTrustedBundle`. If the
+old key is unexpectedly rejected before that review completes, leave the runner
+disabled.
+
 Remove the task and services while preserving the distro, repository, private
 configuration, SSH key, logs, and caches:
 
 ```powershell
-.\scripts\install_wsl_startup_task.ps1 -Uninstall
+& $bootstrapScript -Uninstall
 ```
 
 Linux-only removal is also available:

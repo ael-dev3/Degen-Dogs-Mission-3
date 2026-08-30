@@ -7,6 +7,8 @@ import ast
 import json
 import re
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -109,6 +111,82 @@ def test() -> None:
     assert installer.index("config --unset-all remote.origin.pushurl") > skip_deploy_marker
     deploy_key_block = installer.split('if [[ "$skip_deploy_key" != "1" ]]', 1)[1]
     assert deploy_key_block.index("validate_runner_git_destination") > deploy_key_block.index("fi\n")
+
+    validator_marker = "# WSL_SSH_MATERIAL_VALIDATOR"
+    validator_marker_offset = installer.index(validator_marker)
+    validator_start = installer.rfind("<<'PY'\n", 0, validator_marker_offset)
+    assert validator_start >= 0
+    validator_start += len("<<'PY'\n")
+    validator_end = installer.index("\nPY", validator_marker_offset)
+    validator = installer[validator_start:validator_end]
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        temporary = Path(temporary_directory)
+        known_hosts_path = temporary / "known_hosts"
+        config_path = temporary / "config"
+        key_path = temporary / "deploy_key"
+        known_hosts = (
+            "github.com ssh-ed25519 "
+            "AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n"
+        )
+        config = f"""Host github-degen-dogs
+    HostName github.com
+    User git
+    IdentityFile {key_path}
+    IdentitiesOnly yes
+    BatchMode yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile {known_hosts_path}
+    GlobalKnownHostsFile /dev/null
+    ProxyCommand none
+    ProxyJump none
+"""
+        known_hosts_path.write_text(known_hosts, encoding="ascii", newline="\n")
+        config_path.write_text(config, encoding="ascii", newline="\n")
+
+        def validate_ssh_material() -> subprocess.CompletedProcess[bytes]:
+            return subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    validator,
+                    str(known_hosts_path),
+                    str(config_path),
+                    str(key_path),
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+
+        accepted = validate_ssh_material()
+        assert accepted.returncode == 0, accepted.stderr.decode("utf-8", errors="replace")
+        mutations = {
+            "HostName": config.replace("HostName github.com", "HostName attacker.invalid"),
+            "IdentityFile": config.replace(str(key_path), str(temporary / "attacker_key")),
+            "StrictHostKeyChecking": config.replace("StrictHostKeyChecking yes", "StrictHostKeyChecking no"),
+            "UserKnownHostsFile": config.replace(str(known_hosts_path), str(temporary / "other_hosts")),
+            "ProxyCommand": config.replace("ProxyCommand none", "ProxyCommand ssh attacker.invalid -W %h:%p"),
+            "ProxyJump": config.replace("ProxyJump none", "ProxyJump attacker.invalid"),
+        }
+        for field, mutation in mutations.items():
+            config_path.write_text(mutation, encoding="ascii", newline="\n")
+            rejected = validate_ssh_material()
+            assert rejected.returncode != 0, f"unsafe {field} mutation was accepted"
+        config_path.write_text(config, encoding="ascii", newline="\n")
+        known_hosts_path.write_text(
+            known_hosts.replace("github.com", "attacker.invalid"),
+            encoding="ascii",
+            newline="\n",
+        )
+        rejected = validate_ssh_material()
+        assert rejected.returncode != 0, "non-canonical known_hosts destination was accepted"
+        known_hosts_path.write_text(
+            known_hosts + "attacker.invalid ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvil\n",
+            encoding="ascii",
+            newline="\n",
+        )
+        rejected = validate_ssh_material()
+        assert rejected.returncode != 0, "extra known_hosts entry was accepted"
     for line in installer.splitlines():
         if re.search(r'\bgit\s+-C\s+"\$repo_dir"', line):
             assert "runner_git" in line or "run_as_runner_runtime" in line, line
@@ -129,6 +207,40 @@ def test() -> None:
     assert "systemctl is-active --quiet" in powershell
     assert "$UpgradeTrustedBundle" in powershell
     assert "TrustedInstallerCommit" in powershell
+    task_name_pattern_match = re.search(
+        r"\[ValidatePattern\('([^']+)'\)\]\s*\[string\]\$TaskName",
+        powershell,
+    )
+    assert task_name_pattern_match
+    task_name_pattern = task_name_pattern_match.group(1)
+    assert re.fullmatch(task_name_pattern, "Degen Dogs WSL Runner")
+    for unsafe_task_name in (
+        "*",
+        "Degen Dogs*",
+        "\\Degen Dogs",
+        "Degen/Dogs",
+        " Degen Dogs",
+        "Degen Dogs ",
+        "Degen Dogs?",
+        "Degen[Dogs]",
+    ):
+        assert not re.fullmatch(task_name_pattern, unsafe_task_name), unsafe_task_name
+    assert "function Get-ExactScheduledTask" in powershell
+    assert "[WildcardPattern]::Escape($Name)" in powershell
+    assert "[StringComparison]::Ordinal" in powershell
+    assert not re.search(
+        r"(?m)^\s*(?:Disable|Stop|Unregister|Enable|Start)-ScheduledTask\s+-TaskName\s+\$TaskName",
+        powershell,
+    )
+    source_check = powershell.index(
+        "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"
+    )
+    wsl_initialization = powershell.index("$wsl = Join-Path")
+    assert source_check < wsl_initialization
+    source_guard = powershell[:wsl_initialization]
+    assert "hash-object" in source_guard and "--no-filters" in source_guard
+    assert "'merge-base'" in source_guard and "'--is-ancestor'" in source_guard
+    assert "refs/remotes/origin/main" in source_guard
     assert "ROOT_ASSETS.sha256" in powershell
     assert 'git -c core.hooksPath=/dev/null --git-dir="$stage/repo.git" archive' in powershell
     assert "/run/degen-dogs/anchor-ready" in powershell

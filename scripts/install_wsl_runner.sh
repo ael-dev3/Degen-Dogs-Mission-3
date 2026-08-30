@@ -13,7 +13,7 @@ Options:
   --env-file PATH       Protected runner config (default: REPO/.env.local)
   --expected-head SHA   Exact trusted origin/main commit staged by bootstrap
   --runtime-tree PATH   Root-owned export of EXPECTED_HEAD used as manifest
-  --skip-deploy-key     Keep the existing origin/SSH configuration unchanged
+  --skip-deploy-key     Keep existing credentials only if canonical and valid
   --skip-bootstrap      Do not create the venv, npm install, build, or smoke tests
   --enable-now          Verify prerequisites and enable units behind activation gate
   --uninstall           Disable/remove services; preserve repo, secrets, logs, and keys
@@ -470,6 +470,9 @@ config_text = f"""Host github-degen-dogs
     BatchMode yes
     StrictHostKeyChecking yes
     UserKnownHostsFile {known_hosts}
+    GlobalKnownHostsFile /dev/null
+    ProxyCommand none
+    ProxyJump none
 """
 
 for target, text in ((known_hosts, known_hosts_text), (config, config_text)):
@@ -504,6 +507,44 @@ validate_runner_git_destination() {
       "$(stat -c %a "$protected_path")" == "600" ]] || \
       fail "dedicated SSH material is missing, linked, or not mode 600: ${protected_path}"
   done
+  run_as_runner python3 - "$known_hosts" "$ssh_config" "$deploy_key" <<'PY'
+# WSL_SSH_MATERIAL_VALIDATOR
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+known_hosts, config, key = map(Path, sys.argv[1:])
+expected_known_hosts = (
+    "github.com ssh-ed25519 "
+    "AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl\n"
+).encode("ascii")
+expected_config = f"""Host github-degen-dogs
+    HostName github.com
+    User git
+    IdentityFile {key}
+    IdentitiesOnly yes
+    BatchMode yes
+    StrictHostKeyChecking yes
+    UserKnownHostsFile {known_hosts}
+    GlobalKnownHostsFile /dev/null
+    ProxyCommand none
+    ProxyJump none
+""".encode("ascii")
+
+for label, path, expected in (
+    ("known_hosts", known_hosts, expected_known_hosts),
+    ("SSH config", config, expected_config),
+):
+    try:
+        actual = path.read_bytes()
+    except OSError as exc:
+        raise SystemExit(f"could not read canonical {label}: {exc}") from exc
+    if actual != expected:
+        raise SystemExit(f"dedicated {label} does not match the canonical managed content")
+PY
+  run_as_runner ssh-keygen -y -f "$deploy_key" >/dev/null || \
+    fail "dedicated deploy private key is invalid"
   host_fingerprint="$(run_as_runner ssh-keygen -lf "$known_hosts" -E sha256 | awk '{print $2}')"
   [[ "$host_fingerprint" == "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU" ]] || \
     fail "pinned GitHub host key fingerprint validation failed"
