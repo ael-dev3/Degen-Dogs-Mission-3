@@ -163,7 +163,12 @@ def atomic_write_record(path: os.PathLike[str] | str, record: dict[str, Any]) ->
             os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
             0o600,
         )
-        os.write(descriptor, data)
+        offset = 0
+        while offset < len(data):
+            written = os.write(descriptor, data[offset:])
+            if written <= 0:
+                raise StateValidationError("atomic state record write made no progress")
+            offset += written
         os.fsync(descriptor)
         os.close(descriptor)
         descriptor = None
@@ -376,7 +381,7 @@ def enqueue_latest_observation(
             record = latest_record(_advance_generation(paths, 0), runner_id, run_scope, created_at_utc, observation)
             digest = _digest(record)
             atomic_write_record(paths.latest, record)
-            return EnqueueResult("enqueued", 1, digest, record)
+            return EnqueueResult("enqueued", record["generation"], digest, record)
         old, old_digest = current
         old_observation = old["observation"]
         if observation == old_observation:
@@ -450,11 +455,32 @@ def cas_clear_pending(
 
 
 def _validate_journal(value: Any) -> dict[str, Any]:
+    keys = {
+        "schema_version", "repo_realpath", "branch", "baseline_head", "run_id", "runner_id",
+        "run_scope", "created_at_utc", "publish_paths", "publication_generation", "queue_digest",
+        "terminal_outcome", "handoff_phase", "remote_commit",
+    }
     if not isinstance(value, dict) or value.get("schema_version") != SCHEMA_VERSION:
         raise StateValidationError("recovery journal schema is invalid")
-    required = {"publication_generation", "queue_digest", "terminal_outcome", "handoff_phase", "remote_commit"}
-    if not required <= set(value):
-        raise StateValidationError("recovery journal lacks deferred handoff identity")
+    _require_exact_keys(value, keys, "recovery journal")
+    if not isinstance(value["repo_realpath"], str) or not os.path.isabs(value["repo_realpath"]):
+        raise StateValidationError("journal repository path is invalid")
+    if not isinstance(value["branch"], str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}", value["branch"]):
+        raise StateValidationError("journal branch is invalid")
+    if not isinstance(value["baseline_head"], str) or not _SHA_40.fullmatch(value["baseline_head"]):
+        raise StateValidationError("journal baseline head is invalid")
+    if not isinstance(value["run_id"], str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", value["run_id"]):
+        raise StateValidationError("journal run ID is invalid")
+    if not isinstance(value["runner_id"], str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,63}", value["runner_id"]):
+        raise StateValidationError("journal runner ID is invalid")
+    if value["run_scope"] not in {"current", "full", "archive", "archive_full"}:
+        raise StateValidationError("journal run scope is invalid")
+    _utc(value["created_at_utc"], "journal creation time")
+    if not isinstance(value["publish_paths"], list) or not value["publish_paths"] or len(value["publish_paths"]) > 32:
+        raise StateValidationError("journal publish paths are invalid")
+    for path in value["publish_paths"]:
+        if not isinstance(path, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*", path):
+            raise StateValidationError("journal publish path is invalid")
     _integer(value["publication_generation"], "journal generation", minimum=1)
     if not isinstance(value["queue_digest"], str) or not re.fullmatch(r"[0-9a-f]{64}", value["queue_digest"]):
         raise StateValidationError("journal queue digest is invalid")
@@ -507,6 +533,12 @@ def _validate_checkpoint(value: Any) -> dict[str, Any]:
     if value["outcome"] == "pushed":
         if value["commit_sha"] is None or value["push_completed_at_utc"] is None:
             raise StateValidationError("pushed checkpoint lacks immutable push proof")
+    elif value["outcome"] == "no_diff":
+        if value["push_completed_at_utc"] is not None:
+            raise StateValidationError("no-diff checkpoint must not invent a push completion time")
+    else:
+        if value["commit_sha"] is None or value["push_completed_at_utc"] is not None:
+            raise StateValidationError("peer-superseded checkpoint requires peer commit and no local push time")
     if value["push_completed_at_utc"] is not None:
         _utc(value["push_completed_at_utc"], "checkpoint push completion")
     return value
@@ -558,6 +590,8 @@ def finalize_pushed_handoff(lock_dir: os.PathLike[str] | str, generation: int, d
         journal = _validate_journal(_read_json(paths.journal))
         checkpoint = _validate_checkpoint(_read_json(paths.checkpoint))
         _same_identity(journal, checkpoint, "checkpoint record")
+        if checkpoint["outcome"] != journal["terminal_outcome"]:
+            raise StateValidationError("checkpoint outcome differs from recovery journal")
         if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
             raise StateValidationError("finalization generation/digest differs from recovery journal")
         if journal["terminal_outcome"] == "pushed":
@@ -566,11 +600,20 @@ def finalize_pushed_handoff(lock_dir: os.PathLike[str] | str, generation: int, d
             if pending["commit_sha"] != checkpoint["commit_sha"]:
                 raise StateValidationError("pending commit differs from checkpoint")
         current = read_latest_with_digest(lock_dir)
-        cleared = False
-        if current is not None and current[0]["generation"] == generation and current[1] == digest:
-            cleared = _unlink_record(paths.latest)
-        _unlink_record(paths.journal)
-        return cleared or current is None or current[0]["generation"] != generation
+        if current is None:
+            _unlink_record(paths.journal)
+            return True
+        current_generation, current_digest = current[0]["generation"], current[1]
+        if current_generation == generation:
+            if current_digest != digest:
+                raise StateValidationError("same-generation latest record differs from finalization digest")
+            _unlink_record(paths.latest)
+            _unlink_record(paths.journal)
+            return True
+        if current_generation > generation:
+            _unlink_record(paths.journal)
+            return True
+        raise StateValidationError("latest generation predates the finalization generation")
 
 
 def recover_deferred_handoff(lock_dir: os.PathLike[str] | str, immutable_commit_confirmed: Callable[[str], bool], *, pending: dict[str, Any] | None = None, checkpoint: dict[str, Any] | None = None, lock_context: Any | None = None) -> bool:
@@ -590,13 +633,35 @@ def recover_deferred_handoff(lock_dir: os.PathLike[str] | str, immutable_commit_
             checkpoint = _validate_checkpoint(checkpoint)
             _same_identity(journal, pending, "pending record")
             _same_identity(journal, checkpoint, "checkpoint record")
-            if not paths.pending.exists():
+            if checkpoint["outcome"] != journal["terminal_outcome"]:
+                raise StateValidationError("checkpoint outcome differs from recovery journal")
+            try:
+                existing_pending = _validate_pending(_read_json(paths.pending))
+            except FileNotFoundError:
                 atomic_write_record(paths.pending, pending)
-            if not paths.checkpoint.exists():
+            else:
+                _same_identity(journal, existing_pending, "existing pending record")
+            try:
+                existing_checkpoint = _validate_checkpoint(_read_json(paths.checkpoint))
+            except FileNotFoundError:
                 atomic_write_record(paths.checkpoint, checkpoint)
-        elif checkpoint is not None:
+            else:
+                _same_identity(journal, existing_checkpoint, "existing checkpoint record")
+                if existing_checkpoint["outcome"] != journal["terminal_outcome"]:
+                    raise StateValidationError("existing checkpoint outcome differs from recovery journal")
+        else:
+            if checkpoint is None:
+                raise StateValidationError("terminal recovery needs an independently retained checkpoint")
             checkpoint = _validate_checkpoint(checkpoint)
             _same_identity(journal, checkpoint, "checkpoint record")
-            if not paths.checkpoint.exists():
+            if checkpoint["outcome"] != journal["terminal_outcome"]:
+                raise StateValidationError("checkpoint outcome differs from recovery journal")
+            try:
+                existing_checkpoint = _validate_checkpoint(_read_json(paths.checkpoint))
+            except FileNotFoundError:
                 atomic_write_record(paths.checkpoint, checkpoint)
+            else:
+                _same_identity(journal, existing_checkpoint, "existing checkpoint record")
+                if existing_checkpoint["outcome"] != journal["terminal_outcome"]:
+                    raise StateValidationError("existing checkpoint outcome differs from recovery journal")
         return True
