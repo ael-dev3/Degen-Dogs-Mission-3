@@ -20,7 +20,8 @@ parse `${DEGEN_DOGS_ENV_FILE:-.env.local}` as data-only `KEY=value` records, rej
 unsupported or duplicate keys and files not owned by the current user or readable by
 group/others, and carry the least-privilege RPC settings into worker repairs. The file
 is deliberately never sourced as shell code. For direct commands, load it through
-`scripts/load_runner_env.sh` and `degen_dogs_load_runner_env`.
+`scripts/load_runner_env.sh` and `degen_dogs_load_runner_env`. The WSL launcher uses
+the same protected data-only loader.
 
 The runner health job continuously validates this file without reading or logging its
 contents. It repairs mode drift to `0600` only for an otherwise safe, current-user-owned
@@ -76,6 +77,7 @@ configured `DEGEN_DOGS_ENV_FILE` is reported as configuration drift.
 | `MISSION3_ARCHIVE_OVERLAP_BLOCKS` | Canonical overlap replaced on every incremental run; default 100 blocks. | no |
 | `MISSION3_ARCHIVE_MAX_AGE_SECONDS` | Maximum age of archive state/manifests accepted by health checks; default three hours. | no |
 | `MISSION3_ARCHIVE_MAX_HEAD_LAG_BLOCKS` | Maximum lag from the live safe head when archive health runs with `--rpc`; default 6,000 blocks. | no |
+| `DEGEN_DOGS_RUN_MISSION3_ARCHIVE` | Hourly Mission 3 archive policy, accepting only `0` or `1`. The absent-key fallback is `1` for backward compatibility, while the fresh WSL template sets `0` because a new clone has no ignored SQLite/raw seed. Keep `0` for a latency-only peer; set `1` after seeding an archive-capable runner. Event watchers always force `0`. | no |
 | `COINGECKO_API_KEY` | Optional historical price fetching. | yes |
 | `HISTORICAL_PRICES_PREFER_COINGECKO` | Optional override to try CoinGecko before DefiLlama for historical price refreshes; default off to avoid public API 429s. | no |
 | `DUNE_API_KEY` | Optional Dune discovery/recovery work where query IDs are available. | yes |

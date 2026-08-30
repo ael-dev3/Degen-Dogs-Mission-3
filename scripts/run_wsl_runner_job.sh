@@ -125,8 +125,16 @@ case "$job" in
     ;;
   hourly)
     require_production_rpc_quorum
+    hourly_run_mission3_archive="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE-1}"
+    case "$hourly_run_mission3_archive" in
+      0|1) ;;
+      *)
+        printf '%s\n' 'error: DEGEN_DOGS_RUN_MISSION3_ARCHIVE must be 0 or 1' >&2
+        exit 78
+        ;;
+    esac
     export DEGEN_DOGS_FULL_REFRESH=0
-    export DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1
+    export DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$hourly_run_mission3_archive"
     export DEGEN_DOGS_REFRESH_TRIGGER=hourly_refresh
     exec /bin/bash -p "${repo_dir}/scripts/refresh_and_publish.sh"
     ;;
