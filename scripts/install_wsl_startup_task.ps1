@@ -951,6 +951,84 @@ function Assert-WslRunnerManagedTaskXml {
     throw "The scheduled task does not match any exact managed predecessor schema: $($failures -join ' | ')"
 }
 
+function Get-WslRunnerTaskRunningInstanceCount {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [scriptblock]$QueryAction
+    )
+
+    if ([String]::IsNullOrWhiteSpace($Name) -or $Name -match '[\\/]') {
+        throw 'The running-instance query requires one exact root task name.'
+    }
+    if ($QueryAction) {
+        $rawCount = & $QueryAction $Name
+    }
+    else {
+        $scheduler = New-Object -ComObject 'Schedule.Service'
+        $scheduler.Connect()
+        $rootFolder = $scheduler.GetFolder('\')
+        $registeredTask = $rootFolder.GetTask($Name)
+        if ($null -eq $registeredTask -or
+            -not [String]::Equals($registeredTask.Name, $Name, [StringComparison]::Ordinal) -or
+            -not [String]::Equals($registeredTask.Path, "\$Name", [StringComparison]::Ordinal)) {
+            throw "Task Scheduler returned a non-exact running-instance target for '$Name'."
+        }
+        $instances = $registeredTask.GetInstances(0)
+        if ($null -eq $instances) {
+            throw "Task Scheduler returned no running-instance collection for '$Name'."
+        }
+        $rawCount = $instances.Count
+    }
+
+    $instanceCount = 0
+    if ($null -eq $rawCount -or
+        -not [int]::TryParse([string]$rawCount, [ref]$instanceCount) -or
+        $instanceCount -lt 0) {
+        throw "Task Scheduler returned an invalid running-instance count for '$Name'."
+    }
+    return $instanceCount
+}
+
+function Get-WslRunnerTaskResultReport {
+    param(
+        [Parameter(Mandatory)][long]$LastTaskResult,
+        [Parameter(Mandatory)][bool]$TaskEnabled,
+        [Parameter(Mandatory)][string]$TaskState,
+        [Parameter(Mandatory)][bool]$MultipleInstancesIgnoreNewAttested,
+        [Parameter(Mandatory)][ValidateRange(0, 2147483647)][int]$RunningInstanceCount,
+        [Parameter(Mandatory)][bool]$LinuxLivenessPassed
+    )
+
+    if ($LastTaskResult -lt [int32]::MinValue -or $LastTaskResult -gt [uint32]::MaxValue) {
+        throw 'Task Scheduler returned a result outside the 32-bit result-code range.'
+    }
+    $resultCode = if ($LastTaskResult -lt 0) {
+        [uint32]($LastTaskResult + 4294967296L)
+    }
+    else {
+        [uint32]$LastTaskResult
+    }
+    $healthySuppression = (
+        $resultCode -eq [uint32]2147946720 -and
+        $TaskEnabled -and
+        [String]::Equals($TaskState, 'Running', [StringComparison]::Ordinal) -and
+        $MultipleInstancesIgnoreNewAttested -and
+        $RunningInstanceCount -eq 1 -and
+        $LinuxLivenessPassed
+    )
+    $display = if ($healthySuppression) {
+        'watchdog launch suppressed (healthy)'
+    }
+    else {
+        '0x{0:X8}' -f $resultCode
+    }
+    return [PSCustomObject]@{
+        ResultCode = $resultCode
+        Display = $display
+        HealthySuppression = $healthySuppression
+    }
+}
+
 $isAdministrator = Test-CurrentProcessIsAdministrator
 Assert-WslRunnerInvocationPolicy `
     -IsAdministrator $isAdministrator `
@@ -2254,8 +2332,14 @@ active_tmp=$(mktemp /run/degen-dogs/.activation-enabled.XXXXXX)
 printf 'active=1\n' >"$active_tmp"
 install -o root -g root -m 0644 "$active_tmp" /run/degen-dogs/activation-enabled
 rm -f -- "$active_tmp"
-systemctl start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
+systemctl start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer
+systemctl restart degen-dogs-health.timer
 systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
+health_next=$(systemctl show --property=NextElapseUSecMonotonic --value degen-dogs-health.timer)
+if [[ ! "$health_next" =~ [1-9] ]]; then
+  printf 'error: health timer has no scheduled monotonic elapse after activation\n' >&2
+  exit 1
+fi
 '@
         Invoke-WslRoot -Script $commitActivation
         $publisherReady = $false
@@ -2290,7 +2374,32 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         if ($LASTEXITCODE -ne 0) {
             throw 'The final activation liveness proof failed: the anchor, activation gate, or publisher units are no longer healthy.'
         }
-        $currentTask | Get-ScheduledTaskInfo | Format-List LastRunTime,LastTaskResult,NextRunTime
+        $taskInfo = $currentTask | Get-ScheduledTaskInfo
+        $taskResultReport = Get-WslRunnerTaskResultReport `
+            -LastTaskResult ([long]$taskInfo.LastTaskResult) `
+            -TaskEnabled ([bool]$currentTask.Settings.Enabled) `
+            -TaskState ([string]$currentTask.State) `
+            -MultipleInstancesIgnoreNewAttested $true `
+            -RunningInstanceCount 0 `
+            -LinuxLivenessPassed $true
+        if ($taskResultReport.ResultCode -eq [uint32]2147946720) {
+            $runningInstanceCount = 0
+            try {
+                $runningInstanceCount = Get-WslRunnerTaskRunningInstanceCount -Name $TaskName
+            }
+            catch {
+                Write-Warning "Could not prove the exact running task-instance count; preserving raw Task Scheduler result: $($_.Exception.Message)"
+            }
+            $taskResultReport = Get-WslRunnerTaskResultReport `
+                -LastTaskResult ([long]$taskInfo.LastTaskResult) `
+                -TaskEnabled ([bool]$currentTask.Settings.Enabled) `
+                -TaskState ([string]$currentTask.State) `
+                -MultipleInstancesIgnoreNewAttested $true `
+                -RunningInstanceCount $runningInstanceCount `
+                -LinuxLivenessPassed $true
+        }
+        Write-Host "Task Scheduler result: $($taskResultReport.Display)"
+        $taskInfo | Format-List LastRunTime,LastTaskResult,NextRunTime
     }
     catch {
         $activationError = $_

@@ -4,10 +4,13 @@
 from __future__ import annotations
 
 import ast
+import io
 import json
+import os
 import re
 import subprocess
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
 
@@ -23,7 +26,7 @@ def text(relative: str) -> str:
 
 def powershell_literal_payload(source: str, variable: str) -> str:
     match = re.search(
-        rf"(?ms)^\${re.escape(variable)}\s*=\s+@'\r?\n(?P<body>.*?)\r?\n'@\s*$",
+        rf"(?ms)^[ \t]*\${re.escape(variable)}\s*=\s+@'\r?\n(?P<body>.*?)\r?\n[ \t]*'@\s*$",
         source,
     )
     assert match, f"missing literal PowerShell payload ${variable}"
@@ -45,6 +48,257 @@ def run_bash(source: str, *, expected_returncode: int = 0) -> subprocess.Complet
         f"stderr={result.stderr.decode('utf-8', errors='replace')}"
     )
     return result
+
+
+def run_checkout_attestation(
+    attestation: str,
+    trusted: Path,
+    checkout: Path,
+    *,
+    mode_overrides: dict[Path, int] | None = None,
+) -> subprocess.CompletedProcess[bytes]:
+    with tempfile.TemporaryDirectory() as harness_directory:
+        harness = Path(harness_directory)
+        script = harness / "attest.py"
+        script.write_text(attestation, encoding="utf-8", newline="\n")
+        environment = os.environ.copy()
+        if mode_overrides:
+            serialized_modes = {
+                str(path.resolve()).casefold(): mode
+                for path, mode in mode_overrides.items()
+            }
+            (harness / "sitecustomize.py").write_text(
+                """import json
+import os
+import pathlib
+
+_real_lstat = pathlib.Path.lstat
+_mode_overrides = json.loads(os.environ["DEGEN_DOGS_TEST_MODE_OVERRIDES"])
+
+
+def _lstat_with_test_mode(path):
+    details = _real_lstat(path)
+    mode = _mode_overrides.get(str(path.resolve()).casefold())
+    if mode is None:
+        return details
+    values = list(details)
+    values[0] = (details.st_mode & ~0o777) | int(mode)
+    return os.stat_result(values)
+
+
+pathlib.Path.lstat = _lstat_with_test_mode
+""",
+                encoding="utf-8",
+                newline="\n",
+            )
+            environment["DEGEN_DOGS_TEST_MODE_OVERRIDES"] = json.dumps(serialized_modes)
+            environment["PYTHONPATH"] = str(harness)
+        return subprocess.run(
+            [sys.executable, str(script), str(trusted), str(checkout)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            env=environment,
+        )
+
+
+def checkout_attestation_result_for_modes(
+    attestation: str,
+    trusted_mode: int,
+    checkout_mode: int,
+) -> subprocess.CompletedProcess[bytes]:
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        root = Path(temporary_directory)
+        trusted = root / "trusted"
+        checkout = root / "checkout"
+        trusted.mkdir()
+        checkout.mkdir()
+        trusted_asset = trusted / "asset.sh"
+        checkout_asset = checkout / "asset.sh"
+        trusted_asset.write_bytes(b"#!/bin/sh\nexit 0\n")
+        checkout_asset.write_bytes(trusted_asset.read_bytes())
+        trusted_asset.chmod(trusted_mode)
+        checkout_asset.chmod(checkout_mode)
+        overrides = None
+        if os.name == "nt":
+            overrides = {
+                trusted_asset: trusted_mode,
+                checkout_asset: checkout_mode,
+            }
+        return run_checkout_attestation(
+            attestation,
+            trusted,
+            checkout,
+            mode_overrides=overrides,
+        )
+
+
+def assert_posix_umask_fast_forward_attests(attestation: str) -> None:
+    if os.name == "nt":
+        return
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        root = Path(temporary_directory)
+        source = root / "source"
+        checkout = root / "checkout"
+        trusted = root / "trusted"
+        source.mkdir()
+        git_environment = os.environ.copy()
+        git_environment.update(
+            {
+                "GIT_AUTHOR_EMAIL": "runner-test@example.invalid",
+                "GIT_AUTHOR_NAME": "Runner Test",
+                "GIT_COMMITTER_EMAIL": "runner-test@example.invalid",
+                "GIT_COMMITTER_NAME": "Runner Test",
+            }
+        )
+        subprocess.run(
+            ["git", "init", "--initial-branch=main", str(source)],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=git_environment,
+        )
+        (source / "README").write_text("initial\n", encoding="utf-8", newline="\n")
+        subprocess.run(["git", "-C", str(source), "add", "README"], check=True)
+        subprocess.run(
+            ["git", "-C", str(source), "commit", "-m", "initial"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=git_environment,
+        )
+        subprocess.run(
+            ["git", "clone", "--quiet", str(source), str(checkout)],
+            check=True,
+            env=git_environment,
+        )
+        executable = source / "runner.sh"
+        executable.write_bytes(b"#!/bin/sh\nexit 0\n")
+        executable.chmod(0o755)
+        subprocess.run(["git", "-C", str(source), "add", "runner.sh"], check=True)
+        subprocess.run(
+            ["git", "-C", str(source), "commit", "-m", "add executable"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=git_environment,
+        )
+        subprocess.run(
+            [
+                "bash",
+                "-c",
+                'umask 077; git -C "$1" pull --ff-only --quiet',
+                "--",
+                str(checkout),
+            ],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=git_environment,
+        )
+        checkout_executable = checkout / "runner.sh"
+        assert checkout_executable.stat().st_mode & 0o777 == 0o700
+        archive = subprocess.run(
+            ["git", "-C", str(source), "archive", "HEAD"],
+            check=True,
+            stdout=subprocess.PIPE,
+        ).stdout
+        trusted.mkdir()
+        with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as archive_file:
+            archive_file.extractall(trusted)
+        assert (trusted / "runner.sh").stat().st_mode & 0o777 == 0o755
+        accepted = run_checkout_attestation(attestation, trusted, checkout)
+        assert accepted.returncode == 0, accepted.stderr.decode("utf-8", errors="replace")
+
+
+def test_checkout_attestation_modes(installer: str) -> None:
+    attestation_marker = '/usr/bin/python3 - "$runtime_tree" "$repo_dir" <<\'PY\'\n'
+    attestation_start = installer.index(attestation_marker) + len(attestation_marker)
+    attestation_end = installer.index("\nPY\n", attestation_start)
+    checkout_attestation = installer[attestation_start:attestation_end]
+
+    owner_execute_preserved = checkout_attestation_result_for_modes(
+        checkout_attestation,
+        trusted_mode=0o755,
+        checkout_mode=0o700,
+    )
+    assert owner_execute_preserved.returncode == 0, owner_execute_preserved.stderr.decode(
+        "utf-8", errors="replace"
+    )
+
+    rejected_mode_cases = (
+        (0o755, 0o600, "trusted executable without checkout owner execute"),
+        (0o755, 0o611, "checkout group/other execute without owner execute"),
+        (0o644, 0o744, "checkout owner execute for trusted non-executable"),
+    )
+    for trusted_mode, checkout_mode, label in rejected_mode_cases:
+        rejected = checkout_attestation_result_for_modes(
+            checkout_attestation,
+            trusted_mode=trusted_mode,
+            checkout_mode=checkout_mode,
+        )
+        assert rejected.returncode != 0, f"attestation accepted {label}"
+        assert b"runner executable mode differs from trusted commit" in rejected.stderr
+    assert_posix_umask_fast_forward_attests(checkout_attestation)
+
+
+def test_health_timer_activation(powershell: str) -> None:
+    commit_activation = powershell_literal_payload(powershell, "commitActivation")
+    expected_activation_calls = """is-enabled --quiet degen-dogs-runner.target
+is-enabled --quiet degen-dogs-watcher.timer
+is-enabled --quiet degen-dogs-hourly.timer
+is-enabled --quiet degen-dogs-health.timer
+start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer
+restart degen-dogs-health.timer
+is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
+show --property=NextElapseUSecMonotonic --value degen-dogs-health.timer
+"""
+
+    def health_timer_activation_regression(next_elapse: str, expected_returncode: int) -> None:
+        harness = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+calls="$test_root/calls"
+cat >"$test_root/expected" <<'EXPECTED_CALLS'
+''' + expected_activation_calls + r'''EXPECTED_CALLS
+next_elapse=''' + next_elapse + r'''
+systemctl() {
+  printf '%s\n' "$*" >>"$calls"
+  case "${1:-}" in
+    is-enabled|is-active|start|restart) return 0 ;;
+    show) printf '%s\n' "$next_elapse" ;;
+    *) return 97 ;;
+  esac
+}
+install() { return 0; }
+mktemp() {
+  case "${1:-}" in
+    /var/lib/degen-dogs/*) printf '%s\n' "$test_root/armed.tmp" ;;
+    /run/degen-dogs/*) printf '%s\n' "$test_root/active.tmp" ;;
+    *) return 98 ;;
+  esac
+}
+commit_activation() (
+''' + commit_activation + r'''
+)
+set +e
+commit_activation
+status=$?
+set -e
+if ! cmp -s "$test_root/expected" "$calls"; then
+  diff -u "$test_root/expected" "$calls" >&2 || true
+  command rm -rf -- "$test_root"
+  exit 99
+fi
+test "$status" = "''' + str(expected_returncode) + r'''"
+printf 'health-timer-activation-checked status=%s\n' "$status"
+command rm -rf -- "$test_root"
+'''
+        result = run_bash(harness)
+        assert b"health-timer-activation-checked" in result.stdout
+
+    health_timer_activation_regression("5min", 0)
+    health_timer_activation_regression("0", 1)
 
 
 def test() -> None:
@@ -140,6 +394,8 @@ def test() -> None:
     assert '"%" in value' in installer
     assert "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU" in installer
     assert "validate_runner_git_destination" in installer
+    test_checkout_attestation_modes(installer)
+
     publisher = text("scripts/refresh_and_publish.sh")
     assert 'QUARANTINE_STATE_DIR="${REPO_DIR}/.local"' in publisher
     assert 'degen_dogs_private_dir "$QUARANTINE_STATE_DIR"' in publisher
@@ -347,6 +603,8 @@ def test() -> None:
     assert activation_success.count("/run/degen-dogs/anchor-ready") >= 2
     assert "if ($currentTask.State -ne 'Running')" in activation_success
     assert "The final activation liveness proof failed" in activation_success
+    test_health_timer_activation(powershell)
+
     assert "6F71F525282841EEDAF851B42F59B5F99B1BE0B4" in powershell
     key_download = powershell.index("nodesource-repo.gpg.key")
     key_verify = powershell.index("--with-colons", key_download)

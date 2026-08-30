@@ -56,6 +56,8 @@ $requiredFunctions = @(
     'Get-WslRunnerImageSpec',
     'Get-WslRunnerKnownLocalAppData',
     'Get-WslRunnerOwnershipMarkerValue',
+    'Get-WslRunnerTaskResultReport',
+    'Get-WslRunnerTaskRunningInstanceCount',
     'Get-WslRunnerTriggerKinds',
     'Get-WslDistros',
     'Get-ExactScheduledTask',
@@ -285,6 +287,83 @@ if ($importArguments -contains '--install') { throw 'per-user import planned wsl
 Write-Output 'task-plan-import-command-checked'
 """,
         "task-plan-import-command-checked",
+    )
+
+
+def test_task_result_reporting_requires_complete_healthy_suppression_state() -> None:
+    assert_harness(
+        r"""
+$suppressedResult = [long]2147946720
+$healthy = Get-WslRunnerTaskResultReport `
+    -LastTaskResult $suppressedResult `
+    -TaskEnabled $true `
+    -TaskState 'Running' `
+    -MultipleInstancesIgnoreNewAttested $true `
+    -RunningInstanceCount 1 `
+    -LinuxLivenessPassed $true
+if (-not $healthy.HealthySuppression -or
+    $healthy.Display -ne 'watchdog launch suppressed (healthy)') {
+    throw 'complete healthy IgnoreNew state was not classified as a healthy suppression'
+}
+$signedHealthy = Get-WslRunnerTaskResultReport `
+    -LastTaskResult ([long]-2147020576) `
+    -TaskEnabled $true `
+    -TaskState 'Running' `
+    -MultipleInstancesIgnoreNewAttested $true `
+    -RunningInstanceCount 1 `
+    -LinuxLivenessPassed $true
+if (-not $signedHealthy.HealthySuppression -or
+    $signedHealthy.ResultCode -ne [uint32]2147946720) {
+    throw 'signed Task Scheduler result did not normalize to 0x800710E0'
+}
+
+$unsafeStates = @(
+    [PSCustomObject]@{ Name = 'different result'; Result = 1; Enabled = $true; State = 'Running'; IgnoreNew = $true; Instances = 1; Linux = $true },
+    [PSCustomObject]@{ Name = 'disabled task'; Result = $suppressedResult; Enabled = $false; State = 'Running'; IgnoreNew = $true; Instances = 1; Linux = $true },
+    [PSCustomObject]@{ Name = 'non-running task'; Result = $suppressedResult; Enabled = $true; State = 'Ready'; IgnoreNew = $true; Instances = 1; Linux = $true },
+    [PSCustomObject]@{ Name = 'unattested policy'; Result = $suppressedResult; Enabled = $true; State = 'Running'; IgnoreNew = $false; Instances = 1; Linux = $true },
+    [PSCustomObject]@{ Name = 'zero instances'; Result = $suppressedResult; Enabled = $true; State = 'Running'; IgnoreNew = $true; Instances = 0; Linux = $true },
+    [PSCustomObject]@{ Name = 'multiple instances'; Result = $suppressedResult; Enabled = $true; State = 'Running'; IgnoreNew = $true; Instances = 2; Linux = $true },
+    [PSCustomObject]@{ Name = 'failed Linux liveness'; Result = $suppressedResult; Enabled = $true; State = 'Running'; IgnoreNew = $true; Instances = 1; Linux = $false }
+)
+foreach ($state in $unsafeStates) {
+    $report = Get-WslRunnerTaskResultReport `
+        -LastTaskResult ([long]$state.Result) `
+        -TaskEnabled ([bool]$state.Enabled) `
+        -TaskState ([string]$state.State) `
+        -MultipleInstancesIgnoreNewAttested ([bool]$state.IgnoreNew) `
+        -RunningInstanceCount ([int]$state.Instances) `
+        -LinuxLivenessPassed ([bool]$state.Linux)
+    if ($report.HealthySuppression -or
+        $report.Display -eq 'watchdog launch suppressed (healthy)') {
+        throw "unsafe state suppressed the raw task result: $($state.Name)"
+    }
+    $expectedRaw = '0x{0:X8}' -f ([uint32]$state.Result)
+    if ($report.Display -ne $expectedRaw) {
+        throw "unsafe state did not preserve raw result $expectedRaw`: $($state.Name)"
+    }
+}
+
+$instanceCount = Get-WslRunnerTaskRunningInstanceCount `
+    -Name 'Degen Dogs WSL Runner' `
+    -QueryAction { param($name) if ($name -ne 'Degen Dogs WSL Runner') { throw 'wrong task' }; 1 }
+if ($instanceCount -ne 1) { throw 'validated instance query did not return one' }
+foreach ($invalidCount in @(-1, 'unknown')) {
+    $rejected = $false
+    try {
+        Get-WslRunnerTaskRunningInstanceCount `
+            -Name 'Degen Dogs WSL Runner' `
+            -QueryAction { param($name) $invalidCount } |
+            Out-Null
+    }
+    catch {
+        $rejected = $true
+    }
+    if (-not $rejected) { throw "invalid running-instance count was accepted: $invalidCount" }
+}
+Write-Output 'task-result-reporting-checked'
+""",
+        "task-result-reporting-checked",
     )
 
 
@@ -1235,6 +1314,7 @@ def main() -> None:
     test_git_command_resolution_is_deterministic()
     test_temporary_git_cleanup_is_bounded_and_handles_read_only_pack_files()
     test_task_plan_and_import_command_are_mode_complete()
+    test_task_result_reporting_requires_complete_healthy_suppression_state()
     test_verified_import_orders_hash_before_import_and_cleans_up()
     test_wsl_inventory_fails_closed()
     test_import_claim_is_physical_unique_and_exclusive()
@@ -1245,7 +1325,7 @@ def main() -> None:
     test_task_isolation_does_not_short_circuit_or_touch_foreign_tasks()
     test_task_xml_attestation_rejects_privilege_and_trigger_mutations()
     test_real_windows_task_scheduler_round_trip()
-    print("wsl_runner_windows_policy_tests=pass count=14")
+    print("wsl_runner_windows_policy_tests=pass count=15")
 
 
 if __name__ == "__main__":

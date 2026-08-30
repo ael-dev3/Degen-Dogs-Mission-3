@@ -306,7 +306,8 @@ index_tree="$(runner_git -C "$repo_dir" write-tree)"
 
 # Git index flags can hide worktree edits from status/diff. Compare every file
 # exported from the independently fetched root-owned commit byte-for-byte and
-# compare symlink targets/executable bits without trusting the runner's index.
+# compare symlink targets/Git's owner-executable classification without trusting
+# the runner's index.
 /usr/bin/python3 - "$runtime_tree" "$repo_dir" <<'PY'
 from __future__ import annotations
 
@@ -347,7 +348,7 @@ for source in trusted.rglob("*"):
             raise SystemExit(f"runner path has wrong file type: {relative}")
         if digest(source) != digest(target):
             raise SystemExit(f"runner file differs from trusted commit: {relative}")
-        if (source_details.st_mode & 0o111) != (target_details.st_mode & 0o111):
+        if (source_details.st_mode & stat.S_IXUSR) != (target_details.st_mode & stat.S_IXUSR):
             raise SystemExit(f"runner executable mode differs from trusted commit: {relative}")
     else:
         raise SystemExit(f"trusted commit contains unsupported file type: {relative}")
