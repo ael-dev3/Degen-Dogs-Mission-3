@@ -454,15 +454,25 @@ def cas_clear_pending(
         return _unlink_record(paths.pending)
 
 
+_JOURNAL_BASE_KEYS = {
+    "schema_version", "repo_realpath", "branch", "baseline_head", "run_id", "runner_id",
+    "run_scope", "created_at_utc", "publish_paths",
+}
+_JOURNAL_ALIGNMENT_KEYS = {"alignment_runner_commit", "alignment_remote_head", "alignment_result"}
+_JOURNAL_PROOF_KEYS = {
+    "raw_status_path", "raw_bundle_path", "expected_bundle_sha256", "expected_bundle_bytes",
+    "expected_block_number", "expected_block_hash", "push_completed_at_utc", "retry_deadline_utc",
+    "retry_count",
+}
+_JOURNAL_DEFERRED_KEYS = _JOURNAL_BASE_KEYS | _JOURNAL_ALIGNMENT_KEYS | _JOURNAL_PROOF_KEYS | {
+    "publication_generation", "queue_digest", "terminal_outcome", "handoff_phase", "remote_commit",
+}
+
+
 def _validate_journal(value: Any) -> dict[str, Any]:
-    keys = {
-        "schema_version", "repo_realpath", "branch", "baseline_head", "run_id", "runner_id",
-        "run_scope", "created_at_utc", "publish_paths", "publication_generation", "queue_digest",
-        "terminal_outcome", "handoff_phase", "remote_commit",
-    }
     if not isinstance(value, dict) or value.get("schema_version") != SCHEMA_VERSION:
         raise StateValidationError("recovery journal schema is invalid")
-    _require_exact_keys(value, keys, "recovery journal")
+    _require_exact_keys(value, _JOURNAL_DEFERRED_KEYS, "recovery journal")
     if not isinstance(value["repo_realpath"], str) or not os.path.isabs(value["repo_realpath"]):
         raise StateValidationError("journal repository path is invalid")
     if not isinstance(value["branch"], str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}", value["branch"]):
@@ -484,12 +494,57 @@ def _validate_journal(value: Any) -> dict[str, Any]:
     _integer(value["publication_generation"], "journal generation", minimum=1)
     if not isinstance(value["queue_digest"], str) or not re.fullmatch(r"[0-9a-f]{64}", value["queue_digest"]):
         raise StateValidationError("journal queue digest is invalid")
-    if value["terminal_outcome"] not in {"pushed", "no_diff", "peer_superseded"}:
+    alignment = (
+        value["alignment_runner_commit"],
+        value["alignment_remote_head"],
+        value["alignment_result"],
+    )
+    if alignment != (None, None, None):
+        if (
+            not isinstance(alignment[0], str)
+            or not _SHA_40.fullmatch(alignment[0])
+            or not isinstance(alignment[1], str)
+            or not _SHA_40.fullmatch(alignment[1])
+            or alignment[2] not in {"peer_supersedes", "regenerate"}
+        ):
+            raise StateValidationError("journal alignment state is invalid")
+    if value["terminal_outcome"] not in {None, "pushed", "no_diff", "peer_superseded"}:
         raise StateValidationError("journal terminal outcome is invalid")
-    if value["handoff_phase"] not in {"remote_proven", "prepared"}:
+    if value["handoff_phase"] not in {"generating", "push_ready", "raw_proven", "terminal"}:
         raise StateValidationError("journal handoff phase is invalid")
-    if not isinstance(value["remote_commit"], str) or not _SHA_40.fullmatch(value["remote_commit"]):
+    if value["remote_commit"] is not None and (
+        not isinstance(value["remote_commit"], str) or not _SHA_40.fullmatch(value["remote_commit"])
+    ):
         raise StateValidationError("journal remote commit is invalid")
+    proof_values = tuple(value[key] for key in _JOURNAL_PROOF_KEYS)
+    proof_is_empty = all(item is None for item in proof_values)
+    phase = value["handoff_phase"]
+    outcome = value["terminal_outcome"]
+    remote_commit = value["remote_commit"]
+    if phase == "generating":
+        if outcome is not None or remote_commit is not None or not proof_is_empty:
+            raise StateValidationError("generating journal contains terminal handoff evidence")
+    elif phase == "push_ready":
+        if outcome != "pushed" or remote_commit is None or not proof_is_empty:
+            raise StateValidationError("push-ready journal is incomplete or claims raw proof")
+    elif phase == "raw_proven":
+        if outcome != "pushed" or remote_commit is None or proof_is_empty:
+            raise StateValidationError("raw-proven journal lacks exact immutable proof")
+        pending = {
+            "schema_version": SCHEMA_VERSION,
+            "generation": value["publication_generation"],
+            "queue_digest": value["queue_digest"],
+            "commit_sha": remote_commit,
+            **{key: value[key] for key in _JOURNAL_PROOF_KEYS},
+        }
+        _validate_pending(pending)
+    else:
+        if outcome not in {"no_diff", "peer_superseded"} or not proof_is_empty:
+            raise StateValidationError("terminal journal outcome is incomplete or contains push proof")
+        if outcome == "no_diff" and remote_commit is not None:
+            raise StateValidationError("no-diff journal must not invent a remote commit")
+        if outcome == "peer_superseded" and remote_commit is None:
+            raise StateValidationError("peer-superseded journal lacks the peer commit")
     return value
 
 
@@ -551,8 +606,180 @@ def _same_identity(journal: dict[str, Any], record: dict[str, Any], label: str) 
         raise StateValidationError(f"{label} immutable commit differs from recovery journal")
 
 
+def _same_journal_identity(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    keys = _JOURNAL_BASE_KEYS | {"publication_generation", "queue_digest"}
+    return all(left[key] == right[key] for key in keys)
+
+
+def read_deferred_recovery_journal(lock_dir: os.PathLike[str] | str) -> dict[str, Any] | None:
+    """Read only the one fixed deferred journal below ``lock_dir``."""
+    path = state_paths(lock_dir).journal
+    try:
+        return _validate_journal(_read_json(path))
+    except FileNotFoundError:
+        return None
+
+
+def create_deferred_recovery_journal(
+    lock_dir: os.PathLike[str] | str,
+    journal: dict[str, Any],
+    *,
+    lock_context: Any | None = None,
+) -> None:
+    """Create the authenticated pre-generation journal at its fixed path."""
+    paths = state_paths(lock_dir)
+    journal = _validate_journal(journal)
+    if journal["handoff_phase"] != "generating":
+        raise StateValidationError("new deferred recovery journal must begin in generating phase")
+    with _lock(paths, lock_context):
+        try:
+            _read_json(paths.journal)
+        except FileNotFoundError:
+            atomic_write_record(paths.journal, journal)
+            return
+        raise StateValidationError("deferred recovery journal already exists")
+
+
+def arm_deferred_pushed_handoff(
+    lock_dir: os.PathLike[str] | str,
+    generation: int,
+    digest: str,
+    commit_sha: str,
+    *,
+    lock_context: Any | None = None,
+) -> dict[str, Any]:
+    """Bind the pre-push journal to the one local commit before the CAS push."""
+    _integer(generation, "publication generation", minimum=1)
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise StateValidationError("publication digest is invalid")
+    if not isinstance(commit_sha, str) or not _SHA_40.fullmatch(commit_sha):
+        raise StateValidationError("publisher commit is invalid")
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        journal = _validate_journal(_read_json(paths.journal))
+        if (
+            journal["handoff_phase"] != "generating"
+            or journal["publication_generation"] != generation
+            or journal["queue_digest"] != digest
+            or journal["alignment_remote_head"] is not None
+        ):
+            raise StateValidationError("recovery journal cannot be armed for this pushed handoff")
+        armed = dict(journal)
+        armed["terminal_outcome"] = "pushed"
+        armed["handoff_phase"] = "push_ready"
+        armed["remote_commit"] = commit_sha
+        _validate_journal(armed)
+        atomic_write_record(paths.journal, armed)
+        return armed
+
+
+def update_deferred_alignment(
+    lock_dir: os.PathLike[str] | str,
+    generation: int,
+    digest: str,
+    runner_commit: str,
+    remote_head: str,
+    alignment_result: str,
+    *,
+    lock_context: Any | None = None,
+) -> dict[str, Any]:
+    """Persist one crash-safe remote-alignment target without changing paths."""
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        journal = _validate_journal(_read_json(paths.journal))
+        if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
+            raise StateValidationError("alignment identity differs from queued publication")
+        if not _SHA_40.fullmatch(runner_commit) or not _SHA_40.fullmatch(remote_head):
+            raise StateValidationError("alignment commits are invalid")
+        if alignment_result not in {"peer_supersedes", "regenerate"}:
+            raise StateValidationError("alignment result is invalid")
+        updated = dict(journal)
+        updated["alignment_runner_commit"] = runner_commit
+        updated["alignment_remote_head"] = remote_head
+        updated["alignment_result"] = alignment_result
+        for key in _JOURNAL_PROOF_KEYS:
+            updated[key] = None
+        if alignment_result == "peer_supersedes":
+            updated["terminal_outcome"] = "peer_superseded"
+            updated["handoff_phase"] = "terminal"
+            updated["remote_commit"] = remote_head
+        else:
+            updated["terminal_outcome"] = None
+            updated["handoff_phase"] = "generating"
+            updated["remote_commit"] = None
+        _validate_journal(updated)
+        atomic_write_record(paths.journal, updated)
+        return updated
+
+
+def _raw_proven_journal(journal: dict[str, Any], pending: dict[str, Any]) -> dict[str, Any]:
+    proven = dict(journal)
+    proven["handoff_phase"] = "raw_proven"
+    for key in _JOURNAL_PROOF_KEYS:
+        proven[key] = pending[key]
+    return _validate_journal(proven)
+
+
+def _pending_from_journal(journal: dict[str, Any]) -> dict[str, Any]:
+    if journal["handoff_phase"] != "raw_proven" or journal["terminal_outcome"] != "pushed":
+        raise StateValidationError("journal does not contain durable raw proof")
+    return _validate_pending({
+        "schema_version": SCHEMA_VERSION,
+        "generation": journal["publication_generation"],
+        "queue_digest": journal["queue_digest"],
+        "commit_sha": journal["remote_commit"],
+        **{key: journal[key] for key in _JOURNAL_PROOF_KEYS},
+    })
+
+
+def _checkpoint_from_journal(journal: dict[str, Any]) -> dict[str, Any]:
+    outcome = journal["terminal_outcome"]
+    if outcome not in {"pushed", "no_diff", "peer_superseded"}:
+        raise StateValidationError("journal does not identify a terminal checkpoint")
+    return _validate_checkpoint({
+        "schema_version": SCHEMA_VERSION,
+        "outcome": outcome,
+        "generation": journal["publication_generation"],
+        "queue_digest": journal["queue_digest"],
+        "commit_sha": journal["remote_commit"],
+        "push_completed_at_utc": journal["push_completed_at_utc"] if outcome == "pushed" else None,
+    })
+
+
+def _install_exact_if_missing(path: Path, record: dict[str, Any], validator: Callable[[Any], dict[str, Any]], label: str) -> None:
+    try:
+        existing = validator(_read_json(path))
+    except FileNotFoundError:
+        atomic_write_record(path, record)
+        return
+    if _canonical_bytes(existing) != _canonical_bytes(record):
+        raise StateValidationError(f"existing {label} conflicts with authenticated handoff")
+
+
+def _prepare_pushed_handoff_locked(
+    paths: StatePaths,
+    journal: dict[str, Any],
+    pending: dict[str, Any],
+    checkpoint: dict[str, Any],
+) -> None:
+    persisted = _validate_journal(_read_json(paths.journal))
+    if journal["handoff_phase"] == "push_ready":
+        if _canonical_bytes(persisted) != _canonical_bytes(journal):
+            raise StateValidationError("recovery journal changed before pushed handoff preparation")
+        proven = _raw_proven_journal(journal, pending)
+        atomic_write_record(paths.journal, proven)
+    elif journal["handoff_phase"] == "raw_proven":
+        proven = _raw_proven_journal(journal, pending)
+        if _canonical_bytes(persisted) != _canonical_bytes(proven):
+            raise StateValidationError("durable raw proof differs from reconstructed handoff")
+    else:
+        raise StateValidationError("pushed handoff journal is not push-ready or raw-proven")
+    _install_exact_if_missing(paths.pending, pending, _validate_pending, "pending record")
+    _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
+
+
 def prepare_pushed_handoff(lock_dir: os.PathLike[str] | str, journal: dict[str, Any], pending: dict[str, Any], checkpoint: dict[str, Any], *, lock_context: Any | None = None) -> None:
-    """Persist immutable proof/pending/checkpoint; queue acknowledgement is separate."""
+    """Persist raw proof in journal, then pending, then checkpoint; never acknowledge latest."""
     paths = state_paths(lock_dir)
     journal = _validate_journal(journal)
     pending = _validate_pending(pending)
@@ -561,26 +788,34 @@ def prepare_pushed_handoff(lock_dir: os.PathLike[str] | str, journal: dict[str, 
         raise StateValidationError("prepare_pushed_handoff only accepts pushed outcomes")
     _same_identity(journal, pending, "pending record")
     _same_identity(journal, checkpoint, "checkpoint record")
+    if journal["handoff_phase"] not in {"push_ready", "raw_proven"}:
+        raise StateValidationError("pushed handoff journal is in the wrong phase")
     with _lock(paths, lock_context):
-        persisted_journal = _validate_journal(_read_json(paths.journal))
-        if _canonical_bytes(persisted_journal) != _canonical_bytes(journal):
-            raise StateValidationError("recovery journal changed before pushed handoff preparation")
-        atomic_write_record(paths.pending, pending)
-        atomic_write_record(paths.checkpoint, checkpoint)
+        _prepare_pushed_handoff_locked(paths, journal, pending, checkpoint)
 
 
 def record_terminal_outcome(lock_dir: os.PathLike[str] | str, journal: dict[str, Any], checkpoint: dict[str, Any], *, lock_context: Any | None = None) -> None:
     paths = state_paths(lock_dir)
     journal = _validate_journal(journal)
     checkpoint = _validate_checkpoint(checkpoint)
-    if journal["terminal_outcome"] == "pushed" or checkpoint["outcome"] != journal["terminal_outcome"]:
+    if (
+        journal["handoff_phase"] != "terminal"
+        or journal["terminal_outcome"] == "pushed"
+        or checkpoint["outcome"] != journal["terminal_outcome"]
+    ):
         raise StateValidationError("terminal outcome checkpoint disagrees with recovery journal")
     _same_identity(journal, checkpoint, "checkpoint record")
     with _lock(paths, lock_context):
         persisted_journal = _validate_journal(_read_json(paths.journal))
         if _canonical_bytes(persisted_journal) != _canonical_bytes(journal):
-            raise StateValidationError("recovery journal changed before terminal outcome recording")
-        atomic_write_record(paths.checkpoint, checkpoint)
+            if (
+                persisted_journal["handoff_phase"] != "generating"
+                or not _same_journal_identity(persisted_journal, journal)
+                or any(persisted_journal[key] != journal[key] for key in _JOURNAL_ALIGNMENT_KEYS)
+            ):
+                raise StateValidationError("recovery journal changed before terminal outcome recording")
+            atomic_write_record(paths.journal, journal)
+        _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
 
 
 def finalize_pushed_handoff(lock_dir: os.PathLike[str] | str, generation: int, digest: str, *, lock_context: Any | None = None) -> bool:
@@ -624,44 +859,36 @@ def recover_deferred_handoff(lock_dir: os.PathLike[str] | str, immutable_commit_
             journal = _validate_journal(_read_json(paths.journal))
         except FileNotFoundError:
             return False
-        if not immutable_commit_confirmed(journal["remote_commit"]):
-            return False
         if journal["terminal_outcome"] == "pushed":
-            if pending is None or checkpoint is None:
-                raise StateValidationError("pushed recovery needs independently retained pending/checkpoint evidence")
-            pending = _validate_pending(pending)
-            checkpoint = _validate_checkpoint(checkpoint)
+            if not immutable_commit_confirmed(journal["remote_commit"]):
+                return False
+            if journal["handoff_phase"] == "raw_proven":
+                reconstructed_pending = _pending_from_journal(journal)
+                reconstructed_checkpoint = _checkpoint_from_journal(journal)
+                if pending is not None and _canonical_bytes(_validate_pending(pending)) != _canonical_bytes(reconstructed_pending):
+                    raise StateValidationError("supplied pending record differs from durable raw proof")
+                if checkpoint is not None and _canonical_bytes(_validate_checkpoint(checkpoint)) != _canonical_bytes(reconstructed_checkpoint):
+                    raise StateValidationError("supplied checkpoint differs from durable raw proof")
+                pending, checkpoint = reconstructed_pending, reconstructed_checkpoint
+            elif pending is None or checkpoint is None:
+                raise StateValidationError("push-ready recovery needs freshly re-proven pending/checkpoint evidence")
+            else:
+                pending = _validate_pending(pending)
+                checkpoint = _validate_checkpoint(checkpoint)
             _same_identity(journal, pending, "pending record")
             _same_identity(journal, checkpoint, "checkpoint record")
             if checkpoint["outcome"] != journal["terminal_outcome"]:
                 raise StateValidationError("checkpoint outcome differs from recovery journal")
-            try:
-                existing_pending = _validate_pending(_read_json(paths.pending))
-            except FileNotFoundError:
-                atomic_write_record(paths.pending, pending)
-            else:
-                _same_identity(journal, existing_pending, "existing pending record")
-            try:
-                existing_checkpoint = _validate_checkpoint(_read_json(paths.checkpoint))
-            except FileNotFoundError:
-                atomic_write_record(paths.checkpoint, checkpoint)
-            else:
-                _same_identity(journal, existing_checkpoint, "existing checkpoint record")
-                if existing_checkpoint["outcome"] != journal["terminal_outcome"]:
-                    raise StateValidationError("existing checkpoint outcome differs from recovery journal")
+            _prepare_pushed_handoff_locked(paths, journal, pending, checkpoint)
         else:
-            if checkpoint is None:
-                raise StateValidationError("terminal recovery needs an independently retained checkpoint")
-            checkpoint = _validate_checkpoint(checkpoint)
+            if journal["handoff_phase"] != "terminal":
+                return False
+            if journal["terminal_outcome"] == "peer_superseded" and not immutable_commit_confirmed(journal["remote_commit"]):
+                return False
+            reconstructed_checkpoint = _checkpoint_from_journal(journal)
+            if checkpoint is not None and _canonical_bytes(_validate_checkpoint(checkpoint)) != _canonical_bytes(reconstructed_checkpoint):
+                raise StateValidationError("supplied checkpoint differs from terminal journal")
+            checkpoint = reconstructed_checkpoint
             _same_identity(journal, checkpoint, "checkpoint record")
-            if checkpoint["outcome"] != journal["terminal_outcome"]:
-                raise StateValidationError("checkpoint outcome differs from recovery journal")
-            try:
-                existing_checkpoint = _validate_checkpoint(_read_json(paths.checkpoint))
-            except FileNotFoundError:
-                atomic_write_record(paths.checkpoint, checkpoint)
-            else:
-                _same_identity(journal, existing_checkpoint, "existing checkpoint record")
-                if existing_checkpoint["outcome"] != journal["terminal_outcome"]:
-                    raise StateValidationError("existing checkpoint outcome differs from recovery journal")
+            _install_exact_if_missing(paths.checkpoint, checkpoint, _validate_checkpoint, "checkpoint record")
         return True

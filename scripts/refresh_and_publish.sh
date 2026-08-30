@@ -50,6 +50,9 @@ SKIP_PULL="${DEGEN_DOGS_SKIP_PULL:-0}"
 RUN_MISSION3_ARCHIVE="${DEGEN_DOGS_RUN_MISSION3_ARCHIVE:-0}"
 FULL_REFRESH="${DEGEN_DOGS_FULL_REFRESH:-0}"
 LIVE_VERIFY_AFTER_PUSH="${DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH:-1}"
+DEFER_PAGES_VERIFICATION="${DEGEN_DOGS_DEFER_PAGES_VERIFICATION:-0}"
+PUBLICATION_GENERATION="${DEGEN_DOGS_PUBLICATION_GENERATION:-}"
+PUBLICATION_DIGEST="${DEGEN_DOGS_PUBLICATION_DIGEST:-}"
 GIT_RETRY_ATTEMPTS="${DEGEN_DOGS_GIT_RETRY_ATTEMPTS:-4}"
 GIT_RETRY_BASE_SECONDS="${DEGEN_DOGS_GIT_RETRY_BASE_SECONDS:-2}"
 GIT_RETRY_MAX_SECONDS="${DEGEN_DOGS_GIT_RETRY_MAX_SECONDS:-30}"
@@ -112,8 +115,21 @@ ARTIFACT_LIST=""
 LIVE_VERIFY_ENV=""
 LOCAL_AHEAD_COUNT=0
 QUARANTINE_DIR=""
-RECOVERY_JOURNAL="${RECOVERY_STATE_DIR}/publisher-recovery.json"
+if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+  LOCK_DIR="$(python3 - "$LOCK_DIR" <<'PY'
+import os
+import sys
+
+print(os.path.abspath(os.path.expanduser(sys.argv[1])))
+PY
+)"
+  RECOVERY_JOURNAL="${LOCK_DIR}/publisher-recovery.json"
+else
+  RECOVERY_JOURNAL="${RECOVERY_STATE_DIR}/publisher-recovery.json"
+fi
 RECOVERY_SUPERSEDED=0
+RECOVERY_DEFERRED_HANDOFF=0
+RECOVERY_JOURNAL_DEFERRED=0
 PUSH_REMOTE_HEAD=""
 
 utc_stamp() {
@@ -221,7 +237,60 @@ path.unlink()
 PY
 }
 
+write_deferred_recovery_journal() {
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$BRANCH" "$BASELINE_HEAD" \
+    "$DEGEN_DOGS_REFRESH_RUN_ID" "$RUNNER_ID" "$RUN_SCOPE" \
+    "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" "${PUBLISH_PATHS[@]}" <<'PY'
+from __future__ import annotations
+
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+(
+    lock_dir, repo, branch, baseline, run_id, runner_id, run_scope,
+    generation, digest, *publish_paths,
+) = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+journal = {
+    "schema_version": state.SCHEMA_VERSION,
+    "repo_realpath": str(Path(repo).resolve()),
+    "branch": branch,
+    "baseline_head": baseline,
+    "run_id": run_id,
+    "runner_id": runner_id,
+    "run_scope": run_scope,
+    "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    "publish_paths": publish_paths,
+    "alignment_runner_commit": None,
+    "alignment_remote_head": None,
+    "alignment_result": None,
+    "publication_generation": int(generation),
+    "queue_digest": digest,
+    "terminal_outcome": None,
+    "handoff_phase": "generating",
+    "remote_commit": None,
+    "raw_status_path": None,
+    "raw_bundle_path": None,
+    "expected_bundle_sha256": None,
+    "expected_bundle_bytes": None,
+    "expected_block_number": None,
+    "expected_block_hash": None,
+    "push_completed_at_utc": None,
+    "retry_deadline_utc": None,
+    "retry_count": None,
+}
+state.create_deferred_recovery_journal(lock_dir, journal)
+PY
+}
+
 write_recovery_journal() {
+  if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+    write_deferred_recovery_journal
+    return
+  fi
   export RECOVERY_JOURNAL REPO_DIR BRANCH BASELINE_HEAD DEGEN_DOGS_REFRESH_RUN_ID DEGEN_DOGS_RUNNER_ID DEGEN_DOGS_RUN_SCOPE
   python3 - "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
@@ -299,13 +368,33 @@ with os.fdopen(descriptor, encoding="utf-8") as handle:
     payload = json.load(handle)
 if not isinstance(payload, dict) or payload.get("schema_version") != 1:
     raise SystemExit("publisher recovery journal schema is invalid")
+base_keys = {
+    "schema_version", "repo_realpath", "branch", "baseline_head", "run_id",
+    "runner_id", "run_scope", "created_at_utc", "publish_paths",
+}
+alignment_keys = {"alignment_runner_commit", "alignment_remote_head", "alignment_result"}
+deferred = "publication_generation" in payload
+if deferred:
+    sys.path.insert(0, str(Path(expected_repo) / "scripts"))
+    import runner_publication_state as state
+    try:
+        payload = state._validate_journal(payload)
+    except state.StateValidationError as exc:
+        raise SystemExit(f"publisher deferred recovery journal is invalid: {exc}") from None
+elif frozenset(payload) not in {frozenset(base_keys), frozenset(base_keys | alignment_keys)}:
+    raise SystemExit("publisher legacy recovery journal shape is invalid")
 baseline = payload.get("baseline_head")
 run_id = payload.get("run_id")
 runner_id = payload.get("runner_id")
 run_scope = payload.get("run_scope")
-alignment_runner_commit = payload.get("alignment_runner_commit", "-")
-alignment_remote_head = payload.get("alignment_remote_head", "-")
-alignment_result = payload.get("alignment_result", "-")
+alignment_runner_commit = payload.get("alignment_runner_commit") or "-"
+alignment_remote_head = payload.get("alignment_remote_head") or "-"
+alignment_result = payload.get("alignment_result") or "-"
+publication_generation = payload.get("publication_generation", "-")
+queue_digest = payload.get("queue_digest", "-")
+terminal_outcome = payload.get("terminal_outcome") or "-"
+handoff_phase = payload.get("handoff_phase", "-")
+remote_commit = payload.get("remote_commit") or "-"
 if (
     payload.get("repo_realpath") != expected_repo
     or payload.get("branch") != expected_branch
@@ -330,7 +419,8 @@ if alignment_values != ("-", "-", "-") and (
     raise SystemExit("publisher recovery journal alignment state is invalid")
 print(
     f"{baseline}\t{run_id}\t{runner_id}\t{run_scope}\t{alignment_runner_commit}"
-    f"\t{alignment_remote_head}\t{alignment_result}"
+    f"\t{alignment_remote_head}\t{alignment_result}\t{int(deferred)}\t{publication_generation}"
+    f"\t{queue_digest}\t{terminal_outcome}\t{handoff_phase}\t{remote_commit}"
 )
 PY
 }
@@ -401,6 +491,29 @@ write_recovery_alignment() {
   local runner_commit="$1"
   local remote_head="$2"
   local alignment_result="$3"
+  if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+    python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" \
+      "$runner_commit" "$remote_head" "$alignment_result" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+lock_dir, repo, generation, digest, runner_commit, remote_head, alignment_result = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+state.update_deferred_alignment(
+    lock_dir,
+    int(generation),
+    digest,
+    runner_commit,
+    remote_head,
+    alignment_result,
+)
+PY
+    return
+  fi
   python3 - "$RECOVERY_JOURNAL" "$REPO_DIR" "$BRANCH" "$BASELINE_HEAD" \
     "$RUNNER_COMMIT_RUN_ID" "$runner_commit" "$remote_head" "$alignment_result" \
     "${PUBLISH_PATHS[@]}" <<'PY'
@@ -475,6 +588,181 @@ try:
         os.close(directory)
 finally:
     temporary.unlink(missing_ok=True)
+PY
+}
+
+arm_deferred_pushed_handoff() {
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" "$RUNNER_COMMIT_HEAD" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+lock_dir, repo, generation, digest, commit = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+state.arm_deferred_pushed_handoff(lock_dir, int(generation), digest, commit)
+PY
+}
+
+prepare_deferred_pushed_handoff() {
+  local commit="$1"
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" \
+    "$commit" "${DEGEN_DOGS_PUSH_COMPLETED_AT_UTC:-}" <<'PY'
+from __future__ import annotations
+
+import datetime as dt
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+lock_dir, repo_name, generation_raw, digest, commit, push_completed_raw = sys.argv[1:]
+repo = Path(repo_name)
+sys.path.insert(0, str(repo / "scripts"))
+import refresh_telemetry
+import runner_publication_state as state
+
+generation = int(generation_raw)
+journal = state.read_deferred_recovery_journal(lock_dir)
+if journal is None:
+    raise SystemExit("deferred raw proof has no authenticated recovery journal")
+if (
+    journal["publication_generation"] != generation
+    or journal["queue_digest"] != digest
+    or journal["terminal_outcome"] != "pushed"
+    or journal["remote_commit"] != commit
+    or journal["handoff_phase"] not in {"push_ready", "raw_proven"}
+):
+    raise SystemExit("deferred raw proof identity differs from the armed journal")
+
+status_path = "public/generated/refresh_status.json"
+try:
+    status_bytes = subprocess.check_output(["git", "show", f"{commit}:{status_path}"], cwd=repo)
+    status = json.loads(status_bytes.decode("utf-8", errors="strict"))
+except (subprocess.CalledProcessError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+    raise SystemExit("immutable publisher commit lacks a valid raw refresh status") from exc
+if not isinstance(status, dict):
+    raise SystemExit("immutable publisher refresh status is not an object")
+bundle_name = status.get("live_snapshot_bundle")
+bundle_sha = status.get("live_snapshot_bundle_sha256")
+bundle_bytes_expected = status.get("live_snapshot_bundle_bytes")
+block_number = status.get("latest_generated_block")
+block_hash = status.get("snapshot_block_hash")
+if (
+    not isinstance(bundle_name, str)
+    or re.fullmatch(r"live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json", bundle_name) is None
+    or not isinstance(bundle_sha, str)
+    or re.fullmatch(r"[0-9a-f]{64}", bundle_sha) is None
+    or type(bundle_bytes_expected) is not int
+    or bundle_bytes_expected < 1
+    or type(block_number) is not int
+    or block_number < 1
+    or not isinstance(block_hash, str)
+    or re.fullmatch(r"0x[0-9a-f]{64}", block_hash) is None
+):
+    raise SystemExit("immutable publisher refresh status lacks canonical pending-proof metadata")
+bundle_path = f"public/generated/{bundle_name}"
+try:
+    bundle_bytes = subprocess.check_output(["git", "show", f"{commit}:{bundle_path}"], cwd=repo)
+except subprocess.CalledProcessError as exc:
+    raise SystemExit("immutable publisher commit lacks its referenced raw bundle") from exc
+if len(bundle_bytes) != bundle_bytes_expected or hashlib.sha256(bundle_bytes).hexdigest() != bundle_sha:
+    raise SystemExit("immutable publisher commit bundle differs from its exact status attestation")
+
+# This is the remote proof boundary: the fixed raw GitHub commit URL must
+# return the exact status and bundle bytes stored in the immutable Git object.
+refresh_telemetry.fetch_verified_remote_snapshot(
+    "raw_commit",
+    refresh_telemetry.immutable_raw_status_url(commit),
+    status,
+    bundle_bytes,
+)
+
+if journal["handoff_phase"] == "raw_proven":
+    if not state.recover_deferred_handoff(lock_dir, lambda candidate: candidate == commit):
+        raise SystemExit("durable raw-proven journal could not reconstruct its handoff")
+else:
+    if push_completed_raw:
+        try:
+            push_completed = dt.datetime.strptime(push_completed_raw, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
+        except ValueError as exc:
+            raise SystemExit("publisher push completion time is invalid") from exc
+    else:
+        # After a landed-push crash, the exact push instant is unknowable; the
+        # recovery proof time is a conservative durable upper bound.
+        push_completed = dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
+    push_completed_text = push_completed.isoformat().replace("+00:00", "Z")
+    retry_deadline = (push_completed + dt.timedelta(minutes=10)).isoformat().replace("+00:00", "Z")
+    pending = {
+        "schema_version": state.SCHEMA_VERSION,
+        "generation": generation,
+        "queue_digest": digest,
+        "commit_sha": commit,
+        "raw_status_path": status_path,
+        "raw_bundle_path": bundle_path,
+        "expected_bundle_sha256": bundle_sha,
+        "expected_bundle_bytes": bundle_bytes_expected,
+        "expected_block_number": block_number,
+        "expected_block_hash": block_hash,
+        "push_completed_at_utc": push_completed_text,
+        "retry_deadline_utc": retry_deadline,
+        "retry_count": 0,
+    }
+    checkpoint = {
+        "schema_version": state.SCHEMA_VERSION,
+        "outcome": "pushed",
+        "generation": generation,
+        "queue_digest": digest,
+        "commit_sha": commit,
+        "push_completed_at_utc": push_completed_text,
+    }
+    state.prepare_pushed_handoff(lock_dir, journal, pending, checkpoint)
+PY
+}
+
+record_deferred_terminal_outcome() {
+  local outcome="$1"
+  local commit="${2:-}"
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" "$outcome" "$commit" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+lock_dir, repo, generation_raw, digest, outcome, commit = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+generation = int(generation_raw)
+journal = state.read_deferred_recovery_journal(lock_dir)
+if journal is None:
+    raise SystemExit("terminal deferred outcome has no authenticated recovery journal")
+if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
+    raise SystemExit("terminal deferred outcome differs from the queued generation")
+target = dict(journal)
+if target["handoff_phase"] != "terminal":
+    if target["handoff_phase"] != "generating":
+        raise SystemExit("deferred journal cannot transition to this terminal outcome")
+    target["handoff_phase"] = "terminal"
+    target["terminal_outcome"] = outcome
+    target["remote_commit"] = commit or None
+    for key in state._JOURNAL_PROOF_KEYS:
+        target[key] = None
+if target["terminal_outcome"] != outcome or target["remote_commit"] != (commit or None):
+    raise SystemExit("terminal deferred outcome conflicts with the authenticated journal")
+checkpoint = {
+    "schema_version": state.SCHEMA_VERSION,
+    "outcome": outcome,
+    "generation": generation,
+    "queue_digest": digest,
+    "commit_sha": commit or None,
+    "push_completed_at_utc": None,
+}
+state.record_terminal_outcome(lock_dir, target, checkpoint)
 PY
 }
 
@@ -1101,12 +1389,14 @@ align_local_runner_commit_to_remote() {
     log "warning: remote supersession alignment did not leave the expected clean publish snapshot"
     return 1
   fi
-  if ! remove_recovery_journal; then
-    # HEAD now names the exact journaled remote target. Preserve both so the
-    # next invocation can finish the alignment without guessing provenance.
-    MUTATION_STARTED=0
-    log "warning: aligned remote snapshot but could not clear its recovery journal"
-    return 1
+  if [[ "$DEFER_PAGES_VERIFICATION" != "1" || "$peer_snapshot_covers" != "1" ]]; then
+    if ! remove_recovery_journal; then
+      # HEAD now names the exact journaled remote target. Preserve both so the
+      # next invocation can finish the alignment without guessing provenance.
+      MUTATION_STARTED=0
+      log "warning: aligned remote snapshot but could not clear its recovery journal"
+      return 1
+    fi
   fi
   BASELINE_HEAD=""
   RUNNER_COMMIT_HEAD=""
@@ -1136,6 +1426,11 @@ reconcile_remote_descendant() {
 complete_peer_supersession() {
   local remote_head="$1"
   local context="$2"
+  if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+    record_deferred_terminal_outcome "peer_superseded" "$remote_head" || \
+      fail "could not durably checkpoint deferred peer supersession"
+    MUTATION_STARTED=0
+  fi
   export DEGEN_DOGS_REFRESH_RESULT="success_superseded_by_peer"
   export DEGEN_DOGS_COMMIT_SHA="$remote_head"
   unset DEGEN_DOGS_PUSH_COMPLETED_AT_UTC
@@ -1260,7 +1555,7 @@ git_index_lock_is_stale() {
   # Git). Never accept executable or group/other-writable lock files.
   [[ "$lock_owner" == "$(id -u)" && "$lock_links" == "1" && "$lock_mode" =~ ^6(00|44)$ ]] || return 1
   command -v lsof >/dev/null 2>&1 || return 1
-  if lsof_output="$(lsof "$lock_path" 2>&1)"; then
+  if lsof_output="$(lsof -w "$lock_path" 2>&1)"; then
     return 1
   else
     lsof_status=$?
@@ -1305,6 +1600,12 @@ recover_interrupted_generation() {
   local alignment_runner_commit
   local alignment_remote_head
   local alignment_result
+  local journal_deferred
+  local journal_generation
+  local journal_digest
+  local journal_terminal_outcome
+  local journal_handoff_phase
+  local journal_remote_commit
   local journaled_alignment_head
   local latest_alignment_result
   local current_branch
@@ -1316,7 +1617,16 @@ recover_interrupted_generation() {
   [[ -e "$RECOVERY_JOURNAL" || -L "$RECOVERY_JOURNAL" ]] || return 0
   journal_record="$(read_recovery_journal_baseline)" || fail "publisher recovery journal could not be authenticated"
   IFS=$'\t' read -r journal_baseline journal_run_id journal_runner_id journal_run_scope alignment_runner_commit \
-    alignment_remote_head alignment_result <<<"$journal_record"
+    alignment_remote_head alignment_result journal_deferred journal_generation journal_digest \
+    journal_terminal_outcome journal_handoff_phase journal_remote_commit <<<"$journal_record"
+  if [[ "$journal_deferred" == "1" ]]; then
+    [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || fail "deferred publisher journal requires deferred queue mode"
+    [[ "$journal_generation" == "$PUBLICATION_GENERATION" && "$journal_digest" == "$PUBLICATION_DIGEST" ]] || \
+      fail "deferred recovery journal differs from the inherited queue identity"
+    RECOVERY_JOURNAL_DEFERRED=1
+  else
+    RECOVERY_JOURNAL_DEFERRED=0
+  fi
   RUNNER_COMMIT_RUNNER_ID="$journal_runner_id"
   RUNNER_COMMIT_SCOPE="$journal_run_scope"
   current_branch="$(git branch --show-current)" || fail "could not resolve branch during interrupted-run recovery"
@@ -1338,6 +1648,29 @@ recover_interrupted_generation() {
   export DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$RUN_MISSION3_ARCHIVE"
   export DEGEN_DOGS_FULL_REFRESH="$FULL_REFRESH"
   export DEGEN_DOGS_RUN_SCOPE="$RUN_SCOPE"
+
+  if [[ "$journal_deferred" == "1" && "$journal_handoff_phase" == "terminal" && \
+    "$journal_terminal_outcome" == "no_diff" ]]; then
+    [[ "$current_head" == "$journal_baseline" ]] || fail "deferred no-diff recovery is not at its authenticated baseline"
+    [[ -z "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]] || \
+      fail "deferred no-diff recovery has dirty publish artifacts"
+    python3 - "$LOCK_DIR" "$REPO_DIR" <<'PY'
+from pathlib import Path
+import sys
+
+lock_dir, repo = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+if not state.recover_deferred_handoff(lock_dir, lambda _commit: False):
+    raise SystemExit("deferred no-diff recovery could not recreate its checkpoint")
+PY
+    export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
+    RECOVERY_DEFERRED_HANDOFF=1
+    MUTATION_STARTED=0
+    log "recovered durable deferred no-diff handoff for generation ${journal_generation}"
+    return 0
+  fi
 
   if [[ "$alignment_remote_head" != "-" ]]; then
     validate_runner_commit "$alignment_runner_commit" "$journal_baseline" "$journal_run_id" "$journal_runner_id" "$journal_run_scope" || \
@@ -1409,9 +1742,11 @@ recover_interrupted_generation() {
         MUTATION_STARTED=0
         fail "interrupted publisher alignment reached remote HEAD with dirty publish artifacts"
       fi
-      if ! remove_recovery_journal; then
-        MUTATION_STARTED=0
-        fail "could not clear completed remote-alignment recovery journal"
+      if [[ "$journal_deferred" != "1" || "$alignment_result" != "peer_supersedes" ]]; then
+        if ! remove_recovery_journal; then
+          MUTATION_STARTED=0
+          fail "could not clear completed remote-alignment recovery journal"
+        fi
       fi
       BASELINE_HEAD=""
       RUNNER_COMMIT_HEAD=""
@@ -1442,6 +1777,25 @@ recover_interrupted_generation() {
     if [[ "$remote_head" == "$current_head" ]]; then
       if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
         fail "interrupted publisher commit reached the remote but publish artifacts are unexpectedly dirty"
+      fi
+      if [[ "$journal_deferred" == "1" ]]; then
+        [[ "$journal_terminal_outcome" == "pushed" && \
+          ( "$journal_handoff_phase" == "push_ready" || "$journal_handoff_phase" == "raw_proven" ) && \
+          "$journal_remote_commit" == "$current_head" ]] || \
+          fail "landed deferred publisher journal is not armed for the exact remote commit"
+        export DEGEN_DOGS_COMMIT_SHA="$current_head"
+        prepare_deferred_pushed_handoff "$current_head" || \
+          fail "could not recover exact immutable raw proof and deferred handoff"
+        export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
+        RECOVERY_DEFERRED_HANDOFF=1
+        BASELINE_HEAD=""
+        RUNNER_COMMIT_HEAD=""
+        RUNNER_COMMIT_RUN_ID=""
+        RUNNER_COMMIT_RUNNER_ID=""
+        RUNNER_COMMIT_SCOPE=""
+        MUTATION_STARTED=0
+        log "recovered deferred publisher commit ${current_head} that landed before the interruption"
+        return 0
       fi
       remove_recovery_journal || fail "could not clear landed publisher recovery journal"
       BASELINE_HEAD=""
@@ -1563,8 +1917,42 @@ validate_name() {
   fi
 }
 
+validate_deferred_publication_context() {
+  [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || return 0
+  [[ "$RUN_SCOPE" == "current" ]] || fail "deferred Pages verification is valid only for current-surface publication"
+  [[ "$SKIP_PUSH" == "0" ]] || fail "DEGEN_DOGS_SKIP_PUSH is not a deferred terminal outcome"
+  [[ "$PUBLICATION_GENERATION" =~ ^[1-9][0-9]*$ ]] || fail "deferred publication generation must be canonical positive decimal"
+  [[ "$PUBLICATION_DIGEST" =~ ^[0-9a-f]{64}$ ]] || fail "deferred publication digest must be canonical lowercase SHA-256"
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" "$RECOVERY_JOURNAL" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+lock_dir, repo, generation, digest, journal_path = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+paths = state.state_paths(lock_dir)
+if paths.journal != Path(journal_path):
+    raise SystemExit("deferred publisher journal is not the fixed lock-directory record")
+latest = state.read_latest_with_digest(lock_dir)
+if latest is None:
+    raise SystemExit("deferred publisher has no canonical latest queue record")
+record, actual_digest = latest
+if record["generation"] != int(generation) or actual_digest != digest:
+    raise SystemExit("deferred publisher generation/digest differs from latest queue state")
+PY
+}
+
 validate_name "remote" "$REMOTE"
 validate_name "branch" "$BRANCH"
+if [[ "$DEFER_PAGES_VERIFICATION" != "0" && "$DEFER_PAGES_VERIFICATION" != "1" ]]; then
+  fail "DEGEN_DOGS_DEFER_PAGES_VERIFICATION must be 0 or 1"
+fi
+if [[ "$DEFER_PAGES_VERIFICATION" == "1" && "${DEGEN_DOGS_LOCK_HELD:-0}" != "1" ]]; then
+  fail "deferred Pages verification requires an inherited active refresh lock"
+fi
 if [[ ! "$RUNNER_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$ ]]; then
   fail "invalid DEGEN_DOGS_RUNNER_ID"
 fi
@@ -1704,8 +2092,12 @@ fi
 if ! git check-ref-format --branch "$BRANCH" >/dev/null 2>&1; then
   fail "invalid git branch ref: ${BRANCH}"
 fi
+validate_deferred_publication_context
 clear_stale_git_index_lock "publisher preflight" || fail "git index lock is active, recent, or unsafe"
 recover_interrupted_generation
+if [[ "$RECOVERY_DEFERRED_HANDOFF" == "1" ]]; then
+  exit 0
+fi
 if [[ "$RECOVERY_SUPERSEDED" == "1" ]]; then
   complete_peer_supersession "$(git rev-parse HEAD)" "interrupted recovery"
 fi
@@ -1967,7 +2359,12 @@ export DEGEN_DOGS_GIT_STATUS_COMPLETED_AT_UTC="$(utc_stamp)"
 if [[ "$DEGEN_DOGS_CHANGED_FILES" == "[]" ]]; then
   log "no generated website/archive data changes to publish"
   MUTATION_STARTED=0
-  remove_recovery_journal || fail "could not clear publisher recovery journal after no-diff refresh"
+  if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+    record_deferred_terminal_outcome "no_diff" || \
+      fail "could not durably checkpoint deferred no-diff publication"
+  else
+    remove_recovery_journal || fail "could not clear publisher recovery journal after no-diff refresh"
+  fi
   export DEGEN_DOGS_REFRESH_RESULT="success_no_diff"
   exit 0
 fi
@@ -2188,6 +2585,9 @@ remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")"
 if [[ "$remote_head" != "$BASELINE_HEAD" ]]; then
   handle_remote_advance_after_local_commit "$remote_head" "pre-push fetch"
 fi
+if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+  arm_deferred_pushed_handoff || fail "could not arm the authenticated deferred pre-push journal"
+fi
 push_status=0
 if push_with_compare_and_swap; then
   :
@@ -2206,6 +2606,16 @@ if [[ "$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" != "$RUNNER_COMMIT_H
 fi
 export DEGEN_DOGS_PUSH_COMPLETED_AT_UTC="$(utc_stamp)"
 export DEGEN_DOGS_REFRESH_RESULT="success_pushed"
+if [[ "$DEFER_PAGES_VERIFICATION" == "1" ]]; then
+  prepare_deferred_pushed_handoff "$RUNNER_COMMIT_HEAD" || \
+    fail "exact immutable raw proof or deferred handoff preparation failed"
+  RUNNER_COMMIT_HEAD=""
+  RUNNER_COMMIT_RUN_ID=""
+  RUNNER_COMMIT_RUNNER_ID=""
+  RUNNER_COMMIT_SCOPE=""
+  log "prepared deferred publication handoff generation=${PUBLICATION_GENERATION} commit=${DEGEN_DOGS_COMMIT_SHA}"
+  exit 0
+fi
 RUNNER_COMMIT_HEAD=""
 RUNNER_COMMIT_RUN_ID=""
 RUNNER_COMMIT_RUNNER_ID=""

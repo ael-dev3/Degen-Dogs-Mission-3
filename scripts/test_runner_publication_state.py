@@ -259,6 +259,7 @@ def test_generation_digest_compare_and_swap_does_not_clear_newer_latest() -> Non
 
 def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
     commit = "a" * 40
+    terminal = outcome != "pushed"
     journal = {
         "schema_version": 1,
         "repo_realpath": str(ROOT),
@@ -269,11 +270,23 @@ def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") ->
         "run_scope": "current",
         "created_at_utc": "2026-08-30T12:34:56Z",
         "publish_paths": ["generated", "public"],
+        "alignment_runner_commit": None,
+        "alignment_remote_head": None,
+        "alignment_result": None,
         "publication_generation": generation,
         "queue_digest": digest,
         "terminal_outcome": outcome,
-        "handoff_phase": "remote_proven",
-        "remote_commit": commit,
+        "handoff_phase": "terminal" if terminal else "push_ready",
+        "remote_commit": None if outcome == "no_diff" else commit,
+        "raw_status_path": None,
+        "raw_bundle_path": None,
+        "expected_bundle_sha256": None,
+        "expected_bundle_bytes": None,
+        "expected_block_number": None,
+        "expected_block_hash": None,
+        "push_completed_at_utc": None,
+        "retry_deadline_utc": None,
+        "retry_count": None,
     }
     pending = {
         "schema_version": 1,
@@ -295,10 +308,178 @@ def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") ->
         "outcome": outcome,
         "generation": generation,
         "queue_digest": digest,
-        "commit_sha": commit,
+        "commit_sha": None if outcome == "no_diff" else commit,
         "push_completed_at_utc": "2026-08-30T12:35:00Z" if outcome == "pushed" else None,
     }
     return journal, pending, checkpoint
+
+
+def generating_journal(generation: int, digest: str) -> dict[str, object]:
+    journal, _pending, _checkpoint = handoff_records(generation, digest)
+    journal["terminal_outcome"] = None
+    journal["handoff_phase"] = "generating"
+    journal["remote_commit"] = None
+    return journal
+
+
+def test_deferred_journal_creation_and_push_arm_use_only_fixed_authenticated_state() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal = generating_journal(queued.generation, queued.digest)
+        state.create_deferred_recovery_journal(root, journal, lock_context=FakeLock())
+        paths = state.state_paths(root)
+        assert paths.journal.exists()
+        armed = state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        assert armed["handoff_phase"] == "push_ready"
+        assert armed["terminal_outcome"] == "pushed"
+        assert armed["remote_commit"] == "a" * 40
+        assert state.read_deferred_recovery_journal(root) == armed
+
+
+def test_pushed_handoff_is_recoverable_after_push_raw_proof_pending_and_checkpoint_boundaries() -> None:
+    # Missing this test permits a retrying latest generation with no durable
+    # checkpoint after any one of the ordered publisher fsync boundaries.
+    for crash_before in ("pending", "checkpoint"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            generating = generating_journal(queued.generation, queued.digest)
+            state.create_deferred_recovery_journal(root, generating, lock_context=FakeLock())
+            journal = state.arm_deferred_pushed_handoff(
+                root,
+                queued.generation,
+                queued.digest,
+                "a" * 40,
+                lock_context=FakeLock(),
+            )
+            _unused, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+            paths = state.state_paths(root)
+            target = getattr(paths, crash_before)
+            original_write = state.atomic_write_record
+
+            def crash_at_target(path: Path, record: dict[str, object]) -> None:
+                if Path(path) == target:
+                    raise RuntimeError(f"simulated crash before {crash_before} fsync")
+                original_write(path, record)
+
+            state.atomic_write_record = crash_at_target
+            try:
+                try:
+                    state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+                except RuntimeError as exc:
+                    assert "simulated crash" in str(exc)
+                else:
+                    raise AssertionError(f"{crash_before} crash injection did not interrupt preparation")
+            finally:
+                state.atomic_write_record = original_write
+
+            durable_journal = state.read_deferred_recovery_journal(root)
+            assert durable_journal is not None and durable_journal["handoff_phase"] == "raw_proven"
+            assert paths.journal.exists() and state.read_latest_with_digest(root) is not None
+            assert paths.pending.exists() is (crash_before == "checkpoint")
+            assert not paths.checkpoint.exists()
+            assert state.recover_deferred_handoff(
+                root,
+                lambda commit: commit == "a" * 40,
+                lock_context=FakeLock(),
+            )
+            assert paths.pending.exists() and paths.checkpoint.exists() and paths.journal.exists()
+
+    # A crash immediately after the remote push but before the raw-proof
+    # journal transition must re-prove and reconstruct from fresh exact bytes.
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        state.create_deferred_recovery_journal(
+            root,
+            generating_journal(queued.generation, queued.digest),
+            lock_context=FakeLock(),
+        )
+        state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            lock_context=FakeLock(),
+        )
+        _journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        assert state.recover_deferred_handoff(
+            root,
+            lambda commit: commit == "a" * 40,
+            pending=pending,
+            checkpoint=checkpoint,
+            lock_context=FakeLock(),
+        )
+        paths = state.state_paths(root)
+        assert paths.pending.exists() and paths.checkpoint.exists() and paths.journal.exists()
+
+
+def test_terminal_outcomes_checkpoint_before_finalization_and_no_diff_invents_no_commit() -> None:
+    for outcome in ("no_diff", "peer_superseded"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            state.create_deferred_recovery_journal(
+                root,
+                generating_journal(queued.generation, queued.digest),
+                lock_context=FakeLock(),
+            )
+            journal, _pending, checkpoint = handoff_records(queued.generation, queued.digest, outcome=outcome)
+            state.record_terminal_outcome(root, journal, checkpoint, lock_context=FakeLock())
+            paths = state.state_paths(root)
+            assert paths.checkpoint.exists() and paths.journal.exists()
+            assert state.read_latest_with_digest(root) is not None
+            if outcome == "no_diff":
+                assert journal["remote_commit"] is None and checkpoint["commit_sha"] is None
+
+
+def test_finalization_crashes_leave_queue_and_journal_in_a_retryable_order() -> None:
+    for crash_before in ("latest", "journal"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+            paths = state.state_paths(root)
+            state.atomic_write_record(paths.journal, journal)
+            state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+            original_unlink = state._unlink_record
+            target = getattr(paths, crash_before)
+
+            def crash_at_target(path: Path) -> bool:
+                if path == target:
+                    raise RuntimeError(f"simulated crash before {crash_before} unlink")
+                return original_unlink(path)
+
+            state._unlink_record = crash_at_target
+            try:
+                try:
+                    state.finalize_pushed_handoff(root, queued.generation, queued.digest, lock_context=FakeLock())
+                except RuntimeError as exc:
+                    assert "simulated crash" in str(exc)
+                else:
+                    raise AssertionError(f"{crash_before} crash injection did not interrupt finalization")
+            finally:
+                state._unlink_record = original_unlink
+
+            assert paths.journal.exists(), "journal was cleared before finalization completed"
+            if crash_before == "latest":
+                assert paths.latest.exists(), "queue was cleared before its CAS boundary"
+            else:
+                assert not paths.latest.exists(), "journal unlink was attempted before queue acknowledgement"
+            assert state.finalize_pushed_handoff(
+                root,
+                queued.generation,
+                queued.digest,
+                lock_context=FakeLock(),
+            )
+            assert not paths.latest.exists() and not paths.journal.exists()
 
 
 def test_handoff_rejects_every_journal_pending_checkpoint_identity_mismatch() -> None:
@@ -326,6 +507,8 @@ def test_handoff_rejects_every_journal_pending_checkpoint_identity_mismatch() ->
                 lambda: state.finalize_pushed_handoff(root, queued.generation, queued.digest, lock_context=FakeLock()),
                 f"{name} identity mismatch was accepted",
             )
+            paths.pending.unlink(missing_ok=True)
+            paths.checkpoint.unlink(missing_ok=True)
             state.atomic_write_record(paths.journal, journal)
             state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
 

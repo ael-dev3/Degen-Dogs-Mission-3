@@ -87,8 +87,78 @@ os.chmod(path, 0o600)
 PY
 }
 
+write_fixture_publication_latest() {
+  local lock_dir="$1"
+  local generation="$2"
+  python3 - "$SOURCE_DIR/runner_publication_state.py" "$lock_dir" "$generation" <<'PY'
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+module_path = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("runner_publication_state_fixture", module_path)
+assert spec and spec.loader
+state = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = state
+spec.loader.exec_module(state)
+root = Path(sys.argv[2])
+generation = int(sys.argv[3])
+record = state.latest_record(
+    generation,
+    "windows-wsl",
+    "current",
+    "2026-08-30T12:34:56Z",
+    {
+        "confirmed_block_number": 100,
+        "confirmed_block_hash": "0x" + "a" * 64,
+        "confirmed_block_time_utc": "2026-08-30T12:34:00Z",
+        "token_id": "818",
+        "amount_wei": "5500000000000000",
+        "start_time_unix": "1780000000",
+        "end_time_unix": "1780003600",
+        "bidder_wallet": "0x" + "1" * 40,
+        "settled": False,
+        "event_name": "AuctionBid",
+        "event_tx_hash": "0x" + "b" * 64,
+        "event_log_index": 0,
+        "event_block_number": 100,
+        "event_block_hash": "0x" + "a" * 64,
+        "event_block_time_utc": "2026-08-30T12:34:00Z",
+        "canonical_reorg_from_hash": None,
+    },
+)
+state.atomic_write_record(state.state_paths(root).latest, record)
+print(state._digest(record))
+PY
+}
+
+finalize_fixture_publication() {
+  local lock_dir="$1"
+  local generation="$2"
+  local digest="$3"
+  python3 - "$SOURCE_DIR/runner_publication_state.py" "$lock_dir" "$generation" "$digest" <<'PY'
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+module_path = Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("runner_publication_state_fixture", module_path)
+assert spec and spec.loader
+state = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = state
+spec.loader.exec_module(state)
+if not state.finalize_pushed_handoff(Path(sys.argv[2]), int(sys.argv[3]), sys.argv[4]):
+    raise SystemExit("fixture finalization did not acknowledge the exact generation")
+PY
+}
+
 mkdir -p "$TEST_REPO/scripts" "$TEST_REPO/generated" "$TEST_REPO/node_modules" "$TEST_ROOT/home"
 cp "$SOURCE_DIR/refresh_and_publish.sh" "$TEST_REPO/scripts/refresh_and_publish.sh"
+cp "$SOURCE_DIR/runner_publication_state.py" "$TEST_REPO/scripts/runner_publication_state.py"
 cp "$SOURCE_DIR/runner_permissions.sh" "$TEST_REPO/scripts/runner_permissions.sh"
 cp "$SOURCE_DIR/runner_path_security.py" "$TEST_REPO/scripts/runner_path_security.py"
 chmod +x "$TEST_REPO/scripts/refresh_and_publish.sh"
@@ -365,6 +435,7 @@ mkdir -p \
   "$SUCCESS_REPO/public/generated" \
   "$SUCCESS_REPO/node_modules"
 cp "$SOURCE_DIR/refresh_and_publish.sh" "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+cp "$SOURCE_DIR/runner_publication_state.py" "$SUCCESS_REPO/scripts/runner_publication_state.py"
 cp "$SOURCE_DIR/runner_permissions.sh" "$SUCCESS_REPO/scripts/runner_permissions.sh"
 cp "$SOURCE_DIR/runner_path_security.py" "$SUCCESS_REPO/scripts/runner_path_security.py"
 cp "$SOURCE_DIR/refresh_telemetry.py" "$SUCCESS_REPO/scripts/refresh_telemetry_validator.py"
@@ -405,22 +476,41 @@ printf '%s\n' '# fixture compiles' >"$SUCCESS_REPO/scripts/build_dashboard.py"
 printf '%s\n' \
   '#!/usr/bin/env python3' \
   'from __future__ import annotations' \
+  'import json' \
   'import os' \
+  'import re' \
   'import subprocess' \
   'import sys' \
   'from pathlib import Path' \
-  'if len(sys.argv) > 1 and sys.argv[1] == "record-refresh" and os.environ.get("FIXTURE_RESULT_MARKER"):' \
-  '    Path(os.environ["FIXTURE_RESULT_MARKER"]).write_text(os.environ.get("DEGEN_DOGS_REFRESH_RESULT", "") + "\n" + os.environ.get("DEGEN_DOGS_COMMIT_SHA", "") + "\n", encoding="utf-8")' \
-  '    raise SystemExit(0)' \
-  'if "validate-status" in sys.argv[1:]:' \
-  '    root = Path(sys.argv[sys.argv.index("--root") + 1]) if "--root" in sys.argv else Path(__file__).resolve().parents[1]' \
-  '    validator = Path(__file__).with_name("refresh_telemetry_validator.py")' \
-  '    raise SystemExit(subprocess.run([sys.executable, str(validator), "--root", str(root), "validate-status"], check=False).returncode)' \
-  'if len(sys.argv) > 1 and sys.argv[1] == "verify-live" and os.environ.get("FIXTURE_LIVE_TIMEOUT") == "1":' \
-  '    env_path = Path(sys.argv[sys.argv.index("--env-file") + 1])' \
-  '    env_path.write_text("export DEGEN_DOGS_LIVE_VERIFY_RESULT='"'"'timeout'"'"'\nexport DEGEN_DOGS_RAW_COMMIT_VERIFIED='"'"'True'"'"'\nexport DEGEN_DOGS_LIVE_VERIFY_ERROR='"'"'github_pages mismatch'"'"'\n", encoding="utf-8")' \
-  '    raise SystemExit(2)' \
-  'raise SystemExit(0)' >"$SUCCESS_REPO/scripts/refresh_telemetry.py"
+  'def immutable_raw_status_url(commit_sha: str) -> str:' \
+  '    if re.fullmatch(r"[0-9a-f]{40}", commit_sha) is None:' \
+  '        raise RuntimeError("fixture raw proof rejected a noncanonical commit")' \
+  '    return f"https://raw.githubusercontent.com/ael-dev3/Degen-Dogs-Mission-3/{commit_sha}/public/generated/refresh_status.json"' \
+  'def fetch_verified_remote_snapshot(source: str, status_url: str, expected_status: dict[str, object], expected_bundle: bytes) -> None:' \
+  '    if source != "raw_commit" or not expected_bundle or not isinstance(expected_status, dict):' \
+  '        raise RuntimeError("fixture raw proof received invalid exact content")' \
+  '    marker = os.environ.get("FIXTURE_RAW_VERIFY_MARKER")' \
+  '    if marker:' \
+  '        Path(marker).write_text(status_url + "\n" + str(expected_status.get("live_snapshot_bundle")) + "\n", encoding="utf-8")' \
+  'def main() -> int:' \
+  '    if len(sys.argv) > 1 and sys.argv[1] == "record-refresh" and os.environ.get("FIXTURE_RESULT_MARKER"):' \
+  '        Path(os.environ["FIXTURE_RESULT_MARKER"]).write_text(os.environ.get("DEGEN_DOGS_REFRESH_RESULT", "") + "\n" + os.environ.get("DEGEN_DOGS_COMMIT_SHA", "") + "\n", encoding="utf-8")' \
+  '        return 0' \
+  '    if "validate-status" in sys.argv[1:]:' \
+  '        root = Path(sys.argv[sys.argv.index("--root") + 1]) if "--root" in sys.argv else Path(__file__).resolve().parents[1]' \
+  '        validator = Path(__file__).with_name("refresh_telemetry_validator.py")' \
+  '        return subprocess.run([sys.executable, str(validator), "--root", str(root), "validate-status"], check=False).returncode' \
+  '    if len(sys.argv) > 1 and sys.argv[1] == "verify-live":' \
+  '        marker = os.environ.get("FIXTURE_PAGES_VERIFY_MARKER")' \
+  '        if marker:' \
+  '            Path(marker).write_text("pages verification invoked\n", encoding="utf-8")' \
+  '        if os.environ.get("FIXTURE_LIVE_TIMEOUT") == "1":' \
+  '            env_path = Path(sys.argv[sys.argv.index("--env-file") + 1])' \
+  '            env_path.write_text("export DEGEN_DOGS_LIVE_VERIFY_RESULT='"'"'timeout'"'"'\nexport DEGEN_DOGS_RAW_COMMIT_VERIFIED='"'"'True'"'"'\nexport DEGEN_DOGS_LIVE_VERIFY_ERROR='"'"'github_pages mismatch'"'"'\n", encoding="utf-8")' \
+  '            return 2' \
+  '    return 0' \
+  'if __name__ == "__main__":' \
+  '    raise SystemExit(main())' >"$SUCCESS_REPO/scripts/refresh_telemetry.py"
 chmod +x "$SUCCESS_REPO/scripts/refresh_telemetry.py"
 printf '%s\n' 'table,file,rows' 'auction_feed,generated/auction_feed.csv,1' >"$SUCCESS_REPO/generated/manifest.csv"
 printf '%s\n' '{}' >"$SUCCESS_REPO/generated/manifest.json"
@@ -1529,6 +1619,338 @@ if ! grep -q "pushed snapshot is awaiting GitHub Pages" "$TEST_ROOT/live-timeout
   echo "post-push live timeout was not recorded as a successful deferred deployment" >&2
   exit 1
 fi
+
+# Queue mode must stop after exact immutable-commit raw proof and a durable
+# pushed handoff. The inherited refresh lock remains held by the caller; Bash
+# must neither poll Pages nor acknowledge latest.json nor clear the fixed
+# authenticated journal before the future drainer finalizes it.
+printf '%s\n' \
+  "const fs = require('fs');" \
+  "const status = JSON.parse(fs.readFileSync('generated/refresh_status.json', 'utf8'));" \
+  "status.last_successful_refresh_time_utc = '2026-08-30T20:11:00Z';" \
+  "const text = JSON.stringify(status) + '\\n';" \
+  "fs.writeFileSync('generated/refresh_status.json', text);" \
+  "fs.writeFileSync('public/generated/refresh_status.json', text);" >"$SUCCESS_REPO/scripts/success_generation.js"
+git -C "$SUCCESS_REPO" add scripts/success_generation.js
+git -C "$SUCCESS_REPO" commit -qm "fixture: generate deferred pushed snapshot"
+git -C "$SUCCESS_REPO" push -q
+
+DEFER_PUSH_LOCKS="$TEST_ROOT/deferred-push-locks"
+DEFER_PUSH_REFRESH="$TEST_ROOT/deferred-push-refresh-lock/refresh.lock"
+DEFER_PUSH_RESULT="$TEST_ROOT/deferred-push-result"
+DEFER_PUSH_RAW="$TEST_ROOT/deferred-push-raw-proof"
+DEFER_PUSH_PAGES="$TEST_ROOT/deferred-push-pages-proof"
+mkdir -m 700 -p "$DEFER_PUSH_LOCKS" "$(dirname "$DEFER_PUSH_REFRESH")"
+DEFER_PUSH_DIGEST="$(write_fixture_publication_latest "$DEFER_PUSH_LOCKS" 41)"
+: >"$DEFER_PUSH_REFRESH"
+chmod 600 "$DEFER_PUSH_REFRESH"
+exec {DEFER_PUSH_FD}<>"$DEFER_PUSH_REFRESH"
+flock -n "$DEFER_PUSH_FD"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$DEFER_PUSH_RESULT" \
+FIXTURE_RAW_VERIFY_MARKER="$DEFER_PUSH_RAW" \
+FIXTURE_PAGES_VERIFY_MARKER="$DEFER_PUSH_PAGES" \
+DEGEN_DOGS_RUNNER_ID="windows-wsl" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/deferred-push-logs" \
+DEGEN_DOGS_LOCK_DIR="$DEFER_PUSH_LOCKS" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$DEFER_PUSH_REFRESH" \
+DEGEN_DOGS_LOCK_HELD=1 \
+DEGEN_DOGS_LOCK_FD="$DEFER_PUSH_FD" \
+DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
+DEGEN_DOGS_PUBLICATION_GENERATION=41 \
+DEGEN_DOGS_PUBLICATION_DIGEST="$DEFER_PUSH_DIGEST" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+flock -u "$DEFER_PUSH_FD"
+exec {DEFER_PUSH_FD}>&-
+
+python3 - "$DEFER_PUSH_LOCKS" "$DEFER_PUSH_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["publication_generation"] == pending["generation"] == checkpoint["generation"] == 41
+assert journal["queue_digest"] == pending["queue_digest"] == checkpoint["queue_digest"] == sys.argv[2]
+assert journal["terminal_outcome"] == checkpoint["outcome"] == "pushed"
+assert journal["handoff_phase"] == "raw_proven"
+assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"]
+assert (root / "publication/latest.json").exists()
+PY
+if [[ "$(sed -n '1p' "$DEFER_PUSH_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$DEFER_PUSH_RAW" ]] || [[ -e "$DEFER_PUSH_PAGES" ]] || \
+  [[ -e "$(dirname "$DEFER_PUSH_REFRESH")/publisher-recovery.json" ]]; then
+  echo "deferred pushed outcome did not retain the fixed raw-proven handoff without polling Pages" >&2
+  exit 1
+fi
+
+# Simulate a power loss after the remote accepted the commit but before raw
+# proof became durable. Recovery must prove the exact immutable status+bundle
+# again, rebuild pending/checkpoint, retain the journal, and return to the
+# drainer instead of unlinking at the old remote-equals-local branch.
+rm -- "$DEFER_PUSH_LOCKS/publication/pending.json" "$DEFER_PUSH_LOCKS/publication/pushed.json"
+python3 - "$DEFER_PUSH_LOCKS/publisher-recovery.json" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["handoff_phase"] = "push_ready"
+for key in (
+    "raw_status_path", "raw_bundle_path", "expected_bundle_sha256",
+    "expected_bundle_bytes", "expected_block_number", "expected_block_hash",
+    "push_completed_at_utc", "retry_deadline_utc", "retry_count",
+):
+    value[key] = None
+temporary = path.with_name(".publisher-recovery.fixture.tmp")
+temporary.write_text(json.dumps(value, sort_keys=True, separators=(",", ":")), encoding="utf-8")
+os.chmod(temporary, 0o600)
+os.replace(temporary, path)
+os.chmod(path, 0o600)
+PY
+rm -f -- "$DEFER_PUSH_RAW" "$DEFER_PUSH_RESULT"
+exec {DEFER_PUSH_FD}<>"$DEFER_PUSH_REFRESH"
+flock -n "$DEFER_PUSH_FD"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$DEFER_PUSH_RESULT" \
+FIXTURE_RAW_VERIFY_MARKER="$DEFER_PUSH_RAW" \
+FIXTURE_PAGES_VERIFY_MARKER="$DEFER_PUSH_PAGES" \
+DEGEN_DOGS_RUNNER_ID="windows-wsl" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/deferred-push-recovery-logs" \
+DEGEN_DOGS_LOCK_DIR="$DEFER_PUSH_LOCKS" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$DEFER_PUSH_REFRESH" \
+DEGEN_DOGS_LOCK_HELD=1 \
+DEGEN_DOGS_LOCK_FD="$DEFER_PUSH_FD" \
+DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
+DEGEN_DOGS_PUBLICATION_GENERATION=41 \
+DEGEN_DOGS_PUBLICATION_DIGEST="$DEFER_PUSH_DIGEST" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+flock -u "$DEFER_PUSH_FD"
+exec {DEFER_PUSH_FD}>&-
+if [[ ! -e "$DEFER_PUSH_RAW" ]] || [[ -e "$DEFER_PUSH_PAGES" ]] || \
+  [[ ! -e "$DEFER_PUSH_LOCKS/publication/pending.json" ]] || \
+  [[ ! -e "$DEFER_PUSH_LOCKS/publication/pushed.json" ]] || \
+  [[ ! -e "$DEFER_PUSH_LOCKS/publisher-recovery.json" ]] || \
+  [[ "$(sed -n '1p' "$DEFER_PUSH_RESULT")" != "success_pushed" ]]; then
+  echo "remote-equals-local deferred recovery did not rebuild and retain the landed handoff" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DEFER_PUSH_LOCKS" 41 "$DEFER_PUSH_DIGEST"
+if [[ -e "$DEFER_PUSH_LOCKS/publication/latest.json" || -e "$DEFER_PUSH_LOCKS/publisher-recovery.json" ]]; then
+  echo "exact deferred pushed finalization did not CAS the queue before journal unlink" >&2
+  exit 1
+fi
+
+# No-diff is a terminal queued generation with no fabricated commit or push
+# timestamp. It checkpoints durably and leaves queue/journal acknowledgement
+# to the same finalizer boundary.
+python3 - "$SUCCESS_REPO/package.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["scripts"]["refresh:current"] = "node -e \"\""
+path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+PY
+git -C "$SUCCESS_REPO" add package.json
+git -C "$SUCCESS_REPO" commit -qm "fixture: prepare deferred no-diff generation"
+git -C "$SUCCESS_REPO" push -q
+DEFER_NO_DIFF_LOCKS="$TEST_ROOT/deferred-no-diff-locks"
+DEFER_NO_DIFF_REFRESH="$DEFER_NO_DIFF_LOCKS/refresh.lock"
+DEFER_NO_DIFF_RESULT="$TEST_ROOT/deferred-no-diff-result"
+DEFER_NO_DIFF_PAGES="$TEST_ROOT/deferred-no-diff-pages-proof"
+mkdir -m 700 -p "$DEFER_NO_DIFF_LOCKS"
+DEFER_NO_DIFF_DIGEST="$(write_fixture_publication_latest "$DEFER_NO_DIFF_LOCKS" 42)"
+: >"$DEFER_NO_DIFF_REFRESH"
+chmod 600 "$DEFER_NO_DIFF_REFRESH"
+exec {DEFER_NO_DIFF_FD}<>"$DEFER_NO_DIFF_REFRESH"
+flock -n "$DEFER_NO_DIFF_FD"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$DEFER_NO_DIFF_RESULT" \
+FIXTURE_PAGES_VERIFY_MARKER="$DEFER_NO_DIFF_PAGES" \
+DEGEN_DOGS_RUNNER_ID="windows-wsl" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/deferred-no-diff-logs" \
+DEGEN_DOGS_LOCK_DIR="$DEFER_NO_DIFF_LOCKS" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$DEFER_NO_DIFF_REFRESH" \
+DEGEN_DOGS_LOCK_HELD=1 \
+DEGEN_DOGS_LOCK_FD="$DEFER_NO_DIFF_FD" \
+DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
+DEGEN_DOGS_PUBLICATION_GENERATION=42 \
+DEGEN_DOGS_PUBLICATION_DIGEST="$DEFER_NO_DIFF_DIGEST" \
+DEGEN_DOGS_SKIP_PULL=1 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+flock -u "$DEFER_NO_DIFF_FD"
+exec {DEFER_NO_DIFF_FD}>&-
+python3 - "$DEFER_NO_DIFF_LOCKS" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["terminal_outcome"] == checkpoint["outcome"] == "no_diff"
+assert journal["remote_commit"] is None and checkpoint["commit_sha"] is None
+assert checkpoint["push_completed_at_utc"] is None
+assert not (root / "publication/pending.json").exists()
+assert (root / "publication/latest.json").exists()
+PY
+if [[ "$(sed -n '1p' "$DEFER_NO_DIFF_RESULT")" != "success_no_diff" ]] || \
+  [[ -e "$DEFER_NO_DIFF_PAGES" ]]; then
+  echo "deferred no-diff outcome was not checkpointed without Pages polling" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DEFER_NO_DIFF_LOCKS" 42 "$DEFER_NO_DIFF_DIGEST"
+
+# A verified peer winner is another terminal queue outcome. Exercise the
+# interrupted-local-child recovery path because it also covers the existing
+# alignment journal rewrite: deferred metadata must survive that rewrite,
+# checkpoint the peer SHA, and remain for exact drainer finalization.
+DEFER_PEER_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T12:50:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred local interrupted child" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-peer-local"
+DEFER_PEER_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+
+DEFER_PEER_REPO="$TEST_ROOT/deferred-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DEFER_PEER_REPO"
+git -C "$DEFER_PEER_REPO" config user.name "Degen Dogs Deferred Peer"
+git -C "$DEFER_PEER_REPO" config user.email "degen-dogs-deferred-peer@example.invalid"
+touch_valid_refresh_status "$DEFER_PEER_REPO" "2026-08-30T12:51:00Z"
+git -C "$DEFER_PEER_REPO" add generated public/generated
+git -C "$DEFER_PEER_REPO" commit -qm "[cron] deferred peer winner" \
+  -m "Refresh-Runner-ID: fixture-peer" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-peer-winner"
+DEFER_PEER_COMMIT="$(git -C "$DEFER_PEER_REPO" rev-parse HEAD)"
+git -C "$DEFER_PEER_REPO" push -q origin main
+
+DEFER_PEER_LOCKS="$TEST_ROOT/deferred-peer-locks"
+DEFER_PEER_REFRESH="$DEFER_PEER_LOCKS/refresh.lock"
+DEFER_PEER_RESULT="$TEST_ROOT/deferred-peer-result"
+DEFER_PEER_PAGES="$TEST_ROOT/deferred-peer-pages-proof"
+mkdir -m 700 -p "$DEFER_PEER_LOCKS"
+DEFER_PEER_DIGEST="$(write_fixture_publication_latest "$DEFER_PEER_LOCKS" 43)"
+python3 - "$SOURCE_DIR/runner_publication_state.py" "$DEFER_PEER_LOCKS" "$SUCCESS_REPO" \
+  "$DEFER_PEER_BASELINE" "$DEFER_PEER_DIGEST" <<'PY'
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+spec = importlib.util.spec_from_file_location("runner_publication_state_fixture", Path(sys.argv[1]))
+assert spec and spec.loader
+state = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = state
+spec.loader.exec_module(state)
+journal = {
+    "schema_version": 1,
+    "repo_realpath": str(Path(sys.argv[3]).resolve()),
+    "branch": "main",
+    "baseline_head": sys.argv[4],
+    "run_id": "deferred-peer-local",
+    "runner_id": "windows-wsl",
+    "run_scope": "current",
+    "created_at_utc": "2026-08-30T12:49:00Z",
+    "publish_paths": [
+        "README.md", "index.html", "generated", "public",
+        "archive/mission3/data/generated", "archive/data/generated",
+        "archive/data/identity/wallet_profiles.json", "archive/dogs",
+        "archive/prices/data/generated", "archive/prices/data/raw",
+    ],
+    "alignment_runner_commit": None,
+    "alignment_remote_head": None,
+    "alignment_result": None,
+    "publication_generation": 43,
+    "queue_digest": sys.argv[5],
+    "terminal_outcome": None,
+    "handoff_phase": "generating",
+    "remote_commit": None,
+    "raw_status_path": None,
+    "raw_bundle_path": None,
+    "expected_bundle_sha256": None,
+    "expected_bundle_bytes": None,
+    "expected_block_number": None,
+    "expected_block_hash": None,
+    "push_completed_at_utc": None,
+    "retry_deadline_utc": None,
+    "retry_count": None,
+}
+state.create_deferred_recovery_journal(Path(sys.argv[2]), journal)
+PY
+: >"$DEFER_PEER_REFRESH"
+chmod 600 "$DEFER_PEER_REFRESH"
+exec {DEFER_PEER_FD}<>"$DEFER_PEER_REFRESH"
+flock -n "$DEFER_PEER_FD"
+HOME="$TEST_ROOT/home" \
+VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_RESULT_MARKER="$DEFER_PEER_RESULT" \
+FIXTURE_PAGES_VERIFY_MARKER="$DEFER_PEER_PAGES" \
+DEGEN_DOGS_RUNNER_ID="windows-wsl" \
+DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
+DEGEN_DOGS_LOG_DIR="$TEST_ROOT/deferred-peer-logs" \
+DEGEN_DOGS_LOCK_DIR="$DEFER_PEER_LOCKS" \
+DEGEN_DOGS_REFRESH_LOCK_PATH="$DEFER_PEER_REFRESH" \
+DEGEN_DOGS_LOCK_HELD=1 \
+DEGEN_DOGS_LOCK_FD="$DEFER_PEER_FD" \
+DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
+DEGEN_DOGS_PUBLICATION_GENERATION=43 \
+DEGEN_DOGS_PUBLICATION_DIGEST="$DEFER_PEER_DIGEST" \
+DEGEN_DOGS_SKIP_PULL=1 \
+DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+"$SUCCESS_REPO/scripts/refresh_and_publish.sh"
+flock -u "$DEFER_PEER_FD"
+exec {DEFER_PEER_FD}>&-
+python3 - "$DEFER_PEER_LOCKS" "$DEFER_PEER_COMMIT" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["terminal_outcome"] == checkpoint["outcome"] == "peer_superseded"
+assert journal["remote_commit"] == checkpoint["commit_sha"] == sys.argv[2]
+assert checkpoint["push_completed_at_utc"] is None
+assert (root / "publication/latest.json").exists()
+assert not (root / "publication/pending.json").exists()
+PY
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFER_PEER_COMMIT" ]] || \
+  [[ "$(sed -n '1p' "$DEFER_PEER_RESULT")" != "success_superseded_by_peer" ]] || \
+  [[ -e "$DEFER_PEER_PAGES" ]]; then
+  echo "deferred peer supersession did not checkpoint and retain the exact queue handoff" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DEFER_PEER_LOCKS" 43 "$DEFER_PEER_DIGEST"
 
 # A caller cannot bypass the shared lock with a trusted-looking environment
 # flag unless it also supplies the inherited, matching locked descriptor.
