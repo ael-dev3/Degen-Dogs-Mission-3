@@ -1,33 +1,63 @@
 [
   {
     "status": "ongoing",
-    "dog": "Dog #817",
-    "dog_image_url": "https://api.degendogs.club/images/817.png",
-    "dog_external_url": "https://degendogs.club/#dog817",
-    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/817",
-    "bidder_winner": "@0xael.eth",
-    "bidder_winner_url": "https://farcaster.xyz/0xael.eth",
-    "bidder_winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bid": "0.00500 ETH ($12)",
-    "amount_eth": 0.005,
-    "amount_usd": 12.29,
+    "dog": "Dog #818",
+    "dog_image_url": "https://api.degendogs.club/images/818.png",
+    "dog_external_url": "https://degendogs.club/#dog818",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/818",
+    "bidder_winner": "@kzl27.eth",
+    "bidder_winner_url": "https://farcaster.xyz/kzl27.eth",
+    "bidder_winner_wallet": "0x13dbc7d5ace21d1eeb5f884666e284138fbff620",
+    "bid": "0.00050 ETH ($1)",
+    "amount_eth": 0.0005,
+    "amount_usd": 1.23,
     "amount_usd_at_event": null,
-    "eth_usd_price_live": "2457.11",
+    "eth_usd_price_live": "2456.315",
     "eth_usd_price_at_event": null,
-    "eth_usd_price_date_utc": "2026-08-29",
+    "eth_usd_price_date_utc": "2026-08-30",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
     "usd_estimate_confidence": "live_current",
     "usd_estimate_basis": "current_eth_usd_price",
-    "auction_time_utc": "2026-08-29 09:15:35",
-    "time_remaining": "01:32:28",
-    "auction_end_utc": "2026-08-29 21:50:13",
-    "last_bid_utc": "2026-08-29 09:15:35",
+    "auction_time_utc": "2026-08-30 08:25:33",
+    "time_remaining": "13:06:58",
+    "auction_end_utc": "2026-08-30 21:51:31",
+    "last_bid_utc": "2026-08-30 08:25:33",
     "settled_time_utc": "",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#511/693",
+    "rarity": "#602/694",
+    "traits": "Background: None; Body: SugarSkull; Neck: None; Mouth: None; Ears: Earbuds; Head: None; Eyes: BlueLaserEyes",
+    "trait_rarity": "Background: None (91.6%); Body: SugarSkull (6.5%); Neck: None (41.5%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: None (20.2%); Eyes: BlueLaserEyes (11.5%)"
+  },
+  {
+    "status": "settled",
+    "dog": "Dog #817",
+    "dog_image_url": "https://api.degendogs.club/images/817.png",
+    "dog_external_url": "https://degendogs.club/#dog817",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/817",
+    "bidder_winner": "@kunon",
+    "bidder_winner_url": "https://farcaster.xyz/kunon",
+    "bidder_winner_wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
+    "bid": "0.00550 ETH ($13)",
+    "amount_eth": 0.0055,
+    "amount_usd": 13.43,
+    "amount_usd_at_event": 13.43,
+    "eth_usd_price_live": null,
+    "eth_usd_price_at_event": "2442.407614756763",
+    "eth_usd_price_date_utc": "2026-08-29",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "settlement_date_eth_usd",
+    "auction_time_utc": "2026-08-29 21:51:31",
+    "time_remaining": "",
+    "auction_end_utc": "",
+    "last_bid_utc": "2026-08-29 20:37:59",
+    "settled_time_utc": "2026-08-29 21:51:31",
+    "metadata_verification_status": "onchain_token_uri_verified",
+    "rarity": "#511/694",
     "traits": "Background: None; Body: RedBrown; Neck: GoldNecklace; Mouth: None; Ears: LoopEarring; Head: BlackCap; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (91.6%); Body: RedBrown (15.4%); Neck: GoldNecklace (19.2%); Mouth: None (68.5%); Ears: LoopEarring (27.3%); Head: BlackCap (7.6%); Eyes: MaskSnorkel (10.2%)"
+    "trait_rarity": "Background: None (91.6%); Body: RedBrown (15.4%); Neck: GoldNecklace (19.2%); Mouth: None (68.6%); Ears: LoopEarring (27.2%); Head: BlackCap (7.6%); Eyes: MaskSnorkel (10.2%)"
   },
   {
     "status": "settled",
@@ -55,9 +85,9 @@
     "last_bid_utc": "2026-08-28 21:42:35",
     "settled_time_utc": "2026-08-28 21:50:13",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#423/693",
+    "rarity": "#422/694",
     "traits": "Background: Halo; Body: Dalmation; Neck: None; Mouth: None; Ears: None; Head: None; Eyes: BlueLaserEyes",
-    "trait_rarity": "Background: Halo (8.4%); Body: Dalmation (9.2%); Neck: None (41.4%); Mouth: None (68.5%); Ears: None (26.0%); Head: None (20.1%); Eyes: BlueLaserEyes (11.4%)"
+    "trait_rarity": "Background: Halo (8.4%); Body: Dalmation (9.2%); Neck: None (41.5%); Mouth: None (68.6%); Ears: None (25.9%); Head: None (20.2%); Eyes: BlueLaserEyes (11.5%)"
   },
   {
     "status": "settled",
@@ -85,9 +115,9 @@
     "last_bid_utc": "2026-08-27 02:30:13",
     "settled_time_utc": "2026-08-27 21:47:45",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#532/693",
+    "rarity": "#532/694",
     "traits": "Background: None; Body: Orange; Neck: None; Mouth: None; Ears: Earbuds; Head: StripedBeanie; Eyes: Sunglasses",
-    "trait_rarity": "Background: None (91.6%); Body: Orange (8.4%); Neck: None (41.4%); Mouth: None (68.5%); Ears: Earbuds (32.5%); Head: StripedBeanie (7.9%); Eyes: Sunglasses (13.4%)"
+    "trait_rarity": "Background: None (91.6%); Body: Orange (8.4%); Neck: None (41.5%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: StripedBeanie (7.9%); Eyes: Sunglasses (13.4%)"
   },
   {
     "status": "settled",
@@ -115,9 +145,9 @@
     "last_bid_utc": "2026-08-25 20:59:21",
     "settled_time_utc": "2026-08-26 21:45:39",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#490/693",
+    "rarity": "#491/694",
     "traits": "Background: None; Body: Blue; Neck: None; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: Sunglasses",
-    "trait_rarity": "Background: None (91.6%); Body: Blue (8.9%); Neck: None (41.4%); Mouth: None (68.5%); Ears: Earbuds (32.5%); Head: CrazyHair (6.8%); Eyes: Sunglasses (13.4%)"
+    "trait_rarity": "Background: None (91.6%); Body: Blue (8.9%); Neck: None (41.5%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: CrazyHair (6.8%); Eyes: Sunglasses (13.4%)"
   },
   {
     "status": "settled",
@@ -145,9 +175,9 @@
     "last_bid_utc": "2026-08-25 09:39:45",
     "settled_time_utc": "2026-08-25 20:59:03",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#174/693",
+    "rarity": "#174/694",
     "traits": "Background: None; Body: Blue; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: RedLaserEyes",
-    "trait_rarity": "Background: None (91.6%); Body: Blue (8.9%); Neck: RedCollar (29.3%); Mouth: None (68.5%); Ears: Earbuds (32.5%); Head: CrazyHair (6.8%); Eyes: RedLaserEyes (4.9%)"
+    "trait_rarity": "Background: None (91.6%); Body: Blue (8.9%); Neck: RedCollar (29.3%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: CrazyHair (6.8%); Eyes: RedLaserEyes (4.9%)"
   },
   {
     "status": "settled",
@@ -175,9 +205,9 @@
     "last_bid_utc": "2026-08-23 21:33:09",
     "settled_time_utc": "2026-08-24 20:58:23",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#644/693",
+    "rarity": "#645/694",
     "traits": "Background: None; Body: Dalmation; Neck: None; Mouth: None; Ears: None; Head: None; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (91.6%); Body: Dalmation (9.2%); Neck: None (41.4%); Mouth: None (68.5%); Ears: None (26.0%); Head: None (20.1%); Eyes: MaskSnorkel (10.2%)"
+    "trait_rarity": "Background: None (91.6%); Body: Dalmation (9.2%); Neck: None (41.5%); Mouth: None (68.6%); Ears: None (25.9%); Head: None (20.2%); Eyes: MaskSnorkel (10.2%)"
   },
   {
     "status": "settled",
@@ -205,9 +235,9 @@
     "last_bid_utc": "2026-08-22 20:02:51",
     "settled_time_utc": "2026-08-23 20:35:51",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#415/693",
+    "rarity": "#414/694",
     "traits": "Background: None; Body: Brown; Neck: None; Mouth: Pizza; Ears: LoopEarring; Head: BaseballCap; Eyes: VRGoggles",
-    "trait_rarity": "Background: None (91.6%); Body: Brown (10.8%); Neck: None (41.4%); Mouth: Pizza (11.0%); Ears: LoopEarring (27.3%); Head: BaseballCap (10.2%); Eyes: VRGoggles (10.7%)"
+    "trait_rarity": "Background: None (91.6%); Body: Brown (10.8%); Neck: None (41.5%); Mouth: Pizza (11.0%); Ears: LoopEarring (27.2%); Head: BaseballCap (10.2%); Eyes: VRGoggles (10.7%)"
   },
   {
     "status": "settled",
@@ -235,9 +265,9 @@
     "last_bid_utc": "2026-08-21 20:02:43",
     "settled_time_utc": "2026-08-22 20:02:35",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#376/693",
+    "rarity": "#377/694",
     "traits": "Background: None; Body: Orange; Neck: None; Mouth: None; Ears: GoldEarring; Head: RedMohawk; Eyes: BlueLaserEyes",
-    "trait_rarity": "Background: None (91.6%); Body: Orange (8.4%); Neck: None (41.4%); Mouth: None (68.5%); Ears: GoldEarring (14.3%); Head: RedMohawk (7.5%); Eyes: BlueLaserEyes (11.4%)"
+    "trait_rarity": "Background: None (91.6%); Body: Orange (8.4%); Neck: None (41.5%); Mouth: None (68.6%); Ears: GoldEarring (14.3%); Head: RedMohawk (7.5%); Eyes: BlueLaserEyes (11.5%)"
   },
   {
     "status": "settled",
@@ -265,9 +295,9 @@
     "last_bid_utc": "2026-08-20 19:58:13",
     "settled_time_utc": "2026-08-21 20:02:25",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#361/693",
+    "rarity": "#359/694",
     "traits": "Background: None; Body: Grey; Neck: GoldNecklace; Mouth: None; Ears: LoopEarring; Head: WhiteMohawk; Eyes: EyePatch",
-    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: GoldNecklace (19.2%); Mouth: None (68.5%); Ears: LoopEarring (27.3%); Head: WhiteMohawk (6.9%); Eyes: EyePatch (7.8%)"
+    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: GoldNecklace (19.2%); Mouth: None (68.6%); Ears: LoopEarring (27.2%); Head: WhiteMohawk (6.9%); Eyes: EyePatch (7.8%)"
   },
   {
     "status": "settled",
@@ -295,9 +325,9 @@
     "last_bid_utc": "2026-08-19 20:23:21",
     "settled_time_utc": "2026-08-20 19:57:59",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#494/693",
+    "rarity": "#494/694",
     "traits": "Background: None; Body: Grey; Neck: RedCollar; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: RedCollar (29.3%); Mouth: None (68.5%); Ears: Earbuds (32.5%); Head: CrazyHair (6.8%); Eyes: MaskSnorkel (10.2%)"
+    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: RedCollar (29.3%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: CrazyHair (6.8%); Eyes: MaskSnorkel (10.2%)"
   },
   {
     "status": "settled",
@@ -325,8 +355,8 @@
     "last_bid_utc": "2026-08-18 19:50:11",
     "settled_time_utc": "2026-08-19 19:45:47",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#522/693",
+    "rarity": "#521/694",
     "traits": "Background: None; Body: Grey; Neck: None; Mouth: None; Ears: Earbuds; Head: CrazyHair; Eyes: MaskSnorkel",
-    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: None (41.4%); Mouth: None (68.5%); Ears: Earbuds (32.5%); Head: CrazyHair (6.8%); Eyes: MaskSnorkel (10.2%)"
+    "trait_rarity": "Background: None (91.6%); Body: Grey (12.8%); Neck: None (41.5%); Mouth: None (68.6%); Ears: Earbuds (32.6%); Head: CrazyHair (6.8%); Eyes: MaskSnorkel (10.2%)"
   }
 ]

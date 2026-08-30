@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#489/693",
+      "display": "#489/694",
       "rank": 489,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 #489/693 generated auction feed 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c background: none (91.6%) background none body: white (11.1%) body white neck: redcollar (29.3%) neck redcollar mouth: none (68.5%) mouth none ears: loopearring (27.3%) ears loopearring head: headphones (6.8%) head headphones eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 767 dog #767 767 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-09t05:07:55z 0x165715aae0a3bea17571a6a2bdfaef210ac96405659531aa6a617d084e0e58e4 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 generated auction feed 0xdcd01161cd9cdec357b73aee7c3cc07a573078cd3a45f64cdb9bf39053a0bb06 0x4298cac434ef64936f6e0a1cb96ba1bb071fb4106bfe7b94fe9f32000398902c background none body white neck redcollar mouth none ears loopearring head headphones eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #489/694 background: none (91.6%) body: white (11.1%) neck: redcollar (29.3%) mouth: none (68.6%) ears: loopearring (27.2%) head: headphones (6.8%) eyes: glasses (12.4%)",
     "settlement": {
       "block_number": 48392164,
       "block_time_utc": "2026-07-09T05:07:55Z",
@@ -96,12 +96,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

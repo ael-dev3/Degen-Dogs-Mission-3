@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#373/693",
-      "rank": 373,
+      "display": "#372/694",
+      "rank": 372,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 #373/693 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters",
+    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters #372/694 background: none (91.6%) body: brown (10.8%) neck: redcollar (29.3%) mouth: pizza (11.0%) ears: earbuds (32.6%) head: whitemohawk (6.9%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 26006716,
       "block_time_utc": "2025-06-22T17:49:07Z",
@@ -98,7 +98,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.6%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

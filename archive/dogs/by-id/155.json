@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#30/693",
+      "display": "#30/694",
       "rank": 30,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 155 dog #155 155 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c 0x84d85ef6ef117788b4ab37dc788789c5c786e1f7ee83b4e350be6e3db21961c6 #30/693 background: none; body: black; neck: redcollar; mouth: bone; ears: loopearring; head: crazyhair; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 155 dog #155 155 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x66f4699438c205ad74a479754f158c0d669500b446cf10ac8ac59239cfe6db7c 0x84d85ef6ef117788b4ab37dc788789c5c786e1f7ee83b4e350be6e3db21961c6 background: none; body: black; neck: redcollar; mouth: bone; ears: loopearring; head: crazyhair; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #30/694 background: none (91.6%) body: black (11.5%) neck: redcollar (29.3%) mouth: bone (2.6%) ears: loopearring (27.2%) head: crazyhair (6.8%) eyes: bluelasereyes (11.5%)",
     "settlement": {
       "block_number": 31660882,
       "block_time_utc": "2022-08-08T14:02:16Z",
@@ -98,7 +98,7 @@
         "value": "Bone"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -108,7 +108,7 @@
         "value": "CrazyHair"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.4%)",
+        "display": "Eyes: BlueLaserEyes (11.5%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

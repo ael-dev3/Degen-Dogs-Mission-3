@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#494/693",
+      "display": "#494/694",
       "rank": 494,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 22.52 $22.52 2026-08-20t19:57:59z 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25 #494/693 generated auction feed 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21 background: none (91.6%) background none body: grey (12.8%) body grey neck: redcollar (29.3%) neck redcollar mouth: none (68.5%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (6.8%) head crazyhair eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 808 dog #808 808 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 22.52 $22.52 2026-08-20t19:57:59z 0xb3e19a7c0f0df42dfafcafda93c434d8b61b9b6ba98cc5d04d8c98dea74ed52d 0xcaadf1ac52e9fcce099bd52fa49f94afb0489bcdfe911e6bcfc3185ef6281e25 generated auction feed 0x20b6cd76df582f3af280c313eef9832c8c97bf9fe318c268eb24c413d955b301 0xdb655d5c74b10ce34799d869b29b2f7328d2181aa9c7f3f0c6c59b0358026b21 background none body grey neck redcollar mouth none ears earbuds head crazyhair eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #494/694 background: none (91.6%) body: grey (12.8%) neck: redcollar (29.3%) mouth: none (68.6%) ears: earbuds (32.6%) head: crazyhair (6.8%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": 50233266,
       "block_time_utc": "2026-08-20T19:57:59Z",
@@ -97,12 +97,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.6%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

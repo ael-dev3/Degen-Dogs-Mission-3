@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#231/693",
-      "rank": 231,
+      "display": "#228/694",
+      "rank": 228,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 144 dog #144 144 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xee70eed885b3d158fa82de7773227bed83744a72e8558d90a946337bcf5bc66b 0xe6785ad0592c855ff1bdeeb4a279a6625dd171ac644f87d43e0d2405f92d1748 #231/693 background: none; body: rainbow; neck: goldnecklace; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 144 dog #144 144 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xee70eed885b3d158fa82de7773227bed83744a72e8558d90a946337bcf5bc66b 0xe6785ad0592c855ff1bdeeb4a279a6625dd171ac644f87d43e0d2405f92d1748 background: none; body: rainbow; neck: goldnecklace; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #228/694 background: none (91.6%) body: rainbow (4.3%) neck: goldnecklace (19.2%) mouth: none (68.6%) ears: loopearring (27.2%) head: stripedbeanie (7.9%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 30387381,
       "block_time_utc": "2022-07-06T02:08:48Z",
@@ -93,12 +93,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

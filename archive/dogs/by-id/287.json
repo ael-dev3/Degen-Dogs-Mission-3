@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#114/693",
-      "rank": 114,
+      "display": "#112/694",
+      "rank": 112,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 287 dog #287 287 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 3300 degen 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a #114/693 background: none; body: blue; neck: studdedcollar; mouth: none; ears: none; head: beanie; eyes: monocle 0xa770381b8e13a2edb2e0fa1ed2dc68efe327e5b74fff839e22f166c1feeee349 0xd8f426cf2c186555f021af4c2832cd73f4478269698d4b1188ab53b2a05abd66 chain_logs contract_getters",
+    "search_text": "dog 287 dog #287 287 mission 2 mission 2 degen chain settled 0xefbe74a2d564b5da62407d452038db32c9fd6b27 0xefbe…6b27 3300 degen 0xaa60d97c67ddca26045995df1be6569d876077f598d7602a422412890ed1b075 0xd02ea4829c3feaff1afcbbf6e1ac02b997bbdcf3ac0bed05977da3b3827f5d6a background: none; body: blue; neck: studdedcollar; mouth: none; ears: none; head: beanie; eyes: monocle 0xa770381b8e13a2edb2e0fa1ed2dc68efe327e5b74fff839e22f166c1feeee349 0xd8f426cf2c186555f021af4c2832cd73f4478269698d4b1188ab53b2a05abd66 chain_logs contract_getters #112/694 background: none (91.6%) body: blue (8.9%) neck: studdedcollar (10.1%) mouth: none (68.6%) ears: none (25.9%) head: beanie (5.3%) eyes: monocle (7.2%)",
     "settlement": {
       "block_number": 25461075,
       "block_time_utc": "2025-02-16T07:07:01Z",
@@ -94,12 +94,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },

@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#456/693",
+      "display": "#456/694",
       "rank": 456,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 417 dog #417 417 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x8b15e0fd002b41fe040fab57a4e93f8013e8d2c0c7b8b588a1c4730c915cfd67 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a #456/693 background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: loopearring; head: none; eyes: sunglasses 0x2425d61078fda1333445f3dbd480f2044bd39d92c2312b7fc9b8213a1982c9cf chain_logs contract_getters",
+    "search_text": "dog 417 dog #417 417 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x8b15e0fd002b41fe040fab57a4e93f8013e8d2c0c7b8b588a1c4730c915cfd67 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a background: none; body: redbrown; neck: studdedcollar; mouth: pizza; ears: loopearring; head: none; eyes: sunglasses 0x2425d61078fda1333445f3dbd480f2044bd39d92c2312b7fc9b8213a1982c9cf chain_logs contract_getters #456/694 background: none (91.6%) body: redbrown (15.4%) neck: studdedcollar (10.1%) mouth: pizza (11.0%) ears: loopearring (27.2%) head: none (20.2%) eyes: sunglasses (13.4%)",
     "settlement": {
       "block_number": 26002801,
       "block_time_utc": "2025-06-21T14:16:46Z",
@@ -98,12 +98,12 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.2%)",
         "trait_type": "Head",
         "value": "None"
       },

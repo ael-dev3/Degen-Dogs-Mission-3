@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#66/693",
+      "display": "#66/694",
       "rank": 66,
       "scope": "base_existing",
-      "total": 693
+      "total": 694
     },
     "schema_version": 1,
-    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 #66/693 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters",
+    "search_text": "dog 569 dog #569 569 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 12726 degen 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f 0x1d5f2bd0dbfc66f6908e01e206f5bdfd8c5573ef55dfff4554438784edfe8169 background: none; body: sugarskull; neck: studdedcollar; mouth: tongue; ears: loopearring; head: whitemohawk; eyes: monocle 0x6c270535475488b433e2f1bb09d275b51f11f246fa3825d3b0676dd4e289c3e1 0x77dff1523d11cceccc8dd6ba2dbf896606b50389c5b733a39ba399fcac34e39b 0x5ca3ba4f90e18f3a2a71a921854a5c344f9f1ae8d049c01a53d8f733365f4f2a chain_logs contract_getters #66/694 background: none (91.6%) body: sugarskull (6.5%) neck: studdedcollar (10.1%) mouth: tongue (9.9%) ears: loopearring (27.2%) head: whitemohawk (6.9%) eyes: monocle (7.2%)",
     "settlement": {
       "block_number": 26594941,
       "block_time_utc": "2025-12-17T06:15:43Z",
@@ -85,7 +85,7 @@
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.3%)",
+        "display": "Body: SugarSkull (6.5%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
@@ -95,12 +95,12 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Tongue (10.0%)",
+        "display": "Mouth: Tongue (9.9%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
