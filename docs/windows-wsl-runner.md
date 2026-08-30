@@ -118,7 +118,7 @@ policy.
 
 ## Exact-commit bootstrap, disabled by default
 
-The PowerShell bootstrap installs an isolated `Ubuntu-24.04` WSL2 distro,
+The PowerShell bootstrap installs an isolated Ubuntu 24.04 WSL2 distro,
 enables systemd, installs Node 22/Python/Git/runtime packages, creates the
 unprivileged `degendogs` Linux user, clones the public repository to ext4 at
 `/srv/degen-dogs/repo`, creates a hash-locked Python venv, installs npm
@@ -126,10 +126,10 @@ dependencies, generates a unique deploy key, and registers a **disabled**
 Windows keepalive task.
 
 Choose the exact 40-character commit containing the reviewed runner assets,
-then make a separate detached checkout for that object in an elevated
-PowerShell window. Run the bootstrap from that checkout and treat it as
-read-only; do not run a convenient copy from a development worktree. Do not
-substitute a branch name or `HEAD`:
+then make a separate detached checkout for that object. For the recommended
+pre-login service, use an elevated PowerShell window. Run the bootstrap from
+that checkout and treat it as read-only; do not run a convenient copy from a
+development worktree. Do not substitute a branch name or `HEAD`:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
@@ -172,6 +172,51 @@ administrator, network trust store, or already-compromised host can lie about
 or remove its own checks. Review the bootstrap before elevation and keep the
 detached checkout isolated until installation and activation finish.
 
+### No-UAC current-user fallback
+
+When WSL2 is already operational but Windows elevation is unavailable, the
+same exact detached checkout supports a current-user fallback from an ordinary
+PowerShell window. Bootstrap it in disabled state with:
+
+```powershell
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -AtLogOnOnly
+```
+
+For a missing runner distro, this mode imports Canonical's versioned Ubuntu
+24.04.4 AMD64 WSL image beneath the Windows `LocalApplicationData` known
+folder. The image URL and SHA-256 are pinned together in reviewed code; the
+script downloads over HTTPS and verifies the exact digest before
+`wsl --import`. A current-user/distro file lock serializes install, activation,
+uninstall, and recovery. Each import receives a unique location and durable
+host receipt; rollback may unregister or remove files only when that exact
+attempt token matches the WSL registration. Every existing directory from the
+known-folder root through the import is rechecked and reparse points are
+rejected. It never copies the unrelated default Ubuntu distro and never enables
+Windows features or machine policy.
+
+Every mode holds current-user/task-name and current-user/distro locks for the
+full lifecycle.
+Immediately before registration, the installer re-attests and removes only an
+exact managed predecessor; registration never force-overwrites a task that
+appears concurrently.
+
+The disabled Task Scheduler definition is attested before use: it belongs to
+the current SID, uses `InteractiveToken` and least privilege, has exactly one
+logon trigger plus the five-minute watchdog, contains no boot trigger, and
+invokes only the exact System32 `wsl.exe` anchor action. After the deploy key
+and RPC configuration are ready, activate with:
+
+```powershell
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -AtLogOnOnly
+```
+
+This fallback starts only after that Windows user signs in and cannot recover
+while the user is signed out. It also cannot repair Windows Time, sleep, or
+power policy. Keep the user signed in and prefer the password-backed elevated
+task when true boot/pre-login uptime becomes available. Rotate the Ubuntu image
+pin only by reviewing and changing its official versioned URL and checksum
+together in a new trusted commit.
+
 The script prints only the public deploy key. Add that public key at:
 
 ```text
@@ -204,15 +249,15 @@ $credential = Get-Credential "$env:USERDOMAIN\$env:USERNAME"
 & $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -Credential $credential
 ```
 
-If the Windows account uses Windows Hello without a reusable password, a
-reduced-uptime fallback is available:
+If the Windows account uses Windows Hello without a reusable password, use the
+current-user fallback described above:
 
 ```powershell
 & $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -AtLogOnOnly
 ```
 
-That mode cannot start WSL until the user logs on after a reboot. Prefer the
-password-backed task for a truly unattended runner.
+That mode cannot start WSL until the user logs on after a reboot and stays
+signed in. Prefer the password-backed task for a truly unattended runner.
 
 Activation runs the read-only RPC watcher preflight and Git write dry-run before
 enabling either publisher. The Task Scheduler action keeps one root anchor
@@ -301,7 +346,8 @@ hourly job maintains the archive.
 
 ## Verify operation
 
-From elevated PowerShell:
+From the same Windows account (elevation is needed only for the pre-login
+mode):
 
 ```powershell
 Get-ScheduledTask -TaskName 'Degen Dogs WSL Runner'
@@ -376,6 +422,12 @@ configuration, SSH key, logs, and caches:
 
 ```powershell
 & $bootstrapScript -TrustedInstallerCommit $trustedCommit -Uninstall
+```
+
+For a non-elevated current-user installation, preserve the mode selection:
+
+```powershell
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -AtLogOnOnly -Uninstall
 ```
 
 Linux-only removal is also available:

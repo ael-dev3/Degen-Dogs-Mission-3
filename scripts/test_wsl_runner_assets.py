@@ -220,12 +220,45 @@ def test() -> None:
     assert "--uninstall" in installer
 
     powershell = text("scripts/install_wsl_startup_task.ps1")
+    assert not powershell.startswith("#Requires -RunAsAdministrator")
+    assert "function Assert-WslRunnerInvocationPolicy" in powershell
+    policy_gate = powershell.rindex("Assert-WslRunnerInvocationPolicy `")
+    source_attestation = powershell.index(
+        "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"
+    )
+    assert policy_gate < source_attestation
+    assert "function Invoke-VerifiedWslImport" in powershell
+    assert powershell.count("Invoke-VerifiedWslImport") >= 2
+    assert "https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl" in powershell
+    assert "9b2f7730dc68227dd04a9f3e5eab86ad85caf556b8606ad94f1f29ff5c4fd3f5" in powershell
+    assert "Get-WslRunnerImportArguments" in powershell
+    assert "Get-WslRunnerKnownLocalAppData" in powershell
+    assert "New-WslRunnerImportAttempt" in powershell
+    assert "Enter-WslRunnerDistroLock" in powershell
+    assert "Enter-WslRunnerTaskLock" in powershell
+    assert "Invoke-WslRunnerImportRollback" in powershell
+    assert "$listArguments = @('--list', '--all', '--quiet')" in powershell
+    assert "--proto-redir '=https'" in powershell
+    assert "--retry-all-errors" in powershell
+    assert "is not Ubuntu 24.04 AMD64" in powershell
     assert "New-ScheduledTaskAction" in powershell
     assert "-Disable `" in powershell
     assert "degen-dogs-wsl-anchor" in powershell
     assert "-AtStartup" in powershell and "-AtLogOn" in powershell
     assert "-RepetitionInterval (New-TimeSpan -Minutes 5)" in powershell
     assert "$AtLogOnOnly" in powershell
+    assert "Get-WslRunnerTriggerKinds" in powershell
+    assert powershell.count("-Trigger $selectedTriggers.ToArray()") == 3
+    registration_blocks = powershell.split("Register-ScheduledTask `")[1:]
+    assert len(registration_blocks) == 3
+    for block in registration_blocks:
+        assert "-Force" not in block.split("\n        }", 1)[0]
+    assert powershell.count("-PrepareAction $isolateRegisteredTaskAction") == 2
+    assert "-Trigger @($startupTrigger" not in powershell
+    assert "Export-ScheduledTask" in powershell
+    assert powershell.count("Assert-WslRunnerOwnedTaskDefinition") >= 6
+    assert "function Assert-WslRunnerManagedTaskXml" in powershell
+    assert "-AllowManagedPredecessor" in powershell
     assert "Assert-CurrentAccountCredential" in powershell
     assert 'merge --ff-only "$runtime_sha"' in powershell
     assert "refs/heads/main" in powershell
@@ -265,8 +298,14 @@ def test() -> None:
     ):
         assert not re.fullmatch(task_name_pattern, unsafe_task_name), unsafe_task_name
     assert "function Get-ExactScheduledTask" in powershell
-    assert "[WildcardPattern]::Escape($Name)" in powershell
-    assert "[StringComparison]::Ordinal" in powershell
+    task_lookup = powershell.split("function Get-ExactScheduledTask", 1)[1].split(
+        "function Assert-WslRunnerOwnedTaskDefinition", 1
+    )[0]
+    assert "-TaskPath '\\'" in task_lookup
+    assert "-ErrorAction Stop" in task_lookup
+    assert "SilentlyContinue" not in task_lookup
+    assert "[StringComparison]::OrdinalIgnoreCase" in task_lookup
+    assert "[StringComparison]::Ordinal" in task_lookup
     assert not re.search(
         r"(?m)^\s*(?:Disable|Stop|Unregister|Enable|Start)-ScheduledTask\s+-TaskName\s+\$TaskName",
         powershell,
@@ -281,12 +320,11 @@ def test() -> None:
     assert "catch {\n        $activationError = $_" in powershell
     activation_rollback = powershell.rsplit("catch {\n        $activationError = $_", 1)[1]
     assert "$rollbackClean" in activation_rollback
-    assert "Get-ExactScheduledTask -Name $TaskName" in activation_rollback
-    assert "rollback task remained enabled" in activation_rollback
-    assert "rollback task remained running" in activation_rollback
-    assert activation_rollback.count("| Disable-ScheduledTask") >= 2
-    assert "| Unregister-ScheduledTask -Confirm:$false" in activation_rollback
-    assert "fallback task isolation failed" in activation_rollback
+    assert "Invoke-CurrentWslRunnerTaskIsolation -Remove $true" in activation_rollback
+    assert "Windows task isolation was unproven" in activation_rollback
+    assert "function Invoke-WslRunnerTaskIsolation" in powershell
+    assert "Final ownership attestation failed" in powershell
+    assert "OperationAttempts" in powershell
     assert "exact Windows task isolation could not be established" in activation_rollback
     assert "--terminate $DistroName" in activation_rollback
     assert "fallback termination failed" in activation_rollback
@@ -536,8 +574,11 @@ exit "$status"
 
     runner_docs = text("docs/windows-wsl-runner.md")
     assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -Credential $credential" in runner_docs
+    assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -AtLogOnOnly" in runner_docs
     assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -AtLogOnOnly" in runner_docs
     assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Uninstall" in runner_docs
+    assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -AtLogOnOnly -Uninstall" in runner_docs
+    assert "cannot recover\nwhile the user is signed out" in runner_docs
 
     preflight = text("scripts/preflight_wsl_rpc.py")
     ast.parse(preflight)
@@ -588,6 +629,8 @@ exit "$status"
     assert scripts["test:live-snapshot"] == "python3 scripts/test_build_live_snapshot_bundle.py"
     assert "test:pages-validation-runner" in scripts["test:dashboard"]
     assert scripts["test:wsl-runner-assets"] == "python3 scripts/test_wsl_runner_assets.py"
+    assert scripts["test:wsl-windows-policy"] == "python3 scripts/test_wsl_runner_windows_policy.py"
+    assert "test:wsl-windows-policy" in scripts["test:ops"]
 
     runner_env_loader = (ROOT / "scripts" / "load_runner_env.sh").read_text(encoding="utf-8")
     production_allowlist = runner_env_loader.split("DEGEN_DOGS_RUNNER_COMMON_ENV_ALLOWLIST='", 1)[1].split("'", 1)[0]

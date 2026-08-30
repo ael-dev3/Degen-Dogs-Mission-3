@@ -1,4 +1,3 @@
-#Requires -RunAsAdministrator
 [CmdletBinding()]
 param(
     [ValidatePattern('^[A-Za-z0-9._-]{1,48}$')]
@@ -23,6 +22,931 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+function Test-CurrentProcessIsAdministrator {
+    $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = [Security.Principal.WindowsPrincipal]::new($identity)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Assert-WslRunnerInvocationPolicy {
+    param(
+        [Parameter(Mandatory)][bool]$IsAdministrator,
+        [Parameter(Mandatory)][bool]$AtLogOnOnly,
+        [Parameter(Mandatory)][bool]$HasCredential
+    )
+
+    if (-not $IsAdministrator -and -not $AtLogOnOnly) {
+        throw 'Run this installer from an elevated PowerShell, or select -AtLogOnOnly for the current-user fallback.'
+    }
+    if ($AtLogOnOnly -and $HasCredential) {
+        throw 'Do not supply -Credential with -AtLogOnOnly; the interactive fallback uses the current signed-in account.'
+    }
+}
+
+function Get-WslRunnerImageSpec {
+    return [PSCustomObject]@{
+        Uri = 'https://releases.ubuntu.com/24.04.4/ubuntu-24.04.4-wsl-amd64.wsl'
+        Sha256 = '9b2f7730dc68227dd04a9f3e5eab86ad85caf556b8606ad94f1f29ff5c4fd3f5'
+    }
+}
+
+function Get-WslRunnerOwnershipMarkerValue {
+    param(
+        [Parameter(Mandatory)]
+        [ValidatePattern('^[0-9a-f]{32}$')]
+        [string]$AttemptId
+    )
+
+    return "degen-dogs-windows-runner-v1:$AttemptId"
+}
+
+function Get-WslRunnerTriggerKinds {
+    param([Parameter(Mandatory)][bool]$AtLogOnOnly)
+
+    if ($AtLogOnOnly) {
+        return @('Logon', 'Watchdog')
+    }
+    return @('Startup', 'Logon', 'Watchdog')
+}
+
+function Get-WslRunnerKnownLocalAppData {
+    $knownPath = [Environment]::GetFolderPath(
+        [Environment+SpecialFolder]::LocalApplicationData
+    )
+    if (-not $knownPath) {
+        throw 'The Windows LocalApplicationData known folder is unavailable.'
+    }
+    return [IO.Path]::GetFullPath($knownPath)
+}
+
+function Assert-WslRunnerDirectoryBoundary {
+    param(
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$Candidate,
+        [scriptblock]$GetItemAction
+    )
+
+    $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $candidatePath = [IO.Path]::GetFullPath($Candidate).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $boundedPrefix = $rootPath + [IO.Path]::DirectorySeparatorChar
+    if (-not [String]::Equals($candidatePath, $rootPath, [StringComparison]::OrdinalIgnoreCase) -and
+        -not $candidatePath.StartsWith($boundedPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'The candidate directory escaped the Windows known-folder boundary.'
+    }
+    if (-not $GetItemAction) {
+        $GetItemAction = {
+            param($path)
+            if (Test-Path -LiteralPath $path) {
+                return Get-Item -LiteralPath $path -Force
+            }
+            return $null
+        }
+    }
+
+    $pathsToInspect = [Collections.Generic.List[string]]::new()
+    $pathsToInspect.Add($rootPath)
+    if (-not [String]::Equals($candidatePath, $rootPath, [StringComparison]::OrdinalIgnoreCase)) {
+        $relative = $candidatePath.Substring($boundedPrefix.Length)
+        $cursor = $rootPath
+        foreach ($segment in @($relative -split '[\\/]')) {
+            if (-not $segment) { continue }
+            $cursor = Join-Path $cursor $segment
+            $pathsToInspect.Add([IO.Path]::GetFullPath($cursor))
+        }
+    }
+    foreach ($path in $pathsToInspect) {
+        $item = & $GetItemAction $path
+        if ($null -eq $item) {
+            if ([String]::Equals($path, $rootPath, [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'The Windows LocalApplicationData known folder does not exist.'
+            }
+            continue
+        }
+        if (-not $item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "The WSL install boundary contains a non-directory or reparse point: $path"
+        }
+    }
+    return $candidatePath
+}
+
+function Initialize-WslRunnerInstallBase {
+    param([Parameter(Mandatory)][string]$KnownLocalAppData)
+
+    $knownRoot = Assert-WslRunnerDirectoryBoundary `
+        -Root $KnownLocalAppData `
+        -Candidate $KnownLocalAppData
+    $degenDogsRoot = [IO.Path]::GetFullPath((Join-Path $knownRoot 'DegenDogs'))
+    [IO.Directory]::CreateDirectory($degenDogsRoot) | Out-Null
+    Assert-WslRunnerDirectoryBoundary -Root $knownRoot -Candidate $degenDogsRoot | Out-Null
+    $installBase = [IO.Path]::GetFullPath((Join-Path $degenDogsRoot 'WSL'))
+    [IO.Directory]::CreateDirectory($installBase) | Out-Null
+    Assert-WslRunnerDirectoryBoundary -Root $knownRoot -Candidate $installBase | Out-Null
+    return [PSCustomObject]@{
+        KnownLocalAppData = $knownRoot
+        Base = $installBase
+    }
+}
+
+function Enter-WslRunnerDistroLock {
+    param(
+        [Parameter(Mandatory)][string]$KnownLocalAppData,
+        [Parameter(Mandatory)][string]$InstallBase,
+        [Parameter(Mandatory)][string]$UserSid,
+        [Parameter(Mandatory)][string]$DistroName,
+        [ValidateSet('distro', 'task')][string]$LockNamespace = 'distro'
+    )
+
+    $basePath = [IO.Path]::GetFullPath($InstallBase)
+    Assert-WslRunnerDirectoryBoundary `
+        -Root $KnownLocalAppData `
+        -Candidate $basePath |
+        Out-Null
+    $baseItem = Get-Item -LiteralPath $basePath -Force
+    if (-not $baseItem.PSIsContainer -or ($baseItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'The WSL install base is not an ordinary directory.'
+    }
+    $lockDirectory = [IO.Path]::GetFullPath((Join-Path $basePath '.locks'))
+    [IO.Directory]::CreateDirectory($lockDirectory) | Out-Null
+    Assert-WslRunnerDirectoryBoundary `
+        -Root $KnownLocalAppData `
+        -Candidate $lockDirectory |
+        Out-Null
+    $lockDirectoryItem = Get-Item -LiteralPath $lockDirectory -Force
+    if (-not $lockDirectoryItem.PSIsContainer -or
+        ($lockDirectoryItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'The WSL runner lock directory is not an ordinary directory.'
+    }
+    $hashAlgorithm = [Security.Cryptography.SHA256]::Create()
+    try {
+        $canonicalDistroName = $DistroName.ToUpperInvariant()
+        $lockIdentity = "$UserSid`0$LockNamespace`0$canonicalDistroName"
+        $lockDigest = ([BitConverter]::ToString(
+            $hashAlgorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($lockIdentity))
+        )).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $hashAlgorithm.Dispose()
+    }
+    $lockPath = Join-Path $lockDirectory "$lockDigest.lock"
+    try {
+        $stream = [IO.File]::Open(
+            $lockPath,
+            [IO.FileMode]::OpenOrCreate,
+            [IO.FileAccess]::ReadWrite,
+            [IO.FileShare]::None
+        )
+    }
+    catch {
+        throw "Another Degen Dogs installer or uninstaller owns the current-user $LockNamespace lock: $($_.Exception.Message)"
+    }
+    return [PSCustomObject]@{
+        Path = $lockPath
+        Stream = $stream
+    }
+}
+
+function Enter-WslRunnerTaskLock {
+    param(
+        [Parameter(Mandatory)][string]$KnownLocalAppData,
+        [Parameter(Mandatory)][string]$InstallBase,
+        [Parameter(Mandatory)][string]$UserSid,
+        [Parameter(Mandatory)][string]$TaskName
+    )
+
+    return Enter-WslRunnerDistroLock `
+        -KnownLocalAppData $KnownLocalAppData `
+        -InstallBase $InstallBase `
+        -UserSid $UserSid `
+        -DistroName $TaskName `
+        -LockNamespace task
+}
+
+function Exit-WslRunnerDistroLock {
+    param([Parameter(Mandatory)][object]$Lock)
+
+    if ($Lock.PSObject.Properties['Stream'] -and $Lock.Stream) {
+        $Lock.Stream.Dispose()
+    }
+}
+
+function New-WslRunnerImportAttempt {
+    param(
+        [Parameter(Mandatory)][string]$KnownLocalAppData,
+        [Parameter(Mandatory)][string]$DistroName
+    )
+
+    $basePlan = Initialize-WslRunnerInstallBase -KnownLocalAppData $KnownLocalAppData
+    $attemptId = [Guid]::NewGuid().ToString('N')
+    $location = [IO.Path]::GetFullPath((Join-Path $basePlan.Base "$DistroName-$attemptId"))
+    [IO.Directory]::CreateDirectory($location) | Out-Null
+    Assert-WslRunnerDirectoryBoundary `
+        -Root $basePlan.KnownLocalAppData `
+        -Candidate $location |
+        Out-Null
+    $receiptPath = Join-Path $location '.degen-dogs-import-attempt'
+    $receiptText = "degen-dogs-wsl-import-v1:$attemptId"
+    $receiptBytes = [Text.Encoding]::UTF8.GetBytes($receiptText)
+    $receiptStream = [IO.File]::Open(
+        $receiptPath,
+        [IO.FileMode]::CreateNew,
+        [IO.FileAccess]::Write,
+        [IO.FileShare]::None
+    )
+    try {
+        $receiptStream.Write($receiptBytes, 0, $receiptBytes.Length)
+        $receiptStream.Flush($true)
+    }
+    finally {
+        $receiptStream.Dispose()
+    }
+    return [PSCustomObject]@{
+        Id = $attemptId
+        DistroName = $DistroName
+        KnownLocalAppData = $basePlan.KnownLocalAppData
+        Base = $basePlan.Base
+        Location = $location
+        ReceiptPath = $receiptPath
+        ImportCommandSucceeded = $false
+    }
+}
+
+function Test-WslRunnerImportReceipt {
+    param([Parameter(Mandatory)][object]$Attempt)
+
+    try {
+        if ($Attempt.Id -notmatch '^[0-9a-f]{32}$') { return $false }
+        $expectedLocation = [IO.Path]::GetFullPath(
+            (Join-Path $Attempt.Base "$($Attempt.DistroName)-$($Attempt.Id)")
+        )
+        if (-not [String]::Equals(
+            $expectedLocation,
+            [IO.Path]::GetFullPath($Attempt.Location),
+            [StringComparison]::OrdinalIgnoreCase
+        )) { return $false }
+        Assert-WslRunnerDirectoryBoundary `
+            -Root $Attempt.KnownLocalAppData `
+            -Candidate $expectedLocation |
+            Out-Null
+        $expectedReceipt = [IO.Path]::GetFullPath(
+            (Join-Path $expectedLocation '.degen-dogs-import-attempt')
+        )
+        if (-not [String]::Equals(
+            $expectedReceipt,
+            [IO.Path]::GetFullPath($Attempt.ReceiptPath),
+            [StringComparison]::OrdinalIgnoreCase
+        )) { return $false }
+        if (-not (Test-Path -LiteralPath $expectedReceipt -PathType Leaf)) { return $false }
+        $receiptItem = Get-Item -LiteralPath $expectedReceipt -Force
+        if ($receiptItem.Attributes -band [IO.FileAttributes]::ReparsePoint) { return $false }
+        $expectedText = "degen-dogs-wsl-import-v1:$($Attempt.Id)"
+        return [String]::Equals(
+            [IO.File]::ReadAllText($expectedReceipt, [Text.Encoding]::UTF8),
+            $expectedText,
+            [StringComparison]::Ordinal
+        )
+    }
+    catch {
+        return $false
+    }
+}
+
+function Get-WslRunnerImportAttemptFromRegistration {
+    param(
+        [Parameter(Mandatory)][object]$Registration,
+        [Parameter(Mandatory)][string]$KnownLocalAppData,
+        [Parameter(Mandatory)][string]$DistroName
+    )
+
+    try {
+        $registeredName = [string]$Registration.Name
+        $registeredVersion = [int]$Registration.Version
+        $registeredBasePath = [string]$Registration.BasePath
+    }
+    catch {
+        throw 'The existing WSL registration has an invalid shape.'
+    }
+    if (-not [String]::Equals($registeredName, $DistroName, [StringComparison]::Ordinal) -or
+        $registeredVersion -ne 2 -or -not $registeredBasePath) {
+        throw 'The existing WSL registration does not match the exact distro name and WSL2 version.'
+    }
+    if ($registeredBasePath.StartsWith('\\?\', [StringComparison]::Ordinal)) {
+        $registeredBasePath = $registeredBasePath.Substring(4)
+    }
+    $knownRoot = [IO.Path]::GetFullPath($KnownLocalAppData)
+    $installBase = [IO.Path]::GetFullPath(
+        (Join-Path (Join-Path $knownRoot 'DegenDogs') 'WSL')
+    )
+    $location = [IO.Path]::GetFullPath($registeredBasePath)
+    Assert-WslRunnerDirectoryBoundary -Root $knownRoot -Candidate $installBase | Out-Null
+    Assert-WslRunnerDirectoryBoundary -Root $knownRoot -Candidate $location | Out-Null
+    if (-not (Test-Path -LiteralPath $location -PathType Container)) {
+        throw 'The existing WSL registration install directory does not exist.'
+    }
+    $leaf = Split-Path -Leaf $location
+    $leafPattern = '^' + [Regex]::Escape($DistroName) + '-([0-9a-f]{32})$'
+    if ($leaf -notmatch $leafPattern) {
+        throw 'The existing WSL registration path has no attempt-specific location token.'
+    }
+    $attemptId = $Matches[1].ToLowerInvariant()
+    $attempt = [PSCustomObject]@{
+        Id = $attemptId
+        DistroName = $DistroName
+        KnownLocalAppData = $knownRoot
+        Base = $installBase
+        Location = $location
+        ReceiptPath = Join-Path $location '.degen-dogs-import-attempt'
+        ImportCommandSucceeded = $true
+    }
+    if (-not (Test-WslRunnerImportReceipt -Attempt $attempt)) {
+        throw 'The existing WSL registration has no matching ordinary host attempt receipt.'
+    }
+    return $attempt
+}
+
+function Get-WslRunnerImportArguments {
+    param(
+        [Parameter(Mandatory)][string]$DistroName,
+        [Parameter(Mandatory)][string]$InstallLocation,
+        [Parameter(Mandatory)][string]$ImagePath
+    )
+
+    return @('--import', $DistroName, $InstallLocation, $ImagePath, '--version', '2')
+}
+
+function New-WslRunnerTaskPlan {
+    param(
+        [Parameter(Mandatory)][bool]$AtLogOnOnly,
+        [Parameter(Mandatory)][bool]$Activate,
+        [Parameter(Mandatory)][string]$UserSid,
+        [Parameter(Mandatory)][string]$WslPath,
+        [Parameter(Mandatory)][string]$DistroName
+    )
+
+    $logonType = if ($AtLogOnOnly -or -not $Activate) { 'Interactive' } else { 'Password' }
+    return [PSCustomObject]@{
+        TriggerKinds = @(Get-WslRunnerTriggerKinds -AtLogOnOnly $AtLogOnOnly)
+        UserId = $UserSid
+        LogonType = $logonType
+        RunLevel = 'Limited'
+        Executable = $WslPath
+        Arguments = "--distribution $DistroName --user root --exec /usr/local/libexec/degen-dogs-wsl-anchor"
+        InitiallyEnabled = $false
+    }
+}
+
+function Resolve-WslRunnerUserSid {
+    param([Parameter(Mandatory)][string]$UserId)
+
+    if ($UserId -match '^S-1-[0-9-]+$') {
+        return $UserId
+    }
+    try {
+        $account = [Security.Principal.NTAccount]::new($UserId)
+        return $account.Translate([Security.Principal.SecurityIdentifier]).Value
+    }
+    catch {
+        throw "Scheduled-task user '$UserId' could not be resolved to a Windows SID."
+    }
+}
+
+function Test-WslDistroRegistrationMatches {
+    param(
+        [Parameter(Mandatory)][object]$Registration,
+        [Parameter(Mandatory)][string]$DistroName,
+        [Parameter(Mandatory)][string]$InstallLocation
+    )
+
+    try {
+        $registeredName = [string]$Registration.Name
+        $registeredVersion = [int]$Registration.Version
+        $registeredBasePath = [string]$Registration.BasePath
+    }
+    catch {
+        return $false
+    }
+    if (-not [String]::Equals($registeredName, $DistroName, [StringComparison]::Ordinal)) {
+        return $false
+    }
+    if ($registeredVersion -ne 2 -or -not $registeredBasePath) {
+        return $false
+    }
+    if (-not (Test-WslDistroRegistrationPathMatches `
+        -Registration $Registration `
+        -DistroName $DistroName `
+        -InstallLocation $InstallLocation)) {
+        return $false
+    }
+    return $registeredVersion -eq 2
+}
+
+function Test-WslDistroRegistrationPathMatches {
+    param(
+        [Parameter(Mandatory)][object]$Registration,
+        [Parameter(Mandatory)][string]$DistroName,
+        [Parameter(Mandatory)][string]$InstallLocation
+    )
+
+    try {
+        $registeredName = [string]$Registration.Name
+        $registeredBasePath = [string]$Registration.BasePath
+    }
+    catch {
+        return $false
+    }
+    if (-not [String]::Equals($registeredName, $DistroName, [StringComparison]::Ordinal) -or -not $registeredBasePath) {
+        return $false
+    }
+    if ($registeredBasePath.StartsWith('\\?\', [StringComparison]::Ordinal)) {
+        $registeredBasePath = $registeredBasePath.Substring(4)
+    }
+    $registeredPath = [IO.Path]::GetFullPath($registeredBasePath).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    $expectedPath = [IO.Path]::GetFullPath($InstallLocation).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    )
+    return [String]::Equals($registeredPath, $expectedPath, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Remove-BoundedWslImportDirectory {
+    param([Parameter(Mandatory)][object]$Attempt)
+
+    if (-not (Test-WslRunnerImportReceipt -Attempt $Attempt)) {
+        throw 'Refusing to remove a WSL import without the exact attempt receipt.'
+    }
+    $basePath = [IO.Path]::GetFullPath($Attempt.Base)
+    $locationPath = [IO.Path]::GetFullPath($Attempt.Location)
+    Assert-WslRunnerDirectoryBoundary `
+        -Root $Attempt.KnownLocalAppData `
+        -Candidate $basePath |
+        Out-Null
+    Assert-WslRunnerDirectoryBoundary `
+        -Root $Attempt.KnownLocalAppData `
+        -Candidate $locationPath |
+        Out-Null
+    if (-not (Test-Path -LiteralPath $locationPath)) {
+        return
+    }
+    $locationItem = Get-Item -LiteralPath $locationPath -Force
+    if (-not $locationItem.PSIsContainer -or (
+        $locationItem.Attributes -band [IO.FileAttributes]::ReparsePoint
+    )) {
+        throw 'Refusing to remove a partial WSL import that is not an ordinary directory.'
+    }
+    $reparseEntry = @(
+        Get-ChildItem -LiteralPath $locationPath -Force -Recurse |
+            Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint } |
+            Select-Object -First 1
+    )
+    if ($reparseEntry.Count -ne 0) {
+        throw 'Refusing to recursively remove a partial WSL import containing a reparse point.'
+    }
+    Remove-Item -LiteralPath $locationPath -Recurse -Force
+}
+
+function Invoke-WslRunnerImportRollback {
+    param(
+        [Parameter(Mandatory)][object]$Attempt,
+        [Parameter(Mandatory)][scriptblock]$GetInventoryAction,
+        [Parameter(Mandatory)][scriptblock]$GetRegistrationAction,
+        [Parameter(Mandatory)][scriptblock]$UnregisterAction,
+        [Parameter(Mandatory)][scriptblock]$RemoveAction
+    )
+
+    if (-not (Test-WslRunnerImportReceipt -Attempt $Attempt)) {
+        throw 'The failed import has no exact host attempt receipt; preserving all state.'
+    }
+    $inventory = @(& $GetInventoryAction)
+    if ($inventory -contains $Attempt.DistroName) {
+        if (-not [bool]$Attempt.ImportCommandSucceeded) {
+            throw 'The import command did not prove success but the distro name is registered; preserving all state.'
+        }
+        $registration = & $GetRegistrationAction $Attempt.DistroName
+        if ($null -eq $registration -or -not (Test-WslDistroRegistrationMatches `
+            -Registration $registration `
+            -DistroName $Attempt.DistroName `
+            -InstallLocation $Attempt.Location)) {
+            throw 'The registered distro does not match the exact failed import attempt; preserving all state.'
+        }
+        if (-not (Test-WslRunnerImportReceipt -Attempt $Attempt)) {
+            throw 'The failed import attempt receipt changed before unregister; preserving all state.'
+        }
+        & $UnregisterAction $Attempt.DistroName
+        $postUnregisterInventory = @(& $GetInventoryAction)
+        if ($postUnregisterInventory -contains $Attempt.DistroName) {
+            throw 'The distro remains registered after rollback; preserving its install directory.'
+        }
+    }
+    if (-not (Test-WslRunnerImportReceipt -Attempt $Attempt)) {
+        throw 'The failed import attempt receipt changed before directory cleanup; preserving it.'
+    }
+    & $RemoveAction $Attempt
+}
+
+function Invoke-WslRunnerTaskIsolation {
+    param(
+        [Parameter(Mandatory)][bool]$Remove,
+        [Parameter(Mandatory)][scriptblock]$ResolveExactTaskAction,
+        [Parameter(Mandatory)][scriptblock]$AssertOwnedTaskAction,
+        [Parameter(Mandatory)][scriptblock]$DisableAction,
+        [Parameter(Mandatory)][scriptblock]$StopAction,
+        [Parameter(Mandatory)][scriptblock]$UnregisterAction
+    )
+
+    $errors = [Collections.Generic.List[string]]::new()
+    $operationAttempts = [Collections.Generic.List[string]]::new()
+    $unsafeOrForeign = $false
+    $operations = [Collections.Generic.List[object]]::new()
+    $operations.Add([PSCustomObject]@{ Name = 'Disable'; Action = $DisableAction })
+    $operations.Add([PSCustomObject]@{ Name = 'Stop'; Action = $StopAction })
+    if ($Remove) {
+        $operations.Add([PSCustomObject]@{ Name = 'Unregister'; Action = $UnregisterAction })
+    }
+
+    foreach ($operation in $operations) {
+        try {
+            $task = & $ResolveExactTaskAction
+        }
+        catch {
+            $errors.Add("$($operation.Name) resolve failed: $($_.Exception.Message)")
+            continue
+        }
+        if ($null -eq $task) {
+            break
+        }
+        try {
+            & $AssertOwnedTaskAction $task
+        }
+        catch {
+            $unsafeOrForeign = $true
+            $errors.Add("$($operation.Name) ownership attestation failed: $($_.Exception.Message)")
+            continue
+        }
+        $operationAttempts.Add($operation.Name)
+        try {
+            & $operation.Action $task
+        }
+        catch {
+            $errors.Add("$($operation.Name) failed: $($_.Exception.Message)")
+        }
+    }
+
+    $boundaryEstablished = $false
+    $endState = 'Unproven'
+    try {
+        $finalTask = & $ResolveExactTaskAction
+        if ($null -eq $finalTask) {
+            $boundaryEstablished = $true
+            $endState = 'Absent'
+        }
+        else {
+            try {
+                & $AssertOwnedTaskAction $finalTask
+                $finalEnabled = [bool]$finalTask.Settings.Enabled
+                $finalState = [string]$finalTask.State
+                if (-not $finalEnabled -and $finalState -in @('Ready', 'Disabled')) {
+                    $boundaryEstablished = $true
+                    $endState = 'DisabledStopped'
+                }
+                else {
+                    $errors.Add("Final managed task remained enabled or runnable (enabled=$finalEnabled state=$finalState).")
+                }
+            }
+            catch {
+                $unsafeOrForeign = $true
+                $errors.Add("Final ownership attestation failed: $($_.Exception.Message)")
+            }
+        }
+    }
+    catch {
+        $errors.Add("Final task resolution failed: $($_.Exception.Message)")
+    }
+    return [PSCustomObject]@{
+        BoundaryEstablished = $boundaryEstablished
+        EndState = $endState
+        OperationAttempts = @($operationAttempts)
+        Errors = @($errors)
+        UnsafeOrForeign = $unsafeOrForeign
+    }
+}
+
+function Invoke-WslRunnerTaskRegistrationTransaction {
+    param(
+        [Parameter(Mandatory)][scriptblock]$PrepareAction,
+        [Parameter(Mandatory)][scriptblock]$RegisterAction,
+        [Parameter(Mandatory)][scriptblock]$ResolveExactTaskAction,
+        [Parameter(Mandatory)][scriptblock]$AttestAction,
+        [Parameter(Mandatory)][scriptblock]$IsolationAction
+    )
+
+    $preparation = & $PrepareAction
+    if ($null -eq $preparation -or -not [bool]$preparation.BoundaryEstablished) {
+        $detail = if ($preparation -and $preparation.PSObject.Properties['Errors']) {
+            @($preparation.Errors) -join '; '
+        }
+        else {
+            'no preparation evidence was returned'
+        }
+        throw "The pre-registration task boundary was not established: $detail"
+    }
+    try {
+        $registeredTask = & $RegisterAction
+        if ($null -eq $registeredTask) {
+            throw 'Task Scheduler registration returned no task object.'
+        }
+        $resolvedTask = & $ResolveExactTaskAction
+        if ($null -eq $resolvedTask) {
+            throw 'The registered task could not be resolved by its exact root name.'
+        }
+        & $AttestAction $resolvedTask
+        return $resolvedTask
+    }
+    catch {
+        $registrationError = $_
+        try {
+            $isolation = & $IsolationAction
+        }
+        catch {
+            throw [InvalidOperationException]::new(
+                "Scheduled-task registration failed and isolation threw: $($_.Exception.Message)",
+                $registrationError.Exception
+            )
+        }
+        if ($null -eq $isolation -or -not [bool]$isolation.BoundaryEstablished) {
+            $detail = if ($isolation -and $isolation.PSObject.Properties['Errors']) {
+                @($isolation.Errors) -join '; '
+            }
+            else {
+                'no isolation evidence was returned'
+            }
+            throw [InvalidOperationException]::new(
+                "Scheduled-task registration failed and a safe task boundary was not established: $detail",
+                $registrationError.Exception
+            )
+        }
+        throw $registrationError
+    }
+}
+
+function Invoke-VerifiedWslImport {
+    param(
+        [Parameter(Mandatory)][uri]$ImageUri,
+        [Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{64}$')][string]$ExpectedSha256,
+        [Parameter(Mandatory)][string]$TemporaryRoot,
+        [Parameter(Mandatory)][string]$DistroName,
+        [Parameter(Mandatory)][string]$InstallLocation,
+        [Parameter(Mandatory)][scriptblock]$DownloadAction,
+        [Parameter(Mandatory)][scriptblock]$ImportAction,
+        [Parameter(Mandatory)][scriptblock]$RollbackAction
+    )
+
+    if (-not [String]::Equals($ImageUri.Scheme, 'https', [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'The WSL image URI must use HTTPS.'
+    }
+    $temporaryRootPath = [IO.Path]::GetFullPath($TemporaryRoot)
+    if (-not [IO.Directory]::Exists($temporaryRootPath)) {
+        throw 'The WSL image temporary directory does not exist.'
+    }
+    $imagePrefix = Join-Path $temporaryRootPath 'degen-dogs-ubuntu-24.04.4-'
+    $imagePath = [IO.Path]::GetFullPath(
+        ($imagePrefix + [Guid]::NewGuid().ToString('N') + '.wsl')
+    )
+    if (-not $imagePath.StartsWith($imagePrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Could not construct a bounded WSL image temporary path.'
+    }
+
+    try {
+        & $DownloadAction $ImageUri.AbsoluteUri $imagePath
+        if (-not (Test-Path -LiteralPath $imagePath -PathType Leaf)) {
+            throw 'The WSL image download did not create a regular file.'
+        }
+        $imageItem = Get-Item -LiteralPath $imagePath -Force
+        if ($imageItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            throw 'The downloaded WSL image is a reparse point.'
+        }
+        $imageStream = [IO.File]::OpenRead($imagePath)
+        $sha256 = [Security.Cryptography.SHA256]::Create()
+        try {
+            $actualSha256 = (
+                [BitConverter]::ToString($sha256.ComputeHash($imageStream))
+            ).Replace('-', '').ToLowerInvariant()
+        }
+        finally {
+            $sha256.Dispose()
+            $imageStream.Dispose()
+        }
+        if (-not [String]::Equals($actualSha256, $ExpectedSha256, [StringComparison]::Ordinal)) {
+            throw 'The downloaded WSL image SHA-256 does not match the reviewed digest.'
+        }
+
+        try {
+            & $ImportAction $DistroName $InstallLocation $imagePath
+        }
+        catch {
+            $importError = $_
+            try {
+                & $RollbackAction $DistroName $InstallLocation
+            }
+            catch {
+                throw [InvalidOperationException]::new(
+                    "WSL import failed and rollback also failed: $($_.Exception.Message)",
+                    $importError.Exception
+                )
+            }
+            throw $importError
+        }
+    }
+    finally {
+        if ([IO.File]::Exists($imagePath)) {
+            $verifiedParent = [IO.Path]::GetFullPath((Split-Path -Parent $imagePath))
+            if (-not [String]::Equals(
+                $verifiedParent,
+                $temporaryRootPath.TrimEnd([IO.Path]::DirectorySeparatorChar),
+                [StringComparison]::OrdinalIgnoreCase
+            )) {
+                throw 'Refusing to remove a WSL image outside the bounded temporary directory.'
+            }
+            Remove-Item -LiteralPath $imagePath -Force
+        }
+    }
+}
+
+function Assert-WslRunnerScheduledTaskXml {
+    param(
+        [Parameter(Mandatory)][string]$XmlText,
+        [Parameter(Mandatory)][string]$ExpectedUserSid,
+        [Parameter(Mandatory)][ValidateSet('InteractiveToken', 'Password')][string]$ExpectedLogonType,
+        [Parameter(Mandatory)][string]$ExpectedWslPath,
+        [Parameter(Mandatory)][string]$ExpectedArguments,
+        [Parameter(Mandatory)][bool]$AtLogOnOnly,
+        [Parameter(Mandatory)][bool]$ExpectedEnabled
+    )
+
+    [xml]$taskXml = $XmlText
+    $principals = @($taskXml.SelectNodes("/*[local-name()='Task']/*[local-name()='Principals']/*[local-name()='Principal']"))
+    if ($principals.Count -ne 1) {
+        throw "Expected one scheduled-task principal, found $($principals.Count)."
+    }
+    $principal = $principals[0]
+    $principalUser = $principal.SelectSingleNode("./*[local-name()='UserId']")
+    $logonType = $principal.SelectSingleNode("./*[local-name()='LogonType']")
+    $runLevel = $principal.SelectSingleNode("./*[local-name()='RunLevel']")
+    if (-not $principalUser -or -not [String]::Equals(
+        (Resolve-WslRunnerUserSid -UserId $principalUser.InnerText),
+        $ExpectedUserSid,
+        [StringComparison]::Ordinal
+    )) {
+        throw 'The scheduled-task principal is not the exact current-user SID.'
+    }
+    if (-not $logonType -or $logonType.InnerText -ne $ExpectedLogonType) {
+        throw "The scheduled-task logon type is not $ExpectedLogonType."
+    }
+    if ($runLevel -and $runLevel.InnerText -ne 'LeastPrivilege') {
+        throw 'The scheduled-task run level is not LeastPrivilege.'
+    }
+
+    $actions = @($taskXml.SelectNodes("/*[local-name()='Task']/*[local-name()='Actions']/*"))
+    if ($actions.Count -ne 1 -or $actions[0].LocalName -ne 'Exec') {
+        throw 'The scheduled task must contain exactly one Exec action.'
+    }
+    $command = $actions[0].SelectSingleNode("./*[local-name()='Command']")
+    $arguments = $actions[0].SelectSingleNode("./*[local-name()='Arguments']")
+    if (-not $command -or -not [String]::Equals($command.InnerText, $ExpectedWslPath, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'The scheduled-task executable is not the exact System32 wsl.exe path.'
+    }
+    if (-not $arguments -or -not [String]::Equals($arguments.InnerText, $ExpectedArguments, [StringComparison]::Ordinal)) {
+        throw 'The scheduled-task arguments do not match the exact runner anchor invocation.'
+    }
+
+    $triggers = @($taskXml.SelectNodes("/*[local-name()='Task']/*[local-name()='Triggers']/*"))
+    $expectedKinds = if ($AtLogOnOnly) {
+        @('LogonTrigger', 'TimeTrigger')
+    }
+    else {
+        @('BootTrigger', 'LogonTrigger', 'TimeTrigger')
+    }
+    $actualKinds = @($triggers | ForEach-Object { $_.LocalName } | Sort-Object)
+    $sortedExpectedKinds = @($expectedKinds | Sort-Object)
+    if (($actualKinds -join ',') -ne ($sortedExpectedKinds -join ',')) {
+        throw "The scheduled-task trigger set is unsafe: $($actualKinds -join ',')."
+    }
+    foreach ($trigger in $triggers) {
+        $triggerEnabled = $trigger.SelectSingleNode("./*[local-name()='Enabled']")
+        # Task Scheduler omits this node when it uses the schema default (true).
+        if ($triggerEnabled -and $triggerEnabled.InnerText -ne 'true') {
+            throw "The scheduled-task $($trigger.LocalName) is not enabled."
+        }
+    }
+    $logonTriggers = @($triggers | Where-Object { $_.LocalName -eq 'LogonTrigger' })
+    $logonUser = $logonTriggers[0].SelectSingleNode("./*[local-name()='UserId']")
+    if (-not $logonUser -or -not [String]::Equals(
+        (Resolve-WslRunnerUserSid -UserId $logonUser.InnerText),
+        $ExpectedUserSid,
+        [StringComparison]::Ordinal
+    )) {
+        throw 'The logon trigger is not restricted to the exact current-user SID.'
+    }
+    $timeTriggers = @($triggers | Where-Object { $_.LocalName -eq 'TimeTrigger' })
+    $interval = $timeTriggers[0].SelectSingleNode("./*[local-name()='Repetition']/*[local-name()='Interval']")
+    $duration = $timeTriggers[0].SelectSingleNode("./*[local-name()='Repetition']/*[local-name()='Duration']")
+    if (-not $interval -or $interval.InnerText -ne 'PT5M') {
+        throw 'The scheduled-task watchdog interval is not five minutes.'
+    }
+    if (-not $duration -or $duration.InnerText -ne 'P3650D') {
+        throw 'The scheduled-task watchdog duration is not 3650 days.'
+    }
+
+    $settings = @($taskXml.SelectNodes("/*[local-name()='Task']/*[local-name()='Settings']"))
+    if ($settings.Count -ne 1) {
+        throw "Expected one scheduled-task Settings element, found $($settings.Count)."
+    }
+    $multipleInstances = $settings[0].SelectSingleNode("./*[local-name()='MultipleInstancesPolicy']")
+    $startWhenAvailable = $settings[0].SelectSingleNode("./*[local-name()='StartWhenAvailable']")
+    $disallowBatteryStart = $settings[0].SelectSingleNode("./*[local-name()='DisallowStartIfOnBatteries']")
+    $stopOnBattery = $settings[0].SelectSingleNode("./*[local-name()='StopIfGoingOnBatteries']")
+    $wakeToRun = $settings[0].SelectSingleNode("./*[local-name()='WakeToRun']")
+    $restartCount = $settings[0].SelectSingleNode("./*[local-name()='RestartOnFailure']/*[local-name()='Count']")
+    $restartInterval = $settings[0].SelectSingleNode("./*[local-name()='RestartOnFailure']/*[local-name()='Interval']")
+    $executionLimit = $settings[0].SelectSingleNode("./*[local-name()='ExecutionTimeLimit']")
+    $enabled = $settings[0].SelectSingleNode("./*[local-name()='Enabled']")
+    if (-not $multipleInstances -or $multipleInstances.InnerText -ne 'IgnoreNew') {
+        throw 'The scheduled-task multiple-instance policy is not IgnoreNew.'
+    }
+    if (-not $startWhenAvailable -or $startWhenAvailable.InnerText -ne 'true') {
+        throw 'The scheduled task does not enable StartWhenAvailable.'
+    }
+    if (-not $disallowBatteryStart -or $disallowBatteryStart.InnerText -ne 'false') {
+        throw 'The scheduled task is not allowed to start on battery power.'
+    }
+    if (-not $stopOnBattery -or $stopOnBattery.InnerText -ne 'false') {
+        throw 'The scheduled task may stop when switching to battery power.'
+    }
+    if (-not $wakeToRun -or $wakeToRun.InnerText -ne 'true') {
+        throw 'The scheduled task does not enable WakeToRun.'
+    }
+    if (-not $restartCount -or $restartCount.InnerText -ne '999' -or
+        -not $restartInterval -or $restartInterval.InnerText -ne 'PT1M') {
+        throw 'The scheduled-task restart policy is not 999 attempts at one-minute intervals.'
+    }
+    if (-not $executionLimit -or $executionLimit.InnerText -notin @('PT0S', 'P0D')) {
+        throw 'The scheduled task does not have an unlimited execution time.'
+    }
+    $expectedEnabledText = if ($ExpectedEnabled) { 'true' } else { 'false' }
+    if (-not $enabled -or $enabled.InnerText -ne $expectedEnabledText) {
+        throw "The scheduled-task enabled state is not $expectedEnabledText."
+    }
+}
+
+function Assert-WslRunnerManagedTaskXml {
+    param(
+        [Parameter(Mandatory)][string]$XmlText,
+        [Parameter(Mandatory)][string]$ExpectedUserSid,
+        [Parameter(Mandatory)][string]$ExpectedWslPath,
+        [Parameter(Mandatory)][string]$ExpectedArguments,
+        [Parameter(Mandatory)][bool]$ExpectedEnabled
+    )
+
+    # These are the only task schemas this installer can leave behind:
+    # current-user fallback, elevated bootstrap, and elevated activation.
+    $managedSchemas = @(
+        [PSCustomObject]@{ LogonType = 'InteractiveToken'; AtLogOnOnly = $true },
+        [PSCustomObject]@{ LogonType = 'InteractiveToken'; AtLogOnOnly = $false },
+        [PSCustomObject]@{ LogonType = 'Password'; AtLogOnOnly = $false }
+    )
+    $failures = [Collections.Generic.List[string]]::new()
+    foreach ($schema in $managedSchemas) {
+        try {
+            Assert-WslRunnerScheduledTaskXml `
+                -XmlText $XmlText `
+                -ExpectedUserSid $ExpectedUserSid `
+                -ExpectedLogonType $schema.LogonType `
+                -ExpectedWslPath $ExpectedWslPath `
+                -ExpectedArguments $ExpectedArguments `
+                -AtLogOnOnly ([bool]$schema.AtLogOnOnly) `
+                -ExpectedEnabled $ExpectedEnabled
+            return
+        }
+        catch {
+            $failures.Add($_.Exception.Message)
+        }
+    }
+    throw "The scheduled task does not match any exact managed predecessor schema: $($failures -join ' | ')"
+}
+
+$isAdministrator = Test-CurrentProcessIsAdministrator
+Assert-WslRunnerInvocationPolicy `
+    -IsAdministrator $isAdministrator `
+    -AtLogOnOnly ([bool]$AtLogOnOnly) `
+    -HasCredential ($null -ne $Credential)
 
 if ($RepoDir -match '(^|/)\.\.(/|$)' -or $RepoDir.StartsWith('/mnt/')) {
     throw 'RepoDir must be a normalized path on the WSL ext4 filesystem.'
@@ -191,10 +1115,129 @@ $wsl = Join-Path $env:SystemRoot 'System32\wsl.exe'
 if (-not (Test-Path -LiteralPath $wsl)) {
     throw 'wsl.exe is unavailable. Enable Windows Subsystem for Linux first.'
 }
+$currentUserSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$taskPlan = New-WslRunnerTaskPlan `
+    -AtLogOnOnly ([bool]$AtLogOnOnly) `
+    -Activate ([bool]$Activate) `
+    -UserSid $currentUserSid `
+    -WslPath $wsl `
+    -DistroName $DistroName
 
 function Get-WslDistros {
-    $raw = (& $wsl --list --quiet 2>$null | Out-String) -replace "`0", ''
+    param([scriptblock]$ListAction)
+
+    $listArguments = @('--list', '--all', '--quiet')
+    if ($ListAction) {
+        $result = & $ListAction $listArguments
+    }
+    else {
+        $output = @(& $wsl @listArguments 2>&1)
+        $result = [PSCustomObject]@{
+            ExitCode = $LASTEXITCODE
+            Output = $output
+        }
+    }
+    if ($null -eq $result -or
+        $null -eq $result.PSObject.Properties['ExitCode'] -or
+        $null -eq $result.PSObject.Properties['Output']) {
+        throw 'The WSL inventory action returned an invalid result.'
+    }
+    $exitCode = [int]$result.ExitCode
+    $outputLines = @($result.Output | ForEach-Object { $_.ToString() })
+    if ($exitCode -ne 0) {
+        $detail = ($outputLines | Where-Object { $_ }) -join "`n"
+        throw "Could not enumerate WSL distributions (exit=$exitCode): $detail"
+    }
+    $raw = ($outputLines -join "`n") -replace "`0", ''
     return @($raw -split "`r?`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+}
+
+function Get-WslDistroRegistration {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $lxssRoot = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss'
+    if (-not (Test-Path -LiteralPath $lxssRoot)) {
+        return $null
+    }
+    $matches = @(
+        Get-ChildItem -LiteralPath $lxssRoot -ErrorAction Stop |
+            ForEach-Object {
+                $properties = Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction Stop
+                if ([String]::Equals(
+                    [string]$properties.DistributionName,
+                    $Name,
+                    [StringComparison]::Ordinal
+                )) {
+                    [PSCustomObject]@{
+                        Name = [string]$properties.DistributionName
+                        BasePath = [string]$properties.BasePath
+                        Version = [int]$properties.Version
+                        RegistryPath = $_.PSPath
+                    }
+                }
+            }
+    )
+    if ($matches.Count -gt 1) {
+        throw "Multiple WSL registrations unexpectedly use the exact name '$Name'."
+    }
+    if ($matches.Count -eq 1) {
+        return $matches[0]
+    }
+    return $null
+}
+
+function Assert-WslRunnerDistroIdentity {
+    param([Parameter(Mandatory)][string]$Name)
+
+    $verboseListing = ((& $wsl --list --verbose 2>&1 | Out-String) -replace "`0", '')
+    if ($LASTEXITCODE -ne 0 -or $verboseListing -notmatch (
+        '(?m)^\s*\*?\s*' + [Regex]::Escape($Name) + '\s+\S+\s+2\s*$'
+    )) {
+        throw "Distro '$Name' was not verified as WSL version 2."
+    }
+    & $wsl `
+        --distribution $Name `
+        --user root `
+        --exec /bin/sh -c `
+        '. /etc/os-release && test "$ID" = ubuntu && test "$VERSION_ID" = 24.04 && test "$(dpkg --print-architecture)" = amd64'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Distro '$Name' is not Ubuntu 24.04 AMD64."
+    }
+}
+
+function Test-WslRunnerOwnershipMarker {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$AttemptId
+    )
+
+    $expectedMarker = Get-WslRunnerOwnershipMarkerValue -AttemptId $AttemptId
+    & $wsl `
+        --distribution $Name `
+        --user root `
+        --exec /bin/sh -c `
+        'marker=/var/lib/degen-dogs/windows-runner-owned; test -f "$marker" && test ! -L "$marker" && test "$(stat -c %U "$marker")" = root && test "$(stat -c %G "$marker")" = root && test "$(stat -c %a "$marker")" = 600 && test "$(stat -c %h "$marker")" = 1 && test "$(tr -d "\r\n" <"$marker")" = "$1"' `
+        sh $expectedMarker `
+        *> $null
+    return $LASTEXITCODE -eq 0
+}
+
+function Set-WslRunnerOwnershipMarker {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][ValidatePattern('^[0-9a-f]{32}$')][string]$AttemptId
+    )
+
+    $markerValue = Get-WslRunnerOwnershipMarkerValue -AttemptId $AttemptId
+    & $wsl `
+        --distribution $Name `
+        --user root `
+        --exec /bin/sh -c `
+        'set -eu; install -d -o root -g root -m 0755 /var/lib/degen-dogs; tmp=$(mktemp /var/lib/degen-dogs/.windows-runner-owned.XXXXXX); printf "%s\n" "$1" >"$tmp"; install -o root -g root -m 0600 "$tmp" /var/lib/degen-dogs/windows-runner-owned; rm -f -- "$tmp"' `
+        sh $markerValue
+    if ($LASTEXITCODE -ne 0 -or -not (Test-WslRunnerOwnershipMarker -Name $Name -AttemptId $AttemptId)) {
+        throw "Could not establish the root-owned ownership marker in distro '$Name'."
+    }
 }
 
 function Invoke-WslRoot {
@@ -242,31 +1285,116 @@ function Assert-CurrentAccountCredential {
 }
 
 function Get-ExactScheduledTask {
-    param([Parameter(Mandatory)][string]$Name)
-
-    $escapedName = [WildcardPattern]::Escape($Name)
-    $candidateTasks = @(
-        Get-ScheduledTask `
-            -TaskName $escapedName `
-            -TaskPath '\' `
-            -ErrorAction SilentlyContinue
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [scriptblock]$QueryAction
     )
-    $exactTasks = @(
+
+    if ($QueryAction) {
+        $candidateTasks = @(& $QueryAction)
+    }
+    else {
+        # Enumerating the exact root folder distinguishes an empty result from
+        # provider, RPC, or access failures, all of which must stop the caller.
+        $candidateTasks = @(
+            Get-ScheduledTask `
+                -TaskPath '\' `
+                -ErrorAction Stop
+        )
+    }
+    $nameCollisions = @(
         $candidateTasks | Where-Object {
-            [String]::Equals($_.TaskName, $Name, [StringComparison]::Ordinal) -and
-            [String]::Equals($_.TaskPath, '\', [StringComparison]::Ordinal)
+            [String]::Equals($_.TaskName, $Name, [StringComparison]::OrdinalIgnoreCase)
         }
     )
-    if ($candidateTasks.Count -ne $exactTasks.Count) {
-        throw "Task Scheduler returned a non-exact root match for '$Name'."
+    foreach ($collision in $nameCollisions) {
+        if (-not [String]::Equals($collision.TaskName, $Name, [StringComparison]::Ordinal) -or
+            -not [String]::Equals($collision.TaskPath, '\', [StringComparison]::Ordinal)) {
+            throw "Task Scheduler returned a non-exact name or path collision for '$Name'."
+        }
     }
-    if ($exactTasks.Count -gt 1) {
+    if ($nameCollisions.Count -gt 1) {
         throw "Multiple exact root Task Scheduler objects unexpectedly matched '$Name'."
     }
-    if ($exactTasks.Count -eq 1) {
-        return $exactTasks[0]
+    if ($nameCollisions.Count -eq 1) {
+        return $nameCollisions[0]
     }
     return $null
+}
+
+function Assert-WslRunnerOwnedTaskDefinition {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][bool]$ExpectedEnabled,
+        [switch]$AllowManagedPredecessor
+    )
+
+    $exactTask = Get-ExactScheduledTask -Name $Name
+    if (-not $exactTask) {
+        throw "The exact root WSL keepalive task '$Name' does not exist."
+    }
+    $taskXml = Export-ScheduledTask `
+        -TaskName $Name `
+        -TaskPath '\' `
+        -ErrorAction Stop
+    if ($AllowManagedPredecessor) {
+        Assert-WslRunnerManagedTaskXml `
+            -XmlText $taskXml `
+            -ExpectedUserSid $currentUserSid `
+            -ExpectedWslPath $taskPlan.Executable `
+            -ExpectedArguments $taskPlan.Arguments `
+            -ExpectedEnabled $ExpectedEnabled
+    }
+    else {
+        $expectedLogonType = if ($taskPlan.LogonType -eq 'Password') {
+            'Password'
+        }
+        else {
+            'InteractiveToken'
+        }
+        Assert-WslRunnerScheduledTaskXml `
+            -XmlText $taskXml `
+            -ExpectedUserSid $currentUserSid `
+            -ExpectedLogonType $expectedLogonType `
+            -ExpectedWslPath $taskPlan.Executable `
+            -ExpectedArguments $taskPlan.Arguments `
+            -AtLogOnOnly ([bool]$AtLogOnOnly) `
+            -ExpectedEnabled $ExpectedEnabled
+    }
+    return $exactTask
+}
+
+function Assert-WslRunnerAtLogOnTaskDefinition {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][bool]$ExpectedEnabled
+    )
+
+    if (-not $AtLogOnOnly) {
+        throw 'AtLogOn task attestation was requested outside current-user mode.'
+    }
+    return Assert-WslRunnerOwnedTaskDefinition `
+        -Name $Name `
+        -ExpectedEnabled $ExpectedEnabled
+}
+
+function Invoke-CurrentWslRunnerTaskIsolation {
+    param([Parameter(Mandatory)][bool]$Remove)
+
+    return Invoke-WslRunnerTaskIsolation `
+        -Remove $Remove `
+        -ResolveExactTaskAction { Get-ExactScheduledTask -Name $TaskName } `
+        -AssertOwnedTaskAction {
+            param($task)
+            Assert-WslRunnerOwnedTaskDefinition `
+                -Name $TaskName `
+                -ExpectedEnabled ([bool]$task.Settings.Enabled) `
+                -AllowManagedPredecessor |
+                Out-Null
+        } `
+        -DisableAction { param($task) $task | Disable-ScheduledTask | Out-Null } `
+        -StopAction { param($task) $task | Stop-ScheduledTask -ErrorAction Stop } `
+        -UnregisterAction { param($task) $task | Unregister-ScheduledTask -Confirm:$false }
 }
 
 $trustedBundleAttestation = @'
@@ -313,10 +1441,61 @@ test -z "$writable_entry" || attestation_failed 'bundle is group/world writable'
 printf '%s\n' "$trusted_commit"
 '@
 
-$distroAlreadyExists = (Get-WslDistros) -contains $DistroName
+$perUserInstallBasePlan = $null
+$perUserImportAttempt = $null
+$runnerDistroLock = $null
+$runnerTaskLock = $null
+if ($AtLogOnOnly) {
+    if (-not [String]::Equals(
+        $env:PROCESSOR_ARCHITECTURE,
+        'AMD64',
+        [StringComparison]::OrdinalIgnoreCase
+    )) {
+        throw 'The reviewed per-user WSL image supports AMD64 hosts only.'
+    }
+    & $wsl --status *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw 'The per-user fallback requires an already-operational WSL2 runtime.'
+    }
+}
+$knownLocalAppData = Get-WslRunnerKnownLocalAppData
+$lockBasePlan = Initialize-WslRunnerInstallBase `
+    -KnownLocalAppData $knownLocalAppData
+$runnerTaskLock = Enter-WslRunnerTaskLock `
+    -KnownLocalAppData $lockBasePlan.KnownLocalAppData `
+    -InstallBase $lockBasePlan.Base `
+    -UserSid $currentUserSid `
+    -TaskName $TaskName
+
+try {
+$runnerDistroLock = Enter-WslRunnerDistroLock `
+    -KnownLocalAppData $lockBasePlan.KnownLocalAppData `
+    -InstallBase $lockBasePlan.Base `
+    -UserSid $currentUserSid `
+    -DistroName $DistroName
+if ($AtLogOnOnly) {
+    $perUserInstallBasePlan = $lockBasePlan
+}
+$distroInventory = @(Get-WslDistros)
+$distroAlreadyExists = $distroInventory -contains $DistroName
 $trustedInstallerExists = $false
 $installedTrustedCommit = ''
+$perUserOwnershipMarkerExists = $false
 if ($distroAlreadyExists) {
+    if ($AtLogOnOnly) {
+        $registration = Get-WslDistroRegistration -Name $DistroName
+        if (-not $registration) {
+            throw "Existing distro '$DistroName' has no inspectable current-user WSL registration."
+        }
+        $perUserImportAttempt = Get-WslRunnerImportAttemptFromRegistration `
+            -Registration $registration `
+            -KnownLocalAppData $perUserInstallBasePlan.KnownLocalAppData `
+            -DistroName $DistroName
+        Assert-WslRunnerDistroIdentity -Name $DistroName
+        $perUserOwnershipMarkerExists = Test-WslRunnerOwnershipMarker `
+            -Name $DistroName `
+            -AttemptId $perUserImportAttempt.Id
+    }
     & $wsl --distribution $DistroName --user root --exec /usr/bin/test -x /usr/local/libexec/degen-dogs-wsl-installer
     $trustedInstallerExists = $LASTEXITCODE -eq 0
     & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
@@ -339,15 +1518,27 @@ if ($installedTrustedCommit -and -not [String]::Equals(
     }
 }
 $trustedBundleExists = [bool]($installedTrustedCommit -and $trustedInstallerExists)
+if ($AtLogOnOnly -and $distroAlreadyExists -and -not (
+    $perUserOwnershipMarkerExists -or $trustedBundleExists
+)) {
+    throw "Existing distro '$DistroName' has no verified Degen Dogs ownership marker or frozen trusted bundle."
+}
+if ($AtLogOnOnly -and $distroAlreadyExists -and -not $perUserOwnershipMarkerExists) {
+    Set-WslRunnerOwnershipMarker `
+        -Name $DistroName `
+        -AttemptId $perUserImportAttempt.Id
+    $perUserOwnershipMarkerExists = $true
+}
 
 if ($Uninstall) {
     $task = Get-ExactScheduledTask -Name $TaskName
     if ($task) {
-        $task | Disable-ScheduledTask | Out-Null
-        $task | Stop-ScheduledTask -ErrorAction SilentlyContinue
-        $task | Unregister-ScheduledTask -Confirm:$false
+        $taskIsolation = Invoke-CurrentWslRunnerTaskIsolation -Remove $true
+        if (-not $taskIsolation.BoundaryEstablished) {
+            throw "The existing task could not be safely isolated for uninstall: $(@($taskIsolation.Errors) -join '; ')"
+        }
     }
-    if ((Get-WslDistros) -contains $DistroName) {
+    if ($distroAlreadyExists) {
         $uninstallScript = @'
 set -Eeuo pipefail
 rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready
@@ -388,15 +1579,107 @@ if ($Activate) {
 # one-minute repair loop could restart timers while a new preflight is running.
 $existingTask = Get-ExactScheduledTask -Name $TaskName
 if ($existingTask) {
-    $existingTask | Disable-ScheduledTask | Out-Null
-    $existingTask | Stop-ScheduledTask -ErrorAction SilentlyContinue
+    $existingTaskIsolation = Invoke-CurrentWslRunnerTaskIsolation -Remove $false
+    if (-not $existingTaskIsolation.BoundaryEstablished) {
+        throw "The existing task could not be safely disabled and stopped: $(@($existingTaskIsolation.Errors) -join '; ')"
+    }
 }
 
 if (-not $distroAlreadyExists) {
     Write-Host "Installing an isolated Ubuntu 24.04 WSL2 distro named $DistroName..."
-    & $wsl --install Ubuntu-24.04 --name $DistroName --version 2 --no-launch
-    if ($LASTEXITCODE -ne 0) {
-        throw 'WSL distro installation failed. If Windows requested a reboot, reboot and rerun this script.'
+    if ($AtLogOnOnly) {
+        $perUserImportAttempt = New-WslRunnerImportAttempt `
+            -KnownLocalAppData $perUserInstallBasePlan.KnownLocalAppData `
+            -DistroName $DistroName
+        $locationPlan = $perUserImportAttempt
+
+        $curlPath = Join-Path $env:SystemRoot 'System32\curl.exe'
+        if (-not (Test-Path -LiteralPath $curlPath -PathType Leaf)) {
+            throw 'The System32 curl.exe required for the pinned WSL image download is unavailable.'
+        }
+        $imageSpec = Get-WslRunnerImageSpec
+        $downloadImage = {
+            param($uri, $destination)
+            $downloadOutput = @(
+                & $curlPath `
+                    --proto '=https' `
+                    --proto-redir '=https' `
+                    --tlsv1.2 `
+                    --fail `
+                    --silent `
+                    --show-error `
+                    --location `
+                    --retry 3 `
+                    --retry-all-errors `
+                    --connect-timeout 20 `
+                    --output $destination `
+                    $uri 2>&1
+            )
+            if ($LASTEXITCODE -ne 0) {
+                $detail = ($downloadOutput | ForEach-Object { $_.ToString() }) -join "`n"
+                throw "The pinned Ubuntu WSL image download failed (exit=$LASTEXITCODE): $detail"
+            }
+        }
+        $importDistro = {
+            param($name, $location, $imagePath)
+            $importArguments = @(Get-WslRunnerImportArguments `
+                -DistroName $name `
+                -InstallLocation $location `
+                -ImagePath $imagePath)
+            $importOutput = @(& $wsl @importArguments 2>&1)
+            if ($LASTEXITCODE -ne 0) {
+                $detail = ($importOutput | ForEach-Object { $_.ToString() }) -join "`n"
+                throw "The verified WSL distro import failed (exit=$LASTEXITCODE): $detail"
+            }
+            $perUserImportAttempt.ImportCommandSucceeded = $true
+            $postImportInventory = @(Get-WslDistros)
+            if (-not ($postImportInventory -contains $name)) {
+                throw 'The verified WSL import returned success without registering the exact distro.'
+            }
+            $registration = Get-WslDistroRegistration -Name $name
+            if (-not $registration -or -not (Test-WslDistroRegistrationMatches `
+                -Registration $registration `
+                -DistroName $name `
+                -InstallLocation $location)) {
+                throw 'The imported distro registration does not own the exact bounded WSL2 location.'
+            }
+            Assert-WslRunnerDistroIdentity -Name $name
+            Set-WslRunnerOwnershipMarker `
+                -Name $name `
+                -AttemptId $perUserImportAttempt.Id
+        }
+        $rollbackImport = {
+            param($name, $location)
+            $unregisterAttempt = {
+                param($registeredName)
+                & $wsl --unregister $registeredName
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Could not unregister the exact failed import '$registeredName'."
+                }
+            }
+            Invoke-WslRunnerImportRollback `
+                -Attempt $perUserImportAttempt `
+                -GetInventoryAction { @(Get-WslDistros) } `
+                -GetRegistrationAction { param($registeredName) Get-WslDistroRegistration -Name $registeredName } `
+                -UnregisterAction $unregisterAttempt `
+                -RemoveAction { param($attempt) Remove-BoundedWslImportDirectory -Attempt $attempt }
+        }
+        Invoke-VerifiedWslImport `
+            -ImageUri $imageSpec.Uri `
+            -ExpectedSha256 $imageSpec.Sha256 `
+            -TemporaryRoot ([IO.Path]::GetTempPath()) `
+            -DistroName $DistroName `
+            -InstallLocation $locationPlan.Location `
+            -DownloadAction $downloadImage `
+            -ImportAction $importDistro `
+            -RollbackAction $rollbackImport
+        $distroAlreadyExists = $true
+    }
+    else {
+        & $wsl --install Ubuntu-24.04 --name $DistroName --version 2 --no-launch
+        if ($LASTEXITCODE -ne 0) {
+            throw 'WSL distro installation failed. If Windows requested a reboot, reboot and rerun this script.'
+        }
     }
 }
 else {
@@ -677,15 +1960,29 @@ stage_runtime_and_install
 Invoke-WslRoot -Script $bootstrap
 
 $action = New-ScheduledTaskAction `
-    -Execute $wsl `
-    -Argument "--distribution $DistroName --user root --exec /usr/local/libexec/degen-dogs-wsl-anchor"
-$startupTrigger = New-ScheduledTaskTrigger -AtStartup
-$logonTrigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
-$watchdogTrigger = New-ScheduledTaskTrigger `
-    -Once `
-    -At (Get-Date).AddMinutes(2) `
-    -RepetitionInterval (New-TimeSpan -Minutes 5) `
-    -RepetitionDuration (New-TimeSpan -Days 3650)
+    -Execute $taskPlan.Executable `
+    -Argument $taskPlan.Arguments
+$selectedTriggers = [Collections.Generic.List[object]]::new()
+foreach ($triggerKind in $taskPlan.TriggerKinds) {
+    switch ($triggerKind) {
+        'Startup' {
+            $selectedTriggers.Add((New-ScheduledTaskTrigger -AtStartup))
+        }
+        'Logon' {
+            $selectedTriggers.Add((New-ScheduledTaskTrigger -AtLogOn -User $currentUserSid))
+        }
+        'Watchdog' {
+            $selectedTriggers.Add((New-ScheduledTaskTrigger `
+                -Once `
+                -At (Get-Date).AddMinutes(2) `
+                -RepetitionInterval (New-TimeSpan -Minutes 5) `
+                -RepetitionDuration (New-TimeSpan -Days 3650)))
+        }
+        default {
+            throw "Unexpected scheduled-task trigger kind '$triggerKind'."
+        }
+    }
+}
 $settings = New-ScheduledTaskSettingsSet `
     -Disable `
     -StartWhenAvailable `
@@ -753,45 +2050,68 @@ rollback_publisher "$@"
 
 if ($Activate) {
     $registeredTask = $null
+    $plainPassword = $null
     if ($AtLogOnOnly) {
         $principal = New-ScheduledTaskPrincipal `
-            -UserId "$env:USERDOMAIN\$env:USERNAME" `
+            -UserId $taskPlan.UserId `
             -LogonType Interactive `
             -RunLevel Limited
-        $registeredTask = Register-ScheduledTask `
-            -TaskName $TaskName `
-            -TaskPath '\' `
-            -Action $action `
-            -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
-            -Settings $settings `
-            -Principal $principal `
-            -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.' `
-            -Force
-    }
-    else {
-        $plainPassword = $Credential.GetNetworkCredential().Password
-        try {
-            $registeredTask = Register-ScheduledTask `
+        $registerTaskAction = {
+            Register-ScheduledTask `
                 -TaskName $TaskName `
                 -TaskPath '\' `
                 -Action $action `
-                -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
+                -Trigger $selectedTriggers.ToArray() `
+                -Settings $settings `
+                -Principal $principal `
+                -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.'
+        }
+    }
+    else {
+        $plainPassword = $Credential.GetNetworkCredential().Password
+        $registerTaskAction = {
+            Register-ScheduledTask `
+                -TaskName $TaskName `
+                -TaskPath '\' `
+                -Action $action `
+                -Trigger $selectedTriggers.ToArray() `
                 -Settings $settings `
                 -User $Credential.UserName `
                 -Password $plainPassword `
                 -RunLevel Limited `
-                -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.' `
-                -Force
+                -Description 'Keeps the Degen Dogs systemd publisher alive in WSL2; real jobs remain least-privilege Linux services.'
+        }
+    }
+    $resolveRegisteredTaskAction = {
+        Get-ExactScheduledTask -Name $TaskName
+    }
+    $attestTaskAction = {
+        param($task)
+        Assert-WslRunnerOwnedTaskDefinition `
+            -Name $TaskName `
+            -ExpectedEnabled $false |
+            Out-Null
+    }
+    $isolateRegisteredTaskAction = {
+        Invoke-CurrentWslRunnerTaskIsolation -Remove $true
+    }
+    # Registration and activation share one rollback boundary.
+    try {
+        try {
+            $registeredTask = Invoke-WslRunnerTaskRegistrationTransaction `
+                -PrepareAction $isolateRegisteredTaskAction `
+                -RegisterAction $registerTaskAction `
+                -ResolveExactTaskAction $resolveRegisteredTaskAction `
+                -AttestAction $attestTaskAction `
+                -IsolationAction $isolateRegisteredTaskAction
         }
         finally {
             $plainPassword = $null
         }
-    }
 
-    # Activation is intentionally last. It fails closed unless the checked-out
-    # peer-aware publisher, RPC quorum, watcher dry-run, and Git write dry-run
-    # all pass inside WSL.
-    try {
+        # Activation is intentionally last. It fails closed unless the checked-out
+        # peer-aware publisher, RPC quorum, watcher dry-run, and Git write dry-run
+        # all pass inside WSL.
         $activation = @"
 set -Eeuo pipefail
 $runtimeStage
@@ -799,6 +2119,9 @@ stage_runtime_and_install --skip-bootstrap --enable-now
 "@
         Invoke-WslRoot -Script $activation
         $registeredTask | Enable-ScheduledTask | Out-Null
+        $registeredTask = Assert-WslRunnerOwnedTaskDefinition `
+            -Name $TaskName `
+            -ExpectedEnabled $true
         $registeredTask | Start-ScheduledTask
         $taskDeadline = (Get-Date).AddSeconds(30)
         do {
@@ -870,6 +2193,9 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         if ($currentTask.State -ne 'Running') {
             throw "The exact root WSL keepalive task stopped after activation (state=$($currentTask.State))."
         }
+        $currentTask = Assert-WslRunnerOwnedTaskDefinition `
+            -Name $TaskName `
+            -ExpectedEnabled $true
         & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
             'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer'
         if ($LASTEXITCODE -ne 0) {
@@ -882,44 +2208,16 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         $rollbackClean = $true
         $rollbackFailures = [Collections.Generic.List[string]]::new()
         try {
-            $rollbackTask = Get-ExactScheduledTask -Name $TaskName
-            if ($rollbackTask) {
-                $rollbackTask | Disable-ScheduledTask | Out-Null
-                $rollbackTask | Stop-ScheduledTask
-            }
+            $taskIsolation = Invoke-CurrentWslRunnerTaskIsolation -Remove $true
         }
         catch {
+            $taskIsolation = $null
             $rollbackClean = $false
-            $rollbackFailures.Add("Windows task disable/stop failed: $($_.Exception.Message)")
+            $rollbackFailures.Add("Windows task isolation threw: $($_.Exception.Message)")
         }
-
-        try {
-            $taskRollbackDeadline = (Get-Date).AddSeconds(10)
-            do {
-                $verifiedRollbackTask = Get-ExactScheduledTask -Name $TaskName
-                $taskStillEnabled = $false
-                $taskStillRunning = $false
-                if ($verifiedRollbackTask) {
-                    $taskStillEnabled = [bool]$verifiedRollbackTask.Settings.Enabled
-                    $taskStillRunning = $verifiedRollbackTask.State -eq 'Running'
-                }
-                if (-not $taskStillEnabled -and -not $taskStillRunning) {
-                    break
-                }
-                Start-Sleep -Milliseconds 250
-            } while ((Get-Date) -lt $taskRollbackDeadline)
-            if ($taskStillEnabled) {
-                $rollbackClean = $false
-                $rollbackFailures.Add('rollback task remained enabled after disable.')
-            }
-            if ($taskStillRunning) {
-                $rollbackClean = $false
-                $rollbackFailures.Add('rollback task remained running after stop.')
-            }
-        }
-        catch {
+        if ($taskIsolation -and -not $taskIsolation.BoundaryEstablished) {
             $rollbackClean = $false
-            $rollbackFailures.Add("Windows task rollback verification failed: $($_.Exception.Message)")
+            $rollbackFailures.Add("Windows task isolation was unproven: $(@($taskIsolation.Errors) -join '; ')")
         }
 
         try {
@@ -931,43 +2229,6 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
         }
 
         if (-not $rollbackClean) {
-            $taskBoundaryEstablished = $false
-            # Retry the exact task boundary before terminating WSL. If the task
-            # still cannot be proved disabled/stopped, remove only that exact
-            # task so it cannot immediately recreate a persistent armed gate.
-            try {
-                $fallbackTask = Get-ExactScheduledTask -Name $TaskName
-                if ($fallbackTask) {
-                    try {
-                        $fallbackTask | Disable-ScheduledTask | Out-Null
-                        $fallbackTask | Stop-ScheduledTask
-                    }
-                    catch {
-                        $rollbackFailures.Add("fallback task disable/stop failed: $($_.Exception.Message)")
-                    }
-                    $fallbackTask = Get-ExactScheduledTask -Name $TaskName
-                    if ($fallbackTask -and (
-                        [bool]$fallbackTask.Settings.Enabled -or
-                        $fallbackTask.State -eq 'Running'
-                    )) {
-                        Write-Warning "The exact rollback task remained runnable; unregistering only '$TaskName' before WSL termination."
-                        $fallbackTask | Unregister-ScheduledTask -Confirm:$false
-                    }
-                }
-                $fallbackTask = Get-ExactScheduledTask -Name $TaskName
-                if ($fallbackTask -and (
-                    [bool]$fallbackTask.Settings.Enabled -or
-                    $fallbackTask.State -eq 'Running'
-                )) {
-                    $rollbackFailures.Add('fallback task isolation failed: the exact task remains enabled or running.')
-                }
-                else {
-                    $taskBoundaryEstablished = $true
-                }
-            }
-            catch {
-                $rollbackFailures.Add("fallback task isolation failed: $($_.Exception.Message)")
-            }
             $preTerminationDetail = $rollbackFailures -join '; '
             Write-Warning "Activation rollback was not clean; terminating only '$DistroName' as the fail-closed WSL boundary. $preTerminationDetail"
             & $wsl --terminate $DistroName
@@ -975,7 +2236,7 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
                 $rollbackFailures.Add("fallback termination failed for '$DistroName' with exit code $LASTEXITCODE.")
             }
             else {
-                if ($taskBoundaryEstablished) {
+                if ($taskIsolation -and $taskIsolation.BoundaryEstablished) {
                     Write-Warning "Fallback termination stopped only the '$DistroName' distro; the disabled or removed exact task cannot recreate the runtime publication gate."
                 }
                 else {
@@ -991,19 +2252,47 @@ systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer de
 }
 else {
     $principal = New-ScheduledTaskPrincipal `
-        -UserId "$env:USERDOMAIN\$env:USERNAME" `
+        -UserId $taskPlan.UserId `
         -LogonType Interactive `
         -RunLevel Limited
-    $registeredTask = Register-ScheduledTask `
-        -TaskName $TaskName `
-        -TaskPath '\' `
-        -Action $action `
-        -Trigger @($startupTrigger, $logonTrigger, $watchdogTrigger) `
-        -Settings $settings `
-        -Principal $principal `
-        -Description 'Disabled until the peer-aware publisher, RPC quorum, and GitHub deploy key pass preflight.' `
-        -Force
-    $registeredTask | Disable-ScheduledTask | Out-Null
+    $registerTaskAction = {
+        Register-ScheduledTask `
+            -TaskName $TaskName `
+            -TaskPath '\' `
+            -Action $action `
+            -Trigger $selectedTriggers.ToArray() `
+            -Settings $settings `
+            -Principal $principal `
+            -Description 'Disabled until the peer-aware publisher, RPC quorum, and GitHub deploy key pass preflight.'
+    }
+    $attestTaskAction = {
+        param($task)
+        Assert-WslRunnerOwnedTaskDefinition `
+            -Name $TaskName `
+            -ExpectedEnabled $false |
+            Out-Null
+    }
+    $resolveRegisteredTaskAction = {
+        Get-ExactScheduledTask -Name $TaskName
+    }
+    $isolateRegisteredTaskAction = {
+        Invoke-CurrentWslRunnerTaskIsolation -Remove $true
+    }
+    $registeredTask = Invoke-WslRunnerTaskRegistrationTransaction `
+        -PrepareAction $isolateRegisteredTaskAction `
+        -RegisterAction $registerTaskAction `
+        -ResolveExactTaskAction $resolveRegisteredTaskAction `
+        -AttestAction $attestTaskAction `
+        -IsolationAction $isolateRegisteredTaskAction
     Write-Host "Bootstrap complete. The systemd units and Windows task are disabled."
     Write-Host "Add the displayed public deploy key to GitHub with write access, fill $RepoDir/.env.local, then rerun with -Activate."
+}
+}
+finally {
+    if ($runnerDistroLock) {
+        Exit-WslRunnerDistroLock -Lock $runnerDistroLock
+    }
+    if ($runnerTaskLock) {
+        Exit-WslRunnerDistroLock -Lock $runnerTaskLock
+    }
 }
