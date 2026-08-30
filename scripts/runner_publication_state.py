@@ -745,6 +745,8 @@ def record_deferred_push_rejected_alignment(
             or journal["remote_commit"] != runner_commit
         ):
             raise StateValidationError("rejected push does not match exact push-ready journal identity")
+        if remote_head in {runner_commit, journal["baseline_head"]}:
+            raise StateValidationError("rejected push remote is not a distinct sibling target")
         updated = _aligned_journal(journal, runner_commit, remote_head, alignment_result)
         atomic_write_record(paths.journal, updated)
         return updated

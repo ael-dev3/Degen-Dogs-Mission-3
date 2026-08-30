@@ -316,6 +316,30 @@ run_deferred_fixture() {
   return "$status"
 }
 
+write_fixture_unlink_crash_env() {
+  local path="$1"
+  printf '%s\n' \
+    'set -T' \
+    'fixture_alignment_unlink_debug() {' \
+    '  local pending_command="$BASH_COMMAND"' \
+    '  [[ -e "${FIXTURE_UNLINK_MARKER:-}" ]] || return 0' \
+    '  if [[ "$FIXTURE_UNLINK_MODE" == "pre" && "$pending_command" == "remove_recovery_journal" ]]; then' \
+    '    trap - DEBUG' \
+    '    rm -- "$FIXTURE_UNLINK_MARKER"' \
+    '    exit 97' \
+    '  fi' \
+    '  if [[ "$FIXTURE_UNLINK_MODE" == "post" && "$pending_command" == '\''BASELINE_HEAD=""'\'' && ! -e "$FIXTURE_UNLINK_JOURNAL" ]] &&' \
+    '    [[ "$(git rev-parse HEAD)" == "$FIXTURE_ALIGNMENT_REMOTE_HEAD" ]]; then' \
+    '    trap - DEBUG' \
+    '    rm -- "$FIXTURE_UNLINK_MARKER"' \
+    '    exit 97' \
+    '  fi' \
+    '}' \
+    'trap fixture_alignment_unlink_debug DEBUG' \
+    >"$path"
+  chmod 600 "$path"
+}
+
 mkdir -p "$TEST_REPO/scripts" "$TEST_REPO/generated" "$TEST_REPO/node_modules" "$TEST_ROOT/home"
 cp "$SOURCE_DIR/refresh_and_publish.sh" "$TEST_REPO/scripts/refresh_and_publish.sh"
 cp "$SOURCE_DIR/runner_publication_state.py" "$TEST_REPO/scripts/runner_publication_state.py"
@@ -2672,6 +2696,327 @@ if [[ -e "$DEFERRED_CAS_HOOK_MARKER" ]] || \
   exit 1
 fi
 finalize_fixture_publication "$DEFERRED_CAS_LOCKS" 76 "$DEFERRED_CAS_DIGEST"
+
+# A fresh invocation can encounter the same push_ready ambiguity after the
+# original process is gone. A freshly fetched sibling must use the exact
+# rejected-push transition: retain terminal peer evidence for Task 4, or clear
+# only the regenerate alignment before publishing a new exact child.
+git -C "$SUCCESS_REPO" fetch -q origin main
+git -C "$SUCCESS_REPO" merge -q --ff-only origin/main
+DEFERRED_RECOVERY_PEER_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T14:10:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred interrupted peer local" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-interrupted-peer-local"
+DEFERRED_RECOVERY_PEER_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFERRED_RECOVERY_PEER_REPO="$TEST_ROOT/deferred-recovery-peer-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DEFERRED_RECOVERY_PEER_REPO"
+git -C "$DEFERRED_RECOVERY_PEER_REPO" config user.name "Degen Dogs Deferred Recovery Peer"
+git -C "$DEFERRED_RECOVERY_PEER_REPO" config user.email "degen-dogs-deferred-recovery-peer@example.invalid"
+touch_valid_refresh_status "$DEFERRED_RECOVERY_PEER_REPO" "2026-08-30T14:11:00Z"
+git -C "$DEFERRED_RECOVERY_PEER_REPO" add generated public/generated
+git -C "$DEFERRED_RECOVERY_PEER_REPO" commit -qm "[cron] deferred interrupted peer winner" \
+  -m "Refresh-Runner-ID: fixture-peer" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-interrupted-peer-winner"
+DEFERRED_RECOVERY_PEER_REMOTE="$(git -C "$DEFERRED_RECOVERY_PEER_REPO" rev-parse HEAD)"
+git -C "$DEFERRED_RECOVERY_PEER_REPO" push -q origin main
+DEFERRED_RECOVERY_PEER_LOCKS="$TEST_ROOT/deferred-recovery-peer-locks"
+DEFERRED_RECOVERY_PEER_RESULT="$TEST_ROOT/deferred-recovery-peer-result"
+DEFERRED_RECOVERY_PEER_PAGES="$TEST_ROOT/deferred-recovery-peer-pages"
+DEFERRED_RECOVERY_PEER_DIGEST="$(write_fixture_publication_latest "$DEFERRED_RECOVERY_PEER_LOCKS" 77)"
+write_fixture_deferred_journal \
+  "$DEFERRED_RECOVERY_PEER_LOCKS" "$SUCCESS_REPO" "$DEFERRED_RECOVERY_PEER_BASELINE" \
+  77 "$DEFERRED_RECOVERY_PEER_DIGEST" "deferred-interrupted-peer-local" push_ready \
+  "$DEFERRED_RECOVERY_PEER_LOCAL"
+run_deferred_fixture \
+  "$DEFERRED_RECOVERY_PEER_LOCKS" 77 "$DEFERRED_RECOVERY_PEER_DIGEST" \
+  "$TEST_ROOT/deferred-recovery-peer-logs" "$DEFERRED_RECOVERY_PEER_RESULT" \
+  "" "$DEFERRED_RECOVERY_PEER_PAGES"
+python3 - "$DEFERRED_RECOVERY_PEER_LOCKS" "$DEFERRED_RECOVERY_PEER_REMOTE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["handoff_phase"] == "terminal"
+assert journal["terminal_outcome"] == checkpoint["outcome"] == "peer_superseded"
+assert journal["remote_commit"] == checkpoint["commit_sha"] == sys.argv[2]
+assert not (root / "publication/pending.json").exists()
+PY
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFERRED_RECOVERY_PEER_REMOTE" ]] || \
+  [[ "$(sed -n '1p' "$DEFERRED_RECOVERY_PEER_RESULT")" != "success_superseded_by_peer" ]] || \
+  [[ "$(sed -n '2p' "$DEFERRED_RECOVERY_PEER_RESULT")" != "$DEFERRED_RECOVERY_PEER_REMOTE" ]] || \
+  [[ -e "$DEFERRED_RECOVERY_PEER_PAGES" ]]; then
+  echo "fresh deferred push-ready sibling recovery did not retain exact peer terminal evidence" >&2
+  exit 1
+fi
+finalize_fixture_publication \
+  "$DEFERRED_RECOVERY_PEER_LOCKS" 77 "$DEFERRED_RECOVERY_PEER_DIGEST"
+
+# Durable raw proof is not sibling-alignment evidence. If the freshly fetched
+# remote no longer contains that exact local commit, recovery must fail without
+# moving HEAD or changing/unlinking journal, pending, or checkpoint records.
+DEFERRED_RECOVERY_RAW_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T14:11:30Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred interrupted raw-proven local" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-interrupted-raw-proven-local"
+DEFERRED_RECOVERY_RAW_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFERRED_RECOVERY_RAW_REPO="$TEST_ROOT/deferred-recovery-raw-sibling-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DEFERRED_RECOVERY_RAW_REPO"
+git -C "$DEFERRED_RECOVERY_RAW_REPO" config user.name "Degen Dogs Deferred Raw Sibling"
+git -C "$DEFERRED_RECOVERY_RAW_REPO" config user.email "degen-dogs-deferred-raw-sibling@example.invalid"
+printf '%s\n' 'raw-proven sibling divergence' >"$DEFERRED_RECOVERY_RAW_REPO/deferred-raw-sibling.txt"
+git -C "$DEFERRED_RECOVERY_RAW_REPO" add deferred-raw-sibling.txt
+git -C "$DEFERRED_RECOVERY_RAW_REPO" commit -qm "manual deferred raw-proven sibling"
+DEFERRED_RECOVERY_RAW_REMOTE="$(git -C "$DEFERRED_RECOVERY_RAW_REPO" rev-parse HEAD)"
+git -C "$DEFERRED_RECOVERY_RAW_REPO" push -q origin main
+DEFERRED_RECOVERY_RAW_LOCKS="$TEST_ROOT/deferred-recovery-raw-locks"
+DEFERRED_RECOVERY_RAW_RESULT="$TEST_ROOT/deferred-recovery-raw-result"
+DEFERRED_RECOVERY_RAW_PAGES="$TEST_ROOT/deferred-recovery-raw-pages"
+DEFERRED_RECOVERY_RAW_DIGEST="$(write_fixture_publication_latest "$DEFERRED_RECOVERY_RAW_LOCKS" 78)"
+write_fixture_deferred_journal \
+  "$DEFERRED_RECOVERY_RAW_LOCKS" "$SUCCESS_REPO" "$DEFERRED_RECOVERY_RAW_BASELINE" \
+  78 "$DEFERRED_RECOVERY_RAW_DIGEST" "deferred-interrupted-raw-proven-local" raw_proven \
+  "$DEFERRED_RECOVERY_RAW_LOCAL"
+DEFERRED_RECOVERY_RAW_JOURNAL_HASH="$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publisher-recovery.json")"
+DEFERRED_RECOVERY_RAW_PENDING_HASH="$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pending.json")"
+DEFERRED_RECOVERY_RAW_CHECKPOINT_HASH="$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pushed.json")"
+if run_deferred_fixture \
+  "$DEFERRED_RECOVERY_RAW_LOCKS" 78 "$DEFERRED_RECOVERY_RAW_DIGEST" \
+  "$TEST_ROOT/deferred-recovery-raw-logs" "$DEFERRED_RECOVERY_RAW_RESULT" \
+  "" "$DEFERRED_RECOVERY_RAW_PAGES"; then
+  echo "raw-proven sibling recovery unexpectedly replaced immutable proof" >&2
+  exit 1
+fi
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFERRED_RECOVERY_RAW_LOCAL" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$DEFERRED_RECOVERY_RAW_REMOTE" ]] || \
+  [[ ! -e "$DEFERRED_RECOVERY_RAW_LOCKS/publisher-recovery.json" ]] || \
+  [[ ! -e "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pending.json" ]] || \
+  [[ ! -e "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pushed.json" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publisher-recovery.json")" != "$DEFERRED_RECOVERY_RAW_JOURNAL_HASH" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pending.json")" != "$DEFERRED_RECOVERY_RAW_PENDING_HASH" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RECOVERY_RAW_LOCKS/publication/pushed.json")" != "$DEFERRED_RECOVERY_RAW_CHECKPOINT_HASH" ]] || \
+  [[ -e "$DEFERRED_RECOVERY_RAW_PAGES" ]]; then
+  echo "raw-proven sibling recovery mutated immutable local or handoff evidence" >&2
+  exit 1
+fi
+git -C "$SUCCESS_REPO" update-ref refs/heads/main \
+  "$DEFERRED_RECOVERY_RAW_REMOTE" "$DEFERRED_RECOVERY_RAW_LOCAL"
+git -C "$SUCCESS_REPO" restore --source="$DEFERRED_RECOVERY_RAW_REMOTE" --staged --worktree -- .
+
+DEFERRED_RECOVERY_REGEN_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T14:12:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred interrupted regenerate local" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-interrupted-regenerate-local"
+DEFERRED_RECOVERY_REGEN_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFERRED_RECOVERY_REGEN_REPO="$TEST_ROOT/deferred-recovery-regenerate-repo"
+git clone -q --branch main "$REJECT_REMOTE" "$DEFERRED_RECOVERY_REGEN_REPO"
+git -C "$DEFERRED_RECOVERY_REGEN_REPO" config user.name "Degen Dogs Deferred Recovery Sibling"
+git -C "$DEFERRED_RECOVERY_REGEN_REPO" config user.email "degen-dogs-deferred-recovery-sibling@example.invalid"
+printf '%s\n' 'manual sibling requiring regeneration' >"$DEFERRED_RECOVERY_REGEN_REPO/deferred-recovery-sibling.txt"
+git -C "$DEFERRED_RECOVERY_REGEN_REPO" add deferred-recovery-sibling.txt
+git -C "$DEFERRED_RECOVERY_REGEN_REPO" commit -qm "manual deferred recovery sibling"
+DEFERRED_RECOVERY_REGEN_REMOTE="$(git -C "$DEFERRED_RECOVERY_REGEN_REPO" rev-parse HEAD)"
+git -C "$DEFERRED_RECOVERY_REGEN_REPO" push -q origin main
+DEFERRED_RECOVERY_REGEN_LOCKS="$TEST_ROOT/deferred-recovery-regenerate-locks"
+DEFERRED_RECOVERY_REGEN_RESULT="$TEST_ROOT/deferred-recovery-regenerate-result"
+DEFERRED_RECOVERY_REGEN_RAW="$TEST_ROOT/deferred-recovery-regenerate-raw"
+DEFERRED_RECOVERY_REGEN_PAGES="$TEST_ROOT/deferred-recovery-regenerate-pages"
+DEFERRED_RECOVERY_REGEN_DIGEST="$(write_fixture_publication_latest "$DEFERRED_RECOVERY_REGEN_LOCKS" 79)"
+write_fixture_deferred_journal \
+  "$DEFERRED_RECOVERY_REGEN_LOCKS" "$SUCCESS_REPO" "$DEFERRED_RECOVERY_REGEN_BASELINE" \
+  79 "$DEFERRED_RECOVERY_REGEN_DIGEST" "deferred-interrupted-regenerate-local" push_ready \
+  "$DEFERRED_RECOVERY_REGEN_LOCAL"
+run_deferred_fixture \
+  "$DEFERRED_RECOVERY_REGEN_LOCKS" 79 "$DEFERRED_RECOVERY_REGEN_DIGEST" \
+  "$TEST_ROOT/deferred-recovery-regenerate-logs" "$DEFERRED_RECOVERY_REGEN_RESULT" \
+  "$DEFERRED_RECOVERY_REGEN_RAW" "$DEFERRED_RECOVERY_REGEN_PAGES"
+DEFERRED_RECOVERY_REGEN_PUBLISHED="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+python3 - "$DEFERRED_RECOVERY_REGEN_LOCKS" "$DEFERRED_RECOVERY_REGEN_REMOTE" \
+  "$DEFERRED_RECOVERY_REGEN_PUBLISHED" "$SUCCESS_REPO" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+parent = subprocess.check_output(["git", "rev-parse", f"{sys.argv[3]}^"], cwd=sys.argv[4], text=True).strip()
+assert parent == sys.argv[2]
+assert journal["handoff_phase"] == "raw_proven"
+assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"] == sys.argv[3]
+PY
+if [[ "$DEFERRED_RECOVERY_REGEN_PUBLISHED" == "$DEFERRED_RECOVERY_REGEN_REMOTE" ]] || \
+  [[ "$DEFERRED_RECOVERY_REGEN_PUBLISHED" != "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" ]] || \
+  [[ "$(sed -n '1p' "$DEFERRED_RECOVERY_REGEN_RESULT")" != "success_pushed" ]] || \
+  [[ ! -e "$DEFERRED_RECOVERY_REGEN_RAW" || -e "$DEFERRED_RECOVERY_REGEN_PAGES" ]]; then
+  echo "fresh deferred push-ready sibling recovery did not regenerate from exact aligned remote" >&2
+  exit 1
+fi
+finalize_fixture_publication \
+  "$DEFERRED_RECOVERY_REGEN_LOCKS" 79 "$DEFERRED_RECOVERY_REGEN_DIGEST"
+
+# Once sibling alignment reaches its authenticated remote target with clean
+# publish paths, EXIT rollback must be disarmed before journal unlink. Inject a
+# deterministic nonzero crash immediately before and after that unlink in both
+# the ordinary local-child path and the resumed-alignment path.
+run_alignment_unlink_crash_case() {
+  local flow="$1"
+  local mode="$2"
+  local case_name="alignment-unlink-${flow}-${mode}"
+  local remote="$TEST_ROOT/${case_name}-remote.git"
+  local repo="$TEST_ROOT/${case_name}-repo"
+  local peer_repo="$TEST_ROOT/${case_name}-peer"
+  local locks="$TEST_ROOT/${case_name}-locks"
+  local journal="$locks/publisher-recovery.json"
+  local marker="$TEST_ROOT/${case_name}-marker"
+  local debug_env="$TEST_ROOT/${case_name}-bash-env"
+  local baseline=""
+  local local_commit=""
+  local peer_commit=""
+  local status=0
+
+  git clone -q --bare "$REJECT_REMOTE" "$remote"
+  git clone -q --branch main "$remote" "$repo"
+  git -C "$repo" config user.name "Degen Dogs Alignment Signal"
+  git -C "$repo" config user.email "degen-dogs-alignment-signal@example.invalid"
+  ln -s "$SUCCESS_REPO/.venv" "$repo/.venv"
+  mkdir -p "$repo/node_modules"
+  touch "$repo/node_modules/.package-lock.json"
+  baseline="$(git -C "$repo" rev-parse HEAD)"
+  write_fixture_unlink_crash_env "$debug_env"
+
+  git clone -q --branch main "$remote" "$peer_repo"
+  git -C "$peer_repo" config user.name "Degen Dogs Alignment Signal Peer"
+  git -C "$peer_repo" config user.email "degen-dogs-alignment-signal-peer@example.invalid"
+  ln -s "$SUCCESS_REPO/.venv" "$peer_repo/.venv"
+
+  touch_valid_refresh_status "$repo" "2026-08-30T14:00:00Z"
+  git -C "$repo" add generated/refresh_status.json public/generated/refresh_status.json
+  git -C "$repo" commit -qm "[cron] alignment signal local" \
+    -m "Refresh-Runner-ID: fixture-local" \
+    -m "Refresh-Run-Scope: current" \
+    -m "Refresh-Run-ID: ${case_name}-local"
+  local_commit="$(git -C "$repo" rev-parse HEAD)"
+
+  if [[ "$flow" == "landed" ]]; then
+    peer_commit="$local_commit"
+    git -C "$repo" push -q origin "${local_commit}:refs/heads/main"
+  else
+    touch_valid_refresh_status "$peer_repo" "2026-08-30T14:01:00Z"
+    git -C "$peer_repo" add generated/refresh_status.json public/generated/refresh_status.json
+    git -C "$peer_repo" commit -qm "[cron] alignment signal peer" \
+      -m "Refresh-Runner-ID: fixture-peer" \
+      -m "Refresh-Run-Scope: current" \
+      -m "Refresh-Run-ID: ${case_name}-peer"
+    peer_commit="$(git -C "$peer_repo" rev-parse HEAD)"
+    git -C "$peer_repo" push -q origin main
+  fi
+  git -C "$repo" fetch -q origin main
+
+  write_fixture_recovery_journal \
+    "$journal" "$repo" "$baseline" "${case_name}-local" current fixture-local
+  if [[ "$flow" == "resumed" ]]; then
+    python3 - "$journal" "$local_commit" "$peer_commit" <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+value = json.loads(path.read_text(encoding="utf-8"))
+value["alignment_runner_commit"] = sys.argv[2]
+value["alignment_remote_head"] = sys.argv[3]
+value["alignment_result"] = "peer_supersedes"
+path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
+os.chmod(path, 0o600)
+PY
+    git -C "$repo" update-ref refs/heads/main "$baseline" "$local_commit"
+    git -C "$repo" restore --source="$baseline" --staged --worktree -- .
+    git -C "$repo" merge -q --ff-only "$peer_commit"
+  elif [[ "$flow" != "normal" && "$flow" != "landed" ]]; then
+    echo "invalid alignment unlink fixture flow: ${flow}" >&2
+    exit 1
+  fi
+
+  : >"$marker"
+  set +e
+  HOME="$TEST_ROOT/home" \
+  VALIDATOR_MARKER="$SUCCESS_MARKER" \
+  BASH_ENV="$debug_env" \
+  FIXTURE_UNLINK_JOURNAL="$journal" \
+  FIXTURE_UNLINK_MARKER="$marker" \
+  FIXTURE_UNLINK_MODE="$mode" \
+  FIXTURE_ALIGNMENT_REMOTE_HEAD="$peer_commit" \
+  DEGEN_DOGS_RUNNER_ID="fixture-local" \
+  DEGEN_DOGS_REPO_DIR="$repo" \
+  DEGEN_DOGS_LOG_DIR="$TEST_ROOT/${case_name}-logs" \
+  DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/${case_name}-config-locks" \
+  DEGEN_DOGS_REFRESH_LOCK_PATH="$locks/refresh.lock" \
+  DEGEN_DOGS_SKIP_PULL=1 \
+  DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
+  DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+  DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+  DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+  DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+  "$repo/scripts/refresh_and_publish.sh"
+  status=$?
+  set -e
+  if [[ "$status" == "0" || -e "$marker" ]]; then
+    echo "${case_name} did not terminate at the requested journal boundary" >&2
+    exit 1
+  fi
+  if [[ "$(git -C "$repo" rev-parse HEAD)" != "$peer_commit" ]] || \
+    [[ -n "$(git -C "$repo" status --porcelain --untracked-files=all -- README.md index.html generated public archive)" ]]; then
+    echo "${case_name} termination rewound or dirtied the authenticated aligned snapshot" >&2
+    exit 1
+  fi
+  if [[ "$mode" == "pre" && ! -e "$journal" ]] || \
+    [[ "$mode" == "post" && -e "$journal" ]]; then
+    echo "${case_name} left the wrong journal side of the injected unlink boundary" >&2
+    exit 1
+  fi
+
+  HOME="$TEST_ROOT/home" \
+  VALIDATOR_MARKER="$SUCCESS_MARKER" \
+  DEGEN_DOGS_RUNNER_ID="fixture-local" \
+  DEGEN_DOGS_REPO_DIR="$repo" \
+  DEGEN_DOGS_LOG_DIR="$TEST_ROOT/${case_name}-retry-logs" \
+  DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/${case_name}-retry-config-locks" \
+  DEGEN_DOGS_REFRESH_LOCK_PATH="$locks/refresh.lock" \
+  DEGEN_DOGS_SKIP_PULL=1 \
+  DEGEN_DOGS_LIVE_VERIFY_AFTER_PUSH=0 \
+  DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
+  DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
+  DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
+  DEGEN_DOGS_GIT_RETRY_JITTER_SECONDS=0 \
+  "$repo/scripts/refresh_and_publish.sh"
+  if [[ -e "$journal" ]] || \
+    [[ "$(git -C "$repo" rev-parse HEAD)" != "$(git --git-dir="$remote" rev-parse main)" ]] || \
+    [[ -n "$(git -C "$repo" status --porcelain --untracked-files=all -- README.md index.html generated public archive)" ]]; then
+    echo "${case_name} did not recover or retry from its crash-safe aligned state" >&2
+    exit 1
+  fi
+}
+
+for ALIGNMENT_UNLINK_FLOW in normal resumed landed; do
+  for ALIGNMENT_UNLINK_MODE in pre post; do
+    run_alignment_unlink_crash_case "$ALIGNMENT_UNLINK_FLOW" "$ALIGNMENT_UNLINK_MODE"
+  done
+done
 
 # Legacy inline journals must retain their original fail-closed shape. Fields
 # that are present but null/empty are malformed, not equivalent to absence.

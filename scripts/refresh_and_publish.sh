@@ -1424,6 +1424,10 @@ align_local_runner_commit_to_remote() {
     log "warning: remote supersession alignment did not leave the expected clean publish snapshot"
     return 1
   fi
+  # The authenticated remote target is now HEAD and publish paths are clean.
+  # Disarm EXIT rollback before journal unlink so interruption cannot restore
+  # the obsolete baseline into this aligned checkout.
+  MUTATION_STARTED=0
   if [[ "$DEFER_PAGES_VERIFICATION" != "1" || "$peer_snapshot_covers" != "1" ]]; then
     if ! remove_recovery_journal; then
       # HEAD now names the exact journaled remote target. Preserve both so the
@@ -1786,6 +1790,10 @@ PY
         MUTATION_STARTED=0
         fail "interrupted publisher alignment reached remote HEAD with dirty publish artifacts"
       fi
+      # HEAD and publish paths already match the authenticated journal target.
+      # From this point EXIT must preserve that clean alignment whether the
+      # journal unlink has not happened or has just completed.
+      MUTATION_STARTED=0
       if [[ "$journal_deferred" != "1" || "$alignment_result" != "peer_supersedes" ]]; then
         if ! remove_recovery_journal; then
           MUTATION_STARTED=0
@@ -1853,6 +1861,12 @@ PY
     if [[ "$remote_head" == "$journal_baseline" ]]; then
       log "recovering unpushed interrupted publisher commit ${current_head}"
     elif git merge-base --is-ancestor "$journal_baseline" "$remote_head"; then
+      if [[ "$journal_deferred" == "1" && \
+        "$journal_handoff_phase" == "raw_proven" && \
+        "$journal_terminal_outcome" == "pushed" && \
+        "$journal_remote_commit" == "$current_head" ]]; then
+        fail "durable raw-proven publisher commit is absent from the freshly fetched remote; preserving immutable handoff evidence"
+      fi
       # Another writer may have won after this process pushed ambiguously or
       # crashed. Authenticate our local child first, then either acknowledge a
       # covering peer snapshot or fast-forward and regenerate on the new base.
@@ -1860,6 +1874,18 @@ PY
       RUNNER_COMMIT_HEAD="$current_head"
       RUNNER_COMMIT_RUN_ID="$journal_run_id"
       MUTATION_STARTED=1
+      if [[ "$journal_deferred" == "1" && \
+        "$journal_handoff_phase" == "push_ready" && \
+        "$journal_terminal_outcome" == "pushed" && \
+        "$journal_remote_commit" == "$current_head" ]]; then
+        if git merge-base --is-ancestor "$current_head" "$remote_head"; then
+          fail "deferred sibling recovery was misclassified despite remote containing the publisher commit"
+        fi
+        # The journal identity, local runner commit, baseline ancestry, and
+        # freshly fetched non-descendant sibling are now all proven. Permit
+        # exactly one push-ready transition through the narrow state API.
+        DEFERRED_PUSH_REJECTED_ALIGNMENT=1
+      fi
       if reconcile_remote_descendant "$remote_head" "interrupted publisher recovery"; then
         RECOVERY_SUPERSEDED=1
         log "interrupted publisher was safely superseded by peer commit ${remote_head}"

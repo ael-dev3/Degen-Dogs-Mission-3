@@ -1036,6 +1036,24 @@ def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identi
             )
             assert state.read_deferred_recovery_journal(root) == armed
 
+        for remote_head, label in (
+            ("a" * 40, "runner commit"),
+            ("d" * 40, "journal baseline"),
+        ):
+            expect_invalid(
+                lambda remote_head=remote_head: state.record_deferred_push_rejected_alignment(
+                    root,
+                    queued.generation,
+                    queued.digest,
+                    "a" * 40,
+                    remote_head,
+                    "regenerate",
+                    lock_context=FakeLock(),
+                ),
+                f"rejected-push transition accepted remote equal to {label}",
+            )
+            assert state.read_deferred_recovery_journal(root) == armed
+
         updated = state.record_deferred_push_rejected_alignment(
             root,
             queued.generation,
