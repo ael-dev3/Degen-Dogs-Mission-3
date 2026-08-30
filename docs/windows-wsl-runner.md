@@ -159,9 +159,12 @@ script blob at that exact commit. When it detects a surrounding Git checkout,
 it additionally requires exact `HEAD` equality and no tracked changes. It then
 fetches that exact commit inside WSL into a root-only bare repository, archives
 only the privileged asset allowlist, and records SHA-256 hashes. Ordinary
-bootstrap and `-Activate` runs use this frozen bundle and never replace it from
-floating `main`. Runtime dashboard code may fast-forward as the unprivileged
-user, but it is never executed by root.
+bootstrap, `-Activate`, and `-Uninstall` runs require the same exact commit
+argument and attest both the elevated script and the installed frozen bundle
+before changing host state. Supplying the already installed commit does not
+require `-UpgradeTrustedBundle`; a different commit does. Runtime dashboard
+code may fast-forward as the unprivileged user, but it is never executed by
+root.
 
 This source self-check prevents accidental commit/checkout mismatch. It is not
 a malware boundary: a malicious local PowerShell file, Git executable,
@@ -198,14 +201,14 @@ start it before interactive login:
 
 ```powershell
 $credential = Get-Credential "$env:USERDOMAIN\$env:USERNAME"
-& $bootstrapScript -Activate -Credential $credential
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -Credential $credential
 ```
 
 If the Windows account uses Windows Hello without a reusable password, a
 reduced-uptime fallback is available:
 
 ```powershell
-& $bootstrapScript -Activate -AtLogOnOnly
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -AtLogOnOnly
 ```
 
 That mode cannot start WSL until the user logs on after a reboot. Prefer the
@@ -372,7 +375,7 @@ Remove the task and services while preserving the distro, repository, private
 configuration, SSH key, logs, and caches:
 
 ```powershell
-& $bootstrapScript -Uninstall
+& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Uninstall
 ```
 
 Linux-only removal is also available:

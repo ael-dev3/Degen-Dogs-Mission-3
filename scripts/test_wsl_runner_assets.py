@@ -21,6 +21,32 @@ def text(relative: str) -> str:
     return raw.decode("utf-8", errors="strict")
 
 
+def powershell_literal_payload(source: str, variable: str) -> str:
+    match = re.search(
+        rf"(?ms)^\${re.escape(variable)}\s*=\s+@'\r?\n(?P<body>.*?)\r?\n'@\s*$",
+        source,
+    )
+    assert match, f"missing literal PowerShell payload ${variable}"
+    return match.group("body")
+
+
+def run_bash(source: str, *, expected_returncode: int = 0) -> subprocess.CompletedProcess[bytes]:
+    result = subprocess.run(
+        ["bash", "-s", "--"],
+        input=source.encode("utf-8"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        timeout=15,
+    )
+    assert result.returncode == expected_returncode, (
+        f"bash returncode={result.returncode}, expected={expected_returncode}\n"
+        f"stdout={result.stdout.decode('utf-8', errors='replace')}\n"
+        f"stderr={result.stderr.decode('utf-8', errors='replace')}"
+    )
+    return result
+
+
 def test() -> None:
     required = (
         ".gitattributes",
@@ -207,6 +233,19 @@ def test() -> None:
     assert "systemctl is-active --quiet" in powershell
     assert "$UpgradeTrustedBundle" in powershell
     assert "TrustedInstallerCommit" in powershell
+    trust_required = powershell.index("if (-not $TrustedInstallerCommit)")
+    source_check = powershell.index(
+        "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"
+    )
+    wsl_initialization = powershell.index("$wsl = Join-Path")
+    assert trust_required < source_check < wsl_initialization
+    assert "if ($TrustedInstallerCommit)" not in powershell[:wsl_initialization]
+    assert "$installedTrustedCommit" in powershell
+    assert "The installed frozen bundle does not match TrustedInstallerCommit" in powershell
+    assert "A trusted bundle is already installed; use -UpgradeTrustedBundle" not in powershell
+    assert "$trustedWrapperProvision" in powershell
+    assert "wrapper bytes differ after trusted regeneration" in powershell
+    assert "unsafe pre-existing privileged installer" in powershell
     task_name_pattern_match = re.search(
         r"\[ValidatePattern\('([^']+)'\)\]\s*\[string\]\$TaskName",
         powershell,
@@ -232,11 +271,6 @@ def test() -> None:
         r"(?m)^\s*(?:Disable|Stop|Unregister|Enable|Start)-ScheduledTask\s+-TaskName\s+\$TaskName",
         powershell,
     )
-    source_check = powershell.index(
-        "Assert-TrustedBootstrapSource -Commit $TrustedInstallerCommit"
-    )
-    wsl_initialization = powershell.index("$wsl = Join-Path")
-    assert source_check < wsl_initialization
     source_guard = powershell[:wsl_initialization]
     assert "hash-object" in source_guard and "--no-filters" in source_guard
     assert "'merge-base'" in source_guard and "'--is-ancestor'" in source_guard
@@ -244,7 +278,23 @@ def test() -> None:
     assert "ROOT_ASSETS.sha256" in powershell
     assert 'git -c core.hooksPath=/dev/null --git-dir="$stage/repo.git" archive' in powershell
     assert "/run/degen-dogs/anchor-ready" in powershell
-    assert "catch {\n        $activationError = $_\n        try {" in powershell
+    assert "catch {\n        $activationError = $_" in powershell
+    activation_rollback = powershell.rsplit("catch {\n        $activationError = $_", 1)[1]
+    assert "$rollbackClean" in activation_rollback
+    assert "Get-ExactScheduledTask -Name $TaskName" in activation_rollback
+    assert "rollback task remained enabled" in activation_rollback
+    assert "rollback task remained running" in activation_rollback
+    assert activation_rollback.count("| Disable-ScheduledTask") >= 2
+    assert "| Unregister-ScheduledTask -Confirm:$false" in activation_rollback
+    assert "fallback task isolation failed" in activation_rollback
+    assert "exact Windows task isolation could not be established" in activation_rollback
+    assert "--terminate $DistroName" in activation_rollback
+    assert "fallback termination failed" in activation_rollback
+    assert "Activation failed and clean rollback could not be established" in activation_rollback
+    activation_success = powershell.split("if ($Activate) {", 1)[1].split("catch {", 1)[0]
+    assert activation_success.count("/run/degen-dogs/anchor-ready") >= 2
+    assert "if ($currentTask.State -ne 'Running')" in activation_success
+    assert "The final activation liveness proof failed" in activation_success
     assert "6F71F525282841EEDAF851B42F59B5F99B1BE0B4" in powershell
     key_download = powershell.index("nodesource-repo.gpg.key")
     key_verify = powershell.index("--with-colons", key_download)
@@ -260,7 +310,7 @@ def test() -> None:
         r"(?ms)=\s+@(?P<quote>['\"])(?:\r?\n)(?P<body>.*?)(?:\r?\n)(?P=quote)@",
         powershell,
     )
-    assert len(embedded_payloads) == 8
+    assert len(embedded_payloads) == 11
     for index, (quote, payload) in enumerate(embedded_payloads, start=1):
         if quote == '"':
             payload = re.sub(r"`(.)", r"\1", payload)
@@ -278,6 +328,216 @@ def test() -> None:
     anchor = text("scripts/run_wsl_runner_anchor.sh")
     assert "activation-armed" in anchor and "activation-enabled" in anchor
     assert "systemctl is-enabled --quiet" in anchor
+    anchor_regression = anchor + r'''
+
+test_root=$(mktemp -d)
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+
+id() {
+  if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
+  command id "$@"
+}
+install() {
+  if [[ "${1:-}" == "-d" ]]; then
+    mkdir -p -- "${@: -2}"
+    return 0
+  fi
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled) return 0 ;;
+    is-active) return 1 ;;
+    start) return 42 ;;
+    *) return 43 ;;
+  esac
+}
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+set +e
+( set -Eeuo pipefail; anchor_main )
+anchor_status=$?
+set -e
+test "$anchor_status" = 42
+test ! -e "$ready_marker"
+test ! -e "$active_marker"
+printf 'anchor-failure-cleanup-checked\n'
+rm -rf -- "$test_root"
+'''
+    anchor_failure = run_bash(anchor_regression)
+    assert anchor_failure.stdout == b"anchor-failure-cleanup-checked\n"
+
+    attestation = powershell_literal_payload(powershell, "trustedBundleAttestation")
+    attestation_regression = r'''
+set -Eeuo pipefail
+attest() (
+''' + attestation + r'''
+)
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+bundle_root="$test_root/trusted-bundles"
+trusted_commit=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+bundle_target="$bundle_root/$trusted_commit"
+mkdir -p "$bundle_target"
+chmod 0700 "$test_root" "$bundle_root"
+printf 'trusted asset\n' >"$bundle_target/asset"
+printf '%s\n' "$trusted_commit" >"$bundle_target/TRUSTED_COMMIT"
+(cd "$bundle_target" && sha256sum asset >ROOT_ASSETS.sha256)
+ln -s "$bundle_target" "$bundle_root/current"
+actual=$(attest "$bundle_root" "$(id -un)")
+test "$actual" = "$trusted_commit"
+chmod 0777 "$bundle_root"
+if attest "$bundle_root" "$(id -un)" >/dev/null 2>&1; then
+  printf 'writable frozen-bundle root passed attestation\n' >&2
+  exit 88
+fi
+chmod 0700 "$bundle_root"
+chmod 0777 "$test_root"
+if attest "$bundle_root" "$(id -un)" >/dev/null 2>&1; then
+  printf 'writable frozen-bundle parent passed attestation\n' >&2
+  exit 89
+fi
+chmod 0700 "$test_root"
+printf 'tampered\n' >>"$bundle_target/asset"
+if attest "$bundle_root" "$(id -un)" >/dev/null 2>&1; then
+  printf 'tampered frozen bundle passed attestation\n' >&2
+  exit 90
+fi
+printf 'trusted asset\n' >"$bundle_target/asset"
+find() { return 66; }
+if attest "$bundle_root" "$(id -un)" >/dev/null 2>&1; then
+  printf 'failed metadata traversal passed attestation\n' >&2
+  exit 91
+fi
+'''
+    run_bash(attestation_regression)
+
+    wrapper_provision = powershell_literal_payload(powershell, "trustedWrapperProvision")
+    wrapper_regression = r'''
+set -Eeuo pipefail
+provision_wrapper() (
+''' + wrapper_provision + r'''
+)
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+bundle_root="$test_root/trusted-bundles"
+trusted_commit=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bundle_target="$bundle_root/$trusted_commit"
+wrapper_root="$test_root/libexec"
+mkdir -p "$bundle_target/scripts"
+chmod 0700 "$test_root" "$bundle_root"
+cat >"$bundle_target/scripts/install_wsl_runner.sh" <<'INSTALLER'
+#!/usr/bin/env bash
+printf 'trusted-wrapper-executed\n'
+INSTALLER
+chmod 0755 "$bundle_target/scripts/install_wsl_runner.sh"
+printf '%s\n' "$trusted_commit" >"$bundle_target/TRUSTED_COMMIT"
+(cd "$bundle_target" && sha256sum scripts/install_wsl_runner.sh >ROOT_ASSETS.sha256)
+ln -s "$bundle_target" "$bundle_root/current"
+provision_wrapper "$wrapper_root" "$bundle_root" "$(id -un)" "$(id -gn)"
+test -f "$wrapper_root/degen-dogs-wsl-installer"
+test ! -L "$wrapper_root/degen-dogs-wsl-installer"
+test "$(stat -c %a "$wrapper_root/degen-dogs-wsl-installer")" = 755
+test "$("$wrapper_root/degen-dogs-wsl-installer")" = trusted-wrapper-executed
+first_wrapper_inode=$(stat -c %i "$wrapper_root/degen-dogs-wsl-installer")
+provision_wrapper "$wrapper_root" "$bundle_root" "$(id -un)" "$(id -gn)"
+second_wrapper_inode=$(stat -c %i "$wrapper_root/degen-dogs-wsl-installer")
+test "$second_wrapper_inode" != "$first_wrapper_inode"
+rm -f "$wrapper_root/degen-dogs-wsl-installer"
+ln -s "$test_root/attacker" "$wrapper_root/degen-dogs-wsl-installer"
+if provision_wrapper "$wrapper_root" "$bundle_root" "$(id -un)" "$(id -gn)" >/dev/null 2>&1; then
+  printf 'unsafe wrapper symlink was regenerated through\n' >&2
+  exit 92
+fi
+'''
+    run_bash(wrapper_regression)
+
+    rollback = powershell_literal_payload(powershell, "rollbackPublisher")
+    expected_rollback_calls = """disable --now degen-dogs-runner.target
+disable --now degen-dogs-watcher.timer
+disable --now degen-dogs-hourly.timer
+disable --now degen-dogs-health.timer
+stop degen-dogs-watcher.service
+stop degen-dogs-hourly.service
+stop degen-dogs-health.service
+show --property=ActiveState --value degen-dogs-runner.target
+show --property=ActiveState --value degen-dogs-watcher.timer
+show --property=ActiveState --value degen-dogs-hourly.timer
+show --property=ActiveState --value degen-dogs-health.timer
+show --property=ActiveState --value degen-dogs-watcher.service
+show --property=ActiveState --value degen-dogs-hourly.service
+show --property=ActiveState --value degen-dogs-health.service
+"""
+
+    def rollback_regression(mode: str, expected_returncode: int) -> None:
+        harness = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+calls="$test_root/calls"
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+mkdir -p "$state_dir" "$runtime_dir"
+touch "$state_dir/activation-armed" "$runtime_dir/activation-enabled" "$runtime_dir/anchor-ready"
+set -- "$state_dir" "$runtime_dir"
+cat >"$test_root/expected" <<'EXPECTED_CALLS'
+''' + expected_rollback_calls + r'''EXPECTED_CALLS
+systemctl() {
+  printf '%s\n' "$*" >>"$calls"
+  if [[ "''' + mode + r'''" == "failure" && "$*" == "stop degen-dogs-hourly.service" ]]; then
+    return 9
+  fi
+  if [[ "${1:-}" == "show" ]]; then
+    if [[ "''' + mode + r'''" == "failure" && "${*: -1}" == "degen-dogs-hourly.service" ]]; then
+      printf 'active\n'
+    else
+      printf 'inactive\n'
+    fi
+  fi
+}
+rollback_command() {
+''' + rollback + r'''
+}
+set +e
+rollback_command "$@"
+status=$?
+set -e
+test ! -e "$state_dir/activation-armed" || status=91
+test ! -e "$runtime_dir/activation-enabled" || status=92
+test ! -e "$runtime_dir/anchor-ready" || status=93
+if ! cmp -s "$calls" "$test_root/expected"; then
+  diff -u "$test_root/expected" "$calls" >&2 || true
+  status=94
+fi
+printf 'rollback-cleanup-checked status=%s\n' "$status"
+rm -rf -- "$test_root"
+exit "$status"
+'''
+        result = run_bash(harness, expected_returncode=expected_returncode)
+        assert b"rollback-cleanup-checked" in result.stdout
+
+    rollback_regression("success", 0)
+    rollback_regression("failure", 1)
+
+    runner_docs = text("docs/windows-wsl-runner.md")
+    assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -Credential $credential" in runner_docs
+    assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Activate -AtLogOnOnly" in runner_docs
+    assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Uninstall" in runner_docs
 
     preflight = text("scripts/preflight_wsl_rpc.py")
     ast.parse(preflight)
