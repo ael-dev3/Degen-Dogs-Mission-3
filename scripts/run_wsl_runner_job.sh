@@ -7,9 +7,9 @@ umask 077
 
 job="${1:-}"
 case "$job" in
-  watcher|hourly|health|preflight) ;;
+  watcher|publisher|hourly|health|preflight) ;;
   *)
-    printf 'usage: %s {watcher|hourly|health|preflight}\n' "$0" >&2
+    printf 'usage: %s {watcher|publisher|hourly|health|preflight}\n' "$0" >&2
     exit 64
     ;;
 esac
@@ -20,6 +20,10 @@ repo_dir="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
   exit 78
 }
 repo_dir="$(cd "$repo_dir" && pwd -P)"
+[[ "$repo_dir" != /mnt && "$repo_dir" != /mnt/* ]] || {
+  printf 'error: resolved DEGEN_DOGS_REPO_DIR must stay on the WSL ext4 filesystem\n' >&2
+  exit 78
+}
 
 runner_home="${HOME:?HOME must be set by the systemd unit}"
 log_dir="${DEGEN_DOGS_LOG_DIR:-/var/log/degen-dogs}"
@@ -122,6 +126,20 @@ case "$job" in
     export DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0
     export DEGEN_DOGS_REFRESH_TRIGGER=watcher
     exec python3 "${repo_dir}/scripts/watch_mission3_onchain_activity.py" --once
+    ;;
+  publisher)
+    require_production_rpc_quorum
+    # Re-pin every path captured before .env.local was loaded. The queue and
+    # recovery journal may select only a validated generation/digest; neither
+    # may select a command or filesystem path.
+    export DEGEN_DOGS_REPO_DIR="$repo_dir"
+    export DEGEN_DOGS_LOG_DIR="$log_dir"
+    export DEGEN_DOGS_LOCK_DIR="$lock_dir"
+    export DEGEN_DOGS_ENV_FILE="$env_file"
+    export DEGEN_DOGS_REFRESH_LOCK_PATH="${lock_dir}/refresh.lock"
+    export MISSION3_REFRESH_LOCK_PATH="$DEGEN_DOGS_REFRESH_LOCK_PATH"
+    unset MISSION3_REFRESH_COMMAND
+    exec python3 "${repo_dir}/scripts/drain_publication_queue.py"
     ;;
   hourly)
     require_production_rpc_quorum
