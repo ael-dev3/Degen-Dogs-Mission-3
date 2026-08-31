@@ -1269,6 +1269,16 @@ def test_managed_log_inventory_includes_all_high_growth_jsonl_files() -> None:
     assert health.REPO_DIR / "logs" / "refresh-metrics.jsonl" in paths
 
 
+def test_managed_log_inventory_includes_private_pages_verifier_audit_log() -> None:
+    """Catches Pages-verifier audit growth escaping bounded private retention."""
+    values = health.managed_logs()
+    assert any(
+        item.path == health.LOG_DIR / "pages-verifier.jsonl"
+        and item.name == "Pages verifier telemetry"
+        for item in values
+    )
+
+
 def test_runner_permission_hardening_repairs_modes_and_refuses_symlinks() -> None:
     originals = {
         "DRY_RUN": health.DRY_RUN,
@@ -1637,6 +1647,7 @@ if __name__ == "__main__":
     test_watcher_state_health()
     test_log_compaction_is_bounded_and_preserves_launchd_inode()
     test_managed_log_inventory_includes_all_high_growth_jsonl_files()
+    test_managed_log_inventory_includes_private_pages_verifier_audit_log()
     test_runner_permission_hardening_repairs_modes_and_refuses_symlinks()
     test_runner_environment_file_monitoring_is_descriptor_safe_and_optional_by_default()
     test_log_compaction_refuses_symlinks()

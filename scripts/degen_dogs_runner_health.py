@@ -337,6 +337,7 @@ def managed_logs() -> tuple[ManagedLog, ...]:
         ManagedLog(LOG_DIR / "health.launchd.err.log", (), "health launchd stderr"),
         ManagedLog(REPO_DIR / "logs" / "watch-onchain.log", (WATCHER_LABEL,), "repository watcher activity log"),
         ManagedLog(REPO_DIR / ".local" / "watcher_checks.jsonl", (WATCHER_LABEL,), "watcher telemetry"),
+        ManagedLog(LOG_DIR / "pages-verifier.jsonl", (), "Pages verifier telemetry"),
     ]
     if watcher_log is not None:
         values.append(ManagedLog(watcher_log, (WATCHER_LABEL,), "watcher activity log"))

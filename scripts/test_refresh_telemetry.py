@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -806,6 +807,123 @@ def test_queue_latency_and_provider_failure_telemetry_is_redacted_and_measurable
         assert "private-key" not in rendered
         assert "token=secret" not in rendered
         assert "C:\\Users\\operator\\repo" not in rendered
+
+
+def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
+    """Catches metrics that infer a Pages latency from an unrelated proof."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        commit = "a" * 40
+        telemetry.append_jsonl(
+            root / "logs" / "refresh-metrics.jsonl",
+            {
+                "kind": "refresh_publish",
+                "run_id": "generation-7",
+                "result": "success_pushed",
+                "completed_at_utc": iso(20),
+                "observed_at_utc": iso(0),
+                "push_completed_at_utc": iso(15),
+                "queue_generation": 7,
+                "commit_sha": commit,
+            },
+        )
+        telemetry.append_jsonl(
+            root / "logs" / "pages-verifier.jsonl",
+            {
+                "timestamp_utc": iso(25),
+                "result": "proof_verified",
+                "generation": 7,
+                "commit_sha": commit,
+                "pages_verified": True,
+            },
+        )
+        # A later, mismatched proof must not be used for generation 7.
+        telemetry.append_jsonl(
+            root / "logs" / "pages-verifier.jsonl",
+            {
+                "timestamp_utc": iso(99),
+                "result": "proof_verified",
+                "generation": 8,
+                "commit_sha": "b" * 40,
+                "pages_verified": True,
+            },
+        )
+        summary = telemetry.metrics_summary(env, root=root)
+        assert summary["observation_to_push_sample_count_24h"] == 1
+        assert summary["observation_to_push_average_seconds_24h"] == 15
+        assert summary["push_to_pages_sample_count_24h"] == 1
+        assert summary["push_to_pages_average_seconds_24h"] == 10
+
+
+def test_watcher_telemetry_keeps_only_valid_public_summary_fields() -> None:
+    """Catches queue telemetry leaking provider details or accepting bad identity fields."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        row = telemetry.record_watcher_check(
+            {
+                "started_at_utc": iso(0),
+                "completed_at_utc": iso(1),
+                "event_block_time_utc": "not-a-time",
+                "queue_generation": "-7",
+                "provider_failures": [
+                    "https://alice:secret@rpc.example/private?api_key=secret",
+                    "C:\\Users\\alice\\queue",
+                ],
+            },
+            env=env,
+            root=root,
+        )
+        assert "event_block_time_utc" not in row
+        assert "queue_generation" not in row
+        assert row["provider_failure_count"] == 2
+        rendered = json.dumps(row, sort_keys=True)
+        for forbidden in ("rpc.example", "secret", "alice", "C:\\Users"):
+            assert forbidden not in rendered
+
+
+def test_pages_verifier_jsonl_reader_rejects_unsafe_or_oversize_audit_files() -> None:
+    """Catches health metrics accepting an attacker-replaced verifier audit stream."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "pages-verifier.jsonl"
+        path.write_text('{"result":"proof_verified"}\n', encoding="utf-8")
+        path.chmod(0o600)
+        assert telemetry.read_jsonl(path) == [{"result": "proof_verified"}]
+
+        oversized = root / "oversized.jsonl"
+        oversized.write_bytes(b"x" * (telemetry.JSONL_MAX_BYTES + 1))
+        oversized.chmod(0o600)
+        try:
+            telemetry.read_jsonl(oversized)
+        except RuntimeError as exc:
+            assert "too large" in str(exc)
+        else:
+            raise AssertionError("oversized verifier audit file was accepted")
+
+        linked = root / "linked.jsonl"
+        linked.symlink_to(path)
+        try:
+            telemetry.read_jsonl(linked)
+        except RuntimeError as exc:
+            assert "unsafe telemetry file" in str(exc)
+        else:
+            raise AssertionError("symlinked verifier audit file was accepted")
+
+        hard_link = root / "hard-link.jsonl"
+        os.link(path, hard_link)
+        try:
+            telemetry.read_jsonl(path)
+        except RuntimeError as exc:
+            assert "unsafe telemetry file" in str(exc)
+        else:
+            raise AssertionError("hard-linked verifier audit file was accepted")
 
 
 if __name__ == "__main__":

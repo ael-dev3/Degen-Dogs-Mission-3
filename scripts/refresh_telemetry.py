@@ -65,6 +65,8 @@ SUCCESS_RESULTS = {
 }
 LIVE_STATUS_MAX_BYTES = 2 * 1024 * 1024
 LIVE_ARTIFACT_MAX_BYTES = 32 * 1024 * 1024
+JSONL_MAX_BYTES = 16 * 1024 * 1024
+JSONL_MAX_LINES = 50_000
 RAW_STATUS_HOST = "raw.githubusercontent.com"
 RAW_STATUS_PATH = re.compile(
     r"^/ael-dev3/Degen-Dogs-Mission-3/(?P<commit>[0-9a-f]{40})/public/generated/refresh_status\.json$"
@@ -193,6 +195,17 @@ def int_or_none(value: Any) -> int | None:
         return None
 
 
+def positive_int_or_none(value: Any) -> int | None:
+    """Accept only canonical positive telemetry generation/block integers."""
+    parsed = int_or_none(value)
+    return parsed if parsed is not None and parsed > 0 else None
+
+
+def public_commit_sha_or_none(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text if COMMIT_SHA.fullmatch(text) else None
+
+
 def redact_url(value: str) -> str:
     if value == SITE_URL:
         return SITE_URL
@@ -304,13 +317,25 @@ def read_jsonl(path: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
         descriptor = os.open(path, flags)
     except FileNotFoundError:
         return []
+    except OSError as exc:
+        raise RuntimeError(f"refusing unsafe telemetry file: {path}") from exc
     details = os.fstat(descriptor)
-    if not stat.S_ISREG(details.st_mode) or details.st_uid != os.getuid() or stat.S_IMODE(details.st_mode) & 0o077:
+    if (
+        not stat.S_ISREG(details.st_mode)
+        or details.st_uid != os.getuid()
+        or details.st_nlink != 1
+        or stat.S_IMODE(details.st_mode) & 0o077
+    ):
         os.close(descriptor)
         raise RuntimeError(f"refusing unsafe telemetry file: {path}")
+    if details.st_size > JSONL_MAX_BYTES:
+        os.close(descriptor)
+        raise RuntimeError("telemetry file is too large")
     rows: list[dict[str, Any]] = []
     with os.fdopen(descriptor, encoding="utf-8") as handle:
         lines = handle.readlines()
+    if len(lines) > JSONL_MAX_LINES:
+        raise RuntimeError("telemetry file has too many lines")
     if limit is not None:
         lines = lines[-limit:]
     for line in lines:
@@ -507,11 +532,11 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "event_to_observation_seconds": seconds_between(event_block_time, observed) if event_block_time and observed else None,
         "observation_to_push_seconds": seconds_between(observed, pushed) if observed and pushed else None,
         "block_to_push_seconds": seconds_between(event_block_time, pushed) if event_block_time and pushed else None,
-        "queue_generation": int_or_none(env.get("DEGEN_DOGS_PUBLICATION_GENERATION")),
+        "queue_generation": positive_int_or_none(env.get("DEGEN_DOGS_PUBLICATION_GENERATION")),
         "queue_digest": env.get("DEGEN_DOGS_PUBLICATION_DIGEST") or None,
         "queue_outcome": env.get("DEGEN_DOGS_QUEUE_OUTCOME") or None,
         "result": result,
-        "commit_sha": env.get("DEGEN_DOGS_COMMIT_SHA") or None,
+        "commit_sha": public_commit_sha_or_none(env.get("DEGEN_DOGS_COMMIT_SHA")),
         "branch": env.get("DEGEN_DOGS_BRANCH") or None,
         "remote": env.get("DEGEN_DOGS_REMOTE") or None,
         "skip_push": str(env.get("DEGEN_DOGS_SKIP_PUSH", "0")).strip() == "1",
@@ -551,11 +576,51 @@ def watcher_path_from_env(env: dict[str, str], root: Path = ROOT) -> Path:
     return path if path.is_absolute() else root / path
 
 
+def pages_verifier_path_from_env(env: dict[str, str], root: Path = ROOT) -> Path:
+    """Return the fixed private verifier audit stream location.
+
+    Production supplies ``DEGEN_DOGS_LOG_DIR`` outside the checkout.  The
+    repository-local fallback preserves the existing developer/test workflow
+    only when that runner configuration is absent.
+    """
+    explicit = env.get("DEGEN_DOGS_PAGES_VERIFIER_TELEMETRY_PATH")
+    if explicit:
+        path = Path(explicit).expanduser()
+        return path if path.is_absolute() else root / path
+    log_dir = Path(env.get("DEGEN_DOGS_LOG_DIR") or root / "logs").expanduser()
+    if not log_dir.is_absolute():
+        log_dir = root / log_dir
+    return log_dir / "pages-verifier.jsonl"
+
+
 def record_watcher_check(row: dict[str, Any], env: dict[str, str] | None = None, *, root: Path = ROOT) -> dict[str, Any]:
     env = dict(os.environ if env is None else env)
     out = redact_value(dict(row))
     out.setdefault("schema_version", SCHEMA_VERSION)
     out.setdefault("kind", "watcher_check")
+    for key in (
+        "started_at_utc",
+        "completed_at_utc",
+        "event_block_time_utc",
+        "observation_created_at_utc",
+    ):
+        if key in out:
+            value = iso_utc(out[key])
+            if value is None:
+                out.pop(key, None)
+            else:
+                out[key] = value
+    if "queue_generation" in out:
+        generation = positive_int_or_none(out["queue_generation"])
+        if generation is None:
+            out.pop("queue_generation", None)
+        else:
+            out["queue_generation"] = generation
+    failures = out.get("provider_failures")
+    if isinstance(failures, list):
+        out["provider_failure_count"] = len(failures)
+    elif failures is not None:
+        out["provider_failure_count"] = 1
     if out.get("started_at_utc") and out.get("completed_at_utc") and out.get("duration_seconds") is None:
         out["duration_seconds"] = seconds_between(out["started_at_utc"], out["completed_at_utc"])
     if out.get("event_block_time_utc") and out.get("observation_created_at_utc") and out.get("event_to_observation_seconds") is None:
@@ -1122,8 +1187,10 @@ def detect_launchd(label: str) -> dict[str, Any]:
 def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
     local_refresh, metrics_refresh = refresh_paths_from_env(env, root=root)
     watcher_path = watcher_path_from_env(env, root=root)
+    pages_verifier_path = pages_verifier_path_from_env(env, root=root)
     refresh_rows = read_jsonl(metrics_refresh, limit=5000) + read_jsonl(local_refresh, limit=5000)
     watcher_rows = read_jsonl(watcher_path, limit=5000)
+    pages_rows = read_jsonl(pages_verifier_path, limit=5000)
     # Dedupe refresh rows by run_id/result/completed_at because local and logs mirror each other.
     deduped: dict[tuple[str, str, str], dict[str, Any]] = {}
     for row in refresh_rows:
@@ -1134,6 +1201,11 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
     watcher_rows.sort(key=lambda row: str(row.get("completed_at_utc") or row.get("started_at_utc") or ""))
     refresh_24 = recent_24h(refresh_rows)
     watcher_24 = recent_24h(watcher_rows)
+    pages_24 = [
+        row for row in pages_rows
+        if (timestamp := parse_utc(row.get("timestamp_utc"))) is not None
+        and timestamp >= datetime.now(timezone.utc) - timedelta(hours=24)
+    ]
     refresh_durations = []
     for row in refresh_24:
         duration = number_or_none(row.get("duration_seconds"))
@@ -1149,6 +1221,39 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
     last_refresh = refresh_rows[-1] if refresh_rows else {}
     last_success = next((row for row in reversed(refresh_rows) if str(row.get("result")) in SUCCESS_RESULTS), {})
     last_watcher = watcher_rows[-1] if watcher_rows else {}
+    observation_to_push = [
+        value
+        for row in refresh_24
+        for value in [seconds_between(row.get("observed_at_utc"), row.get("push_completed_at_utc"))]
+        if value is not None
+    ]
+    earliest_pages: dict[tuple[int, str], datetime] = {}
+    for row in pages_24:
+        if row.get("result") not in {"proof_verified", "verified_cleared", "verified_waiting_for_journal"}:
+            continue
+        if row.get("pages_verified") is not True:
+            continue
+        generation = positive_int_or_none(row.get("generation"))
+        commit = public_commit_sha_or_none(row.get("commit_sha"))
+        verified_at = parse_utc(row.get("timestamp_utc"))
+        if generation is None or commit is None or verified_at is None:
+            continue
+        key = (generation, commit)
+        if key not in earliest_pages or verified_at < earliest_pages[key]:
+            earliest_pages[key] = verified_at
+    push_to_pages: list[float] = []
+    for row in refresh_24:
+        generation = positive_int_or_none(row.get("queue_generation"))
+        commit = public_commit_sha_or_none(row.get("commit_sha"))
+        pushed_at = parse_utc(row.get("push_completed_at_utc"))
+        verified_at = earliest_pages.get((generation, commit)) if generation and commit else None
+        if pushed_at is None or verified_at is None or verified_at < pushed_at:
+            continue
+        push_to_pages.append(round((verified_at - pushed_at).total_seconds(), 3))
+    provider_failure_count = sum(
+        positive_int_or_none(row.get("provider_failure_count")) or 0
+        for row in watcher_24
+    )
     summary = {
         "last_watcher_check_time_utc": last_watcher.get("completed_at_utc") or last_watcher.get("started_at_utc"),
         "last_watcher_result": last_watcher.get("result"),
@@ -1162,6 +1267,16 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
         "last_detection_lag_seconds": last_watcher.get("detection_lag_seconds"),
         "last_detect_to_push_seconds": last_success.get("detect_to_push_seconds"),
         "last_push_to_live_seconds": last_success.get("push_to_live_seconds"),
+        "observation_to_push_sample_count_24h": len(observation_to_push),
+        "observation_to_push_average_seconds_24h": round(sum(observation_to_push) / len(observation_to_push), 3) if observation_to_push else None,
+        "observation_to_push_p50_seconds_24h": percentile(observation_to_push, 0.5),
+        "observation_to_push_p95_seconds_24h": percentile(observation_to_push, 0.95),
+        "push_to_pages_sample_count_24h": len(push_to_pages),
+        "push_to_pages_average_seconds_24h": round(sum(push_to_pages) / len(push_to_pages), 3) if push_to_pages else None,
+        "push_to_pages_p50_seconds_24h": percentile(push_to_pages, 0.5),
+        "push_to_pages_p95_seconds_24h": percentile(push_to_pages, 0.95),
+        "provider_failure_count_24h": provider_failure_count,
+        "last_provider_failure_count": positive_int_or_none(last_watcher.get("provider_failure_count")) or 0,
         "watcher_check_average_seconds_24h": round(sum(watcher_durations) / len(watcher_durations), 3) if watcher_durations else None,
         "watcher_check_p95_seconds_24h": percentile(watcher_durations, 0.95),
         "refresh_average_seconds_24h": round(sum(refresh_durations) / len(refresh_durations), 3) if refresh_durations else None,
@@ -1179,6 +1294,7 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
             "watcher_checks": str(watcher_path),
             "refresh_runs": str(local_refresh),
             "refresh_metrics": str(metrics_refresh),
+            "pages_verifier": str(pages_verifier_path),
             "public_status": "generated/refresh_status.json",
         },
     }

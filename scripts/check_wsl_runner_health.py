@@ -16,6 +16,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import check_remote_freshness as remote_freshness  # noqa: E402
 import refresh_telemetry  # noqa: E402
+import runner_publication_state  # noqa: E402
 
 TIMER_UNITS = (
     "degen-dogs-watcher.timer",
@@ -72,6 +74,9 @@ def parse_utc(value: Any) -> datetime | None:
         return datetime.fromisoformat(text.replace("Z", "+00:00")).astimezone(timezone.utc)
     except ValueError:
         return None
+
+
+STRICT_UTC = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")
 
 
 def env_int(name: str, default: int, *, minimum: int = 0) -> int:
@@ -174,6 +179,275 @@ def age_seconds(value: Any, now: datetime) -> int | None:
     return None if parsed is None else max(0, int((now - parsed).total_seconds()))
 
 
+def public_commit_sha(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text if len(text) == 40 and all(character in "0123456789abcdef" for character in text) else None
+
+
+def public_timestamp_and_age(value: Any, now: datetime) -> tuple[str | None, int | None, bool]:
+    """Return a canonical UTC value, non-negative age, and >30s future-skew flag."""
+    if not isinstance(value, str) or not STRICT_UTC.fullmatch(value):
+        return None, None, False
+    parsed = parse_utc(value)
+    if parsed is None or utc_text(parsed) != value:
+        return None, None, False
+    text = utc_text(parsed)
+    delta = (now - parsed).total_seconds()
+    return text, max(0, int(delta)), delta < -30
+
+
+def watcher_stale_requires_failure(
+    watcher_age_seconds: int | None,
+    stale_seconds: int,
+    *,
+    publisher_lock_active: bool,
+    publication_mode: str,
+) -> bool:
+    """Keep the old inline lock exemption, but never apply it to queue mode."""
+    if watcher_age_seconds is None or watcher_age_seconds <= stale_seconds:
+        return False
+    return publication_mode == "queue" or not publisher_lock_active
+
+
+def publication_health_summary(
+    snapshot: dict[str, Any],
+    *,
+    now: datetime,
+    publisher_lock_active: bool,
+    provider_failure_count: int = 0,
+) -> dict[str, Any]:
+    """Project one protected state-lock snapshot to a strict public allowlist.
+
+    This deliberately never copies a state record, digest, proof fingerprint,
+    path, observation payload, provider value, or journal value into health
+    output.  State validation belongs to ``read_publication_health_snapshot``;
+    this layer adds queue causality and age policy only.
+    """
+    empty = {
+        "queue_mode": False,
+        "latest_observed_generation": None,
+        "latest_observed_at_utc": None,
+        "handled_generation": None,
+        "handled_pushed_generation": None,
+        "handled_pushed_commit_sha": None,
+        "queue_lag": 0,
+        "queue_age_seconds": None,
+        "unresolved_verification_generation": None,
+        "unresolved_verification_commit_sha": None,
+        "unresolved_verification_age_seconds": None,
+        "pages_verification_state": "unavailable",
+        "last_direct_data_compatible_static_block": None,
+        "provider_failure_count": max(0, int(provider_failure_count)),
+        "problems": [],
+    }
+    problems: list[str] = []
+    try:
+        watermark = snapshot.get("last_generation", 0)
+        if not isinstance(watermark, int) or isinstance(watermark, bool) or watermark < 0:
+            raise ValueError("generation watermark")
+        latest = snapshot.get("latest")
+        pending = snapshot.get("pending")
+        checkpoint = snapshot.get("checkpoint")
+        receipt = snapshot.get("pages_verified")
+        journal = snapshot.get("journal")
+        records = (latest, pending, checkpoint, receipt, journal)
+        if any(record is not None and not isinstance(record, dict) for record in records):
+            raise ValueError("record shape")
+    except Exception:
+        empty["problems"] = ["publication_state_integrity_failure"]
+        return empty
+
+    queue_mode = bool(watermark or any(record is not None for record in records))
+    empty["queue_mode"] = queue_mode
+    if not queue_mode:
+        return empty
+
+    latest_record = latest.get("record") if latest else None
+    if latest is not None and not isinstance(latest_record, dict):
+        problems.append("publication_state_integrity_failure")
+        latest_record = None
+    if latest_record is not None:
+        generation = latest_record.get("generation")
+        if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
+            problems.append("publication_state_integrity_failure")
+        else:
+            empty["latest_observed_generation"] = generation
+        created_at, queue_age, future = public_timestamp_and_age(latest_record.get("created_at_utc"), now)
+        if created_at is None:
+            problems.append("publication_state_integrity_failure")
+        else:
+            empty["latest_observed_at_utc"] = created_at
+            empty["queue_age_seconds"] = queue_age
+        if future:
+            problems.append("publication_future_clock_skew")
+
+    handled_generation = None
+    if checkpoint is not None:
+        generation = checkpoint.get("generation")
+        if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
+            problems.append("publication_state_integrity_failure")
+        else:
+            handled_generation = generation
+            empty["handled_generation"] = generation
+        if checkpoint.get("outcome") == "pushed":
+            empty["handled_pushed_generation"] = handled_generation
+            commit = public_commit_sha(checkpoint.get("commit_sha"))
+            if commit is None:
+                problems.append("publication_state_integrity_failure")
+            else:
+                empty["handled_pushed_commit_sha"] = commit
+
+    effective_handled = handled_generation or 0
+    empty["queue_lag"] = max(0, watermark - effective_handled)
+    if watermark < effective_handled:
+        problems.append("publication_state_integrity_failure")
+    if watermark > effective_handled and latest_record is None and pending is None:
+        problems.append("publication_latest_record_lost")
+    active_publication = bool(
+        publisher_lock_active
+        and isinstance(journal, dict)
+        and latest_record is not None
+        and journal.get("publication_generation") == latest_record.get("generation")
+        and journal.get("queue_digest") == latest.get("record_digest")
+        and public_timestamp_and_age(journal.get("created_at_utc"), now)[0] is not None
+        and public_timestamp_and_age(journal.get("created_at_utc"), now)[2] is False
+    )
+    queue_age = empty["queue_age_seconds"]
+    if empty["queue_lag"] > 0 and isinstance(queue_age, int):
+        queue_limit = 300 if active_publication else 180
+        if queue_age > queue_limit:
+            problems.append("publication_queue_stale")
+
+    pending_generation = None
+    pending_commit = None
+    pending_push_at: str | None = None
+    pending_record = pending.get("record") if isinstance(pending, dict) else None
+    if pending is not None and not isinstance(pending_record, dict):
+        problems.append("publication_state_integrity_failure")
+    if pending_record is not None:
+        pending_generation = pending_record.get("generation")
+        pending_commit = public_commit_sha(pending_record.get("commit_sha"))
+        pending_push_at, pending_age, pending_future = public_timestamp_and_age(pending_record.get("push_completed_at_utc"), now)
+        if not isinstance(pending_generation, int) or isinstance(pending_generation, bool) or pending_generation < 1 or pending_commit is None or pending_push_at is None:
+            problems.append("publication_state_integrity_failure")
+        else:
+            empty["unresolved_verification_generation"] = pending_generation
+            empty["unresolved_verification_commit_sha"] = pending_commit
+            empty["unresolved_verification_age_seconds"] = pending_age
+        if pending_future:
+            problems.append("publication_future_clock_skew")
+        if checkpoint is None or checkpoint.get("generation") != pending_generation or checkpoint.get("outcome") != "pushed":
+            problems.append("publication_proof_gap")
+        if latest_record is not None and latest_record.get("generation") == pending_generation:
+            latest_at = parse_utc(latest_record.get("created_at_utc"))
+            pushed_at = parse_utc(pending_push_at)
+            if latest_at is None or pushed_at is None or pushed_at < latest_at:
+                problems.append("publication_timestamp_reversal")
+
+    receipt_generation = None
+    receipt_commit = None
+    if receipt is not None:
+        receipt_generation = receipt.get("generation")
+        receipt_commit = public_commit_sha(receipt.get("commit_sha"))
+        block = receipt.get("expected_block_number")
+        verified_at, verified_age, receipt_future = public_timestamp_and_age(receipt.get("pages_verified_at_utc"), now)
+        if not isinstance(receipt_generation, int) or isinstance(receipt_generation, bool) or receipt_generation < 1 or receipt_commit is None or not isinstance(block, int) or isinstance(block, bool) or block < 1 or verified_at is None:
+            problems.append("publication_state_integrity_failure")
+        else:
+            # Controller ruling: only this durable receipt proves a static block
+            # reached Pages; never infer it from a queued observation or pending.
+            empty["last_direct_data_compatible_static_block"] = block
+        if receipt_future:
+            problems.append("publication_future_clock_skew")
+        if pending_record is not None and receipt_generation == pending_generation and receipt_commit == pending_commit:
+            empty["pages_verification_state"] = "pages_verified_finalization_pending"
+            if isinstance(verified_age, int) and verified_age > 180 and not active_publication:
+                problems.append("pages_verified_finalization_stale")
+        elif pending_record is not None:
+            empty["pages_verification_state"] = "pending"
+        else:
+            empty["pages_verification_state"] = "verified"
+    elif pending_record is not None:
+        empty["pages_verification_state"] = "pending"
+        unresolved_age = empty["unresolved_verification_age_seconds"]
+        if isinstance(unresolved_age, int) and unresolved_age > 900:
+            problems.append("pages_verification_unresolved")
+    else:
+        empty["pages_verification_state"] = "none"
+
+    empty["problems"] = sorted(set(problems))
+    return empty
+
+
+def public_health_report(
+    *,
+    now: datetime,
+    problems: list[str],
+    warnings: list[str],
+    checks: dict[str, Any],
+) -> dict[str, Any]:
+    """Emit only public derived enums/counts/booleans/times/integers/SHAs."""
+    watcher = checks.get("watcher") if isinstance(checks.get("watcher"), dict) else {}
+    local_status = checks.get("local_status") if isinstance(checks.get("local_status"), dict) else {}
+    terminal = checks.get("terminal_publication") if isinstance(checks.get("terminal_publication"), dict) else {}
+    publication = checks.get("publication") if isinstance(checks.get("publication"), dict) else publication_health_summary(
+        {"last_generation": 0, "latest": None, "pending": None, "checkpoint": None, "pages_verified": None, "journal": None},
+        now=now,
+        publisher_lock_active=False,
+    )
+    timers = checks.get("timers") if isinstance(checks.get("timers"), dict) else {}
+    workers = checks.get("workers") if isinstance(checks.get("workers"), dict) else {}
+    timer_healthy = all(
+        isinstance(row, dict)
+        and not row.get("error")
+        and row.get("LoadState") == "loaded"
+        and row.get("ActiveState") == "active"
+        and row.get("UnitFileState") in {"enabled", "enabled-runtime"}
+        for row in timers.values()
+    )
+    workers_healthy = all(
+        isinstance(row, dict)
+        and not row.get("error")
+        and row.get("ActiveState") != "failed"
+        and row.get("Result") in {"", "success"}
+        for row in workers.values()
+    )
+    terminal_result = str(terminal.get("result") or "")
+    if terminal_result not in PUBLISHED_RESULTS | {"failed", "unavailable"}:
+        terminal_result = "unavailable"
+    completed, _, _ = public_timestamp_and_age(terminal.get("completed_at_utc"), now)
+    local_block = local_status.get("latest_generated_block")
+    if not isinstance(local_block, int) or isinstance(local_block, bool) or local_block < 0:
+        local_block = None
+    remote = checks.get("remote") if isinstance(checks.get("remote"), dict) else {}
+    git = checks.get("git") if isinstance(checks.get("git"), dict) else {}
+    filesystems = checks.get("filesystems") if isinstance(checks.get("filesystems"), list) else []
+    return {
+        "kind": "degen_dogs_wsl_runner_health",
+        "checked_at_utc": utc_text(now),
+        "status": "healthy" if not problems else "unhealthy",
+        "problem_count": len(problems),
+        "warning_count": len(warnings),
+        "checks": {
+            "timers_healthy": timer_healthy,
+            "workers_healthy": workers_healthy,
+            "refresh_lock_active": bool(checks.get("refresh_lock_active")),
+            "watcher_age_seconds": watcher.get("age_seconds") if isinstance(watcher.get("age_seconds"), int) else None,
+            "watcher_pending_refresh": bool(watcher.get("pending_refresh")),
+            "watcher_consecutive_rpc_failures": max(0, int(watcher.get("consecutive_rpc_failures") or 0)),
+            "watcher_consecutive_refresh_failures": max(0, int(watcher.get("consecutive_refresh_failures") or 0)),
+            "local_status_age_seconds": local_status.get("age_seconds") if isinstance(local_status.get("age_seconds"), int) else None,
+            "local_latest_generated_block": local_block,
+            "terminal_publication_result": terminal_result,
+            "terminal_publication_completed_at_utc": completed,
+            "remote_healthy": not bool(remote.get("incident")),
+            "git_clean": git.get("tracked_dirty") is False,
+            "filesystems_healthy": all(isinstance(row, dict) and row.get("error") is None for row in filesystems),
+            "publication": publication,
+        },
+    }
+
+
 def main() -> int:
     now = utc_now()
     lock_dir = Path(os.environ.get("DEGEN_DOGS_LOCK_DIR", "/var/cache/degen-dogs")).expanduser()
@@ -185,6 +459,10 @@ def main() -> int:
     lock_path = Path(
         os.environ.get("DEGEN_DOGS_REFRESH_LOCK_PATH", str(lock_dir / "refresh.lock"))
     ).expanduser()
+    publication_mode = os.environ.get("MISSION3_PUBLICATION_MODE", "inline").strip()
+    if publication_mode not in {"inline", "queue"}:
+        publication_mode = "inline"
+        # Do not probe/create queue state for an unrecognized legacy config.
 
     watcher_stale_seconds = env_int("DEGEN_DOGS_HEALTH_WATCHER_STALE_SECONDS", 180, minimum=30)
     pending_stale_seconds = env_int("DEGEN_DOGS_HEALTH_PENDING_STALE_SECONDS", 900, minimum=60)
@@ -229,6 +507,19 @@ def main() -> int:
         problems.append(f"shared refresh lock validation failed ({type(exc).__name__})")
     checks["refresh_lock_active"] = lock_active
 
+    publication_snapshot: dict[str, Any] | None = None
+    provisional_publication: dict[str, Any] | None = None
+    if publication_mode == "queue":
+        try:
+            publication_snapshot = runner_publication_state.read_publication_health_snapshot(lock_dir)
+            provisional_publication = publication_health_summary(
+                publication_snapshot,
+                now=now,
+                publisher_lock_active=lock_active,
+            )
+        except Exception as exc:  # noqa: BLE001 - detailed state failures remain private
+            problems.append(f"publication queue state is unreadable ({type(exc).__name__})")
+
     try:
         watcher = read_json(state_path)
         watcher_age = age_seconds(watcher.get("last_checked_at_utc"), now)
@@ -241,7 +532,12 @@ def main() -> int:
         }
         if watcher_age is None:
             problems.append("watcher state has no valid last_checked_at_utc")
-        elif watcher_age > watcher_stale_seconds and not lock_active:
+        elif watcher_stale_requires_failure(
+            watcher_age,
+            watcher_stale_seconds,
+            publisher_lock_active=lock_active,
+            publication_mode=publication_mode,
+        ):
             problems.append(f"watcher state is stale ({watcher_age}s > {watcher_stale_seconds}s)")
         if checks["watcher"]["consecutive_rpc_failures"] >= 3:
             problems.append("watcher has at least three consecutive RPC failures")
@@ -286,6 +582,22 @@ def main() -> int:
             problems.append(terminal_problem)
     except Exception as exc:  # noqa: BLE001
         problems.append(f"terminal publication telemetry is unreadable ({type(exc).__name__})")
+
+    if publication_snapshot is not None:
+        try:
+            telemetry_summary = refresh_telemetry.metrics_summary(dict(os.environ), root=ROOT)
+            provider_failure_count = int(telemetry_summary.get("provider_failure_count_24h") or 0)
+        except Exception:
+            provider_failure_count = 0
+            problems.append("publication provider telemetry is unreadable")
+        publication = publication_health_summary(
+            publication_snapshot,
+            now=now,
+            publisher_lock_active=lock_active,
+            provider_failure_count=max(0, provider_failure_count),
+        )
+        checks["publication"] = publication
+        problems.extend(f"publication health failure: {code}" for code in publication["problems"])
 
     raw: Any = None
     pages: Any = None
@@ -366,22 +678,17 @@ def main() -> int:
 
     # Log rotation is external, but surface unexpectedly large files before they
     # can exhaust the WSL VHD. This is warning-only because logrotate may be due.
-    for path in (log_dir / "refresh.log", log_dir / "watch-onchain.log", ROOT / ".local" / "watcher_checks.jsonl"):
+    monitored_logs = [log_dir / "refresh.log", log_dir / "watch-onchain.log", ROOT / ".local" / "watcher_checks.jsonl"]
+    if publication_mode == "queue":
+        monitored_logs.append(log_dir / "pages-verifier.jsonl")
+    for path in monitored_logs:
         try:
             if path.stat().st_size > 32 * 1024 * 1024:
                 warnings.append(f"managed log exceeds 32 MiB: {path.name}")
         except FileNotFoundError:
             continue
 
-    report = {
-        "kind": "degen_dogs_wsl_runner_health",
-        "checked_at_utc": utc_text(now),
-        "runner_id": os.environ.get("DEGEN_DOGS_RUNNER_ID", "windows-wsl"),
-        "status": "healthy" if not problems else "unhealthy",
-        "problems": problems,
-        "warnings": warnings,
-        "checks": checks,
-    }
+    report = public_health_report(now=now, problems=problems, warnings=warnings, checks=checks)
     print(json.dumps(report, sort_keys=True, separators=(",", ":")))
     return 0 if not problems else 1
 
