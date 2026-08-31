@@ -957,6 +957,8 @@ printf 'hourly|%s|%s|%s|%s|%s\n' \
 FAKE_PUBLISHER
 cat >"$repo_dir/scripts/watch_mission3_onchain_activity.py" <<'FAKE_WATCHER'
 import os
+from pathlib import Path
+
 from sibling_probe import VALUE
 
 assert VALUE == "sibling-import-ok"
@@ -988,6 +990,21 @@ actual_git_environment = {
     name: value for name, value in os.environ.items() if name.startswith("GIT_")
 }
 assert actual_git_environment == expected_git_environment, actual_git_environment
+if os.environ.get("MISSION3_WATCHER_AUTO_PUSH") == "0":
+    lock_path = Path(
+        os.environ.get(
+            "MISSION3_WATCHER_LOCK_PATH",
+            str(Path(os.environ["DEGEN_DOGS_REPO_DIR"]) / ".local" / "mission3_onchain_tracker.lock"),
+        )
+    )
+    expected_lock = Path(os.environ["DEGEN_DOGS_LOCK_DIR"]) / "watcher-preflight.lock"
+    expected_state = Path(os.environ["DEGEN_DOGS_LOCK_DIR"]) / "watcher-preflight-state.json"
+    assert lock_path == expected_lock, (lock_path, expected_lock)
+    assert Path(os.environ["MISSION3_WATCHER_STATE_PATH"]) == expected_state
+    lock_path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    lock_path.touch(mode=0o600, exist_ok=True)
+    print("watcher-preflight|{}|{}".format(lock_path, expected_state))
+    raise SystemExit(0)
 print(
     "watcher|{}|{}|{}|{}|{}|{}".format(
         os.environ["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"],
@@ -999,6 +1016,9 @@ print(
     )
 )
 FAKE_WATCHER
+cat >"$repo_dir/scripts/preflight_wsl_rpc.py" <<'FAKE_PREFLIGHT'
+print("rpc-preflight")
+FAKE_PREFLIGHT
 cat >"$repo_dir/scripts/sibling_probe.py" <<'SIBLING'
 VALUE = "sibling-import-ok"
 SIBLING
@@ -1065,6 +1085,7 @@ DEGEN_DOGS_BRANCH=attacker
 DEGEN_DOGS_SKIP_PUSH=1
 DEGEN_DOGS_SKIP_PULL=1
 MISSION3_REFRESH_COMMAND=/attacker/command
+MISSION3_WATCHER_LOCK_PATH=/attacker/watcher.lock
 DEGEN_DOGS_PUBLICATION_OUTCOME=attacker-outcome
 DEGEN_DOGS_RAW_COMMIT_URL=https://attacker.invalid/raw
 DEGEN_DOGS_REFRESH_TELEMETRY_PATH=/attacker/telemetry
@@ -1118,6 +1139,17 @@ test "$(run_job watcher)" = 'watcher|0|origin|main|0|0|queue'
 test "$(run_job publisher)" = "publisher|$repo_dir|$test_root/log|$test_root/lock"
 test "$(run_job verifier)" = "verifier|$repo_dir|$test_root/log|$test_root/lock"
 test "$(run_job health)" = 'health|queue'
+chmod 0555 "$repo_dir"
+set +e
+preflight_output=$(run_job preflight 2>&1)
+preflight_status=$?
+set -e
+chmod 0755 "$repo_dir"
+test "$preflight_status" = 0
+test "$preflight_output" = "rpc-preflight
+watcher-preflight|$test_root/lock/watcher-preflight.lock|$test_root/lock/watcher-preflight-state.json"
+test -f "$test_root/lock/watcher-preflight.lock"
+test ! -e "$repo_dir/.local"
 mkdir "$repo_dir/.venv"
 set +e
 run_job health >/dev/null 2>&1

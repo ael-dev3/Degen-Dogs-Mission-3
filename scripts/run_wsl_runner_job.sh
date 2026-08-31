@@ -280,6 +280,7 @@ case "$job" in
     export MISSION3_REFRESH_COMMAND='npm run refresh:current'
     export MISSION3_WATCHER_REQUIRE_CLEAN_TREE=1
     export MISSION3_WATCHER_LOG_PATH=-
+    export MISSION3_WATCHER_LOCK_PATH="${lock_dir}/watcher-preflight.lock"
     export MISSION3_WATCHER_STATE_PATH="${lock_dir}/watcher-preflight-state.json"
     export DEGEN_DOGS_SKIP_PUSH=1
     "$python_bin" -I -B -c \
