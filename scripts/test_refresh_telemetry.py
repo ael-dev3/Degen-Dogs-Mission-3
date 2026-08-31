@@ -1004,12 +1004,32 @@ def test_watcher_telemetry_keeps_only_valid_public_summary_fields() -> None:
             env=env,
             root=root,
         )
-        assert "event_block_time_utc" not in row
+        assert row["event_block_time_utc"] is None
         assert "queue_generation" not in row
         assert row["provider_failure_count"] == 2
         rendered = json.dumps(row, sort_keys=True)
         for forbidden in ("rpc.example", "secret", "alice", "C:\\Users"):
             assert forbidden not in rendered
+
+
+def test_watcher_state_only_row_preserves_nullable_event_time_schema() -> None:
+    """Catches timestamp normalization dropping the state-only watcher event field."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        row = telemetry.record_watcher_check(
+            {
+                "started_at_utc": iso(0), "completed_at_utc": iso(1), "result": "state_only",
+                "event_name": None, "event_block_number": None, "event_block_time_utc": None,
+                "event_tx_hash": None, "event_log_index": None,
+            },
+            env=env,
+            root=root,
+        )
+        assert "event_block_time_utc" in row
+        assert row["event_block_time_utc"] is None
 
 
 def test_pages_verifier_jsonl_reader_rejects_unsafe_or_oversize_audit_files() -> None:

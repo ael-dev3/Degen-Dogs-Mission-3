@@ -639,7 +639,11 @@ def record_watcher_check(row: dict[str, Any], env: dict[str, str] | None = None,
         if key in out:
             value = iso_utc(out[key])
             if value is None:
-                out.pop(key, None)
+                if key == "event_block_time_utc":
+                    # State-only watcher rows have a stable nullable event schema.
+                    out[key] = None
+                else:
+                    out.pop(key, None)
             else:
                 out[key] = value
     if "queue_generation" in out:
