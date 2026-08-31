@@ -2869,6 +2869,53 @@ fi
 finalize_fixture_publication \
   "$DEFERRED_RECOVERY_REGEN_LOCKS" 79 "$DEFERRED_RECOVERY_REGEN_DIGEST"
 
+# A raw-proven commit can also be absent because the freshly fetched remote was
+# reset exactly to its authenticated baseline. This is not an ordinary
+# unpushed push_ready recovery: every durable proof record and local commit must
+# remain byte-identical for external reconciliation.
+DEFERRED_RAW_BASELINE_RESET_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+touch_valid_refresh_status "$SUCCESS_REPO" "2026-08-30T14:13:00Z"
+git -C "$SUCCESS_REPO" add generated public/generated
+git -C "$SUCCESS_REPO" commit -qm "[cron] deferred raw-proven baseline-reset local" \
+  -m "Refresh-Runner-ID: windows-wsl" \
+  -m "Refresh-Run-Scope: current" \
+  -m "Refresh-Run-ID: deferred-raw-proven-baseline-reset-local"
+DEFERRED_RAW_BASELINE_RESET_LOCAL="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+DEFERRED_RAW_BASELINE_RESET_LOCKS="$TEST_ROOT/deferred-raw-baseline-reset-locks"
+DEFERRED_RAW_BASELINE_RESET_RESULT="$TEST_ROOT/deferred-raw-baseline-reset-result"
+DEFERRED_RAW_BASELINE_RESET_PAGES="$TEST_ROOT/deferred-raw-baseline-reset-pages"
+DEFERRED_RAW_BASELINE_RESET_DIGEST="$(write_fixture_publication_latest "$DEFERRED_RAW_BASELINE_RESET_LOCKS" 80)"
+write_fixture_deferred_journal \
+  "$DEFERRED_RAW_BASELINE_RESET_LOCKS" "$SUCCESS_REPO" "$DEFERRED_RAW_BASELINE_RESET_BASELINE" \
+  80 "$DEFERRED_RAW_BASELINE_RESET_DIGEST" "deferred-raw-proven-baseline-reset-local" raw_proven \
+  "$DEFERRED_RAW_BASELINE_RESET_LOCAL"
+DEFERRED_RAW_BASELINE_RESET_JOURNAL_HASH="$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publisher-recovery.json")"
+DEFERRED_RAW_BASELINE_RESET_PENDING_HASH="$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pending.json")"
+DEFERRED_RAW_BASELINE_RESET_CHECKPOINT_HASH="$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pushed.json")"
+if run_deferred_fixture \
+  "$DEFERRED_RAW_BASELINE_RESET_LOCKS" 80 "$DEFERRED_RAW_BASELINE_RESET_DIGEST" \
+  "$TEST_ROOT/deferred-raw-baseline-reset-logs" "$DEFERRED_RAW_BASELINE_RESET_RESULT" \
+  "" "$DEFERRED_RAW_BASELINE_RESET_PAGES"; then
+  echo "raw-proven remote-baseline recovery was treated as an unpushed publication" >&2
+  exit 1
+fi
+if [[ "$(git -C "$SUCCESS_REPO" rev-parse HEAD)" != "$DEFERRED_RAW_BASELINE_RESET_LOCAL" ]] || \
+  [[ "$(git --git-dir="$REJECT_REMOTE" rev-parse main)" != "$DEFERRED_RAW_BASELINE_RESET_BASELINE" ]] || \
+  [[ ! -e "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publisher-recovery.json" ]] || \
+  [[ ! -e "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pending.json" ]] || \
+  [[ ! -e "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pushed.json" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publisher-recovery.json")" != "$DEFERRED_RAW_BASELINE_RESET_JOURNAL_HASH" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pending.json")" != "$DEFERRED_RAW_BASELINE_RESET_PENDING_HASH" ]] || \
+  [[ "$(sha256sum "$DEFERRED_RAW_BASELINE_RESET_LOCKS/publication/pushed.json")" != "$DEFERRED_RAW_BASELINE_RESET_CHECKPOINT_HASH" ]] || \
+  [[ -n "$(git -C "$SUCCESS_REPO" status --porcelain --untracked-files=all -- README.md index.html generated public archive)" ]] || \
+  [[ -e "$DEFERRED_RAW_BASELINE_RESET_PAGES" ]]; then
+  echo "raw-proven remote-baseline recovery mutated durable evidence or local state" >&2
+  exit 1
+fi
+git -C "$SUCCESS_REPO" update-ref refs/heads/main \
+  "$DEFERRED_RAW_BASELINE_RESET_BASELINE" "$DEFERRED_RAW_BASELINE_RESET_LOCAL"
+git -C "$SUCCESS_REPO" restore --source="$DEFERRED_RAW_BASELINE_RESET_BASELINE" --staged --worktree -- .
+
 # Once sibling alignment reaches its authenticated remote target with clean
 # publish paths, EXIT rollback must be disarmed before journal unlink. Inject a
 # deterministic nonzero crash immediately before and after that unlink in both
@@ -2884,6 +2931,7 @@ run_alignment_unlink_crash_case() {
   local journal="$locks/publisher-recovery.json"
   local marker="$TEST_ROOT/${case_name}-marker"
   local debug_env="$TEST_ROOT/${case_name}-bash-env"
+  local git_trace="$TEST_ROOT/${case_name}-git-trace.json"
   local baseline=""
   local local_commit=""
   local peer_commit=""
@@ -2929,7 +2977,7 @@ run_alignment_unlink_crash_case() {
 
   write_fixture_recovery_journal \
     "$journal" "$repo" "$baseline" "${case_name}-local" current fixture-local
-  if [[ "$flow" == "resumed" ]]; then
+  if [[ "$flow" == "resumed" || "$flow" == "resumed_already_ff" ]]; then
     python3 - "$journal" "$local_commit" "$peer_commit" <<'PY'
 import json
 import os
@@ -2946,9 +2994,15 @@ os.chmod(path, 0o600)
 PY
     git -C "$repo" update-ref refs/heads/main "$baseline" "$local_commit"
     git -C "$repo" restore --source="$baseline" --staged --worktree -- .
-    git -C "$repo" merge -q --ff-only "$peer_commit"
+    if [[ "$flow" == "resumed_already_ff" ]]; then
+      git -C "$repo" merge -q --ff-only "$peer_commit"
+    fi
   elif [[ "$flow" != "normal" && "$flow" != "landed" ]]; then
     echo "invalid alignment unlink fixture flow: ${flow}" >&2
+    exit 1
+  fi
+  if [[ "$flow" == "resumed" && "$(git -C "$repo" rev-parse HEAD)" != "$baseline" ]]; then
+    echo "resumed alignment unlink fixture did not start from its authenticated baseline" >&2
     exit 1
   fi
 
@@ -2957,6 +3011,7 @@ PY
   HOME="$TEST_ROOT/home" \
   VALIDATOR_MARKER="$SUCCESS_MARKER" \
   BASH_ENV="$debug_env" \
+  GIT_TRACE2_EVENT="$git_trace" \
   FIXTURE_UNLINK_JOURNAL="$journal" \
   FIXTURE_UNLINK_MARKER="$marker" \
   FIXTURE_UNLINK_MODE="$mode" \
@@ -2978,6 +3033,23 @@ PY
   if [[ "$status" == "0" || -e "$marker" ]]; then
     echo "${case_name} did not terminate at the requested journal boundary" >&2
     exit 1
+  fi
+  if [[ "$flow" == "resumed" ]]; then
+    python3 - "$git_trace" "$peer_commit" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+events = [json.loads(line) for line in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()]
+target = sys.argv[2]
+if not any(
+    event.get("event") == "start"
+    and event.get("argv", [])[:3] == ["git", "merge", "--ff-only"]
+    and event.get("argv", [None])[-1] == target
+    for event in events
+):
+    raise SystemExit("resumed recovery did not execute its own exact fast-forward merge")
+PY
   fi
   if [[ "$(git -C "$repo" rev-parse HEAD)" != "$peer_commit" ]] || \
     [[ -n "$(git -C "$repo" status --porcelain --untracked-files=all -- README.md index.html generated public archive)" ]]; then
@@ -3012,7 +3084,7 @@ PY
   fi
 }
 
-for ALIGNMENT_UNLINK_FLOW in normal resumed landed; do
+for ALIGNMENT_UNLINK_FLOW in normal resumed resumed_already_ff landed; do
   for ALIGNMENT_UNLINK_MODE in pre post; do
     run_alignment_unlink_crash_case "$ALIGNMENT_UNLINK_FLOW" "$ALIGNMENT_UNLINK_MODE"
   done

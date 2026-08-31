@@ -1848,6 +1848,12 @@ PY
       log "recovered deferred publisher commit ${journal_remote_commit} contained by remote ${remote_head}"
       return 0
     fi
+    if [[ "$journal_deferred" == "1" && \
+      "$journal_handoff_phase" == "raw_proven" && \
+      "$journal_terminal_outcome" == "pushed" && \
+      "$journal_remote_commit" == "$current_head" ]]; then
+      fail "durable raw-proven publisher commit is absent from the freshly fetched remote; preserving immutable handoff evidence"
+    fi
     if [[ "$remote_head" == "$current_head" ]]; then
       if [[ -n "$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" ]]; then
         fail "interrupted publisher commit reached the remote but publish artifacts are unexpectedly dirty"
@@ -1861,12 +1867,6 @@ PY
     if [[ "$remote_head" == "$journal_baseline" ]]; then
       log "recovering unpushed interrupted publisher commit ${current_head}"
     elif git merge-base --is-ancestor "$journal_baseline" "$remote_head"; then
-      if [[ "$journal_deferred" == "1" && \
-        "$journal_handoff_phase" == "raw_proven" && \
-        "$journal_terminal_outcome" == "pushed" && \
-        "$journal_remote_commit" == "$current_head" ]]; then
-        fail "durable raw-proven publisher commit is absent from the freshly fetched remote; preserving immutable handoff evidence"
-      fi
       # Another writer may have won after this process pushed ambiguously or
       # crashed. Authenticate our local child first, then either acknowledge a
       # covering peer snapshot or fast-forward and regenerate on the new base.
