@@ -1893,8 +1893,9 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     key_download = powershell.index("nodesource-repo.gpg.key")
     key_verify = powershell.index("--with-colons", key_download)
     key_trust = powershell.index("--dearmor", key_verify)
-    apt_source = powershell.index("nodesource.list", key_trust)
-    assert key_download < key_verify < key_trust < apt_source
+    key_mode = powershell.index("chmod 0644 /usr/share/keyrings/nodesource.gpg", key_trust)
+    apt_source = powershell.index("nodesource.list", key_mode)
+    assert key_download < key_verify < key_trust < key_mode < apt_source
     powershell_lines = powershell.splitlines()
     for index, line in enumerate(powershell_lines):
         if "git -c core.hooksPath=/dev/null" in line and ("'$RepoDir'" in line or "'$RepoDir/.git'" in line):

@@ -2152,6 +2152,7 @@ if [ "`$nodesource_fingerprint" != "`$nodesource_expected_fingerprint" ]; then
   exit 1
 fi
 gpg --batch --yes --dearmor --output /usr/share/keyrings/nodesource.gpg "`$key_tmp"
+chmod 0644 /usr/share/keyrings/nodesource.gpg
 rm -f "`$key_tmp"
 printf '%s\n' 'deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main' \
   > /etc/apt/sources.list.d/nodesource.list
