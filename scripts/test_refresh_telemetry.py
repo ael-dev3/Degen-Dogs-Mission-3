@@ -809,6 +809,29 @@ def test_queue_latency_and_provider_failure_telemetry_is_redacted_and_measurable
         assert "C:\\Users\\operator\\repo" not in rendered
 
 
+def test_build_refresh_row_preserves_detected_fallback_only_for_legacy_inline_runs() -> None:
+    """Catches queue hardening silently removing the legacy inline timing fields."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        legacy_env = base_env(root)
+        legacy_env.pop("DEGEN_DOGS_OBSERVED_AT_UTC", None)
+        legacy = telemetry.build_refresh_row(legacy_env, result="success_pushed", root=root)
+        assert legacy["observed_at_utc"] == legacy_env["DEGEN_DOGS_DETECTED_AT_UTC"]
+        assert legacy["observation_to_push_seconds"] == 22
+
+        queue_env = dict(legacy_env)
+        queue_env.update({
+            "DEGEN_DOGS_PUBLICATION_GENERATION": "42",
+            "DEGEN_DOGS_PUBLICATION_DIGEST": "a" * 64,
+            "DEGEN_DOGS_QUEUE_OUTCOME": "enqueued",
+        })
+        queued = telemetry.build_refresh_row(queue_env, result="success_pushed", root=root)
+        assert "observed_at_utc" not in queued
+        assert "observation_to_push_seconds" not in queued
+
+
 def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
     """Catches metrics that infer a Pages latency from an unrelated proof."""
     telemetry = load_module()
@@ -864,6 +887,33 @@ def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
         summary = telemetry.metrics_summary(env, root=root)
         assert summary["observation_to_push_sample_count_24h"] == 1
         assert summary["observation_to_push_average_seconds_24h"] == 15
+        assert summary["push_to_pages_sample_count_24h"] == 1
+        assert summary["push_to_pages_average_seconds_24h"] == 10
+
+
+def test_push_to_pages_survives_watcher_rotation_and_skips_reversed_proof() -> None:
+    """Catches Pages latency depending on retained watcher rows or selecting a reversed proof."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        commit = "a" * 40
+        telemetry.append_jsonl(root / "logs" / "refresh-metrics.jsonl", {
+            "kind": "refresh_publish", "run_id": "generation-8", "result": "success_pushed",
+            "completed_at_utc": iso(15), "push_completed_at_utc": iso(15),
+            "queue_generation": 8, "queue_digest": "d" * 64, "commit_sha": commit,
+        })
+        telemetry.append_jsonl(root / "logs" / "pages-verifier.jsonl", {
+            "timestamp_utc": iso(10), "result": "proof_verified", "generation": 8,
+            "commit_sha": commit, "pages_verified": True,
+        })
+        telemetry.append_jsonl(root / "logs" / "pages-verifier.jsonl", {
+            "timestamp_utc": iso(25), "result": "proof_verified", "generation": 8,
+            "commit_sha": commit, "pages_verified": True,
+        })
+        summary = telemetry.metrics_summary(env, root=root)
+        assert summary["observation_to_push_sample_count_24h"] == 0
         assert summary["push_to_pages_sample_count_24h"] == 1
         assert summary["push_to_pages_average_seconds_24h"] == 10
 

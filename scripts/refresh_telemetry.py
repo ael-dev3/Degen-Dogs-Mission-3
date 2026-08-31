@@ -505,9 +505,18 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
     lock_acquired = env_timestamp(env, "DEGEN_DOGS_LOCK_ACQUIRED_AT_UTC") or env_timestamp(env, "DEGEN_DOGS_REFRESH_LOCK_ACQUIRED_AT_UTC")
     pushed = env_timestamp(env, "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
     detected = env_timestamp(env, "DEGEN_DOGS_DETECTED_AT_UTC")
-    # Queue latency is attributed only to an authenticated watcher observation;
-    # do not substitute publisher detection time for a missing queue timestamp.
-    observed = env_timestamp(env, "DEGEN_DOGS_OBSERVED_AT_UTC")
+    queue_identity_present = any(
+        str(env.get(name) or "").strip()
+        for name in (
+            "DEGEN_DOGS_PUBLICATION_GENERATION",
+            "DEGEN_DOGS_PUBLICATION_DIGEST",
+            "DEGEN_DOGS_QUEUE_OUTCOME",
+        )
+    )
+    queue_mode = env.get("MISSION3_PUBLICATION_MODE", "").strip() == "queue" or queue_identity_present
+    # Queue latency is attributed only to an authenticated watcher observation.
+    # Legacy inline publishers retain their historical detected-time fallback.
+    observed = env_timestamp(env, "DEGEN_DOGS_OBSERVED_AT_UTC") or (None if queue_mode else detected)
     event_block_time = env_timestamp(env, "DEGEN_DOGS_EVENT_BLOCK_TIME_UTC")
     raw_commit_verified = str(env.get("DEGEN_DOGS_RAW_COMMIT_VERIFIED") or "").strip().lower()
     row: dict[str, Any] = {
@@ -1280,7 +1289,6 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
         pushed[key] = identity if previous == identity else None
 
     observation_to_push: list[float] = []
-    valid_pushed: dict[tuple[int, str], dict[str, Any]] = {}
     for key, push in pushed.items():
         observed_at = observations.get(key)
         if push is None or observed_at is None:
@@ -1289,8 +1297,18 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
         if seconds is None:
             continue
         observation_to_push.append(seconds)
-        valid_pushed[(push["generation"], push["commit"])] = push
-    earliest_pages: dict[tuple[int, str], datetime] = {}
+
+    # Pages verification is independent of watcher retention.  It is joined
+    # only to an unambiguous successful push identity, then chooses the first
+    # proof that is causally after that push (not merely the first proof).
+    pushed_for_pages: dict[tuple[int, str], dict[str, Any] | None] = {}
+    for push in pushed.values():
+        if push is None:
+            continue
+        key = (push["generation"], push["commit"])
+        previous = pushed_for_pages.get(key, push)
+        pushed_for_pages[key] = push if previous == push else None
+    pages_by_identity: dict[tuple[int, str], list[datetime]] = {}
     for row in pages_24:
         if row.get("result") not in {"proof_verified", "verified_cleared", "verified_waiting_for_journal"}:
             continue
@@ -1303,13 +1321,19 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
             continue
         key = (generation, commit)
         verified_dt = parse_utc(verified_at)
-        if key not in earliest_pages or verified_dt < earliest_pages[key]:
-            earliest_pages[key] = verified_dt
+        pages_by_identity.setdefault(key, []).append(verified_dt)
     push_to_pages: list[float] = []
-    for key, row in valid_pushed.items():
+    for key, row in pushed_for_pages.items():
+        if row is None:
+            continue
         pushed_at = parse_utc(row["pushed_at"])
-        verified_at = earliest_pages.get(key)
-        if pushed_at is None or verified_at is None:
+        if pushed_at is None:
+            continue
+        verified_at = min(
+            (proof for proof in pages_by_identity.get(key, []) if proof >= pushed_at),
+            default=None,
+        )
+        if verified_at is None:
             continue
         verified_text = verified_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
         seconds = causal_seconds_between(row["pushed_at"], verified_text)

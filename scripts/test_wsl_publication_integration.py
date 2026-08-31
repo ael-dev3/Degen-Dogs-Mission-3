@@ -399,7 +399,7 @@ def test_queue_health_state_machine_boundaries_and_durable_watermark() -> None:
     for name, snapshot, expected in cases:
         summary = health.publication_health_summary(snapshot, now=now, publisher_lock_active=False)
         assert summary["latest_observed_generation"] == snapshot["last_generation"], name
-        assert expected <= set(summary["problems"]), (name, summary)
+        assert set(summary["problems"]) == expected, (name, summary)
 
     older_pending_newer_receipt = health.publication_health_summary({
         "last_generation": 8, "latest": None, "journal": None,
@@ -410,6 +410,21 @@ def test_queue_health_state_machine_boundaries_and_durable_watermark() -> None:
     assert older_pending_newer_receipt["pages_verification_state"] == "pending"
     assert older_pending_newer_receipt["last_direct_data_compatible_static_block"] == 702
     assert "publication_proof_gap" not in older_pending_newer_receipt["problems"]
+
+    for age, expected in ((180, set()), (181, {"pages_verified_finalization_stale"})):
+        verified_at = (now - timedelta(seconds=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        finalization = health.publication_health_summary({
+            "last_generation": 7, "latest": None, "journal": None,
+            "pending": pending(7, "2026-08-31T11:55:00Z"),
+            "checkpoint": pushed(7, "2026-08-31T11:55:00Z"),
+            "pages_verified": {
+                "generation": 7, "queue_digest": "d" * 64, "commit_sha": commit,
+                "expected_block_number": 702, "push_completed_at_utc": "2026-08-31T11:55:00Z",
+                "pages_verified_at_utc": verified_at,
+            },
+        }, now=now, publisher_lock_active=False)
+        assert finalization["pages_verification_state"] == "pages_verified_finalization_pending"
+        assert set(finalization["problems"]) == expected, (age, finalization)
 
 
 def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
