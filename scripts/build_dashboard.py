@@ -44,6 +44,14 @@ def is_live_snapshot_bundle_filename(filename: str) -> bool:
     return bool(LIVE_SNAPSHOT_BUNDLE_FILENAME_RE.fullmatch(filename))
 
 
+def canonical_reorg_marker_from_env() -> str:
+    """Return the queue-authenticated directional reorg marker, if present."""
+    marker = os.environ.get("DEGEN_DOGS_CANONICAL_REORG_FROM_HASH", "").strip().lower()
+    if marker and re.fullmatch(r"0x[0-9a-f]{64}", marker) is None:
+        raise AssertionError("queue-authenticated canonical reorg marker is invalid")
+    return marker
+
+
 CACHE_DIR = ROOT / ".cache"
 LOG_CACHE_DIR = CACHE_DIR / "rpc_logs"
 DOG_METADATA_CACHE = CACHE_DIR / "dog_metadata.json"
@@ -3574,6 +3582,8 @@ def fetch_current_auction(latest_block: int, latest_time: str, block_tag: str) -
         "amount_eth": float(Decimal(amount) / Decimal(10**18)),
         "amount_eth_exact": decimal_str(amount, 18),
         "amount_wei": str(amount),
+        "start_time_unix": start_ts,
+        "end_time_unix": end_ts,
         "start_time_utc": utc_from_unix(start_ts) if start_ts else "",
         "end_time_utc": utc_from_unix(end_ts) if end_ts else "",
         "bidder": bidder,
@@ -6028,6 +6038,7 @@ def main() -> None:
     current = fetch_current_auction(latest_block, latest_time, snapshot_tag)
     token_stats = fetch_token_stats(snapshot_tag)
     token_stats.update(onchain_verification)
+    token_stats["canonical_reorg_from_hash"] = canonical_reorg_marker_from_env()
     decimals = int(token_stats["woof_decimals"])
     token_stats["dog_total_supply"] = str(dog_total_supply)
     token_stats["dog_id_ceiling"] = str(dog_total_supply)
@@ -6160,7 +6171,7 @@ def main() -> None:
     insert_rows(conn, "dog_metadata", dog_metadata, [("token_id", "INTEGER"), ("dog_name", "TEXT"), ("dog_image_url", "TEXT"), ("dog_external_url", "TEXT"), ("dog_opensea_url", "TEXT"), ("traits", "TEXT"), ("trait_rarity", "TEXT"), ("rarity", "TEXT"), ("rarity_score", "REAL"), ("metadata_verification_status", "TEXT")])
     insert_rows(conn, "token_stats", [{"metric": k, "value": v} for k, v in token_stats.items()], [("metric", "TEXT"), ("value", "TEXT")])
     insert_rows(conn, "historical_prices_daily", load_historical_price_rows(), HISTORICAL_PRICE_SCHEMA)
-    insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
+    insert_rows(conn, "current_auction_source", [current], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("start_time_unix", "INTEGER"), ("end_time_unix", "INTEGER"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
 
     conn.executescript(SQL_PATH.read_text(encoding="utf-8"))
     build_historical_dog_tables(conn, dog_total_supply, dog_metadata)

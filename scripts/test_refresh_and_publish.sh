@@ -4,6 +4,22 @@ set -Eeuo pipefail
 # Regression test: a failed generator must not poison every later scheduled run.
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEST_RUNNING_UNDER_WSL=0
+if [[ -r /proc/sys/kernel/osrelease ]]; then
+  IFS= read -r TEST_KERNEL_RELEASE </proc/sys/kernel/osrelease || TEST_KERNEL_RELEASE=""
+  case "$TEST_KERNEL_RELEASE" in
+    *microsoft*|*Microsoft*|*WSL*|*wsl*) TEST_RUNNING_UNDER_WSL=1 ;;
+  esac
+fi
+TEST_TRUSTED_WSL_PYTHON_AUTHORITY=0
+if [[ "$TEST_RUNNING_UNDER_WSL" == "1" && -n "${DEGEN_DOGS_PYTHON_BIN:-}" ]]; then
+  [[ "$DEGEN_DOGS_PYTHON_BIN" == "/var/lib/degen-dogs/python-runtime/bin/python3" && \
+    -x "$DEGEN_DOGS_PYTHON_BIN" ]] || {
+    echo "publisher regression received an invalid trusted WSL Python authority" >&2
+    exit 1
+  }
+  TEST_TRUSTED_WSL_PYTHON_AUTHORITY=1
+fi
 TEST_ROOT="$(mktemp -d -t degen-dogs-refresh-test.XXXXXX)"
 TEST_REPO="${TEST_ROOT}/repo"
 CROSS_DEVICE_ROOT=""
@@ -90,7 +106,9 @@ PY
 write_fixture_publication_latest() {
   local lock_dir="$1"
   local generation="$2"
-  python3 - "$SOURCE_DIR/runner_publication_state.py" "$lock_dir" "$generation" <<'PY'
+  local confirmed_block="${3:-100}"
+  python3 - "$SOURCE_DIR/runner_publication_state.py" "$lock_dir" "$generation" \
+    "$confirmed_block" <<'PY'
 from __future__ import annotations
 
 import importlib.util
@@ -105,13 +123,14 @@ sys.modules[spec.name] = state
 spec.loader.exec_module(state)
 root = Path(sys.argv[2])
 generation = int(sys.argv[3])
+confirmed_block = int(sys.argv[4])
 record = state.latest_record(
     generation,
     "windows-wsl",
     "current",
     "2026-08-30T12:34:56Z",
     {
-        "confirmed_block_number": 100,
+        "confirmed_block_number": confirmed_block,
         "confirmed_block_hash": "0x" + "a" * 64,
         "confirmed_block_time_utc": "2026-08-30T12:34:00Z",
         "token_id": "818",
@@ -123,7 +142,7 @@ record = state.latest_record(
         "event_name": "AuctionBid",
         "event_tx_hash": "0x" + "b" * 64,
         "event_log_index": 0,
-        "event_block_number": 100,
+        "event_block_number": confirmed_block,
         "event_block_hash": "0x" + "a" * 64,
         "event_block_time_utc": "2026-08-30T12:34:00Z",
         "canonical_reorg_from_hash": None,
@@ -182,6 +201,8 @@ assert spec and spec.loader
 state = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = state
 spec.loader.exec_module(state)
+sys.path.insert(0, str(Path(module_path).parent))
+import publication_coverage as coverage
 lock_dir = Path(lock_name)
 repo = Path(repo_name)
 generation = int(generation_raw)
@@ -205,6 +226,7 @@ journal = {
     "alignment_result": None,
     "publication_generation": generation,
     "queue_digest": digest,
+    "coverage_proof": None,
     "terminal_outcome": None,
     "handoff_phase": "generating",
     "remote_commit": None,
@@ -220,25 +242,33 @@ journal = {
 }
 state.create_deferred_recovery_journal(lock_dir, journal)
 if phase in {"push_ready", "raw_proven"}:
-    journal = state.arm_deferred_pushed_handoff(lock_dir, generation, digest, commit)
+    journal = state.read_deferred_recovery_journal(lock_dir)
+    assert journal is not None
+    proof = coverage.extract_coverage_proof(
+        repo,
+        source_kind="generated_commit",
+        source_commit_sha=commit,
+        publication_target=journal["publication_target"],
+    )
+    journal = state.arm_deferred_pushed_handoff(
+        lock_dir,
+        generation,
+        digest,
+        commit,
+        proof,
+    )
 if phase == "raw_proven":
-    status_path = "public/generated/refresh_status.json"
-    status = json.loads(subprocess.check_output(["git", "show", f"{commit}:{status_path}"], cwd=repo))
-    bundle_path = f"public/generated/{status['live_snapshot_bundle']}"
-    bundle = subprocess.check_output(["git", "show", f"{commit}:{bundle_path}"], cwd=repo)
-    assert len(bundle) == status["live_snapshot_bundle_bytes"]
-    assert hashlib.sha256(bundle).hexdigest() == status["live_snapshot_bundle_sha256"]
     pending = {
         "schema_version": 1,
         "generation": generation,
         "queue_digest": digest,
         "commit_sha": commit,
-        "raw_status_path": status_path,
-        "raw_bundle_path": bundle_path,
-        "expected_bundle_sha256": status["live_snapshot_bundle_sha256"],
-        "expected_bundle_bytes": status["live_snapshot_bundle_bytes"],
-        "expected_block_number": status["latest_generated_block"],
-        "expected_block_hash": status["snapshot_block_hash"],
+        "raw_status_path": proof["status_path"],
+        "raw_bundle_path": proof["bundle_path"],
+        "expected_bundle_sha256": proof["bundle_sha256"],
+        "expected_bundle_bytes": proof["bundle_bytes"],
+        "expected_block_number": proof["block_number"],
+        "expected_block_hash": proof["block_hash"],
         "push_completed_at_utc": "2026-08-30T12:50:00Z",
         "retry_deadline_utc": "2026-08-30T13:00:00Z",
         "retry_count": 0,
@@ -250,12 +280,23 @@ if phase == "raw_proven":
         "queue_digest": digest,
         "commit_sha": commit,
         "push_completed_at_utc": "2026-08-30T12:50:00Z",
+        "publication_target": journal["publication_target"],
+        "coverage_proof": proof,
     }
     state.prepare_pushed_handoff(lock_dir, journal, pending, checkpoint)
 elif phase == "terminal_no_diff":
+    journal = state.read_deferred_recovery_journal(lock_dir)
+    assert journal is not None
+    proof = coverage.extract_coverage_proof(
+        repo,
+        source_kind="baseline_no_diff",
+        source_commit_sha=baseline,
+        publication_target=journal["publication_target"],
+    )
     terminal = dict(journal)
     terminal["terminal_outcome"] = "no_diff"
     terminal["handoff_phase"] = "terminal"
+    terminal["coverage_proof"] = proof
     checkpoint = {
         "schema_version": 1,
         "outcome": "no_diff",
@@ -263,6 +304,8 @@ elif phase == "terminal_no_diff":
         "queue_digest": digest,
         "commit_sha": None,
         "push_completed_at_utc": None,
+        "publication_target": journal["publication_target"],
+        "coverage_proof": proof,
     }
     state.record_terminal_outcome(lock_dir, terminal, checkpoint)
 elif phase != "generating" and phase != "push_ready":
@@ -354,6 +397,10 @@ grep -q 'Refresh-Runner-ID: ${RUNNER_ID}' "$TEST_REPO/scripts/refresh_and_publis
 grep -q 'Refresh-Run-Scope: ${RUN_SCOPE}' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'update_recovery_run_scope "full"' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'live_bundle_name.fullmatch(path.name)' "$TEST_REPO/scripts/refresh_and_publish.sh"
+if grep -q -- '-m py_compile' "$TEST_REPO/scripts/refresh_and_publish.sh"; then
+  echo "publisher syntax validation still writes repository bytecode" >&2
+  exit 1
+fi
 python3 - "$TEST_REPO/scripts/refresh_and_publish.sh" <<'PY'
 from pathlib import Path
 import sys
@@ -555,13 +602,26 @@ fi
 if [[ -d /dev/shm && -w /dev/shm ]]; then
   CROSS_DEVICE_ROOT="$(mktemp -d /dev/shm/degen-dogs-refresh-cross-device.XXXXXX)"
   chmod 700 "$CROSS_DEVICE_ROOT"
-  if python3 - "$TEST_REPO" "$CROSS_DEVICE_ROOT" <<'PY'
+  if cross_device_skip_reason="$(python3 - "$TEST_REPO" "$CROSS_DEVICE_ROOT" <<'PY'
 import os
 import sys
 
-raise SystemExit(0 if os.stat(sys.argv[1]).st_dev != os.stat(sys.argv[2]).st_dev else 1)
+if os.stat(sys.argv[1]).st_dev == os.stat(sys.argv[2]).st_dev:
+    print("repository and /dev/shm are on the same filesystem")
+    raise SystemExit(1)
+
+sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
+from runner_path_security import SecurePathError, open_secure_directory
+
+try:
+    descriptor = open_secure_directory(sys.argv[2], private=True)
+except (OSError, SecurePathError) as exc:
+    print(f"/dev/shm fixture is rejected by runner path security: {exc}")
+    raise SystemExit(1)
+else:
+    os.close(descriptor)
 PY
-  then
+  )"; then
     set +e
     HOME="$TEST_ROOT/home" \
     DEGEN_DOGS_REPO_DIR="$TEST_REPO" \
@@ -593,7 +653,11 @@ PY
       echo "cross-device rollback did not complete without an EXDEV warning" >&2
       exit 1
     fi
+  else
+    echo "skipping cross-device rollback fixture: $cross_device_skip_reason" >&2
   fi
+else
+  echo "skipping cross-device rollback fixture: /dev/shm is unavailable or not writable" >&2
 fi
 if [[ -n "$(git -C "$TEST_REPO" status --porcelain --untracked-files=all -- generated)" ]]; then
   echo "generated path remains dirty after full-builder fallback rollback" >&2
@@ -620,6 +684,7 @@ mkdir -p \
   "$SUCCESS_REPO/node_modules"
 cp "$SOURCE_DIR/refresh_and_publish.sh" "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
 cp "$SOURCE_DIR/runner_publication_state.py" "$SUCCESS_REPO/scripts/runner_publication_state.py"
+cp "$SOURCE_DIR/publication_coverage.py" "$SUCCESS_REPO/scripts/publication_coverage.py"
 cp "$SOURCE_DIR/runner_permissions.sh" "$SUCCESS_REPO/scripts/runner_permissions.sh"
 cp "$SOURCE_DIR/runner_path_security.py" "$SUCCESS_REPO/scripts/runner_path_security.py"
 cp "$SOURCE_DIR/refresh_telemetry.py" "$SUCCESS_REPO/scripts/refresh_telemetry_validator.py"
@@ -628,8 +693,8 @@ cp "$SOURCE_DIR/build_live_snapshot_bundle.py" "$SUCCESS_REPO/scripts/build_live
 chmod +x "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
 printf '%s\n' \
   '{"scripts":{' \
-  '"refresh:current":"node scripts/success_generation.js && python3 scripts/build_live_snapshot_bundle.py",' \
-  '"data":"node scripts/success_generation.js && python3 scripts/build_live_snapshot_bundle.py",' \
+  '"refresh:current":"python3 scripts/assert_python_authority.py && node scripts/success_generation.js && node scripts/apply_reorg_marker.js && python3 scripts/build_live_snapshot_bundle.py",' \
+  '"data":"python3 scripts/assert_python_authority.py && node scripts/success_generation.js && node scripts/apply_reorg_marker.js && python3 scripts/build_live_snapshot_bundle.py",' \
   '"archive:mission3:index":"node scripts/archive_generation.js",' \
   '"archive:mission3:health":"node -e \"\"",' \
   '"validate:dashboard":"node scripts/validate_marker.js",' \
@@ -637,6 +702,35 @@ printf '%s\n' \
   '"check:historical-dogs":"node -e \"\"",' \
   '"build":"node -e \"\""' \
   '}}' >"$SUCCESS_REPO/package.json"
+printf '%s\n' \
+  'from __future__ import annotations' \
+  'import os' \
+  'import sys' \
+  'from pathlib import Path' \
+  'expected = os.environ.get("DEGEN_DOGS_PYTHON_BIN")' \
+  'if expected and os.path.abspath(sys.executable) != expected:' \
+  '    raise SystemExit(f"unexpected Python authority: {sys.executable}")' \
+  'marker = os.environ.get("FIXTURE_PYTHON_AUTHORITY_MARKER")' \
+  'if marker:' \
+  '    Path(marker).write_text(os.path.abspath(sys.executable) + "\n", encoding="utf-8")' \
+  >"$SUCCESS_REPO/scripts/assert_python_authority.py"
+printf '%s\n' \
+  "const fs = require('fs');" \
+  "const marker = process.env.DEGEN_DOGS_CANONICAL_REORG_FROM_HASH || '';" \
+  "for (const prefix of ['generated', 'public/generated']) {" \
+  "  const statusPath = prefix + '/refresh_status.json';" \
+  "  const status = JSON.parse(fs.readFileSync(statusPath));" \
+  "  if (marker) status.canonical_reorg_from_hash = marker; else delete status.canonical_reorg_from_hash;" \
+  "  fs.writeFileSync(statusPath, JSON.stringify(status, null, 2) + '\\n');" \
+  "  const metricsPath = prefix + '/mission3_metrics.json';" \
+  "  const metrics = JSON.parse(fs.readFileSync(metricsPath));" \
+  "  const index = metrics.findIndex(row => row.metric === 'canonical_reorg_from_hash');" \
+  "  if (marker && index >= 0) metrics[index].value = marker;" \
+  "  else if (marker) metrics.push({metric:'canonical_reorg_from_hash', value:marker});" \
+  "  else if (index >= 0) metrics.splice(index, 1);" \
+  "  fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2) + '\\n');" \
+  "}" \
+  >"$SUCCESS_REPO/scripts/apply_reorg_marker.js"
 printf '%s\n' \
   "const fs = require('fs');" \
   "fs.rmSync('generated/obsolete.json');" \
@@ -716,6 +810,36 @@ cp "$SOURCE_DIR/../generated/auction_feed.json" "$SUCCESS_REPO/generated/auction
 cp "$SOURCE_DIR/../public/generated/auction_feed.json" "$SUCCESS_REPO/public/generated/auction_feed.json"
 cp "$SOURCE_DIR/../generated/mission3_metrics.json" "$SUCCESS_REPO/generated/mission3_metrics.json"
 cp "$SOURCE_DIR/../public/generated/mission3_metrics.json" "$SUCCESS_REPO/public/generated/mission3_metrics.json"
+python3 - "$SUCCESS_REPO" <<'PY'
+from __future__ import annotations
+
+import datetime as dt
+import json
+import sys
+from decimal import Decimal
+from pathlib import Path
+
+repo = Path(sys.argv[1])
+for relative in ("generated/current_auction.json", "public/generated/current_auction.json"):
+    path = repo / relative
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        raise SystemExit("current-auction fixture must contain exactly one row")
+    row = rows[0]
+    amount = Decimal(str(row["current_bid_eth"])) * Decimal(10**18)
+    if amount != amount.to_integral_value():
+        raise SystemExit("current-auction fixture amount is not exact wei")
+    row["amount_wei"] = str(int(amount))
+    for source, target in (
+        ("start_time_utc", "start_time_unix"),
+        ("end_time_utc", "end_time_unix"),
+    ):
+        parsed = dt.datetime.strptime(row[source], "%Y-%m-%d %H:%M:%S").replace(
+            tzinfo=dt.timezone.utc
+        )
+        row[target] = int(parsed.timestamp())
+    path.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
+PY
 cp "$SOURCE_DIR/../generated/refresh_status.json" "$SUCCESS_REPO/scripts/fixture_valid_refresh_status.json"
 cp "$SOURCE_DIR/../public/generated/unified_dog_search_index.json" "$SUCCESS_REPO/public/generated/unified_dog_search_index.json"
 cp "$SOURCE_DIR"/../generated/live_snapshot_*.json "$SUCCESS_REPO/generated/"
@@ -736,10 +860,17 @@ git -C "$SUCCESS_REPO" config user.email "degen-dogs-test@example.invalid"
 git -C "$SUCCESS_REPO" add .
 git -C "$SUCCESS_REPO" commit -qm "successful baseline"
 
-# Exercise the same pinned runtime selection as production before the first
-# success-repository publisher invocation, including archive recovery below.
-python3 -m venv "$SUCCESS_REPO/.venv"
-"$SUCCESS_REPO/.venv/bin/python3" -m pip install --require-hashes -r "$SOURCE_DIR/../requirements.txt"
+# WSL must ignore all checkout-controlled Python authorities. Other supported
+# platforms retain the existing local virtualenv fixture.
+if [[ "$TEST_TRUSTED_WSL_PYTHON_AUTHORITY" == "1" ]]; then
+  mkdir -p "$SUCCESS_REPO/.venv/bin"
+  printf '%s\n' '#!/bin/sh' 'printf invoked >"$FIXTURE_HOSTILE_VENV_MARKER"' 'exit 97' \
+    >"$SUCCESS_REPO/.venv/bin/python3"
+  chmod +x "$SUCCESS_REPO/.venv/bin/python3"
+else
+  python3 -m venv "$SUCCESS_REPO/.venv"
+  "$SUCCESS_REPO/.venv/bin/python3" -m pip install --require-hashes -r "$SOURCE_DIR/../requirements.txt"
+fi
 
 # A proven-stale, safely permissioned, owned index lock left by a crash must be removed
 # before preflight so it cannot block staging or rollback later in the run.
@@ -751,6 +882,8 @@ touch -t 200001010000 "$SUCCESS_REPO/.git/index.lock"
 
 HOME="$TEST_ROOT/home" \
 VALIDATOR_MARKER="$SUCCESS_MARKER" \
+FIXTURE_PYTHON_AUTHORITY_MARKER="$TEST_ROOT/python-authority-ran" \
+FIXTURE_HOSTILE_VENV_MARKER="$TEST_ROOT/hostile-venv-ran" \
 DEGEN_DOGS_REPO_DIR="$SUCCESS_REPO" \
 DEGEN_DOGS_LOG_DIR="$TEST_ROOT/success-logs" \
 DEGEN_DOGS_LOCK_DIR="$TEST_ROOT/success-locks" \
@@ -759,6 +892,18 @@ DEGEN_DOGS_SKIP_PUSH=1 \
 "$SUCCESS_REPO/scripts/refresh_and_publish.sh"
 
 [[ "$(<"$SUCCESS_MARKER")" == "validated" ]]
+if find "$SUCCESS_REPO" -path "$SUCCESS_REPO/.venv" -prune -o \
+  \( -type d -name __pycache__ -o -type f -name '*.pyc' \) -print -quit | grep -q .; then
+  echo "publisher created forbidden repository Python bytecode" >&2
+  exit 1
+fi
+if [[ "$TEST_TRUSTED_WSL_PYTHON_AUTHORITY" == "1" ]]; then
+  [[ "$(<"$TEST_ROOT/python-authority-ran")" == "/var/lib/degen-dogs/python-runtime/bin/python3" ]]
+  if [[ -e "$TEST_ROOT/hostile-venv-ran" ]]; then
+    echo "WSL publisher executed checkout-controlled .venv Python" >&2
+    exit 1
+  fi
+fi
 if [[ -e "$SUCCESS_REPO/.git/index.lock" ]]; then
   echo "proven-stale git index lock was not removed" >&2
   exit 1
@@ -1870,6 +2015,17 @@ assert journal["queue_digest"] == pending["queue_digest"] == checkpoint["queue_d
 assert journal["terminal_outcome"] == checkpoint["outcome"] == "pushed"
 assert journal["handoff_phase"] == "raw_proven"
 assert journal["remote_commit"] == pending["commit_sha"] == checkpoint["commit_sha"]
+assert journal["publication_target"] == checkpoint["publication_target"]
+assert journal["coverage_proof"] == checkpoint["coverage_proof"]
+proof = journal["coverage_proof"]
+assert proof["source_kind"] == "generated_commit"
+assert proof["source_commit_sha"] == pending["commit_sha"]
+assert pending["raw_status_path"] == proof["status_path"]
+assert pending["raw_bundle_path"] == proof["bundle_path"]
+assert pending["expected_bundle_sha256"] == proof["bundle_sha256"]
+assert pending["expected_bundle_bytes"] == proof["bundle_bytes"]
+assert pending["expected_block_number"] == proof["block_number"]
+assert pending["expected_block_hash"] == proof["block_hash"]
 assert (root / "publication/latest.json").exists()
 PY
 if [[ "$(sed -n '1p' "$DEFER_PUSH_RESULT")" != "success_pushed" ]] || \
@@ -2000,6 +2156,10 @@ checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="u
 assert journal["terminal_outcome"] == checkpoint["outcome"] == "no_diff"
 assert journal["remote_commit"] is None and checkpoint["commit_sha"] is None
 assert checkpoint["push_completed_at_utc"] is None
+assert journal["publication_target"] == checkpoint["publication_target"]
+assert journal["coverage_proof"] == checkpoint["coverage_proof"]
+assert checkpoint["coverage_proof"]["source_kind"] == "baseline_no_diff"
+assert checkpoint["coverage_proof"]["source_commit_sha"] == journal["baseline_head"]
 assert not (root / "publication/pending.json").exists()
 assert (root / "publication/latest.json").exists()
 PY
@@ -2009,6 +2169,36 @@ if [[ "$(sed -n '1p' "$DEFER_NO_DIFF_RESULT")" != "success_no_diff" ]] || \
   exit 1
 fi
 finalize_fixture_publication "$DEFER_NO_DIFF_LOCKS" 42 "$DEFER_NO_DIFF_DIGEST"
+
+# A syntactically valid no-diff baseline is not authority to acknowledge a
+# newer queued observation. The exact target must remain queued and no terminal
+# checkpoint may be created when immutable bundle coverage is stale.
+STALE_NO_DIFF_LOCKS="$TEST_ROOT/stale-no-diff-locks"
+STALE_NO_DIFF_RESULT="$TEST_ROOT/stale-no-diff-result"
+STALE_NO_DIFF_DIGEST="$(write_fixture_publication_latest "$STALE_NO_DIFF_LOCKS" 44 60000000)"
+if run_deferred_fixture \
+  "$STALE_NO_DIFF_LOCKS" 44 "$STALE_NO_DIFF_DIGEST" \
+  "$TEST_ROOT/stale-no-diff-logs" "$STALE_NO_DIFF_RESULT"; then
+  echo "stale no-diff snapshot acknowledged a newer queued observation" >&2
+  exit 1
+fi
+python3 - "$STALE_NO_DIFF_LOCKS" "$STALE_NO_DIFF_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+latest = json.loads((root / "publication/latest.json").read_text(encoding="utf-8"))
+assert latest["generation"] == 44
+assert latest["observation"]["confirmed_block_number"] == 60000000
+assert not (root / "publication/pending.json").exists()
+assert not (root / "publication/pushed.json").exists()
+PY
+if [[ -e "$STALE_NO_DIFF_RESULT" && "$(sed -n '1p' "$STALE_NO_DIFF_RESULT")" == success_* ]] || \
+  ! grep -q "does not cover its queue target" "$TEST_ROOT/stale-no-diff-logs/refresh.log"; then
+  echo "stale no-diff rejection did not fail closed before terminal handoff" >&2
+  exit 1
+fi
 
 # A verified peer winner is another terminal queue outcome. Exercise the
 # interrupted-local-child recovery path because it also covers the existing
@@ -2075,6 +2265,7 @@ journal = {
     "alignment_result": None,
     "publication_generation": 43,
     "queue_digest": sys.argv[5],
+    "coverage_proof": None,
     "terminal_outcome": None,
     "handoff_phase": "generating",
     "remote_commit": None,
@@ -2127,6 +2318,10 @@ checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="u
 assert journal["terminal_outcome"] == checkpoint["outcome"] == "peer_superseded"
 assert journal["remote_commit"] == checkpoint["commit_sha"] == sys.argv[2]
 assert checkpoint["push_completed_at_utc"] is None
+assert journal["publication_target"] == checkpoint["publication_target"]
+assert journal["coverage_proof"] == checkpoint["coverage_proof"]
+assert checkpoint["coverage_proof"]["source_kind"] == "peer_commit"
+assert checkpoint["coverage_proof"]["source_commit_sha"] == sys.argv[2]
 assert (root / "publication/latest.json").exists()
 assert not (root / "publication/pending.json").exists()
 PY
@@ -2214,6 +2409,8 @@ latest = json.loads((root / "publication/latest.json").read_text(encoding="utf-8
 assert journal["publication_generation"] == checkpoint["generation"] == 60
 assert journal["queue_digest"] == checkpoint["queue_digest"] == sys.argv[2]
 assert checkpoint["outcome"] == "no_diff"
+assert journal["publication_target"] == checkpoint["publication_target"]
+assert journal["coverage_proof"] == checkpoint["coverage_proof"]
 assert latest["generation"] == 61
 PY
 if [[ "$(sed -n '1p' "$NPLUS_GENERATING_RESULT")" != "success_no_diff" ]]; then

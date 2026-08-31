@@ -518,6 +518,7 @@ SELECT
   COALESCE(d.metadata_verification_status, 'unavailable') AS metadata_verification_status,
   printf('%.5f ETH ($%.0f)', c.amount_eth, c.amount_eth * eth_price.eth_usd) AS current_bid,
   ROUND(c.amount_eth, 8) AS current_bid_eth,
+  c.amount_wei,
   ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd,
   ROUND(c.amount_eth * eth_price.eth_usd, 2) AS current_bid_usd_live,
   CAST(eth_price.eth_usd AS TEXT) AS eth_usd_price_live,
@@ -537,6 +538,8 @@ SELECT
   c.bidder AS bidder_wallet,
   c.start_time_utc,
   c.end_time_utc,
+  c.start_time_unix,
+  c.end_time_unix,
   CASE
     WHEN c.settled != 0 THEN 'settled'
     WHEN c.seconds_left = 0 THEN 'ended_unsettled'
@@ -797,6 +800,7 @@ UNION ALL SELECT 'onchain_verification_status', (SELECT value FROM token_stats W
 UNION ALL SELECT 'onchain_verification_scope', (SELECT value FROM token_stats WHERE metric = 'onchain_verification_scope')
 UNION ALL SELECT 'onchain_chain_id', (SELECT value FROM token_stats WHERE metric = 'onchain_chain_id')
 UNION ALL SELECT 'snapshot_block_hash', (SELECT value FROM token_stats WHERE metric = 'snapshot_block_hash')
+UNION ALL SELECT 'canonical_reorg_from_hash', (SELECT value FROM token_stats WHERE metric = 'canonical_reorg_from_hash')
 UNION ALL SELECT 'snapshot_confirmations', (SELECT value FROM token_stats WHERE metric = 'snapshot_confirmations')
 UNION ALL SELECT 'rpc_quorum_size', (SELECT value FROM token_stats WHERE metric = 'rpc_quorum_size')
 UNION ALL SELECT 'rpc_quorum_agreement', (SELECT value FROM token_stats WHERE metric = 'rpc_quorum_agreement')

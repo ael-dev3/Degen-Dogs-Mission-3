@@ -319,17 +319,27 @@ unexpected-origin, locally-ahead, hidden-index, or byte-different clones.
 Activation separately fetches the configured SSH origin and requires
 `HEAD == origin/main`.
 
-The dependency/test pass removes any earlier receipt before it starts. It runs
-the publication-state, watcher, queue-drainer, detached-verifier, publisher,
-telemetry, runner-health, and delayed-publication integration tests once as the
-unprivileged runner, then performs the dashboard build. Only that complete pass
-may atomically create
+The dependency/test pass removes any earlier receipt before it starts. It builds
+a root-owned Python runtime under `/var/lib/degen-dogs`, stages the exact
+attested source tree without Git metadata, and runs the dashboard-data,
+live-snapshot-bundle, current-surface, publication-state,
+publication-coverage Git-hardening, watcher, queue-drainer, detached-verifier,
+publisher, telemetry, runner-health, and delayed-publication integration tests
+exactly once as the unprivileged runner. It then performs the dashboard build
+from that immutable source and warms the production checkout's Node dependencies
+with lifecycle scripts disabled. A managed legacy checkout `.venv` is moved to a
+root-only quarantine and removed without executing any of its contents. Only
+that complete pass, followed by successful unit rendering, `systemd-analyze`,
+and logrotate verification, may atomically create
 `/var/lib/degen-dogs/bootstrap-test-receipt.json`. The private root-owned receipt
 is bound to the exact runtime commit, the exact frozen trusted-installer commit,
 and its strict schema. The separate `-Activate` pass uses `--skip-bootstrap` and
 refuses a missing, legacy, malformed, linked, non-private, wrong-schema, or
 commit-mismatched receipt; changing the trusted installer therefore invalidates
-the previous test policy even when the runtime commit is unchanged. Portable
+the previous test policy even when the runtime commit is unchanged. Activation
+atomically claims this receipt before preflight. Success deletes the claim;
+failure leaves a non-replayable claimed tombstone that only a new full bootstrap
+may garbage-collect, so a failed activation cannot reuse its proof. Portable
 asset checks, Windows policy checks, and the privileged rendered-systemd
 isolation proof remain separate release gates and are not recursively executed
 by this bootstrap suite.

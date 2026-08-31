@@ -116,6 +116,36 @@ def _runner_path_security_module() -> Any:
     return module
 
 
+def _publication_coverage_module() -> Any:
+    """Load the fixed sibling proof helper in importlib-driven test contexts."""
+    try:
+        import publication_coverage
+
+        return publication_coverage
+    except ModuleNotFoundError as exc:
+        if exc.name != "publication_coverage":
+            raise
+    import importlib.util
+    import sys
+
+    module_name = "_degen_dogs_publication_coverage"
+    existing = sys.modules.get(module_name)
+    if existing is not None:
+        return existing
+    helper_path = Path(__file__).resolve().with_name("publication_coverage.py")
+    specification = importlib.util.spec_from_file_location(module_name, helper_path)
+    if specification is None or specification.loader is None:
+        raise StateValidationError("cannot load the fixed publication coverage helper")
+    module = importlib.util.module_from_spec(specification)
+    sys.modules[module_name] = module
+    try:
+        specification.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(module_name, None)
+        raise
+    return module
+
+
 def state_paths(lock_dir: os.PathLike[str] | str) -> StatePaths:
     # ``resolve()`` would silently follow an attacker-controlled lock-dir link.
     root = Path(os.path.abspath(os.fspath(lock_dir)))
@@ -812,7 +842,32 @@ def validate_observation(value: Any) -> dict[str, Any]:
     reorg = value["canonical_reorg_from_hash"]
     if reorg is not None:
         _hash(reorg, "canonical_reorg_from_hash")
+        if reorg == value["confirmed_block_hash"]:
+            raise StateValidationError(
+                "canonical_reorg_from_hash cannot equal the confirmed block hash"
+            )
     return value
+
+
+def validate_coverage_proof_for_target(
+    proof: Any,
+    publication_target: Any,
+) -> dict[str, Any]:
+    """Validate one strict proof and require its snapshot to cover the target."""
+    target = validate_latest(publication_target)
+    coverage = _publication_coverage_module()
+    try:
+        validated = coverage.validate_coverage_proof(proof)
+        if not coverage.coverage_proof_covers_observation(
+            validated,
+            target["observation"],
+        ):
+            raise coverage.CoverageValidationError(
+                "publication snapshot does not cover the selected observation"
+            )
+    except coverage.CoverageValidationError as exc:
+        raise StateValidationError(f"publication coverage proof is invalid: {exc}") from exc
+    return validated
 
 
 def latest_record(generation: int, runner_id: str, run_scope: str, created_at_utc: str, observation: dict[str, Any]) -> dict[str, Any]:
@@ -990,7 +1045,7 @@ def cas_clear_pending(
 
 _JOURNAL_BASE_KEYS = {
     "schema_version", "repo_realpath", "branch", "baseline_head", "run_id", "runner_id",
-    "run_scope", "created_at_utc", "publish_paths",
+    "run_scope", "created_at_utc", "publish_paths", "publication_target",
 }
 _JOURNAL_ALIGNMENT_KEYS = {"alignment_runner_commit", "alignment_remote_head", "alignment_result"}
 _JOURNAL_PROOF_KEYS = {
@@ -999,7 +1054,12 @@ _JOURNAL_PROOF_KEYS = {
     "retry_count",
 }
 _JOURNAL_DEFERRED_KEYS = _JOURNAL_BASE_KEYS | _JOURNAL_ALIGNMENT_KEYS | _JOURNAL_PROOF_KEYS | {
-    "publication_generation", "queue_digest", "terminal_outcome", "handoff_phase", "remote_commit",
+    "publication_generation", "queue_digest", "coverage_proof", "terminal_outcome",
+    "handoff_phase", "remote_commit",
+}
+_CHECKPOINT_KEYS = {
+    "schema_version", "outcome", "generation", "queue_digest", "commit_sha",
+    "push_completed_at_utc", "publication_target", "coverage_proof",
 }
 _PENDING_KEYS = {
     "schema_version", "generation", "queue_digest", "commit_sha", "raw_status_path", "raw_bundle_path",
@@ -1014,10 +1074,17 @@ _PAGES_VERIFIED_KEYS = _PENDING_IMMUTABLE_KEYS | {
 }
 
 
-def _validate_journal(value: Any) -> dict[str, Any]:
+def _validate_journal(
+    value: Any,
+    *,
+    allow_unbound_publication_target: bool = False,
+) -> dict[str, Any]:
     if not isinstance(value, dict) or value.get("schema_version") != SCHEMA_VERSION:
         raise StateValidationError("recovery journal schema is invalid")
-    _require_exact_keys(value, _JOURNAL_DEFERRED_KEYS, "recovery journal")
+    expected_keys = _JOURNAL_DEFERRED_KEYS
+    if allow_unbound_publication_target and "publication_target" not in value:
+        expected_keys = expected_keys - {"publication_target"}
+    _require_exact_keys(value, expected_keys, "recovery journal")
     if not isinstance(value["repo_realpath"], str) or not os.path.isabs(value["repo_realpath"]):
         raise StateValidationError("journal repository path is invalid")
     if not isinstance(value["branch"], str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]{0,127}", value["branch"]):
@@ -1039,6 +1106,15 @@ def _validate_journal(value: Any) -> dict[str, Any]:
     _integer(value["publication_generation"], "journal generation", minimum=1)
     if not isinstance(value["queue_digest"], str) or not re.fullmatch(r"[0-9a-f]{64}", value["queue_digest"]):
         raise StateValidationError("journal queue digest is invalid")
+    target: dict[str, Any] | None = None
+    if "publication_target" in value:
+        target = validate_latest(value["publication_target"])
+        if target["generation"] != value["publication_generation"]:
+            raise StateValidationError("journal publication target generation differs from queue identity")
+        if _digest(target) != value["queue_digest"]:
+            raise StateValidationError("journal publication target digest differs from queue identity")
+    elif not allow_unbound_publication_target:
+        raise StateValidationError("recovery journal lacks its publication target")
     alignment = (
         value["alignment_runner_commit"],
         value["alignment_remote_head"],
@@ -1066,8 +1142,14 @@ def _validate_journal(value: Any) -> dict[str, Any]:
     phase = value["handoff_phase"]
     outcome = value["terminal_outcome"]
     remote_commit = value["remote_commit"]
+    coverage_proof = value["coverage_proof"]
     if phase == "generating":
-        if outcome is not None or remote_commit is not None or not proof_is_empty:
+        if (
+            outcome is not None
+            or remote_commit is not None
+            or not proof_is_empty
+            or coverage_proof is not None
+        ):
             raise StateValidationError("generating journal contains terminal handoff evidence")
     elif phase == "push_ready":
         if outcome != "pushed" or remote_commit is None or not proof_is_empty:
@@ -1090,6 +1172,24 @@ def _validate_journal(value: Any) -> dict[str, Any]:
             raise StateValidationError("no-diff journal must not invent a remote commit")
         if outcome == "peer_superseded" and remote_commit is None:
             raise StateValidationError("peer-superseded journal lacks the peer commit")
+    if phase != "generating":
+        if target is None or coverage_proof is None:
+            raise StateValidationError("terminal journal lacks publication coverage evidence")
+        validated_proof = validate_coverage_proof_for_target(coverage_proof, target)
+        source_kind = validated_proof["source_kind"]
+        source_commit = validated_proof["source_commit_sha"]
+        if outcome == "pushed" and (
+            source_kind != "generated_commit" or source_commit != remote_commit
+        ):
+            raise StateValidationError("pushed journal coverage source differs from publisher commit")
+        if outcome == "no_diff" and (
+            source_kind != "baseline_no_diff" or source_commit != value["baseline_head"]
+        ):
+            raise StateValidationError("no-diff journal coverage source differs from baseline")
+        if outcome == "peer_superseded" and (
+            source_kind != "peer_commit" or source_commit != remote_commit
+        ):
+            raise StateValidationError("peer journal coverage source differs from peer commit")
     return value
 
 
@@ -1308,7 +1408,7 @@ def read_publication_health_snapshot(
 def _validate_checkpoint(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise StateValidationError("checkpoint record must be an object")
-    _require_exact_keys(value, {"schema_version", "outcome", "generation", "queue_digest", "commit_sha", "push_completed_at_utc"}, "checkpoint record")
+    _require_exact_keys(value, _CHECKPOINT_KEYS, "checkpoint record")
     if value["schema_version"] != SCHEMA_VERSION or value["outcome"] not in {"pushed", "no_diff", "peer_superseded"}:
         raise StateValidationError("checkpoint outcome is invalid")
     _integer(value["generation"], "checkpoint generation", minimum=1)
@@ -1327,6 +1427,22 @@ def _validate_checkpoint(value: Any) -> dict[str, Any]:
             raise StateValidationError("peer-superseded checkpoint requires peer commit and no local push time")
     if value["push_completed_at_utc"] is not None:
         _utc(value["push_completed_at_utc"], "checkpoint push completion")
+    target = validate_latest(value["publication_target"])
+    if target["generation"] != value["generation"] or _digest(target) != value["queue_digest"]:
+        raise StateValidationError("checkpoint publication target differs from queue identity")
+    proof = validate_coverage_proof_for_target(value["coverage_proof"], target)
+    source_kind = proof["source_kind"]
+    source_commit = proof["source_commit_sha"]
+    if value["outcome"] == "pushed" and (
+        source_kind != "generated_commit" or source_commit != value["commit_sha"]
+    ):
+        raise StateValidationError("pushed checkpoint coverage source differs from commit")
+    if value["outcome"] == "no_diff" and source_kind != "baseline_no_diff":
+        raise StateValidationError("no-diff checkpoint coverage source is not the baseline")
+    if value["outcome"] == "peer_superseded" and (
+        source_kind != "peer_commit" or source_commit != value["commit_sha"]
+    ):
+        raise StateValidationError("peer checkpoint coverage source differs from commit")
     return value
 
 
@@ -1359,14 +1475,36 @@ def create_deferred_recovery_journal(
 ) -> None:
     """Create the authenticated pre-generation journal at its fixed path."""
     paths = state_paths(lock_dir)
-    journal = _validate_journal(journal)
-    if journal["handoff_phase"] != "generating":
+    journal_template = _validate_journal(
+        journal,
+        allow_unbound_publication_target=True,
+    )
+    if journal_template["handoff_phase"] != "generating":
         raise StateValidationError("new deferred recovery journal must begin in generating phase")
     with _lock(paths, lock_context):
         try:
             _read_json(paths.journal)
         except FileNotFoundError:
-            atomic_write_record(paths.journal, journal)
+            selected = read_latest_with_digest(lock_dir)
+            if selected is None:
+                raise StateValidationError("deferred recovery journal has no selected latest record")
+            selected_record, selected_digest = selected
+            if (
+                selected_record["generation"] != journal_template["publication_generation"]
+                or selected_digest != journal_template["queue_digest"]
+            ):
+                raise StateValidationError(
+                    "deferred recovery journal identity differs from the selected latest record"
+                )
+            bound = dict(journal_template)
+            supplied_target = bound.get("publication_target")
+            if supplied_target is not None and _canonical_bytes(supplied_target) != _canonical_bytes(selected_record):
+                raise StateValidationError(
+                    "deferred recovery journal supplied a conflicting publication target"
+                )
+            bound["publication_target"] = selected_record
+            bound = _validate_journal(bound)
+            atomic_write_record(paths.journal, bound)
             return
         raise StateValidationError("deferred recovery journal already exists")
 
@@ -1376,6 +1514,7 @@ def arm_deferred_pushed_handoff(
     generation: int,
     digest: str,
     commit_sha: str,
+    coverage_proof: dict[str, Any],
     *,
     lock_context: Any | None = None,
 ) -> dict[str, Any]:
@@ -1399,6 +1538,10 @@ def arm_deferred_pushed_handoff(
         armed["terminal_outcome"] = "pushed"
         armed["handoff_phase"] = "push_ready"
         armed["remote_commit"] = commit_sha
+        armed["coverage_proof"] = validate_coverage_proof_for_target(
+            coverage_proof,
+            journal["publication_target"],
+        )
         _validate_journal(armed)
         atomic_write_record(paths.journal, armed)
         return armed
@@ -1411,6 +1554,7 @@ def update_deferred_alignment(
     runner_commit: str,
     remote_head: str,
     alignment_result: str,
+    coverage_proof: dict[str, Any] | None = None,
     *,
     lock_context: Any | None = None,
 ) -> dict[str, Any]:
@@ -1422,7 +1566,13 @@ def update_deferred_alignment(
             raise StateValidationError("alignment cannot erase a pushed handoff phase")
         if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
             raise StateValidationError("alignment identity differs from queued publication")
-        updated = _aligned_journal(journal, runner_commit, remote_head, alignment_result)
+        updated = _aligned_journal(
+            journal,
+            runner_commit,
+            remote_head,
+            alignment_result,
+            coverage_proof,
+        )
         atomic_write_record(paths.journal, updated)
         return updated
 
@@ -1434,6 +1584,7 @@ def record_deferred_push_rejected_alignment(
     runner_commit: str,
     remote_head: str,
     alignment_result: str,
+    coverage_proof: dict[str, Any] | None = None,
     *,
     lock_context: Any | None = None,
 ) -> dict[str, Any]:
@@ -1450,7 +1601,13 @@ def record_deferred_push_rejected_alignment(
             raise StateValidationError("rejected push does not match exact push-ready journal identity")
         if remote_head in {runner_commit, journal["baseline_head"]}:
             raise StateValidationError("rejected push remote is not a distinct sibling target")
-        updated = _aligned_journal(journal, runner_commit, remote_head, alignment_result)
+        updated = _aligned_journal(
+            journal,
+            runner_commit,
+            remote_head,
+            alignment_result,
+            coverage_proof,
+        )
         atomic_write_record(paths.journal, updated)
         return updated
 
@@ -1460,6 +1617,7 @@ def _aligned_journal(
     runner_commit: str,
     remote_head: str,
     alignment_result: str,
+    coverage_proof: dict[str, Any] | None,
 ) -> dict[str, Any]:
     if not isinstance(runner_commit, str) or not _SHA_40.fullmatch(runner_commit):
         raise StateValidationError("alignment runner commit is invalid")
@@ -1474,22 +1632,54 @@ def _aligned_journal(
     for key in _JOURNAL_PROOF_KEYS:
         updated[key] = None
     if alignment_result == "peer_supersedes":
+        if coverage_proof is None:
+            raise StateValidationError("peer supersession lacks publication coverage proof")
         updated["terminal_outcome"] = "peer_superseded"
         updated["handoff_phase"] = "terminal"
         updated["remote_commit"] = remote_head
+        updated["coverage_proof"] = validate_coverage_proof_for_target(
+            coverage_proof,
+            updated["publication_target"],
+        )
     else:
+        if coverage_proof is not None:
+            raise StateValidationError("regeneration alignment must not retain a coverage proof")
         updated["terminal_outcome"] = None
         updated["handoff_phase"] = "generating"
         updated["remote_commit"] = None
+        updated["coverage_proof"] = None
     return _validate_journal(updated)
 
 
 def _raw_proven_journal(journal: dict[str, Any], pending: dict[str, Any]) -> dict[str, Any]:
+    _authenticate_pending_coverage(journal, pending)
     proven = dict(journal)
     proven["handoff_phase"] = "raw_proven"
     for key in _JOURNAL_PROOF_KEYS:
         proven[key] = pending[key]
     return _validate_journal(proven)
+
+
+def _authenticate_pending_coverage(
+    journal: dict[str, Any],
+    pending: dict[str, Any],
+) -> None:
+    """Bind verifier handoff metadata to the exact causal coverage proof."""
+    proof = validate_coverage_proof_for_target(
+        journal["coverage_proof"],
+        journal["publication_target"],
+    )
+    expected = {
+        "commit_sha": proof["source_commit_sha"],
+        "raw_status_path": proof["status_path"],
+        "raw_bundle_path": proof["bundle_path"],
+        "expected_bundle_sha256": proof["bundle_sha256"],
+        "expected_bundle_bytes": proof["bundle_bytes"],
+        "expected_block_number": proof["block_number"],
+        "expected_block_hash": proof["block_hash"],
+    }
+    if any(pending[key] != value for key, value in expected.items()):
+        raise StateValidationError("pending metadata differs from publication coverage proof")
 
 
 def _pending_from_journal(journal: dict[str, Any]) -> dict[str, Any]:
@@ -1515,10 +1705,13 @@ def _checkpoint_from_journal(journal: dict[str, Any]) -> dict[str, Any]:
         "queue_digest": journal["queue_digest"],
         "commit_sha": journal["remote_commit"],
         "push_completed_at_utc": journal["push_completed_at_utc"] if outcome == "pushed" else None,
+        "publication_target": journal["publication_target"],
+        "coverage_proof": journal["coverage_proof"],
     })
 
 
 def _authenticate_pending_from_journal(journal: dict[str, Any], pending: dict[str, Any]) -> None:
+    _authenticate_pending_coverage(journal, pending)
     expected = _pending_from_journal(journal)
     if not _same_pending_immutable(expected, pending):
         raise StateValidationError("pending immutable proof differs from raw-proven journal")

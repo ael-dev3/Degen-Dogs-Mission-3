@@ -31,6 +31,8 @@ MAX_BUNDLE_BYTES = 32 * 1024 * 1024
 MAX_UNIFIED_INDEX_BYTES = 128 * 1024 * 1024
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 BLOCK_HASH_RE = re.compile(r"^0x[0-9a-f]{64}$")
+ADDRESS_RE = re.compile(r"^0x[0-9a-f]{40}$")
+DECIMAL_RE = re.compile(r"^(?:0|[1-9][0-9]*)$")
 BUNDLE_FILENAME_RE = re.compile(
     r"^live_snapshot_(?P<block>[1-9][0-9]*)_(?P<block_hash>[0-9a-f]{64})_"
     r"(?P<content_hash>[0-9a-f]{64})\.json$"
@@ -323,7 +325,34 @@ def _metrics_map(rows: Any) -> dict[str, str]:
     return metrics
 
 
-def _load_source_state(root: Path) -> tuple[dict[str, Any], int, str]:
+def _optional_block_hash(value: Any, label: str) -> str | None:
+    if value in (None, ""):
+        return None
+    if not isinstance(value, str) or not BLOCK_HASH_RE.fullmatch(value):
+        raise AssertionError(f"{label} is not canonical")
+    return value
+
+
+def _validate_current_auction_coverage_row(row: dict[str, Any]) -> None:
+    """Require the exact tuple needed by the private publication proof."""
+    amount_wei = row.get("amount_wei")
+    start_time_unix = row.get("start_time_unix")
+    end_time_unix = row.get("end_time_unix")
+    bidder_wallet = row.get("bidder_wallet")
+    settled = row.get("settled")
+    if not isinstance(amount_wei, str) or not DECIMAL_RE.fullmatch(amount_wei):
+        raise AssertionError("current_auction coverage amount_wei is not canonical")
+    if type(start_time_unix) is not int or start_time_unix < 1:
+        raise AssertionError("current_auction coverage start_time_unix is invalid")
+    if type(end_time_unix) is not int or end_time_unix < start_time_unix:
+        raise AssertionError("current_auction coverage end_time_unix is invalid")
+    if not isinstance(bidder_wallet, str) or not ADDRESS_RE.fullmatch(bidder_wallet):
+        raise AssertionError("current_auction coverage bidder_wallet is invalid")
+    if type(settled) is not int or settled not in {0, 1}:
+        raise AssertionError("current_auction coverage settled flag is invalid")
+
+
+def _load_source_state(root: Path) -> tuple[dict[str, Any], int, str, str | None]:
     sources: dict[str, Any] = {}
     for field in SOURCE_FIELDS:
         value, _payload = _read_json_pair(root, f"{field}.json")
@@ -334,6 +363,7 @@ def _load_source_state(root: Path) -> tuple[dict[str, Any], int, str]:
     current_rows = sources["current_auction"]
     if len(current_rows) != 1 or not isinstance(current_rows[0], dict):
         raise AssertionError("current_auction live snapshot source must contain exactly one object")
+    _validate_current_auction_coverage_row(current_rows[0])
     if not all(isinstance(row, dict) for field in SOURCE_FIELDS for row in sources[field]):
         raise AssertionError("live snapshot source arrays must contain only objects")
 
@@ -376,7 +406,11 @@ def _load_source_state(root: Path) -> tuple[dict[str, Any], int, str]:
     }
     if not required_scope.issubset(actual_scope):
         raise AssertionError("mission3_metrics live snapshot verification scope is incomplete")
-    return sources, latest_block, snapshot_block_hash
+    canonical_reorg_from_hash = _optional_block_hash(
+        metrics.get("canonical_reorg_from_hash"),
+        "mission3_metrics canonical_reorg_from_hash",
+    )
+    return sources, latest_block, snapshot_block_hash, canonical_reorg_from_hash
 
 
 def _load_status_pair(root: Path) -> dict[str, Any]:
@@ -403,6 +437,7 @@ def _validate_status_against_sources(
     status: dict[str, Any],
     latest_block: int,
     snapshot_block_hash: str,
+    canonical_reorg_from_hash: str | None,
 ) -> None:
     if status.get("kind") != "refresh_status":
         raise AssertionError("refresh_status kind is invalid before live snapshot publication")
@@ -412,6 +447,14 @@ def _validate_status_against_sources(
         raise AssertionError("refresh_status latest_generated_block differs from live snapshot sources")
     if status.get("snapshot_block_hash") != snapshot_block_hash:
         raise AssertionError("refresh_status snapshot_block_hash differs from live snapshot sources")
+    status_reorg = _optional_block_hash(
+        status.get("canonical_reorg_from_hash"),
+        "refresh_status canonical_reorg_from_hash",
+    )
+    if status_reorg != canonical_reorg_from_hash:
+        raise AssertionError(
+            "refresh_status canonical_reorg_from_hash differs from live snapshot sources"
+        )
     if status.get("onchain_verification_status") != "current_snapshot_cross_provider_verified":
         raise AssertionError("refresh_status current snapshot is not cross-provider verified")
     if status.get("onchain_chain_id") != 8453:
@@ -547,9 +590,14 @@ def build_live_snapshot_bundle(
     root = _canonical_owned_root(Path(root))
     _ensure_output_directory(root, root / "generated")
     _ensure_output_directory(root, root / "public" / "generated")
-    sources, latest_block, snapshot_block_hash = _load_source_state(root)
+    sources, latest_block, snapshot_block_hash, canonical_reorg_from_hash = _load_source_state(root)
     status = _load_status_pair(root)
-    _validate_status_against_sources(status, latest_block, snapshot_block_hash)
+    _validate_status_against_sources(
+        status,
+        latest_block,
+        snapshot_block_hash,
+        canonical_reorg_from_hash,
+    )
     unified_sha256, unified_bytes = _load_unified_revision(root)
 
     bundle = {
@@ -700,9 +748,14 @@ def validate_live_snapshot_bundle(
     if _canonical_json_bytes(bundle) != generated_bytes:
         raise AssertionError("live snapshot bundle JSON is not canonical")
 
-    sources, source_block, source_hash = _load_source_state(root)
+    sources, source_block, source_hash, source_reorg = _load_source_state(root)
     if source_block != latest_block or source_hash != snapshot_block_hash:
         raise AssertionError("live snapshot source checkpoint differs from refresh_status")
+    if _optional_block_hash(
+        status.get("canonical_reorg_from_hash"),
+        "refresh_status canonical_reorg_from_hash",
+    ) != source_reorg:
+        raise AssertionError("live snapshot reorg marker differs from refresh_status")
     for field in SOURCE_FIELDS:
         if bundle.get(field) != sources[field]:
             raise AssertionError(f"live snapshot bundle {field} differs from legacy source")

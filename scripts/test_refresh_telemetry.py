@@ -43,7 +43,7 @@ def iso(offset_seconds: int = 0) -> str:
     return (TEST_BASE_TIME + timedelta(seconds=offset_seconds)).isoformat().replace("+00:00", "Z")
 
 
-def write_fixture(root: Path) -> None:
+def write_fixture(root: Path, *, canonical_reorg_from_hash: str = "") -> None:
     metrics = {
         "latest_block": "46822740",
         "latest_block_time_utc": "2026-06-02 21:13:47",
@@ -51,6 +51,7 @@ def write_fixture(root: Path) -> None:
         "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,dog_total_supply,dog_token_uri_bindings,recent_event_logs",
         "onchain_chain_id": "8453",
         "snapshot_block_hash": "0x" + "a" * 64,
+        "canonical_reorg_from_hash": canonical_reorg_from_hash,
         "snapshot_confirmations": "1",
         "rpc_quorum_size": "2",
         "rpc_quorum_agreement": "2/2",
@@ -101,8 +102,12 @@ def write_fixture(root: Path) -> None:
     current = {
         "token_id": 732,
         "current_bid_eth": 0.01,
+        "amount_wei": "10000000000000000",
+        "start_time_unix": 1780511841,
+        "end_time_unix": 1780515441,
         "bidder": "@thec1",
         "bidder_wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+        "settled": 0,
         "auction_state": "live",
         "end_time_utc": "2026-06-03 19:37:21",
         "latest_block": 46822740,
@@ -204,6 +209,27 @@ def test_record_refresh_redacts_secrets_and_writes_public_status() -> None:
         assert_raises_contains(
             lambda: telemetry.validate_refresh_status(root=root),
             "integer fields have invalid JSON types",
+        )
+
+
+def test_refresh_status_binds_directional_reorg_marker_from_generated_metrics() -> None:
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        marker = "0x" + "f" * 64
+        write_fixture(root, canonical_reorg_from_hash=marker)
+        status = telemetry.write_refresh_status(base_env(root), root=root)
+        assert status["canonical_reorg_from_hash"] == marker
+        assert telemetry.validate_refresh_status(root=root) == status
+
+        for directory in (root / "generated", root / "public" / "generated"):
+            path = directory / "refresh_status.json"
+            tampered = json.loads(path.read_text(encoding="utf-8"))
+            tampered["canonical_reorg_from_hash"] = "0x" + "e" * 64
+            write_json(path, tampered)
+        assert_raises_contains(
+            lambda: telemetry.validate_refresh_status(root=root),
+            "canonical_reorg_from_hash differs",
         )
 
 

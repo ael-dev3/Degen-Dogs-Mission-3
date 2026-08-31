@@ -934,6 +934,42 @@ def test_current_bid_reward_stats_unavailable_when_bid_or_daily_flow_missing() -
     assert zero_flow["reward_current_bid_apr_display"] == "N/A"
 
 
+def test_fetch_current_auction_preserves_exact_coverage_tuple_types() -> None:
+    dashboard = load_module()
+    token_id = 819
+    amount_wei = 5_500_000_000_000_000
+    start_time_unix = 1_780_000_000
+    end_time_unix = 1_780_003_600
+    bidder = int("76d0e7a13248945ee9f808b4a472262b28778942", 16)
+    raw = "0x" + "".join(
+        f"{value:064x}"
+        for value in (
+            token_id,
+            amount_wei,
+            start_time_unix,
+            end_time_unix,
+            bidder,
+            0,
+        )
+    )
+    original = dashboard.eth_call
+    dashboard.eth_call = lambda *_args: raw
+    try:
+        current = dashboard.fetch_current_auction(
+            123,
+            "2026-08-30 12:34:00",
+            "0x7b",
+        )
+    finally:
+        dashboard.eth_call = original
+
+    assert current["amount_wei"] == "5500000000000000"
+    assert type(current["start_time_unix"]) is int
+    assert current["start_time_unix"] == start_time_unix
+    assert type(current["end_time_unix"]) is int
+    assert current["end_time_unix"] == end_time_unix
+
+
 def test_timer_urgency_stays_calm_until_less_than_one_hour_remains() -> None:
     dashboard = load_module()
     assert dashboard.timer_urgency_state(3601, "live") == "calm"
@@ -994,11 +1030,13 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
         "amount_wei": "1000000000000000000",
         "start_time_utc": "2026-06-02 00:00:00",
         "end_time_utc": "2026-06-03 00:00:00",
+        "start_time_unix": 1780358400,
+        "end_time_unix": 1780444800,
         "bidder": "0x00000000000000000000000000000000000000b2",
         "settled": 0,
         "latest_block": 220,
         "latest_block_time_utc": "2026-06-02 02:00:00",
-    }], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
+    }], [("token_id", "INTEGER"), ("amount_eth", "REAL"), ("amount_eth_exact", "TEXT"), ("amount_wei", "TEXT"), ("start_time_utc", "TEXT"), ("end_time_utc", "TEXT"), ("start_time_unix", "INTEGER"), ("end_time_unix", "INTEGER"), ("bidder", "TEXT"), ("settled", "INTEGER"), ("latest_block", "INTEGER"), ("latest_block_time_utc", "TEXT")])
     dashboard.insert_rows(conn, "historical_prices_daily", [{
         "asset_key": "ETH",
         "date_utc": "2026-06-01",
@@ -1055,6 +1093,9 @@ def test_metadata_verification_status_reaches_public_sql_outputs() -> None:
     assert current["metadata_verification_status"] == "unavailable"
     assert current["rarity"] == "Unavailable"
     assert current["rarity_score"] is None
+    assert current["amount_wei"] == "1000000000000000000"
+    assert current["start_time_unix"] == 1780358400
+    assert current["end_time_unix"] == 1780444800
     assert winner["metadata_verification_status"] == "onchain_token_uri_verified"
     assert timeline["metadata_verification_status"] == "onchain_token_uri_verified"
     assert current_feed["metadata_verification_status"] == "unavailable"
@@ -3706,6 +3747,29 @@ def test_full_builder_cleanup_preserves_only_canonical_live_snapshot_names() -> 
         "live_snapshot_attacker.json",
     ):
         assert not dashboard.is_live_snapshot_bundle_filename(invalid)
+
+
+def test_queue_authenticated_reorg_marker_environment_is_strict() -> None:
+    dashboard = load_module()
+    previous = os.environ.get("DEGEN_DOGS_CANONICAL_REORG_FROM_HASH")
+    try:
+        os.environ.pop("DEGEN_DOGS_CANONICAL_REORG_FROM_HASH", None)
+        assert dashboard.canonical_reorg_marker_from_env() == ""
+        marker = "0x" + "a" * 64
+        os.environ["DEGEN_DOGS_CANONICAL_REORG_FROM_HASH"] = marker.upper().replace("0X", "0x")
+        assert dashboard.canonical_reorg_marker_from_env() == marker
+        os.environ["DEGEN_DOGS_CANONICAL_REORG_FROM_HASH"] = "0x1234"
+        try:
+            dashboard.canonical_reorg_marker_from_env()
+        except AssertionError as exc:
+            assert "canonical reorg marker" in str(exc)
+        else:
+            raise AssertionError("invalid queue reorg marker reached generated metrics")
+    finally:
+        if previous is None:
+            os.environ.pop("DEGEN_DOGS_CANONICAL_REORG_FROM_HASH", None)
+        else:
+            os.environ["DEGEN_DOGS_CANONICAL_REORG_FROM_HASH"] = previous
 
 
 if __name__ == "__main__":

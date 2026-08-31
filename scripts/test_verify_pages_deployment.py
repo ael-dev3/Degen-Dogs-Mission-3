@@ -187,6 +187,49 @@ def proof(block: int = 123, block_hash: str = "0x" + "a" * 64) -> tuple[bytes, b
     return status, bundle, pending
 
 
+def coverage_proof_for_target(
+    target: dict[str, Any],
+    pending: dict[str, Any],
+    status: bytes,
+) -> dict[str, Any]:
+    observation = target["observation"]
+    return {
+        "schema_version": 1,
+        "source_kind": "generated_commit",
+        "source_commit_sha": pending["commit_sha"],
+        "status_path": pending["raw_status_path"],
+        "status_sha256": hashlib.sha256(status).hexdigest(),
+        "bundle_path": pending["raw_bundle_path"],
+        "bundle_sha256": pending["expected_bundle_sha256"],
+        "bundle_bytes": pending["expected_bundle_bytes"],
+        "block_number": pending["expected_block_number"],
+        "block_hash": pending["expected_block_hash"],
+        "auction": {
+            key: observation[key]
+            for key in (
+                "token_id",
+                "amount_wei",
+                "start_time_unix",
+                "end_time_unix",
+                "bidder_wallet",
+                "settled",
+            )
+        },
+        "canonical_reorg_from_hash": observation["canonical_reorg_from_hash"],
+        "quorum_attestation": {
+            "onchain_chain_id": 8453,
+            "onchain_verification_status": "current_snapshot_cross_provider_verified",
+            "onchain_verification_scope": (
+                "snapshot_hash,contract_code,current_auction,recent_event_logs"
+            ),
+            "rpc_quorum_size": 2,
+            "rpc_quorum_agreement": "2/2",
+            "rpc_quorum_providers": "base.org,publicnode.com",
+            "snapshot_confirmations": 1,
+        },
+    }
+
+
 def install_pending(root: Path, pending: dict[str, Any]) -> None:
     state.atomic_write_record(state.state_paths(root).pending, pending)
 
@@ -864,12 +907,14 @@ def test_matching_task4_journal_blocks_then_next_attempt_clears() -> None:
         pending["generation"] = queued.generation
         pending["queue_digest"] = queued.digest
         commit = pending["commit_sha"]
+        coverage_proof = coverage_proof_for_target(queued.record, pending, status)
         journal = {
             "schema_version": 1, "repo_realpath": str(ROOT), "branch": "main", "baseline_head": "d" * 40,
             "run_id": "task5-test", "runner_id": "windows-wsl", "run_scope": "current",
             "created_at_utc": "2026-08-30T12:34:56Z", "publish_paths": ["generated", "public"],
             "alignment_runner_commit": None, "alignment_remote_head": None, "alignment_result": None,
             "publication_generation": queued.generation, "queue_digest": queued.digest,
+            "publication_target": queued.record, "coverage_proof": coverage_proof,
             "terminal_outcome": "pushed", "handoff_phase": "push_ready", "remote_commit": commit,
             "raw_status_path": None, "raw_bundle_path": None, "expected_bundle_sha256": None,
             "expected_bundle_bytes": None, "expected_block_number": None, "expected_block_hash": None,
@@ -879,6 +924,7 @@ def test_matching_task4_journal_blocks_then_next_attempt_clears() -> None:
             "schema_version": 1, "outcome": "pushed", "generation": queued.generation,
             "queue_digest": queued.digest, "commit_sha": commit,
             "push_completed_at_utc": pending["push_completed_at_utc"],
+            "publication_target": queued.record, "coverage_proof": coverage_proof,
         }
         paths = state.state_paths(root)
         state.atomic_write_record(paths.journal, journal)

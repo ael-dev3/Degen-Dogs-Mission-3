@@ -5,8 +5,33 @@ umask 077
 # Refresh Degen Dogs Mission 3 cached blockchain data locally and publish it to GitHub Pages.
 # Intended to run from a supervised private macOS or Linux runner.
 
-PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+SYSTEM_PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+RUNNING_UNDER_WSL=0
+if [[ -r /proc/sys/kernel/osrelease ]]; then
+  IFS= read -r KERNEL_RELEASE </proc/sys/kernel/osrelease || KERNEL_RELEASE=""
+  case "$KERNEL_RELEASE" in
+    *microsoft*|*Microsoft*|*WSL*|*wsl*) RUNNING_UNDER_WSL=1 ;;
+  esac
+fi
+TRUSTED_WSL_PYTHON_AUTHORITY=0
+if [[ "$RUNNING_UNDER_WSL" == "1" && -n "${DEGEN_DOGS_PYTHON_BIN:-}" ]]; then
+  TRUSTED_WSL_PYTHON="/var/lib/degen-dogs/python-runtime/bin/python3"
+  [[ "${DEGEN_DOGS_PYTHON_BIN:-}" == "$TRUSTED_WSL_PYTHON" ]] || {
+    echo "refusing WSL publisher without the fixed trusted Python authority" >&2
+    exit 70
+  }
+  [[ -x "$TRUSTED_WSL_PYTHON" ]] || {
+    echo "fixed trusted WSL Python authority is unavailable" >&2
+    exit 70
+  }
+  PATH="${TRUSTED_WSL_PYTHON%/python3}:${SYSTEM_PATH}"
+  TRUSTED_WSL_PYTHON_AUTHORITY=1
+else
+  PATH="$SYSTEM_PATH"
+fi
 export PATH
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONNOUSERSITE=1
 
 USER_HOME="${HOME:-$(python3 - <<'PY'
 import os
@@ -18,7 +43,7 @@ export HOME="$USER_HOME"
 
 REPO_DIR="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 RUNNER_VENV_ERROR=""
-if [[ -e "${REPO_DIR}/.venv" || -L "${REPO_DIR}/.venv" ]]; then
+if [[ "$TRUSTED_WSL_PYTHON_AUTHORITY" != "1" && ( -e "${REPO_DIR}/.venv" || -L "${REPO_DIR}/.venv" ) ]]; then
   if [[ "$REPO_DIR" != *:* && -x "${REPO_DIR}/.venv/bin/python3" ]] && \
     [[ -x "${REPO_DIR}/scripts/runtime-bin/python3" ]] && \
     PYTHONNOUSERSITE=1 "${REPO_DIR}/.venv/bin/python3" -I -c \
@@ -130,6 +155,7 @@ fi
 RECOVERY_SUPERSEDED=0
 RECOVERY_DEFERRED_HANDOFF=0
 RECOVERY_JOURNAL_DEFERRED=0
+RECOVERY_REUSE_DEFERRED_JOURNAL=0
 PUSH_REMOTE_HEAD=""
 DEFERRED_PUSH_REJECTED_ALIGNMENT=0
 
@@ -241,7 +267,8 @@ PY
 write_deferred_recovery_journal() {
   python3 - "$LOCK_DIR" "$REPO_DIR" "$BRANCH" "$BASELINE_HEAD" \
     "$DEGEN_DOGS_REFRESH_RUN_ID" "$RUNNER_ID" "$RUN_SCOPE" \
-    "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" "${PUBLISH_PATHS[@]}" <<'PY'
+    "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" \
+    "$RECOVERY_REUSE_DEFERRED_JOURNAL" "${PUBLISH_PATHS[@]}" <<'PY'
 from __future__ import annotations
 
 import sys
@@ -250,10 +277,38 @@ from pathlib import Path
 
 (
     lock_dir, repo, branch, baseline, run_id, runner_id, run_scope,
-    generation, digest, *publish_paths,
+    generation, digest, reuse_existing, *publish_paths,
 ) = sys.argv[1:]
 sys.path.insert(0, str(Path(repo) / "scripts"))
 import runner_publication_state as state
+
+if reuse_existing == "1":
+    existing = state.read_deferred_recovery_journal(lock_dir)
+    if existing is None:
+        raise SystemExit("deferred journal selected for reuse is missing")
+    expected = {
+        "repo_realpath": str(Path(repo).resolve()),
+        "branch": branch,
+        "baseline_head": baseline,
+        "run_id": run_id,
+        "runner_id": runner_id,
+        "run_scope": run_scope,
+        "publish_paths": publish_paths,
+        "publication_generation": int(generation),
+        "queue_digest": digest,
+        "handoff_phase": "generating",
+        "terminal_outcome": None,
+        "remote_commit": None,
+        "alignment_runner_commit": None,
+        "alignment_remote_head": None,
+        "alignment_result": None,
+        "coverage_proof": None,
+    }
+    if any(existing[key] != value for key, value in expected.items()):
+        raise SystemExit("existing deferred journal cannot be reused for this exact generation")
+    raise SystemExit(0)
+if reuse_existing != "0":
+    raise SystemExit("invalid deferred journal reuse mode")
 
 journal = {
     "schema_version": state.SCHEMA_VERSION,
@@ -270,6 +325,7 @@ journal = {
     "alignment_result": None,
     "publication_generation": int(generation),
     "queue_digest": digest,
+    "coverage_proof": None,
     "terminal_outcome": None,
     "handoff_phase": "generating",
     "remote_commit": None,
@@ -336,6 +392,32 @@ try:
 finally:
     temporary.unlink(missing_ok=True)
 PY
+}
+
+export_authenticated_reorg_marker() {
+  DEGEN_DOGS_CANONICAL_REORG_FROM_HASH=""
+  export DEGEN_DOGS_CANONICAL_REORG_FROM_HASH
+  [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || return 0
+  DEGEN_DOGS_CANONICAL_REORG_FROM_HASH="$(python3 - "$LOCK_DIR" <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path.cwd() / "scripts"))
+import runner_publication_state as state
+
+lock_dir = Path(sys.argv[1])
+with state.production_lock(state.state_paths(lock_dir).lock):
+    journal = state.read_deferred_recovery_journal(lock_dir)
+if journal is None:
+    raise SystemExit("deferred generation lacks its authenticated recovery journal")
+observation = journal["publication_target"]["observation"]
+marker = observation.get("canonical_reorg_from_hash")
+print(marker or "")
+PY
+)" || return
+  export DEGEN_DOGS_CANONICAL_REORG_FROM_HASH
 }
 
 read_recovery_journal_baseline() {
@@ -520,8 +602,20 @@ from pathlib import Path
     rejected_push,
 ) = sys.argv[1:]
 sys.path.insert(0, str(Path(repo) / "scripts"))
+import publication_coverage as coverage
 import runner_publication_state as state
 
+proof = None
+if alignment_result == "peer_supersedes":
+    journal = state.read_deferred_recovery_journal(lock_dir)
+    if journal is None:
+        raise SystemExit("peer alignment has no authenticated recovery journal")
+    proof = coverage.extract_coverage_proof(
+        repo,
+        source_kind="peer_commit",
+        source_commit_sha=remote_head,
+        publication_target=journal["publication_target"],
+    )
 if rejected_push == "1":
     state.record_deferred_push_rejected_alignment(
         lock_dir,
@@ -530,6 +624,7 @@ if rejected_push == "1":
         runner_commit,
         remote_head,
         alignment_result,
+        coverage_proof=proof,
     )
 else:
     state.update_deferred_alignment(
@@ -539,6 +634,7 @@ else:
         runner_commit,
         remote_head,
         alignment_result,
+        coverage_proof=proof,
     )
 PY
     return
@@ -629,9 +725,25 @@ from pathlib import Path
 
 lock_dir, repo, generation, digest, commit = sys.argv[1:]
 sys.path.insert(0, str(Path(repo) / "scripts"))
+import publication_coverage as coverage
 import runner_publication_state as state
 
-state.arm_deferred_pushed_handoff(lock_dir, int(generation), digest, commit)
+journal = state.read_deferred_recovery_journal(lock_dir)
+if journal is None:
+    raise SystemExit("deferred push arm has no authenticated recovery journal")
+proof = coverage.extract_coverage_proof(
+    repo,
+    source_kind="generated_commit",
+    source_commit_sha=commit,
+    publication_target=journal["publication_target"],
+)
+state.arm_deferred_pushed_handoff(
+    lock_dir,
+    int(generation),
+    digest,
+    commit,
+    proof,
+)
 PY
 }
 
@@ -645,13 +757,13 @@ import datetime as dt
 import hashlib
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
 lock_dir, repo_name, generation_raw, digest, commit, push_completed_raw = sys.argv[1:]
 repo = Path(repo_name)
 sys.path.insert(0, str(repo / "scripts"))
+import publication_coverage as coverage
 import refresh_telemetry
 import runner_publication_state as state
 
@@ -668,37 +780,31 @@ if (
 ):
     raise SystemExit("deferred raw proof identity differs from the armed journal")
 
-status_path = "public/generated/refresh_status.json"
+fresh_coverage = coverage.extract_coverage_proof(
+    repo,
+    source_kind="generated_commit",
+    source_commit_sha=commit,
+    publication_target=journal["publication_target"],
+)
+if fresh_coverage != journal["coverage_proof"]:
+    raise SystemExit("immutable publisher coverage differs from the armed journal")
+
+status_path = fresh_coverage["status_path"]
 try:
-    status_bytes = subprocess.check_output(["git", "show", f"{commit}:{status_path}"], cwd=repo)
+    status_bytes, bundle_bytes = coverage.read_proven_publication_artifacts(
+        repo,
+        fresh_coverage,
+    )
     status = json.loads(status_bytes.decode("utf-8", errors="strict"))
-except (subprocess.CalledProcessError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+except (coverage.CoverageValidationError, UnicodeDecodeError, json.JSONDecodeError) as exc:
     raise SystemExit("immutable publisher commit lacks a valid raw refresh status") from exc
 if not isinstance(status, dict):
     raise SystemExit("immutable publisher refresh status is not an object")
-bundle_name = status.get("live_snapshot_bundle")
-bundle_sha = status.get("live_snapshot_bundle_sha256")
-bundle_bytes_expected = status.get("live_snapshot_bundle_bytes")
-block_number = status.get("latest_generated_block")
-block_hash = status.get("snapshot_block_hash")
-if (
-    not isinstance(bundle_name, str)
-    or re.fullmatch(r"live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json", bundle_name) is None
-    or not isinstance(bundle_sha, str)
-    or re.fullmatch(r"[0-9a-f]{64}", bundle_sha) is None
-    or type(bundle_bytes_expected) is not int
-    or bundle_bytes_expected < 1
-    or type(block_number) is not int
-    or block_number < 1
-    or not isinstance(block_hash, str)
-    or re.fullmatch(r"0x[0-9a-f]{64}", block_hash) is None
-):
-    raise SystemExit("immutable publisher refresh status lacks canonical pending-proof metadata")
-bundle_path = f"public/generated/{bundle_name}"
-try:
-    bundle_bytes = subprocess.check_output(["git", "show", f"{commit}:{bundle_path}"], cwd=repo)
-except subprocess.CalledProcessError as exc:
-    raise SystemExit("immutable publisher commit lacks its referenced raw bundle") from exc
+bundle_sha = fresh_coverage["bundle_sha256"]
+bundle_bytes_expected = fresh_coverage["bundle_bytes"]
+block_number = fresh_coverage["block_number"]
+block_hash = fresh_coverage["block_hash"]
+bundle_path = fresh_coverage["bundle_path"]
 if len(bundle_bytes) != bundle_bytes_expected or hashlib.sha256(bundle_bytes).hexdigest() != bundle_sha:
     raise SystemExit("immutable publisher commit bundle differs from its exact status attestation")
 
@@ -748,6 +854,8 @@ else:
         "queue_digest": digest,
         "commit_sha": commit,
         "push_completed_at_utc": push_completed_text,
+        "publication_target": journal["publication_target"],
+        "coverage_proof": fresh_coverage,
     }
     state.prepare_pushed_handoff(lock_dir, journal, pending, checkpoint)
 PY
@@ -764,6 +872,7 @@ from pathlib import Path
 
 lock_dir, repo, generation_raw, digest, outcome, commit = sys.argv[1:]
 sys.path.insert(0, str(Path(repo) / "scripts"))
+import publication_coverage as coverage
 import runner_publication_state as state
 
 generation = int(generation_raw)
@@ -772,6 +881,24 @@ if journal is None:
     raise SystemExit("terminal deferred outcome has no authenticated recovery journal")
 if journal["publication_generation"] != generation or journal["queue_digest"] != digest:
     raise SystemExit("terminal deferred outcome differs from the queued generation")
+if outcome == "no_diff":
+    if commit:
+        raise SystemExit("no-diff outcome must not name a remote commit")
+    source_kind = "baseline_no_diff"
+    source_commit = journal["baseline_head"]
+elif outcome == "peer_superseded":
+    if not commit:
+        raise SystemExit("peer-superseded outcome lacks its remote commit")
+    source_kind = "peer_commit"
+    source_commit = commit
+else:
+    raise SystemExit("unsupported deferred terminal outcome")
+proof = coverage.extract_coverage_proof(
+    repo,
+    source_kind=source_kind,
+    source_commit_sha=source_commit,
+    publication_target=journal["publication_target"],
+)
 target = dict(journal)
 if target["handoff_phase"] != "terminal":
     if target["handoff_phase"] != "generating":
@@ -779,9 +906,14 @@ if target["handoff_phase"] != "terminal":
     target["handoff_phase"] = "terminal"
     target["terminal_outcome"] = outcome
     target["remote_commit"] = commit or None
+    target["coverage_proof"] = proof
     for key in state._JOURNAL_PROOF_KEYS:
         target[key] = None
-if target["terminal_outcome"] != outcome or target["remote_commit"] != (commit or None):
+if (
+    target["terminal_outcome"] != outcome
+    or target["remote_commit"] != (commit or None)
+    or target["coverage_proof"] != proof
+):
     raise SystemExit("terminal deferred outcome conflicts with the authenticated journal")
 checkpoint = {
     "schema_version": state.SCHEMA_VERSION,
@@ -790,6 +922,8 @@ checkpoint = {
     "queue_digest": digest,
     "commit_sha": commit or None,
     "push_completed_at_utc": None,
+    "publication_target": target["publication_target"],
+    "coverage_proof": proof,
 }
 state.record_terminal_outcome(lock_dir, target, checkpoint)
 PY
@@ -1033,12 +1167,14 @@ remote_snapshot_supersedes_local_commit() {
   [[ -n "$remote_scope" ]] || return 1
   validate_committed_refresh_snapshot "$local_commit" || return 1
   validate_committed_refresh_snapshot "$remote_head" || return 1
-  python3 - "$local_commit" "$remote_head" <<'PY'
+  python3 - "$local_commit" "$remote_head" "$DEFER_PAGES_VERIFICATION" \
+    "$LOCK_DIR" "$REPO_DIR" <<'PY'
 from __future__ import annotations
 
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 
 def load_status(commit: str, relative: str) -> dict[str, object]:
@@ -1083,6 +1219,27 @@ if remote_block == local_block:
         "unified_dog_search_sha256",
     )
     if any(local.get(key) != remote.get(key) for key in exact_keys):
+        raise SystemExit(1)
+
+if sys.argv[3] == "1":
+    lock_dir, repo = sys.argv[4:6]
+    sys.path.insert(0, str(Path(repo) / "scripts"))
+    import publication_coverage as coverage
+    import runner_publication_state as state
+
+    try:
+        journal = state.read_deferred_recovery_journal(lock_dir)
+        if journal is None:
+            raise coverage.CoverageValidationError(
+                "peer comparison has no authenticated recovery journal"
+            )
+        coverage.extract_coverage_proof(
+            repo,
+            source_kind="peer_commit",
+            source_commit_sha=sys.argv[2],
+            publication_target=journal["publication_target"],
+        )
+    except (KeyError, state.StateValidationError, coverage.CoverageValidationError):
         raise SystemExit(1)
 
 raise SystemExit(0)
@@ -1912,7 +2069,21 @@ PY
     RUNNER_COMMIT_RUN_ID="$journal_run_id"
   fi
   MUTATION_STARTED=1
-  cleanup_partial_generation || fail "authenticated interrupted publisher rollback did not complete"
+  if [[ "$journal_deferred" == "1" && "$journal_handoff_phase" == "generating" && \
+    "$alignment_remote_head" == "-" ]]; then
+    DEGEN_DOGS_REFRESH_RUN_ID="$journal_run_id"
+    export DEGEN_DOGS_REFRESH_RUN_ID
+    if [[ "$journal_run_scope" != "$RUN_SCOPE" ]]; then
+      update_recovery_run_scope "$RUN_SCOPE" || \
+        fail "could not promote reused deferred recovery journal scope"
+      journal_run_scope="$RUN_SCOPE"
+    fi
+    cleanup_partial_generation 1 || fail "authenticated interrupted publisher rollback did not complete"
+    RECOVERY_REUSE_DEFERRED_JOURNAL=1
+    MUTATION_STARTED=0
+  else
+    cleanup_partial_generation || fail "authenticated interrupted publisher rollback did not complete"
+  fi
   BASELINE_HEAD=""
   RUNNER_COMMIT_HEAD=""
   RUNNER_COMMIT_RUN_ID=""
@@ -2284,11 +2455,12 @@ if digest != "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470":
     raise SystemExit("unexpected Ethereum Keccak-256 implementation")
 PY
   then
-    fail "Mission 3 archive requires the hash-locked Python runtime; create .venv and install requirements.txt"
+    fail "Mission 3 archive requires the hash-locked trusted Python runtime"
   fi
 fi
 
 write_recovery_journal || fail "could not persist publisher crash-recovery journal"
+export_authenticated_reorg_marker || fail "could not bind canonical reorg evidence to generation"
 MUTATION_STARTED=1
 
 if [[ "$RUN_MISSION3_ARCHIVE" == "1" ]]; then
@@ -2334,7 +2506,16 @@ export DEGEN_DOGS_DATA_COMPLETED_AT_UTC="$(utc_stamp)"
 
 log "validating generated artifacts"
 export DEGEN_DOGS_VALIDATION_STARTED_AT_UTC="$(utc_stamp)"
-python3 -m py_compile scripts/build_dashboard.py scripts/build_live_snapshot_bundle.py
+python3 - scripts/build_dashboard.py scripts/build_live_snapshot_bundle.py <<'PY'
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+for raw_path in sys.argv[1:]:
+    path = Path(raw_path)
+    compile(path.read_bytes(), str(path), "exec")
+PY
 python3 - <<'PY'
 from __future__ import annotations
 

@@ -2700,10 +2700,38 @@ def authenticated_surface_checkpoint(
         raise FullRefreshRequired("current auction and mission metrics checkpoints disagree")
     return current_block
 
+
+def validate_current_auction_coverage_contract(
+    current_row: dict[str, Any],
+) -> dict[str, Any]:
+    """Fail to the full builder unless the exact queue-proof tuple is durable."""
+    if not isinstance(current_row, dict):
+        raise FullRefreshRequired("current_auction coverage row is not an object")
+    token_id = current_row.get("token_id")
+    amount_wei = current_row.get("amount_wei")
+    start_time_unix = current_row.get("start_time_unix")
+    end_time_unix = current_row.get("end_time_unix")
+    bidder_wallet = current_row.get("bidder_wallet")
+    settled = current_row.get("settled")
+    if type(token_id) is not int or token_id < 1:
+        raise FullRefreshRequired("current_auction coverage token_id is invalid")
+    if not isinstance(amount_wei, str) or re.fullmatch(r"(?:0|[1-9][0-9]*)", amount_wei) is None:
+        raise FullRefreshRequired("current_auction coverage amount_wei is not canonical")
+    if type(start_time_unix) is not int or start_time_unix < 1:
+        raise FullRefreshRequired("current_auction coverage start_time_unix is invalid")
+    if type(end_time_unix) is not int or end_time_unix < start_time_unix:
+        raise FullRefreshRequired("current_auction coverage end_time_unix is invalid")
+    if not isinstance(bidder_wallet, str) or re.fullmatch(r"0x[0-9a-f]{40}", bidder_wallet) is None:
+        raise FullRefreshRequired("current_auction coverage bidder_wallet is invalid")
+    if type(settled) is not int or settled not in {0, 1}:
+        raise FullRefreshRequired("current_auction coverage settled flag is invalid")
+    return current_row
+
 def main() -> None:
     current_rows = read_json("current_auction")
     if not isinstance(current_rows, list) or not current_rows:
         raise RuntimeError("generated/current_auction.json has no baseline row")
+    validate_current_auction_coverage_contract(current_rows[0])
     metrics_rows = read_json("mission3_metrics")
     if not isinstance(metrics_rows, list) or not metrics_rows:
         raise FullRefreshRequired("generated/mission3_metrics.json has no verified rarity baseline")
@@ -2736,6 +2764,7 @@ def main() -> None:
     import build_dashboard as builder
 
     latest_block, latest_block_data, verification = builder.verified_snapshot()
+    canonical_reorg_from_hash = builder.canonical_reorg_marker_from_env()
     latest_time = builder.utc_from_unix(int(latest_block_data["timestamp"], 16))
     current = builder.fetch_current_auction(latest_block, latest_time, hex(latest_block))
     require_exact_8_decimal_amount(
@@ -3345,6 +3374,7 @@ def main() -> None:
             "metadata_verification_status": "onchain_token_uri_verified",
             "current_bid": bid_text,
             "current_bid_eth": numeric_8(amount_eth),
+            "amount_wei": str(current.get("amount_wei", "")),
             "current_bid_usd": amount_usd,
             "current_bid_usd_live": amount_usd,
             "eth_usd_price_live": str(eth_usd),
@@ -3358,6 +3388,8 @@ def main() -> None:
             "bidder_wallet": contract_wallet,
             "start_time_utc": current.get("start_time_utc", ""),
             "end_time_utc": current.get("end_time_utc", ""),
+            "start_time_unix": current.get("start_time_unix"),
+            "end_time_unix": current.get("end_time_unix"),
             "auction_state": state,
             "seconds_remaining": remaining,
             "time_remaining": (
@@ -4170,6 +4202,7 @@ def main() -> None:
             "current_bidder_wallet": contract_wallet,
             "latest_block": str(latest_block),
             "latest_block_time_utc": latest_time,
+            "canonical_reorg_from_hash": canonical_reorg_from_hash,
             **{str(key): str(value) for key, value in verification.items()},
             **continuity_metrics,
         }
@@ -4179,6 +4212,7 @@ def main() -> None:
     write_table("mission3_metrics", metric_columns or ["metric", "value"], metric_rows)
     update_readme_snapshot(current_row, metrics, builder)
     refresh_status = read_json("refresh_status")
+    refresh_status.pop("canonical_reorg_from_hash", None)
     refresh_status.update(
         {
             "last_refresh_result": "success_generated",
@@ -4205,6 +4239,8 @@ def main() -> None:
             **continuity_metrics,
         }
     )
+    if canonical_reorg_from_hash:
+        refresh_status["canonical_reorg_from_hash"] = canonical_reorg_from_hash
     write_json("refresh_status", normalize_refresh_status_integer_fields(refresh_status))
 
     # Repoint the dashboard only after all four live source mirrors and the

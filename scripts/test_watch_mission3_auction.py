@@ -3428,8 +3428,10 @@ def test_run_refresh_exports_structured_event_environment():
         capture_script.chmod(0o700)
         old_out = os.environ.get("WATCH_TEST_OUT")
         old_path = os.environ.get("PATH", "")
+        old_git_status_tracked = watcher.git_status_tracked
         os.environ["WATCH_TEST_OUT"] = str(out_path)
         os.environ["PATH"] = f"{tmp}:{old_path}"
+        watcher.git_status_tracked = lambda: ""
         try:
             config = watcher.config_from_env({
                 "MISSION3_WATCHER_LOG_PATH": "-",
@@ -3448,6 +3450,7 @@ def test_run_refresh_exports_structured_event_environment():
             else:
                 os.environ["WATCH_TEST_OUT"] = old_out
             os.environ["PATH"] = old_path
+            watcher.git_status_tracked = old_git_status_tracked
         assert (status, exit_code) == ("success", 0)
         captured = json.loads(out_path.read_text(encoding="utf-8"))
         assert captured["DEGEN_DOGS_REFRESH_TRIGGER"] == "watcher"

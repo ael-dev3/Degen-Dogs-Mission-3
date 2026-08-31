@@ -29,6 +29,7 @@ NEW_UNIT_ASSETS = (
 )
 NEW_RUNTIME_ASSETS = (
     "scripts/runner_publication_state.py",
+    "scripts/publication_coverage.py",
     "scripts/drain_publication_queue.py",
     "scripts/verify_pages_deployment.py",
 )
@@ -49,11 +50,32 @@ SERVICE_UNITS = (
     "degen-dogs-publisher.service",
     "degen-dogs-pages-verifier.service",
 )
+RENDERED_UNIT_NAMES = (
+    "degen-dogs-watcher.service",
+    "degen-dogs-hourly.service",
+    "degen-dogs-health.service",
+    "degen-dogs-publisher.service",
+    "degen-dogs-publisher.path",
+    "degen-dogs-pages-verifier.service",
+    "degen-dogs-pages-verifier.path",
+)
+COPIED_UNIT_NAMES = (
+    "degen-dogs-watcher.timer",
+    "degen-dogs-hourly.timer",
+    "degen-dogs-health.timer",
+    "degen-dogs-publisher.timer",
+    "degen-dogs-pages-verifier.timer",
+    "degen-dogs-runner.target",
+)
 NEW_TRIGGER_UNITS = ACTIVATION_UNITS[-4:]
 NEW_TRIGGERED_SERVICES = SERVICE_UNITS[-2:]
 PRIVILEGED_ISOLATION_FLAG = "--require-rendered-systemd-isolation"
 BOOTSTRAP_CORE_TESTS = (
+    "scripts/test_build_dashboard.py",
+    "scripts/test_build_live_snapshot_bundle.py",
+    "scripts/test_refresh_current_surface.py",
     "scripts/test_runner_publication_state.py",
+    "scripts/test_publication_coverage_git_hardening.py",
     "scripts/test_watch_mission3_auction.py",
     "scripts/test_drain_publication_queue.py",
     "scripts/test_verify_pages_deployment.py",
@@ -105,7 +127,7 @@ def run_bash(source: str, *, expected_returncode: int = 0) -> subprocess.Complet
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
-        timeout=15,
+        timeout=30,
     )
     assert result.returncode == expected_returncode, (
         f"bash returncode={result.returncode}, expected={expected_returncode}\n"
@@ -130,7 +152,50 @@ def python_payload_with_marker(source: str, marker: str) -> str:
     return source[payload_start:payload_end]
 
 
+def test_trusted_runtime_is_runner_executable() -> None:
+    if os.name == "nt" or os.geteuid() != 0:
+        return
+    result = run_bash(
+        r'''
+set -Eeuo pipefail
+stage=$(mktemp -d /tmp/degen-dogs-runtime-test.XXXXXX)
+trap '/bin/rm -rf -- "$stage"' EXIT
+/usr/bin/python3 -I -m venv --without-pip --copies "$stage"
+/bin/chown -R root:root "$stage"
+/bin/chmod -R u+rwX,go+rX,go-w "$stage"
+/usr/sbin/runuser -u nobody -- /usr/bin/env -i PATH="$stage/bin:/usr/bin:/bin" \
+  "$stage/bin/python3" -I -c 'import sys; assert sys.prefix'
+'''
+    )
+    assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
+
+
 def test_bootstrap_receipt_gate(installer: str) -> None:
+    def shell_function(name: str) -> str:
+        start = installer.index(f"{name}() {{")
+        end = installer.index("\n}\n", start) + len("\n}\n")
+        return installer[start:end]
+
+    assert "# WSL_TRUSTED_CHECKOUT_SURFACE_VALIDATOR" in installer
+    assert "# WSL_TRUSTED_PYTHON_RUNTIME_PROVISION" in installer
+    assert "# WSL_TRUSTED_TEST_SOURCE_PROVISION" in installer
+    assert "# WSL_BOOTSTRAP_RECEIPT_CLAIM" in installer
+    assert '${repo_dir}/.venv/bin/python3' not in installer
+    assert 'PATH="${repo_dir}/scripts/runtime-bin:' not in installer
+    assert 'python_runtime_root="${state_dir}/python-runtimes"' in installer
+    assert '"$env_bin" -i' in installer
+    assert "PYTHONPATH" in installer and "PYTHONHOME" in installer
+    assert "BASH_ENV" in installer and "NODE_OPTIONS" in installer
+    assert "cleanup_legacy_python_caches" in installer
+    assert "__pycache__" in installer and "*.pyc" in installer
+    assert '--userconfig="$npm_user_config"' in installer
+    assert '--globalconfig="$npm_global_config"' in installer
+    assert installer.index("systemd-analyze verify") < installer.rindex(
+        "write_bootstrap_receipt"
+    )
+    assert installer.index("logrotate --debug") < installer.rindex(
+        "write_bootstrap_receipt"
+    )
     core = marked_payload(
         installer,
         "# WSL_BOOTSTRAP_CORE_START",
@@ -138,95 +203,176 @@ def test_bootstrap_receipt_gate(installer: str) -> None:
     )
     for suite in BOOTSTRAP_CORE_TESTS:
         assert installer.count(suite) == 1, f"bootstrap suite is not single-run: {suite}"
-    expected_order = "|".join(BOOTSTRAP_CORE_TESTS)
-    harness = r'''
+    suite_offsets = [core.index(suite) for suite in BOOTSTRAP_CORE_TESTS]
+    assert suite_offsets == sorted(suite_offsets), "bootstrap suites are out of order"
+    python_suites = tuple(path for path in BOOTSTRAP_CORE_TESTS if path.endswith(".py"))
+    assert core.count('\n  run_bootstrap_python "') == len(python_suites)
+    assert 'ci --ignore-scripts --no-audit --no-fund' in core
+    assert '--prefix "$source_stage" run build' in core
+    assert 'DEGEN_DOGS_PYTHON_BIN="${python_runtime_link}/bin/python3"' in core
+    assert "write_bootstrap_receipt" not in core
+
+    system_python_calls = tuple(
+        line
+        for line in installer.splitlines()
+        if re.search(r'"\$system_python_bin"\s+-', line)
+    )
+    assert len(system_python_calls) == 16, system_python_calls
+    for call in system_python_calls:
+        assert re.search(r'"\$system_python_bin"\s+-I\s+-B(?:\s|\\)', call), call
+    assert '"${candidate}/bin/python3" -I -B -c' in installer
+    assert '"${runtime_stage}/bin/python3" -I -B -c' in installer
+
+    all_gates = (
+        "python-venv",
+        "python-pip",
+        "test-npm-ci",
+        *(f"suite:{Path(path).name}" for path in BOOTSTRAP_CORE_TESTS),
+        "dashboard-build",
+        "bootstrap-runtime-tests",
+        "production-npm-warm",
+        *(f"render:{name}" for name in (*RENDERED_UNIT_NAMES, *COPIED_UNIT_NAMES)),
+        "render:logrotate",
+        "systemd-analyze",
+        "logrotate",
+        "final-checkout",
+        "final-git-surface",
+        "final-python-runtime",
+    )
+    receipt_gates = (
+        "bootstrap-runtime-tests",
+        "production-npm-warm",
+        *(f"render:{name}" for name in (*RENDERED_UNIT_NAMES, *COPIED_UNIT_NAMES)),
+        "render:logrotate",
+        "systemd-analyze",
+        "logrotate",
+        "final-checkout",
+        "final-git-surface",
+        "final-python-runtime",
+    )
+    assert bash_array_items(installer, "all_bootstrap_gates") == all_gates
+    assert bash_array_items(installer, "required_bootstrap_gates") == receipt_gates
+    writer_function = shell_function("write_bootstrap_receipt")
+    assert writer_function.index("assert_bootstrap_gate_completion") < writer_function.index(
+        '"$system_python_bin"'
+    )
+    for gate in all_gates:
+        if gate.startswith("suite:"):
+            assert gate.removeprefix("suite:") in core
+        elif gate.startswith("render:") and gate != "render:logrotate":
+            assert gate.removeprefix("render:") in (*RENDERED_UNIT_NAMES, *COPIED_UNIT_NAMES)
+        else:
+            assert gate in installer
+    gate_harness = r'''
 set -Eeuo pipefail
-test_root=$(mktemp -d)
-trap 'rm -rf -- "$test_root"' EXIT
-repo_dir="$test_root/repo"
-state_dir="$test_root/state"
-tested_receipt_path="$state_dir/bootstrap-test-receipt.json"
-legacy_tested_sha_path="$state_dir/tested-main.sha"
-expected_head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-trusted_installer_commit=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-bootstrap_receipt_schema_version=1
-runner_user=degendogs
-mkdir -p "$repo_dir/.venv/bin" "$repo_dir/scripts/runtime-bin" "$state_dir"
-printf '#!/bin/sh\nexit 0\n' >"$repo_dir/.venv/bin/python3"
-chmod 0755 "$repo_dir/.venv/bin/python3"
-calls="$test_root/calls"
-fail_needle=''
-
-run_as_runner() {
-  printf 'dependency:%s\n' "$*" >>"$calls"
-  return 0
+root=$(mktemp -d)
+trap '/bin/rm -rf -- "$root"' EXIT
+receipt="$root/receipt"
+skip_bootstrap=0
+all_bootstrap_gates=(''' + " ".join(shlex.quote(gate) for gate in all_gates) + r''')
+required_bootstrap_gates=(''' + " ".join(shlex.quote(gate) for gate in receipt_gates) + r''')
+declare -A completed_bootstrap_gates=()
+fail() { printf 'error: %s\n' "$*" >&2; return 97; }
+''' + shell_function("run_required_gate") + shell_function("assert_bootstrap_gate_completion") + r'''
+gate_ok() { [[ "$1" != "$fail_gate" ]] || return 73; }
+reset_completed_gates() {
+  local gate
+  for gate in "${!completed_bootstrap_gates[@]}"; do
+    unset 'completed_bootstrap_gates[$gate]'
+  done
 }
-run_as_runner_runtime() {
-  printf 'runtime:%s\n' "$*" >>"$calls"
-  if [[ -n "$fail_needle" && "$*" == *"$fail_needle"* ]]; then
-    return 73
-  fi
-  return 0
+mint_receipt() {
+  assert_bootstrap_gate_completion || return $?
+  printf proof >"$receipt"
 }
-write_bootstrap_receipt() {
-  printf 'receipt\n' >"$tested_receipt_path"
+run_release() {
+  /bin/rm -f -- "$receipt"
+  reset_completed_gates
+  for gate in "$@"; do run_required_gate "$gate" gate_ok "$gate" || return $?; done
+  mint_receipt
 }
-bootstrap_under_test() {
-''' + core + r'''
-}
-
-run_case() {
-  fail_needle="$1"
-  : >"$calls"
-  printf 'stale\n' >"$tested_receipt_path"
-  printf 'legacy\n' >"$legacy_tested_sha_path"
+all_gates=(''' + " ".join(shlex.quote(gate) for gate in all_gates) + r''')
+receipt_gates=(''' + " ".join(shlex.quote(gate) for gate in receipt_gates) + r''')
+for fail_gate in "${all_gates[@]}"; do
   set +e
-  ( set -Eeuo pipefail; bootstrap_under_test )
+  ( run_release "${all_gates[@]}" )
   status=$?
   set -e
-  printf 'case=%s status=%s receipt=%s legacy=%s\n' \
-    "${fail_needle:-success}" "$status" \
-    "$([[ -e "$tested_receipt_path" ]] && printf yes || printf no)" \
-    "$([[ -e "$legacy_tested_sha_path" ]] && printf yes || printf no)"
-}
-
-run_case ''
-test -f "$tested_receipt_path"
-test ! -e "$legacy_tested_sha_path"
-printf 'order='
-awk -F: '/^runtime:/ && /scripts\/test_/ {print $2}' "$calls" | \
-  sed -E 's#^.*(scripts/test_[^ ]+).*$#\1#' | paste -sd'|' -
-for suite in ''' + " ".join(BOOTSTRAP_CORE_TESTS) + r'''; do
-  test "$(grep -F -c -- "$suite" "$calls")" = 1
+  test "$status" != 0
+  test ! -e "$receipt"
 done
-test "$(grep -F -c -- "npm --prefix $repo_dir run build" "$calls")" = 1
-test "$(grep -F -c -- "npm --prefix $repo_dir ci --ignore-scripts" "$calls")" = 1
-
-for suite in ''' + " ".join(BOOTSTRAP_CORE_TESTS) + r'''; do
-  run_case "$suite"
-  test ! -e "$tested_receipt_path"
-  test ! -e "$legacy_tested_sha_path"
+fail_gate=''
+run_release "${all_gates[@]}"
+test -f "$receipt"
+for missing_gate in "${receipt_gates[@]}"; do
+  /bin/rm -f -- "$receipt"
+  reset_completed_gates
+  for gate in "${all_gates[@]}"; do
+    [[ "$gate" == "$missing_gate" ]] || run_required_gate "$gate" gate_ok "$gate"
+  done
+  set +e
+  ( mint_receipt ) >/dev/null 2>&1
+  missing_status=$?
+  set -e
+  test "$missing_status" != 0
+  test ! -e "$receipt"
 done
-run_case 'npm --prefix'
-test ! -e "$tested_receipt_path"
-test ! -e "$legacy_tested_sha_path"
-run_case 'run build'
-test ! -e "$tested_receipt_path"
-test ! -e "$legacy_tested_sha_path"
+reset_completed_gates
+run_required_gate "${receipt_gates[0]}" gate_ok "${receipt_gates[0]}"
+set +e
+( run_required_gate "${receipt_gates[0]}" gate_ok "${receipt_gates[0]}" ) >/dev/null 2>&1
+duplicate_status=$?
+set -e
+test "$duplicate_status" != 0
+side_effect="$root/unexpected-ran"
+set +e
+( run_required_gate unexpected /usr/bin/touch "$side_effect" ) >/dev/null 2>&1
+unexpected_status=$?
+set -e
+test "$unexpected_status" != 0
+test ! -e "$side_effect"
 '''
-    result = run_bash(harness)
-    output = result.stdout.decode("utf-8", errors="strict")
-    assert "case=success status=0 receipt=yes legacy=no" in output
-    assert f"order={expected_order}" in output
-    for suite in BOOTSTRAP_CORE_TESTS:
-        assert f"case={suite} status=73 receipt=no legacy=no" in output
+    assert run_bash(gate_harness).returncode == 0
+
+    nested_failure_harness = r'''
+set -Eeuo pipefail
+skip_bootstrap=0
+all_bootstrap_gates=(inner-first inner-second bootstrap-runtime-tests)
+required_bootstrap_gates=(bootstrap-runtime-tests)
+declare -A completed_bootstrap_gates=()
+fail() { printf 'error: %s\n' "$*" >&2; return 97; }
+''' + shell_function("run_required_gate") + shell_function("assert_bootstrap_gate_completion") + r'''
+gate_ok() {
+  if [[ "$1" == inner-first ]]; then return 73; fi
+  printf 'gate:%s\n' "$1"
+}
+nested_bootstrap() {
+  run_required_gate inner-first gate_ok inner-first
+  printf 'continued-after-first\n'
+  run_required_gate inner-second gate_ok inner-second
+}
+run_required_gate bootstrap-runtime-tests nested_bootstrap
+assert_bootstrap_gate_completion
+printf 'receipt\n'
+'''
+    nested_failure = run_bash(nested_failure_harness, expected_returncode=73)
+    assert nested_failure.stdout == b""
+
+    nested_success_harness = nested_failure_harness.replace(
+        'if [[ "$1" == inner-first ]]; then return 73; fi',
+        ":",
+    )
+    nested_success = run_bash(nested_success_harness)
+    assert nested_success.stdout == (
+        b"gate:inner-first\ncontinued-after-first\ngate:inner-second\nreceipt\n"
+    )
 
     assert installer.count('if [[ "$skip_bootstrap" == "1" && "$enable_now" == "1" ]]') == 1
     activation_guard = installer.split(
         'if [[ "$skip_bootstrap" == "1" && "$enable_now" == "1" ]]', 1
-    )[1].split("fi", 1)[0]
-    assert "validate_bootstrap_receipt" in activation_guard
-    assert "tested-main.sha" not in activation_guard
+    )[1]
+    assert "claim_bootstrap_receipt" in activation_guard
+    assert "validate_bootstrap_receipt \"$claimed_receipt_path\"" in installer
 
     writer = python_payload_with_marker(installer, "# WSL_BOOTSTRAP_RECEIPT_WRITER")
     validator = python_payload_with_marker(installer, "# WSL_BOOTSTRAP_RECEIPT_VALIDATOR")
@@ -237,44 +383,54 @@ test ! -e "$legacy_tested_sha_path"
 
     with tempfile.TemporaryDirectory() as temporary_directory:
         directory = Path(temporary_directory)
+        (directory / "pathlib.py").write_text(
+            'raise SystemExit("cwd pathlib shadow executed")\n',
+            encoding="utf-8",
+        )
         receipt = directory / "bootstrap-test-receipt.json"
         runtime_commit = "a" * 40
         trusted_commit = "b" * 40
-        schema_version = "1"
+        schema_version = "2"
         expected_uid = str(os.getuid())
 
         def write_receipt() -> subprocess.CompletedProcess[bytes]:
             return subprocess.run(
                 [
                     sys.executable,
-                    "-c",
-                    writer,
+                    "-I",
+                    "-B",
+                    "-",
                     str(receipt),
                     runtime_commit,
                     trusted_commit,
                     schema_version,
                     expected_uid,
                 ],
+                input=writer.encode("utf-8"),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=False,
+                cwd=directory,
             )
 
         def validate_receipt() -> subprocess.CompletedProcess[bytes]:
             return subprocess.run(
                 [
                     sys.executable,
-                    "-c",
-                    validator,
+                    "-I",
+                    "-B",
+                    "-",
                     str(receipt),
                     runtime_commit,
                     trusted_commit,
                     schema_version,
                     expected_uid,
                 ],
+                input=validator.encode("utf-8"),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=False,
+                cwd=directory,
             )
 
         first = write_receipt()
@@ -282,7 +438,7 @@ test ! -e "$legacy_tested_sha_path"
         first_inode = receipt.stat().st_ino
         expected_record = {
             "runtime_commit": runtime_commit,
-            "schema_version": 1,
+            "schema_version": 2,
             "trusted_installer_commit": trusted_commit,
         }
         assert json.loads(receipt.read_text(encoding="utf-8")) == expected_record
@@ -324,6 +480,69 @@ test ! -e "$legacy_tested_sha_path"
         receipt.unlink()
         receipt.symlink_to(directory / "missing-target")
         assert validate_receipt().returncode != 0, "receipt symlink was accepted"
+
+    lifecycle = r'''
+set -Eeuo pipefail
+state_dir=$(mktemp -d)
+trap '/bin/rm -rf -- "$state_dir"' EXIT
+tested_receipt_path="$state_dir/bootstrap-test-receipt.json"
+claimed_receipt_path="$state_dir/bootstrap-test-receipt.claimed.json"
+fail() { printf 'error: %s\n' "$*" >&2; exit 1; }
+validate_bootstrap_receipt() { test -f "$1" && test ! -L "$1"; }
+fsync_state_directory() { :; }
+''' + shell_function("claim_bootstrap_receipt") + shell_function("consume_bootstrap_receipt") + r'''
+printf proof >"$tested_receipt_path"
+claim_bootstrap_receipt
+test ! -e "$tested_receipt_path" && test -f "$claimed_receipt_path"
+set +e
+( claim_bootstrap_receipt ) >/dev/null 2>&1
+replay_status=$?
+set -e
+test "$replay_status" != 0
+test -f "$claimed_receipt_path"
+set +e
+( false )
+preflight_status=$?
+set -e
+test "$preflight_status" != 0
+test -f "$claimed_receipt_path"
+consume_bootstrap_receipt
+test ! -e "$claimed_receipt_path"
+printf new-proof >"$tested_receipt_path"
+claim_bootstrap_receipt
+test -f "$claimed_receipt_path"
+'''
+    lifecycle_result = run_bash(lifecycle)
+    assert lifecycle_result.returncode == 0
+
+    migration = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d /tmp/degen-dogs-migration-test.XXXXXX)
+trap '/bin/rm -rf -- "$test_root"' EXIT
+chmod 0755 "$test_root"
+repo_dir="$test_root/repo"
+state_dir="$test_root/state"
+marker="$test_root/executed"
+runner_user=nobody
+runuser_bin=/usr/sbin/runuser
+env_bin=/usr/bin/env
+system_python_bin=/usr/bin/python3
+mkdir -p "$repo_dir/.venv/bin" "$repo_dir/scripts/__pycache__" "$state_dir"
+printf '#!/bin/sh\nprintf executed >%s\n' "$marker" >"$repo_dir/.venv/bin/python3"
+chmod 0755 "$repo_dir/.venv/bin/python3"
+printf forged >"$repo_dir/scripts/__pycache__/forged.pyc"
+printf forged >"$repo_dir/root-shadow.pyc"
+chown -R nobody:nogroup "$repo_dir"
+''' + shell_function("migrate_legacy_checkout_venv") + shell_function("cleanup_legacy_python_caches") + r'''
+migrate_legacy_checkout_venv
+cleanup_legacy_python_caches
+test ! -e "$marker"
+test ! -e "$repo_dir/.venv"
+test ! -e "$repo_dir/scripts/__pycache__"
+test ! -e "$repo_dir/root-shadow.pyc"
+test -z "$(find "$state_dir" -mindepth 1 -maxdepth 1 -name 'legacy-checkout-venv.*' -print -quit)"
+'''
+    assert run_bash(migration).returncode == 0
 
 
 def run_checkout_attestation(
@@ -503,7 +722,7 @@ def assert_posix_umask_fast_forward_attests(attestation: str) -> None:
 
 
 def test_checkout_attestation_modes(installer: str) -> None:
-    attestation_marker = '/usr/bin/python3 - "$runtime_tree" "$repo_dir" <<\'PY\'\n'
+    attestation_marker = '"$system_python_bin" -I -B - "$runtime_tree" "$repo_dir" <<\'PY\'\n'
     attestation_start = installer.index(attestation_marker) + len(attestation_marker)
     attestation_end = installer.index("\nPY\n", attestation_start)
     checkout_attestation = installer[attestation_start:attestation_end]
@@ -693,6 +912,23 @@ printf 'activation-liveness-probe-checked probe=''' + str(probe_number) + r'''\n
 
 
 def test_wsl_launcher_policy(launcher: str, env_loader: str) -> None:
+    launcher_python_calls = tuple(
+        line
+        for line in launcher.splitlines()
+        if re.search(r'"\$python_bin"\s+-', line)
+    )
+    assert len(launcher_python_calls) == 3, launcher_python_calls
+    for call in launcher_python_calls:
+        assert re.search(r'"\$python_bin"\s+-I\s+-B(?:\s|\\)', call), call
+    trusted_python_start = launcher.index("# WSL_TRUSTED_PYTHON_START")
+    trusted_python_end = launcher.index("# WSL_TRUSTED_PYTHON_END") + len(
+        "# WSL_TRUSTED_PYTHON_END"
+    )
+    launcher_fixture = (
+        launcher[:trusted_python_start]
+        + 'python_bin="${DEGEN_DOGS_TEST_PYTHON_BIN:?}"\n'
+        + launcher[trusted_python_end:]
+    )
     regression = r'''
 set -Eeuo pipefail
 test_root=$(mktemp -d)
@@ -702,27 +938,12 @@ runner_home="$test_root/home"
 mkdir -p "$repo_dir/scripts/runtime-bin" "$runner_home/.ssh" "$test_root/log" "$test_root/lock"
 
 cat >"$repo_dir/scripts/run_wsl_runner_job.sh" <<'LAUNCHER'
-''' + launcher + r'''
+''' + launcher_fixture + r'''
 LAUNCHER
 cat >"$repo_dir/scripts/load_runner_env.sh" <<'ENV_LOADER'
 ''' + env_loader + r'''
 ENV_LOADER
-cat >"$repo_dir/scripts/runtime-bin/git" <<'FAKE_GIT'
-#!/usr/bin/env bash
-set -Eeuo pipefail
-case "$*" in
-  'branch --show-current') printf 'main\n' ;;
-  'remote get-url origin'|'remote get-url --push --all origin')
-    printf 'git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git\n'
-    ;;
-  'config --local --get-all remote.origin.pushurl') ;;
-  'config --local --get core.sshCommand')
-    printf 'ssh -F %s/.ssh/degen_dogs_config\n' "$HOME"
-    ;;
-  'config --local --get core.hooksPath') printf '/dev/null\n' ;;
-  *) printf 'unexpected git call: %s\n' "$*" >&2; exit 97 ;;
-esac
-FAKE_GIT
+printf '#!/bin/sh\nexit 127\n' >"$repo_dir/scripts/runtime-bin/python3"
 cat >"$repo_dir/scripts/refresh_and_publish.sh" <<'FAKE_PUBLISHER'
 #!/usr/bin/env bash
 set -Eeuo pipefail
@@ -735,7 +956,37 @@ printf 'hourly|%s|%s|%s|%s|%s\n' \
 FAKE_PUBLISHER
 cat >"$repo_dir/scripts/watch_mission3_onchain_activity.py" <<'FAKE_WATCHER'
 import os
+from sibling_probe import VALUE
 
+assert VALUE == "sibling-import-ok"
+for hostile in (
+    "PYTHONPATH",
+    "PYTHONHOME",
+    "BASH_ENV",
+    "ENV",
+    "NODE_OPTIONS",
+    "GIT_COMMON_DIR",
+    "GIT_CONFIG_PARAMETERS",
+    "GIT_NAMESPACE",
+    "GIT_SHALLOW_FILE",
+    "GIT_GRAFT_FILE",
+    "GIT_EXTERNAL_DIFF",
+    "GIT_ASKPASS",
+    "SSH_ASKPASS",
+    "SSH_ASKPASS_REQUIRE",
+):
+    assert hostile not in os.environ, hostile
+expected_git_environment = {
+    "GIT_CONFIG_GLOBAL": "/dev/null",
+    "GIT_CONFIG_SYSTEM": "/dev/null",
+    "GIT_NO_REPLACE_OBJECTS": "1",
+    "GIT_OPTIONAL_LOCKS": "0",
+    "GIT_TERMINAL_PROMPT": "0",
+}
+actual_git_environment = {
+    name: value for name, value in os.environ.items() if name.startswith("GIT_")
+}
+assert actual_git_environment == expected_git_environment, actual_git_environment
 print(
     "watcher|{}|{}|{}|{}|{}|{}".format(
         os.environ["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"],
@@ -747,6 +998,9 @@ print(
     )
 )
 FAKE_WATCHER
+cat >"$repo_dir/scripts/sibling_probe.py" <<'SIBLING'
+VALUE = "sibling-import-ok"
+SIBLING
 cat >"$repo_dir/scripts/drain_publication_queue.py" <<'FAKE_DRAINER'
 import os
 
@@ -788,7 +1042,17 @@ import os
 
 print("health|{}".format(os.environ["MISSION3_PUBLICATION_MODE"]))
 FAKE_HEALTH
-chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh" "$repo_dir/scripts/runtime-bin/git"
+chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh" "$repo_dir/scripts/runtime-bin/python3"
+/usr/bin/git -C "$repo_dir" init -q -b main
+/usr/bin/git -C "$repo_dir" config user.name 'Degen Dogs Windows Runner'
+/usr/bin/git -C "$repo_dir" config user.email degen-dogs-runner@users.noreply.github.com
+/usr/bin/git -C "$repo_dir" config core.hooksPath /dev/null
+/usr/bin/git -C "$repo_dir" config core.autocrlf false
+/usr/bin/git -C "$repo_dir" config core.safecrlf true
+/usr/bin/git -C "$repo_dir" config core.sshCommand "ssh -F $runner_home/.ssh/degen_dogs_config"
+/usr/bin/git -C "$repo_dir" remote add origin git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git
+/usr/bin/git -C "$repo_dir" config branch.main.remote origin
+/usr/bin/git -C "$repo_dir" config branch.main.merge refs/heads/main
 
 write_env() {
   cat >"$repo_dir/.env.local" <<'COMMON_ENV'
@@ -812,11 +1076,23 @@ COMMON_ENV
 
 run_job() {
   env -u DEGEN_DOGS_RUN_MISSION3_ARCHIVE \
+    PYTHONPATH=/attacker PYTHONHOME=/attacker BASH_ENV=/attacker ENV=/attacker \
+    NODE_OPTIONS=--require=/attacker.js \
+    GIT_DIR=/attacker GIT_WORK_TREE=/attacker GIT_INDEX_FILE=/attacker/index \
+    GIT_OBJECT_DIRECTORY=/attacker/objects GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/attacker/hooks \
+    GIT_EXEC_PATH=/attacker GIT_SSH=/attacker/ssh GIT_SSH_COMMAND=/attacker/ssh \
+    GIT_COMMON_DIR=/attacker/common GIT_CONFIG_PARAMETERS=attacker \
+    GIT_NAMESPACE=attacker GIT_SHALLOW_FILE=/attacker/shallow \
+    GIT_GRAFT_FILE=/attacker/grafts GIT_EXTERNAL_DIFF=/attacker/diff \
+    GIT_ASKPASS=/attacker/askpass SSH_ASKPASS=/attacker/askpass \
+    SSH_ASKPASS_REQUIRE=force \
     HOME="$runner_home" \
     DEGEN_DOGS_REPO_DIR="$repo_dir" \
     DEGEN_DOGS_LOG_DIR="$test_root/log" \
     DEGEN_DOGS_LOCK_DIR="$test_root/lock" \
     DEGEN_DOGS_ENV_FILE="$repo_dir/.env.local" \
+    DEGEN_DOGS_TEST_PYTHON_BIN=/usr/bin/python3 \
     /bin/bash -p "$repo_dir/scripts/run_wsl_runner_job.sh" "$1"
 }
 
@@ -841,6 +1117,60 @@ test "$(run_job watcher)" = 'watcher|0|origin|main|0|0|queue'
 test "$(run_job publisher)" = "publisher|$repo_dir|$test_root/log|$test_root/lock"
 test "$(run_job verifier)" = "verifier|$repo_dir|$test_root/log|$test_root/lock"
 test "$(run_job health)" = 'health|queue'
+mkdir "$repo_dir/.venv"
+set +e
+run_job health >/dev/null 2>&1
+unsafe_status=$?
+set -e
+test "$unsafe_status" != 0
+rmdir "$repo_dir/.venv"
+printf '#!/bin/sh\nexit 0\n' >"$repo_dir/scripts/runtime-bin/npm"
+chmod 0755 "$repo_dir/scripts/runtime-bin/npm"
+set +e
+run_job health >/dev/null 2>&1
+unsafe_status=$?
+set -e
+test "$unsafe_status" != 0
+/bin/rm -f -- "$repo_dir/scripts/runtime-bin/npm"
+printf '\xa7\x0d\x0d\x0a\x03\x00\x00\x00unchecked-hash' >"$repo_dir/scripts/forged.pyc"
+set +e
+run_job health >/dev/null 2>&1
+unsafe_status=$?
+set -e
+test "$unsafe_status" != 0
+/bin/rm -f -- "$repo_dir/scripts/forged.pyc"
+/bin/mkdir "$repo_dir/scripts/directory.pyc"
+set +e
+run_job health >/dev/null 2>&1
+unsafe_status=$?
+set -e
+test "$unsafe_status" != 0
+/bin/rmdir -- "$repo_dir/scripts/directory.pyc"
+/bin/printf forged >"$repo_dir/scripts/__pycache__"
+set +e
+run_job health >/dev/null 2>&1
+unsafe_status=$?
+set -e
+test "$unsafe_status" != 0
+/bin/rm -f -- "$repo_dir/scripts/__pycache__"
+if /bin/ln -s /attacker/bytecode "$repo_dir/scripts/symlinked.pyc" 2>/dev/null && \
+  [[ -L "$repo_dir/scripts/symlinked.pyc" ]]; then
+  set +e
+  run_job health >/dev/null 2>&1
+  unsafe_status=$?
+  set -e
+  test "$unsafe_status" != 0
+  /bin/rm -f -- "$repo_dir/scripts/symlinked.pyc"
+fi
+if /bin/ln -s /attacker/cache "$repo_dir/scripts/__pycache__" 2>/dev/null && \
+  [[ -L "$repo_dir/scripts/__pycache__" ]]; then
+  set +e
+  run_job health >/dev/null 2>&1
+  unsafe_status=$?
+  set -e
+  test "$unsafe_status" != 0
+  /bin/rm -f -- "$repo_dir/scripts/__pycache__"
+fi
 printf 'wsl-launcher-policy-checked\n'
 '''
     result = run_bash(regression)
@@ -1006,6 +1336,10 @@ def test_queued_worker_lifecycle_inventories() -> None:
     trusted_stage = powershell_literal_payload(powershell, "trustedBundleProvision")
     assert bash_array_items(trusted_stage, "required") == expected_trusted_assets
     runtime_stage = powershell_literal_payload(powershell, "runtimeStage")
+    assert 'chmod 0711 "$runtime_stage"' in runtime_stage
+    assert 'chmod 0700 "$runtime_stage/repo.git"' in runtime_stage
+    assert 'find "$runtime_stage/tree" -xdev -type d -exec chmod 0755 {} +' in runtime_stage
+    assert 'find "$runtime_stage/tree" -xdev -type f ! -perm /0111 -exec chmod 0644 {} +' in runtime_stage
     assert bash_array_items(runtime_stage, "runtime_required_assets") == (
         *NEW_UNIT_ASSETS,
         *NEW_RUNTIME_ASSETS,
@@ -1316,7 +1650,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     installer = text("scripts/install_wsl_runner.sh")
     assert "Usage: /usr/local/libexec/degen-dogs-wsl-installer" in installer
     assert "--repo-dir is required and must be supplied" in installer
-    assert 'python3 - "$runtime_tree"' in installer
+    assert '"$system_python_bin" -I -B - "$runtime_tree"' in installer
     assert "subprocess.check_output" not in installer
     assert 'filesystem_type="$(stat -f -c %T "$repo_dir")"' in installer
     assert "test_refresh_and_publish.sh" in installer
@@ -1325,16 +1659,24 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert '"$(id -u "$runner_user")" != "0"' in installer
     assert "runner checkout parent must be a root-owned" in installer
     assert "/var/lib/degen-dogs/activation-armed" in installer
-    assert "git -C \"$repo_dir\" push --dry-run" in installer
-    assert 'current_branch="$(run_as_runner_runtime git -C "$repo_dir" branch --show-current)"' in installer
-    assert 'remote_head="$(run_as_runner_runtime git -C "$repo_dir" rev-parse refs/remotes/origin/main)"' in installer
-    assert 'PATH="${repo_dir}/scripts/runtime-bin:/usr/local/bin:/usr/bin:/bin"' in installer
-    assert 'run_as_runner /usr/bin/python3 -m venv' in installer
+    assert '"$git_bin" -C "$repo_dir" push --dry-run' in installer
+    assert 'current_branch="$(run_as_runner_runtime "$git_bin" -C "$repo_dir" branch --show-current)"' in installer
+    assert 'remote_head="$(run_as_runner_runtime "$git_bin" -C "$repo_dir" rev-parse refs/remotes/origin/main)"' in installer
+    assert 'PATH="${python_runtime_dir}/bin:/usr/bin:/bin"' in installer
+    assert '"$system_python_bin" -I -B -m venv --without-pip --copies' in installer
     assert '"%" in value' in installer
     assert "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU" in installer
     assert "validate_runner_git_destination" in installer
     test_checkout_attestation_modes(installer)
+    test_trusted_runtime_is_runner_executable()
     test_bootstrap_receipt_gate(installer)
+    watcher_tests = text("scripts/test_watch_mission3_auction.py")
+    structured_env_test = watcher_tests.split(
+        "def test_run_refresh_exports_structured_event_environment():", 1
+    )[1].split("\ndef ", 1)[0]
+    assert "old_git_status_tracked = watcher.git_status_tracked" in structured_env_test
+    assert 'watcher.git_status_tracked = lambda: ""' in structured_env_test
+    assert "watcher.git_status_tracked = old_git_status_tracked" in structured_env_test
 
     publisher = text("scripts/refresh_and_publish.sh")
     assert 'QUARANTINE_STATE_DIR="${REPO_DIR}/.local"' in publisher
@@ -1696,7 +2038,12 @@ mkdir -p "$bundle_target/scripts"
 chmod 0700 "$test_root" "$bundle_root"
 cat >"$bundle_target/scripts/install_wsl_runner.sh" <<'INSTALLER'
 #!/usr/bin/env bash
-printf 'trusted-wrapper-executed\n'
+/usr/bin/python3 - <<'PY'
+from pathlib import Path
+
+assert Path("/").is_absolute()
+print("trusted-wrapper-executed")
+PY
 INSTALLER
 chmod 0755 "$bundle_target/scripts/install_wsl_runner.sh"
 printf '%s\n' "$trusted_commit" >"$bundle_target/TRUSTED_COMMIT"
@@ -1706,6 +2053,8 @@ provision_wrapper "$wrapper_root" "$bundle_root" "$(id -un)" "$(id -gn)"
 test -f "$wrapper_root/degen-dogs-wsl-installer"
 test ! -L "$wrapper_root/degen-dogs-wsl-installer"
 test "$(stat -c %a "$wrapper_root/degen-dogs-wsl-installer")" = 755
+printf 'raise SystemExit("cwd pathlib shadow executed")\n' >"$test_root/pathlib.py"
+cd "$test_root"
 test "$("$wrapper_root/degen-dogs-wsl-installer")" = trusted-wrapper-executed
 first_wrapper_inode=$(stat -c %i "$wrapper_root/degen-dogs-wsl-installer")
 provision_wrapper "$wrapper_root" "$bundle_root" "$(id -un)" "$(id -gn)"

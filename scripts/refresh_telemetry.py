@@ -432,6 +432,7 @@ def generated_state(root: Path = ROOT) -> dict[str, Any]:
         "onchain_verification_scope": str(metrics.get("onchain_verification_scope") or ""),
         "onchain_chain_id": int_or_none(metrics.get("onchain_chain_id")),
         "snapshot_block_hash": str(metrics.get("snapshot_block_hash") or ""),
+        "canonical_reorg_from_hash": str(metrics.get("canonical_reorg_from_hash") or ""),
         "snapshot_confirmations": int_or_none(metrics.get("snapshot_confirmations")),
         "rpc_quorum_size": int_or_none(metrics.get("rpc_quorum_size")),
         "rpc_quorum_agreement": str(metrics.get("rpc_quorum_agreement") or ""),
@@ -719,6 +720,7 @@ def public_refresh_status(env: dict[str, str], root: Path = ROOT, *, prefer_curr
         "onchain_verification_scope": state.get("onchain_verification_scope"),
         "onchain_chain_id": state.get("onchain_chain_id"),
         "snapshot_block_hash": state.get("snapshot_block_hash"),
+        "canonical_reorg_from_hash": state.get("canonical_reorg_from_hash"),
         "snapshot_confirmations": state.get("snapshot_confirmations"),
         "rpc_quorum_size": state.get("rpc_quorum_size"),
         "rpc_quorum_agreement": state.get("rpc_quorum_agreement"),
@@ -895,6 +897,10 @@ def validate_refresh_status(
         raise AssertionError("refresh_status onchain_chain_id is not Base mainnet")
     if not re.fullmatch(r"0x[a-fA-F0-9]{64}", str(status.get("snapshot_block_hash") or "")):
         raise AssertionError("refresh_status snapshot_block_hash is invalid")
+    if status.get("canonical_reorg_from_hash") is not None and re.fullmatch(
+        r"0x[0-9a-f]{64}", str(status["canonical_reorg_from_hash"])
+    ) is None:
+        raise AssertionError("refresh_status canonical_reorg_from_hash is invalid")
     if int_or_none(status.get("rpc_quorum_size")) is None or int(status["rpc_quorum_size"]) < 2:
         raise AssertionError("refresh_status rpc_quorum_size is invalid")
     quorum_size = int(status["rpc_quorum_size"])
@@ -1132,6 +1138,7 @@ def validate_refresh_status(
         "onchain_verification_scope",
         "onchain_chain_id",
         "snapshot_block_hash",
+        "canonical_reorg_from_hash",
         "snapshot_confirmations",
         "rpc_quorum_size",
         "rpc_quorum_agreement",

@@ -1969,7 +1969,7 @@ if (-not $trustedBundleExists -or $UpgradeTrustedBundle) {
     config/systemd/degen-dogs-publisher.timer
     config/systemd/degen-dogs-pages-verifier.service.in config/systemd/degen-dogs-pages-verifier.path.in
     config/systemd/degen-dogs-pages-verifier.timer
-    scripts/runner_publication_state.py scripts/drain_publication_queue.py
+    scripts/runner_publication_state.py scripts/publication_coverage.py scripts/drain_publication_queue.py
     scripts/verify_pages_deployment.py
   )
   mkdir "$stage/tree"
@@ -2042,7 +2042,7 @@ trusted_wrapper_provision() (
   trap cleanup_wrapper EXIT
   printf -v quoted_bundle_root '%q' "$bundle_root"
   printf '%s\n' \
-    '#!/usr/bin/env bash' \
+    '#!/bin/bash' \
     'set -Eeuo pipefail' \
     "bundle_root=$quoted_bundle_root" \
     'bundle=$(readlink -f -- "$bundle_root/current")' \
@@ -2050,7 +2050,8 @@ trusted_wrapper_provision() (
     '[[ "$trusted_commit" =~ ^[0-9a-f]{40}$ ]] || exit 78' \
     'test "$bundle" = "$bundle_root/$trusted_commit" || exit 78' \
     '(cd "$bundle" && sha256sum --check --status ROOT_ASSETS.sha256)' \
-    'exec "$bundle/scripts/install_wsl_runner.sh" "$@"' >"$wrapper_tmp"
+    'cd /' \
+    'exec /usr/bin/env -i PATH=/usr/sbin:/usr/bin:/sbin:/bin /bin/bash -p "$bundle/scripts/install_wsl_runner.sh" "$@"' >"$wrapper_tmp"
   chmod 0755 "$wrapper_tmp"
   test "$(stat -c %U "$wrapper_tmp")" = "$expected_owner" || wrapper_failed 'prepared wrapper owner mismatch'
   test "$(stat -c %G "$wrapper_tmp")" = "$expected_group" || wrapper_failed 'prepared wrapper group mismatch'
@@ -2078,10 +2079,12 @@ stage_runtime_and_install() (
   set -Eeuo pipefail
   umask 077
   runtime_stage=$(mktemp -d /run/degen-dogs-runtime.XXXXXX)
+  chmod 0711 "$runtime_stage"
   cleanup() { case "$runtime_stage" in /run/degen-dogs-runtime.*) rm -rf -- "$runtime_stage" ;; esac; }
   trap cleanup EXIT
   export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null GIT_TERMINAL_PROMPT=0
   git -c core.hooksPath=/dev/null init --bare "$runtime_stage/repo.git"
+  chmod 0700 "$runtime_stage/repo.git"
   git -c core.hooksPath=/dev/null --git-dir="$runtime_stage/repo.git" fetch --no-tags \
     https://github.com/ael-dev3/Degen-Dogs-Mission-3.git \
     refs/heads/main:refs/heads/main
@@ -2089,7 +2092,9 @@ stage_runtime_and_install() (
   mkdir "$runtime_stage/tree"
   git -c core.hooksPath=/dev/null --git-dir="$runtime_stage/repo.git" archive "$runtime_sha" | \
     tar -x -C "$runtime_stage/tree"
-  chmod -R go-w "$runtime_stage/tree"
+  find "$runtime_stage/tree" -xdev -type d -exec chmod 0755 {} +
+  find "$runtime_stage/tree" -xdev -type f -perm /0111 -exec chmod 0755 {} +
+  find "$runtime_stage/tree" -xdev -type f ! -perm /0111 -exec chmod 0644 {} +
   runtime_required_assets=(
     config/systemd/degen-dogs-publisher.service.in
     config/systemd/degen-dogs-publisher.path.in
@@ -2098,6 +2103,7 @@ stage_runtime_and_install() (
     config/systemd/degen-dogs-pages-verifier.path.in
     config/systemd/degen-dogs-pages-verifier.timer
     scripts/runner_publication_state.py
+    scripts/publication_coverage.py
     scripts/drain_publication_queue.py
     scripts/verify_pages_deployment.py
   )
@@ -2177,6 +2183,20 @@ runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null
   git -c core.hooksPath=/dev/null -C '$RepoDir' config user.name 'Degen Dogs Windows Runner'
 runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
   git -c core.hooksPath=/dev/null -C '$RepoDir' config user.email 'degen-dogs-runner@users.noreply.github.com'
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config core.hooksPath /dev/null
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config core.autocrlf false
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config core.safecrlf true
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config core.sshCommand "ssh -F `$runner_home/.ssh/degen_dogs_config"
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config branch.main.remote origin
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config branch.main.merge refs/heads/main
+runuser -u '$RunnerUser' -- env HOME="`$runner_home" GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null \
+  git -c core.hooksPath=/dev/null -C '$RepoDir' config remote.origin.url 'git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git'
 
 $trustedBundleProvision
 $trustedWrapperProvision

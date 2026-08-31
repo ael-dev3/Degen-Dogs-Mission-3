@@ -217,7 +217,10 @@ def test_pages_delay_keeps_newer_observation_and_drains_it_next() -> None:
     assert unavailable["queue_mode"] is False
     assert unavailable["last_direct_data_compatible_static_block"] is None
 
-    with tempfile.TemporaryDirectory(dir="/tmp") as directory:
+    # The runner's path-security model deliberately rejects world-writable
+    # ancestors such as /tmp.  Release gates provide a private 0700 TMPDIR;
+    # honor it instead of bypassing it with a hard-coded parent.
+    with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         (root / "repo" / "scripts").mkdir(parents=True)
         lock_dir = root / "state"
@@ -267,6 +270,16 @@ def test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private
         "checkpoint": {
             "outcome": "no_diff", "generation": 5, "queue_digest": "e" * 64,
             "commit_sha": None, "push_completed_at_utc": None,
+            "publication_target": {
+                "observation": {
+                    "bidder_wallet": "private-target-wallet",
+                    "provider_evidence": "private-target-provider",
+                },
+            },
+            "coverage_proof": {
+                "bundle_path": "private-proof-bundle-path",
+                "quorum_attestation": {"providers": "private-proof-provider"},
+            },
         },
         "pages_verified": {
             "generation": 4, "queue_digest": "d" * 64, "commit_sha": commit,
@@ -286,7 +299,15 @@ def test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private
     assert summary["pages_verification_state"] == "verified"
     assert summary["problems"] == []
     rendered = json.dumps(summary, sort_keys=True)
-    for forbidden in ("secret-path", "private-proof", "queue_digest", "expected_block_hash"):
+    for forbidden in (
+        "secret-path",
+        "private-proof",
+        "private-target",
+        "queue_digest",
+        "expected_block_hash",
+        "coverage_proof",
+        "publication_target",
+    ):
         assert forbidden not in rendered
     report = health.public_health_report(
         now=datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc),
@@ -302,7 +323,16 @@ def test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private
         },
     )
     rendered = json.dumps(report, sort_keys=True)
-    for forbidden in ("rpc.example", "alice", "C:\\Users", "secret-path", "private-proof"):
+    for forbidden in (
+        "rpc.example",
+        "alice",
+        "C:\\Users",
+        "secret-path",
+        "private-proof",
+        "private-target",
+        "coverage_proof",
+        "publication_target",
+    ):
         assert forbidden not in rendered
 
 

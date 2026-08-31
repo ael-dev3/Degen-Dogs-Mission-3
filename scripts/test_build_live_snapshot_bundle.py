@@ -43,11 +43,22 @@ def snapshot_hash(block: int) -> str:
     return "0x" + f"{block:064x}"
 
 
-def write_fixture(root: Path, *, block: int = 123, countdown: str = "01:00:00") -> None:
+def write_fixture(
+    root: Path,
+    *,
+    block: int = 123,
+    countdown: str = "01:00:00",
+    canonical_reorg_from_hash: str | None = None,
+) -> None:
     block_hash = snapshot_hash(block)
     current = [
         {
             "token_id": 7,
+            "amount_wei": "10000000000000000",
+            "start_time_unix": 1780000000,
+            "end_time_unix": 1780003600,
+            "bidder_wallet": "0x" + "1" * 40,
+            "settled": 0,
             "latest_block": block,
             "latest_block_time_utc": "2026-08-21 10:00:00",
             "time_remaining": countdown,
@@ -67,6 +78,10 @@ def write_fixture(root: Path, *, block: int = 123, countdown: str = "01:00:00") 
         {"metric": "onchain_chain_id", "value": "8453"},
         {"metric": "snapshot_confirmations", "value": "1"},
         {"metric": "rpc_quorum_size", "value": "2"},
+        {
+            "metric": "canonical_reorg_from_hash",
+            "value": canonical_reorg_from_hash or "",
+        },
     ]
     sources = {
         "current_auction.json": current,
@@ -85,6 +100,8 @@ def write_fixture(root: Path, *, block: int = 123, countdown: str = "01:00:00") 
         "onchain_verification_status": "current_snapshot_cross_provider_verified",
         "onchain_chain_id": 8453,
     }
+    if canonical_reorg_from_hash is not None:
+        status["canonical_reorg_from_hash"] = canonical_reorg_from_hash
     write_json(root / "generated" / "refresh_status.json", status)
     write_json(root / "public" / "generated" / "refresh_status.json", status)
     write_json(
@@ -186,6 +203,30 @@ def test_same_block_dynamic_change_creates_a_new_content_addressed_object() -> N
         assert (root / "generated" / second["live_snapshot_bundle"]).exists()
 
 
+def test_directional_reorg_marker_is_bound_in_status_and_bundle_metrics() -> None:
+    bundle_module = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        marker = "0x" + "a" * 64
+        write_fixture(root, canonical_reorg_from_hash=marker)
+        status = bundle_module.build_live_snapshot_bundle(root=root)
+        assert status["canonical_reorg_from_hash"] == marker
+        bundle = json.loads(
+            (root / "generated" / status["live_snapshot_bundle"]).read_text(encoding="utf-8")
+        )
+        metrics = {row["metric"]: row["value"] for row in bundle["mission3_metrics"]}
+        assert metrics["canonical_reorg_from_hash"] == marker
+
+        for directory in (root / "generated", root / "public" / "generated"):
+            status_path = directory / "refresh_status.json"
+            tampered = json.loads(status_path.read_text(encoding="utf-8"))
+            tampered["canonical_reorg_from_hash"] = "0x" + "b" * 64
+            write_json(status_path, tampered)
+        assert_raises_contains(
+            lambda: bundle_module.build_live_snapshot_bundle(root=root),
+            "canonical_reorg_from_hash differs",
+        )
+
 def test_rejects_split_source_before_advancing_status() -> None:
     bundle_module = load_module()
     with tempfile.TemporaryDirectory() as tmp:
@@ -200,6 +241,30 @@ def test_rejects_split_source_before_advancing_status() -> None:
         )
         assert (root / "generated" / "refresh_status.json").read_bytes() == original_status
         assert not list((root / "generated").glob("live_snapshot_*.json"))
+
+
+def test_rejects_current_auction_without_canonical_coverage_fields() -> None:
+    bundle_module = load_module()
+    invalid_values = {
+        "amount_wei": 100,
+        "start_time_unix": "1780000000",
+        "end_time_unix": 0,
+        "bidder_wallet": "0xABC",
+        "settled": False,
+    }
+    for field, invalid in invalid_values.items():
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_fixture(root)
+            for directory in (root / "generated", root / "public" / "generated"):
+                path = directory / "current_auction.json"
+                rows = json.loads(path.read_text(encoding="utf-8"))
+                rows[0][field] = invalid
+                write_json(path, rows)
+            assert_raises_contains(
+                lambda: bundle_module._load_source_state(root),
+                "current_auction coverage",
+            )
 
 
 def test_immutable_collision_and_tampering_fail_closed() -> None:

@@ -530,6 +530,41 @@ def test_surface_checkpoint_requires_current_and_metrics_atomicity() -> None:
         raise AssertionError("split current/metrics checkpoint was authenticated")
 
 
+def test_bounded_refresh_requires_exact_current_auction_coverage_contract() -> None:
+    surface = load_module()
+    valid = {
+        "token_id": 818,
+        "amount_wei": "5500000000000000",
+        "start_time_unix": 1780000000,
+        "end_time_unix": 1780003600,
+        "bidder_wallet": "0x" + "1" * 40,
+        "settled": 0,
+    }
+    assert surface.validate_current_auction_coverage_contract(valid) == valid
+
+    invalid_rows = []
+    missing = dict(valid)
+    missing.pop("amount_wei")
+    invalid_rows.append(missing)
+    for field, invalid in (
+        ("amount_wei", 5500000000000000),
+        ("start_time_unix", "1780000000"),
+        ("end_time_unix", 0),
+        ("bidder_wallet", "0xABC"),
+        ("settled", False),
+    ):
+        row = dict(valid)
+        row[field] = invalid
+        invalid_rows.append(row)
+    for row in invalid_rows:
+        try:
+            surface.validate_current_auction_coverage_contract(row)
+        except surface.FullRefreshRequired:
+            pass
+        else:
+            raise AssertionError("legacy or malformed current_auction schema stayed on the bounded path")
+
+
 def test_legacy_historical_schema_migrates_rarity_score_after_rarity() -> None:
     surface = load_module()
 

@@ -234,9 +234,56 @@ def real_handoff_records(
     digest: str,
     *,
     outcome: str,
+    publication_target: dict[str, object],
 ) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
     commit = "a" * 40
     terminal = outcome != "pushed"
+    observation = publication_target["observation"]
+    assert isinstance(observation, dict)
+    source_kind = {
+        "pushed": "generated_commit",
+        "no_diff": "baseline_no_diff",
+        "peer_superseded": "peer_commit",
+    }[outcome]
+    source_commit = "d" * 40 if outcome == "no_diff" else commit
+    proof = {
+        "schema_version": 1,
+        "source_kind": source_kind,
+        "source_commit_sha": source_commit,
+        "status_path": "public/generated/refresh_status.json",
+        "status_sha256": "c" * 64,
+        "bundle_path": (
+            f"public/generated/live_snapshot_{observation['confirmed_block_number']}_"
+            f"{str(observation['confirmed_block_hash'])[2:]}_{'b' * 64}.json"
+        ),
+        "bundle_sha256": "b" * 64,
+        "bundle_bytes": 1234,
+        "block_number": observation["confirmed_block_number"],
+        "block_hash": observation["confirmed_block_hash"],
+        "auction": {
+            key: observation[key]
+            for key in (
+                "token_id",
+                "amount_wei",
+                "start_time_unix",
+                "end_time_unix",
+                "bidder_wallet",
+                "settled",
+            )
+        },
+        "canonical_reorg_from_hash": None,
+        "quorum_attestation": {
+            "onchain_chain_id": 8453,
+            "onchain_verification_status": "current_snapshot_cross_provider_verified",
+            "onchain_verification_scope": (
+                "snapshot_hash,contract_code,current_auction,recent_event_logs"
+            ),
+            "rpc_quorum_size": 2,
+            "rpc_quorum_agreement": "2/2",
+            "rpc_quorum_providers": "base.org,publicnode.com",
+            "snapshot_confirmations": 1,
+        },
+    }
     recovery = {
         "schema_version": 1,
         "repo_realpath": str(ROOT),
@@ -247,11 +294,13 @@ def real_handoff_records(
         "run_scope": "current",
         "created_at_utc": "2026-08-30T12:34:56Z",
         "publish_paths": ["generated", "public"],
+        "publication_target": publication_target,
         "alignment_runner_commit": None,
         "alignment_remote_head": None,
         "alignment_result": None,
         "publication_generation": generation,
         "queue_digest": digest,
+        "coverage_proof": proof if terminal else None,
         "terminal_outcome": outcome if terminal else None,
         "handoff_phase": "terminal" if terminal else "generating",
         "remote_commit": None if outcome == "no_diff" or not terminal else commit,
@@ -271,11 +320,11 @@ def real_handoff_records(
         "queue_digest": digest,
         "commit_sha": commit,
         "raw_status_path": "public/generated/refresh_status.json",
-        "raw_bundle_path": "public/generated/bundle.json",
+        "raw_bundle_path": proof["bundle_path"],
         "expected_bundle_sha256": "b" * 64,
-        "expected_bundle_bytes": 2,
-        "expected_block_number": 100,
-        "expected_block_hash": "0x" + "a" * 64,
+        "expected_bundle_bytes": 1234,
+        "expected_block_number": observation["confirmed_block_number"],
+        "expected_block_hash": observation["confirmed_block_hash"],
         "push_completed_at_utc": "2026-08-30T12:35:00Z",
         "retry_deadline_utc": "2026-08-30T12:45:00Z",
         "retry_count": 0,
@@ -287,6 +336,8 @@ def real_handoff_records(
         "queue_digest": digest,
         "commit_sha": None if outcome == "no_diff" else commit,
         "push_completed_at_utc": "2026-08-30T12:35:00Z" if outcome == "pushed" else None,
+        "publication_target": publication_target,
+        "coverage_proof": proof,
     }
     return recovery, pending, checkpoint
 
@@ -296,6 +347,7 @@ def stage_real_handoff(state: Any, lock_dir: Path, queued: Any, outcome: str) ->
         queued.generation,
         queued.digest,
         outcome=outcome,
+        publication_target=queued.record,
     )
     generating = dict(recovery)
     generating.update(
@@ -303,6 +355,7 @@ def stage_real_handoff(state: Any, lock_dir: Path, queued: Any, outcome: str) ->
             "terminal_outcome": None,
             "handoff_phase": "generating",
             "remote_commit": None,
+            "coverage_proof": None,
         }
     )
     state.create_deferred_recovery_journal(lock_dir, generating, lock_context=FakeStateLock())
@@ -312,6 +365,7 @@ def stage_real_handoff(state: Any, lock_dir: Path, queued: Any, outcome: str) ->
             queued.generation,
             queued.digest,
             "a" * 40,
+            checkpoint["coverage_proof"],
             lock_context=FakeStateLock(),
         )
         state.prepare_pushed_handoff(
@@ -1363,7 +1417,19 @@ def test_launcher_publisher_case_executes_only_fixed_drainer_and_repins_paths() 
         scripts = repo / "scripts"
         runtime_bin = scripts / "runtime-bin"
         runtime_bin.mkdir(parents=True)
-        shutil.copy2(ROOT / "scripts" / "run_wsl_runner_job.sh", scripts / "run_wsl_runner_job.sh")
+        launcher_source = (ROOT / "scripts" / "run_wsl_runner_job.sh").read_text(encoding="utf-8")
+        trusted_start = launcher_source.index("# WSL_TRUSTED_PYTHON_START")
+        trusted_end = launcher_source.index("# WSL_TRUSTED_PYTHON_END") + len(
+            "# WSL_TRUSTED_PYTHON_END"
+        )
+        launcher_source = (
+            launcher_source[:trusted_start]
+            + 'python_bin="${DEGEN_DOGS_TEST_PYTHON_BIN:?}"\n'
+            + launcher_source[trusted_end:]
+        )
+        (scripts / "run_wsl_runner_job.sh").write_text(
+            launcher_source, encoding="utf-8"
+        )
         shutil.copy2(ROOT / "scripts" / "load_runner_env.sh", scripts / "load_runner_env.sh")
         capture = temporary / "capture.json"
         (scripts / "drain_publication_queue.py").write_text(
@@ -1374,21 +1440,8 @@ def test_launcher_publisher_case_executes_only_fixed_drainer_and_repins_paths() 
             "'mission': os.environ.get('MISSION3_REFRESH_COMMAND')}, handle)\n",
             encoding="utf-8",
         )
-        fake_git = runtime_bin / "git"
-        fake_git.write_text(
-            "#!/usr/bin/env bash\n"
-            "case \"$*\" in\n"
-            "  'branch --show-current') printf '%s\\n' main ;;\n"
-            "  'remote get-url origin') printf '%s\\n' 'git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git' ;;\n"
-            "  'config --local --get-all remote.origin.pushurl') exit 1 ;;\n"
-            "  'remote get-url --push --all origin') printf '%s\\n' 'git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git' ;;\n"
-            "  'config --local --get core.sshCommand') printf 'ssh -F %s/.ssh/degen_dogs_config\\n' \"$HOME\" ;;\n"
-            "  'config --local --get core.hooksPath') printf '%s\\n' /dev/null ;;\n"
-            "  *) exit 99 ;;\n"
-            "esac\n",
-            encoding="utf-8",
-        )
-        fake_git.chmod(0o755)
+        (runtime_bin / "python3").write_text("#!/bin/sh\nexit 127\n", encoding="utf-8")
+        (runtime_bin / "python3").chmod(0o755)
         env_file = repo / ".env.local"
         env_file.write_text(
             "MISSION3_REFRESH_COMMAND='touch /tmp/not-allowed'\n"
@@ -1398,6 +1451,16 @@ def test_launcher_publisher_case_executes_only_fixed_drainer_and_repins_paths() 
         env_file.chmod(0o600)
         runner_home = temporary / "home"
         runner_home.mkdir()
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "init", "-q", "-b", "main"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "user.name", "Degen Dogs Windows Runner"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "user.email", "degen-dogs-runner@users.noreply.github.com"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "core.hooksPath", "/dev/null"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "core.autocrlf", "false"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "core.safecrlf", "true"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "core.sshCommand", f"ssh -F {runner_home}/.ssh/degen_dogs_config"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "remote", "add", "origin", "git@github-degen-dogs:ael-dev3/Degen-Dogs-Mission-3.git"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "branch.main.remote", "origin"], check=True)
+        subprocess.run(["/usr/bin/git", "-C", str(repo), "config", "branch.main.merge", "refs/heads/main"], check=True)
         lock_dir = temporary / "state"
         environment = dict(os.environ)
         environment.update(
@@ -1411,6 +1474,7 @@ def test_launcher_publisher_case_executes_only_fixed_drainer_and_repins_paths() 
                 "BASE_RPC_URLS": "https://one.invalid,https://two.invalid",
                 "BASE_LOG_RPC_URLS": "https://one.invalid,https://two.invalid",
                 "BASE_RPC_QUORUM_SIZE": "2",
+                "DEGEN_DOGS_TEST_PYTHON_BIN": sys.executable,
             }
         )
         completed = subprocess.run(

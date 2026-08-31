@@ -69,6 +69,63 @@ def observation(
     }
 
 
+def coverage_proof(
+    target: dict[str, object],
+    *,
+    block: int | None = None,
+    block_hash: str | None = None,
+    source_kind: str = "generated_commit",
+    source_commit_sha: str = "a" * 40,
+    reorg_from: str | None = None,
+    auction_updates: dict[str, object] | None = None,
+) -> dict[str, object]:
+    observed = target["observation"]
+    assert isinstance(observed, dict)
+    proof_block = observed["confirmed_block_number"] if block is None else block
+    proof_hash = observed["confirmed_block_hash"] if block_hash is None else block_hash
+    assert isinstance(proof_block, int)
+    assert isinstance(proof_hash, str)
+    auction = {
+        key: observed[key]
+        for key in (
+            "token_id",
+            "amount_wei",
+            "start_time_unix",
+            "end_time_unix",
+            "bidder_wallet",
+            "settled",
+        )
+    }
+    auction.update(auction_updates or {})
+    return {
+        "schema_version": 1,
+        "source_kind": source_kind,
+        "source_commit_sha": source_commit_sha,
+        "status_path": "public/generated/refresh_status.json",
+        "status_sha256": "c" * 64,
+        "bundle_path": (
+            f"public/generated/live_snapshot_{proof_block}_{proof_hash[2:]}_"
+            + "b" * 64
+            + ".json"
+        ),
+        "bundle_sha256": "b" * 64,
+        "bundle_bytes": 1234,
+        "block_number": proof_block,
+        "block_hash": proof_hash,
+        "auction": auction,
+        "canonical_reorg_from_hash": reorg_from,
+        "quorum_attestation": {
+            "onchain_chain_id": 8453,
+            "onchain_verification_status": "current_snapshot_cross_provider_verified",
+            "onchain_verification_scope": "snapshot_hash,contract_code,current_auction,recent_event_logs",
+            "rpc_quorum_size": 2,
+            "rpc_quorum_agreement": "2/2",
+            "rpc_quorum_providers": "base.org,publicnode.com",
+            "snapshot_confirmations": 1,
+        },
+    }
+
+
 def enqueue(root: Path, value: dict[str, object], **kwargs: object) -> Any:
     return state.enqueue_latest_observation(
         root,
@@ -416,9 +473,34 @@ def test_generation_digest_compare_and_swap_does_not_clear_newer_latest() -> Non
         assert latest["generation"] == 3
 
 
-def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
+def handoff_records(
+    generation: int,
+    digest: str,
+    *,
+    outcome: str = "pushed",
+    target: dict[str, object] | None = None,
+) -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
     commit = "a" * 40
     terminal = outcome != "pushed"
+    if target is None:
+        target = state.latest_record(
+            generation,
+            "windows-wsl",
+            "current",
+            "2026-08-30T12:34:56Z",
+            observation(),
+        )
+    source_kind = {
+        "pushed": "generated_commit",
+        "no_diff": "baseline_no_diff",
+        "peer_superseded": "peer_commit",
+    }[outcome]
+    source_commit = "d" * 40 if outcome == "no_diff" else commit
+    proof = coverage_proof(
+        target,
+        source_kind=source_kind,
+        source_commit_sha=source_commit,
+    )
     journal = {
         "schema_version": 1,
         "repo_realpath": str(ROOT),
@@ -434,6 +516,8 @@ def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") ->
         "alignment_result": None,
         "publication_generation": generation,
         "queue_digest": digest,
+        "publication_target": target,
+        "coverage_proof": proof,
         "terminal_outcome": outcome,
         "handoff_phase": "terminal" if terminal else "push_ready",
         "remote_commit": None if outcome == "no_diff" else commit,
@@ -452,12 +536,12 @@ def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") ->
         "generation": generation,
         "queue_digest": digest,
         "commit_sha": commit,
-        "raw_status_path": "public/generated/refresh_status.json",
-        "raw_bundle_path": "public/generated/bundle.json",
-        "expected_bundle_sha256": "b" * 64,
-        "expected_bundle_bytes": 2,
-        "expected_block_number": 100,
-        "expected_block_hash": "0x" + "a" * 64,
+        "raw_status_path": proof["status_path"],
+        "raw_bundle_path": proof["bundle_path"],
+        "expected_bundle_sha256": proof["bundle_sha256"],
+        "expected_bundle_bytes": proof["bundle_bytes"],
+        "expected_block_number": proof["block_number"],
+        "expected_block_hash": proof["block_hash"],
         "push_completed_at_utc": "2026-08-30T12:35:00Z",
         "retry_deadline_utc": "2026-08-30T12:45:00Z",
         "retry_count": 0,
@@ -469,15 +553,27 @@ def handoff_records(generation: int, digest: str, *, outcome: str = "pushed") ->
         "queue_digest": digest,
         "commit_sha": None if outcome == "no_diff" else commit,
         "push_completed_at_utc": "2026-08-30T12:35:00Z" if outcome == "pushed" else None,
+        "publication_target": target,
+        "coverage_proof": proof,
     }
     return journal, pending, checkpoint
 
 
-def generating_journal(generation: int, digest: str) -> dict[str, object]:
-    journal, _pending, _checkpoint = handoff_records(generation, digest)
+def generating_journal(
+    generation: int,
+    digest: str,
+    *,
+    target: dict[str, object] | None = None,
+) -> dict[str, object]:
+    journal, _pending, _checkpoint = handoff_records(
+        generation,
+        digest,
+        target=target,
+    )
     journal["terminal_outcome"] = None
     journal["handoff_phase"] = "generating"
     journal["remote_commit"] = None
+    journal["coverage_proof"] = None
     return journal
 
 
@@ -485,16 +581,26 @@ def prepare_and_finalize_generation(root: Path, queued: Any, outcome: str) -> No
     """Test-only full handoff used to exercise retained cross-generation state."""
     state.create_deferred_recovery_journal(
         root,
-        generating_journal(queued.generation, queued.digest),
+        generating_journal(
+            queued.generation,
+            queued.digest,
+            target=queued.record,
+        ),
         lock_context=FakeLock(),
     )
-    journal, pending, checkpoint = handoff_records(queued.generation, queued.digest, outcome=outcome)
+    journal, pending, checkpoint = handoff_records(
+        queued.generation,
+        queued.digest,
+        outcome=outcome,
+        target=queued.record,
+    )
     if outcome == "pushed":
         journal = state.arm_deferred_pushed_handoff(
             root,
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
@@ -521,12 +627,210 @@ def test_deferred_journal_creation_and_push_arm_use_only_fixed_authenticated_sta
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         assert armed["handoff_phase"] == "push_ready"
         assert armed["terminal_outcome"] == "pushed"
         assert armed["remote_commit"] == "a" * 40
         assert state.read_deferred_recovery_journal(root) == armed
+
+
+def test_deferred_journal_atomically_captures_the_exact_selected_publication_target() -> None:
+    """Removing the target capture would let a later latest-wins write erase causality."""
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        selected = enqueue(root, observation())
+        state.create_deferred_recovery_journal(
+            root,
+            generating_journal(selected.generation, selected.digest),
+            lock_context=FakeLock(),
+        )
+
+        # The latest queue is allowed to advance while generation is running,
+        # but the journal must retain the exact record selected by the drainer.
+        enqueue(root, observation(block=101, block_hash="0x" + "c" * 64))
+        durable = state.read_deferred_recovery_journal(root)
+        assert durable is not None
+        assert durable["publication_target"] == selected.record
+
+        with tempfile.TemporaryDirectory() as mismatch_temporary:
+            mismatch_root = Path(mismatch_temporary)
+            mismatch = enqueue(mismatch_root, observation())
+            wrong = generating_journal(mismatch.generation, "f" * 64)
+            expect_invalid(
+                lambda: state.create_deferred_recovery_journal(
+                    mismatch_root,
+                    wrong,
+                    lock_context=FakeLock(),
+                ),
+                "journal creation accepted a digest that did not identify the selected latest record",
+            )
+            assert not state.state_paths(mismatch_root).journal.exists()
+
+
+def test_publication_coverage_invariant_rejects_stale_or_ambiguous_snapshots() -> None:
+    target = state.latest_record(
+        1,
+        "windows-wsl",
+        "current",
+        "2026-08-30T12:34:56Z",
+        observation(),
+    )
+    assert state.validate_coverage_proof_for_target(coverage_proof(target), target)
+
+    higher = coverage_proof(
+        target,
+        block=101,
+        block_hash="0x" + "d" * 64,
+        auction_updates={"amount_wei": "999"},
+    )
+    assert state.validate_coverage_proof_for_target(higher, target)
+
+    stale = coverage_proof(target, block=99, block_hash="0x" + "e" * 64)
+    expect_invalid(
+        lambda: state.validate_coverage_proof_for_target(stale, target),
+        "a lower-block publication proof covered a newer queued observation",
+    )
+
+    tuple_mismatch = coverage_proof(target, auction_updates={"amount_wei": "999"})
+    expect_invalid(
+        lambda: state.validate_coverage_proof_for_target(tuple_mismatch, target),
+        "a same-hash publication proof with a different auction tuple was accepted",
+    )
+
+    replacement_hash = "0x" + "f" * 64
+    missing_marker = coverage_proof(target, block_hash=replacement_hash)
+    expect_invalid(
+        lambda: state.validate_coverage_proof_for_target(missing_marker, target),
+        "a same-height changed hash without an explicit reorg marker was accepted",
+    )
+    wrong_marker = coverage_proof(
+        target,
+        block_hash=replacement_hash,
+        reorg_from="0x" + "e" * 64,
+    )
+    expect_invalid(
+        lambda: state.validate_coverage_proof_for_target(wrong_marker, target),
+        "a same-height changed hash with the wrong reorg marker was accepted",
+    )
+    canonical_reorg = coverage_proof(
+        target,
+        block_hash=replacement_hash,
+        reorg_from=str(target["observation"]["confirmed_block_hash"]),
+        auction_updates={"amount_wei": "999"},
+    )
+    assert state.validate_coverage_proof_for_target(canonical_reorg, target)
+
+    malformed = coverage_proof(target)
+    malformed["unexpected"] = True
+    expect_invalid(
+        lambda: state.validate_coverage_proof_for_target(malformed, target),
+        "coverage proof accepted an unrecognized top-level field",
+    )
+
+
+def test_observation_rejects_a_self_referential_reorg_marker() -> None:
+    candidate = observation()
+    candidate["canonical_reorg_from_hash"] = candidate["confirmed_block_hash"]
+    expect_invalid(
+        lambda: state.validate_observation(candidate),
+        "observation accepted its own confirmed hash as prior reorg evidence",
+    )
+
+
+def test_terminal_outcomes_bind_exact_coverage_source_kind_commit_and_pending_metadata() -> None:
+    target = state.latest_record(
+        1,
+        "windows-wsl",
+        "current",
+        "2026-08-30T12:34:56Z",
+        observation(),
+    )
+    digest = state._digest(target)
+    pushed, pending, pushed_checkpoint = handoff_records(1, digest, target=target)
+    assert state._validate_journal(pushed) == pushed
+    assert state._validate_checkpoint(pushed_checkpoint) == pushed_checkpoint
+
+    cases: list[tuple[str, dict[str, object]]] = []
+    pushed_wrong_kind = dict(pushed)
+    pushed_wrong_kind["coverage_proof"] = dict(pushed["coverage_proof"])
+    pushed_wrong_kind["coverage_proof"]["source_kind"] = "peer_commit"
+    cases.append(("pushed proof kind", pushed_wrong_kind))
+    pushed_wrong_commit = dict(pushed)
+    pushed_wrong_commit["coverage_proof"] = dict(pushed["coverage_proof"])
+    pushed_wrong_commit["coverage_proof"]["source_commit_sha"] = "c" * 40
+    cases.append(("pushed proof commit", pushed_wrong_commit))
+
+    no_diff, _unused, no_diff_checkpoint = handoff_records(
+        1,
+        digest,
+        outcome="no_diff",
+        target=target,
+    )
+    assert state._validate_journal(no_diff) == no_diff
+    assert state._validate_checkpoint(no_diff_checkpoint) == no_diff_checkpoint
+    no_diff_wrong = dict(no_diff)
+    no_diff_wrong["coverage_proof"] = dict(no_diff["coverage_proof"])
+    no_diff_wrong["coverage_proof"]["source_kind"] = "generated_commit"
+    cases.append(("no-diff proof kind", no_diff_wrong))
+    no_diff_commit = dict(no_diff)
+    no_diff_commit["coverage_proof"] = dict(no_diff["coverage_proof"])
+    no_diff_commit["coverage_proof"]["source_commit_sha"] = "c" * 40
+    cases.append(("no-diff baseline commit", no_diff_commit))
+
+    peer, _unused, peer_checkpoint = handoff_records(
+        1,
+        digest,
+        outcome="peer_superseded",
+        target=target,
+    )
+    assert state._validate_journal(peer) == peer
+    assert state._validate_checkpoint(peer_checkpoint) == peer_checkpoint
+    peer_wrong = dict(peer)
+    peer_wrong["coverage_proof"] = dict(peer["coverage_proof"])
+    peer_wrong["coverage_proof"]["source_kind"] = "generated_commit"
+    cases.append(("peer proof kind", peer_wrong))
+    peer_commit = dict(peer)
+    peer_commit["coverage_proof"] = dict(peer["coverage_proof"])
+    peer_commit["coverage_proof"]["source_commit_sha"] = "c" * 40
+    cases.append(("peer proof commit", peer_commit))
+
+    for label, malformed_journal in cases:
+        expect_invalid(
+            lambda value=malformed_journal: state._validate_journal(value),
+            f"journal accepted mismatched {label}",
+        )
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        generating = generating_journal(queued.generation, queued.digest)
+        state.create_deferred_recovery_journal(root, generating, lock_context=FakeLock())
+        journal = state.arm_deferred_pushed_handoff(
+            root,
+            queued.generation,
+            queued.digest,
+            "a" * 40,
+            coverage_proof(queued.record),
+            lock_context=FakeLock(),
+        )
+        _unused, pending, checkpoint = handoff_records(
+            queued.generation,
+            queued.digest,
+            target=queued.record,
+        )
+        pending["expected_block_number"] = 99
+        expect_invalid(
+            lambda: state.prepare_pushed_handoff(
+                root,
+                journal,
+                pending,
+                checkpoint,
+                lock_context=FakeLock(),
+            ),
+            "pushed pending metadata was not bound to the coverage proof",
+        )
 
 
 def test_pushed_handoff_is_recoverable_after_push_raw_proof_pending_and_checkpoint_boundaries() -> None:
@@ -543,6 +847,7 @@ def test_pushed_handoff_is_recoverable_after_push_raw_proof_pending_and_checkpoi
                 queued.generation,
                 queued.digest,
                 "a" * 40,
+                coverage_proof(queued.record),
                 lock_context=FakeLock(),
             )
             _unused, pending, checkpoint = handoff_records(queued.generation, queued.digest)
@@ -593,6 +898,7 @@ def test_pushed_handoff_is_recoverable_after_push_raw_proof_pending_and_checkpoi
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         _journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
@@ -778,6 +1084,86 @@ def test_finalize_clears_exact_generation_then_authenticated_journal_only() -> N
         paths = state.state_paths(root)
         assert not paths.journal.exists()
         assert paths.pending.exists() and paths.checkpoint.exists()
+
+
+def test_finalization_and_recovery_never_clear_missing_or_conflicting_coverage_evidence() -> None:
+    for record_name, mutate in (
+        (
+            "journal",
+            lambda value: value.pop("coverage_proof"),
+        ),
+        (
+            "journal",
+            lambda value: value["publication_target"]["observation"].update(
+                {"amount_wei": "999"}
+            ),
+        ),
+        (
+            "checkpoint",
+            lambda value: value["coverage_proof"].update(
+                {"source_commit_sha": "c" * 40}
+            ),
+        ),
+    ):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queued = enqueue(root, observation())
+            journal, pending, checkpoint = handoff_records(
+                queued.generation,
+                queued.digest,
+            )
+            paths = state.state_paths(root)
+            state.atomic_write_record(paths.journal, journal)
+            state.prepare_pushed_handoff(
+                root,
+                journal,
+                pending,
+                checkpoint,
+                lock_context=FakeLock(),
+            )
+            target_path = getattr(paths, record_name)
+            tampered = state._read_json(target_path)
+            mutate(tampered)
+            state.atomic_write_record(target_path, tampered)
+            expect_invalid(
+                lambda: state.finalize_pushed_handoff(
+                    root,
+                    queued.generation,
+                    queued.digest,
+                    lock_context=FakeLock(),
+                ),
+                f"finalization cleared {record_name} with missing/conflicting coverage",
+            )
+            assert paths.latest.exists(), "coverage failure acknowledged the queue target"
+            assert paths.journal.exists(), "coverage failure unlinked the recovery journal"
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(
+            root,
+            journal,
+            pending,
+            checkpoint,
+            lock_context=FakeLock(),
+        )
+        paths.checkpoint.unlink()
+        tampered = state._read_json(paths.journal)
+        tampered["coverage_proof"] = None
+        state.atomic_write_record(paths.journal, tampered)
+        expect_invalid(
+            lambda: state.recover_deferred_handoff(
+                root,
+                lambda commit: commit == "a" * 40,
+                lock_context=FakeLock(),
+            ),
+            "recovery reconstructed handoff state without its coverage proof",
+        )
+        assert paths.latest.exists() and paths.journal.exists()
+        assert not paths.checkpoint.exists()
 
 
 def test_terminal_no_diff_outcome_is_durable_and_acknowledged() -> None:
@@ -1178,6 +1564,7 @@ def test_alignment_cannot_erase_a_pushed_handoff_phase() -> None:
                 queued.generation,
                 queued.digest,
                 "a" * 40,
+                coverage_proof(queued.record),
                 lock_context=FakeLock(),
             )
             if phase == "raw_proven":
@@ -1211,6 +1598,7 @@ def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identi
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         for generation, digest, runner_commit in (
@@ -1259,6 +1647,11 @@ def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identi
             "a" * 40,
             "c" * 40,
             "peer_supersedes",
+            coverage_proof(
+                queued.record,
+                source_kind="peer_commit",
+                source_commit_sha="c" * 40,
+            ),
             lock_context=FakeLock(),
         )
         assert updated["handoff_phase"] == "terminal"
@@ -1279,6 +1672,7 @@ def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identi
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         updated = state.record_deferred_push_rejected_alignment(
@@ -1308,6 +1702,7 @@ def test_rejected_push_transition_is_narrowly_limited_to_exact_push_ready_identi
             queued.generation,
             queued.digest,
             "a" * 40,
+            coverage_proof(queued.record),
             lock_context=FakeLock(),
         )
         _journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
@@ -1641,7 +2036,19 @@ def test_snapshot_finalization_waits_for_matching_journal_but_ignores_newer_term
         private_json(paths.pending, pending)
         captured = state.read_pending_with_digest(root, lock_context=FakeLock())
         assert captured is not None
-        newer_journal, _unused, _checkpoint = handoff_records(5, "f" * 64, outcome="no_diff")
+        newer_target = state.latest_record(
+            5,
+            "windows-wsl",
+            "current",
+            "2026-08-30T12:40:00Z",
+            observation(block=101, block_hash="0x" + "c" * 64),
+        )
+        newer_journal, _unused, _checkpoint = handoff_records(
+            5,
+            state._digest(newer_target),
+            outcome="no_diff",
+            target=newer_target,
+        )
         private_json(paths.journal, newer_journal)
         assert state.finalize_verified_pending(
             root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
