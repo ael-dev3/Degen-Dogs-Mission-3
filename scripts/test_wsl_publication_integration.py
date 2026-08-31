@@ -313,14 +313,18 @@ def test_queue_health_future_boundary_and_watcher_lock_rule() -> None:
 def test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure() -> None:
     """Catches health reading the snapshot wrapper instead of its validated pending record."""
     commit = "a" * 40
+    digest = "d" * 64
     snapshot = {
         "last_generation": 7, "latest": None, "journal": None,
         "pending": {"record": {
-            "generation": 7, "commit_sha": commit, "push_completed_at_utc": "2026-08-31T11:55:00Z",
+            "generation": 7, "queue_digest": digest, "commit_sha": commit,
+            "push_completed_at_utc": "2026-08-31T11:55:00Z",
         }},
-        "checkpoint": {"outcome": "pushed", "generation": 7, "commit_sha": commit},
+        "checkpoint": {"outcome": "pushed", "generation": 7, "queue_digest": digest,
+                       "commit_sha": commit, "push_completed_at_utc": "2026-08-31T11:55:00Z"},
         "pages_verified": {
-            "generation": 7, "commit_sha": commit, "expected_block_number": 702,
+            "generation": 7, "queue_digest": digest, "commit_sha": commit, "expected_block_number": 702,
+            "push_completed_at_utc": "2026-08-31T11:55:00Z",
             "pages_verified_at_utc": "2026-08-31T11:59:00Z",
         },
     }
@@ -333,9 +337,153 @@ def test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure(
     assert "publication_state_integrity_failure" not in summary["problems"]
 
 
+def test_queue_health_state_machine_boundaries_and_durable_watermark() -> None:
+    """Catches incomplete queue proofs hidden by a stale receipt or latest record."""
+    now = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
+    commit = "a" * 40
+
+    def pending(generation: int, pushed_at: str, digest: str = "d" * 64) -> dict[str, Any]:
+        return {"record": {
+            "generation": generation, "queue_digest": digest, "commit_sha": commit,
+            "push_completed_at_utc": pushed_at,
+        }}
+
+    def pushed(generation: int, pushed_at: str, digest: str = "d" * 64) -> dict[str, Any]:
+        return {"outcome": "pushed", "generation": generation, "queue_digest": digest,
+                "commit_sha": commit, "push_completed_at_utc": pushed_at}
+
+    def receipt(generation: int, verified_at: str, digest: str = "d" * 64) -> dict[str, Any]:
+        return {"generation": generation, "queue_digest": digest, "commit_sha": commit,
+                "expected_block_number": 702, "push_completed_at_utc": "2026-08-31T11:44:00Z",
+                "pages_verified_at_utc": verified_at}
+
+    cases = [
+        # A receipt for an older generation never makes a newer pending proof healthy forever.
+        ("mismatched_receipt_at_900", {
+            "last_generation": 8, "latest": None, "journal": None,
+            "pending": pending(8, "2026-08-31T11:45:00Z"),
+            "checkpoint": pushed(8, "2026-08-31T11:45:00Z"),
+            "pages_verified": receipt(7, "2026-08-31T11:46:00Z"),
+        }, set()),
+        ("mismatched_receipt_at_901", {
+            "last_generation": 8, "latest": None, "journal": None,
+            "pending": pending(8, "2026-08-31T11:44:59Z"),
+            "checkpoint": pushed(8, "2026-08-31T11:44:59Z"),
+            "pages_verified": receipt(7, "2026-08-31T11:46:00Z"),
+        }, {"pages_verification_unresolved"}),
+        # Durable watermark is authoritative; an old latest record or unrelated pending cannot hide loss.
+        ("watermark_latest_lost", {
+            "last_generation": 5,
+            "latest": {"record": {"generation": 4, "created_at_utc": "2026-08-31T11:59:00Z"}},
+            "pending": None, "journal": None,
+            "checkpoint": {"outcome": "no_diff", "generation": 3}, "pages_verified": None,
+        }, {"publication_latest_record_lost"}),
+        ("watermark_pending_cannot_hide_loss", {
+            "last_generation": 9,
+            "latest": {"record": {"generation": 8, "created_at_utc": "2026-08-31T11:59:00Z"}},
+            "pending": pending(7, "2026-08-31T11:55:00Z"), "journal": None,
+            "checkpoint": pushed(7, "2026-08-31T11:55:00Z"), "pages_verified": None,
+        }, {"publication_latest_record_lost"}),
+        # A pushed durable checkpoint must have a same-identity pending or receipt proof.
+        ("pushed_checkpoint_missing_proof", {
+            "last_generation": 4, "latest": None, "pending": None, "journal": None,
+            "checkpoint": pushed(4, "2026-08-31T11:55:00Z"), "pages_verified": None,
+        }, {"publication_proof_gap"}),
+        # A newer terminal no_diff checkpoint is allowed to coexist with an older durable receipt.
+        ("newer_no_diff_over_receipt", {
+            "last_generation": 5, "latest": None, "pending": None, "journal": None,
+            "checkpoint": {"outcome": "no_diff", "generation": 5},
+            "pages_verified": receipt(4, "2026-08-31T11:46:00Z"),
+        }, set()),
+    ]
+    for name, snapshot, expected in cases:
+        summary = health.publication_health_summary(snapshot, now=now, publisher_lock_active=False)
+        assert summary["latest_observed_generation"] == snapshot["last_generation"], name
+        assert expected <= set(summary["problems"]), (name, summary)
+
+    older_pending_newer_receipt = health.publication_health_summary({
+        "last_generation": 8, "latest": None, "journal": None,
+        "pending": pending(7, "2026-08-31T11:55:00Z"),
+        "checkpoint": pushed(7, "2026-08-31T11:55:00Z"),
+        "pages_verified": receipt(8, "2026-08-31T11:59:00Z"),
+    }, now=now, publisher_lock_active=False)
+    assert older_pending_newer_receipt["pages_verification_state"] == "pending"
+    assert older_pending_newer_receipt["last_direct_data_compatible_static_block"] == 702
+    assert "publication_proof_gap" not in older_pending_newer_receipt["problems"]
+
+
+def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
+    """Catches future/casual state accepted around the exact health grace boundaries."""
+    now = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
+    commit = "a" * 40
+    digest = "d" * 64
+
+    def active_snapshot(created_at: str, journal_at: str, checkpoint_at: str) -> dict[str, Any]:
+        return {
+            "last_generation": 2,
+            "latest": {"record": {"generation": 2, "created_at_utc": created_at}, "record_digest": digest},
+            "journal": {"publication_generation": 2, "queue_digest": digest, "created_at_utc": journal_at},
+            "pending": {"record": {"generation": 2, "queue_digest": digest, "commit_sha": commit,
+                                     "push_completed_at_utc": checkpoint_at}},
+            "checkpoint": {"outcome": "pushed", "generation": 2, "queue_digest": digest,
+                           "commit_sha": commit, "push_completed_at_utc": checkpoint_at},
+            "pages_verified": None,
+        }
+
+    accepted = health.publication_health_summary(
+        active_snapshot("2026-08-31T11:55:00Z", "2026-08-31T11:56:00Z", "2026-08-31T11:57:00Z"),
+        now=now, publisher_lock_active=True,
+    )
+    assert "publication_timestamp_reversal" not in accepted["problems"]
+    assert "publication_future_clock_skew" not in health.publication_health_summary(
+        active_snapshot("2026-08-31T11:55:00Z", "2026-08-31T12:00:30Z", "2026-08-31T11:57:00Z"),
+        now=now, publisher_lock_active=True,
+    )["problems"]
+    assert "publication_future_clock_skew" not in health.publication_health_summary(
+        active_snapshot("2026-08-31T11:55:00Z", "2026-08-31T11:56:00Z", "2026-08-31T12:00:30Z"),
+        now=now, publisher_lock_active=True,
+    )["problems"]
+    future = health.publication_health_summary(
+        active_snapshot("2026-08-31T11:55:00Z", "2026-08-31T12:00:31Z", "2026-08-31T11:57:00Z"),
+        now=now, publisher_lock_active=True,
+    )
+    assert "publication_future_clock_skew" in future["problems"]
+    checkpoint_future = health.publication_health_summary(
+        active_snapshot("2026-08-31T11:55:00Z", "2026-08-31T11:56:00Z", "2026-08-31T12:00:31Z"),
+        now=now, publisher_lock_active=True,
+    )
+    assert "publication_future_clock_skew" in checkpoint_future["problems"]
+    reversed_summary = health.publication_health_summary(
+        active_snapshot("2026-08-31T11:57:00Z", "2026-08-31T11:56:00Z", "2026-08-31T11:55:00Z"),
+        now=now, publisher_lock_active=True,
+    )
+    assert "publication_timestamp_reversal" in reversed_summary["problems"]
+
+    for age, stale in ((180, False), (181, True), (300, False), (301, True)):
+        at = (now - timedelta(seconds=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        snapshot = {
+            "last_generation": 1,
+            "latest": {"record": {"generation": 1, "created_at_utc": at}, "record_digest": digest},
+            "journal": {"publication_generation": 1, "queue_digest": digest, "created_at_utc": at},
+            "pending": None, "checkpoint": None, "pages_verified": None,
+        }
+        summary = health.publication_health_summary(snapshot, now=now, publisher_lock_active=age >= 300)
+        assert ("publication_queue_stale" in summary["problems"]) is stale, (age, summary)
+
+    invalid = health.publication_health_summary(
+        {"last_generation": "bad", "latest": None, "pending": None, "checkpoint": None,
+         "pages_verified": None, "journal": None},
+        now=now, publisher_lock_active=False, configured_queue_mode=True,
+    )
+    assert invalid["queue_mode"] is True
+    assert invalid["problems"] == ["publication_state_integrity_failure"]
+
+
 if __name__ == "__main__":
     test_pages_delay_keeps_newer_observation_and_drains_it_next()
     test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private_values()
     test_queue_health_future_boundary_and_watcher_lock_rule()
     test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure()
+    test_queue_health_state_machine_boundaries_and_durable_watermark()
+    test_queue_health_timestamp_and_active_grace_boundaries()
     print("wsl_publication_integration=pass delay_seconds=120")

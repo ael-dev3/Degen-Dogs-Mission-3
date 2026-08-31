@@ -43,6 +43,7 @@ PUBLISHED_RESULTS = {
     "success_pushed",
     "success_pushed_live_timeout",
 }
+QUEUE_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 
 
 def terminal_publication_problem(row: dict[str, object]) -> str:
@@ -184,6 +185,11 @@ def public_commit_sha(value: Any) -> str | None:
     return text if len(text) == 40 and all(character in "0123456789abcdef" for character in text) else None
 
 
+def queue_digest(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text if QUEUE_DIGEST.fullmatch(text) else None
+
+
 def public_timestamp_and_age(value: Any, now: datetime) -> tuple[str | None, int | None, bool]:
     """Return a canonical UTC value, non-negative age, and >30s future-skew flag."""
     if not isinstance(value, str) or not STRICT_UTC.fullmatch(value):
@@ -215,6 +221,7 @@ def publication_health_summary(
     now: datetime,
     publisher_lock_active: bool,
     provider_failure_count: int = 0,
+    configured_queue_mode: bool = False,
 ) -> dict[str, Any]:
     """Project one protected state-lock snapshot to a strict public allowlist.
 
@@ -224,7 +231,7 @@ def publication_health_summary(
     this layer adds queue causality and age policy only.
     """
     empty = {
-        "queue_mode": False,
+        "queue_mode": bool(configured_queue_mode),
         "latest_observed_generation": None,
         "latest_observed_at_utc": None,
         "handled_generation": None,
@@ -257,78 +264,86 @@ def publication_health_summary(
         empty["problems"] = ["publication_state_integrity_failure"]
         return empty
 
-    queue_mode = bool(watermark or any(record is not None for record in records))
+    queue_mode = bool(configured_queue_mode or watermark or any(record is not None for record in records))
     empty["queue_mode"] = queue_mode
     if not queue_mode:
         return empty
 
     latest_record = latest.get("record") if latest else None
+    latest_digest = queue_digest(latest.get("record_digest")) if latest else None
     if latest is not None and not isinstance(latest_record, dict):
         problems.append("publication_state_integrity_failure")
         latest_record = None
+    # The watermark is durable.  The latest file is an ephemeral handoff record
+    # and is only evidence when it is exactly the durable latest generation.
+    empty["latest_observed_generation"] = watermark or None
+    latest_generation = None
+    latest_created_at: str | None = None
     if latest_record is not None:
-        generation = latest_record.get("generation")
-        if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
+        latest_generation = latest_record.get("generation")
+        if not isinstance(latest_generation, int) or isinstance(latest_generation, bool) or latest_generation < 1:
             problems.append("publication_state_integrity_failure")
-        else:
-            empty["latest_observed_generation"] = generation
-        created_at, queue_age, future = public_timestamp_and_age(latest_record.get("created_at_utc"), now)
-        if created_at is None:
+            latest_generation = None
+        latest_created_at, queue_age, future = public_timestamp_and_age(latest_record.get("created_at_utc"), now)
+        if latest_created_at is None:
             problems.append("publication_state_integrity_failure")
-        else:
-            empty["latest_observed_at_utc"] = created_at
+        elif latest_generation == watermark:
+            empty["latest_observed_at_utc"] = latest_created_at
             empty["queue_age_seconds"] = queue_age
         if future:
             problems.append("publication_future_clock_skew")
 
     handled_generation = None
+    checkpoint_generation = None
+    checkpoint_outcome = None
+    checkpoint_push_at: str | None = None
+    checkpoint_commit = None
+    checkpoint_digest = None
     if checkpoint is not None:
         generation = checkpoint.get("generation")
         if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
             problems.append("publication_state_integrity_failure")
         else:
             handled_generation = generation
+            checkpoint_generation = generation
             empty["handled_generation"] = generation
-        if checkpoint.get("outcome") == "pushed":
+        checkpoint_outcome = checkpoint.get("outcome")
+        if checkpoint_outcome not in {"pushed", "no_diff", "peer_superseded"}:
+            problems.append("publication_state_integrity_failure")
+        if checkpoint_outcome == "pushed":
             empty["handled_pushed_generation"] = handled_generation
-            commit = public_commit_sha(checkpoint.get("commit_sha"))
-            if commit is None:
+            checkpoint_commit = public_commit_sha(checkpoint.get("commit_sha"))
+            checkpoint_digest = queue_digest(checkpoint.get("queue_digest"))
+            checkpoint_push_at, _checkpoint_age, checkpoint_future = public_timestamp_and_age(
+                checkpoint.get("push_completed_at_utc"), now
+            )
+            if checkpoint_commit is None or checkpoint_digest is None or checkpoint_push_at is None:
                 problems.append("publication_state_integrity_failure")
             else:
-                empty["handled_pushed_commit_sha"] = commit
+                empty["handled_pushed_commit_sha"] = checkpoint_commit
+            if checkpoint_future:
+                problems.append("publication_future_clock_skew")
 
     effective_handled = handled_generation or 0
     empty["queue_lag"] = max(0, watermark - effective_handled)
     if watermark < effective_handled:
         problems.append("publication_state_integrity_failure")
-    if watermark > effective_handled and latest_record is None and pending is None:
+    if watermark > effective_handled and (latest_generation != watermark or latest_created_at is None):
         problems.append("publication_latest_record_lost")
-    active_publication = bool(
-        publisher_lock_active
-        and isinstance(journal, dict)
-        and latest_record is not None
-        and journal.get("publication_generation") == latest_record.get("generation")
-        and journal.get("queue_digest") == latest.get("record_digest")
-        and public_timestamp_and_age(journal.get("created_at_utc"), now)[0] is not None
-        and public_timestamp_and_age(journal.get("created_at_utc"), now)[2] is False
-    )
-    queue_age = empty["queue_age_seconds"]
-    if empty["queue_lag"] > 0 and isinstance(queue_age, int):
-        queue_limit = 300 if active_publication else 180
-        if queue_age > queue_limit:
-            problems.append("publication_queue_stale")
 
     pending_generation = None
     pending_commit = None
     pending_push_at: str | None = None
+    pending_digest = None
     pending_record = pending.get("record") if isinstance(pending, dict) else None
     if pending is not None and not isinstance(pending_record, dict):
         problems.append("publication_state_integrity_failure")
     if pending_record is not None:
         pending_generation = pending_record.get("generation")
         pending_commit = public_commit_sha(pending_record.get("commit_sha"))
+        pending_digest = queue_digest(pending_record.get("queue_digest"))
         pending_push_at, pending_age, pending_future = public_timestamp_and_age(pending_record.get("push_completed_at_utc"), now)
-        if not isinstance(pending_generation, int) or isinstance(pending_generation, bool) or pending_generation < 1 or pending_commit is None or pending_push_at is None:
+        if not isinstance(pending_generation, int) or isinstance(pending_generation, bool) or pending_generation < 1 or pending_commit is None or pending_digest is None or pending_push_at is None:
             problems.append("publication_state_integrity_failure")
         else:
             empty["unresolved_verification_generation"] = pending_generation
@@ -336,44 +351,120 @@ def publication_health_summary(
             empty["unresolved_verification_age_seconds"] = pending_age
         if pending_future:
             problems.append("publication_future_clock_skew")
-        if checkpoint is None or checkpoint.get("generation") != pending_generation or checkpoint.get("outcome") != "pushed":
+        if (
+            checkpoint_outcome != "pushed"
+            or checkpoint_generation != pending_generation
+            or checkpoint_commit != pending_commit
+            or checkpoint_digest != pending_digest
+            or checkpoint_push_at != pending_push_at
+        ):
             problems.append("publication_proof_gap")
-        if latest_record is not None and latest_record.get("generation") == pending_generation:
-            latest_at = parse_utc(latest_record.get("created_at_utc"))
-            pushed_at = parse_utc(pending_push_at)
-            if latest_at is None or pushed_at is None or pushed_at < latest_at:
-                problems.append("publication_timestamp_reversal")
 
     receipt_generation = None
     receipt_commit = None
+    receipt_push_at: str | None = None
+    receipt_verified_at: str | None = None
+    receipt_digest = None
+    finalization_verified_age: int | None = None
     if receipt is not None:
         receipt_generation = receipt.get("generation")
         receipt_commit = public_commit_sha(receipt.get("commit_sha"))
+        receipt_digest = queue_digest(receipt.get("queue_digest"))
         block = receipt.get("expected_block_number")
-        verified_at, verified_age, receipt_future = public_timestamp_and_age(receipt.get("pages_verified_at_utc"), now)
-        if not isinstance(receipt_generation, int) or isinstance(receipt_generation, bool) or receipt_generation < 1 or receipt_commit is None or not isinstance(block, int) or isinstance(block, bool) or block < 1 or verified_at is None:
+        receipt_push_at, _receipt_push_age, receipt_push_future = public_timestamp_and_age(
+            receipt.get("push_completed_at_utc"), now
+        )
+        receipt_verified_at, verified_age, receipt_future = public_timestamp_and_age(receipt.get("pages_verified_at_utc"), now)
+        if not isinstance(receipt_generation, int) or isinstance(receipt_generation, bool) or receipt_generation < 1 or receipt_commit is None or receipt_digest is None or not isinstance(block, int) or isinstance(block, bool) or block < 1 or receipt_push_at is None or receipt_verified_at is None:
             problems.append("publication_state_integrity_failure")
         else:
             # Controller ruling: only this durable receipt proves a static block
             # reached Pages; never infer it from a queued observation or pending.
             empty["last_direct_data_compatible_static_block"] = block
-        if receipt_future:
+        if receipt_future or receipt_push_future:
             problems.append("publication_future_clock_skew")
-        if pending_record is not None and receipt_generation == pending_generation and receipt_commit == pending_commit:
+        if parse_utc(receipt_verified_at) is not None and parse_utc(receipt_push_at) is not None and parse_utc(receipt_verified_at) < parse_utc(receipt_push_at):
+            problems.append("publication_timestamp_reversal")
+        if pending_record is not None and (
+            receipt_generation == pending_generation and receipt_commit == pending_commit
+            and receipt_digest == pending_digest and receipt_push_at == pending_push_at
+        ):
             empty["pages_verification_state"] = "pages_verified_finalization_pending"
-            if isinstance(verified_age, int) and verified_age > 180 and not active_publication:
-                problems.append("pages_verified_finalization_stale")
+            finalization_verified_age = verified_age
         elif pending_record is not None:
             empty["pages_verification_state"] = "pending"
         else:
             empty["pages_verification_state"] = "verified"
     elif pending_record is not None:
         empty["pages_verification_state"] = "pending"
-        unresolved_age = empty["unresolved_verification_age_seconds"]
-        if isinstance(unresolved_age, int) and unresolved_age > 900:
-            problems.append("pages_verification_unresolved")
+        empty["pages_verification_state"] = "pending"
     else:
         empty["pages_verification_state"] = "none"
+
+    # Every outstanding pending must age out even when an older/nonmatching
+    # receipt exists. A matching receipt is finalization rather than verifier work.
+    receipt_matches_pending = bool(
+        pending_record is not None and receipt is not None
+        and receipt_generation == pending_generation and receipt_commit == pending_commit
+        and receipt_digest == pending_digest and receipt_push_at == pending_push_at
+    )
+    unresolved_age = empty["unresolved_verification_age_seconds"]
+    if pending_record is not None and not receipt_matches_pending and isinstance(unresolved_age, int) and unresolved_age > 900:
+        problems.append("pages_verification_unresolved")
+
+    # A durable pushed checkpoint cannot lose both the current pending proof and
+    # its exact receipt.  A later no_diff checkpoint over an older receipt is
+    # intentionally allowed because it did not replace deployed static data.
+    checkpoint_matches_pending = bool(
+        checkpoint_outcome == "pushed" and checkpoint_generation == pending_generation
+        and checkpoint_commit == pending_commit and checkpoint_digest == pending_digest
+        and checkpoint_push_at == pending_push_at
+    )
+    checkpoint_matches_receipt = bool(
+        checkpoint_outcome == "pushed" and checkpoint_generation == receipt_generation
+        and checkpoint_commit == receipt_commit and checkpoint_digest == receipt_digest
+        and checkpoint_push_at == receipt_push_at
+    )
+    if checkpoint_outcome == "pushed" and not checkpoint_matches_pending and not checkpoint_matches_receipt:
+        problems.append("publication_proof_gap")
+
+    journal_at: str | None = None
+    journal_generation: int | None = None
+    journal_matches_latest = False
+    if journal is not None:
+        journal_at, _journal_age, journal_future = public_timestamp_and_age(journal.get("created_at_utc"), now)
+        journal_generation = journal.get("publication_generation")
+        journal_matches_latest = bool(
+            latest_record is not None and journal_generation == latest_generation
+            and latest_digest is not None and queue_digest(journal.get("queue_digest")) == latest_digest
+        )
+        if journal_at is None or not isinstance(journal_generation, int) or isinstance(journal_generation, bool) or journal_generation < 1:
+            problems.append("publication_state_integrity_failure")
+        if journal_future:
+            problems.append("publication_future_clock_skew")
+
+    # Applicable causal chain is observation -> journal -> push -> verification.
+    journal_causal_with_latest = bool(journal_matches_latest and journal_at is not None)
+    if latest_generation is not None and latest_created_at is not None and journal_causal_with_latest:
+        if parse_utc(journal_at) < parse_utc(latest_created_at):
+            problems.append("publication_timestamp_reversal")
+            journal_causal_with_latest = False
+    for generation, push_at in ((pending_generation, pending_push_at), (checkpoint_generation, checkpoint_push_at), (receipt_generation, receipt_push_at)):
+        if generation is not None and push_at is not None and latest_generation == generation and latest_created_at is not None:
+            if parse_utc(push_at) < parse_utc(latest_created_at):
+                problems.append("publication_timestamp_reversal")
+        if generation is not None and push_at is not None and journal_generation == generation and journal_at is not None:
+            if parse_utc(push_at) < parse_utc(journal_at):
+                problems.append("publication_timestamp_reversal")
+
+    active_publication = bool(publisher_lock_active and journal_causal_with_latest)
+    if isinstance(finalization_verified_age, int) and finalization_verified_age > 180 and not active_publication:
+        problems.append("pages_verified_finalization_stale")
+    queue_age = empty["queue_age_seconds"]
+    if empty["queue_lag"] > 0 and isinstance(queue_age, int):
+        queue_limit = 300 if active_publication else 180
+        if queue_age > queue_limit:
+            problems.append("publication_queue_stale")
 
     empty["problems"] = sorted(set(problems))
     return empty
@@ -508,17 +599,19 @@ def main() -> int:
     checks["refresh_lock_active"] = lock_active
 
     publication_snapshot: dict[str, Any] | None = None
-    provisional_publication: dict[str, Any] | None = None
     if publication_mode == "queue":
         try:
             publication_snapshot = runner_publication_state.read_publication_health_snapshot(lock_dir)
-            provisional_publication = publication_health_summary(
-                publication_snapshot,
-                now=now,
-                publisher_lock_active=lock_active,
-            )
         except Exception as exc:  # noqa: BLE001 - detailed state failures remain private
             problems.append(f"publication queue state is unreadable ({type(exc).__name__})")
+            publication = publication_health_summary(
+                {"last_generation": "invalid"},
+                now=now,
+                publisher_lock_active=lock_active,
+                configured_queue_mode=True,
+            )
+            checks["publication"] = publication
+            problems.extend(f"publication health failure: {code}" for code in publication["problems"])
 
     try:
         watcher = read_json(state_path)
@@ -595,6 +688,7 @@ def main() -> int:
             now=now,
             publisher_lock_active=lock_active,
             provider_failure_count=max(0, provider_failure_count),
+            configured_queue_mode=True,
         )
         checks["publication"] = publication
         problems.extend(f"publication health failure: {code}" for code in publication["problems"])

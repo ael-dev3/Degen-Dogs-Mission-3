@@ -817,6 +817,15 @@ def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
         write_fixture(root)
         env = base_env(root)
         commit = "a" * 40
+        digest = "d" * 64
+        telemetry.append_jsonl(
+            Path(env["MISSION3_WATCHER_TELEMETRY_PATH"]),
+            {
+                "kind": "watcher_check", "result": "queued", "completed_at_utc": iso(1),
+                "observation_created_at_utc": iso(0), "queue_generation": 7,
+                "queue_digest": digest, "queue_outcome": "enqueued",
+            },
+        )
         telemetry.append_jsonl(
             root / "logs" / "refresh-metrics.jsonl",
             {
@@ -827,6 +836,7 @@ def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
                 "observed_at_utc": iso(0),
                 "push_completed_at_utc": iso(15),
                 "queue_generation": 7,
+                "queue_digest": digest,
                 "commit_sha": commit,
             },
         )
@@ -856,6 +866,71 @@ def test_metrics_summary_joins_only_exact_generation_and_commit_pairs() -> None:
         assert summary["observation_to_push_average_seconds_24h"] == 15
         assert summary["push_to_pages_sample_count_24h"] == 1
         assert summary["push_to_pages_average_seconds_24h"] == 10
+
+
+def test_queue_latency_metrics_reject_unauthenticated_unsuccessful_and_reversed_rows() -> None:
+    """Catches metrics joining a raw row instead of one authenticated queue publication."""
+    telemetry = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root)
+        env = base_env(root)
+        commit = "a" * 40
+        digest = "d" * 64
+
+        def watcher(generation: int, at: int, row_digest: str = digest) -> None:
+            telemetry.append_jsonl(Path(env["MISSION3_WATCHER_TELEMETRY_PATH"]), {
+                "kind": "watcher_check", "result": "queued", "completed_at_utc": iso(at),
+                "observation_created_at_utc": iso(at), "queue_generation": generation,
+                "queue_digest": row_digest, "queue_outcome": "enqueued",
+            })
+
+        def refresh(generation: int, observed: int, pushed: int, *, result: str = "success_pushed",
+                    row_digest: str = digest, row_commit: str = commit) -> None:
+            telemetry.append_jsonl(root / "logs" / "refresh-metrics.jsonl", {
+                "kind": "refresh_publish", "run_id": f"run-{generation}-{observed}-{pushed}-{result}",
+                "result": result, "completed_at_utc": iso(pushed), "observed_at_utc": iso(observed),
+                "push_completed_at_utc": iso(pushed), "queue_generation": generation,
+                "queue_digest": row_digest, "commit_sha": row_commit,
+            })
+
+        def proof(generation: int, at: int, *, result: str = "proof_verified",
+                  row_commit: str = commit) -> None:
+            telemetry.append_jsonl(root / "logs" / "pages-verifier.jsonl", {
+                "timestamp_utc": iso(at), "result": result, "generation": generation,
+                "commit_sha": row_commit, "pages_verified": True,
+            })
+
+        watcher(1, 0)
+        refresh(1, 0, 10)
+        refresh(1, 0, 10)  # mirrored audit row must not create a second sample
+        proof(1, 20)
+        # Every following row is intentionally ineligible: no observation identity, no pushed outcome,
+        # identity mismatch, timestamp reversal, a non-success proof, or conflicting mirrored publication.
+        refresh(2, 0, 10)  # no watcher identity
+        watcher(3, 0)
+        refresh(3, 0, 10, result="success_no_diff")
+        watcher(4, 0, row_digest="e" * 64)
+        refresh(4, 0, 10)
+        watcher(5, 10)
+        refresh(5, 10, 5)
+        watcher(6, 0)
+        refresh(6, 0, 10)
+        proof(6, 20, result="verification_unresolved")
+        watcher(7, 0)
+        refresh(7, 0, 10)
+        refresh(7, 0, 11, row_commit="b" * 40)
+        proof(7, 20)
+
+        summary = telemetry.metrics_summary(env, root=root)
+        assert summary["observation_to_push_sample_count_24h"] == 2
+        assert summary["observation_to_push_average_seconds_24h"] == 10
+        assert summary["observation_to_push_p50_seconds_24h"] == 10
+        assert summary["observation_to_push_p95_seconds_24h"] == 10
+        assert summary["push_to_pages_sample_count_24h"] == 1
+        assert summary["push_to_pages_average_seconds_24h"] == 10
+        assert summary["push_to_pages_p50_seconds_24h"] == 10
+        assert summary["push_to_pages_p95_seconds_24h"] == 10
 
 
 def test_watcher_telemetry_keeps_only_valid_public_summary_fields() -> None:

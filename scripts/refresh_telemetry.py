@@ -84,6 +84,7 @@ PAGES_BUNDLE_PATH = re.compile(
     rf"^/Degen-Dogs-Mission-3/generated/(?P<filename>{LIVE_BUNDLE_FILENAME_PATTERN})$"
 )
 COMMIT_SHA = re.compile(r"^[0-9a-f]{40}$")
+QUEUE_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 LIVE_STATUS_CACHE_BUST = re.compile(r"^cache_bust=[0-9]+$")
 REFRESH_STATUS_INTEGER_FIELDS = frozenset(
     {
@@ -204,6 +205,26 @@ def positive_int_or_none(value: Any) -> int | None:
 def public_commit_sha_or_none(value: Any) -> str | None:
     text = str(value or "").strip()
     return text if COMMIT_SHA.fullmatch(text) else None
+
+
+def queue_digest_or_none(value: Any) -> str | None:
+    text = str(value or "").strip()
+    return text if QUEUE_DIGEST.fullmatch(text) else None
+
+
+def canonical_utc(value: Any) -> str | None:
+    """Return only the exact UTC wire format used for causal telemetry joins."""
+    return value if isinstance(value, str) and iso_utc(value) == value else None
+
+
+def causal_seconds_between(start: Any, end: Any) -> float | None:
+    """Return a duration only for a canonical non-reversed causal edge."""
+    start_text = canonical_utc(start)
+    end_text = canonical_utc(end)
+    if start_text is None or end_text is None:
+        return None
+    seconds = (parse_utc(end_text) - parse_utc(start_text)).total_seconds()
+    return round(seconds, 3) if seconds >= 0 else None
 
 
 def redact_url(value: str) -> str:
@@ -484,7 +505,9 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
     lock_acquired = env_timestamp(env, "DEGEN_DOGS_LOCK_ACQUIRED_AT_UTC") or env_timestamp(env, "DEGEN_DOGS_REFRESH_LOCK_ACQUIRED_AT_UTC")
     pushed = env_timestamp(env, "DEGEN_DOGS_PUSH_COMPLETED_AT_UTC")
     detected = env_timestamp(env, "DEGEN_DOGS_DETECTED_AT_UTC")
-    observed = env_timestamp(env, "DEGEN_DOGS_OBSERVED_AT_UTC") or detected
+    # Queue latency is attributed only to an authenticated watcher observation;
+    # do not substitute publisher detection time for a missing queue timestamp.
+    observed = env_timestamp(env, "DEGEN_DOGS_OBSERVED_AT_UTC")
     event_block_time = env_timestamp(env, "DEGEN_DOGS_EVENT_BLOCK_TIME_UTC")
     raw_commit_verified = str(env.get("DEGEN_DOGS_RAW_COMMIT_VERIFIED") or "").strip().lower()
     row: dict[str, Any] = {
@@ -530,7 +553,7 @@ def build_refresh_row(env: dict[str, str], *, result: str, error: str | None = N
         "upload_completed_at_utc": pushed,
         "detect_to_push_seconds": seconds_between(detected, pushed) if detected and pushed else None,
         "event_to_observation_seconds": seconds_between(event_block_time, observed) if event_block_time and observed else None,
-        "observation_to_push_seconds": seconds_between(observed, pushed) if observed and pushed else None,
+        "observation_to_push_seconds": causal_seconds_between(observed, pushed) if observed and pushed else None,
         "block_to_push_seconds": seconds_between(event_block_time, pushed) if event_block_time and pushed else None,
         "queue_generation": positive_int_or_none(env.get("DEGEN_DOGS_PUBLICATION_GENERATION")),
         "queue_digest": env.get("DEGEN_DOGS_PUBLICATION_DIGEST") or None,
@@ -616,6 +639,12 @@ def record_watcher_check(row: dict[str, Any], env: dict[str, str] | None = None,
             out.pop("queue_generation", None)
         else:
             out["queue_generation"] = generation
+    if "queue_digest" in out:
+        digest = queue_digest_or_none(out["queue_digest"])
+        if digest is None:
+            out.pop("queue_digest", None)
+        else:
+            out["queue_digest"] = digest
     failures = out.get("provider_failures")
     if isinstance(failures, list):
         out["provider_failure_count"] = len(failures)
@@ -1221,12 +1250,46 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
     last_refresh = refresh_rows[-1] if refresh_rows else {}
     last_success = next((row for row in reversed(refresh_rows) if str(row.get("result")) in SUCCESS_RESULTS), {})
     last_watcher = watcher_rows[-1] if watcher_rows else {}
-    observation_to_push = [
-        value
-        for row in refresh_24
-        for value in [seconds_between(row.get("observed_at_utc"), row.get("push_completed_at_utc"))]
-        if value is not None
-    ]
+    # A watcher row has no public commit SHA.  Authenticate it to the pushed
+    # row with the private queue identity, then expose only the exact
+    # generation+commit join.  Ambiguous mirrors/conflicts are discarded.
+    observations: dict[tuple[int, str], str | None] = {}
+    for row in watcher_24:
+        generation = positive_int_or_none(row.get("queue_generation"))
+        digest = queue_digest_or_none(row.get("queue_digest"))
+        observed_at = canonical_utc(row.get("observation_created_at_utc"))
+        if row.get("result") != "queued" or row.get("queue_outcome") not in {"enqueued", "replaced", "reorg_replaced", "coalesced"}:
+            continue
+        if generation is None or digest is None or observed_at is None:
+            continue
+        key = (generation, digest)
+        previous = observations.get(key, observed_at)
+        observations[key] = observed_at if previous == observed_at else None
+
+    pushed: dict[tuple[int, str], dict[str, Any] | None] = {}
+    for row in refresh_24:
+        generation = positive_int_or_none(row.get("queue_generation"))
+        digest = queue_digest_or_none(row.get("queue_digest"))
+        commit = public_commit_sha_or_none(row.get("commit_sha"))
+        pushed_at = canonical_utc(row.get("push_completed_at_utc"))
+        if row.get("result") != "success_pushed" or generation is None or digest is None or commit is None or pushed_at is None:
+            continue
+        key = (generation, digest)
+        identity = {"generation": generation, "digest": digest, "commit": commit, "pushed_at": pushed_at}
+        previous = pushed.get(key, identity)
+        pushed[key] = identity if previous == identity else None
+
+    observation_to_push: list[float] = []
+    valid_pushed: dict[tuple[int, str], dict[str, Any]] = {}
+    for key, push in pushed.items():
+        observed_at = observations.get(key)
+        if push is None or observed_at is None:
+            continue
+        seconds = causal_seconds_between(observed_at, push["pushed_at"])
+        if seconds is None:
+            continue
+        observation_to_push.append(seconds)
+        valid_pushed[(push["generation"], push["commit"])] = push
     earliest_pages: dict[tuple[int, str], datetime] = {}
     for row in pages_24:
         if row.get("result") not in {"proof_verified", "verified_cleared", "verified_waiting_for_journal"}:
@@ -1235,21 +1298,23 @@ def metrics_summary(env: dict[str, str], root: Path = ROOT) -> dict[str, Any]:
             continue
         generation = positive_int_or_none(row.get("generation"))
         commit = public_commit_sha_or_none(row.get("commit_sha"))
-        verified_at = parse_utc(row.get("timestamp_utc"))
+        verified_at = canonical_utc(row.get("timestamp_utc"))
         if generation is None or commit is None or verified_at is None:
             continue
         key = (generation, commit)
-        if key not in earliest_pages or verified_at < earliest_pages[key]:
-            earliest_pages[key] = verified_at
+        verified_dt = parse_utc(verified_at)
+        if key not in earliest_pages or verified_dt < earliest_pages[key]:
+            earliest_pages[key] = verified_dt
     push_to_pages: list[float] = []
-    for row in refresh_24:
-        generation = positive_int_or_none(row.get("queue_generation"))
-        commit = public_commit_sha_or_none(row.get("commit_sha"))
-        pushed_at = parse_utc(row.get("push_completed_at_utc"))
-        verified_at = earliest_pages.get((generation, commit)) if generation and commit else None
-        if pushed_at is None or verified_at is None or verified_at < pushed_at:
+    for key, row in valid_pushed.items():
+        pushed_at = parse_utc(row["pushed_at"])
+        verified_at = earliest_pages.get(key)
+        if pushed_at is None or verified_at is None:
             continue
-        push_to_pages.append(round((verified_at - pushed_at).total_seconds(), 3))
+        verified_text = verified_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        seconds = causal_seconds_between(row["pushed_at"], verified_text)
+        if seconds is not None:
+            push_to_pages.append(seconds)
     provider_failure_count = sum(
         positive_int_or_none(row.get("provider_failure_count")) or 0
         for row in watcher_24
