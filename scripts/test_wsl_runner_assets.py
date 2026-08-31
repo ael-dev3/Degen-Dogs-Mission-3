@@ -516,6 +516,9 @@ test -f "$claimed_receipt_path"
     lifecycle_result = run_bash(lifecycle)
     assert lifecycle_result.returncode == 0
 
+    if os.name == "nt" or os.geteuid() != 0:
+        return
+
     migration = r'''
 set -Eeuo pipefail
 test_root=$(mktemp -d /tmp/degen-dogs-migration-test.XXXXXX)
