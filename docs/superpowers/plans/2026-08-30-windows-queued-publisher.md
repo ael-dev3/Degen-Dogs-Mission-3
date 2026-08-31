@@ -265,6 +265,13 @@ For a state-only transition, all `event_*` fields are `null`, while confirmed ob
   wsl.exe -d DegenDogsRunner -u degendogs --cd /srv/degen-dogs/repo -- /bin/bash -lc 'python3 scripts/test_runner_publication_state.py && python3 scripts/test_watch_mission3_auction.py && python3 scripts/test_drain_publication_queue.py && python3 scripts/test_verify_pages_deployment.py && bash scripts/test_refresh_and_publish.sh && python3 scripts/test_refresh_telemetry.py && python3 scripts/test_degen_dogs_runner_health.py && npm run test:wsl-publication-integration && npm run test:watcher'
   ```
 
+  Keep `npm run test:wsl-runner-assets` in the ordinary non-root CI/Pages gate
+  for portable asset checks. From the exact reviewed Windows checkout, also run
+  `python scripts/test_wsl_runner_assets.py --require-rendered-systemd-isolation`;
+  this separate fail-closed gate must execute the rendered verifier denial as
+  root inside the isolated WSL distro. Never treat a portable-suite pass as a
+  receipt for the privileged systemd isolation test.
+
 - [ ] **Step 2: Push, install through the trusted bootstrap, and activate queue mode**
 
   Push reviewed source through the normal full Pages gate. Use the existing trusted Windows bootstrap with the exact reviewed commit; inspect all rendered units and activation liveness conditions before enabling. Confirm Mac's launchd settings and archive role are unchanged. Verify that a held verifier does not suppress a 15-second watcher scan and that no Windows archive artifacts are emitted.

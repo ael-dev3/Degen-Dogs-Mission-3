@@ -51,6 +51,7 @@ SERVICE_UNITS = (
 )
 NEW_TRIGGER_UNITS = ACTIVATION_UNITS[-4:]
 NEW_TRIGGERED_SERVICES = SERVICE_UNITS[-2:]
+PRIVILEGED_ISOLATION_FLAG = "--require-rendered-systemd-isolation"
 
 
 def text(relative: str) -> str:
@@ -1002,7 +1003,7 @@ printf 'rendered-verifier-isolation-denied unit=%s status=%s\n' "$unit_name" "$r
     print(output.strip())
 
 
-def test() -> None:
+def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     required = (
         ".gitattributes",
         "config/logrotate/degen-dogs-wsl.in",
@@ -1628,7 +1629,8 @@ exit "$status"
     assert re.search(r"(?m)^MISSION3_WATCHER_PUBLICATION_MODE=inline$", runner_env)
     assert "MISSION3_WATCHER_PUBLICATION_MODE=queue" not in runner_env
 
-    test_rendered_verifier_systemd_isolation()
+    if require_rendered_systemd_isolation:
+        test_rendered_verifier_systemd_isolation()
 
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     scripts = package["scripts"]
@@ -1636,7 +1638,11 @@ exit "$status"
     assert scripts["test:live-snapshot"] == "python3 scripts/test_build_live_snapshot_bundle.py"
     assert "test:pages-validation-runner" in scripts["test:dashboard"]
     assert scripts["test:wsl-runner-assets"] == "python3 scripts/test_wsl_runner_assets.py"
+    assert scripts["test:wsl-runner-isolation"] == (
+        "python3 scripts/test_wsl_runner_assets.py --require-rendered-systemd-isolation"
+    )
     assert scripts["test:wsl-windows-policy"] == "python3 scripts/test_wsl_runner_windows_policy.py"
+    assert "test:wsl-runner-isolation" not in scripts["test:ops"]
     assert "test:wsl-windows-policy" in scripts["test:ops"]
 
     runner_env_loader = (ROOT / "scripts" / "load_runner_env.sh").read_text(encoding="utf-8")
@@ -1649,5 +1655,17 @@ exit "$status"
     print(f"wsl_runner_asset_tests=pass count={len(required)}")
 
 
+def main(argv: list[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args not in ([], [PRIVILEGED_ISOLATION_FLAG]):
+        print(
+            f"usage: {Path(sys.argv[0]).name} [{PRIVILEGED_ISOLATION_FLAG}]",
+            file=sys.stderr,
+        )
+        return 2
+    test(require_rendered_systemd_isolation=bool(args))
+    return 0
+
+
 if __name__ == "__main__":
-    test()
+    raise SystemExit(main())
