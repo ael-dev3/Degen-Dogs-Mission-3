@@ -2,12 +2,14 @@
 """Behavioral tests for the private WSL publication queue state machine."""
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import json
 import os
 import stat
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -147,6 +149,163 @@ def test_state_root_must_not_be_a_symlink() -> None:
         linked = root / "linked"
         linked.symlink_to(target, target_is_directory=True)
         expect_invalid(lambda: enqueue(linked, observation()), "symlinked lock root was accepted")
+
+        real_parent = root / "real-parent"
+        real_parent.mkdir()
+        linked_parent = root / "linked-parent"
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+        expect_invalid(
+            lambda: enqueue(linked_parent / "nested-state", observation()),
+            "symlinked lock-directory ancestor was accepted",
+        )
+
+
+def test_state_lock_pins_publication_directory_across_same_uid_replacement() -> None:
+    if os.name != "posix":
+        return
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        paths = state.state_paths(root)
+        attacker = root / "attacker-publication"
+        attacker.mkdir(mode=0o700)
+        attacker_latest = attacker / paths.latest.name
+        attacker_latest.write_bytes(paths.latest.read_bytes())
+        attacker_latest.chmod(0o600)
+        pinned = root / "pinned-publication"
+
+        class SwapAfterDirectoryValidation:
+            def __enter__(self) -> "SwapAfterDirectoryValidation":
+                paths.publication.rename(pinned)
+                attacker.rename(paths.publication)
+                return self
+
+            def __exit__(self, *_args: object) -> None:
+                return None
+
+        expect_invalid(
+            lambda: state.cas_clear_latest(
+                root,
+                queued.generation,
+                queued.digest,
+                lock_context=SwapAfterDirectoryValidation(),
+            ),
+            "state CAS followed a same-UID publication-directory replacement",
+        )
+        assert (pinned / paths.latest.name).exists()
+        assert (paths.publication / paths.latest.name).exists()
+
+
+def test_state_transaction_never_follows_directory_swap_after_record_read() -> None:
+    if os.name != "posix":
+        return
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        paths = state.state_paths(root)
+        attacker = root / "attacker-publication"
+        attacker.mkdir(mode=0o700)
+        attacker.chmod(0o700)
+        attacker_latest = attacker / paths.latest.name
+        attacker_latest.write_bytes(paths.latest.read_bytes())
+        attacker_latest.chmod(0o600)
+        attacker_bytes = attacker_latest.read_bytes()
+        pinned = root / "pinned-publication"
+
+        original_read_json = state._read_json
+        swapped = False
+
+        def swap_after_first_latest_read(path: Path) -> dict[str, object]:
+            nonlocal swapped
+            record = original_read_json(path)
+            if path == paths.latest and not swapped:
+                paths.publication.rename(pinned)
+                attacker.rename(paths.publication)
+                swapped = True
+            return record
+
+        state._read_json = swap_after_first_latest_read
+        try:
+            expect_invalid(
+                lambda: state.cas_clear_latest(root, queued.generation, queued.digest),
+                "state CAS accepted a publication-directory swap after reading latest",
+            )
+        finally:
+            state._read_json = original_read_json
+
+        assert swapped, "directory-swap barrier was not reached"
+        assert not (pinned / paths.latest.name).exists(), "CAS did not operate on its pinned parent"
+        assert (paths.publication / paths.latest.name).read_bytes() == attacker_bytes
+
+
+def test_atomic_writer_keeps_pinned_parent_after_lexical_replacement() -> None:
+    if os.name != "posix":
+        return
+    with tempfile.TemporaryDirectory() as temporary:
+        base = Path(temporary)
+        live = base / "live"
+        decoy = base / "decoy"
+        for root in (live, decoy):
+            (root / "publication").mkdir(parents=True, mode=0o700)
+            (root / "publication").chmod(0o700)
+        target = live / "publication" / "latest.json"
+        original_record = state.latest_record(
+            1, "windows-wsl", "current", "2026-08-30T12:34:56Z", observation()
+        )
+        decoy_record = state.latest_record(
+            2, "windows-wsl", "current", "2026-08-30T12:35:56Z", observation(block=101)
+        )
+        replacement_record = state.latest_record(
+            3, "windows-wsl", "current", "2026-08-30T12:36:56Z", observation(block=102)
+        )
+        private_json(target, original_record)
+        private_json(decoy / "publication" / "latest.json", decoy_record)
+
+        pinned = threading.Event()
+        resume = threading.Event()
+        failures: list[BaseException] = []
+        original_private_parent = state._private_parent
+
+        @contextlib.contextmanager
+        def barrier_parent(path: Path, *, create: bool) -> Any:
+            with original_private_parent(path, create=create) as descriptor:
+                pinned.set()
+                if not resume.wait(timeout=2):
+                    raise AssertionError("state writer barrier timed out")
+                yield descriptor
+
+        def worker() -> None:
+            try:
+                state.atomic_write_record(target, replacement_record)
+            except BaseException as exc:
+                failures.append(exc)
+
+        state._private_parent = barrier_parent
+        thread = threading.Thread(target=worker)
+        thread.start()
+        try:
+            if not pinned.wait(timeout=2):
+                resume.set()
+                thread.join(timeout=3)
+                raise AssertionError(
+                    f"state writer never pinned the original parent; "
+                    f"failures={failures!r} "
+                    f"causes={[repr(item.__cause__) for item in failures]!r}"
+                )
+            original = base / "original"
+            live.rename(original)
+            decoy.rename(live)
+            resume.set()
+            thread.join(timeout=3)
+        finally:
+            resume.set()
+            state._private_parent = original_private_parent
+            thread.join(timeout=3)
+        assert not thread.is_alive(), "state writer remained blocked"
+        assert not failures, f"pinned state writer failed: {failures!r}"
+        assert json.loads((original / "publication" / "latest.json").read_text()) == replacement_record
+        assert json.loads((live / "publication" / "latest.json").read_text()) == decoy_record
+        assert not list((original / "publication").glob(".latest.json.*.tmp"))
 
 
 def test_atomic_writer_fsyncs_file_and_parent_and_rejects_corrupt_temp() -> None:
@@ -681,6 +840,8 @@ def test_pending_compare_and_swap_requires_the_exact_generation_and_commit() -> 
         paths = state.state_paths(root)
         state.atomic_write_record(paths.journal, journal)
         state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
         replacement = dict(pending)
         replacement["retry_count"] = 1
         assert not state.cas_write_pending(root, 99, "a" * 40, replacement, lock_context=FakeLock())
@@ -693,7 +854,13 @@ def test_pending_compare_and_swap_requires_the_exact_generation_and_commit() -> 
             queued.digest,
             lock_context=FakeLock(),
         )
-        assert state.cas_clear_pending(root, queued.generation, "a" * 40, lock_context=FakeLock())
+        assert state.cas_clear_pending(
+            root,
+            queued.generation,
+            "a" * 40,
+            captured_snapshot=captured,
+            lock_context=FakeLock(),
+        )
 
 
 def test_pending_clear_waits_for_authenticated_journal_finalization_and_fails_on_conflict() -> None:
@@ -704,6 +871,8 @@ def test_pending_clear_waits_for_authenticated_journal_finalization_and_fails_on
         paths = state.state_paths(root)
         state.atomic_write_record(paths.journal, journal)
         state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
 
         assert not state.cas_clear_pending(
             root,
@@ -722,6 +891,7 @@ def test_pending_clear_waits_for_authenticated_journal_finalization_and_fails_on
                 root,
                 queued.generation,
                 "a" * 40,
+                captured_snapshot=captured,
                 lock_context=FakeLock(),
             ),
             "same-generation conflicting journal/pending identity did not fail closed",
@@ -739,8 +909,36 @@ def test_pending_clear_waits_for_authenticated_journal_finalization_and_fails_on
             root,
             queued.generation,
             "a" * 40,
+            captured_snapshot=captured,
             lock_context=FakeLock(),
         )
+
+
+def test_legacy_pending_clear_requires_full_captured_immutable_proof() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        assert not state.cas_clear_pending(
+            root, 4, "a" * 40, lock_context=FakeLock()
+        ), "coarse generation/commit authority unexpectedly deleted pending"
+        changed = dict(pending)
+        changed["expected_bundle_sha256"] = "c" * 64
+        private_json(paths.pending, changed)
+        expect_invalid(
+            lambda: state.cas_clear_pending(
+                root,
+                4,
+                "a" * 40,
+                captured_snapshot=captured,
+                lock_context=FakeLock(),
+            ),
+            "captured pending clear accepted same-generation immutable mutation",
+        )
+        assert paths.pending.exists()
 
 
 def test_pushed_finalization_authenticates_raw_proof_checkpoint_and_retry_progress() -> None:
@@ -1211,6 +1409,509 @@ def test_finalization_rejects_outcome_or_same_generation_digest_mismatch_without
             "finalization cleared a same-generation record with a different digest",
         )
         assert paths.journal.exists()
+
+
+def test_pending_snapshot_reader_is_locked_validated_and_fingerprinted() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        lock = FakeLock()
+        assert state.read_pending_with_digest(root, lock_context=lock) is None
+        assert lock.entered == 1
+
+        _journal, pending, _checkpoint = handoff_records(7, "e" * 64)
+        private_json(paths.pending, pending)
+        snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert snapshot is not None
+        assert snapshot.record == pending
+        assert snapshot.record_digest == state.hashlib.sha256(
+            json.dumps(pending, sort_keys=True, separators=(",", ":")).encode("ascii")
+        ).hexdigest()
+        assert len(snapshot.proof_fingerprint) == 64
+
+        retry_only = dict(pending)
+        retry_only["retry_count"] = 9
+        retry_only["retry_deadline_utc"] = "2026-08-30T14:45:00Z"
+        private_json(paths.pending, retry_only)
+        advanced = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert advanced is not None
+        assert advanced.record_digest != snapshot.record_digest
+        assert advanced.proof_fingerprint == snapshot.proof_fingerprint
+
+        malformed = dict(pending)
+        malformed["unexpected"] = True
+        private_json(paths.pending, malformed)
+        expect_invalid(
+            lambda: state.read_pending_with_digest(root, lock_context=FakeLock()),
+            "pending snapshot reader accepted an unknown field",
+        )
+
+
+def test_pending_retry_timestamps_enforce_producer_and_causal_contracts() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(1, "a" * 64)
+
+        far_future_initial = dict(pending)
+        far_future_initial["retry_deadline_utc"] = "2126-08-30T12:45:00Z"
+        private_json(paths.pending, far_future_initial)
+        expect_invalid(
+            lambda: state.read_pending_with_digest(root, lock_context=FakeLock()),
+            "initial retry deadline was not bound to push plus ten minutes",
+        )
+
+        pre_push_retry = dict(pending)
+        pre_push_retry["retry_count"] = 1
+        pre_push_retry["retry_deadline_utc"] = "2026-08-30T12:34:59Z"
+        private_json(paths.pending, pre_push_retry)
+        expect_invalid(
+            lambda: state.read_pending_with_digest(root, lock_context=FakeLock()),
+            "retry deadline before push completion was accepted",
+        )
+
+        valid_retry = dict(pending)
+        valid_retry["retry_count"] = 1
+        valid_retry["retry_deadline_utc"] = "2026-08-30T12:50:00Z"
+        private_json(paths.pending, valid_retry)
+        snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert snapshot is not None and snapshot.record == valid_retry
+
+
+def test_pending_snapshot_reader_rejects_unsafe_private_files() -> None:
+    if os.name != "posix":
+        return
+    for unsafe in ("mode", "link", "owner", "symlink", "oversize"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = state.state_paths(root)
+            _journal, pending, _checkpoint = handoff_records(1, "e" * 64)
+            private_json(paths.pending, pending)
+            restore_owner = state._owner_uid
+            try:
+                if unsafe == "mode":
+                    os.chmod(paths.pending, 0o644)
+                elif unsafe == "link":
+                    os.link(paths.pending, paths.pending.with_name("pending-hardlink.json"))
+                elif unsafe == "symlink":
+                    target = paths.pending.with_name("attacker-pending.json")
+                    private_json(target, pending)
+                    paths.pending.unlink()
+                    paths.pending.symlink_to(target)
+                elif unsafe == "oversize":
+                    paths.pending.write_bytes(b"x" * (state.MAX_RECORD_BYTES + 1))
+                    os.chmod(paths.pending, 0o600)
+                else:
+                    state._owner_uid = lambda: os.getuid() + 1
+                expect_invalid(
+                    lambda: state.read_pending_with_digest(root, lock_context=FakeLock()),
+                    f"pending snapshot reader accepted unsafe {unsafe}",
+                )
+            finally:
+                state._owner_uid = restore_owner
+
+
+def test_snapshot_authenticated_finalization_allows_only_monotonic_retry_progress() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+
+        advanced = dict(pending)
+        advanced["retry_count"] = 3
+        advanced["retry_deadline_utc"] = "2026-08-30T13:45:00Z"
+        private_json(paths.pending, advanced)
+        result = state.finalize_verified_pending(
+            root,
+            captured,
+            "2026-08-30T12:50:00Z",
+            lock_context=FakeLock(),
+        )
+        assert result is state.PendingFinalizeResult.CLEARED
+        assert not paths.pending.exists()
+        receipt = state.read_pages_verified_receipt(root, lock_context=FakeLock())
+        assert receipt is not None
+        assert receipt["generation"] == 4
+        assert receipt["pending_proof_fingerprint"] == captured.proof_fingerprint
+        assert receipt["pages_verified_at_utc"] == "2026-08-30T12:50:00Z"
+
+    for key, wrong in (
+        ("retry_count", -1),
+        ("retry_deadline_utc", "2026-08-30T12:44:59Z"),
+        ("expected_bundle_sha256", "c" * 64),
+        ("commit_sha", "c" * 40),
+        ("queue_digest", "d" * 64),
+    ):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = state.state_paths(root)
+            _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+            private_json(paths.pending, pending)
+            captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+            assert captured is not None
+            changed = dict(pending)
+            changed[key] = wrong
+            if key == "retry_count":
+                # Keep the record schema-valid while making it older than capture.
+                changed[key] = 0
+                captured_record = dict(pending)
+                captured_record["retry_count"] = 1
+                private_json(paths.pending, captured_record)
+                captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+                assert captured is not None
+                changed = dict(pending)
+            private_json(paths.pending, changed)
+            expect_invalid(
+                lambda: state.finalize_verified_pending(
+                    root,
+                    captured,
+                    "2026-08-30T12:50:00Z",
+                    lock_context=FakeLock(),
+                ),
+                f"snapshot finalizer accepted conflicting/regressed {key}",
+            )
+            assert paths.pending.exists() and not paths.pages_verified.exists()
+
+
+def test_snapshot_finalization_distinguishes_missing_newer_and_lower_pending() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+
+        paths.pending.unlink()
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.SUPERSEDED_OR_ABSENT
+        assert not paths.pages_verified.exists()
+
+        newer = dict(pending)
+        newer["generation"] = 5
+        newer["queue_digest"] = "f" * 64
+        newer["commit_sha"] = "b" * 40
+        private_json(paths.pending, newer)
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.SUPERSEDED_OR_ABSENT
+        assert state.read_pending_with_digest(root, lock_context=FakeLock()).record == newer
+        assert not paths.pages_verified.exists()
+
+        lower = dict(pending)
+        lower["generation"] = 3
+        private_json(paths.pending, lower)
+        expect_invalid(
+            lambda: state.finalize_verified_pending(
+                root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+            ),
+            "snapshot finalizer accepted a generation regression",
+        )
+
+
+def test_snapshot_finalization_waits_for_matching_journal_but_ignores_newer_terminal() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.BLOCKED_MATCHING_JOURNAL
+        assert paths.pending.exists() and not paths.pages_verified.exists()
+        assert state.finalize_pushed_handoff(
+            root, queued.generation, queued.digest, lock_context=FakeLock()
+        )
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        newer_journal, _unused, _checkpoint = handoff_records(5, "f" * 64, outcome="no_diff")
+        private_json(paths.journal, newer_journal)
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        assert paths.journal.exists(), "verifier must not consume an unrelated Task 4 journal"
+
+
+def test_snapshot_finalization_fails_closed_on_malformed_or_conflicting_journal() -> None:
+    for mutation in ("malformed", "same_generation_conflict", "older"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = state.state_paths(root)
+            _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+            private_json(paths.pending, pending)
+            captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+            assert captured is not None
+            if mutation == "malformed":
+                private_json(paths.journal, {"schema_version": 1})
+            else:
+                journal, _unused, _checkpoint = handoff_records(
+                    4 if mutation == "same_generation_conflict" else 3,
+                    "f" * 64,
+                    outcome="no_diff",
+                )
+                private_json(paths.journal, journal)
+            expect_invalid(
+                lambda: state.finalize_verified_pending(
+                    root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+                ),
+                f"snapshot finalizer accepted {mutation} journal state",
+            )
+            assert paths.pending.exists() and not paths.pages_verified.exists()
+
+    # Supersession is not permission to ignore malformed or conflicting fixed state.
+    for newer_journal_kind in ("malformed", "older", "same_generation_terminal_conflict"):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = state.state_paths(root)
+            _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+            private_json(paths.pending, pending)
+            captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+            assert captured is not None
+            newer = dict(pending)
+            newer["generation"] = 5
+            newer["queue_digest"] = "f" * 64
+            newer["commit_sha"] = "b" * 40
+            private_json(paths.pending, newer)
+            if newer_journal_kind == "malformed":
+                durable_journal = {"schema_version": 1}
+            else:
+                durable_journal, _unused, _checkpoint = handoff_records(
+                    4 if newer_journal_kind == "older" else 5,
+                    "f" * 64,
+                    outcome="no_diff",
+                )
+            private_json(paths.journal, durable_journal)
+            expect_invalid(
+                lambda: state.finalize_verified_pending(
+                    root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+                ),
+                f"newer pending caused {newer_journal_kind} fixed journal state to be ignored",
+            )
+            assert state.read_pending_with_digest(root, lock_context=FakeLock()).record == newer
+
+
+def test_pages_receipt_is_durable_idempotent_and_monotonic() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        expect_invalid(
+            lambda: state.pages_verified_receipt(captured, "2026-08-30T12:34:59Z"),
+            "Pages receipt predates its authenticated push completion",
+        )
+
+        original_unlink = state._unlink_record
+        state._unlink_record = lambda path: (
+            (_ for _ in ()).throw(RuntimeError("crash after receipt fsync"))
+            if path == paths.pending
+            else original_unlink(path)
+        )
+        try:
+            try:
+                state.finalize_verified_pending(
+                    root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+                )
+            except RuntimeError:
+                pass
+            else:
+                raise AssertionError("simulated receipt/unlink crash was not reached")
+        finally:
+            state._unlink_record = original_unlink
+        receipt = state.read_pages_verified_receipt(root, lock_context=FakeLock())
+        assert receipt is not None and receipt["generation"] == 4
+        assert paths.pending.exists()
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:51:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        assert state.read_pages_verified_receipt(root, lock_context=FakeLock()) == receipt
+
+        # An older pending can be cleared without regressing a newer receipt.
+        newer_pending = dict(pending)
+        newer_pending["generation"] = 6
+        newer_pending["queue_digest"] = "f" * 64
+        newer_pending["commit_sha"] = "b" * 40
+        private_json(paths.pending, newer_pending)
+        newer_snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert newer_snapshot is not None
+        assert state.finalize_verified_pending(
+            root, newer_snapshot, "2026-08-30T12:52:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        newer_receipt = state.read_pages_verified_receipt(root, lock_context=FakeLock())
+        assert newer_receipt is not None and newer_receipt["generation"] == 6
+
+        private_json(paths.pending, pending)
+        older_snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert older_snapshot is not None
+        assert state.finalize_verified_pending(
+            root, older_snapshot, "2026-08-30T12:53:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        assert state.read_pages_verified_receipt(root, lock_context=FakeLock()) == newer_receipt
+
+
+def test_two_captured_verifiers_can_clear_at_most_once() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        first = state.read_pending_with_digest(root, lock_context=FakeLock())
+        second = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert first is not None and second is not None
+        assert state.finalize_verified_pending(
+            root, first, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        receipt = state.read_pages_verified_receipt(root, lock_context=FakeLock())
+        assert state.finalize_verified_pending(
+            root, second, "2026-08-30T12:51:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.SUPERSEDED_OR_ABSENT
+        assert state.read_pages_verified_receipt(root, lock_context=FakeLock()) == receipt
+
+
+def test_snapshot_finalizer_never_reports_clear_when_pending_unlink_did_not_happen() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+
+        original_unlink = state._unlink_record
+        state._unlink_record = lambda path: False if path == paths.pending else original_unlink(path)
+        try:
+            expect_invalid(
+                lambda: state.finalize_verified_pending(
+                    root,
+                    captured,
+                    "2026-08-30T12:50:00Z",
+                    lock_context=FakeLock(),
+                ),
+                "snapshot finalizer reported a clear without unlinking pending",
+            )
+        finally:
+            state._unlink_record = original_unlink
+        assert paths.pending.exists(), "failed unlink unexpectedly removed pending"
+        assert paths.pages_verified.exists(), "durable receipt was not installed before unlink"
+
+
+def test_equal_generation_receipt_conflict_retains_pending() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(4, "e" * 64)
+        private_json(paths.pending, pending)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        conflicting = dict(pending)
+        conflicting["commit_sha"] = "c" * 40
+        private_json(paths.pending, conflicting)
+        conflicting_snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert conflicting_snapshot is not None
+        receipt = state.pages_verified_receipt(conflicting_snapshot, "2026-08-30T12:49:00Z")
+        private_json(paths.pages_verified, receipt)
+        private_json(paths.pending, pending)
+        expect_invalid(
+            lambda: state.finalize_verified_pending(
+                root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+            ),
+            "equal-generation conflicting receipt was overwritten",
+        )
+        assert paths.pending.exists()
+
+
+def test_publication_health_snapshot_reads_fixed_state_under_one_lock() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        paths = state.state_paths(root)
+        state.atomic_write_record(paths.journal, journal)
+        state.prepare_pushed_handoff(root, journal, pending, checkpoint, lock_context=FakeLock())
+        lock = FakeLock()
+        snapshot = state.read_publication_health_snapshot(root, lock_context=lock)
+        assert lock.entered == 1, "health snapshot did not use exactly one caller-supplied state lock"
+        assert snapshot["latest"] == {"record": queued.record, "record_digest": queued.digest}
+        assert snapshot["pending"]["record"] == pending
+        assert len(snapshot["pending"]["record_digest"]) == 64
+        assert len(snapshot["pending"]["proof_fingerprint"]) == 64
+        assert snapshot["checkpoint"] == checkpoint
+        assert snapshot["pages_verified"] is None
+        assert snapshot["journal"]["handoff_phase"] == "raw_proven"
+        assert snapshot["last_generation"] == queued.generation
+
+        assert state.finalize_pushed_handoff(
+            root, queued.generation, queued.digest, lock_context=FakeLock()
+        )
+        pending_snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert pending_snapshot is not None
+        assert state.finalize_verified_pending(
+            root, pending_snapshot, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        completed = state.read_publication_health_snapshot(root, lock_context=FakeLock())
+        assert completed["latest"] is None
+        assert completed["pending"] is None
+        assert completed["journal"] is None
+        assert completed["pages_verified"]["generation"] == queued.generation
+        assert completed["checkpoint"] == checkpoint
+        assert completed["last_generation"] == queued.generation
+
+
+def test_publication_health_snapshot_fails_closed_on_conflicting_fixed_state() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        paths = state.state_paths(root)
+        _journal, pending, _checkpoint = handoff_records(queued.generation, queued.digest)
+        private_json(paths.pending, pending)
+        pending_snapshot = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert pending_snapshot is not None
+        receipt = state.pages_verified_receipt(pending_snapshot, "2026-08-30T12:50:00Z")
+        receipt["commit_sha"] = "c" * 40
+        private_json(paths.pages_verified, receipt)
+        expect_invalid(
+            lambda: state.read_publication_health_snapshot(root, lock_context=FakeLock()),
+            "health snapshot accepted a malformed/conflicting verified receipt",
+        )
+
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        paths = state.state_paths(root)
+        _journal, pending, checkpoint = handoff_records(queued.generation, queued.digest)
+        private_json(paths.pending, pending)
+        private_json(paths.checkpoint, checkpoint)
+        captured = state.read_pending_with_digest(root, lock_context=FakeLock())
+        assert captured is not None
+        assert state.finalize_verified_pending(
+            root, captured, "2026-08-30T12:50:00Z", lock_context=FakeLock()
+        ) is state.PendingFinalizeResult.CLEARED
+        conflicting_checkpoint = dict(checkpoint)
+        conflicting_checkpoint["commit_sha"] = "c" * 40
+        private_json(paths.checkpoint, conflicting_checkpoint)
+        expect_invalid(
+            lambda: state.read_publication_health_snapshot(root, lock_context=FakeLock()),
+            "health snapshot failed to authenticate receipt against same-generation checkpoint",
+        )
 
 
 def test_wsl_fcntl_lock_is_exclusive_and_inode_stable() -> None:

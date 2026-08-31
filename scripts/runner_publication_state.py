@@ -8,9 +8,11 @@ the exact compare-and-swap transitions consumed by the watcher and drainer.
 from __future__ import annotations
 
 import contextlib
+import contextvars
 import dataclasses
 import datetime as dt
 import errno
+import enum
 import hashlib
 import json
 import os
@@ -40,6 +42,7 @@ class StatePaths:
     publication: Path
     latest: Path
     pending: Path
+    pages_verified: Path
     checkpoint: Path
     sequence: Path
     journal: Path
@@ -54,6 +57,65 @@ class EnqueueResult:
     record: dict[str, Any]
 
 
+@dataclasses.dataclass(frozen=True)
+class PendingSnapshot:
+    """One validated pending record and its captured mutable/immutable digests."""
+
+    record: dict[str, Any]
+    record_digest: str
+    proof_fingerprint: str
+
+
+class PendingFinalizeResult(enum.Enum):
+    CLEARED = "cleared"
+    BLOCKED_MATCHING_JOURNAL = "blocked_matching_journal"
+    SUPERSEDED_OR_ABSENT = "superseded_or_absent"
+
+
+@dataclasses.dataclass(frozen=True)
+class _PinnedStateIO:
+    root_path: Path
+    publication_path: Path
+    root_fd: int
+    publication_fd: int
+
+
+_ACTIVE_STATE_IO: contextvars.ContextVar[_PinnedStateIO | None] = contextvars.ContextVar(
+    "runner_publication_state_active_io",
+    default=None,
+)
+
+
+def _runner_path_security_module() -> Any:
+    """Load the fixed sibling helper even in stdin/importlib fixture contexts."""
+    try:
+        import runner_path_security
+
+        return runner_path_security
+    except ModuleNotFoundError as exc:
+        if exc.name != "runner_path_security":
+            raise
+    import importlib.util
+    import sys
+
+    module_name = "_degen_dogs_runner_path_security"
+    existing = sys.modules.get(module_name)
+    if existing is not None:
+        return existing
+    helper_path = Path(__file__).resolve().with_name("runner_path_security.py")
+    specification = importlib.util.spec_from_file_location(module_name, helper_path)
+    if specification is None or specification.loader is None:
+        raise StateValidationError("cannot load the fixed runner path-security helper")
+    module = importlib.util.module_from_spec(specification)
+    sys.modules[module_name] = module
+    try:
+        specification.loader.exec_module(module)
+    except BaseException:
+        sys.modules.pop(module_name, None)
+        raise
+    return module
+
+
 def state_paths(lock_dir: os.PathLike[str] | str) -> StatePaths:
     # ``resolve()`` would silently follow an attacker-controlled lock-dir link.
     root = Path(os.path.abspath(os.fspath(lock_dir)))
@@ -63,6 +125,7 @@ def state_paths(lock_dir: os.PathLike[str] | str) -> StatePaths:
         publication=publication,
         latest=publication / "latest.json",
         pending=publication / "pending.json",
+        pages_verified=publication / "pages-verified.json",
         checkpoint=publication / "pushed.json",
         sequence=publication / "generation.json",
         journal=root / "publisher-recovery.json",
@@ -84,6 +147,36 @@ def _requires_posix_metadata() -> bool:
 
 
 def _ensure_private_directory(path: Path) -> None:
+    if _requires_posix_metadata():
+        normalized = Path(os.path.abspath(os.fspath(path)))
+        active = _ACTIVE_STATE_IO.get()
+        if active is not None:
+            if normalized == active.root_path:
+                _validate_private_directory_descriptor(active.root_fd, normalized)
+                return
+            if normalized == active.publication_path:
+                _validate_private_directory_descriptor(active.publication_fd, normalized)
+                return
+            raise StateValidationError(
+                f"state transaction attempted an unrelated directory: {normalized}"
+            )
+        try:
+            runner_path_security = _runner_path_security_module()
+
+            descriptor = runner_path_security.open_secure_directory(
+                normalized,
+                create=True,
+                private=True,
+            )
+            try:
+                details = os.fstat(descriptor)
+            finally:
+                os.close(descriptor)
+        except Exception as exc:
+            raise StateValidationError(f"private state directory is unsafe: {normalized}") from exc
+        if not stat.S_ISDIR(details.st_mode):
+            raise StateValidationError(f"private state directory is not a real directory: {normalized}")
+        return
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
     details = path.lstat()
     if stat.S_ISLNK(details.st_mode) or not stat.S_ISDIR(details.st_mode):
@@ -93,6 +186,98 @@ def _ensure_private_directory(path: Path) -> None:
         raise StateValidationError(f"private state directory is owned by another user: {path}")
     if _requires_posix_metadata() and stat.S_IMODE(details.st_mode) != 0o700:
         os.chmod(path, 0o700)
+
+
+def _validate_private_directory_descriptor(descriptor: int, path: Path) -> os.stat_result:
+    details = os.fstat(descriptor)
+    owner = _owner_uid()
+    if (
+        not stat.S_ISDIR(details.st_mode)
+        or owner is None
+        or details.st_uid != owner
+        or stat.S_IMODE(details.st_mode) != 0o700
+    ):
+        raise StateValidationError(f"private state directory metadata is unsafe: {path}")
+    return details
+
+
+def _open_private_directory(path: Path, *, create: bool) -> int:
+    """Open one absolute private directory without following any ancestor link."""
+    try:
+        runner_path_security = _runner_path_security_module()
+
+        descriptor = runner_path_security.open_secure_directory(
+            path,
+            create=create,
+            private=True,
+        )
+    except FileNotFoundError:
+        raise
+    except Exception as exc:
+        raise StateValidationError(f"private state directory is unsafe: {path}") from exc
+    try:
+        _validate_private_directory_descriptor(descriptor, path)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def _validate_private_descriptor(
+    descriptor: int,
+    path: Path,
+    *,
+    max_bytes: int = MAX_RECORD_BYTES,
+) -> os.stat_result:
+    details = os.fstat(descriptor)
+    owner = _owner_uid()
+    if not stat.S_ISREG(details.st_mode):
+        raise StateValidationError(f"private state record is not a regular file: {path}")
+    if owner is None or details.st_uid != owner:
+        raise StateValidationError(f"private state record is owned by another user: {path}")
+    if stat.S_IMODE(details.st_mode) != 0o600:
+        raise StateValidationError(f"private state record mode is not 0600: {path}")
+    if details.st_nlink != 1:
+        raise StateValidationError(f"private state record has unexpected link count: {path}")
+    if details.st_size > max_bytes:
+        raise StateValidationError(f"private state record exceeds size limit: {path}")
+    return details
+
+
+def _validate_named_identity(
+    parent_descriptor: int,
+    path: Path,
+    opened: os.stat_result,
+) -> None:
+    try:
+        named = os.stat(path.name, dir_fd=parent_descriptor, follow_symlinks=False)
+    except OSError as exc:
+        raise StateValidationError(f"private state record identity changed: {path}") from exc
+    if (
+        stat.S_ISLNK(named.st_mode)
+        or (named.st_dev, named.st_ino) != (opened.st_dev, opened.st_ino)
+    ):
+        raise StateValidationError(f"private state record identity changed: {path}")
+
+
+@contextlib.contextmanager
+def _private_parent(path: Path, *, create: bool) -> Iterator[int]:
+    """Borrow the transaction-pinned parent, or securely pin it for one operation."""
+    target = Path(os.path.abspath(os.fspath(path)))
+    active = _ACTIVE_STATE_IO.get()
+    if active is not None:
+        if target.parent == active.publication_path:
+            yield active.publication_fd
+            return
+        if target.parent == active.root_path:
+            yield active.root_fd
+            return
+        raise StateValidationError(f"state transaction attempted an unrelated path: {target}")
+    descriptor = _open_private_directory(target.parent, create=create)
+    try:
+        yield descriptor
+    finally:
+        os.close(descriptor)
 
 
 def _validate_private_file(path: Path, *, max_bytes: int = MAX_RECORD_BYTES) -> os.stat_result:
@@ -129,21 +314,80 @@ def _digest(record: dict[str, Any]) -> str:
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    before = _validate_private_file(path)
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-    descriptor = os.open(path, flags)
-    try:
-        after = os.fstat(descriptor)
-        if (before.st_dev, before.st_ino) != (after.st_dev, after.st_ino):
-            raise StateValidationError(f"private state record changed during open: {path}")
-        raw = os.read(descriptor, MAX_RECORD_BYTES + 1)
-    finally:
-        os.close(descriptor)
+    path = Path(os.path.abspath(os.fspath(path)))
+    if not _requires_posix_metadata():
+        before = _validate_private_file(path)
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        try:
+            after = os.fstat(descriptor)
+            if (before.st_dev, before.st_ino) != (after.st_dev, after.st_ino):
+                raise StateValidationError(f"private state record changed during open: {path}")
+            raw = os.read(descriptor, MAX_RECORD_BYTES + 1)
+        finally:
+            os.close(descriptor)
+    else:
+        flags = (
+            os.O_RDONLY
+            | getattr(os, "O_NOFOLLOW", 0)
+            | getattr(os, "O_CLOEXEC", 0)
+            | getattr(os, "O_NONBLOCK", 0)
+        )
+        try:
+            with _private_parent(path, create=False) as parent_descriptor:
+                descriptor = os.open(path.name, flags, dir_fd=parent_descriptor)
+                try:
+                    opened = _validate_private_descriptor(descriptor, path)
+                    chunks: list[bytes] = []
+                    total = 0
+                    while total <= MAX_RECORD_BYTES:
+                        chunk = os.read(
+                            descriptor,
+                            min(64 * 1024, MAX_RECORD_BYTES + 1 - total),
+                        )
+                        if not chunk:
+                            break
+                        chunks.append(chunk)
+                        total += len(chunk)
+                    after = _validate_private_descriptor(descriptor, path)
+                    raw = b"".join(chunks)
+                    if (
+                        (opened.st_dev, opened.st_ino) != (after.st_dev, after.st_ino)
+                        or opened.st_size != after.st_size
+                        or opened.st_mtime_ns != after.st_mtime_ns
+                        or opened.st_ctime_ns != after.st_ctime_ns
+                        or len(raw) != after.st_size
+                    ):
+                        raise StateValidationError(f"private state record changed during read: {path}")
+                    _validate_named_identity(parent_descriptor, path, after)
+                finally:
+                    os.close(descriptor)
+        except FileNotFoundError:
+            raise
+        except StateValidationError:
+            raise
+        except OSError as exc:
+            raise StateValidationError(f"cannot securely read private state record: {path}") from exc
     if len(raw) > MAX_RECORD_BYTES:
         raise StateValidationError(f"private state record exceeds size limit: {path}")
+
+    def pairs(items: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate state key")
+            result[key] = value
+        return result
+
+    def nonfinite(_value: str) -> Any:
+        raise ValueError("non-finite state number")
+
     try:
-        decoded = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        decoded = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=pairs,
+            parse_constant=nonfinite,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         raise StateValidationError(f"private state record is not valid JSON: {path}") from exc
     if not isinstance(decoded, dict):
         raise StateValidationError(f"private state record is not a JSON object: {path}")
@@ -152,92 +396,338 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def atomic_write_record(path: os.PathLike[str] | str, record: dict[str, Any]) -> None:
     """Durably replace one fixed private record (file fsync then parent fsync)."""
-    target = Path(path)
+    target = Path(os.path.abspath(os.fspath(path)))
     _ensure_private_directory(target.parent)
     data = _canonical_bytes(record)
-    temporary = target.with_name(f".{target.name}.{secrets.token_hex(16)}.tmp")
+    if not _requires_posix_metadata():
+        temporary = target.with_name(f".{target.name}.{secrets.token_hex(16)}.tmp")
+        descriptor: int | None = None
+        try:
+            descriptor = os.open(
+                temporary,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+            )
+            offset = 0
+            while offset < len(data):
+                written = os.write(descriptor, data[offset:])
+                if written <= 0:
+                    raise StateValidationError("atomic state record write made no progress")
+                offset += written
+            os.fsync(descriptor)
+            os.close(descriptor)
+            descriptor = None
+            os.replace(temporary, target)
+            _validate_private_file(target)
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
+        return
+
+    temporary_name = f".{target.name}.{secrets.token_hex(16)}.tmp"
     descriptor: int | None = None
+    installed_descriptor: int | None = None
+    temporary_identity: tuple[int, int] | None = None
+    installed = False
     try:
-        descriptor = os.open(
-            temporary,
-            os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
-            0o600,
-        )
-        offset = 0
-        while offset < len(data):
-            written = os.write(descriptor, data[offset:])
-            if written <= 0:
-                raise StateValidationError("atomic state record write made no progress")
-            offset += written
-        os.fsync(descriptor)
-        os.close(descriptor)
-        descriptor = None
-        os.replace(temporary, target)
-        _validate_private_file(target)
-        if _requires_posix_metadata():
-            installed = os.open(target, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        with _private_parent(target, create=True) as parent_descriptor:
+            flags = (
+                os.O_WRONLY
+                | os.O_CREAT
+                | os.O_EXCL
+                | getattr(os, "O_NOFOLLOW", 0)
+                | getattr(os, "O_CLOEXEC", 0)
+                | getattr(os, "O_NONBLOCK", 0)
+            )
+            descriptor = os.open(
+                temporary_name,
+                flags,
+                0o600,
+                dir_fd=parent_descriptor,
+            )
+            os.fchmod(descriptor, 0o600)
+            created_details = _validate_private_descriptor(descriptor, target)
+            temporary_identity = (created_details.st_dev, created_details.st_ino)
+            offset = 0
+            while offset < len(data):
+                written = os.write(descriptor, data[offset:])
+                if written <= 0:
+                    raise StateValidationError("atomic state record write made no progress")
+                offset += written
+            os.fsync(descriptor)
+            completed = _validate_private_descriptor(descriptor, target)
+            if (
+                (completed.st_dev, completed.st_ino) != temporary_identity
+                or completed.st_size != len(data)
+            ):
+                raise StateValidationError("atomic state record changed during write")
+
+            existing_descriptor: int | None = None
             try:
-                os.fsync(installed)
-            finally:
-                os.close(installed)
-        if _requires_posix_metadata():
-            parent = os.open(target.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-            try:
-                os.fsync(parent)
-            finally:
-                os.close(parent)
+                existing_descriptor = os.open(
+                    target.name,
+                    os.O_RDONLY
+                    | getattr(os, "O_NOFOLLOW", 0)
+                    | getattr(os, "O_CLOEXEC", 0)
+                    | getattr(os, "O_NONBLOCK", 0),
+                    dir_fd=parent_descriptor,
+                )
+            except FileNotFoundError:
+                existing_descriptor = None
+            if existing_descriptor is not None:
+                try:
+                    existing = _validate_private_descriptor(existing_descriptor, target)
+                    _validate_named_identity(parent_descriptor, target, existing)
+                finally:
+                    os.close(existing_descriptor)
+
+            os.replace(
+                temporary_name,
+                target.name,
+                src_dir_fd=parent_descriptor,
+                dst_dir_fd=parent_descriptor,
+            )
+            installed = True
+            installed_descriptor = os.open(
+                target.name,
+                os.O_RDONLY
+                | getattr(os, "O_NOFOLLOW", 0)
+                | getattr(os, "O_CLOEXEC", 0)
+                | getattr(os, "O_NONBLOCK", 0),
+                dir_fd=parent_descriptor,
+            )
+            installed_details = _validate_private_descriptor(installed_descriptor, target)
+            if (installed_details.st_dev, installed_details.st_ino) != temporary_identity:
+                raise StateValidationError("installed state record has unexpected identity")
+            _validate_named_identity(parent_descriptor, target, installed_details)
+            os.fsync(installed_descriptor)
+            after_file_sync = _validate_private_descriptor(installed_descriptor, target)
+            _validate_named_identity(parent_descriptor, target, after_file_sync)
+            os.fsync(parent_descriptor)
+            after_parent_sync = _validate_private_descriptor(installed_descriptor, target)
+            _validate_named_identity(parent_descriptor, target, after_parent_sync)
+    except StateValidationError:
+        raise
+    except OSError as exc:
+        raise StateValidationError(f"cannot securely replace private state record: {target}") from exc
     finally:
+        if installed_descriptor is not None:
+            os.close(installed_descriptor)
         if descriptor is not None:
             os.close(descriptor)
-        try:
-            temporary.unlink()
-        except FileNotFoundError:
-            pass
+        if not installed and temporary_identity is not None:
+            try:
+                with _private_parent(target, create=False) as parent_descriptor:
+                    named = os.stat(
+                        temporary_name,
+                        dir_fd=parent_descriptor,
+                        follow_symlinks=False,
+                    )
+                    if (named.st_dev, named.st_ino) == temporary_identity:
+                        os.unlink(temporary_name, dir_fd=parent_descriptor)
+            except (FileNotFoundError, StateValidationError, OSError):
+                pass
 
 
 def _unlink_record(path: Path) -> bool:
+    path = Path(os.path.abspath(os.fspath(path)))
+    if not _requires_posix_metadata():
+        try:
+            _validate_private_file(path)
+        except FileNotFoundError:
+            return False
+        path.unlink()
+        return True
+    descriptor: int | None = None
     try:
-        _validate_private_file(path)
+        with _private_parent(path, create=False) as parent_descriptor:
+            try:
+                descriptor = os.open(
+                    path.name,
+                    os.O_RDONLY
+                    | getattr(os, "O_NOFOLLOW", 0)
+                    | getattr(os, "O_CLOEXEC", 0)
+                    | getattr(os, "O_NONBLOCK", 0),
+                    dir_fd=parent_descriptor,
+                )
+            except FileNotFoundError:
+                return False
+            opened = _validate_private_descriptor(descriptor, path)
+            _validate_named_identity(parent_descriptor, path, opened)
+            os.unlink(path.name, dir_fd=parent_descriptor)
+            os.fsync(parent_descriptor)
+            return True
     except FileNotFoundError:
         return False
-    path.unlink()
-    if _requires_posix_metadata():
-        parent = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-        try:
-            os.fsync(parent)
-        finally:
-            os.close(parent)
-    return True
+    except StateValidationError:
+        raise
+    except OSError as exc:
+        raise StateValidationError(f"cannot securely unlink private state record: {path}") from exc
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
+def _same_inode(left: os.stat_result, right: os.stat_result) -> bool:
+    return (left.st_dev, left.st_ino) == (right.st_dev, right.st_ino)
+
+
+def _validate_pinned_state_identity(pinned: _PinnedStateIO) -> None:
+    root_details = _validate_private_directory_descriptor(pinned.root_fd, pinned.root_path)
+    publication_details = _validate_private_directory_descriptor(
+        pinned.publication_fd,
+        pinned.publication_path,
+    )
+    try:
+        named_publication = os.stat(
+            pinned.publication_path.name,
+            dir_fd=pinned.root_fd,
+            follow_symlinks=False,
+        )
+    except OSError as exc:
+        raise StateValidationError("publication directory identity changed") from exc
+    if stat.S_ISLNK(named_publication.st_mode) or not _same_inode(
+        named_publication,
+        publication_details,
+    ):
+        raise StateValidationError("publication directory identity changed")
+
+    reopened_root = _open_private_directory(pinned.root_path, create=False)
+    try:
+        reopened_details = _validate_private_directory_descriptor(
+            reopened_root,
+            pinned.root_path,
+        )
+        if not _same_inode(root_details, reopened_details):
+            raise StateValidationError("state root directory identity changed")
+    finally:
+        os.close(reopened_root)
 
 
 @contextlib.contextmanager
-def production_lock(path: os.PathLike[str] | str, *, nonblocking: bool = False) -> Iterator[None]:
-    """Acquire a real POSIX flock on the one fixed private state lock file."""
-    if os.name != "posix":
-        raise StateValidationError("production publication locking requires POSIX fcntl")
+def _pin_state_io(paths: StatePaths) -> Iterator[_PinnedStateIO]:
+    root_descriptor = _open_private_directory(paths.root, create=True)
+    publication_descriptor: int | None = None
+    try:
+        publication_descriptor = _open_private_directory(paths.publication, create=True)
+        pinned = _PinnedStateIO(
+            root_path=paths.root,
+            publication_path=paths.publication,
+            root_fd=root_descriptor,
+            publication_fd=publication_descriptor,
+        )
+        _validate_pinned_state_identity(pinned)
+        yield pinned
+    finally:
+        if publication_descriptor is not None:
+            os.close(publication_descriptor)
+        os.close(root_descriptor)
+
+
+@contextlib.contextmanager
+def _acquire_pinned_lock(
+    pinned: _PinnedStateIO,
+    lock_path: Path,
+    *,
+    nonblocking: bool,
+) -> Iterator[None]:
     import fcntl
 
-    lock_path = Path(path)
-    _ensure_private_directory(lock_path.parent)
-    descriptor = os.open(lock_path, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0), 0o600)
+    if lock_path.parent != pinned.publication_path:
+        raise StateValidationError("publication lock is outside the pinned state directory")
+    descriptor: int | None = None
+    flags = (
+        os.O_RDWR
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+    )
     try:
-        _validate_private_file(lock_path)
-        flags = fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0)
         try:
-            fcntl.flock(descriptor, flags)
+            descriptor = os.open(
+                lock_path.name,
+                flags | os.O_CREAT | os.O_EXCL,
+                0o600,
+                dir_fd=pinned.publication_fd,
+            )
+            os.fchmod(descriptor, 0o600)
+            os.fsync(descriptor)
+            os.fsync(pinned.publication_fd)
+        except FileExistsError:
+            descriptor = os.open(
+                lock_path.name,
+                flags,
+                dir_fd=pinned.publication_fd,
+            )
+        opened = _validate_private_descriptor(descriptor, lock_path)
+        _validate_named_identity(pinned.publication_fd, lock_path, opened)
+        lock_flags = fcntl.LOCK_EX | (fcntl.LOCK_NB if nonblocking else 0)
+        try:
+            fcntl.flock(descriptor, lock_flags)
         except OSError as exc:
             if exc.errno in {errno.EACCES, errno.EAGAIN}:
                 raise StateValidationError("publication state lock is already held") from exc
             raise
+        after_lock = _validate_private_descriptor(descriptor, lock_path)
+        _validate_named_identity(pinned.publication_fd, lock_path, after_lock)
+        _validate_pinned_state_identity(pinned)
         yield
+    except StateValidationError:
+        raise
+    except OSError as exc:
+        raise StateValidationError("cannot securely acquire publication state lock") from exc
     finally:
-        os.close(descriptor)
+        if descriptor is not None:
+            os.close(descriptor)
 
 
-def _lock(paths: StatePaths, lock_context: Any | None) -> Any:
-    _ensure_private_directory(paths.root)
-    _ensure_private_directory(paths.publication)
-    return production_lock(paths.lock) if lock_context is None else lock_context
+@contextlib.contextmanager
+def production_lock(path: os.PathLike[str] | str, *, nonblocking: bool = False) -> Iterator[None]:
+    """Acquire a real POSIX flock with state paths pinned for its full lifetime."""
+    if os.name != "posix":
+        raise StateValidationError("production publication locking requires POSIX fcntl")
+    lock_path = Path(os.path.abspath(os.fspath(path)))
+    paths = state_paths(lock_path.parent.parent)
+    if lock_path != paths.lock:
+        raise StateValidationError("publication state lock path is invalid")
+    with _pin_state_io(paths) as pinned:
+        token = _ACTIVE_STATE_IO.set(pinned)
+        try:
+            with _acquire_pinned_lock(pinned, lock_path, nonblocking=nonblocking):
+                yield
+                _validate_pinned_state_identity(pinned)
+        finally:
+            _ACTIVE_STATE_IO.reset(token)
+
+
+@contextlib.contextmanager
+def _lock(paths: StatePaths, lock_context: Any | None) -> Iterator[None]:
+    if not _requires_posix_metadata():
+        _ensure_private_directory(paths.root)
+        _ensure_private_directory(paths.publication)
+        context = production_lock(paths.lock) if lock_context is None else lock_context
+        with context:
+            yield
+        return
+
+    with _pin_state_io(paths) as pinned:
+        token = _ACTIVE_STATE_IO.set(pinned)
+        try:
+            context = (
+                _acquire_pinned_lock(pinned, paths.lock, nonblocking=False)
+                if lock_context is None
+                else lock_context
+            )
+            with context:
+                _validate_pinned_state_identity(pinned)
+                yield
+                _validate_pinned_state_identity(pinned)
+        finally:
+            _ACTIVE_STATE_IO.reset(token)
 
 
 def _require_exact_keys(value: dict[str, Any], keys: set[str], label: str) -> None:
@@ -253,6 +743,19 @@ def _utc(value: Any, label: str) -> str:
     except ValueError as exc:
         raise StateValidationError(f"{label} is not a valid UTC timestamp") from exc
     return value
+
+
+def _utc_datetime(value: Any, label: str) -> dt.datetime:
+    canonical = _utc(value, label)
+    return dt.datetime.strptime(canonical, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=dt.timezone.utc,
+    )
+
+
+def _format_utc(value: dt.datetime) -> str:
+    return value.astimezone(dt.timezone.utc).replace(microsecond=0).strftime(
+        "%Y-%m-%dT%H:%M:%SZ",
+    )
 
 
 def _integer(value: Any, label: str, *, minimum: int = 0) -> int:
@@ -447,9 +950,15 @@ def cas_clear_pending(
     generation: int,
     commit_sha: str,
     *,
+    captured_snapshot: PendingSnapshot | None = None,
     lock_context: Any | None = None,
 ) -> bool:
-    """Clear pending only for the exact generation and immutable commit it names."""
+    """Legacy boolean clear, requiring a full captured immutable proof."""
+    if captured_snapshot is None:
+        return False
+    captured = _validate_pending_snapshot(captured_snapshot)
+    if captured["generation"] != generation or captured["commit_sha"] != commit_sha:
+        raise StateValidationError("pending clear arguments differ from captured proof")
     paths = state_paths(lock_dir)
     with _lock(paths, lock_context):
         try:
@@ -458,6 +967,13 @@ def cas_clear_pending(
             return False
         if current["generation"] != generation or current["commit_sha"] != commit_sha:
             return False
+        if not _same_pending_immutable(current, captured):
+            raise StateValidationError("pending immutable proof changed before legacy clear")
+        if (
+            current["retry_count"] < captured["retry_count"]
+            or current["retry_deadline_utc"] < captured["retry_deadline_utc"]
+        ):
+            raise StateValidationError("pending retry state regressed before legacy clear")
         try:
             journal = _validate_journal(_read_json(paths.journal))
         except FileNotFoundError:
@@ -492,6 +1008,10 @@ _PENDING_KEYS = {
 }
 _PENDING_MUTABLE_KEYS = {"retry_deadline_utc", "retry_count"}
 _PENDING_IMMUTABLE_KEYS = _PENDING_KEYS - _PENDING_MUTABLE_KEYS
+_PAGES_VERIFIED_KEYS = _PENDING_IMMUTABLE_KEYS | {
+    "pending_proof_fingerprint",
+    "pages_verified_at_utc",
+}
 
 
 def _validate_journal(value: Any) -> dict[str, Any]:
@@ -592,14 +1112,197 @@ def _validate_pending(value: Any) -> dict[str, Any]:
     _integer(value["expected_bundle_bytes"], "pending bundle bytes")
     _integer(value["expected_block_number"], "pending block number", minimum=1)
     _hash(value["expected_block_hash"], "pending block hash")
-    _utc(value["push_completed_at_utc"], "pending push completion")
-    _utc(value["retry_deadline_utc"], "pending retry deadline")
-    _integer(value["retry_count"], "pending retry count")
+    pushed_at = _utc_datetime(value["push_completed_at_utc"], "pending push completion")
+    retry_at = _utc_datetime(value["retry_deadline_utc"], "pending retry deadline")
+    retry_count = _integer(value["retry_count"], "pending retry count")
+    if retry_count == 0:
+        if retry_at != pushed_at + dt.timedelta(minutes=10):
+            raise StateValidationError("initial pending retry deadline is not push plus ten minutes")
+    elif retry_at < pushed_at:
+        raise StateValidationError("pending retry deadline predates push completion")
     return value
 
 
 def _same_pending_immutable(left: dict[str, Any], right: dict[str, Any]) -> bool:
     return all(left[key] == right[key] for key in _PENDING_IMMUTABLE_KEYS)
+
+
+def _pending_proof_fingerprint(record: dict[str, Any]) -> str:
+    validated = _validate_pending(record)
+    proof = {key: validated[key] for key in _PENDING_IMMUTABLE_KEYS}
+    return hashlib.sha256(_canonical_bytes(proof)).hexdigest()
+
+
+def _validate_pending_snapshot(snapshot: PendingSnapshot) -> dict[str, Any]:
+    if not isinstance(snapshot, PendingSnapshot):
+        raise StateValidationError("pending snapshot type is invalid")
+    record = _validate_pending(dict(snapshot.record))
+    if snapshot.record_digest != _digest(record):
+        raise StateValidationError("pending snapshot record digest is invalid")
+    if snapshot.proof_fingerprint != _pending_proof_fingerprint(record):
+        raise StateValidationError("pending snapshot proof fingerprint is invalid")
+    return record
+
+
+def read_pending_with_digest(
+    lock_dir: os.PathLike[str] | str,
+    *,
+    lock_context: Any | None = None,
+) -> PendingSnapshot | None:
+    """Capture one validated pending record while holding only state.lock."""
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        try:
+            record = _validate_pending(_read_json(paths.pending))
+        except FileNotFoundError:
+            return None
+        captured = dict(record)
+        return PendingSnapshot(
+            record=captured,
+            record_digest=_digest(captured),
+            proof_fingerprint=_pending_proof_fingerprint(captured),
+        )
+
+
+def pages_verified_receipt(
+    snapshot: PendingSnapshot,
+    pages_verified_at_utc: str,
+) -> dict[str, Any]:
+    """Build the fixed durable health receipt for one immutable pending proof."""
+    record = _validate_pending_snapshot(snapshot)
+    verified_at = _utc(pages_verified_at_utc, "Pages verification time")
+    receipt = {key: record[key] for key in _PENDING_IMMUTABLE_KEYS}
+    receipt["pending_proof_fingerprint"] = snapshot.proof_fingerprint
+    receipt["pages_verified_at_utc"] = verified_at
+    return _validate_pages_verified(receipt)
+
+
+def _validate_pages_verified(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise StateValidationError("Pages verification receipt must be an object")
+    _require_exact_keys(value, _PAGES_VERIFIED_KEYS, "Pages verification receipt")
+    pending = {key: value[key] for key in _PENDING_IMMUTABLE_KEYS}
+    pushed_at = _utc_datetime(value["push_completed_at_utc"], "pending push completion")
+    pending["retry_deadline_utc"] = _format_utc(pushed_at + dt.timedelta(minutes=10))
+    pending["retry_count"] = 0
+    _validate_pending(pending)
+    expected_fingerprint = _pending_proof_fingerprint(pending)
+    if value["pending_proof_fingerprint"] != expected_fingerprint:
+        raise StateValidationError("Pages verification receipt proof fingerprint is invalid")
+    verified_at = _utc(value["pages_verified_at_utc"], "Pages verification time")
+    if verified_at < value["push_completed_at_utc"]:
+        raise StateValidationError("Pages verification receipt predates push completion")
+    return value
+
+
+def read_pages_verified_receipt(
+    lock_dir: os.PathLike[str] | str,
+    *,
+    lock_context: Any | None = None,
+) -> dict[str, Any] | None:
+    """Read the protected monotonic Pages verification health receipt."""
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        try:
+            return dict(_validate_pages_verified(_read_json(paths.pages_verified)))
+        except FileNotFoundError:
+            return None
+
+
+def read_publication_health_snapshot(
+    lock_dir: os.PathLike[str] | str,
+    *,
+    lock_context: Any | None = None,
+) -> dict[str, Any]:
+    """Read all fixed publication-health records under one state-lock view."""
+    paths = state_paths(lock_dir)
+
+    def optional(path: Path, validator: Callable[[Any], dict[str, Any]]) -> dict[str, Any] | None:
+        try:
+            return dict(validator(_read_json(path)))
+        except FileNotFoundError:
+            return None
+
+    with _lock(paths, lock_context):
+        latest_record_value = optional(paths.latest, validate_latest)
+        latest = None
+        if latest_record_value is not None:
+            latest = {
+                "record": latest_record_value,
+                "record_digest": _digest(latest_record_value),
+            }
+
+        pending_record = optional(paths.pending, _validate_pending)
+        pending = None
+        if pending_record is not None:
+            pending = {
+                "record": pending_record,
+                "record_digest": _digest(pending_record),
+                "proof_fingerprint": _pending_proof_fingerprint(pending_record),
+            }
+        checkpoint = optional(paths.checkpoint, _validate_checkpoint)
+        verified = optional(paths.pages_verified, _validate_pages_verified)
+        journal = optional(paths.journal, _validate_journal)
+        last_generation = _read_generation_watermark(paths.sequence)
+
+        generations = [
+            record["generation"]
+            for record in (
+                latest_record_value,
+                pending_record,
+                checkpoint,
+                verified,
+            )
+            if record is not None
+        ]
+        if journal is not None:
+            generations.append(journal["publication_generation"])
+        if generations and max(generations) > last_generation:
+            raise StateValidationError("publication generation watermark predates durable state")
+
+        if latest is not None and pending_record is not None:
+            if latest_record_value["generation"] == pending_record["generation"] and (
+                latest["record_digest"] != pending_record["queue_digest"]
+            ):
+                raise StateValidationError("same-generation latest and pending identities conflict")
+        if pending_record is not None and checkpoint is not None:
+            if pending_record["generation"] == checkpoint["generation"] and (
+                checkpoint["outcome"] != "pushed"
+                or checkpoint["queue_digest"] != pending_record["queue_digest"]
+                or checkpoint["commit_sha"] != pending_record["commit_sha"]
+                or checkpoint["push_completed_at_utc"] != pending_record["push_completed_at_utc"]
+            ):
+                raise StateValidationError("same-generation pending and checkpoint identities conflict")
+        if pending_record is not None and verified is not None:
+            if pending_record["generation"] == verified["generation"] and not _receipt_matches_pending(
+                verified, pending_record
+            ):
+                raise StateValidationError("same-generation pending and Pages receipt identities conflict")
+        if checkpoint is not None and verified is not None:
+            if checkpoint["generation"] == verified["generation"] and (
+                checkpoint["outcome"] != "pushed"
+                or checkpoint["queue_digest"] != verified["queue_digest"]
+                or checkpoint["commit_sha"] != verified["commit_sha"]
+                or checkpoint["push_completed_at_utc"] != verified["push_completed_at_utc"]
+            ):
+                raise StateValidationError("same-generation checkpoint and Pages receipt identities conflict")
+        if journal is not None and pending_record is not None:
+            if journal["publication_generation"] == pending_record["generation"]:
+                if journal["handoff_phase"] != "raw_proven" or journal["terminal_outcome"] != "pushed":
+                    raise StateValidationError("same-generation journal cannot authenticate pending state")
+                _authenticate_pending_from_journal(journal, pending_record)
+        if journal is not None and checkpoint is not None:
+            if journal["publication_generation"] == checkpoint["generation"]:
+                _authenticate_checkpoint_from_journal(journal, checkpoint)
+
+        return {
+            "latest": latest,
+            "pending": pending,
+            "checkpoint": checkpoint,
+            "pages_verified": verified,
+            "journal": journal,
+            "last_generation": last_generation,
+        }
 
 
 def _validate_checkpoint(value: Any) -> dict[str, Any]:
@@ -830,6 +1533,94 @@ def _authenticate_checkpoint_from_journal(journal: dict[str, Any], checkpoint: d
     expected = _checkpoint_from_journal(journal)
     if _canonical_bytes(checkpoint) != _canonical_bytes(expected):
         raise StateValidationError("checkpoint differs from authenticated recovery journal")
+
+
+def _receipt_matches_pending(receipt: dict[str, Any], pending: dict[str, Any]) -> bool:
+    return all(receipt[key] == pending[key] for key in _PENDING_IMMUTABLE_KEYS)
+
+
+def finalize_verified_pending(
+    lock_dir: os.PathLike[str] | str,
+    captured: PendingSnapshot,
+    pages_verified_at_utc: str,
+    *,
+    lock_context: Any | None = None,
+) -> PendingFinalizeResult:
+    """Install a durable receipt, then clear only the captured immutable proof.
+
+    Retry-only progress may advance while HTTP is in flight.  Every immutable
+    field stays authenticated against the captured snapshot, and a matching
+    Task 4 recovery journal blocks rather than races the verifier.
+    """
+    captured_record = _validate_pending_snapshot(captured)
+    receipt_to_install = pages_verified_receipt(captured, pages_verified_at_utc)
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        try:
+            current = _validate_pending(_read_json(paths.pending))
+        except FileNotFoundError:
+            return PendingFinalizeResult.SUPERSEDED_OR_ABSENT
+
+        # A fixed recovery journal is part of the same protected state view.
+        # Validate it even when pending was superseded; supersession must not
+        # turn malformed durable state into a benign result.
+        try:
+            journal = _validate_journal(_read_json(paths.journal))
+        except FileNotFoundError:
+            journal = None
+
+        captured_generation = captured_record["generation"]
+        current_generation = current["generation"]
+        matching_journal = False
+        if journal is not None:
+            journal_generation = journal["publication_generation"]
+            if journal_generation < current_generation:
+                raise StateValidationError("recovery journal generation predates pending verification")
+            if journal_generation == current_generation:
+                if (
+                    journal["queue_digest"] != current["queue_digest"]
+                    or journal["remote_commit"] != current["commit_sha"]
+                    or journal["handoff_phase"] != "raw_proven"
+                    or journal["terminal_outcome"] != "pushed"
+                ):
+                    raise StateValidationError("same-generation recovery journal conflicts with pending verification")
+                _authenticate_pending_from_journal(journal, current)
+                matching_journal = True
+        if current_generation > captured_generation:
+            return PendingFinalizeResult.SUPERSEDED_OR_ABSENT
+        if current_generation < captured_generation:
+            raise StateValidationError("pending generation regressed during Pages verification")
+        if not _same_pending_immutable(current, captured_record):
+            raise StateValidationError("pending immutable proof changed during Pages verification")
+        if (
+            current["retry_count"] < captured_record["retry_count"]
+            or current["retry_deadline_utc"] < captured_record["retry_deadline_utc"]
+        ):
+            raise StateValidationError("pending retry state regressed during Pages verification")
+
+        if matching_journal:
+            return PendingFinalizeResult.BLOCKED_MATCHING_JOURNAL
+
+        try:
+            existing_receipt = _validate_pages_verified(_read_json(paths.pages_verified))
+        except FileNotFoundError:
+            existing_receipt = None
+        if existing_receipt is not None:
+            existing_generation = existing_receipt["generation"]
+            if existing_generation == current_generation:
+                if not _receipt_matches_pending(existing_receipt, current):
+                    raise StateValidationError("equal-generation Pages receipt conflicts with pending proof")
+            elif existing_generation < current_generation:
+                atomic_write_record(paths.pages_verified, receipt_to_install)
+            else:
+                # A newer verified receipt is monotonic authority; never regress it.
+                pass
+        else:
+            atomic_write_record(paths.pages_verified, receipt_to_install)
+
+        if not _unlink_record(paths.pending):
+            raise StateValidationError("pending record vanished before authenticated unlink")
+        return PendingFinalizeResult.CLEARED
 
 
 def _install_generation_record(
