@@ -1,17 +1,17 @@
 metric,value
 network,base
 site_url,https://ael-dev3.github.io/Degen-Dogs-Mission-3/
-latest_block,50674303
-latest_block_time_utc,2026-08-31 00:59:13
+latest_block,50675032
+latest_block_time_utc,2026-08-31 01:23:31
 onchain_verification_status,current_snapshot_cross_provider_verified
 onchain_verification_scope,"snapshot_hash,contract_code,current_auction,dog_total_supply,recent_event_logs,event_block_timestamps,dog_token_uri_bindings,woof_token_state,sup_token_state"
 onchain_chain_id,8453
-snapshot_block_hash,0xad4b29beaf9208ed00001b42976317e3e6368efb7b91fca10c8ac4441338a845
+snapshot_block_hash,0x93eea1a690eab9c4d186efa053cb2718f9385784b53f512877dc28089d25d172
 snapshot_confirmations,1
 rpc_quorum_size,2
-rpc_quorum_agreement,5/5
-rpc_quorum_providers,"alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
-log_rpc_quorum_providers,"base.org,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
+rpc_quorum_agreement,4/4
+rpc_quorum_providers,"alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb"
+log_rpc_quorum_providers,"base.org,rpc-host-a0d298ecc6bb"
 auction_house_code_sha256,ade197f5a438f532d3502f579a7f53b141e596c4f6b2c52898f6aa0de0cad253
 dog_nft_code_sha256,224272d1e3ec04b7524dfc5e16419675d26b776497f5318da61df821250c5f20
 auction_house,0x8F34fe11ce28893DEA6A802c8d0b3d0FFC7f5CeA
@@ -41,8 +41,8 @@ dog_rarity_tie_policy,competition_rank_equal_scores_share_rank
 dog_rarity_trait_schema,Background|Body|Neck|Mouth|Ears|Head|Eyes
 dog_rarity_attested_block,50667487
 dog_rarity_attested_block_hash,0xaef02db8b38fc03b1a1701ca7a20f4bc6887f2f26aba893c4f3014c1e256b225
-dog_rarity_continuity_through_block,50674303
-dog_rarity_continuity_through_block_hash,0xad4b29beaf9208ed00001b42976317e3e6368efb7b91fca10c8ac4441338a845
+dog_rarity_continuity_through_block,50675032
+dog_rarity_continuity_through_block_hash,0x93eea1a690eab9c4d186efa053cb2718f9385784b53f512877dc28089d25d172
 dog_rarity_continuity_verification_status,hash_pinned_cross_provider_canonical_mint_extension_plus_no_other_rarity_mutations
 woof_token,0x3e5c4FA0cAA794516eD0DF77f31daA534918d492
 woof_symbol,WOOF
@@ -58,7 +58,7 @@ sup_token,0xa69f80524381275A7fFdb3AE01c54150644c8792
 sup_symbol,SUP
 sup_usd_price,0.005651
 sup_usd_source,dexscreener:uniswap:0xc4838FbEef72Ba0719A4C4F1eFEec68991b74A20
-eth_usd_price,2427.135
+eth_usd_price,2420.67
 eth_usd_source,coinbase
 reward_basis_dogs,133
 reward_basis_source,observed_stream_snapshot_133_dogs
@@ -86,10 +86,10 @@ reward_sup_per_dog_per_day,1.5006015037593985
 reward_sup_per_dog_usd_per_day,0.00848
 reward_total_flow_usd_per_day,12.42
 reward_total_per_dog_usd_per_day,0.0934
-reward_current_bid_payback_days,129.98
-reward_current_bid_daily_roi_pct,0.7694
-reward_current_bid_apr_pct,280.82
-reward_current_bid_apr_display,≈281% APR
+reward_current_bid_payback_days,129.55
+reward_current_bid_daily_roi_pct,0.7719
+reward_current_bid_apr_pct,281.74
+reward_current_bid_apr_display,≈282% APR
 woof_holders,unavailable
 top_woof_holder,
 top_woof_holder_balance,unavailable
@@ -97,7 +97,7 @@ farcaster_profiles_resolved,64
 current_auction_token_id,819
 current_auction_status,live
 current_bid_eth,0.005
-current_bid_usd,12.14
+current_bid_usd,12.1
 current_bidder,@0xael.eth
 current_bidder_wallet,0x76d0e7a13248945ee9f808b4a472262b28778942
 current_auction_end_utc,2026-08-31 21:57:23
@@ -132,14 +132,14 @@ season6_sup_current_bid_projected_total_without_win_sup,29719.120233
 season6_sup_current_bidder_prior_s6_wins,26
 season6_sup_current_bidder_prior_s6_xp,2600
 season6_sup_current_bidder_wallet,0x76d0e7a13248945ee9f808b4a472262b28778942
-season6_sup_days_remaining,0.96
+season6_sup_days_remaining,0.94
 season6_sup_enabled,true
 season6_sup_end_utc,2026-09-01T00:00:00Z
 season6_sup_estimate_status,wallet_near_cap
 season6_sup_expected_future_settlement_interval_seconds,86400
 season6_sup_future_dilution_enabled,true
 season6_sup_projection_model,time_weighted_xp_with_expected_future_daily_auctions
-season6_sup_raw_allocated_to_date,246433.397192
+season6_sup_raw_allocated_to_date,246480.005571
 season6_sup_raw_projected_full_allocated,249081.795261
 season6_sup_reward_start_delay_days,0
 season6_sup_reward_start_utc,2026-06-02T00:00:00Z
