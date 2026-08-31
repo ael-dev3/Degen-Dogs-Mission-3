@@ -725,9 +725,8 @@ printf '%s\n' \
   "  const metricsPath = prefix + '/mission3_metrics.json';" \
   "  const metrics = JSON.parse(fs.readFileSync(metricsPath));" \
   "  const index = metrics.findIndex(row => row.metric === 'canonical_reorg_from_hash');" \
-  "  if (marker && index >= 0) metrics[index].value = marker;" \
-  "  else if (marker) metrics.push({metric:'canonical_reorg_from_hash', value:marker});" \
-  "  else if (index >= 0) metrics.splice(index, 1);" \
+  "  if (index >= 0) metrics[index].value = marker;" \
+  "  else metrics.push({metric:'canonical_reorg_from_hash', value:marker});" \
   "  fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2) + '\\n');" \
   "}" \
   >"$SUCCESS_REPO/scripts/apply_reorg_marker.js"
@@ -839,6 +838,18 @@ for relative in ("generated/current_auction.json", "public/generated/current_auc
         )
         row[target] = int(parsed.timestamp())
     path.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
+
+# The production generators always retain one reorg metric and use an empty
+# value for a non-reorg publication. Normalize the copied source data to that
+# exact fixture state before the baseline commit.
+for relative in ("generated/mission3_metrics.json", "public/generated/mission3_metrics.json"):
+    path = repo / relative
+    rows = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+        raise SystemExit("mission3-metrics fixture must be a list of objects")
+    rows = [row for row in rows if row.get("metric") != "canonical_reorg_from_hash"]
+    rows.append({"metric": "canonical_reorg_from_hash", "value": ""})
+    path.write_text(json.dumps(rows, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 PY
 cp "$SOURCE_DIR/../generated/refresh_status.json" "$SUCCESS_REPO/scripts/fixture_valid_refresh_status.json"
 cp "$SOURCE_DIR/../public/generated/unified_dog_search_index.json" "$SUCCESS_REPO/public/generated/unified_dog_search_index.json"
