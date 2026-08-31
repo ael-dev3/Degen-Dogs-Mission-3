@@ -1275,7 +1275,7 @@ for path in root.rglob("*"):
         raise SystemExit(f"npm dependency is group/other writable: {path}")
 PY
   /bin/chown -R root:root "$npm_stage/node_modules"
-  /bin/chmod -R go-w "$npm_stage/node_modules"
+  /bin/chmod -R u+rwX,go+rX,go-w "$npm_stage/node_modules"
   /bin/mv -T -- "$npm_stage/node_modules" "$source_stage/node_modules"
   /bin/chown "$runner_user:$runner_group" "$runner_tmp" "$build_output"
   /bin/chmod 0700 "$runner_tmp" "$build_output"

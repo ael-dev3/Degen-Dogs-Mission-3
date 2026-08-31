@@ -208,6 +208,7 @@ def test_bootstrap_receipt_gate(installer: str) -> None:
     python_suites = tuple(path for path in BOOTSTRAP_CORE_TESTS if path.endswith(".py"))
     assert core.count('\n  run_bootstrap_python "') == len(python_suites)
     assert 'ci --ignore-scripts --no-audit --no-fund' in core
+    assert '/bin/chmod -R u+rwX,go+rX,go-w "$npm_stage/node_modules"' in core
     assert '--prefix "$source_stage" run build' in core
     assert 'DEGEN_DOGS_PYTHON_BIN="${python_runtime_link}/bin/python3"' in core
     assert "write_bootstrap_receipt" not in core
