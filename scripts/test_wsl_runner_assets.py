@@ -69,6 +69,15 @@ def powershell_literal_payload(source: str, variable: str) -> str:
     return match.group("body")
 
 
+def powershell_activation_liveness_probes(source: str) -> tuple[str, ...]:
+    return tuple(
+        re.findall(
+            r"(?m)^[ \t]*'(?P<probe>test -f /run/degen-dogs/anchor-ready.*?)'[ \t]*$",
+            source,
+        )
+    )
+
+
 def bash_array_items(source: str, variable: str) -> tuple[str, ...]:
     match = re.search(
         rf"(?ms)^[ \t]*{re.escape(variable)}=\(\s*(?P<body>.*?)^[ \t]*\)",
@@ -314,7 +323,14 @@ is-enabled --quiet degen-dogs-pages-verifier.path
 is-enabled --quiet degen-dogs-pages-verifier.timer
 start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
 restart degen-dogs-health.timer
-is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
+is-active --quiet degen-dogs-runner.target
+is-active --quiet degen-dogs-watcher.timer
+is-active --quiet degen-dogs-hourly.timer
+is-active --quiet degen-dogs-health.timer
+is-active --quiet degen-dogs-publisher.path
+is-active --quiet degen-dogs-publisher.timer
+is-active --quiet degen-dogs-pages-verifier.path
+is-active --quiet degen-dogs-pages-verifier.timer
 show --property=LoadState --value degen-dogs-publisher.service
 is-failed --quiet degen-dogs-publisher.service
 show --property=LoadState --value degen-dogs-pages-verifier.service
@@ -322,18 +338,34 @@ is-failed --quiet degen-dogs-pages-verifier.service
 show --property=NextElapseUSecMonotonic --value degen-dogs-health.timer
 """
 
-    def health_timer_activation_regression(next_elapse: str, expected_returncode: int) -> None:
+    def health_timer_activation_regression(
+        next_elapse: str,
+        inactive_unit: str,
+        expected_returncode: int,
+        *,
+        verify_complete_calls: bool,
+    ) -> None:
         harness = r'''
 set -Eeuo pipefail
 test_root=$(mktemp -d)
+trap 'command rm -rf -- "$test_root"' EXIT
 calls="$test_root/calls"
 cat >"$test_root/expected" <<'EXPECTED_CALLS'
 ''' + expected_activation_calls + r'''EXPECTED_CALLS
-next_elapse=''' + next_elapse + r'''
+next_elapse=''' + shlex.quote(next_elapse) + r'''
+inactive_unit=''' + shlex.quote(inactive_unit) + r'''
 systemctl() {
   printf '%s\n' "$*" >>"$calls"
   case "${1:-}" in
-    is-enabled|is-active|start|restart) return 0 ;;
+    is-enabled|start|restart) return 0 ;;
+    is-active)
+      shift
+      [[ "${1:-}" == --quiet ]] && shift
+      for queried_unit in "$@"; do
+        [[ "$queried_unit" != "$inactive_unit" ]] && return 0
+      done
+      return 3
+      ;;
     is-failed) return 1 ;;
     show)
       if [[ "$*" == "show --property=LoadState --value "* ]]; then printf 'loaded\n'; else printf '%s\n' "$next_elapse"; fi
@@ -349,27 +381,92 @@ mktemp() {
     *) return 98 ;;
   esac
 }
-commit_activation() (
+export calls next_elapse inactive_unit test_root
+export -f systemctl install mktemp
+cat >"$test_root/commit-activation.sh" <<'COMMIT_ACTIVATION'
 ''' + commit_activation + r'''
-)
+COMMIT_ACTIVATION
 set +e
-commit_activation
+bash -Eeuo pipefail "$test_root/commit-activation.sh"
 status=$?
 set -e
-if ! cmp -s "$test_root/expected" "$calls"; then
+if [[ "$status" != "''' + str(expected_returncode) + r'''" ]]; then
+  printf 'expected activation status ''' + str(expected_returncode) + r''' with inactive unit %s, got %s\n' \
+    "${inactive_unit:-none}" "$status" >&2
+  exit 96
+fi
+if [[ "''' + ("1" if verify_complete_calls else "0") + r'''" == 1 ]] && ! cmp -s "$test_root/expected" "$calls"; then
   diff -u "$test_root/expected" "$calls" >&2 || true
-  command rm -rf -- "$test_root"
   exit 99
 fi
-test "$status" = "''' + str(expected_returncode) + r'''"
-printf 'health-timer-activation-checked status=%s\n' "$status"
-command rm -rf -- "$test_root"
+printf 'health-timer-activation-checked inactive=%s status=%s\n' "${inactive_unit:-none}" "$status"
 '''
         result = run_bash(harness)
         assert b"health-timer-activation-checked" in result.stdout
 
-    health_timer_activation_regression("5min", 0)
-    health_timer_activation_regression("0", 1)
+    health_timer_activation_regression("5min", "", 0, verify_complete_calls=True)
+    health_timer_activation_regression(
+        "5min",
+        "degen-dogs-pages-verifier.timer",
+        3,
+        verify_complete_calls=False,
+    )
+    health_timer_activation_regression("0", "", 1, verify_complete_calls=True)
+
+
+def test_activation_liveness_probes_reject_each_inactive_unit(powershell: str) -> None:
+    probes = powershell_activation_liveness_probes(powershell)
+    assert len(probes) == 2
+    for probe_number, probe in enumerate(probes, start=1):
+        harness = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+trap 'command rm -rf -- "$test_root"' EXIT
+cat >"$test_root/probe.sh" <<'ACTIVATION_PROBE'
+''' + probe + r'''
+ACTIVATION_PROBE
+test() {
+  if [[ "$#" == 2 && "$1" == -f ]]; then return 0; fi
+  builtin test "$@"
+}
+systemctl() {
+  case "${1:-}" in
+    is-active)
+      shift
+      [[ "${1:-}" == --quiet ]] && shift
+      for queried_unit in "$@"; do
+        [[ "$queried_unit" != "$inactive_unit" ]] && return 0
+      done
+      return 3
+      ;;
+    show) printf 'loaded\n' ;;
+    is-failed) return 1 ;;
+    *) return 97 ;;
+  esac
+}
+export -f test systemctl
+run_probe() {
+  inactive_unit="$1"
+  expected_status="$2"
+  export inactive_unit
+  set +e
+  bash -Eeuo pipefail "$test_root/probe.sh"
+  status=$?
+  set -e
+  if [[ "$status" != "$expected_status" ]]; then
+    printf 'probe ''' + str(probe_number) + r''' expected status %s with inactive unit %s, got %s\n' \
+      "$expected_status" "${inactive_unit:-none}" "$status" >&2
+    exit 96
+  fi
+}
+run_probe '' 0
+for inactive_unit in ''' + " ".join(ACTIVATION_UNITS) + r'''; do
+  run_probe "$inactive_unit" 1
+done
+printf 'activation-liveness-probe-checked probe=''' + str(probe_number) + r'''\n'
+'''
+        result = run_bash(harness)
+        assert b"activation-liveness-probe-checked" in result.stdout
 
 
 def test_wsl_launcher_policy(launcher: str, env_loader: str) -> None:
@@ -734,15 +831,6 @@ def test_rendered_verifier_systemd_isolation() -> None:
 set -Eeuo pipefail
 source_root="$1"
 unit_name="$2"
-test_root=$(mktemp -d /srv/degen-dogs-task7.XXXXXX)
-unit_dir="$test_root/units"
-repo_dir="$test_root/repo"
-log_dir="$test_root/log"
-lock_dir="$test_root/lock"
-run_output="$test_root/systemd-run.log"
-test_user=degendogs
-test_group=$(id -gn "$test_user")
-test "$(id -u "$test_user")" != 0
 cleanup_status=0
 cleanup() {
   prior_status=$?
@@ -753,7 +841,7 @@ cleanup() {
   systemctl stop "$unit_name" >/dev/null 2>&1 || true
   systemctl reset-failed "$unit_name" >/dev/null 2>&1 || true
   load_state=$(systemctl show --property=LoadState --value "$unit_name" 2>/dev/null || true)
-  if (( prior_status != 0 )) && [[ -f "$run_output" ]]; then
+  if (( prior_status != 0 )) && [[ -n "${run_output:-}" && -f "$run_output" ]]; then
     sed 's/^/systemd-run: /' "$run_output" >&2 || true
   fi
   case "$test_root" in
@@ -767,7 +855,20 @@ cleanup() {
   if (( prior_status != 0 )); then exit "$prior_status"; fi
   exit "$cleanup_status"
 }
+test_root=$(mktemp -d /srv/degen-dogs-task7.XXXXXX)
 trap cleanup EXIT
+if [[ "${3:-}" == force-prerequisite-failure ]]; then
+  printf 'forced isolation prerequisite failure\n' >&2
+  false
+fi
+unit_dir="$test_root/units"
+repo_dir="$test_root/repo"
+log_dir="$test_root/log"
+lock_dir="$test_root/lock"
+run_output="$test_root/systemd-run.log"
+test_user=degendogs
+test_group=$(id -gn "$test_user")
+test "$(id -u "$test_user")" != 0
 
 test "$(ps -p 1 -o comm=)" = systemd
 test "$(stat -f -c %T /srv)" = 'ext2/ext3'
@@ -862,6 +963,25 @@ test ! -e "$repo_dir/forbidden-write"
 test ! -e "$log_dir/isolation-escaped"
 printf 'rendered-verifier-isolation-denied unit=%s status=%s\n' "$unit_name" "$run_status"
 '''
+    assert harness.index("test_root=$(mktemp -d /srv/degen-dogs-task7.XXXXXX)") < harness.index(
+        "trap cleanup EXIT"
+    ) < harness.index('test_group=$(id -gn "$test_user")')
+    prerequisite_failure = subprocess.run(
+        [*command, "force-prerequisite-failure"],
+        input=harness.encode("utf-8"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        timeout=60,
+    )
+    prerequisite_output = prerequisite_failure.stdout.decode("utf-8", errors="strict")
+    assert prerequisite_failure.returncode != 0, "forced prerequisite failure unexpectedly succeeded"
+    assert "load=not-found temp_absent=yes" in prerequisite_output, (
+        "forced prerequisite cleanup was not proven\n"
+        f"stdout={prerequisite_output}\n"
+        f"stderr={prerequisite_failure.stderr.decode('utf-8', errors='replace')}"
+    )
+    print(prerequisite_output.strip())
     result = subprocess.run(
         command,
         input=harness.encode("utf-8"),
@@ -1200,6 +1320,7 @@ def test() -> None:
     assert "if ($currentTask.State -ne 'Running')" in activation_success
     assert "The final activation liveness proof failed" in activation_success
     test_health_timer_activation(powershell)
+    test_activation_liveness_probes_reject_each_inactive_unit(powershell)
 
     assert "6F71F525282841EEDAF851B42F59B5F99B1BE0B4" in powershell
     key_download = powershell.index("nodesource-repo.gpg.key")

@@ -2413,7 +2413,9 @@ install -o root -g root -m 0644 "$active_tmp" /run/degen-dogs/activation-enabled
 rm -f -- "$active_tmp"
 systemctl start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
 systemctl restart degen-dogs-health.timer
-systemctl is-active --quiet "${activation_units[@]}"
+for unit in "${activation_units[@]}"; do
+  systemctl is-active --quiet "$unit"
+done
 for unit in "${triggered_services[@]}"; do
   test "$(systemctl show --property=LoadState --value "$unit")" = loaded
   if systemctl is-failed --quiet "$unit"; then
@@ -2434,7 +2436,7 @@ fi
             $currentTask = Get-ExactScheduledTask -Name $TaskName
             if ($currentTask -and $currentTask.State -eq 'Running') {
                 & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
-                    'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
+                    'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer; do systemctl is-active --quiet "$unit" || exit 1; done && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
                 if ($LASTEXITCODE -eq 0) {
                     $publisherReady = $true
                     break
@@ -2456,7 +2458,7 @@ fi
             -Name $TaskName `
             -ExpectedEnabled $true
         & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
-            'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
+            'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer; do systemctl is-active --quiet "$unit" || exit 1; done && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
         if ($LASTEXITCODE -ne 0) {
             throw 'The final activation liveness proof failed: the anchor, activation gate, or publisher units are no longer healthy.'
         }

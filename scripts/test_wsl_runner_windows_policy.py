@@ -77,6 +77,15 @@ def bash_array(source: str, variable: str) -> tuple[str, ...]:
     return tuple(shlex.split(match.group("body"), comments=True, posix=True))
 
 
+def activation_liveness_probes(source: str) -> tuple[str, ...]:
+    return tuple(
+        re.findall(
+            r"(?m)^[ \t]*'(?P<probe>test -f /run/degen-dogs/anchor-ready.*?)'[ \t]*$",
+            source,
+        )
+    )
+
+
 def run_policy_harness(body: str) -> subprocess.CompletedProcess[str]:
     installer = ps_literal(str(INSTALLER))
     harness = rf"""
@@ -1386,6 +1395,69 @@ def test_embedded_linux_lifecycle_inventories_are_symmetric() -> None:
         assert liveness.count(unit) >= 2, unit
     for service in SERVICE_UNITS[-2:]:
         assert liveness.count(service) >= 2, service
+
+    probes = activation_liveness_probes(source)
+    assert len(probes) == 2
+    for probe_number, probe in enumerate(probes, start=1):
+        harness = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+trap 'command rm -rf -- "$test_root"' EXIT
+cat >"$test_root/probe.sh" <<'ACTIVATION_PROBE'
+''' + probe + r'''
+ACTIVATION_PROBE
+test() {
+  if [[ "$#" == 2 && "$1" == -f ]]; then return 0; fi
+  builtin test "$@"
+}
+systemctl() {
+  case "${1:-}" in
+    is-active)
+      shift
+      [[ "${1:-}" == --quiet ]] && shift
+      for queried_unit in "$@"; do
+        [[ "$queried_unit" != "$inactive_unit" ]] && return 0
+      done
+      return 3
+      ;;
+    show) printf 'loaded\n' ;;
+    is-failed) return 1 ;;
+    *) return 97 ;;
+  esac
+}
+export -f test systemctl
+run_probe() {
+  inactive_unit="$1"
+  expected_status="$2"
+  export inactive_unit
+  set +e
+  bash -Eeuo pipefail "$test_root/probe.sh"
+  status=$?
+  set -e
+  if [[ "$status" != "$expected_status" ]]; then
+    printf 'probe ''' + str(probe_number) + r''' expected status %s with inactive unit %s, got %s\n' \
+      "$expected_status" "${inactive_unit:-none}" "$status" >&2
+    exit 96
+  fi
+}
+run_probe '' 0
+for inactive_unit in ''' + " ".join(ACTIVATION_UNITS) + r'''; do
+  run_probe "$inactive_unit" 1
+done
+'''
+        result = subprocess.run(
+            ["bash", "-s", "--"],
+            input=harness.encode("utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+            timeout=15,
+        )
+        assert result.returncode == 0, (
+            f"activation liveness probe {probe_number} accepted an inactive unit\n"
+            f"stdout={result.stdout.decode('utf-8', errors='replace')}\n"
+            f"stderr={result.stderr.decode('utf-8', errors='replace')}"
+        )
 
 
 def main() -> None:
