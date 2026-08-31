@@ -41,6 +41,7 @@ NEW_ASSETS = (
     "config/systemd/degen-dogs-pages-verifier.path.in",
     "config/systemd/degen-dogs-pages-verifier.timer",
     "scripts/runner_publication_state.py",
+    "scripts/publication_coverage.py",
     "scripts/drain_publication_queue.py",
     "scripts/verify_pages_deployment.py",
 )
