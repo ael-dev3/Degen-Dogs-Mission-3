@@ -405,12 +405,13 @@ printf 'health-timer-activation-checked inactive=%s status=%s\n' "${inactive_uni
         assert b"health-timer-activation-checked" in result.stdout
 
     health_timer_activation_regression("5min", "", 0, verify_complete_calls=True)
-    health_timer_activation_regression(
-        "5min",
-        "degen-dogs-pages-verifier.timer",
-        3,
-        verify_complete_calls=False,
-    )
+    for inactive_unit in ACTIVATION_UNITS:
+        health_timer_activation_regression(
+            "5min",
+            inactive_unit,
+            3,
+            verify_complete_calls=False,
+        )
     health_timer_activation_regression("0", "", 1, verify_complete_calls=True)
 
 
