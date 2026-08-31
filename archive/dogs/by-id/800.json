@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#283/694",
-      "rank": 283,
+      "display": "#282/695",
+      "rank": 282,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 800 dog #800 800 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.04 $15.04 2026-08-12t16:03:19z 0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626 0x373ca217764a26d00c507d8b1eeb2506eba9683d26ce994884831357ed153ace #283/694 generated auction feed 0x567528ee6302a6af32850cd8b7a79abe4097cf583eb4489556a4261e31719bb3 0xed02e5e014ce1ec69174dd139bbc85f001d37e32a19ba3c9fe2d9286579bc71e background: none (91.6%) background none body: blue (8.9%) body blue neck: none (41.5%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.6%) ears earbuds head: hoodie (4.8%) head hoodie eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 800 dog #800 800 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.008 eth 8000000000000000 15.04 $15.04 2026-08-12t16:03:19z 0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626 0x373ca217764a26d00c507d8b1eeb2506eba9683d26ce994884831357ed153ace #282/695 generated auction feed 0x567528ee6302a6af32850cd8b7a79abe4097cf583eb4489556a4261e31719bb3 0xed02e5e014ce1ec69174dd139bbc85f001d37e32a19ba3c9fe2d9286579bc71e background: none (91.5%) background none body: blue (8.9%) body blue neck: none (41.4%) neck none mouth: none (68.6%) mouth none ears: earbuds (32.5%) ears earbuds head: hoodie (4.7%) head hoodie eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49880626,
       "block_time_utc": "2026-08-12T16:03:19Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,12 +101,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: Hoodie (4.8%)",
+        "display": "Head: Hoodie (4.7%)",
         "trait_type": "Head",
         "value": "Hoodie"
       },

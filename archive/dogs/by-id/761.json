@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#478/694",
-      "rank": 478,
+      "display": "#476/695",
+      "rank": 476,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 761 dog #761 761 mission 3 mission 3 base settled 0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d @aliyaindah aliyaindah 0.011 eth 11000000000000000 18.68 $18.68 2026-07-03t02:10:29z 0x280586b0d9c4847d5503e4022a84578c8d8a9340722f4b1310069f3b1e5b98e2 0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5 #478/694 generated auction feed 0x2e1f1e6845f6dc41f79028ea3ebbcba323ca9fe0f1b7099d96f3d6a4dc9e697c 0x6b67370bd505bdc3939be47b3474fe8849a4e9cdc9597ef8fb55c1863bb44178 0x163227bca87cbe8c145f8294c90de0c85fb2edda79ddc693375a4f017bc10ef7 background: none (91.6%) background none body: grey (12.8%) body grey neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.6%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.5%) head redmohawk eyes: vrgoggles (10.7%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 761 dog #761 761 mission 3 mission 3 base settled 0x182a4e4759e9f841682dc7d89b5cccd6ccb6a82d @aliyaindah aliyaindah 0.011 eth 11000000000000000 18.68 $18.68 2026-07-03t02:10:29z 0x280586b0d9c4847d5503e4022a84578c8d8a9340722f4b1310069f3b1e5b98e2 0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5 #476/695 generated auction feed 0x2e1f1e6845f6dc41f79028ea3ebbcba323ca9fe0f1b7099d96f3d6a4dc9e697c 0x6b67370bd505bdc3939be47b3474fe8849a4e9cdc9597ef8fb55c1863bb44178 0x163227bca87cbe8c145f8294c90de0c85fb2edda79ddc693375a4f017bc10ef7 background: none (91.5%) background none body: grey (12.8%) body grey neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.6%) mouth none ears: loopearring (27.3%) ears loopearring head: redmohawk (7.5%) head redmohawk eyes: vrgoggles (10.6%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48127641,
       "block_time_utc": "2026-07-03T02:10:29Z",
@@ -82,7 +82,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -92,7 +92,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -112,7 +112,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: VRGoggles (10.7%)",
+        "display": "Eyes: VRGoggles (10.6%)",
         "trait_type": "Eyes",
         "value": "VRGoggles"
       }

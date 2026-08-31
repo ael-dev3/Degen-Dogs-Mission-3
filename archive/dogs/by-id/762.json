@@ -58,13 +58,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#647/694",
-      "rank": 647,
+      "display": "#649/695",
+      "rank": 649,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 762 dog #762 762 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00934 eth 9340000000000000 16.41 $16.41 2026-07-04t02:16:27z 0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5 0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e #647/694 generated auction feed 0x6cdfee81f95a35e526e3f62a87b691a1a21b72c834d5ddad708b4262175b49de 0x625aff4604bd41507f73e543508e9d083a167ce76d88ca988cb9578a859de1a4 0xd0b08c6466badeee0ab4c56e555aaf40b6952cd1568d8f5d939a3be3d1051d1e 0x97204d7a6d45beeb02f608ef633f9c90969f7d712a08c6afa14705b7b5cdb09b 0x23460d6ed980b4539546434d2f5effadacc40a4b1676656889a2dc2b0e7a2975 0x9052a0e63aaf830e5b18f4f120936c97941755077c8755308df5fd1a8ce5659d 0x4b7590e2beabf1a886e7df1c4e4f1ac65420c96147578935635f807063cee0bc background: none (91.6%) background none body: grey (12.8%) body grey neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.6%) mouth none ears: earbuds (32.6%) ears earbuds head: baseballcap (10.2%) head baseballcap eyes: none (17.6%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 762 dog #762 762 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00934 eth 9340000000000000 16.41 $16.41 2026-07-04t02:16:27z 0xda84fff479298b5f0d6515d6e1986d43537ca5251d2dde5bf5a8850c2cd9e1c5 0x9bbc60e8d2c19e174533f6fc5337d60cd4bd336c49585dde92b4be07aa793d3e #649/695 generated auction feed 0x6cdfee81f95a35e526e3f62a87b691a1a21b72c834d5ddad708b4262175b49de 0x625aff4604bd41507f73e543508e9d083a167ce76d88ca988cb9578a859de1a4 0xd0b08c6466badeee0ab4c56e555aaf40b6952cd1568d8f5d939a3be3d1051d1e 0x97204d7a6d45beeb02f608ef633f9c90969f7d712a08c6afa14705b7b5cdb09b 0x23460d6ed980b4539546434d2f5effadacc40a4b1676656889a2dc2b0e7a2975 0x9052a0e63aaf830e5b18f4f120936c97941755077c8755308df5fd1a8ce5659d 0x4b7590e2beabf1a886e7df1c4e4f1ac65420c96147578935635f807063cee0bc background: none (91.5%) background none body: grey (12.8%) body grey neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.6%) mouth none ears: earbuds (32.5%) ears earbuds head: baseballcap (10.2%) head baseballcap eyes: none (17.6%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48171020,
       "block_time_utc": "2026-07-04T02:16:27Z",
@@ -86,7 +86,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -106,7 +106,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

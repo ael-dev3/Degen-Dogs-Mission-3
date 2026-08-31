@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#497/694",
-      "rank": 497,
+      "display": "#503/695",
+      "rank": 503,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-21t16:51:53z 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4 #497/694 generated auction feed 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 background: none (91.6%) background none body: redbrown (15.4%) body redbrown neck: none (41.5%) neck none mouth: none (68.6%) mouth none ears: loopearring (27.2%) ears loopearring head: redmohawk (7.5%) head redmohawk eyes: eyepatch (7.8%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 779 dog #779 779 mission 3 mission 3 base settled 0x46e9beef5dc68dff095eca56dadf90247f1af7ef @stemo.eth stemo.eth 0.00991 eth 9910000000000000 19.11 $19.11 2026-07-21t16:51:53z 0xb64bce85a2b23d0c42f062bd0fff5d1959d02626a42dca37182e0ed4e74effd5 0xafa8ed8fa9b83e62f5397d325eeb12bf468b43c35cafde354da4c3ccf32cf9c4 #503/695 generated auction feed 0x0468eb4549ef1615828fcccec0ab89f4a1a6fb07945a8bffb3792d19eaac80c6 0xa073983e522f5d7ac78cfdf47c1585f77ff836dce123e5cbe16423389d7a51e8 background: none (91.5%) background none body: redbrown (15.4%) body redbrown neck: none (41.4%) neck none mouth: none (68.6%) mouth none ears: loopearring (27.3%) ears loopearring head: redmohawk (7.5%) head redmohawk eyes: eyepatch (7.9%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48931683,
       "block_time_utc": "2026-07-21T16:51:53Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.2%)",
+        "display": "Ears: LoopEarring (27.3%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -111,7 +111,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: EyePatch (7.8%)",
+        "display": "Eyes: EyePatch (7.9%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }

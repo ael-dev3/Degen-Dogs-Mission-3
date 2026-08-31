@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#125/694",
-      "rank": 125,
+      "display": "#124/695",
+      "rank": 124,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 799 dog #799 799 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.00849 eth 8490000000000000 15.89 $15.89 2026-08-11t16:00:33z 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626 #125/694 generated auction feed 0x4e1fa22c4944ccb2b72a40025d752f96a31c56965eed0c10bf89beaa1b75f239 0x5717a95a54210e70f0243b7fc98e82f85bb846cff6f62d37351d4966f8f9c8b4 0x5eaf0e5bd2badee803194b9256510e4efd01f70adc14fd73b93d70c3d8e902e9 background: none (91.6%) background none body: orange (8.4%) body orange neck: redcollar (29.3%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: earbuds (32.6%) ears earbuds head: partyhat (4.2%) head partyhat eyes: none (17.6%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 799 dog #799 799 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.00849 eth 8490000000000000 15.89 $15.89 2026-08-11t16:00:33z 0xcfe7fd0dff6cc77fb9d08c8c1eedca95a44f070cf1798de70beeecdd2b83a878 0x49aa883ad35fa60b66acef615f86e9fcdfa0fbd909d58d179d99baf51aacf626 #124/695 generated auction feed 0x4e1fa22c4944ccb2b72a40025d752f96a31c56965eed0c10bf89beaa1b75f239 0x5717a95a54210e70f0243b7fc98e82f85bb846cff6f62d37351d4966f8f9c8b4 0x5eaf0e5bd2badee803194b9256510e4efd01f70adc14fd73b93d70c3d8e902e9 background: none (91.5%) background none body: orange (8.3%) body orange neck: redcollar (29.2%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: earbuds (32.5%) ears earbuds head: partyhat (4.2%) head partyhat eyes: none (17.6%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 49837343,
       "block_time_utc": "2026-08-11T16:00:33Z",
@@ -82,17 +82,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Orange (8.4%)",
+        "display": "Body: Orange (8.3%)",
         "trait_type": "Body",
         "value": "Orange"
       },
       {
-        "display": "Neck: RedCollar (29.3%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -102,7 +102,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#529/694",
-      "rank": 529,
+      "display": "#530/695",
+      "rank": 530,
       "scope": "base_existing",
-      "total": 694
+      "total": 695
     },
     "schema_version": 1,
-    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z 0xdb57f06e2c234e6f50def74eb9ccba6e5b0aed26c7d7af33ec80a30839e50858 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 #529/694 generated auction feed 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d background: none (91.6%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.2%) neck goldnecklace mouth: none (68.6%) mouth none ears: earbuds (32.6%) ears earbuds head: crazyhair (6.8%) head crazyhair eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 777 dog #777 777 mission 3 mission 3 base settled 0x7e94850ea092dd314c0519ad675885b50564dadb @anotherplanet anotherplanet 0.00991 eth 9910000000000000 18.44 $18.44 2026-07-19t13:04:07z 0xdb57f06e2c234e6f50def74eb9ccba6e5b0aed26c7d7af33ec80a30839e50858 0xc126c6bc78afe5234e4c55a8b3677f2d90b349154c793fcdf5154b0da016c948 #530/695 generated auction feed 0x6401f6ce5e92dcef561249c460fe353a2e9c27daabe198903ed6d806b15fd0b8 0xd1c5ae2401ee4c254f739c1afcb9388329a3f8149b0df179c478e45b697e402d background: none (91.5%) background none body: redbrown (15.4%) body redbrown neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.6%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (6.8%) head crazyhair eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 48838450,
       "block_time_utc": "2026-07-19T13:04:07Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.6%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -91,7 +91,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

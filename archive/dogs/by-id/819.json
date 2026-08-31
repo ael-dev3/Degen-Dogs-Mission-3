@@ -1,0 +1,128 @@
+{
+  "generated_at_utc": "2026-08-30T22:17:20Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-08-30T21:57:39Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-08-31",
+      "native": "0.005",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "5000000000000000",
+      "usd_estimate": "12.22647500",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$12.23",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-08-31",
+      "usd_estimate_price_usd": "2445.295",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 50668848,
+      "block_time_utc": "2026-08-30T21:57:23Z",
+      "tx_hash": "0xb398bcfc315397494e8f26c5900ed789e62d93ae2c660db072bacec9a67c4850",
+      "tx_url": "https://basescan.org/tx/0xb398bcfc315397494e8f26c5900ed789e62d93ae2c660db072bacec9a67c4850"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 1,
+      "last_bid_time_utc": "2026-08-30T21:57:39Z",
+      "unique_bidder_count": 1
+    },
+    "bid_tx_hashes": [
+      "0x774b14a790a2ae965acdb185c24d032cd66683bd234623013e2e44a265de28ab"
+    ],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 819,
+    "dog_image_url": "https://api.degendogs.club/images/819.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/819",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0xb398bcfc315397494e8f26c5900ed789e62d93ae2c660db072bacec9a67c4850",
+      "dog_page": "https://degendogs.club/#dog819",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/819",
+      "repo_archive": "archive/dogs/by-id/819.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#171/695",
+      "rank": 171,
+      "scope": "base_existing",
+      "total": 695
+    },
+    "schema_version": 1,
+    "search_text": "dog 819 dog #819 819 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.23000000 $12.23 2026-08-30t21:57:39z 0xb398bcfc315397494e8f26c5900ed789e62d93ae2c660db072bacec9a67c4850 #171/695 generated auction feed 0x774b14a790a2ae965acdb185c24d032cd66683bd234623013e2e44a265de28ab background: halo (8.5%) background halo body: black (11.7%) body black neck: goldnecklace (19.3%) neck goldnecklace mouth: none (68.6%) mouth none ears: loopearring (27.3%) ears loopearring head: stripedbeanie (8.1%) head stripedbeanie eyes: eyepatch (7.9%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: Halo (8.5%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: Black (11.7%)",
+        "trait_type": "Body",
+        "value": "Black"
+      },
+      {
+        "display": "Neck: GoldNecklace (19.3%)",
+        "trait_type": "Neck",
+        "value": "GoldNecklace"
+      },
+      {
+        "display": "Mouth: None (68.6%)",
+        "trait_type": "Mouth",
+        "value": "None"
+      },
+      {
+        "display": "Ears: LoopEarring (27.3%)",
+        "trait_type": "Ears",
+        "value": "LoopEarring"
+      },
+      {
+        "display": "Head: StripedBeanie (8.1%)",
+        "trait_type": "Head",
+        "value": "StripedBeanie"
+      },
+      {
+        "display": "Eyes: EyePatch (7.9%)",
+        "trait_type": "Eyes",
+        "value": "EyePatch"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "@0xael.eth",
+      "farcaster_fid": null,
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+    }
+  },
+  "schema_version": 1
+}
