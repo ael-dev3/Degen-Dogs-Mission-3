@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#239/695",
-      "rank": 239,
+      "display": "#238/696",
+      "rank": 238,
       "scope": "base_existing",
-      "total": 695
+      "total": 696
     },
     "schema_version": 1,
-    "search_text": "dog 431 dog #431 431 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 2445 degen 0x62e0c287a8d4433c86000347f3854627e8158ccf27cb868753f949882e019067 0x114cfb7236b7a4471e1565814017faf080ac6d081ba90df69029803afde13238 #239/695 background: none; body: orange; neck: studdedcollar; mouth: none; ears: goldearring; head: stripedbeanie; eyes: bluelasereyes 0x5133bc1404829d6de73d88eddf7a2458ba09218ea7817e66b2735bf024ccde90 0xaece28c55f41b7fa3903553d52bde5d43f42ad81ed42d2103c8fd3a827455314 0xd70a88821be0e1c1ede2c24d0f992dcf4469f77b4bdc94264cf5fe387a5097be chain_logs contract_getters",
+    "search_text": "dog 431 dog #431 431 mission 2 mission 2 degen chain settled 0xf561592d05174512905cece6f00efc52423adc3c 0xf561…dc3c 2445 degen 0x62e0c287a8d4433c86000347f3854627e8158ccf27cb868753f949882e019067 0x114cfb7236b7a4471e1565814017faf080ac6d081ba90df69029803afde13238 background: none; body: orange; neck: studdedcollar; mouth: none; ears: goldearring; head: stripedbeanie; eyes: bluelasereyes 0x5133bc1404829d6de73d88eddf7a2458ba09218ea7817e66b2735bf024ccde90 0xaece28c55f41b7fa3903553d52bde5d43f42ad81ed42d2103c8fd3a827455314 0xd70a88821be0e1c1ede2c24d0f992dcf4469f77b4bdc94264cf5fe387a5097be chain_logs contract_getters #238/696 background: none (91.5%) body: orange (8.3%) neck: studdedcollar (10.1%) mouth: none (68.7%) ears: goldearring (14.2%) head: stripedbeanie (8.0%) eyes: bluelasereyes (11.5%)",
     "settlement": {
       "block_number": 26079069,
       "block_time_utc": "2025-07-15T16:25:14Z",
@@ -95,7 +95,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -105,7 +105,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: StripedBeanie (8.1%)",
+        "display": "Head: StripedBeanie (8.0%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

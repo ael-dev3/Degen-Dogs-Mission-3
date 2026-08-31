@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#628/695",
+      "display": "#628/696",
       "rank": 628,
       "scope": "base_existing",
-      "total": 695
+      "total": 696
     },
     "schema_version": 1,
-    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.05 $54.05 2026-06-09t20:37:53z 0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e #628/695 generated auction feed 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 background: none (91.5%) background none body: redbrown (15.4%) body redbrown neck: none (41.4%) neck none mouth: tongue (9.9%) mouth tongue ears: earbuds (32.5%) ears earbuds head: none (20.1%) head none eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 738 dog #738 738 mission 3 mission 3 base settled 0x23d660548cd61432537592dcea15b059605c9242 @kenshiking.eth kenshiking.eth 0.033 eth 33000000000000000 54.05 $54.05 2026-06-09t20:37:53z 0xc3376e2b92c0b20596c147156364b7dadb8a9ed220589d7baa352868c0a2059a 0xab40afc2427ed2399b2c30ba0f9e080475f450431bc77253e4fdd53823dfee2e generated auction feed 0x77b59c3afc962c4a70625743457b94805c220c925f59a887b116c0b0abaf11ff 0x8484e67ca4199b8e4c26bfca228e9d66a6881d8d93bc4b7a560984df5e769203 0x33446fc09dbddc495392de6de72aaf6f753ea6866561abbafb1199a10dc790c3 0x0c79f83bacf4cf6032be354d8dded9eaa37e95ce279c05f5c38ab2f3a23d0919 background none body redbrown neck none mouth tongue ears earbuds head none eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #628/696 background: none (91.5%) body: redbrown (15.4%) neck: none (41.5%) mouth: tongue (9.9%) ears: earbuds (32.6%) head: none (20.3%) eyes: sunglasses (13.4%)",
     "settlement": {
       "block_number": 47124063,
       "block_time_utc": "2026-06-09T20:37:53Z",
@@ -93,7 +93,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.6%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

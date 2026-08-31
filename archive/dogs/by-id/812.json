@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#644/695",
-      "rank": 644,
+      "display": "#645/696",
+      "rank": 645,
       "scope": "base_existing",
-      "total": 695
+      "total": 696
     },
     "schema_version": 1,
-    "search_text": "dog 812 dog #812 812 mission 3 mission 3 base settled 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00661 eth 6610000000000000 16.28 $16.28 2026-08-24t20:58:23z 0x098de1109dff400406abe4a7571b87bd66a36e78c8b4f0e3b2930924d7ffc360 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 #644/695 generated auction feed 0x2f452d08676c61ccf4aec42711743831ab7ddff73a6f4c88027883f5725729e9 0x169a8d864b2275bf36a18990dc01038fd806c08d95079103d46a6ef0ddb79d4b 0x01e94a7c25c864b702e48d055c4f36496fcb1384f231548965c4825c3d3df3b5 background: none (91.5%) background none body: dalmation (9.2%) body dalmation neck: none (41.4%) neck none mouth: none (68.6%) mouth none ears: none (25.9%) ears none head: none (20.1%) head none eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 812 dog #812 812 mission 3 mission 3 base settled 0x13dbc7d5ace21d1eeb5f884666e284138fbff620 @kzl27.eth kzl27.eth 0.00661 eth 6610000000000000 16.28 $16.28 2026-08-24t20:58:23z 0x098de1109dff400406abe4a7571b87bd66a36e78c8b4f0e3b2930924d7ffc360 0xabe629d548d8d5e873ea60172c71ffe181367176634c3767de0299be93b12e62 generated auction feed 0x2f452d08676c61ccf4aec42711743831ab7ddff73a6f4c88027883f5725729e9 0x169a8d864b2275bf36a18990dc01038fd806c08d95079103d46a6ef0ddb79d4b 0x01e94a7c25c864b702e48d055c4f36496fcb1384f231548965c4825c3d3df3b5 background none body dalmation neck none mouth none ears none head none eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #645/696 background: none (91.5%) body: dalmation (9.2%) neck: none (41.5%) mouth: none (68.7%) ears: none (25.9%) head: none (20.3%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": 50407878,
       "block_time_utc": "2026-08-24T20:58:23Z",
@@ -93,12 +93,12 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "None"
       },
       {
-        "display": "Head: None (20.1%)",
+        "display": "Head: None (20.3%)",
         "trait_type": "Head",
         "value": "None"
       },

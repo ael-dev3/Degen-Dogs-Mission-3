@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#436/695",
+      "display": "#436/696",
       "rank": 436,
       "scope": "base_existing",
-      "total": 695
+      "total": 696
     },
     "schema_version": 1,
-    "search_text": "dog 568 dog #568 568 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12725 degen 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f #436/695 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: headphones; eyes: vrgoggles 0x3ac6fe663f2458a43cd0368f3b7a981ce162535d43c929edd2412ac2144f3d15 0x83c601dd0fe39a40a776650c5217b0f7d5e82cb5ca73d1e04d2bfbc1e82c5e6b chain_logs contract_getters",
+    "search_text": "dog 568 dog #568 568 mission 2 mission 2 degen chain settled 0xc7aab24ede583b0dc9041343ae51466bb86a1ab7 @neghvar.eth neghvar.eth 12725 degen 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b 0x1d80aedc20bce7d213dc1effb6b17595e049b4468b1b1a21be33aa9da366e80f background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: headphones; eyes: vrgoggles 0x3ac6fe663f2458a43cd0368f3b7a981ce162535d43c929edd2412ac2144f3d15 0x83c601dd0fe39a40a776650c5217b0f7d5e82cb5ca73d1e04d2bfbc1e82c5e6b chain_logs contract_getters #436/696 background: none (91.5%) body: redbrown (15.4%) neck: redcollar (29.2%) mouth: none (68.7%) ears: goldearring (14.2%) head: headphones (6.8%) eyes: vrgoggles (10.6%)",
     "settlement": {
       "block_number": 26591436,
       "block_time_utc": "2025-12-16T06:15:21Z",
@@ -94,7 +94,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
