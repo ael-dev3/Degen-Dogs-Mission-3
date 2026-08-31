@@ -126,8 +126,9 @@ The PowerShell bootstrap installs an isolated Ubuntu 24.04 WSL2 distro,
 enables systemd, installs Node 22/Python/Git/runtime packages, creates the
 unprivileged `degendogs` Linux user, clones the public repository to ext4 at
 `/srv/degen-dogs/repo`, creates a hash-locked Python venv, installs npm
-dependencies, generates a unique deploy key, and registers a **disabled**
-Windows keepalive task.
+dependencies, runs the nonrecursive WSL publication regression suite and build,
+generates a unique deploy key, and registers a **disabled** Windows keepalive
+task.
 
 Choose the exact 40-character commit containing the reviewed runner assets,
 then make a separate detached checkout for that object. For the recommended
@@ -317,6 +318,21 @@ unprivileged clone to that same SHA. It refuses dirty, non-main, divergent,
 unexpected-origin, locally-ahead, hidden-index, or byte-different clones.
 Activation separately fetches the configured SSH origin and requires
 `HEAD == origin/main`.
+
+The dependency/test pass removes any earlier receipt before it starts. It runs
+the publication-state, watcher, queue-drainer, detached-verifier, publisher,
+telemetry, runner-health, and delayed-publication integration tests once as the
+unprivileged runner, then performs the dashboard build. Only that complete pass
+may atomically create
+`/var/lib/degen-dogs/bootstrap-test-receipt.json`. The private root-owned receipt
+is bound to the exact runtime commit, the exact frozen trusted-installer commit,
+and its strict schema. The separate `-Activate` pass uses `--skip-bootstrap` and
+refuses a missing, legacy, malformed, linked, non-private, wrong-schema, or
+commit-mismatched receipt; changing the trusted installer therefore invalidates
+the previous test policy even when the runtime commit is unchanged. Portable
+asset checks, Windows policy checks, and the privileged rendered-systemd
+isolation proof remain separate release gates and are not recursively executed
+by this bootstrap suite.
 
 On upgrades, the bootstrap first removes the persistent/runtime activation
 markers, disables the keepalive, disables every timer and path unit, waits for

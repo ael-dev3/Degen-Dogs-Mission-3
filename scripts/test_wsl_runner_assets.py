@@ -52,6 +52,16 @@ SERVICE_UNITS = (
 NEW_TRIGGER_UNITS = ACTIVATION_UNITS[-4:]
 NEW_TRIGGERED_SERVICES = SERVICE_UNITS[-2:]
 PRIVILEGED_ISOLATION_FLAG = "--require-rendered-systemd-isolation"
+BOOTSTRAP_CORE_TESTS = (
+    "scripts/test_runner_publication_state.py",
+    "scripts/test_watch_mission3_auction.py",
+    "scripts/test_drain_publication_queue.py",
+    "scripts/test_verify_pages_deployment.py",
+    "scripts/test_refresh_and_publish.sh",
+    "scripts/test_refresh_telemetry.py",
+    "scripts/test_degen_dogs_runner_health.py",
+    "scripts/test_wsl_publication_integration.py",
+)
 
 
 def text(relative: str) -> str:
@@ -103,6 +113,217 @@ def run_bash(source: str, *, expected_returncode: int = 0) -> subprocess.Complet
         f"stderr={result.stderr.decode('utf-8', errors='replace')}"
     )
     return result
+
+
+def marked_payload(source: str, start_marker: str, end_marker: str) -> str:
+    start = source.index(start_marker) + len(start_marker)
+    end = source.index(end_marker, start)
+    return source[start:end].strip("\n")
+
+
+def python_payload_with_marker(source: str, marker: str) -> str:
+    marker_offset = source.index(marker)
+    payload_start = source.rfind("<<'PY'\n", 0, marker_offset)
+    assert payload_start >= 0, f"missing Python heredoc before {marker}"
+    payload_start += len("<<'PY'\n")
+    payload_end = source.index("\nPY", marker_offset)
+    return source[payload_start:payload_end]
+
+
+def test_bootstrap_receipt_gate(installer: str) -> None:
+    core = marked_payload(
+        installer,
+        "# WSL_BOOTSTRAP_CORE_START",
+        "# WSL_BOOTSTRAP_CORE_END",
+    )
+    for suite in BOOTSTRAP_CORE_TESTS:
+        assert installer.count(suite) == 1, f"bootstrap suite is not single-run: {suite}"
+    expected_order = "|".join(BOOTSTRAP_CORE_TESTS)
+    harness = r'''
+set -Eeuo pipefail
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+repo_dir="$test_root/repo"
+state_dir="$test_root/state"
+tested_receipt_path="$state_dir/bootstrap-test-receipt.json"
+legacy_tested_sha_path="$state_dir/tested-main.sha"
+expected_head=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+trusted_installer_commit=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bootstrap_receipt_schema_version=1
+runner_user=degendogs
+mkdir -p "$repo_dir/.venv/bin" "$repo_dir/scripts/runtime-bin" "$state_dir"
+printf '#!/bin/sh\nexit 0\n' >"$repo_dir/.venv/bin/python3"
+chmod 0755 "$repo_dir/.venv/bin/python3"
+calls="$test_root/calls"
+fail_needle=''
+
+run_as_runner() {
+  printf 'dependency:%s\n' "$*" >>"$calls"
+  return 0
+}
+run_as_runner_runtime() {
+  printf 'runtime:%s\n' "$*" >>"$calls"
+  if [[ -n "$fail_needle" && "$*" == *"$fail_needle"* ]]; then
+    return 73
+  fi
+  return 0
+}
+write_bootstrap_receipt() {
+  printf 'receipt\n' >"$tested_receipt_path"
+}
+bootstrap_under_test() {
+''' + core + r'''
+}
+
+run_case() {
+  fail_needle="$1"
+  : >"$calls"
+  printf 'stale\n' >"$tested_receipt_path"
+  printf 'legacy\n' >"$legacy_tested_sha_path"
+  set +e
+  ( set -Eeuo pipefail; bootstrap_under_test )
+  status=$?
+  set -e
+  printf 'case=%s status=%s receipt=%s legacy=%s\n' \
+    "${fail_needle:-success}" "$status" \
+    "$([[ -e "$tested_receipt_path" ]] && printf yes || printf no)" \
+    "$([[ -e "$legacy_tested_sha_path" ]] && printf yes || printf no)"
+}
+
+run_case ''
+test -f "$tested_receipt_path"
+test ! -e "$legacy_tested_sha_path"
+printf 'order='
+awk -F: '/^runtime:/ && /scripts\/test_/ {print $2}' "$calls" | \
+  sed -E 's#^.*(scripts/test_[^ ]+).*$#\1#' | paste -sd'|' -
+for suite in ''' + " ".join(BOOTSTRAP_CORE_TESTS) + r'''; do
+  test "$(grep -F -c -- "$suite" "$calls")" = 1
+done
+test "$(grep -F -c -- "npm --prefix $repo_dir run build" "$calls")" = 1
+test "$(grep -F -c -- "npm --prefix $repo_dir ci --ignore-scripts" "$calls")" = 1
+
+for suite in ''' + " ".join(BOOTSTRAP_CORE_TESTS) + r'''; do
+  run_case "$suite"
+  test ! -e "$tested_receipt_path"
+  test ! -e "$legacy_tested_sha_path"
+done
+run_case 'npm --prefix'
+test ! -e "$tested_receipt_path"
+test ! -e "$legacy_tested_sha_path"
+run_case 'run build'
+test ! -e "$tested_receipt_path"
+test ! -e "$legacy_tested_sha_path"
+'''
+    result = run_bash(harness)
+    output = result.stdout.decode("utf-8", errors="strict")
+    assert "case=success status=0 receipt=yes legacy=no" in output
+    assert f"order={expected_order}" in output
+    for suite in BOOTSTRAP_CORE_TESTS:
+        assert f"case={suite} status=73 receipt=no legacy=no" in output
+
+    assert installer.count('if [[ "$skip_bootstrap" == "1" && "$enable_now" == "1" ]]') == 1
+    activation_guard = installer.split(
+        'if [[ "$skip_bootstrap" == "1" && "$enable_now" == "1" ]]', 1
+    )[1].split("fi", 1)[0]
+    assert "validate_bootstrap_receipt" in activation_guard
+    assert "tested-main.sha" not in activation_guard
+
+    writer = python_payload_with_marker(installer, "# WSL_BOOTSTRAP_RECEIPT_WRITER")
+    validator = python_payload_with_marker(installer, "# WSL_BOOTSTRAP_RECEIPT_VALIDATOR")
+    ast.parse(writer)
+    ast.parse(validator)
+    if os.name == "nt":
+        return
+
+    with tempfile.TemporaryDirectory() as temporary_directory:
+        directory = Path(temporary_directory)
+        receipt = directory / "bootstrap-test-receipt.json"
+        runtime_commit = "a" * 40
+        trusted_commit = "b" * 40
+        schema_version = "1"
+        expected_uid = str(os.getuid())
+
+        def write_receipt() -> subprocess.CompletedProcess[bytes]:
+            return subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    writer,
+                    str(receipt),
+                    runtime_commit,
+                    trusted_commit,
+                    schema_version,
+                    expected_uid,
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+
+        def validate_receipt() -> subprocess.CompletedProcess[bytes]:
+            return subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    validator,
+                    str(receipt),
+                    runtime_commit,
+                    trusted_commit,
+                    schema_version,
+                    expected_uid,
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+
+        first = write_receipt()
+        assert first.returncode == 0, first.stderr.decode("utf-8", errors="replace")
+        first_inode = receipt.stat().st_ino
+        expected_record = {
+            "runtime_commit": runtime_commit,
+            "schema_version": 1,
+            "trusted_installer_commit": trusted_commit,
+        }
+        assert json.loads(receipt.read_text(encoding="utf-8")) == expected_record
+        assert receipt.stat().st_mode & 0o777 == 0o600
+        assert receipt.stat().st_nlink == 1
+        assert not list(directory.glob(".bootstrap-test-receipt.json.*"))
+        accepted = validate_receipt()
+        assert accepted.returncode == 0, accepted.stderr.decode("utf-8", errors="replace")
+
+        second = write_receipt()
+        assert second.returncode == 0, second.stderr.decode("utf-8", errors="replace")
+        assert receipt.stat().st_ino != first_inode, "receipt replacement was not atomic"
+
+        mutations = (
+            b"a" * 40 + b"\n",
+            b"{}\n",
+            b'{"runtime_commit":"' + b"a" * 40 + b'"}\n',
+            json.dumps({**expected_record, "schema_version": 0}).encode() + b"\n",
+            json.dumps({**expected_record, "schema_version": True}).encode() + b"\n",
+            json.dumps({**expected_record, "runtime_commit": "c" * 40}).encode() + b"\n",
+            json.dumps({**expected_record, "trusted_installer_commit": "c" * 40}).encode() + b"\n",
+            json.dumps({**expected_record, "extra": "field"}).encode() + b"\n",
+            b"{" + b"x" * 1024 + b"}\n",
+        )
+        for mutation in mutations:
+            receipt.write_bytes(mutation)
+            receipt.chmod(0o600)
+            rejected = validate_receipt()
+            assert rejected.returncode != 0, f"unsafe receipt accepted: {mutation[:80]!r}"
+
+        assert write_receipt().returncode == 0
+        receipt.chmod(0o644)
+        assert validate_receipt().returncode != 0, "non-private receipt was accepted"
+        receipt.chmod(0o600)
+        hard_link = directory / "receipt-link.json"
+        os.link(receipt, hard_link)
+        assert validate_receipt().returncode != 0, "multiply-linked receipt was accepted"
+        hard_link.unlink()
+        receipt.unlink()
+        receipt.symlink_to(directory / "missing-target")
+        assert validate_receipt().returncode != 0, "receipt symlink was accepted"
 
 
 def run_checkout_attestation(
@@ -1024,6 +1245,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
         "scripts/run_wsl_runner_job.sh",
         *NEW_UNIT_ASSETS,
         *NEW_RUNTIME_ASSETS,
+        *BOOTSTRAP_CORE_TESTS,
     )
     for relative in required:
         assert (ROOT / relative).is_file(), relative
@@ -1112,6 +1334,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU" in installer
     assert "validate_runner_git_destination" in installer
     test_checkout_attestation_modes(installer)
+    test_bootstrap_receipt_gate(installer)
 
     publisher = text("scripts/refresh_and_publish.sh")
     assert 'QUARANTINE_STATE_DIR="${REPO_DIR}/.local"' in publisher
@@ -1582,6 +1805,7 @@ exit "$status"
     assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -Uninstall" in runner_docs
     assert "& $bootstrapScript -TrustedInstallerCommit $trustedCommit -AtLogOnOnly -Uninstall" in runner_docs
     assert "cannot recover\nwhile the user is signed out" in runner_docs
+    assert "/var/lib/degen-dogs/bootstrap-test-receipt.json" in runner_docs
 
     preflight = text("scripts/preflight_wsl_rpc.py")
     ast.parse(preflight)

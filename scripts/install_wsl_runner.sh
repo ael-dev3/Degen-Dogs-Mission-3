@@ -14,7 +14,7 @@ Options:
   --expected-head SHA   Exact trusted origin/main commit staged by bootstrap
   --runtime-tree PATH   Root-owned export of EXPECTED_HEAD used as manifest
   --skip-deploy-key     Keep existing credentials only if canonical and valid
-  --skip-bootstrap      Do not create the venv, npm install, build, or smoke tests
+  --skip-bootstrap      Reuse the exact valid core-suite/build receipt for activation
   --enable-now          Verify prerequisites and enable units behind activation gate
   --uninstall           Disable/remove services; preserve repo, secrets, logs, and keys
   --help                Show this help
@@ -200,6 +200,19 @@ for relative in "${trusted_root_assets[@]}"; do
   (( (8#$trusted_mode & 8#022) == 0 )) || \
     fail "root-consumed asset is group/other writable: ${relative}"
 done
+trusted_commit_path="${asset_dir}/TRUSTED_COMMIT"
+[[ -f "$trusted_commit_path" && ! -L "$trusted_commit_path" && \
+  "$(stat -c %U "$trusted_commit_path")" == "root" && \
+  "$(stat -c %h "$trusted_commit_path")" == "1" ]] || \
+  fail "trusted installer commit metadata is not a root-owned single-link regular file"
+trusted_commit_mode="$(stat -c %a "$trusted_commit_path")"
+(( (8#$trusted_commit_mode & 8#022) == 0 )) || \
+  fail "trusted installer commit metadata is group/other writable"
+[[ "$(stat -c %s "$trusted_commit_path")" == "41" ]] || \
+  fail "trusted installer commit metadata has an invalid size"
+trusted_installer_commit="$(<"$trusted_commit_path")"
+[[ "$trusted_installer_commit" =~ ^[0-9a-f]{40}$ ]] || \
+  fail "trusted installer commit metadata is malformed"
 
 # Direct Linux upgrades must be as race-safe as the Windows bootstrap. Remove
 # the two-phase activation gates first, then synchronously quiesce every old
@@ -348,13 +361,136 @@ for source in trusted.rglob("*"):
 PY
 
 state_dir="/var/lib/degen-dogs"
-tested_sha_path="${state_dir}/tested-main.sha"
+tested_receipt_path="${state_dir}/bootstrap-test-receipt.json"
+legacy_tested_sha_path="${state_dir}/tested-main.sha"
+bootstrap_receipt_schema_version=1
 install -d -o root -g root -m 0755 "$state_dir"
+
+validate_bootstrap_receipt() {
+  /usr/bin/python3 - "$tested_receipt_path" "$expected_head" \
+    "$trusted_installer_commit" "$bootstrap_receipt_schema_version" 0 <<'PY'
+# WSL_BOOTSTRAP_RECEIPT_VALIDATOR
+from __future__ import annotations
+
+import json
+import os
+import re
+import stat
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+expected_runtime_commit = sys.argv[2]
+expected_trusted_installer_commit = sys.argv[3]
+expected_schema_version = int(sys.argv[4])
+expected_uid = int(sys.argv[5])
+maximum_size = 512
+
+try:
+    descriptor = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+except OSError as exc:
+    raise SystemExit(f"bootstrap test receipt is missing or unsafe: {exc}") from exc
+try:
+    details = os.fstat(descriptor)
+    if not stat.S_ISREG(details.st_mode):
+        raise SystemExit("bootstrap test receipt is not a regular file")
+    if details.st_uid != expected_uid:
+        raise SystemExit("bootstrap test receipt owner is not trusted")
+    if stat.S_IMODE(details.st_mode) != 0o600:
+        raise SystemExit("bootstrap test receipt must have mode 0600")
+    if details.st_nlink != 1:
+        raise SystemExit("bootstrap test receipt must have exactly one hard link")
+    if details.st_size <= 0 or details.st_size > maximum_size:
+        raise SystemExit("bootstrap test receipt has an invalid size")
+    with os.fdopen(descriptor, "rb", closefd=True) as handle:
+        descriptor = -1
+        raw = handle.read(maximum_size + 1)
+finally:
+    if descriptor >= 0:
+        os.close(descriptor)
+
+try:
+    record = json.loads(raw.decode("utf-8", errors="strict"))
+except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"bootstrap test receipt is malformed: {exc}") from exc
+required_keys = {
+    "runtime_commit",
+    "schema_version",
+    "trusted_installer_commit",
+}
+if not isinstance(record, dict) or set(record) != required_keys:
+    raise SystemExit("bootstrap test receipt has an unexpected schema")
+if type(record["schema_version"]) is not int or record["schema_version"] != expected_schema_version:
+    raise SystemExit("bootstrap test receipt was minted under an old test schema")
+commit_pattern = re.compile(r"[0-9a-f]{40}")
+for field in ("runtime_commit", "trusted_installer_commit"):
+    value = record[field]
+    if not isinstance(value, str) or commit_pattern.fullmatch(value) is None:
+        raise SystemExit(f"bootstrap test receipt has an invalid {field}")
+if record["runtime_commit"] != expected_runtime_commit:
+    raise SystemExit("bootstrap test receipt does not match the runtime commit")
+if record["trusted_installer_commit"] != expected_trusted_installer_commit:
+    raise SystemExit("bootstrap test receipt was minted by a different trusted installer")
+canonical = (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+if raw != canonical:
+    raise SystemExit("bootstrap test receipt is not canonical JSON")
+PY
+}
+
+write_bootstrap_receipt() {
+  /usr/bin/python3 - "$tested_receipt_path" "$expected_head" \
+    "$trusted_installer_commit" "$bootstrap_receipt_schema_version" 0 <<'PY'
+# WSL_BOOTSTRAP_RECEIPT_WRITER
+from __future__ import annotations
+
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+target = Path(sys.argv[1])
+runtime_commit = sys.argv[2]
+trusted_installer_commit = sys.argv[3]
+schema_version = int(sys.argv[4])
+expected_uid = int(sys.argv[5])
+if os.geteuid() != expected_uid:
+    raise SystemExit("bootstrap test receipt writer is not running as the trusted owner")
+record = {
+    "runtime_commit": runtime_commit,
+    "schema_version": schema_version,
+    "trusted_installer_commit": trusted_installer_commit,
+}
+payload = (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+if len(payload) > 512:
+    raise SystemExit("bootstrap test receipt payload is unexpectedly large")
+
+descriptor, temporary_name = tempfile.mkstemp(prefix=f".{target.name}.", dir=target.parent)
+temporary = Path(temporary_name)
+try:
+    os.fchmod(descriptor, 0o600)
+    with os.fdopen(descriptor, "wb", closefd=True) as handle:
+        descriptor = -1
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, target)
+    directory_descriptor = os.open(target.parent, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(directory_descriptor)
+    finally:
+        os.close(directory_descriptor)
+finally:
+    if descriptor >= 0:
+        os.close(descriptor)
+    temporary.unlink(missing_ok=True)
+PY
+  validate_bootstrap_receipt
+}
+
 if [[ "$skip_bootstrap" == "1" && "$enable_now" == "1" ]]; then
-  [[ -f "$tested_sha_path" && ! -L "$tested_sha_path" && "$(stat -c %U "$tested_sha_path")" == "root" ]] || \
-    fail "no root-owned bootstrap test receipt exists for this checkout"
-  [[ "$(tr -d '\r\n' <"$tested_sha_path")" == "$expected_head" ]] || \
-    fail "origin/main advanced after dependency/build tests; rerun the full Windows bootstrap"
+  validate_bootstrap_receipt || \
+    fail "no valid bootstrap test receipt exists for this runtime and trusted installer"
 fi
 
 env_file="${env_file:-${repo_dir}/.env.local}"
@@ -558,19 +694,30 @@ PY
 # of the dedicated destination, strict SSH config, or pinned GitHub host key.
 validate_runner_git_destination
 
-if [[ "$skip_bootstrap" != "1" ]]; then
+bootstrap_runtime_and_write_receipt() {
+  # WSL_BOOTSTRAP_CORE_START
+  rm -f -- "$tested_receipt_path" "$legacy_tested_sha_path"
   if [[ ! -x "${repo_dir}/.venv/bin/python3" ]]; then
     run_as_runner /usr/bin/python3 -m venv "${repo_dir}/.venv"
   fi
   run_as_runner "${repo_dir}/.venv/bin/python3" -m pip install \
     --require-hashes --only-binary=:all: -r "${repo_dir}/requirements.txt"
   run_as_runner_runtime npm --prefix "$repo_dir" ci --ignore-scripts
-  run_as_runner_runtime npm --prefix "$repo_dir" run test:watcher
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_runner_publication_state.py"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_watch_mission3_auction.py"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_drain_publication_queue.py"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_verify_pages_deployment.py"
+  run_as_runner_runtime /bin/bash "${repo_dir}/scripts/test_refresh_and_publish.sh"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_refresh_telemetry.py"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_degen_dogs_runner_health.py"
+  run_as_runner_runtime python3 "${repo_dir}/scripts/test_wsl_publication_integration.py"
   run_as_runner_runtime npm --prefix "$repo_dir" run build
-  receipt_tmp="$(mktemp "${state_dir}/.tested-main.sha.XXXXXX")"
-  printf '%s\n' "$expected_head" >"$receipt_tmp"
-  install -o root -g root -m 0644 "$receipt_tmp" "$tested_sha_path"
-  rm -f -- "$receipt_tmp"
+  write_bootstrap_receipt
+  # WSL_BOOTSTRAP_CORE_END
+}
+
+if [[ "$skip_bootstrap" != "1" ]]; then
+  bootstrap_runtime_and_write_receipt
 fi
 
 render_template() {
@@ -680,9 +827,6 @@ if [[ "$enable_now" == "1" ]]; then
   remote_head="$(run_as_runner_runtime git -C "$repo_dir" rev-parse refs/remotes/origin/main)"
   [[ "$local_head" == "$remote_head" ]] || \
     fail "local main must exactly match origin/main before activation; fast-forward it and rerun"
-  run_as_runner_runtime /bin/bash "${repo_dir}/scripts/test_refresh_and_publish.sh" || \
-    fail "publisher collision/recovery regression failed on the exact activation commit"
-
   # Parse .env.local through the data-only loader, prove the configured
   # cross-provider quorum, and run one read-only watcher sample. The preflight
   # never writes watcher state or invokes a refresh/push command.
