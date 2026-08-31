@@ -6,6 +6,14 @@ units=(
   degen-dogs-watcher.timer
   degen-dogs-hourly.timer
   degen-dogs-health.timer
+  degen-dogs-publisher.path
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.path
+  degen-dogs-pages-verifier.timer
+)
+triggered_services=(
+  degen-dogs-publisher.service
+  degen-dogs-pages-verifier.service
 )
 
 state_dir=/var/lib/degen-dogs
@@ -28,7 +36,7 @@ write_marker() {
 }
 
 start_units() {
-  local unit
+  local unit load_state
   if [[ ! -f "$armed_marker" || -L "$armed_marker" || \
     "$(stat -c %U "$armed_marker")" != "root" || \
     "$(stat -c %h "$armed_marker")" != "1" || \
@@ -46,6 +54,13 @@ start_units() {
   done
   for unit in "${units[@]}"; do
     systemctl is-active --quiet "$unit"
+  done
+  for unit in "${triggered_services[@]}"; do
+    load_state="$(systemctl show --property=LoadState --value "$unit")"
+    [[ "$load_state" == "loaded" ]] || return 1
+    if systemctl is-failed --quiet "$unit"; then
+      return 1
+    fi
   done
   write_marker "$active_marker"
 }

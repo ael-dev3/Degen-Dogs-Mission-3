@@ -125,6 +125,37 @@ The precise tracker is a local-only accelerator for Mission 3 auction freshness.
 
 The tracker state and logs stay local. `.local/`, `.var/`, and `logs/` are gitignored. Public refresh freshness is exposed only through sanitized `generated/refresh_status.json` and `public/generated/refresh_status.json`.
 
+## WSL queued publication lifecycle
+
+Repository, environment-template, and macOS launchd behavior defaults to
+`MISSION3_WATCHER_PUBLICATION_MODE=inline`. Only the fixed WSL `watcher`
+launcher branch pins `queue`, after `.env.local` is loaded. Queue mode does not
+spawn a publisher from the watcher: it durably replaces only
+`/var/cache/degen-dogs/publication/latest.json`, then the exact
+`degen-dogs-publisher.path` leaf watch starts the fixed
+`scripts/drain_publication_queue.py` entrypoint. A short non-persistent timer is
+the bounded missed-event/retry fallback.
+
+After an exact push and immutable Raw proof, the publisher writes the protected
+`/var/cache/degen-dogs/publication/pending.json` handoff. Its exact path watch
+starts only `scripts/verify_pages_deployment.py`; a non-persistent sub-minute
+timer retries missed events. The verifier neither regenerates nor mutates the
+checkout: systemd mounts the repository read-only and permits writes only in
+`/var/cache/degen-dogs` and `/var/log/degen-dogs`. Exit `2` is a normal bounded
+unresolved/waiting result (including a matching authenticated journal still
+being finalized), not success or hard failure; systemd accepts it and a later
+path/timer activation retries the same protected pending identity.
+
+Queue health is exposed through the WSL health service and protected
+publication records. Publisher/verifier process history is in journald;
+sanitized verifier detail is fixed at
+`/var/log/degen-dogs/pages-verifier.jsonl`, and existing refresh/watcher logs
+remain under `/var/log/degen-dogs`. Quiesce, uninstall, and activation rollback
+remove the activation markers first, disable all path/timer triggers, stop both
+oneshot workers, and fail closed unless every unit is inactive. These assets do
+not activate production by themselves; installation and activation remain the
+separate reviewed Task 8 step.
+
 ## Trigger logic
 
 A refresh is triggered when any of these are new or changed:
@@ -156,7 +187,7 @@ MISSION3_REFRESH_LOCK_PATH=~/Library/Caches/degen-dogs-mission3/refresh.lock
 Rules:
 
 - One-shot runs take a non-blocking watcher lock at `.local/mission3_onchain_tracker.lock` so watcher checks do not overlap.
-- Watcher checks defer before RPC/log scanning while the shared publisher lock is active, avoiding duplicate long-outage catch-up work after a reboot.
+- Inline watcher checks defer before RPC/log scanning while the shared publisher lock is active, avoiding duplicate long-outage catch-up work after a reboot. The WSL queue watcher still scans and persists a newer observation while the drainer owns that lock.
 - Log catch-up starts with 2,000-block quorum requests and halves the range on provider rejection, preserving fail-closed quorum checks without thousands of fixed 50-block calls.
 - Refresh commands take the shared `refresh.lock` used by `scripts/refresh_and_publish.sh`, so hourly and event-triggered refreshes cannot run at the same time.
 - New auctions, settlements, and token changes bypass cooldown.

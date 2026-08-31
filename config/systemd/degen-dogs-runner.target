@@ -1,6 +1,7 @@
 [Unit]
 Description=Degen Dogs Mission 3 WSL publisher timers
 After=network-online.target
+Wants=degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
 
 [Install]
 WantedBy=multi-user.target

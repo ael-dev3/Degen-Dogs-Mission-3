@@ -1,0 +1,13 @@
+[Unit]
+Description=Retry the Degen Dogs queued publisher after missed path events
+
+[Timer]
+OnBootSec=10s
+OnUnitInactiveSec=10s
+AccuracySec=1s
+RandomizedDelaySec=1s
+Persistent=false
+Unit=degen-dogs-publisher.service
+
+[Install]
+WantedBy=timers.target

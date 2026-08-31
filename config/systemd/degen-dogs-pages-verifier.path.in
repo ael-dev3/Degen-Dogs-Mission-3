@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch for a pending immutable Degen Dogs Pages deployment
+
+[Path]
+PathChanged=@LOCK_DIR@/publication/pending.json
+Unit=degen-dogs-pages-verifier.service
+
+[Install]
+WantedBy=multi-user.target

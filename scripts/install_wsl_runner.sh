@@ -108,35 +108,33 @@ grep -qi microsoft /proc/sys/kernel/osrelease || fail "this installer is for WSL
 [[ "$(ps -p 1 -o comm=)" == "systemd" ]] || fail "enable systemd=true in /etc/wsl.conf, then run wsl --shutdown from Windows"
 
 unit_dir="/etc/systemd/system"
-unit_names=(
-  degen-dogs-watcher.service
-  degen-dogs-watcher.timer
-  degen-dogs-hourly.service
-  degen-dogs-hourly.timer
-  degen-dogs-health.service
-  degen-dogs-health.timer
+activation_unit_names=(
   degen-dogs-runner.target
+  degen-dogs-watcher.timer
+  degen-dogs-hourly.timer
+  degen-dogs-health.timer
+  degen-dogs-publisher.path
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.path
+  degen-dogs-pages-verifier.timer
+)
+service_unit_names=(
+  degen-dogs-watcher.service
+  degen-dogs-hourly.service
+  degen-dogs-health.service
+  degen-dogs-publisher.service
+  degen-dogs-pages-verifier.service
+)
+unit_names=(
+  "${activation_unit_names[@]}"
+  "${service_unit_names[@]}"
 )
 
 if [[ "$uninstall" == "1" ]]; then
   rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready
-  systemctl disable --now \
-    degen-dogs-runner.target \
-    degen-dogs-watcher.timer \
-    degen-dogs-hourly.timer \
-    degen-dogs-health.timer >/dev/null 2>&1 || true
-  systemctl stop \
-    degen-dogs-watcher.service \
-    degen-dogs-hourly.service \
-    degen-dogs-health.service >/dev/null 2>&1 || true
-  for old_unit in \
-    degen-dogs-runner.target \
-    degen-dogs-watcher.timer \
-    degen-dogs-hourly.timer \
-    degen-dogs-health.timer \
-    degen-dogs-watcher.service \
-    degen-dogs-hourly.service \
-    degen-dogs-health.service; do
+  systemctl disable --now "${activation_unit_names[@]}" >/dev/null 2>&1 || true
+  systemctl stop "${service_unit_names[@]}" >/dev/null 2>&1 || true
+  for old_unit in "${unit_names[@]}"; do
     systemctl is-active --quiet "$old_unit" && fail "could not stop ${old_unit} during uninstall"
   done
   for name in "${unit_names[@]}"; do
@@ -184,6 +182,15 @@ trusted_root_assets=(
   config/systemd/degen-dogs-health.service.in
   config/systemd/degen-dogs-health.timer
   config/systemd/degen-dogs-runner.target
+  config/systemd/degen-dogs-publisher.service.in
+  config/systemd/degen-dogs-publisher.path.in
+  config/systemd/degen-dogs-publisher.timer
+  config/systemd/degen-dogs-pages-verifier.service.in
+  config/systemd/degen-dogs-pages-verifier.path.in
+  config/systemd/degen-dogs-pages-verifier.timer
+  scripts/runner_publication_state.py
+  scripts/drain_publication_queue.py
+  scripts/verify_pages_deployment.py
 )
 for relative in "${trusted_root_assets[@]}"; do
   trusted_path="${asset_dir}/${relative}"
@@ -198,23 +205,9 @@ done
 # the two-phase activation gates first, then synchronously quiesce every old
 # timer/worker before inspecting or replacing the runtime and unit files.
 rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready
-systemctl disable --now \
-  degen-dogs-runner.target \
-  degen-dogs-watcher.timer \
-  degen-dogs-hourly.timer \
-  degen-dogs-health.timer >/dev/null 2>&1 || true
-systemctl stop \
-  degen-dogs-watcher.service \
-  degen-dogs-hourly.service \
-  degen-dogs-health.service >/dev/null 2>&1 || true
-for old_unit in \
-  degen-dogs-runner.target \
-  degen-dogs-watcher.timer \
-  degen-dogs-hourly.timer \
-  degen-dogs-health.timer \
-  degen-dogs-watcher.service \
-  degen-dogs-hourly.service \
-  degen-dogs-health.service; do
+systemctl disable --now "${activation_unit_names[@]}" >/dev/null 2>&1 || true
+systemctl stop "${service_unit_names[@]}" >/dev/null 2>&1 || true
+for old_unit in "${unit_names[@]}"; do
   systemctl is-active --quiet "$old_unit" && fail "could not quiesce ${old_unit} before installation"
 done
 
@@ -633,10 +626,27 @@ PY
 }
 
 unit_dir="/etc/systemd/system"
-for name in degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service; do
+rendered_unit_names=(
+  degen-dogs-watcher.service
+  degen-dogs-hourly.service
+  degen-dogs-health.service
+  degen-dogs-publisher.service
+  degen-dogs-publisher.path
+  degen-dogs-pages-verifier.service
+  degen-dogs-pages-verifier.path
+)
+copied_unit_names=(
+  degen-dogs-watcher.timer
+  degen-dogs-hourly.timer
+  degen-dogs-health.timer
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.timer
+  degen-dogs-runner.target
+)
+for name in "${rendered_unit_names[@]}"; do
   render_template "${asset_dir}/config/systemd/${name}.in" "${unit_dir}/${name}"
 done
-for name in degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-runner.target; do
+for name in "${copied_unit_names[@]}"; do
   install -m 0644 "${asset_dir}/config/systemd/${name}" "${unit_dir}/${name}"
 done
 render_template "${asset_dir}/config/logrotate/degen-dogs-wsl.in" "/etc/logrotate.d/degen-dogs-wsl"
@@ -645,14 +655,11 @@ install -o root -g root -m 0755 "${asset_dir}/scripts/run_wsl_runner_anchor.sh" 
   /usr/local/libexec/degen-dogs-wsl-anchor
 
 systemctl daemon-reload
-systemd-analyze verify \
-  "${unit_dir}/degen-dogs-watcher.service" \
-  "${unit_dir}/degen-dogs-watcher.timer" \
-  "${unit_dir}/degen-dogs-hourly.service" \
-  "${unit_dir}/degen-dogs-hourly.timer" \
-  "${unit_dir}/degen-dogs-health.service" \
-  "${unit_dir}/degen-dogs-health.timer" \
-  "${unit_dir}/degen-dogs-runner.target"
+verify_units=()
+for name in "${unit_names[@]}"; do
+  verify_units+=("${unit_dir}/${name}")
+done
+systemd-analyze verify "${verify_units[@]}"
 logrotate --debug /etc/logrotate.d/degen-dogs-wsl >/dev/null
 
 if [[ "$enable_now" == "1" ]]; then
@@ -693,33 +700,20 @@ if [[ "$enable_now" == "1" ]]; then
   run_as_runner_runtime git -C "$repo_dir" push --dry-run origin HEAD:refs/heads/main >/dev/null || \
     fail "GitHub write authentication, branch policy, or fast-forward state rejected a dry-run push"
 
-  if ! systemctl enable \
-    degen-dogs-watcher.timer \
-    degen-dogs-hourly.timer \
-    degen-dogs-health.timer \
-    degen-dogs-runner.target; then
-    systemctl disable --now \
-      degen-dogs-runner.target \
-      degen-dogs-watcher.timer \
-      degen-dogs-hourly.timer \
-      degen-dogs-health.timer >/dev/null 2>&1 || true
-    systemctl stop \
-      degen-dogs-watcher.service \
-      degen-dogs-hourly.service \
-      degen-dogs-health.service >/dev/null 2>&1 || true
+  if ! systemctl enable "${activation_unit_names[@]}"; then
+    systemctl disable --now "${activation_unit_names[@]}" >/dev/null 2>&1 || true
+    systemctl stop "${service_unit_names[@]}" >/dev/null 2>&1 || true
     fail "systemd enable failed and all runner timers were disabled again"
   fi
+  for name in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do
+    [[ "$(systemctl show --property=LoadState --value "$name")" == "loaded" ]] || \
+      fail "triggered worker did not load after installation: ${name}"
+    systemctl is-failed --quiet "$name" && fail "triggered worker is failed after installation: ${name}"
+  done
   printf 'systemd units enabled behind the absent activation marker; the Windows bootstrap must verify its keepalive before publication can start\n'
 else
-  systemctl disable --now \
-    degen-dogs-runner.target \
-    degen-dogs-watcher.timer \
-    degen-dogs-hourly.timer \
-    degen-dogs-health.timer >/dev/null 2>&1 || true
-  systemctl stop \
-    degen-dogs-watcher.service \
-    degen-dogs-hourly.service \
-    degen-dogs-health.service >/dev/null 2>&1 || true
+  systemctl disable --now "${activation_unit_names[@]}" >/dev/null 2>&1 || true
+  systemctl stop "${service_unit_names[@]}" >/dev/null 2>&1 || true
   printf 'units installed but disabled; rerun with --enable-now only after the race-safe publisher is on main and RPC/GitHub configuration is complete\n'
 fi
 

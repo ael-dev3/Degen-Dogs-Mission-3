@@ -1,0 +1,13 @@
+[Unit]
+Description=Retry pending immutable Degen Dogs Pages verification
+
+[Timer]
+OnBootSec=30s
+OnUnitInactiveSec=50s
+AccuracySec=5s
+RandomizedDelaySec=5s
+Persistent=false
+Unit=degen-dogs-pages-verifier.service
+
+[Install]
+WantedBy=timers.target

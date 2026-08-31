@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import base64
 import os
+import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -13,6 +15,35 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts" / "install_wsl_startup_task.ps1"
+
+ACTIVATION_UNITS = (
+    "degen-dogs-runner.target",
+    "degen-dogs-watcher.timer",
+    "degen-dogs-hourly.timer",
+    "degen-dogs-health.timer",
+    "degen-dogs-publisher.path",
+    "degen-dogs-publisher.timer",
+    "degen-dogs-pages-verifier.path",
+    "degen-dogs-pages-verifier.timer",
+)
+SERVICE_UNITS = (
+    "degen-dogs-watcher.service",
+    "degen-dogs-hourly.service",
+    "degen-dogs-health.service",
+    "degen-dogs-publisher.service",
+    "degen-dogs-pages-verifier.service",
+)
+NEW_ASSETS = (
+    "config/systemd/degen-dogs-publisher.service.in",
+    "config/systemd/degen-dogs-publisher.path.in",
+    "config/systemd/degen-dogs-publisher.timer",
+    "config/systemd/degen-dogs-pages-verifier.service.in",
+    "config/systemd/degen-dogs-pages-verifier.path.in",
+    "config/systemd/degen-dogs-pages-verifier.timer",
+    "scripts/runner_publication_state.py",
+    "scripts/drain_publication_queue.py",
+    "scripts/verify_pages_deployment.py",
+)
 
 
 def powershell() -> str:
@@ -26,6 +57,24 @@ def powershell() -> str:
 
 def ps_literal(value: str) -> str:
     return "'" + value.replace("'", "''") + "'"
+
+
+def literal_payload(source: str, variable: str) -> str:
+    match = re.search(
+        rf"(?ms)^[ \t]*\${re.escape(variable)}\s*=\s+@'\r?\n(?P<body>.*?)\r?\n[ \t]*'@\s*$",
+        source,
+    )
+    assert match, f"missing literal PowerShell payload ${variable}"
+    return match.group("body")
+
+
+def bash_array(source: str, variable: str) -> tuple[str, ...]:
+    match = re.search(
+        rf"(?ms)^[ \t]*{re.escape(variable)}=\(\s*(?P<body>.*?)^[ \t]*\)",
+        source,
+    )
+    assert match, f"missing Bash array {variable}"
+    return tuple(shlex.split(match.group("body"), comments=True, posix=True))
 
 
 def run_policy_harness(body: str) -> subprocess.CompletedProcess[str]:
@@ -1309,6 +1358,36 @@ Write-Output 'windows-task-round-trip-checked'
     )
 
 
+def test_embedded_linux_lifecycle_inventories_are_symmetric() -> None:
+    source = INSTALLER.read_text(encoding="utf-8")
+    trusted = literal_payload(source, "trustedBundleProvision")
+    trusted_required = bash_array(trusted, "required")
+    for relative in NEW_ASSETS:
+        assert trusted_required.count(relative) == 1, relative
+
+    runtime = literal_payload(source, "runtimeStage")
+    assert bash_array(runtime, "runtime_required_assets") == NEW_ASSETS
+
+    for payload_name in ("uninstallScript", "quiesce", "rollbackPublisher"):
+        payload = literal_payload(source, payload_name)
+        assert bash_array(payload, "activation_units") == ACTIVATION_UNITS
+        assert bash_array(payload, "service_units") == SERVICE_UNITS
+
+    activation = literal_payload(source, "commitActivation")
+    assert bash_array(activation, "activation_units") == ACTIVATION_UNITS
+    assert bash_array(activation, "triggered_services") == SERVICE_UNITS[-2:]
+    for service in SERVICE_UNITS[-2:]:
+        assert f'systemctl show --property=LoadState --value "$unit"' in activation
+        assert f'systemctl is-failed --quiet "$unit"' in activation
+        assert source.count(service) >= 6
+
+    liveness = source.split("$publisherReady = $false", 1)[1].split("$taskInfo =", 1)[0]
+    for unit in ACTIVATION_UNITS:
+        assert liveness.count(unit) >= 2, unit
+    for service in SERVICE_UNITS[-2:]:
+        assert liveness.count(service) >= 2, service
+
+
 def main() -> None:
     test_invocation_policy_and_trigger_selection()
     test_git_command_resolution_is_deterministic()
@@ -1325,7 +1404,8 @@ def main() -> None:
     test_task_isolation_does_not_short_circuit_or_touch_foreign_tasks()
     test_task_xml_attestation_rejects_privilege_and_trigger_mutations()
     test_real_windows_task_scheduler_round_trip()
-    print("wsl_runner_windows_policy_tests=pass count=15")
+    test_embedded_linux_lifecycle_inventories_are_symmetric()
+    print("wsl_runner_windows_policy_tests=pass count=16")
 
 
 if __name__ == "__main__":

@@ -1709,12 +1709,33 @@ if ($Uninstall) {
         $uninstallScript = @'
 set -Eeuo pipefail
 rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready
-systemctl disable --now degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer >/dev/null 2>&1 || true
-systemctl stop degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service >/dev/null 2>&1 || true
-for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service; do
+activation_units=(
+  degen-dogs-runner.target
+  degen-dogs-watcher.timer
+  degen-dogs-hourly.timer
+  degen-dogs-health.timer
+  degen-dogs-publisher.path
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.path
+  degen-dogs-pages-verifier.timer
+)
+service_units=(
+  degen-dogs-watcher.service
+  degen-dogs-hourly.service
+  degen-dogs-health.service
+  degen-dogs-publisher.service
+  degen-dogs-pages-verifier.service
+)
+all_units=("${activation_units[@]}" "${service_units[@]}")
+systemctl disable --now "${activation_units[@]}" >/dev/null 2>&1 || true
+systemctl stop "${service_units[@]}" >/dev/null 2>&1 || true
+for unit in "${all_units[@]}"; do
   if systemctl is-active --quiet "$unit"; then exit 1; fi
 done
-rm -f -- /etc/systemd/system/degen-dogs-{watcher,hourly,health}.{service,timer} /etc/systemd/system/degen-dogs-runner.target /etc/logrotate.d/degen-dogs-wsl /usr/local/libexec/degen-dogs-wsl-anchor /usr/local/libexec/degen-dogs-wsl-installer
+for unit in "${all_units[@]}"; do
+  rm -f -- "/etc/systemd/system/$unit"
+done
+rm -f -- /etc/logrotate.d/degen-dogs-wsl /usr/local/libexec/degen-dogs-wsl-anchor /usr/local/libexec/degen-dogs-wsl-installer
 systemctl daemon-reload
 '@
         Invoke-WslRoot -Script $uninstallScript
@@ -1856,13 +1877,31 @@ else {
 $quiesce = @'
 set -Eeuo pipefail
 rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready
-for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer; do
+activation_units=(
+  degen-dogs-runner.target
+  degen-dogs-watcher.timer
+  degen-dogs-hourly.timer
+  degen-dogs-health.timer
+  degen-dogs-publisher.path
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.path
+  degen-dogs-pages-verifier.timer
+)
+service_units=(
+  degen-dogs-watcher.service
+  degen-dogs-hourly.service
+  degen-dogs-health.service
+  degen-dogs-publisher.service
+  degen-dogs-pages-verifier.service
+)
+all_units=("${activation_units[@]}" "${service_units[@]}")
+for unit in "${activation_units[@]}"; do
   systemctl disable --now "$unit" >/dev/null 2>&1 || true
 done
-for unit in degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service; do
+for unit in "${service_units[@]}"; do
   systemctl stop "$unit" >/dev/null 2>&1 || true
 done
-for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-watcher.service degen-dogs-hourly.service degen-dogs-health.service; do
+for unit in "${all_units[@]}"; do
   if systemctl is-active --quiet "$unit"; then
     printf 'error: could not quiesce %s before runner upgrade\n' "$unit" >&2
     exit 1
@@ -1926,6 +1965,12 @@ if (-not $trustedBundleExists -or $UpgradeTrustedBundle) {
     config/systemd/degen-dogs-hourly.service.in config/systemd/degen-dogs-hourly.timer
     config/systemd/degen-dogs-health.service.in config/systemd/degen-dogs-health.timer
     config/systemd/degen-dogs-runner.target
+    config/systemd/degen-dogs-publisher.service.in config/systemd/degen-dogs-publisher.path.in
+    config/systemd/degen-dogs-publisher.timer
+    config/systemd/degen-dogs-pages-verifier.service.in config/systemd/degen-dogs-pages-verifier.path.in
+    config/systemd/degen-dogs-pages-verifier.timer
+    scripts/runner_publication_state.py scripts/drain_publication_queue.py
+    scripts/verify_pages_deployment.py
   )
   mkdir "$stage/tree"
   git -c core.hooksPath=/dev/null --git-dir="$stage/repo.git" archive \
@@ -2045,6 +2090,20 @@ stage_runtime_and_install() (
   git -c core.hooksPath=/dev/null --git-dir="$runtime_stage/repo.git" archive "$runtime_sha" | \
     tar -x -C "$runtime_stage/tree"
   chmod -R go-w "$runtime_stage/tree"
+  runtime_required_assets=(
+    config/systemd/degen-dogs-publisher.service.in
+    config/systemd/degen-dogs-publisher.path.in
+    config/systemd/degen-dogs-publisher.timer
+    config/systemd/degen-dogs-pages-verifier.service.in
+    config/systemd/degen-dogs-pages-verifier.path.in
+    config/systemd/degen-dogs-pages-verifier.timer
+    scripts/runner_publication_state.py
+    scripts/drain_publication_queue.py
+    scripts/verify_pages_deployment.py
+  )
+  for relative in "${runtime_required_assets[@]}"; do
+    test -f "$runtime_stage/tree/$relative" && test ! -L "$runtime_stage/tree/$relative"
+  done
 
   runner_home=$(getent passwd '__RUNNER_USER__' | cut -d: -f6)
   runner_git=(runuser -u '__RUNNER_USER__' -- env HOME="$runner_home" PATH=/usr/local/bin:/usr/bin:/bin \
@@ -2174,19 +2233,25 @@ rollback_publisher() (
     fi
   done
   rollback_failed=0
-  enabled_units=(
+  activation_units=(
     degen-dogs-runner.target
     degen-dogs-watcher.timer
     degen-dogs-hourly.timer
     degen-dogs-health.timer
+    degen-dogs-publisher.path
+    degen-dogs-publisher.timer
+    degen-dogs-pages-verifier.path
+    degen-dogs-pages-verifier.timer
   )
   service_units=(
     degen-dogs-watcher.service
     degen-dogs-hourly.service
     degen-dogs-health.service
+    degen-dogs-publisher.service
+    degen-dogs-pages-verifier.service
   )
-  all_units=("${enabled_units[@]}" "${service_units[@]}")
-  for unit in "${enabled_units[@]}"; do
+  all_units=("${activation_units[@]}" "${service_units[@]}")
+  for unit in "${activation_units[@]}"; do
     if ! systemctl disable --now "$unit"; then
       printf 'error: activation rollback could not disable/stop %s\n' "$unit" >&2
       rollback_failed=1
@@ -2320,7 +2385,21 @@ stage_runtime_and_install --skip-bootstrap --enable-now
         }
         $commitActivation = @'
 set -Eeuo pipefail
-for unit in degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer; do
+activation_units=(
+  degen-dogs-runner.target
+  degen-dogs-watcher.timer
+  degen-dogs-hourly.timer
+  degen-dogs-health.timer
+  degen-dogs-publisher.path
+  degen-dogs-publisher.timer
+  degen-dogs-pages-verifier.path
+  degen-dogs-pages-verifier.timer
+)
+triggered_services=(
+  degen-dogs-publisher.service
+  degen-dogs-pages-verifier.service
+)
+for unit in "${activation_units[@]}"; do
   systemctl is-enabled --quiet "$unit"
 done
 install -d -o root -g root -m 0755 /var/lib/degen-dogs /run/degen-dogs
@@ -2332,9 +2411,16 @@ active_tmp=$(mktemp /run/degen-dogs/.activation-enabled.XXXXXX)
 printf 'active=1\n' >"$active_tmp"
 install -o root -g root -m 0644 "$active_tmp" /run/degen-dogs/activation-enabled
 rm -f -- "$active_tmp"
-systemctl start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer
+systemctl start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
 systemctl restart degen-dogs-health.timer
-systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
+systemctl is-active --quiet "${activation_units[@]}"
+for unit in "${triggered_services[@]}"; do
+  test "$(systemctl show --property=LoadState --value "$unit")" = loaded
+  if systemctl is-failed --quiet "$unit"; then
+    printf 'error: triggered worker is failed after activation: %s\n' "$unit" >&2
+    exit 1
+  fi
+done
 health_next=$(systemctl show --property=NextElapseUSecMonotonic --value degen-dogs-health.timer)
 if [[ ! "$health_next" =~ [1-9] ]]; then
   printf 'error: health timer has no scheduled monotonic elapse after activation\n' >&2
@@ -2348,7 +2434,7 @@ fi
             $currentTask = Get-ExactScheduledTask -Name $TaskName
             if ($currentTask -and $currentTask.State -eq 'Running') {
                 & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
-                    'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer'
+                    'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
                 if ($LASTEXITCODE -eq 0) {
                     $publisherReady = $true
                     break
@@ -2370,7 +2456,7 @@ fi
             -Name $TaskName `
             -ExpectedEnabled $true
         & $wsl --distribution $DistroName --user root --exec /bin/bash -lc `
-            'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer'
+            'test -f /run/degen-dogs/anchor-ready && test -f /run/degen-dogs/activation-enabled && systemctl is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer && for unit in degen-dogs-publisher.service degen-dogs-pages-verifier.service; do test "$(systemctl show --property=LoadState --value "$unit")" = loaded || exit 1; if systemctl is-failed --quiet "$unit"; then exit 1; fi; done'
         if ($LASTEXITCODE -ne 0) {
             throw 'The final activation liveness proof failed: the anchor, activation gate, or publisher units are no longer healthy.'
         }

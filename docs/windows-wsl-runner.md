@@ -6,7 +6,9 @@ publisher. It is a local data producer, not a GitHub Actions self-hosted runner:
 ```text
 Windows Task Scheduler keepalive
   -> isolated WSL2 Ubuntu distro with systemd
-     -> 15-second event watcher (bounded current refresh, no archive)
+     -> 15-second event watcher (durable latest-wins queue, no archive)
+        -> path-triggered queued publisher (fixed drainer, bounded timer fallback)
+           -> path-triggered immutable Pages verifier (bounded timer fallback)
      -> staggered hourly publisher (bounded refresh, optional incremental archive)
      -> five-minute local/live health probe
         -> Git push to main
@@ -39,6 +41,8 @@ Keep the PC units disabled until all of these are true:
 
 The installer enforces this gate. Even its internal enable pass leaves services
 behind an absent activation marker until the Windows keepalive is verified.
+The queued publisher/verifier rollout is not activated by this asset change:
+production installation and activation are a separate reviewed Task 8 step.
 
 ## Why two publishers are now safe
 
@@ -315,18 +319,20 @@ Activation separately fetches the configured SSH origin and requires
 `HEAD == origin/main`.
 
 On upgrades, the bootstrap first removes the persistent/runtime activation
-markers, disables the keepalive, disables all timers,
-waits for watcher/hourly/health services to stop, verifies every old unit is
-inactive, and terminates only the isolated runner distro. This prevents a live
-publisher from modifying the clone while Git is fast-forwarded or unit files are
-replaced. Any quiesce, sync, preflight, or task-start failure leaves both the
-Windows keepalive and Linux timers disabled.
+markers, disables the keepalive, disables every timer and path unit, waits for
+watcher/hourly/health/publisher/verifier services to stop, verifies every old
+unit is inactive, and terminates only the isolated runner distro. This prevents
+a live publisher from modifying the clone while Git is fast-forwarded or unit
+files are replaced. Any quiesce, sync, preflight, or task-start failure leaves
+the Windows keepalive and every Linux activation unit disabled.
 
 Activation is a two-phase commit. The installer can enable unit files, but each
 service has `ConditionPathExists=/run/degen-dogs/activation-enabled`. Only after
 Task Scheduler reports the keepalive running and the WSL anchor publishes its
 ready signal does PowerShell atomically create the persistent armed marker and
-runtime marker, start the timers, and verify them. `/run` is cleared on reboot;
+runtime marker, start the timers/path units, and verify all four new activation
+units are active and both trigger-started services are loaded/not failed.
+`/run` is cleared on reboot;
 the scheduled anchor recreates the runtime marker only when the root-owned
 persistent marker exists. A setup crash cannot leave an unverified publisher
 able to start at the next boot.
@@ -347,7 +353,14 @@ The systemd assets are:
 - `degen-dogs-hourly.service` / `.timer`: minute-59 bounded reconcile, with
   optional incremental archive maintenance;
 - `degen-dogs-health.service` / `.timer`: five-minute health and freshness;
-- `degen-dogs-runner.target`: boot grouping for all three timers.
+- `degen-dogs-publisher.service` / `.path` / `.timer`: drain only
+  `/var/cache/degen-dogs/publication/latest.json` immediately, with a fast
+  bounded fallback retry;
+- `degen-dogs-pages-verifier.service` / `.path` / `.timer`: verify only
+  `/var/cache/degen-dogs/publication/pending.json`, with a sub-minute bounded
+  fallback retry;
+- `degen-dogs-runner.target`: groups the four publisher/verifier path/timer
+  activation units; the bounded oneshot services remain trigger-started.
 
 Services use bounded timeouts, control-group termination, a narrow runtime
 PATH, empty capability sets, read-only system/home mounts, and explicit write
@@ -358,6 +371,20 @@ checks. The hourly and health services retain bounded retry backoff. Event
 refreshes keep archive work off for latency. On a seeded archive-capable runner,
 the staggered hourly job also maintains the archive; a latency-only peer may opt
 out as described above.
+
+The WSL watcher alone pins `MISSION3_WATCHER_PUBLICATION_MODE=queue` after the
+protected environment file is loaded. Repository, environment-template, and
+Mac launchd defaults remain `inline`; archive behavior is unchanged. The
+publisher service executes only
+`/srv/degen-dogs/repo/scripts/run_wsl_runner_job.sh publisher`, which selects
+only `drain_publication_queue.py`, and may write the
+repository, log, and lock directories. The verifier service executes the same
+fixed launcher with only the `verifier` branch, which selects only
+`verify_pages_deployment.py`; systemd mounts the repository read-only and
+allows writes only below `/var/log/degen-dogs` and `/var/cache/degen-dogs`.
+Verifier exit `2` means the exact pending proof is unresolved or waiting for
+its authenticated journal, so systemd treats it as a successful bounded wait
+and the path/timer retries later.
 
 ## Verify operation
 
@@ -382,11 +409,15 @@ unsuppressed; do not add a second task or weaken the single-instance policy.
 From WSL:
 
 ```bash
-systemctl status degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
-systemctl status degen-dogs-watcher.service degen-dogs-hourly.service
-journalctl -u degen-dogs-watcher.service -u degen-dogs-hourly.service --since '1 hour ago'
+systemctl status degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer \
+  degen-dogs-publisher.path degen-dogs-publisher.timer \
+  degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
+systemctl status degen-dogs-watcher.service degen-dogs-hourly.service \
+  degen-dogs-publisher.service degen-dogs-pages-verifier.service
+journalctl -u degen-dogs-publisher.service -u degen-dogs-pages-verifier.service --since '1 hour ago'
 tail -n 80 /var/log/degen-dogs/watch-onchain.log
 tail -n 80 /var/log/degen-dogs/refresh.log
+tail -n 80 /var/log/degen-dogs/pages-verifier.jsonl
 sudo -u degendogs bash -p /srv/degen-dogs/repo/scripts/run_wsl_runner_job.sh preflight
 sudo -u degendogs bash -p /srv/degen-dogs/repo/scripts/run_wsl_runner_job.sh health
 ```
@@ -410,8 +441,14 @@ stale.
 
 ## Maintenance and removal
 
-Stop the Windows keepalive before deliberately disabling timers; the anchor
-repairs stopped timers once per minute.
+Stop the Windows keepalive before deliberately disabling timers or path units;
+the anchor repairs stopped activation units once per minute.
+
+Quiesce and rollback remove both activation markers first, disable all timers
+and path units, stop every worker including publisher/verifier, and fail closed
+unless every unit is inactive. Uninstall removes all six queued-worker unit
+files while preserving the repository, protected environment, SSH key, logs,
+and queue/cache state for operator recovery.
 
 ### Deploy-key and pinned-key rotation
 

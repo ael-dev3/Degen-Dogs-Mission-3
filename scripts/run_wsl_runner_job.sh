@@ -7,9 +7,9 @@ umask 077
 
 job="${1:-}"
 case "$job" in
-  watcher|publisher|hourly|health|preflight) ;;
+  watcher|publisher|verifier|hourly|health|preflight) ;;
   *)
-    printf 'usage: %s {watcher|publisher|hourly|health|preflight}\n' "$0" >&2
+    printf 'usage: %s {watcher|publisher|verifier|hourly|health|preflight}\n' "$0" >&2
     exit 64
     ;;
 esac
@@ -89,7 +89,9 @@ validate_runtime_git_destination() {
   }
 }
 
-validate_runtime_git_destination
+if [[ "$job" != "verifier" ]]; then
+  validate_runtime_git_destination
+fi
 
 # Machine identity is public-safe and intentionally generic: do not use a
 # hostname, user name, serial number, or other private machine identifier.
@@ -113,6 +115,28 @@ if quorum < 2:
 PY
 }
 
+scrub_fixed_worker_authority() {
+  local name
+  while IFS= read -r name; do
+    case "$name" in
+      DEGEN_DOGS_*_OUTCOME|DEGEN_DOGS_*_RESULT|DEGEN_DOGS_*_ERROR|\
+      DEGEN_DOGS_*_COMMAND|DEGEN_DOGS_*_URL|DEGEN_DOGS_*_URLS|DEGEN_DOGS_*_PATH|\
+      MISSION3_*_OUTCOME|MISSION3_*_RESULT|MISSION3_*_ERROR|\
+      MISSION3_*_COMMAND|MISSION3_*_URL|MISSION3_*_URLS|MISSION3_*_PATH|\
+      DEGEN_DOGS_REPO_DIR|DEGEN_DOGS_LOG_DIR|DEGEN_DOGS_LOCK_DIR|DEGEN_DOGS_ENV_FILE)
+        unset "$name"
+        ;;
+    esac
+  done < <(compgen -e)
+
+  export DEGEN_DOGS_REPO_DIR="$repo_dir"
+  export DEGEN_DOGS_LOG_DIR="$log_dir"
+  export DEGEN_DOGS_LOCK_DIR="$lock_dir"
+  export DEGEN_DOGS_ENV_FILE="$env_file"
+  export DEGEN_DOGS_REFRESH_LOCK_PATH="${lock_dir}/refresh.lock"
+  export MISSION3_REFRESH_LOCK_PATH="$DEGEN_DOGS_REFRESH_LOCK_PATH"
+}
+
 case "$job" in
   watcher)
     require_production_rpc_quorum
@@ -125,6 +149,7 @@ case "$job" in
     export DEGEN_DOGS_FULL_REFRESH=0
     export DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0
     export DEGEN_DOGS_REFRESH_TRIGGER=watcher
+    export MISSION3_WATCHER_PUBLICATION_MODE=queue
     exec python3 "${repo_dir}/scripts/watch_mission3_onchain_activity.py" --once
     ;;
   publisher)
@@ -132,14 +157,14 @@ case "$job" in
     # Re-pin every path captured before .env.local was loaded. The queue and
     # recovery journal may select only a validated generation/digest; neither
     # may select a command or filesystem path.
-    export DEGEN_DOGS_REPO_DIR="$repo_dir"
-    export DEGEN_DOGS_LOG_DIR="$log_dir"
-    export DEGEN_DOGS_LOCK_DIR="$lock_dir"
-    export DEGEN_DOGS_ENV_FILE="$env_file"
-    export DEGEN_DOGS_REFRESH_LOCK_PATH="${lock_dir}/refresh.lock"
-    export MISSION3_REFRESH_LOCK_PATH="$DEGEN_DOGS_REFRESH_LOCK_PATH"
-    unset MISSION3_REFRESH_COMMAND
+    scrub_fixed_worker_authority
     exec python3 "${repo_dir}/scripts/drain_publication_queue.py"
+    ;;
+  verifier)
+    # The detached verifier receives no command, URL, outcome, or filesystem
+    # authority from the environment and never validates mutable Git state.
+    scrub_fixed_worker_authority
+    exec python3 "${repo_dir}/scripts/verify_pages_deployment.py"
     ;;
   hourly)
     require_production_rpc_quorum
@@ -157,6 +182,7 @@ case "$job" in
     exec /bin/bash -p "${repo_dir}/scripts/refresh_and_publish.sh"
     ;;
   health)
+    export MISSION3_PUBLICATION_MODE=queue
     exec python3 "${repo_dir}/scripts/check_wsl_runner_health.py"
     ;;
   preflight)

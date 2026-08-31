@@ -1,0 +1,36 @@
+[Unit]
+Description=Drain the Degen Dogs queued Windows publication
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/run/degen-dogs/activation-enabled
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+User=@RUNNER_USER@
+Group=@RUNNER_GROUP@
+WorkingDirectory=@REPO_DIR@
+UMask=0077
+Environment=HOME=@RUNNER_HOME@
+Environment=DEGEN_DOGS_REPO_DIR=@REPO_DIR@
+Environment=DEGEN_DOGS_LOG_DIR=@LOG_DIR@
+Environment=DEGEN_DOGS_LOCK_DIR=@LOCK_DIR@
+Environment=DEGEN_DOGS_ENV_FILE=@ENV_FILE@
+Environment=DEGEN_DOGS_RUNNER_ID=@RUNNER_ID@
+ExecStart=/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh publisher
+TimeoutStartSec=5min
+TimeoutStopSec=30s
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+StandardOutput=journal
+StandardError=journal

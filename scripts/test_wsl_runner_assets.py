@@ -8,13 +8,49 @@ import io
 import json
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+NEW_UNIT_ASSETS = (
+    "config/systemd/degen-dogs-publisher.service.in",
+    "config/systemd/degen-dogs-publisher.path.in",
+    "config/systemd/degen-dogs-publisher.timer",
+    "config/systemd/degen-dogs-pages-verifier.service.in",
+    "config/systemd/degen-dogs-pages-verifier.path.in",
+    "config/systemd/degen-dogs-pages-verifier.timer",
+)
+NEW_RUNTIME_ASSETS = (
+    "scripts/runner_publication_state.py",
+    "scripts/drain_publication_queue.py",
+    "scripts/verify_pages_deployment.py",
+)
+ACTIVATION_UNITS = (
+    "degen-dogs-runner.target",
+    "degen-dogs-watcher.timer",
+    "degen-dogs-hourly.timer",
+    "degen-dogs-health.timer",
+    "degen-dogs-publisher.path",
+    "degen-dogs-publisher.timer",
+    "degen-dogs-pages-verifier.path",
+    "degen-dogs-pages-verifier.timer",
+)
+SERVICE_UNITS = (
+    "degen-dogs-watcher.service",
+    "degen-dogs-hourly.service",
+    "degen-dogs-health.service",
+    "degen-dogs-publisher.service",
+    "degen-dogs-pages-verifier.service",
+)
+NEW_TRIGGER_UNITS = ACTIVATION_UNITS[-4:]
+NEW_TRIGGERED_SERVICES = SERVICE_UNITS[-2:]
 
 
 def text(relative: str) -> str:
@@ -31,6 +67,15 @@ def powershell_literal_payload(source: str, variable: str) -> str:
     )
     assert match, f"missing literal PowerShell payload ${variable}"
     return match.group("body")
+
+
+def bash_array_items(source: str, variable: str) -> tuple[str, ...]:
+    match = re.search(
+        rf"(?ms)^[ \t]*{re.escape(variable)}=\(\s*(?P<body>.*?)^[ \t]*\)",
+        source,
+    )
+    assert match, f"missing Bash array {variable}"
+    return tuple(shlex.split(match.group("body"), comments=True, posix=True))
 
 
 def run_bash(source: str, *, expected_returncode: int = 0) -> subprocess.CompletedProcess[bytes]:
@@ -149,6 +194,8 @@ def assert_posix_umask_fast_forward_attests(attestation: str) -> None:
                 "GIT_AUTHOR_NAME": "Runner Test",
                 "GIT_COMMITTER_EMAIL": "runner-test@example.invalid",
                 "GIT_COMMITTER_NAME": "Runner Test",
+                "GIT_CONFIG_GLOBAL": os.devnull,
+                "GIT_CONFIG_SYSTEM": os.devnull,
             }
         )
         subprocess.run(
@@ -202,10 +249,23 @@ def assert_posix_umask_fast_forward_attests(attestation: str) -> None:
             ["git", "-C", str(source), "archive", "HEAD"],
             check=True,
             stdout=subprocess.PIPE,
+            env=git_environment,
         ).stdout
         trusted.mkdir()
         with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as archive_file:
             archive_file.extractall(trusted)
+        extracted_mode = (trusted / "runner.sh").stat().st_mode & 0o777
+        git_version = subprocess.run(
+            ["git", "--version"],
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+        ).stdout.strip()
+        if git_version.startswith("git version 2.43."):
+            assert extracted_mode == 0o775
+        else:
+            assert extracted_mode in {0o755, 0o775}
+        subprocess.run(["chmod", "-R", "go-w", str(trusted)], check=True)
         assert (trusted / "runner.sh").stat().st_mode & 0o777 == 0o755
         accepted = run_checkout_attestation(attestation, trusted, checkout)
         assert accepted.returncode == 0, accepted.stderr.decode("utf-8", errors="replace")
@@ -248,9 +308,17 @@ def test_health_timer_activation(powershell: str) -> None:
 is-enabled --quiet degen-dogs-watcher.timer
 is-enabled --quiet degen-dogs-hourly.timer
 is-enabled --quiet degen-dogs-health.timer
-start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer
+is-enabled --quiet degen-dogs-publisher.path
+is-enabled --quiet degen-dogs-publisher.timer
+is-enabled --quiet degen-dogs-pages-verifier.path
+is-enabled --quiet degen-dogs-pages-verifier.timer
+start degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
 restart degen-dogs-health.timer
-is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer
+is-active --quiet degen-dogs-runner.target degen-dogs-watcher.timer degen-dogs-hourly.timer degen-dogs-health.timer degen-dogs-publisher.path degen-dogs-publisher.timer degen-dogs-pages-verifier.path degen-dogs-pages-verifier.timer
+show --property=LoadState --value degen-dogs-publisher.service
+is-failed --quiet degen-dogs-publisher.service
+show --property=LoadState --value degen-dogs-pages-verifier.service
+is-failed --quiet degen-dogs-pages-verifier.service
 show --property=NextElapseUSecMonotonic --value degen-dogs-health.timer
 """
 
@@ -266,7 +334,10 @@ systemctl() {
   printf '%s\n' "$*" >>"$calls"
   case "${1:-}" in
     is-enabled|is-active|start|restart) return 0 ;;
-    show) printf '%s\n' "$next_elapse" ;;
+    is-failed) return 1 ;;
+    show)
+      if [[ "$*" == "show --property=LoadState --value "* ]]; then printf 'loaded\n'; else printf '%s\n' "$next_elapse"; fi
+      ;;
     *) return 97 ;;
   esac
 }
@@ -346,15 +417,57 @@ cat >"$repo_dir/scripts/watch_mission3_onchain_activity.py" <<'FAKE_WATCHER'
 import os
 
 print(
-    "watcher|{}|{}|{}|{}|{}".format(
+    "watcher|{}|{}|{}|{}|{}|{}".format(
         os.environ["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"],
         os.environ["DEGEN_DOGS_REMOTE"],
         os.environ["DEGEN_DOGS_BRANCH"],
         os.environ["DEGEN_DOGS_SKIP_PUSH"],
         os.environ["DEGEN_DOGS_SKIP_PULL"],
+        os.environ["MISSION3_WATCHER_PUBLICATION_MODE"],
     )
 )
 FAKE_WATCHER
+cat >"$repo_dir/scripts/drain_publication_queue.py" <<'FAKE_DRAINER'
+import os
+
+scrubbed = (
+    "MISSION3_REFRESH_COMMAND",
+    "DEGEN_DOGS_PUBLICATION_OUTCOME",
+    "DEGEN_DOGS_RAW_COMMIT_URL",
+    "DEGEN_DOGS_REFRESH_TELEMETRY_PATH",
+)
+assert not any(name in os.environ for name in scrubbed), scrubbed
+print(
+    "publisher|{}|{}|{}".format(
+        os.environ["DEGEN_DOGS_REPO_DIR"],
+        os.environ["DEGEN_DOGS_LOG_DIR"],
+        os.environ["DEGEN_DOGS_LOCK_DIR"],
+    )
+)
+FAKE_DRAINER
+cat >"$repo_dir/scripts/verify_pages_deployment.py" <<'FAKE_VERIFIER'
+import os
+
+scrubbed = (
+    "MISSION3_REFRESH_COMMAND",
+    "DEGEN_DOGS_PUBLICATION_OUTCOME",
+    "DEGEN_DOGS_RAW_COMMIT_URL",
+    "DEGEN_DOGS_REFRESH_TELEMETRY_PATH",
+)
+assert not any(name in os.environ for name in scrubbed), scrubbed
+print(
+    "verifier|{}|{}|{}".format(
+        os.environ["DEGEN_DOGS_REPO_DIR"],
+        os.environ["DEGEN_DOGS_LOG_DIR"],
+        os.environ["DEGEN_DOGS_LOCK_DIR"],
+    )
+)
+FAKE_VERIFIER
+cat >"$repo_dir/scripts/check_wsl_runner_health.py" <<'FAKE_HEALTH'
+import os
+
+print("health|{}".format(os.environ["MISSION3_PUBLICATION_MODE"]))
+FAKE_HEALTH
 chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh" "$repo_dir/scripts/runtime-bin/git"
 
 write_env() {
@@ -366,6 +479,10 @@ DEGEN_DOGS_REMOTE=attacker
 DEGEN_DOGS_BRANCH=attacker
 DEGEN_DOGS_SKIP_PUSH=1
 DEGEN_DOGS_SKIP_PULL=1
+MISSION3_REFRESH_COMMAND=/attacker/command
+DEGEN_DOGS_PUBLICATION_OUTCOME=attacker-outcome
+DEGEN_DOGS_RAW_COMMIT_URL=https://attacker.invalid/raw
+DEGEN_DOGS_REFRESH_TELEMETRY_PATH=/attacker/telemetry
 COMMON_ENV
   if (( $# > 0 )); then
     printf '%s\n' "$1" >>"$repo_dir/.env.local"
@@ -400,11 +517,368 @@ for invalid_value in 2 ''; do
 done
 
 write_env 'DEGEN_DOGS_RUN_MISSION3_ARCHIVE=1'
-test "$(run_job watcher)" = 'watcher|0|origin|main|0|0'
+test "$(run_job watcher)" = 'watcher|0|origin|main|0|0|queue'
+test "$(run_job publisher)" = "publisher|$repo_dir|$test_root/log|$test_root/lock"
+test "$(run_job verifier)" = "verifier|$repo_dir|$test_root/log|$test_root/lock"
+test "$(run_job health)" = 'health|queue'
 printf 'wsl-launcher-policy-checked\n'
 '''
     result = run_bash(regression)
     assert result.stdout == b"wsl-launcher-policy-checked\n"
+
+
+def systemd_values(source: str, directive: str) -> tuple[str, ...]:
+    return tuple(
+        match.group(1)
+        for match in re.finditer(rf"(?m)^{re.escape(directive)}=(.*)$", source)
+    )
+
+
+def test_queued_worker_units() -> None:
+    publisher_service = text("config/systemd/degen-dogs-publisher.service.in")
+    verifier_service = text("config/systemd/degen-dogs-pages-verifier.service.in")
+    common_service_lines = (
+        "ConditionPathExists=/run/degen-dogs/activation-enabled",
+        "User=@RUNNER_USER@",
+        "Group=@RUNNER_GROUP@",
+        "WorkingDirectory=@REPO_DIR@",
+        "UMask=0077",
+        "NoNewPrivileges=true",
+        "PrivateTmp=true",
+        "ProtectSystem=strict",
+        "ProtectHome=read-only",
+        "ProtectKernelTunables=true",
+        "ProtectKernelModules=true",
+        "ProtectControlGroups=true",
+        "RestrictSUIDSGID=true",
+        "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6",
+        "CapabilityBoundingSet=",
+        "KillMode=control-group",
+        "TimeoutStopSec=30s",
+    )
+    for service in (publisher_service, verifier_service):
+        for line in common_service_lines:
+            assert service.count(line) == 1, line
+        assert "Restart=" not in service
+        assert "ExecStart=/bin/bash -c" not in service
+
+    assert systemd_values(publisher_service, "ExecStart") == (
+        "/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh publisher",
+    )
+    assert systemd_values(publisher_service, "TimeoutStartSec") == ("5min",)
+    assert systemd_values(publisher_service, "ReadWritePaths") == (
+        "@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@",
+    )
+    assert not systemd_values(publisher_service, "ReadOnlyPaths")
+
+    assert systemd_values(verifier_service, "ExecStart") == (
+        "/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh verifier",
+    )
+    assert systemd_values(verifier_service, "TimeoutStartSec") == ("6min",)
+    assert systemd_values(verifier_service, "SuccessExitStatus") == ("2",)
+    assert systemd_values(verifier_service, "ReadOnlyPaths") == ("@REPO_DIR@",)
+    assert systemd_values(verifier_service, "ReadWritePaths") == (
+        "@LOG_DIR@ @LOCK_DIR@",
+    )
+    assert "ReadWritePaths=@REPO_DIR@" not in verifier_service
+
+    path_expectations = {
+        "config/systemd/degen-dogs-publisher.path.in": (
+            "@LOCK_DIR@/publication/latest.json",
+            "degen-dogs-publisher.service",
+        ),
+        "config/systemd/degen-dogs-pages-verifier.path.in": (
+            "@LOCK_DIR@/publication/pending.json",
+            "degen-dogs-pages-verifier.service",
+        ),
+    }
+    for relative, (watched_leaf, service_name) in path_expectations.items():
+        path_unit = text(relative)
+        assert systemd_values(path_unit, "PathChanged") == (watched_leaf,)
+        assert systemd_values(path_unit, "Unit") == (service_name,)
+        assert not systemd_values(path_unit, "ConditionPathExists")
+        assert "DirectoryNotEmpty=" not in path_unit
+        assert not systemd_values(path_unit, "PathExists")
+        assert "*" not in watched_leaf
+
+    timer_expectations = {
+        "config/systemd/degen-dogs-publisher.timer": (
+            "degen-dogs-publisher.service",
+            "10s",
+            "1s",
+            "1s",
+        ),
+        "config/systemd/degen-dogs-pages-verifier.timer": (
+            "degen-dogs-pages-verifier.service",
+            "50s",
+            "5s",
+            "5s",
+        ),
+    }
+    for relative, (service_name, inactive, accuracy, jitter) in timer_expectations.items():
+        timer = text(relative)
+        assert systemd_values(timer, "Unit") == (service_name,)
+        assert systemd_values(timer, "Persistent") == ("false",)
+        assert systemd_values(timer, "OnUnitInactiveSec") == (inactive,)
+        assert systemd_values(timer, "AccuracySec") == (accuracy,)
+        assert systemd_values(timer, "RandomizedDelaySec") == (jitter,)
+        assert len(systemd_values(timer, "OnBootSec")) == 1
+        assert not systemd_values(timer, "OnCalendar")
+
+    target = text("config/systemd/degen-dogs-runner.target")
+    assert systemd_values(target, "Wants") == (" ".join(NEW_TRIGGER_UNITS),)
+
+
+def test_queued_worker_lifecycle_inventories() -> None:
+    installer = text("scripts/install_wsl_runner.sh")
+    assert bash_array_items(installer, "activation_unit_names") == ACTIVATION_UNITS
+    assert bash_array_items(installer, "service_unit_names") == SERVICE_UNITS
+    assert bash_array_items(installer, "unit_names") == (
+        "${activation_unit_names[@]}",
+        "${service_unit_names[@]}",
+    )
+    expected_trusted_assets = (
+        "scripts/install_wsl_runner.sh",
+        "scripts/run_wsl_runner_anchor.sh",
+        "config/wsl-runner.env.template",
+        "config/logrotate/degen-dogs-wsl.in",
+        "config/systemd/degen-dogs-watcher.service.in",
+        "config/systemd/degen-dogs-watcher.timer",
+        "config/systemd/degen-dogs-hourly.service.in",
+        "config/systemd/degen-dogs-hourly.timer",
+        "config/systemd/degen-dogs-health.service.in",
+        "config/systemd/degen-dogs-health.timer",
+        "config/systemd/degen-dogs-runner.target",
+        *NEW_UNIT_ASSETS,
+        *NEW_RUNTIME_ASSETS,
+    )
+    assert bash_array_items(installer, "trusted_root_assets") == expected_trusted_assets
+    assert bash_array_items(installer, "rendered_unit_names") == (
+        "degen-dogs-watcher.service",
+        "degen-dogs-hourly.service",
+        "degen-dogs-health.service",
+        "degen-dogs-publisher.service",
+        "degen-dogs-publisher.path",
+        "degen-dogs-pages-verifier.service",
+        "degen-dogs-pages-verifier.path",
+    )
+    assert bash_array_items(installer, "copied_unit_names") == (
+        "degen-dogs-watcher.timer",
+        "degen-dogs-hourly.timer",
+        "degen-dogs-health.timer",
+        "degen-dogs-publisher.timer",
+        "degen-dogs-pages-verifier.timer",
+        "degen-dogs-runner.target",
+    )
+    assert installer.count('systemctl disable --now "${activation_unit_names[@]}"') == 4
+    assert installer.count('systemctl stop "${service_unit_names[@]}"') == 4
+    assert installer.count('for old_unit in "${unit_names[@]}"') == 2
+    assert 'systemctl enable "${activation_unit_names[@]}"' in installer
+    assert 'systemd-analyze verify "${verify_units[@]}"' in installer
+
+    anchor = text("scripts/run_wsl_runner_anchor.sh")
+    assert bash_array_items(anchor, "units") == ACTIVATION_UNITS
+    assert bash_array_items(anchor, "triggered_services") == NEW_TRIGGERED_SERVICES
+    assert 'systemctl show --property=LoadState --value "$unit"' in anchor
+    assert 'systemctl is-failed --quiet "$unit"' in anchor
+
+    powershell = text("scripts/install_wsl_startup_task.ps1")
+    trusted_stage = powershell_literal_payload(powershell, "trustedBundleProvision")
+    assert bash_array_items(trusted_stage, "required") == expected_trusted_assets
+    runtime_stage = powershell_literal_payload(powershell, "runtimeStage")
+    assert bash_array_items(runtime_stage, "runtime_required_assets") == (
+        *NEW_UNIT_ASSETS,
+        *NEW_RUNTIME_ASSETS,
+    )
+    for payload_name in ("uninstallScript", "quiesce", "rollbackPublisher"):
+        payload = powershell_literal_payload(powershell, payload_name)
+        assert bash_array_items(payload, "activation_units") == ACTIVATION_UNITS
+        assert bash_array_items(payload, "service_units") == SERVICE_UNITS
+    activation = powershell_literal_payload(powershell, "commitActivation")
+    assert bash_array_items(activation, "activation_units") == ACTIVATION_UNITS
+    assert bash_array_items(activation, "triggered_services") == NEW_TRIGGERED_SERVICES
+
+
+def test_rendered_verifier_systemd_isolation() -> None:
+    test_id = uuid.uuid4().hex
+    unit_name = f"degen-dogs-pages-verifier-isolation-test-{test_id}.service"
+    if os.name == "nt":
+        wsl = shutil.which("wsl.exe")
+        assert wsl, "rendered systemd isolation requires wsl.exe"
+        distro = "DegenDogsRunner"
+        converted = subprocess.run(
+            [
+                wsl,
+                "-d",
+                distro,
+                "-u",
+                "root",
+                "--",
+                "/bin/bash",
+                "-c",
+                'IFS= read -r value; wslpath -a -u "$value"',
+            ],
+            check=True,
+            input=str(ROOT) + "\n",
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=15,
+        ).stdout.strip()
+        command = [wsl, "-d", distro, "-u", "root", "--", "/bin/bash", "-s", "--", converted, unit_name]
+    else:
+        assert os.geteuid() == 0, "rendered systemd isolation requires root"
+        command = ["/bin/bash", "-s", "--", str(ROOT), unit_name]
+
+    harness = r'''
+set -Eeuo pipefail
+source_root="$1"
+unit_name="$2"
+test_root=$(mktemp -d /srv/degen-dogs-task7.XXXXXX)
+unit_dir="$test_root/units"
+repo_dir="$test_root/repo"
+log_dir="$test_root/log"
+lock_dir="$test_root/lock"
+run_output="$test_root/systemd-run.log"
+test_user=degendogs
+test_group=$(id -gn "$test_user")
+test "$(id -u "$test_user")" != 0
+cleanup_status=0
+cleanup() {
+  prior_status=$?
+  trap - EXIT
+  if (( prior_status != 0 )); then
+    journalctl --no-pager -n 20 -u "$unit_name" >&2 || true
+  fi
+  systemctl stop "$unit_name" >/dev/null 2>&1 || true
+  systemctl reset-failed "$unit_name" >/dev/null 2>&1 || true
+  load_state=$(systemctl show --property=LoadState --value "$unit_name" 2>/dev/null || true)
+  if (( prior_status != 0 )) && [[ -f "$run_output" ]]; then
+    sed 's/^/systemd-run: /' "$run_output" >&2 || true
+  fi
+  case "$test_root" in
+    /srv/degen-dogs-task7.??????) rm -rf -- "$test_root" ;;
+    *) printf 'error: refusing unsafe isolation cleanup path: %s\n' "$test_root" >&2; cleanup_status=1 ;;
+  esac
+  if [[ -e "$test_root" || -L "$test_root" ]]; then cleanup_status=1; fi
+  if [[ -n "$load_state" && "$load_state" != "not-found" ]]; then cleanup_status=1; fi
+  printf 'rendered-verifier-isolation-cleanup unit=%s load=%s temp_absent=%s\n' \
+    "$unit_name" "${load_state:-not-found}" "$([[ ! -e "$test_root" ]] && printf yes || printf no)"
+  if (( prior_status != 0 )); then exit "$prior_status"; fi
+  exit "$cleanup_status"
+}
+trap cleanup EXIT
+
+test "$(ps -p 1 -o comm=)" = systemd
+test "$(stat -f -c %T /srv)" = 'ext2/ext3'
+mkdir -p "$unit_dir" "$repo_dir/scripts" "$log_dir" "$lock_dir/publication"
+chmod 0711 "$test_root"
+cat >"$repo_dir/scripts/run_wsl_runner_job.sh" <<'FAKE_LAUNCHER'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+test "${1:-}" = verifier
+printf 'started\n' >"$DEGEN_DOGS_LOG_DIR/isolation-started"
+printf 'forbidden\n' >"$DEGEN_DOGS_REPO_DIR/forbidden-write"
+printf 'escaped\n' >"$DEGEN_DOGS_LOG_DIR/isolation-escaped"
+FAKE_LAUNCHER
+chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh"
+chown -R root:root "$test_root"
+chown "$test_user:$test_group" "$repo_dir" "$log_dir" "$lock_dir" "$lock_dir/publication"
+chmod 0711 "$test_root"
+chmod 0755 "$repo_dir" "$repo_dir/scripts"
+chmod 0700 "$log_dir" "$lock_dir" "$lock_dir/publication"
+chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh"
+
+render() {
+  sed \
+    -e "s|@RUNNER_USER@|$test_user|g" \
+    -e "s|@RUNNER_GROUP@|$test_group|g" \
+    -e 's|@RUNNER_HOME@|/nonexistent|g' \
+    -e "s|@REPO_DIR@|$repo_dir|g" \
+    -e "s|@LOG_DIR@|$log_dir|g" \
+    -e "s|@LOCK_DIR@|$lock_dir|g" \
+    -e "s|@ENV_FILE@|$repo_dir/.env.local|g" \
+    -e 's|@RUNNER_ID@|isolation-test|g' \
+    "$1" >"$2"
+}
+render "$source_root/config/systemd/degen-dogs-publisher.service.in" "$unit_dir/degen-dogs-publisher.service"
+render "$source_root/config/systemd/degen-dogs-publisher.path.in" "$unit_dir/degen-dogs-publisher.path"
+cp "$source_root/config/systemd/degen-dogs-publisher.timer" "$unit_dir/degen-dogs-publisher.timer"
+render "$source_root/config/systemd/degen-dogs-pages-verifier.service.in" "$unit_dir/degen-dogs-pages-verifier.service"
+render "$source_root/config/systemd/degen-dogs-pages-verifier.path.in" "$unit_dir/degen-dogs-pages-verifier.path"
+cp "$source_root/config/systemd/degen-dogs-pages-verifier.timer" "$unit_dir/degen-dogs-pages-verifier.timer"
+cp "$source_root/config/systemd/degen-dogs-runner.target" "$unit_dir/degen-dogs-runner.target"
+chmod 0644 "$unit_dir"/*
+if grep -R '@[A-Z_]*@' "$unit_dir"; then
+  printf 'error: rendered unit retained a placeholder\n' >&2
+  exit 81
+fi
+systemd-analyze verify \
+  "$unit_dir/degen-dogs-publisher.service" \
+  "$unit_dir/degen-dogs-publisher.path" \
+  "$unit_dir/degen-dogs-publisher.timer" \
+  "$unit_dir/degen-dogs-pages-verifier.service" \
+  "$unit_dir/degen-dogs-pages-verifier.path" \
+  "$unit_dir/degen-dogs-pages-verifier.timer" \
+  "$unit_dir/degen-dogs-runner.target"
+
+rendered="$unit_dir/degen-dogs-pages-verifier.service"
+directive() { sed -n "s/^$1=//p" "$rendered"; }
+test "$(directive ExecStart)" = "/bin/bash -p $repo_dir/scripts/run_wsl_runner_job.sh verifier"
+test "$(directive ReadOnlyPaths)" = "$repo_dir"
+test "$(directive ReadWritePaths)" = "$log_dir $lock_dir"
+
+properties=(
+  "--property=UMask=$(directive UMask)"
+  "--property=NoNewPrivileges=$(directive NoNewPrivileges)"
+  "--property=PrivateTmp=$(directive PrivateTmp)"
+  "--property=ProtectSystem=$(directive ProtectSystem)"
+  "--property=ProtectHome=$(directive ProtectHome)"
+  "--property=ReadOnlyPaths=$(directive ReadOnlyPaths)"
+  "--property=ReadWritePaths=$(directive ReadWritePaths)"
+  "--property=ProtectKernelTunables=$(directive ProtectKernelTunables)"
+  "--property=ProtectKernelModules=$(directive ProtectKernelModules)"
+  "--property=ProtectControlGroups=$(directive ProtectControlGroups)"
+  "--property=RestrictSUIDSGID=$(directive RestrictSUIDSGID)"
+  "--property=RestrictAddressFamilies=$(directive RestrictAddressFamilies)"
+  "--property=CapabilityBoundingSet=$(directive CapabilityBoundingSet)"
+  "--property=KillMode=$(directive KillMode)"
+  "--property=TimeoutStartSec=$(directive TimeoutStartSec)"
+  "--property=TimeoutStopSec=$(directive TimeoutStopSec)"
+)
+set +e
+systemd-run --quiet --wait --collect --unit "$unit_name" \
+  --uid="$test_user" --gid="$test_group" --working-directory="$repo_dir" \
+  --setenv="DEGEN_DOGS_REPO_DIR=$repo_dir" \
+  --setenv="DEGEN_DOGS_LOG_DIR=$log_dir" \
+  --setenv="DEGEN_DOGS_LOCK_DIR=$lock_dir" \
+  "${properties[@]}" \
+  /bin/bash -p "$repo_dir/scripts/run_wsl_runner_job.sh" verifier >"$run_output" 2>&1
+run_status=$?
+set -e
+test "$run_status" -ne 0
+test -f "$log_dir/isolation-started"
+test ! -e "$repo_dir/forbidden-write"
+test ! -e "$log_dir/isolation-escaped"
+printf 'rendered-verifier-isolation-denied unit=%s status=%s\n' "$unit_name" "$run_status"
+'''
+    result = subprocess.run(
+        command,
+        input=harness.encode("utf-8"),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+        timeout=60,
+    )
+    assert result.returncode == 0, (
+        f"rendered systemd isolation failed with {result.returncode}\n"
+        f"stdout={result.stdout.decode('utf-8', errors='replace')}\n"
+        f"stderr={result.stderr.decode('utf-8', errors='replace')}"
+    )
+    output = result.stdout.decode("utf-8", errors="strict")
+    assert "rendered-verifier-isolation-denied" in output
+    assert "temp_absent=yes" in output
+    print(output.strip())
 
 
 def test() -> None:
@@ -426,6 +900,8 @@ def test() -> None:
         "scripts/preflight_wsl_rpc.py",
         "scripts/run_wsl_runner_anchor.sh",
         "scripts/run_wsl_runner_job.sh",
+        *NEW_UNIT_ASSETS,
+        *NEW_RUNTIME_ASSETS,
     )
     for relative in required:
         assert (ROOT / relative).is_file(), relative
@@ -467,6 +943,7 @@ def test() -> None:
     assert "StartLimitBurst=" not in watcher_service
     assert "Restart=on-failure" in text("config/systemd/degen-dogs-hourly.service.in")
     assert "Restart=on-failure" in text("config/systemd/degen-dogs-health.service.in")
+    test_queued_worker_units()
 
     launcher = text("scripts/run_wsl_runner_job.sh")
     assert "MISSION3_WATCHER_AUTO_PUSH=1" in launcher
@@ -480,6 +957,12 @@ def test() -> None:
     assert "export DEGEN_DOGS_SKIP_PUSH=0" in launcher
     assert "export DEGEN_DOGS_SKIP_PULL=0" in launcher
     assert 'export DEGEN_DOGS_RUNNER_ID="${DEGEN_DOGS_RUNNER_ID:-windows-wsl}"' in launcher
+    assert launcher.count("MISSION3_WATCHER_PUBLICATION_MODE=queue") == 1
+    assert launcher.index("degen_dogs_load_runner_env") < launcher.index(
+        "MISSION3_WATCHER_PUBLICATION_MODE=queue"
+    )
+    assert "verify_pages_deployment.py" in launcher
+    assert "scrub_fixed_worker_authority" in launcher
     assert "remote.origin.pushurl" in launcher
     test_wsl_launcher_policy(
         launcher,
@@ -596,6 +1079,7 @@ def test() -> None:
             assert "runner_git" in line or "run_as_runner_runtime" in line, line
     assert "systemctl disable --now" in installer
     assert "--uninstall" in installer
+    test_queued_worker_lifecycle_inventories()
 
     powershell = text("scripts/install_wsl_startup_task.ps1")
     assert not powershell.startswith("#Requires -RunAsAdministrator")
@@ -895,16 +1379,28 @@ fi
 disable --now degen-dogs-watcher.timer
 disable --now degen-dogs-hourly.timer
 disable --now degen-dogs-health.timer
+disable --now degen-dogs-publisher.path
+disable --now degen-dogs-publisher.timer
+disable --now degen-dogs-pages-verifier.path
+disable --now degen-dogs-pages-verifier.timer
 stop degen-dogs-watcher.service
 stop degen-dogs-hourly.service
 stop degen-dogs-health.service
+stop degen-dogs-publisher.service
+stop degen-dogs-pages-verifier.service
 show --property=ActiveState --value degen-dogs-runner.target
 show --property=ActiveState --value degen-dogs-watcher.timer
 show --property=ActiveState --value degen-dogs-hourly.timer
 show --property=ActiveState --value degen-dogs-health.timer
+show --property=ActiveState --value degen-dogs-publisher.path
+show --property=ActiveState --value degen-dogs-publisher.timer
+show --property=ActiveState --value degen-dogs-pages-verifier.path
+show --property=ActiveState --value degen-dogs-pages-verifier.timer
 show --property=ActiveState --value degen-dogs-watcher.service
 show --property=ActiveState --value degen-dogs-hourly.service
 show --property=ActiveState --value degen-dogs-health.service
+show --property=ActiveState --value degen-dogs-publisher.service
+show --property=ActiveState --value degen-dogs-pages-verifier.service
 """
 
     def rollback_regression(mode: str, expected_returncode: int) -> None:
@@ -1007,6 +1503,10 @@ exit "$status"
     runner_env = text("config/wsl-runner.env.template")
     assert "MISSION3_LOG_QUORUM_MAX_BLOCKS=500" in runner_env
     assert re.search(r"(?m)^DEGEN_DOGS_RUN_MISSION3_ARCHIVE=0$", runner_env)
+    assert re.search(r"(?m)^MISSION3_WATCHER_PUBLICATION_MODE=inline$", runner_env)
+    assert "MISSION3_WATCHER_PUBLICATION_MODE=queue" not in runner_env
+
+    test_rendered_verifier_systemd_isolation()
 
     package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     scripts = package["scripts"]
