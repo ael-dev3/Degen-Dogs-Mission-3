@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import sys
 import tempfile
+from contextlib import redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -30,6 +32,23 @@ state = load("runner_publication_state")
 drainer = load("drain_publication_queue")
 verifier = load("verify_pages_deployment")
 health = load("check_wsl_runner_health")
+
+EXPECTED_ACTIVATION_UNITS = (
+    "degen-dogs-runner.target",
+    "degen-dogs-watcher.timer",
+    "degen-dogs-hourly.timer",
+    "degen-dogs-health.timer",
+    "degen-dogs-publisher.path",
+    "degen-dogs-publisher.timer",
+    "degen-dogs-pages-verifier.path",
+    "degen-dogs-pages-verifier.timer",
+)
+EXPECTED_WORKER_UNITS = (
+    "degen-dogs-watcher.service",
+    "degen-dogs-hourly.service",
+    "degen-dogs-publisher.service",
+    "degen-dogs-pages-verifier.service",
+)
 
 
 class FakeLock:
@@ -287,6 +306,338 @@ def test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private
         assert forbidden not in rendered
 
 
+def systemd_properties_fixture(
+    *,
+    load_state: str = "loaded",
+    active_state: str = "active",
+    sub_state: str = "waiting",
+    unit_file_state: str = "enabled",
+    result: str = "success",
+) -> dict[str, str]:
+    """Mirror the complete bounded ``systemctl show`` property response."""
+    return {
+        "LoadState": load_state,
+        "ActiveState": active_state,
+        "SubState": sub_state,
+        "UnitFileState": unit_file_state,
+        "Result": result,
+    }
+
+
+def inspect_systemd_with(rows: dict[str, dict[str, str]]) -> tuple[list[str], dict[str, Any], list[str]]:
+    calls: list[str] = []
+    original = health.systemd_properties
+    try:
+        def fake_properties(unit: str) -> dict[str, str]:
+            calls.append(unit)
+            return dict(rows[unit])
+
+        health.systemd_properties = fake_properties
+        problems, checks = health.inspect_systemd_inventory()
+        return problems, checks, calls
+    finally:
+        health.systemd_properties = original
+
+
+def public_systemd_report(
+    problems: list[str],
+    checks: dict[str, Any],
+    *,
+    publication: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if publication is None:
+        publication = health.publication_health_summary(
+            {
+                "last_generation": 0,
+                "latest": None,
+                "pending": None,
+                "checkpoint": None,
+                "pages_verified": None,
+                "journal": None,
+            },
+            now=datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc),
+            publisher_lock_active=False,
+        )
+    return health.public_health_report(
+        now=datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc),
+        problems=problems,
+        warnings=[],
+        checks={
+            **checks,
+            "publication": publication,
+            "remote": {"incident": False},
+            "git": {"tracked_dirty": False},
+            "filesystems": [],
+        },
+    )
+
+
+def test_systemd_health_inventory_checks_every_required_unit_exactly_once() -> None:
+    """Catches any required queue activation or worker disappearing from health."""
+    rows = {
+        unit: systemd_properties_fixture(unit_file_state="enabled-runtime")
+        for unit in EXPECTED_ACTIVATION_UNITS
+    }
+    rows.update({
+        "degen-dogs-watcher.service": systemd_properties_fixture(
+            active_state="inactive",
+            sub_state="dead",
+            unit_file_state="disabled",
+            result="",
+        ),
+        "degen-dogs-hourly.service": systemd_properties_fixture(
+            active_state="activating",
+            sub_state="start",
+            unit_file_state="disabled",
+            result="",
+        ),
+        "degen-dogs-publisher.service": systemd_properties_fixture(
+            active_state="inactive",
+            sub_state="dead",
+            unit_file_state="disabled",
+            result="success",
+        ),
+        # The verifier wrapper maps its intentional exit 2 to systemd success.
+        "degen-dogs-pages-verifier.service": systemd_properties_fixture(
+            active_state="inactive",
+            sub_state="dead",
+            unit_file_state="disabled",
+            result="success",
+        ),
+    })
+
+    problems, checks, calls = inspect_systemd_with(rows)
+    report = public_systemd_report(problems, checks)
+
+    assert calls == list(EXPECTED_ACTIVATION_UNITS + EXPECTED_WORKER_UNITS)
+    assert len(calls) == len(set(calls))
+    assert "degen-dogs-health.service" not in calls
+    assert problems == []
+    assert report["status"] == "healthy"
+    assert report["checks"]["activation_units_healthy"] is True
+    assert report["checks"]["timers_healthy"] is True
+    assert report["checks"]["workers_healthy"] is True
+    assert checks["workers"]["degen-dogs-watcher.service"]["Result"] == ""
+    assert checks["workers"]["degen-dogs-hourly.service"]["ActiveState"] == "activating"
+    assert checks["workers"]["degen-dogs-pages-verifier.service"]["Result"] == "success"
+
+
+def test_systemd_health_rejects_each_activation_unit_state_failure() -> None:
+    """Catches inactive, disabled, unloaded, or failed persistent triggers being accepted."""
+    failures = {
+        "inactive": {"active_state": "inactive"},
+        "disabled": {"unit_file_state": "disabled"},
+        "unloaded": {"load_state": "not-found"},
+        "failed": {"active_state": "failed", "sub_state": "failed", "result": "exit-code"},
+    }
+    for unit in EXPECTED_ACTIVATION_UNITS:
+        for name, overrides in failures.items():
+            rows = {
+                item: systemd_properties_fixture()
+                for item in EXPECTED_ACTIVATION_UNITS + EXPECTED_WORKER_UNITS
+            }
+            rows[unit] = systemd_properties_fixture(**overrides)
+
+            problems, checks, _calls = inspect_systemd_with(rows)
+            report = public_systemd_report(problems, checks)
+
+            assert any(unit in problem for problem in problems), (unit, name, problems)
+            assert report["status"] == "unhealthy", (unit, name, report)
+            assert report["checks"]["activation_units_healthy"] is False, (unit, name, report)
+            assert report["checks"]["timers_healthy"] is False, (unit, name, report)
+            assert report["checks"]["workers_healthy"] is True, (unit, name, report)
+
+
+def test_systemd_health_rejects_each_worker_load_or_result_failure() -> None:
+    """Catches a missing or failed oneshot worker being hidden by idle state."""
+    failures = {
+        "unloaded": {"load_state": "not-found", "active_state": "inactive", "sub_state": "dead"},
+        "failed": {"active_state": "failed", "sub_state": "failed", "result": "exit-code"},
+        "bad_result": {"active_state": "inactive", "sub_state": "dead", "result": "exit-code"},
+    }
+    for unit in EXPECTED_WORKER_UNITS:
+        for name, overrides in failures.items():
+            rows = {
+                item: systemd_properties_fixture()
+                for item in EXPECTED_ACTIVATION_UNITS + EXPECTED_WORKER_UNITS
+            }
+            rows[unit] = systemd_properties_fixture(**overrides)
+
+            problems, checks, _calls = inspect_systemd_with(rows)
+            report = public_systemd_report(problems, checks)
+
+            assert any(unit in problem for problem in problems), (unit, name, problems)
+            assert report["status"] == "unhealthy", (unit, name, report)
+            assert report["checks"]["activation_units_healthy"] is True, (unit, name, report)
+            assert report["checks"]["workers_healthy"] is False, (unit, name, report)
+
+
+def test_systemd_activation_failure_is_independent_of_healthy_queue_records() -> None:
+    """Catches a healthy queue state masking a disabled publication trigger."""
+    rows = {
+        unit: systemd_properties_fixture()
+        for unit in EXPECTED_ACTIVATION_UNITS + EXPECTED_WORKER_UNITS
+    }
+    rows["degen-dogs-publisher.path"] = systemd_properties_fixture(unit_file_state="disabled")
+
+    problems, checks, _calls = inspect_systemd_with(rows)
+    publication = health.publication_health_summary(
+        {
+            "last_generation": 5,
+            "latest": None,
+            "pending": None,
+            "checkpoint": {
+                "outcome": "no_diff",
+                "generation": 5,
+                "queue_digest": "e" * 64,
+                "commit_sha": None,
+                "push_completed_at_utc": None,
+            },
+            "pages_verified": None,
+            "journal": None,
+        },
+        now=datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc),
+        publisher_lock_active=False,
+        configured_queue_mode=True,
+    )
+    report = public_systemd_report(problems, checks, publication=publication)
+
+    assert publication["handled_generation"] == 5
+    assert publication["problems"] == []
+    assert report["checks"]["publication"]["problems"] == []
+    assert report["checks"]["publication"]["queue_mode"] is True
+    assert report["checks"]["activation_units_healthy"] is False
+    assert report["status"] == "unhealthy"
+
+
+def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None:
+    """Catches main rendering unit drift but omitting it from the exit status."""
+    now = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
+    activation = {
+        unit: systemd_properties_fixture()
+        for unit in EXPECTED_ACTIVATION_UNITS
+    }
+    activation["degen-dogs-publisher.path"] = systemd_properties_fixture(
+        unit_file_state="disabled"
+    )
+    workers = {
+        unit: systemd_properties_fixture(active_state="inactive", sub_state="dead", result="")
+        for unit in EXPECTED_WORKER_UNITS
+    }
+    systemd_problem = "degen-dogs-publisher.path is not enabled (disabled)"
+    originals = {
+        "ROOT": health.ROOT,
+        "utc_now": health.utc_now,
+        "inspect_systemd_inventory": health.inspect_systemd_inventory,
+        "refresh_lock_active": health.refresh_lock_active,
+        "read_json": health.read_json,
+        "run": health.run,
+        "disk_usage": health.shutil.disk_usage,
+        "status_problem": health.remote_freshness.status_problem,
+        "fetch_json": health.remote_freshness.fetch_json,
+        "assess_freshness": health.remote_freshness.assess_freshness,
+        "latest_refresh_row": health.refresh_telemetry.latest_refresh_row,
+    }
+    environment_names = (
+        "DEGEN_DOGS_LOCK_DIR",
+        "DEGEN_DOGS_LOG_DIR",
+        "MISSION3_WATCHER_STATE_PATH",
+        "DEGEN_DOGS_REFRESH_LOCK_PATH",
+        "MISSION3_PUBLICATION_MODE",
+        "DEGEN_DOGS_BRANCH",
+    )
+    original_environment = {name: os.environ.get(name) for name in environment_names}
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        log_dir = root / "logs"
+        lock_dir = root / "state"
+        (root / "generated").mkdir()
+        log_dir.mkdir()
+        lock_dir.mkdir()
+        try:
+            health.ROOT = root
+            health.utc_now = lambda: now
+            health.inspect_systemd_inventory = lambda: (
+                [systemd_problem],
+                {"activation_units": activation, "workers": workers},
+            )
+            health.refresh_lock_active = lambda _path: False
+            health.read_json = lambda path: (
+                {
+                    "last_checked_at_utc": "2026-08-31T12:00:00Z",
+                    "pending_refresh": False,
+                    "consecutive_rpc_failures": 0,
+                    "consecutive_refresh_failures": 0,
+                    "last_refresh_status": "not_needed",
+                }
+                if path.name == "watcher.json"
+                else {
+                    "last_successful_refresh_time_utc": "2026-08-31T12:00:00Z",
+                    "latest_generated_block": 700,
+                    "current_dog_token_id": 10,
+                }
+            )
+            health.remote_freshness.status_problem = lambda _status: ""
+            health.refresh_telemetry.latest_refresh_row = lambda _env, root: {
+                "result": "success_no_diff",
+                "completed_at_utc": "2026-08-31T12:00:00Z",
+            }
+            health.remote_freshness.fetch_json = lambda *_args, **_kwargs: {}
+            health.remote_freshness.assess_freshness = lambda *_args, **_kwargs: {
+                "incident": False,
+            }
+
+            def fake_run(command: list[str], *, timeout: int = 20) -> Any:  # noqa: ARG001
+                output = "main\n" if command == ["git", "branch", "--show-current"] else ""
+                return health.subprocess.CompletedProcess(command, 0, output, "")
+
+            health.run = fake_run
+            health.shutil.disk_usage = lambda _path: type(
+                "DiskUsage",
+                (),
+                {
+                    "total": 100 * 1024**3,
+                    "used": 10 * 1024**3,
+                    "free": 90 * 1024**3,
+                },
+            )()
+            os.environ.update({
+                "DEGEN_DOGS_LOCK_DIR": str(lock_dir),
+                "DEGEN_DOGS_LOG_DIR": str(log_dir),
+                "MISSION3_WATCHER_STATE_PATH": str(root / "watcher.json"),
+                "DEGEN_DOGS_REFRESH_LOCK_PATH": str(lock_dir / "refresh.lock"),
+                "MISSION3_PUBLICATION_MODE": "inline",
+                "DEGEN_DOGS_BRANCH": "main",
+            })
+
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                exit_code = health.main()
+            report = json.loads(stdout.getvalue())
+
+            assert exit_code == 1
+            assert report["status"] == "unhealthy"
+            assert report["problem_count"] == 1
+            assert report["checks"]["activation_units_healthy"] is False
+        finally:
+            health.ROOT = originals["ROOT"]
+            health.utc_now = originals["utc_now"]
+            health.inspect_systemd_inventory = originals["inspect_systemd_inventory"]
+            health.refresh_lock_active = originals["refresh_lock_active"]
+            health.read_json = originals["read_json"]
+            health.run = originals["run"]
+            health.shutil.disk_usage = originals["disk_usage"]
+            health.remote_freshness.status_problem = originals["status_problem"]
+            health.remote_freshness.fetch_json = originals["fetch_json"]
+            health.remote_freshness.assess_freshness = originals["assess_freshness"]
+            health.refresh_telemetry.latest_refresh_row = originals["latest_refresh_row"]
+            for name, value in original_environment.items():
+                if value is None:
+                    os.environ.pop(name, None)
+                else:
+                    os.environ[name] = value
+
+
 def test_queue_health_future_boundary_and_watcher_lock_rule() -> None:
     """Catches queue mode inheriting the legacy publisher-lock watcher exemption."""
     now = datetime(2026, 8, 31, 12, 0, tzinfo=timezone.utc)
@@ -497,6 +848,11 @@ def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
 if __name__ == "__main__":
     test_pages_delay_keeps_newer_observation_and_drains_it_next()
     test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private_values()
+    test_systemd_health_inventory_checks_every_required_unit_exactly_once()
+    test_systemd_health_rejects_each_activation_unit_state_failure()
+    test_systemd_health_rejects_each_worker_load_or_result_failure()
+    test_systemd_activation_failure_is_independent_of_healthy_queue_records()
+    test_main_returns_unhealthy_when_systemd_inventory_reports_failure()
     test_queue_health_future_boundary_and_watcher_lock_rule()
     test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure()
     test_queue_health_state_machine_boundaries_and_durable_watermark()

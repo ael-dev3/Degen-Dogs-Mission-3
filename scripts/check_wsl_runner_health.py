@@ -3,8 +3,9 @@
 
 The macOS health agent intentionally understands launchd and repairs plists.
 This smaller probe leaves service supervision to systemd and verifies the
-signals that matter for a second publisher: timers, local locks/state, Git
-cleanliness, generated freshness, remote freshness, and free disk space.
+signals that matter for a second publisher: persistent activation units,
+workers, local locks/state, Git cleanliness, generated freshness, remote
+freshness, and free disk space.
 """
 
 from __future__ import annotations
@@ -28,14 +29,21 @@ import check_remote_freshness as remote_freshness  # noqa: E402
 import refresh_telemetry  # noqa: E402
 import runner_publication_state  # noqa: E402
 
-TIMER_UNITS = (
+ACTIVATION_UNITS = (
+    "degen-dogs-runner.target",
     "degen-dogs-watcher.timer",
     "degen-dogs-hourly.timer",
     "degen-dogs-health.timer",
+    "degen-dogs-publisher.path",
+    "degen-dogs-publisher.timer",
+    "degen-dogs-pages-verifier.path",
+    "degen-dogs-pages-verifier.timer",
 )
 WORKER_UNITS = (
     "degen-dogs-watcher.service",
     "degen-dogs-hourly.service",
+    "degen-dogs-publisher.service",
+    "degen-dogs-pages-verifier.service",
 )
 PUBLISHED_RESULTS = {
     "success_no_diff",
@@ -132,6 +140,41 @@ def systemd_properties(unit: str) -> dict[str, str]:
         if separator:
             properties[key] = value
     return properties
+
+
+def inspect_systemd_inventory() -> tuple[list[str], dict[str, Any]]:
+    """Inspect every persistent activation and idle-capable worker unit."""
+    problems: list[str] = []
+    activation_units: dict[str, Any] = {}
+    for unit in ACTIVATION_UNITS:
+        properties = systemd_properties(unit)
+        activation_units[unit] = properties
+        if properties.get("error"):
+            problems.append(f"{unit}: {properties['error']}")
+        elif properties.get("LoadState") != "loaded" or properties.get("ActiveState") != "active":
+            problems.append(
+                f"{unit} is not active (load={properties.get('LoadState')} active={properties.get('ActiveState')})"
+            )
+        elif properties.get("UnitFileState") not in {"enabled", "enabled-runtime"}:
+            problems.append(f"{unit} is not enabled ({properties.get('UnitFileState')})")
+
+    workers: dict[str, Any] = {}
+    for unit in WORKER_UNITS:
+        properties = systemd_properties(unit)
+        workers[unit] = properties
+        if properties.get("error"):
+            problems.append(f"{unit}: {properties['error']}")
+        elif (
+            properties.get("LoadState") != "loaded"
+            or properties.get("ActiveState") == "failed"
+            or properties.get("Result") not in {"", "success"}
+        ):
+            problems.append(
+                f"{unit} last result is unhealthy "
+                f"(load={properties.get('LoadState')} active={properties.get('ActiveState')} "
+                f"result={properties.get('Result')})"
+            )
+    return problems, {"activation_units": activation_units, "workers": workers}
 
 
 def read_json(path: Path, *, max_bytes: int = 2 * 1024 * 1024) -> dict[str, Any]:
@@ -486,22 +529,33 @@ def public_health_report(
         now=now,
         publisher_lock_active=False,
     )
-    timers = checks.get("timers") if isinstance(checks.get("timers"), dict) else {}
-    workers = checks.get("workers") if isinstance(checks.get("workers"), dict) else {}
-    timer_healthy = all(
-        isinstance(row, dict)
-        and not row.get("error")
-        and row.get("LoadState") == "loaded"
-        and row.get("ActiveState") == "active"
-        and row.get("UnitFileState") in {"enabled", "enabled-runtime"}
-        for row in timers.values()
+    activation_units = (
+        checks.get("activation_units") if isinstance(checks.get("activation_units"), dict) else {}
     )
-    workers_healthy = all(
-        isinstance(row, dict)
-        and not row.get("error")
-        and row.get("ActiveState") != "failed"
-        and row.get("Result") in {"", "success"}
-        for row in workers.values()
+    workers = checks.get("workers") if isinstance(checks.get("workers"), dict) else {}
+    activation_units_healthy = (
+        set(activation_units) == set(ACTIVATION_UNITS)
+        and len(activation_units) == len(ACTIVATION_UNITS)
+        and all(
+            isinstance(row, dict)
+            and not row.get("error")
+            and row.get("LoadState") == "loaded"
+            and row.get("ActiveState") == "active"
+            and row.get("UnitFileState") in {"enabled", "enabled-runtime"}
+            for row in activation_units.values()
+        )
+    )
+    workers_healthy = (
+        set(workers) == set(WORKER_UNITS)
+        and len(workers) == len(WORKER_UNITS)
+        and all(
+            isinstance(row, dict)
+            and not row.get("error")
+            and row.get("LoadState") == "loaded"
+            and row.get("ActiveState") != "failed"
+            and row.get("Result") in {"", "success"}
+            for row in workers.values()
+        )
     )
     terminal_result = str(terminal.get("result") or "")
     if terminal_result not in PUBLISHED_RESULTS | {"failed", "unavailable"}:
@@ -520,7 +574,10 @@ def public_health_report(
         "problem_count": len(problems),
         "warning_count": len(warnings),
         "checks": {
-            "timers_healthy": timer_healthy,
+            # Keep the established public field as a compatibility alias while
+            # making its broader persistent-activation meaning explicit.
+            "timers_healthy": activation_units_healthy,
+            "activation_units_healthy": activation_units_healthy,
             "workers_healthy": workers_healthy,
             "refresh_lock_active": bool(checks.get("refresh_lock_active")),
             "watcher_age_seconds": watcher.get("age_seconds") if isinstance(watcher.get("age_seconds"), int) else None,
@@ -565,31 +622,9 @@ def main() -> int:
     warnings: list[str] = []
     checks: dict[str, Any] = {}
 
-    timers: dict[str, Any] = {}
-    for unit in TIMER_UNITS:
-        properties = systemd_properties(unit)
-        timers[unit] = properties
-        if properties.get("error"):
-            problems.append(f"{unit}: {properties['error']}")
-        elif properties.get("LoadState") != "loaded" or properties.get("ActiveState") != "active":
-            problems.append(
-                f"{unit} is not active (load={properties.get('LoadState')} active={properties.get('ActiveState')})"
-            )
-        elif properties.get("UnitFileState") not in {"enabled", "enabled-runtime"}:
-            problems.append(f"{unit} is not enabled ({properties.get('UnitFileState')})")
-    checks["timers"] = timers
-
-    workers: dict[str, Any] = {}
-    for unit in WORKER_UNITS:
-        properties = systemd_properties(unit)
-        workers[unit] = properties
-        if properties.get("error"):
-            problems.append(f"{unit}: {properties['error']}")
-        elif properties.get("ActiveState") == "failed" or properties.get("Result") not in {"", "success"}:
-            problems.append(
-                f"{unit} last result is unhealthy (active={properties.get('ActiveState')} result={properties.get('Result')})"
-            )
-    checks["workers"] = workers
+    systemd_problems, systemd_checks = inspect_systemd_inventory()
+    problems.extend(systemd_problems)
+    checks.update(systemd_checks)
 
     try:
         lock_active = refresh_lock_active(lock_path)
