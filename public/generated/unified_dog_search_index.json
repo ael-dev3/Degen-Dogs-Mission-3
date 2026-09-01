@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "5000000000000000",
-      "usd_estimate": "12.21460000",
+      "usd_estimate": "12.19742500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$12.21",
+      "usd_estimate_display": "$12.20",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-01",
-      "usd_estimate_price_usd": "2442.92",
+      "usd_estimate_price_usd": "2439.485",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 696
     },
     "schema_version": 1,
-    "search_text": "dog 820 dog #820 820 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.21000000 $12.21 2026-08-31t23:25:29z 0x4f69c75fcb951ce40a6207638faa9729242eb6d875acde182d436cbdabf3c6c6 #695/696 generated auction feed 0x3c0573bb68d212ffe297fef420adb0387c5c14a5d5af82db3dc22fcb171d6239 background: none (91.5%) background none body: grey (12.9%) body grey neck: none (41.5%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.6%) ears earbuds head: none (20.3%) head none eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 820 dog #820 820 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.20000000 $12.20 2026-08-31t23:25:29z 0x4f69c75fcb951ce40a6207638faa9729242eb6d875acde182d436cbdabf3c6c6 #695/696 generated auction feed 0x3c0573bb68d212ffe297fef420adb0387c5c14a5d5af82db3dc22fcb171d6239 background: none (91.5%) background none body: grey (12.9%) body grey neck: none (41.5%) neck none mouth: none (68.7%) mouth none ears: earbuds (32.6%) ears earbuds head: none (20.3%) head none eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
