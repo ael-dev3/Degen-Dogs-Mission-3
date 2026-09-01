@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50726890"
+    "value": "50728305"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-01 06:12:07"
+    "value": "2026-09-01 06:59:17"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x48474ee6cba70a045afd57b5bde409d0e6eb506535accefb799f73c1bea61c4c"
+    "value": "0x2daf50ce16a20b68afcbef91a31616959bd4b33cafe65cd48daca7c80daa3545"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -45,15 +45,15 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "4/4"
+    "value": "5/5"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb"
+    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
   },
   {
     "metric": "log_rpc_quorum_providers",
-    "value": "base.org,publicnode.com,rpc-host-a0d298ecc6bb"
+    "value": "base.org,rpc-host-e5083daccc13"
   },
   {
     "metric": "auction_house_code_sha256",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50726890"
+    "value": "50728305"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x48474ee6cba70a045afd57b5bde409d0e6eb506535accefb799f73c1bea61c4c"
+    "value": "0x2daf50ce16a20b68afcbef91a31616959bd4b33cafe65cd48daca7c80daa3545"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2479.48"
+    "value": "2471.335"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "134.56"
+    "value": "134.13"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.7431"
+    "value": "0.7455"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "271.25"
+    "value": "272.12"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈271% APR"
+    "value": "≈272% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "12.4"
+    "value": "12.36"
   },
   {
     "metric": "current_bidder",
