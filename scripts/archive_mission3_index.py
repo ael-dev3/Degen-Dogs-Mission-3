@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import csv
+import email.utils
 import hashlib
 import itertools
 import json
@@ -90,6 +91,16 @@ class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 
 
 RPC_OPENER = urllib.request.build_opener(NoRedirectHandler())
+MAX_RETRY_AFTER_SECONDS = 300.0
+MAX_RETRY_AFTER_HEADER_CHARS = 128
+
+
+class RpcRateLimited(RuntimeError):
+    """Secret-safe HTTP 429 signal with an optional bounded retry hint."""
+
+    def __init__(self, retry_after_seconds: float | None) -> None:
+        super().__init__("HTTP 429")
+        self.retry_after_seconds = retry_after_seconds
 
 
 def open_rpc_request(request: urllib.request.Request, timeout: int):
@@ -248,6 +259,27 @@ def validate_rpc_url(url: str) -> None:
         raise RuntimeError("RPC endpoint must use HTTPS on port 443 without userinfo or a fragment")
 
 
+def parse_retry_after(value: Any, *, now: datetime | None = None) -> float | None:
+    if not isinstance(value, str):
+        return None
+    raw = value.strip()
+    if not raw or len(raw) > MAX_RETRY_AFTER_HEADER_CHARS:
+        return None
+    if raw.isascii() and raw.isdigit():
+        return float(min(int(raw), int(MAX_RETRY_AFTER_SECONDS)))
+    try:
+        retry_at = email.utils.parsedate_to_datetime(raw)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if retry_at.tzinfo is None:
+        return None
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        return None
+    delay = (retry_at.astimezone(timezone.utc) - current.astimezone(timezone.utc)).total_seconds()
+    return min(max(delay, 0.0), MAX_RETRY_AFTER_SECONDS)
+
+
 def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
     validate_rpc_url(url)
     body = json.dumps(payload).encode("utf-8")
@@ -268,6 +300,12 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
     try:
         response = open_rpc_request(req, timeout)
     except urllib.error.HTTPError as exc:
+        if exc.code == 429:
+            try:
+                retry_after = parse_retry_after(exc.headers.get("Retry-After") if exc.headers else None)
+            except Exception:  # noqa: BLE001 - provider-controlled headers are never diagnostic output
+                retry_after = None
+            raise RpcRateLimited(retry_after) from None
         raise RuntimeError(f"HTTP {exc.code}") from None
     except Exception as exc:  # noqa: BLE001 - never expose credential-bearing URLs in transport errors
         raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
@@ -336,6 +374,10 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str] | None = None, t
                     raise RuntimeError("invalid JSON-RPC error envelope")
                 raise RuntimeError(f"JSON-RPC error code={error['code']}")
             return data["result"], url
+        except RpcRateLimited as exc:
+            if len(active_urls) == 1:
+                raise
+            errors.append(f"{redact_url(url)}: {exc}")
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{redact_url(url)}: {exc}")
     raise RuntimeError(f"RPC {method} failed: {'; '.join(errors)}")
@@ -518,8 +560,13 @@ def rpc_consensus(
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
                 remaining = deadline - time.monotonic()
-                if attempt + 1 < attempts and remaining > 0.25:
-                    time.sleep(min(0.25 * (2**attempt), max(remaining - 0.05, 0)))
+                if attempt + 1 >= attempts:
+                    break
+                retry_hint = exc.retry_after_seconds if isinstance(exc, RpcRateLimited) else None
+                delay = max(0.25 * (2**attempt), retry_hint or 0.0)
+                if delay + 0.05 > remaining:
+                    break
+                time.sleep(delay)
         raise RuntimeError(str(last_error or "unknown RPC failure"))
 
     pool = concurrent.futures.ThreadPoolExecutor(max_workers=len(active_urls))

@@ -2594,6 +2594,120 @@ def test_archive_rpc_transport_rejects_unsafe_urls_and_sanitizes_http_errors():
         archive.open_rpc_request = original
 
 
+def test_archive_retry_after_parser_supports_delay_and_http_date_with_a_bounded_hint():
+    archive = load_archive_module()
+    now = datetime(2026, 9, 2, 12, 0, 0, tzinfo=timezone.utc)
+    assert archive.parse_retry_after("15", now=now) == 15.0
+    assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 GMT", now=now) == 120.0
+    assert archive.parse_retry_after("600", now=now) == 300.0
+    assert archive.parse_retry_after("Wed, 02 Sep 2026 12:10:00 GMT", now=now) == 300.0
+    assert archive.parse_retry_after("not-a-delay", now=now) is None
+    assert archive.parse_retry_after("9" * 129, now=now) is None
+
+
+def test_archive_http_429_is_typed_secret_safe_and_preserved_for_a_single_provider():
+    archive = load_archive_module()
+    original = archive.open_rpc_request
+    secret_url = "https://host-secret.rpc.custom.example/v2/path-secret?api_key=query-secret"
+    headers = {
+        "Retry-After": "7",
+        "X-Provider-Debug": "header-secret",
+    }
+    error = archive.urllib.error.HTTPError(secret_url, 429, "reason-secret", headers, None)
+    archive.open_rpc_request = lambda *_args, **_kwargs: (_ for _ in ()).throw(error)
+    try:
+        try:
+            archive.rpc_call("eth_test", [], urls=[secret_url])
+        except archive.RpcRateLimited as exc:
+            assert str(exc) == "HTTP 429"
+            assert exc.retry_after_seconds == 7.0
+            rendered = repr(exc)
+            for secret in ("host-secret", "path-secret", "query-secret", "reason-secret", "header-secret"):
+                assert secret not in str(exc)
+                assert secret not in rendered
+        else:
+            raise AssertionError("archive flattened a singleton HTTP 429 rate-limit signal")
+    finally:
+        archive.open_rpc_request = original
+
+
+def test_archive_rpc_quorum_waits_for_the_full_retry_after_hint_before_retrying():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example"]
+    original = archive.rpc_call
+    previous = {
+        key: os.environ.get(key)
+        for key in ("BASE_RPC_ATTEMPTS", "BASE_RPC_QUORUM_DEADLINE_SECONDS")
+    }
+    os.environ["BASE_RPC_ATTEMPTS"] = "2"
+    os.environ["BASE_RPC_QUORUM_DEADLINE_SECONDS"] = "3"
+    attempts = {url: [] for url in urls}
+
+    def fake_call(_method, _params, *, urls, timeout=60):  # noqa: ARG001
+        url = urls[0]
+        attempts[url].append(time.monotonic())
+        if len(attempts[url]) == 1:
+            raise archive.RpcRateLimited(1.0)
+        return "canonical", url
+
+    archive.rpc_call = fake_call
+    try:
+        result, agreeing = archive.rpc_consensus("unit", [], urls=urls)
+        assert result == "canonical"
+        assert set(agreeing) == set(urls)
+        assert all(len(timestamps) == 2 for timestamps in attempts.values())
+        assert all(timestamps[1] - timestamps[0] >= 1.0 for timestamps in attempts.values())
+    finally:
+        archive.rpc_call = original
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
+def test_archive_rpc_quorum_does_not_sleep_or_retry_when_hint_misses_deadline():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example"]
+    original_call = archive.rpc_call
+    original_sleep = archive.time.sleep
+    previous = {
+        key: os.environ.get(key)
+        for key in ("BASE_RPC_ATTEMPTS", "BASE_RPC_QUORUM_DEADLINE_SECONDS")
+    }
+    os.environ["BASE_RPC_ATTEMPTS"] = "3"
+    os.environ["BASE_RPC_QUORUM_DEADLINE_SECONDS"] = "1"
+    calls = {url: 0 for url in urls}
+    sleeps: list[float] = []
+
+    def fake_call(_method, _params, *, urls, timeout=60):  # noqa: ARG001
+        calls[urls[0]] += 1
+        raise archive.RpcRateLimited(300.0)
+
+    archive.rpc_call = fake_call
+    archive.time.sleep = lambda seconds: sleeps.append(seconds)
+    started = time.monotonic()
+    try:
+        try:
+            archive.rpc_consensus("unit", [], urls=urls)
+        except RuntimeError as exc:
+            elapsed = time.monotonic() - started
+            assert "failed independent quorum" in str(exc)
+            assert elapsed < 0.5, elapsed
+            assert calls == {url: 1 for url in urls}
+            assert sleeps == []
+        else:
+            raise AssertionError("archive retried a rate limit that exceeded the quorum deadline")
+    finally:
+        archive.rpc_call = original_call
+        archive.time.sleep = original_sleep
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+
 def test_archive_rpc_single_and_batch_envelopes_are_exact_and_secret_safe():
     archive = load_archive_module()
     original = archive.post_json
