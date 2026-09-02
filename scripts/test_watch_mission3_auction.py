@@ -2601,6 +2601,8 @@ def test_archive_retry_after_parser_supports_delay_and_http_date_with_a_bounded_
     assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 GMT", now=now) == 120.0
     assert archive.parse_retry_after("Wednesday, 02-Sep-26 12:02:00 GMT", now=now) == 120.0
     assert archive.parse_retry_after("Wed Sep  2 12:02:00 2026", now=now) == 120.0
+    assert archive.parse_retry_after("Wed Sep 02 12:02:00 2026", now=now) == 120.0
+    assert archive.parse_retry_after("Wed Sep 00 12:02:00 2026", now=now) is None
     assert archive.parse_retry_after("600", now=now) == 300.0
     assert archive.parse_retry_after("Wed, 02 Sep 2026 12:10:00 GMT", now=now) == 300.0
     assert archive.parse_retry_after(" " * 126 + "15", now=now) == 15.0

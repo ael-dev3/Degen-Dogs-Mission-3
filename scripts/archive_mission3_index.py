@@ -101,7 +101,7 @@ _HTTP_TIME = r"(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
 _RETRY_AFTER_HTTP_DATE_PATTERNS = (
     re.compile(rf"{_HTTP_WEEKDAY}, (?:0[1-9]|[12][0-9]|3[01]) {_HTTP_MONTH} [0-9]{{4}} {_HTTP_TIME} GMT"),
     re.compile(rf"{_HTTP_WEEKDAY_LONG}, (?:0[1-9]|[12][0-9]|3[01])-{_HTTP_MONTH}-[0-9]{{2}} {_HTTP_TIME} GMT"),
-    re.compile(rf"{_HTTP_WEEKDAY} {_HTTP_MONTH} (?: [1-9]|[12][0-9]|3[01]) {_HTTP_TIME} [0-9]{{4}}"),
+    re.compile(rf"{_HTTP_WEEKDAY} {_HTTP_MONTH} (?: [1-9]|0[1-9]|[12][0-9]|3[01]) {_HTTP_TIME} [0-9]{{4}}"),
 )
 
 
