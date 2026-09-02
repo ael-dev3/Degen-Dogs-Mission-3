@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#187/696",
+      "display": "#187/697",
       "rank": 187,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-10t05:14:19z 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 0x095e1d5d11e59bd08478e53004aa6fa70e2a2cf2f811cc7fb66c715de6637d6c #187/696 generated auction feed 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 background: none (91.5%) background none body: rainbow (4.3%) body rainbow neck: none (41.5%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.3%) ears loopearring head: headphones (6.8%) head headphones eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 768 dog #768 768 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 17.45 $17.45 2026-07-10t05:14:19z 0x945b96765a8093e54c9446c5b0a9a333c14d46fc707c2de0bbf349db71e8d771 0x095e1d5d11e59bd08478e53004aa6fa70e2a2cf2f811cc7fb66c715de6637d6c generated auction feed 0x5caedfcedbb9a534a9be1ebf09c2aa11aa39bf4a35e2e8dcbc86ea2592d1bf07 0x45fb3ab9e94c992c973a7fda9c3239b3b1bfb272ac7cd70d24cb989b0bb43d1d 0x0ec1b7e2565e8cc7f3b22f99d09728a442e4ab627308bbbc04ce5ff1e13d00b2 background none body rainbow neck none mouth none ears loopearring head headphones eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #187/697 background: none (91.5%) body: rainbow (4.3%) neck: none (41.6%) mouth: none (68.7%) ears: loopearring (27.3%) head: headphones (6.7%) eyes: glasses (12.3%)",
     "settlement": {
       "block_number": 48435556,
       "block_time_utc": "2026-07-10T05:14:19Z",
@@ -92,7 +92,7 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,12 +107,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Headphones (6.8%)",
+        "display": "Head: Headphones (6.7%)",
         "trait_type": "Head",
         "value": "Headphones"
       },
       {
-        "display": "Eyes: Glasses (12.4%)",
+        "display": "Eyes: Glasses (12.3%)",
         "trait_type": "Eyes",
         "value": "Glasses"
       }

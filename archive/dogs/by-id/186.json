@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#432/696",
-      "rank": 432,
+      "display": "#439/697",
+      "rank": 439,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 186 dog #186 186 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x15e901b6e172273a28a4e862fcf7b4fc6d34a86afdf6f67a460d236a762975b4 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d #432/696 background: none; body: grey; neck: none; mouth: none; ears: none; head: redmohawk; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 186 dog #186 186 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x15e901b6e172273a28a4e862fcf7b4fc6d34a86afdf6f67a460d236a762975b4 0x677f6709c7be4130bd3e3615d85d814b6f78d1b505f9f98a39a45ceda0815b6d background: none; body: grey; neck: none; mouth: none; ears: none; head: redmohawk; eyes: monocle polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #439/697 background: none (91.5%) body: grey (12.9%) neck: none (41.6%) mouth: none (68.7%) ears: none (26.0%) head: redmohawk (7.5%) eyes: monocle (7.3%)",
     "settlement": {
       "block_number": 37616694,
       "block_time_utc": "2023-01-03T09:10:46Z",
@@ -88,7 +88,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Monocle (7.2%)",
+        "display": "Eyes: Monocle (7.3%)",
         "trait_type": "Eyes",
         "value": "Monocle"
       }

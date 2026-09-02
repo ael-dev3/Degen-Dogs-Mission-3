@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#453/696",
-      "rank": 453,
+      "display": "#454/697",
+      "rank": 454,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.9 $20.90 2026-06-29t00:22:15z 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3 #453/696 generated auction feed 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 background: none (91.5%) background none body: white (11.1%) body white neck: goldnecklace (19.3%) neck goldnecklace mouth: tongue (9.9%) mouth tongue ears: earbuds (32.6%) ears earbuds head: none (20.3%) head none eyes: vrgoggles (10.6%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 757 dog #757 757 mission 3 mission 3 base settled 0x9f080983c678c6639f9a4de8f1feace2b2a1a54c @biang-kerok.eth biang-kerok.eth 0.01331 eth 13310000000000000 20.9 $20.90 2026-06-29t00:22:15z 0x9ca227d479c9f5edff69d4657e60950e8d5f8d856b1c1fbf53926a272660fd33 0x5040ee424f02d0ac0375132b82947011ed1a44a4af97a31d60090f79a0883af3 generated auction feed 0x08e6aecc2097e639b6252813c2fd96287178bca2a48883c7c158133ea8785932 0xe46e14fbcac3127ccb5352787408085fd85afa3d82a815038bfc27a3828524bb 0xd24014202a8feccb3a7589bf5f040138c8aafc22474c1a589a7db43cd9d44301 0x66fd3200f8f2998d9ee3d771a8bb4f85ff374fd4de24a1857d15d2919591d120 background none body white neck goldnecklace mouth tongue ears earbuds head none eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_winners #454/697 background: none (91.5%) body: white (11.0%) neck: goldnecklace (19.2%) mouth: tongue (9.9%) ears: earbuds (32.6%) head: none (20.2%) eyes: vrgoggles (10.6%)",
     "settlement": {
       "block_number": 47951594,
       "block_time_utc": "2026-06-29T00:22:15Z",
@@ -88,12 +88,12 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.1%)",
+        "display": "Body: White (11.0%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.2%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -108,7 +108,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (20.3%)",
+        "display": "Head: None (20.2%)",
         "trait_type": "Head",
         "value": "None"
       },

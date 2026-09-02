@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#293/696",
-      "rank": 293,
+      "display": "#307/697",
+      "rank": 307,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 325 dog #325 325 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x7d6e7df3da54dd90cc33ba4cd522827613a5f4ecd7ba62b13ffe6ae0faa80469 0x233bf456a00ca70908c7eeab1cefe5e71f622dd113c3a50107fbba6c6cb6d100 #293/696 background: none; body: brown; neck: goldnecklace; mouth: none; ears: earbuds; head: partyhat; eyes: none 0xac694a4896104e603fc4ecde4f99d173489ce0acf23de3d97b9151502f372db4 chain_logs contract_getters",
+    "search_text": "dog 325 dog #325 325 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x7d6e7df3da54dd90cc33ba4cd522827613a5f4ecd7ba62b13ffe6ae0faa80469 0x233bf456a00ca70908c7eeab1cefe5e71f622dd113c3a50107fbba6c6cb6d100 background: none; body: brown; neck: goldnecklace; mouth: none; ears: earbuds; head: partyhat; eyes: none 0xac694a4896104e603fc4ecde4f99d173489ce0acf23de3d97b9151502f372db4 chain_logs contract_getters #307/697 background: none (91.5%) body: brown (10.8%) neck: goldnecklace (19.2%) mouth: none (68.7%) ears: earbuds (32.6%) head: partyhat (4.3%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 25639469,
       "block_time_utc": "2025-03-24T16:46:48Z",
@@ -88,7 +88,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.2%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -103,12 +103,12 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: PartyHat (4.2%)",
+        "display": "Head: PartyHat (4.3%)",
         "trait_type": "Head",
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.6%)",
         "trait_type": "Eyes",
         "value": "None"
       }

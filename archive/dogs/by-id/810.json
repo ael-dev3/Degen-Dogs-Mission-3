@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#376/696",
+      "display": "#376/697",
       "rank": 376,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 810 dog #810 810 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0081 eth 8100000000000000 20.37 $20.37 2026-08-22t20:02:35z 0xf266e5138494270375eedc50e38c2d9a66a1f3386b8a6ee03869763ffc10ab05 0x948fefb9c3abff43138de97d9ec460d60fd4b11de4f776b814bf49808305e8ef #376/696 generated auction feed 0x06624b391c2d07202b035845b393b79dd4a6466634878626fbbffb9083b4ca1f background: none (91.5%) background none body: orange (8.3%) body orange neck: none (41.5%) neck none mouth: none (68.7%) mouth none ears: goldearring (14.2%) ears goldearring head: redmohawk (7.5%) head redmohawk eyes: bluelasereyes (11.5%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 810 dog #810 810 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.0081 eth 8100000000000000 20.37 $20.37 2026-08-22t20:02:35z 0xf266e5138494270375eedc50e38c2d9a66a1f3386b8a6ee03869763ffc10ab05 0x948fefb9c3abff43138de97d9ec460d60fd4b11de4f776b814bf49808305e8ef generated auction feed 0x06624b391c2d07202b035845b393b79dd4a6466634878626fbbffb9083b4ca1f background none body orange neck none mouth none ears goldearring head redmohawk eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #376/697 background: none (91.5%) body: orange (8.3%) neck: none (41.6%) mouth: none (68.7%) ears: goldearring (14.2%) head: redmohawk (7.5%) eyes: bluelasereyes (11.5%)",
     "settlement": {
       "block_number": 50319804,
       "block_time_utc": "2026-08-22T20:02:35Z",
@@ -91,7 +91,7 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.6%)",
         "trait_type": "Neck",
         "value": "None"
       },

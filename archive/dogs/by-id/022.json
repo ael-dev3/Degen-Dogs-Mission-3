@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#493/696",
-      "rank": 493,
+      "display": "#494/697",
+      "rank": 494,
       "scope": "base_existing",
-      "total": 696
+      "total": 697
     },
     "schema_version": 1,
-    "search_text": "dog 22 dog #22 22 mission 1 mission 1 polygon no auction dogmaster reward weth #493/696 background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: goldearring; head: whitemohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 22 dog #22 22 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: redbrown; neck: goldnecklace; mouth: none; ears: goldearring; head: whitemohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #494/697 background: none (91.5%) body: redbrown (15.4%) neck: goldnecklace (19.2%) mouth: none (68.7%) ears: goldearring (14.2%) head: whitemohawk (6.9%) eyes: none (17.6%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,7 +81,7 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.2%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.6%)",
         "trait_type": "Eyes",
         "value": "None"
       }
