@@ -2599,10 +2599,19 @@ def test_archive_retry_after_parser_supports_delay_and_http_date_with_a_bounded_
     now = datetime(2026, 9, 2, 12, 0, 0, tzinfo=timezone.utc)
     assert archive.parse_retry_after("15", now=now) == 15.0
     assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 GMT", now=now) == 120.0
+    assert archive.parse_retry_after("Wednesday, 02-Sep-26 12:02:00 GMT", now=now) == 120.0
+    assert archive.parse_retry_after("Wed Sep  2 12:02:00 2026", now=now) == 120.0
     assert archive.parse_retry_after("600", now=now) == 300.0
     assert archive.parse_retry_after("Wed, 02 Sep 2026 12:10:00 GMT", now=now) == 300.0
+    assert archive.parse_retry_after(" " * 126 + "15", now=now) == 15.0
+    assert archive.parse_retry_after(" " * 127 + "15", now=now) is None
+    assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 +0000", now=now) is None
+    assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 GMT trailing", now=now) is None
+    assert archive.parse_retry_after("Wed, 02 Sep 2026 12:02:00 gmt", now=now) is None
+    assert archive.parse_retry_after("\r\nWed, 02 Sep 2026 12:02:00 GMT", now=now) is None
     assert archive.parse_retry_after("not-a-delay", now=now) is None
     assert archive.parse_retry_after("9" * 129, now=now) is None
+    assert archive.parse_retry_after(" " * 128, now=now) is None
 
 
 def test_archive_http_429_is_typed_secret_safe_and_preserved_for_a_single_provider():
@@ -2621,6 +2630,8 @@ def test_archive_http_429_is_typed_secret_safe_and_preserved_for_a_single_provid
         except archive.RpcRateLimited as exc:
             assert str(exc) == "HTTP 429"
             assert exc.retry_after_seconds == 7.0
+            assert exc.__context__ is None
+            assert exc.__cause__ is None
             rendered = repr(exc)
             for secret in ("host-secret", "path-secret", "query-secret", "reason-secret", "header-secret"):
                 assert secret not in str(exc)
@@ -2629,6 +2640,48 @@ def test_archive_http_429_is_typed_secret_safe_and_preserved_for_a_single_provid
             raise AssertionError("archive flattened a singleton HTTP 429 rate-limit signal")
     finally:
         archive.open_rpc_request = original
+
+
+def test_archive_multi_provider_429_falls_back_and_aggregates_only_redacted_errors():
+    archive = load_archive_module()
+    original = archive.post_json
+    urls = [
+        "https://first-secret.rpc.custom.example/v2/path-secret?api_key=query-secret",
+        "https://second-secret.rpc.custom.example/v3/other-secret?token=token-secret",
+    ]
+    calls: list[str] = []
+
+    def fallback_post(url, *_args, **_kwargs):
+        calls.append(url)
+        if url == urls[0]:
+            raise archive.RpcRateLimited(1.0)
+        return {"jsonrpc": "2.0", "id": 1, "result": "canonical"}
+
+    try:
+        archive.post_json = fallback_post
+        assert archive.rpc_call("eth_test", [], urls=urls) == ("canonical", urls[1])
+        assert calls == urls
+
+        archive.post_json = lambda *_args, **_kwargs: (_ for _ in ()).throw(archive.RpcRateLimited(1.0))
+        try:
+            archive.rpc_call("eth_test", [], urls=urls)
+        except RuntimeError as exc:
+            message = str(exc)
+            assert message.count("HTTP 429") == 2
+            assert "rpc-host-" in message
+            for secret in (
+                "first-secret",
+                "second-secret",
+                "path-secret",
+                "other-secret",
+                "query-secret",
+                "token-secret",
+            ):
+                assert secret not in message
+        else:
+            raise AssertionError("archive accepted rate limits from every configured provider")
+    finally:
+        archive.post_json = original
 
 
 def test_archive_rpc_quorum_waits_for_the_full_retry_after_hint_before_retrying():

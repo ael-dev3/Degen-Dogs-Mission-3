@@ -16,6 +16,7 @@ import hashlib
 import itertools
 import json
 import os
+import re
 import secrets
 import shutil
 import sqlite3
@@ -93,6 +94,15 @@ class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
 RPC_OPENER = urllib.request.build_opener(NoRedirectHandler())
 MAX_RETRY_AFTER_SECONDS = 300.0
 MAX_RETRY_AFTER_HEADER_CHARS = 128
+_HTTP_WEEKDAY = r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)"
+_HTTP_WEEKDAY_LONG = r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)"
+_HTTP_MONTH = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+_HTTP_TIME = r"(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]"
+_RETRY_AFTER_HTTP_DATE_PATTERNS = (
+    re.compile(rf"{_HTTP_WEEKDAY}, (?:0[1-9]|[12][0-9]|3[01]) {_HTTP_MONTH} [0-9]{{4}} {_HTTP_TIME} GMT"),
+    re.compile(rf"{_HTTP_WEEKDAY_LONG}, (?:0[1-9]|[12][0-9]|3[01])-{_HTTP_MONTH}-[0-9]{{2}} {_HTTP_TIME} GMT"),
+    re.compile(rf"{_HTTP_WEEKDAY} {_HTTP_MONTH} (?: [1-9]|[12][0-9]|3[01]) {_HTTP_TIME} [0-9]{{4}}"),
+)
 
 
 class RpcRateLimited(RuntimeError):
@@ -260,19 +270,27 @@ def validate_rpc_url(url: str) -> None:
 
 
 def parse_retry_after(value: Any, *, now: datetime | None = None) -> float | None:
-    if not isinstance(value, str):
+    if not isinstance(value, str) or len(value) > MAX_RETRY_AFTER_HEADER_CHARS:
         return None
-    raw = value.strip()
-    if not raw or len(raw) > MAX_RETRY_AFTER_HEADER_CHARS:
+    raw = value.strip(" \t")
+    if not raw:
         return None
     if raw.isascii() and raw.isdigit():
         return float(min(int(raw), int(MAX_RETRY_AFTER_SECONDS)))
+    date_format = next(
+        (index for index, pattern in enumerate(_RETRY_AFTER_HTTP_DATE_PATTERNS) if pattern.fullmatch(raw)),
+        None,
+    )
+    if date_format is None:
+        return None
     try:
         retry_at = email.utils.parsedate_to_datetime(raw)
     except (TypeError, ValueError, OverflowError):
         return None
     if retry_at.tzinfo is None:
-        return None
+        if date_format != 2:
+            return None
+        retry_at = retry_at.replace(tzinfo=timezone.utc)
     current = now or datetime.now(timezone.utc)
     if current.tzinfo is None:
         return None
@@ -297,6 +315,7 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
         1024 * 1024,
         min(int(os.environ.get("BASE_RPC_MAX_RESPONSE_BYTES", str(DEFAULT_RPC_MAX_RESPONSE_BYTES))), 128 * 1024 * 1024),
     )
+    rate_limit_error: RpcRateLimited | None = None
     try:
         response = open_rpc_request(req, timeout)
     except urllib.error.HTTPError as exc:
@@ -305,10 +324,13 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
                 retry_after = parse_retry_after(exc.headers.get("Retry-After") if exc.headers else None)
             except Exception:  # noqa: BLE001 - provider-controlled headers are never diagnostic output
                 retry_after = None
-            raise RpcRateLimited(retry_after) from None
-        raise RuntimeError(f"HTTP {exc.code}") from None
+            rate_limit_error = RpcRateLimited(retry_after)
+        else:
+            raise RuntimeError(f"HTTP {exc.code}") from None
     except Exception as exc:  # noqa: BLE001 - never expose credential-bearing URLs in transport errors
         raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
+    if rate_limit_error is not None:
+        raise rate_limit_error
     try:
         with response:
             status = response.getcode() if hasattr(response, "getcode") else getattr(response, "status", None)
