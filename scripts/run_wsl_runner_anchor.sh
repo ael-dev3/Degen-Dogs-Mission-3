@@ -59,7 +59,8 @@ start_units() {
     load_state="$(systemctl show --property=LoadState --value "$unit")"
     [[ "$load_state" == "loaded" ]] || return 1
     if systemctl is-failed --quiet "$unit"; then
-      return 1
+      printf 'warning: loaded one-shot service failed; keeping runner anchor active: %s\n' \
+        "$unit" >&2
     fi
   done
   write_marker "$active_marker"

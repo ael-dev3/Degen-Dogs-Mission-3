@@ -1389,6 +1389,174 @@ def test_queued_worker_lifecycle_inventories() -> None:
     assert bash_array_items(activation, "triggered_services") == NEW_TRIGGERED_SERVICES
 
 
+def test_anchor_triggered_service_resilience() -> None:
+    anchor = text("scripts/run_wsl_runner_anchor.sh")
+    loaded_failure_harness = anchor + r'''
+
+test_root=$(mktemp -d)
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+anchor_stderr="$test_root/anchor.stderr"
+anchor_pid=''
+
+cleanup_test() {
+  prior_status=$?
+  trap - EXIT
+  if [[ -n "$anchor_pid" ]] && kill -0 "$anchor_pid" 2>/dev/null; then
+    kill -TERM "$anchor_pid" 2>/dev/null || true
+    wait "$anchor_pid" 2>/dev/null || true
+  fi
+  rm -rf -- "$test_root"
+  exit "$prior_status"
+}
+trap cleanup_test EXIT
+
+id() {
+  if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
+  command id "$@"
+}
+install() {
+  if [[ "${1:-}" == "-d" ]]; then
+    mkdir -p -- "${@: -2}"
+    return 0
+  fi
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled|is-active) return 0 ;;
+    show)
+      [[ "$*" == "show --property=LoadState --value "* ]] || return 96
+      printf 'loaded\n'
+      ;;
+    is-failed)
+      [[ "${*: -1}" == "degen-dogs-publisher.service" ]]
+      ;;
+    start) return 95 ;;
+    *) return 97 ;;
+  esac
+}
+sleep() {
+  command sleep 0.05
+}
+
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+( set -Eeuo pipefail; anchor_main ) 2>"$anchor_stderr" &
+anchor_pid=$!
+for _ in {1..100}; do
+  if [[ -f "$ready_marker" && -f "$active_marker" ]] && \
+    grep -Fq 'warning:' "$anchor_stderr" && \
+    grep -Fq 'degen-dogs-publisher.service' "$anchor_stderr"; then
+    break
+  fi
+  kill -0 "$anchor_pid" 2>/dev/null || break
+  command sleep 0.02
+done
+kill -0 "$anchor_pid"
+test -f "$ready_marker"
+test -f "$active_marker"
+test -f "$armed_marker"
+grep -Fq 'warning:' "$anchor_stderr"
+grep -Fq 'degen-dogs-publisher.service' "$anchor_stderr"
+set +e
+kill -TERM "$anchor_pid"
+wait "$anchor_pid"
+anchor_status=$?
+set -e
+anchor_pid=''
+test "$anchor_status" = 1
+test ! -e "$ready_marker"
+test ! -e "$active_marker"
+test -f "$armed_marker"
+printf 'anchor-loaded-one-shot-failure-survived\n'
+'''
+    loaded_failure = run_bash(loaded_failure_harness)
+    assert loaded_failure.stdout == b"anchor-loaded-one-shot-failure-survived\n"
+
+    missing_unit_harness = anchor + r'''
+
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+
+id() {
+  if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
+  command id "$@"
+}
+install() {
+  if [[ "${1:-}" == "-d" ]]; then
+    mkdir -p -- "${@: -2}"
+    return 0
+  fi
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled|is-active) return 0 ;;
+    show)
+      if [[ "${*: -1}" == "degen-dogs-publisher.service" ]]; then
+        printf 'not-found\n'
+      else
+        printf 'loaded\n'
+      fi
+      ;;
+    is-failed) return 1 ;;
+    start) return 95 ;;
+    *) return 97 ;;
+  esac
+}
+sleep() {
+  return 88
+}
+
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+set +e
+( set -Eeuo pipefail; anchor_main )
+anchor_status=$?
+set -e
+test "$anchor_status" = 1
+test ! -e "$ready_marker"
+test ! -e "$active_marker"
+test -f "$armed_marker"
+printf 'anchor-missing-unit-failed-closed\n'
+'''
+    missing_unit = run_bash(missing_unit_harness)
+    assert missing_unit.stdout == b"anchor-missing-unit-failed-closed\n"
+
+
 def test_rendered_verifier_systemd_isolation() -> None:
     test_id = uuid.uuid4().hex
     unit_name = f"degen-dogs-pages-verifier-isolation-test-{test_id}.service"
@@ -1803,6 +1971,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "systemctl disable --now" in installer
     assert "--uninstall" in installer
     test_queued_worker_lifecycle_inventories()
+    test_anchor_triggered_service_resilience()
 
     powershell = text("scripts/install_wsl_startup_task.ps1")
     assert not powershell.startswith("#Requires -RunAsAdministrator")
