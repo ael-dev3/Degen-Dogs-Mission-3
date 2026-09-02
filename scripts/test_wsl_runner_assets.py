@@ -1489,6 +1489,66 @@ printf 'anchor-loaded-one-shot-failure-survived\n'
     loaded_failure = run_bash(loaded_failure_harness)
     assert loaded_failure.stdout == b"anchor-loaded-one-shot-failure-survived\n"
 
+    warning_sink_harness = anchor + r'''
+
+test_root=$(mktemp -d)
+trap 'rm -rf -- "$test_root"' EXIT
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+load_checks="$test_root/load-checks"
+
+install() {
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled|is-active) return 0 ;;
+    show)
+      if [[ "${*: -1}" == "degen-dogs-publisher.service" ]]; then
+        printf 'publisher\n' >>"$load_checks"
+      fi
+      printf 'loaded\n'
+      ;;
+    is-failed)
+      [[ "${*: -1}" == "degen-dogs-publisher.service" ]]
+      ;;
+    start) return 95 ;;
+    *) return 97 ;;
+  esac
+}
+
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+for expected_checks in 1 2; do
+  rm -f -- "$active_marker"
+  set +e
+  ( set -Eeuo pipefail; exec 2>&-; start_units )
+  cycle_status=$?
+  set -e
+  test "$cycle_status" = 0
+  test -f "$active_marker"
+  test "$(wc -l <"$load_checks")" = "$expected_checks"
+done
+printf 'anchor-warning-sink-failure-survived-two-cycles\n'
+'''
+    warning_sink = run_bash(warning_sink_harness)
+    assert warning_sink.stdout == b"anchor-warning-sink-failure-survived-two-cycles\n"
+
     missing_unit_harness = anchor + r'''
 
 test_root=$(mktemp -d)
@@ -1543,6 +1603,8 @@ sleep() {
 mkdir -p "$state_dir" "$runtime_dir"
 printf 'armed=1\n' >"$armed_marker"
 chmod 0644 "$armed_marker"
+printf 'sentinel=1\n' >"$active_marker"
+test -f "$active_marker"
 set +e
 ( set -Eeuo pipefail; anchor_main )
 anchor_status=$?
