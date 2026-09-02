@@ -32,6 +32,7 @@ state = load("runner_publication_state")
 drainer = load("drain_publication_queue")
 verifier = load("verify_pages_deployment")
 health = load("check_wsl_runner_health")
+recorder = load("record_wsl_runner_health")
 
 EXPECTED_ACTIVATION_UNITS = (
     "degen-dogs-runner.target",
@@ -49,6 +50,11 @@ EXPECTED_WORKER_UNITS = (
     "degen-dogs-publisher.service",
     "degen-dogs-pages-verifier.service",
 )
+
+
+def test_health_candidate_failure_vocabulary_matches_immutable_recorder() -> None:
+    """Catches one-sided probe enum changes that the trusted recorder would reject."""
+    assert health.HEALTH_FAILURE_CODES == recorder.CANDIDATE_FAILURE_CODES
 
 
 class FakeLock:
@@ -354,6 +360,131 @@ def systemd_properties_fixture(
     }
 
 
+def test_health_candidate_is_canonical_public_and_invocation_bound() -> None:
+    """Catches arbitrary probe text or stale invocation data entering the root recorder."""
+    now = datetime(2026, 9, 2, 18, 0, tzinfo=timezone.utc)
+    problems = [
+        "watcher state file is missing",
+        "remote dashboard freshness is unhealthy: https://private-rpc.invalid/key",
+        "publisher clone has tracked changes while no refresh owns the lock",
+        "unexpected private failure C:\\Users\\alice\\secret",
+    ]
+    assert health.normalized_failure_codes(problems) == [
+        "git_unhealthy",
+        "health_probe_failure",
+        "remote_dashboard_unhealthy",
+        "watcher_state_missing",
+    ]
+    publication = health.publication_health_summary(
+        {
+            "last_generation": 5,
+            "latest": None,
+            "pending": None,
+            "checkpoint": {
+                "outcome": "no_diff",
+                "generation": 5,
+                "queue_digest": None,
+                "commit_sha": None,
+                "push_completed_at_utc": None,
+            },
+            "pages_verified": None,
+            "journal": None,
+        },
+        now=now,
+        publisher_lock_active=False,
+        configured_queue_mode=True,
+    )
+    report = health.public_health_report(
+        now=now,
+        problems=problems,
+        warnings=[],
+        checks={
+            "watcher": {},
+            "local_status": {"latest_generated_block": 50_789_720},
+            "terminal_publication": {"result": "success_no_diff"},
+            "publication": publication,
+            "activation_units": {},
+            "workers": {},
+            "remote": {"incident": True},
+            "git": {"tracked_dirty": True, "head": "a" * 40},
+            "filesystems": {
+                "cache": {"error": "OSError"},
+                "repository": {"error": None},
+            },
+        },
+    )
+    assert report["failure_codes"] == health.normalized_failure_codes(problems)
+    assert report["runner_head"] == "a" * 40
+    assert report["latest_generated_block"] == 50_789_720
+    assert report["publication_generation"] == 5
+    assert report["checks"]["filesystems_healthy"] is False
+    attempt = {"attempt_token": "c" * 64, "invocation_id": "d" * 32}
+    candidate = health.candidate_payload(report, attempt)
+    assert candidate == {
+        "attempt_token": "c" * 64,
+        "checked_at_utc": "2026-09-02T18:00:00Z",
+        "failure_codes": [
+            "git_unhealthy",
+            "health_probe_failure",
+            "remote_dashboard_unhealthy",
+            "watcher_state_missing",
+        ],
+        "invocation_id": "d" * 32,
+        "latest_generated_block": 50_789_720,
+        "publication_generation": 5,
+        "runner_head": "a" * 40,
+        "schema_version": 1,
+        "status": "unhealthy",
+    }
+    encoded = health.canonical_candidate_bytes(candidate)
+    assert encoded == (json.dumps(candidate, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    assert b"private" not in encoded and b"alice" not in encoded
+
+    healthy = health.public_health_report(
+        now=now,
+        problems=[],
+        warnings=[],
+        checks={
+            "local_status": {"latest_generated_block": 50_789_720},
+            "terminal_publication": {"result": "success_no_diff"},
+            "publication": publication,
+            "activation_units": {},
+            "workers": {},
+            "remote": {"incident": False},
+            "git": {"tracked_dirty": False, "head": "a" * 40},
+            "filesystems": [],
+        },
+    )
+    healthy_candidate = health.candidate_payload(healthy, attempt)
+    assert healthy_candidate["status"] == "healthy"
+    assert healthy_candidate["failure_codes"] == []
+
+    if os.name == "posix":
+        with tempfile.TemporaryDirectory() as raw:
+            directory = Path(raw) / "cache"
+            directory.mkdir(mode=0o700)
+            target = directory / "health-report.json"
+            health.write_health_candidate(
+                target,
+                healthy_candidate,
+                expected_uid=os.getuid(),
+                expected_gid=os.getgid(),
+            )
+            assert target.read_bytes() == health.canonical_candidate_bytes(healthy_candidate)
+            details = target.lstat()
+            assert details.st_uid == os.getuid() and details.st_gid == os.getgid()
+            assert details.st_mode & 0o777 == 0o600
+            assert details.st_nlink == 1
+            first_inode = details.st_ino
+            health.write_health_candidate(
+                target,
+                healthy_candidate,
+                expected_uid=os.getuid(),
+                expected_gid=os.getgid(),
+            )
+            assert target.stat().st_ino != first_inode
+
+
 def inspect_systemd_with(rows: dict[str, dict[str, str]]) -> tuple[list[str], dict[str, Any], list[str]]:
     calls: list[str] = []
     original = health.systemd_properties
@@ -567,6 +698,8 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
         "fetch_json": health.remote_freshness.fetch_json,
         "assess_freshness": health.remote_freshness.assess_freshness,
         "latest_refresh_row": health.refresh_telemetry.latest_refresh_row,
+        "read_health_attempt": health.read_health_attempt,
+        "write_health_candidate": health.write_health_candidate,
     }
     environment_names = (
         "DEGEN_DOGS_LOCK_DIR",
@@ -575,6 +708,7 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
         "DEGEN_DOGS_REFRESH_LOCK_PATH",
         "MISSION3_PUBLICATION_MODE",
         "DEGEN_DOGS_BRANCH",
+        "INVOCATION_ID",
     )
     original_environment = {name: os.environ.get(name) for name in environment_names}
     with tempfile.TemporaryDirectory() as directory:
@@ -616,9 +750,18 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
             health.remote_freshness.assess_freshness = lambda *_args, **_kwargs: {
                 "incident": False,
             }
+            health.read_health_attempt = lambda *_args, **_kwargs: {
+                "attempt_token": "c" * 64,
+                "invocation_id": "d" * 32,
+            }
+            health.write_health_candidate = lambda *_args, **_kwargs: None
 
             def fake_run(command: list[str], *, timeout: int = 20) -> Any:  # noqa: ARG001
-                output = "main\n" if command == ["git", "branch", "--show-current"] else ""
+                output = ""
+                if command == ["git", "branch", "--show-current"]:
+                    output = "main\n"
+                elif command == ["git", "rev-parse", "HEAD"]:
+                    output = "a" * 40 + "\n"
                 return health.subprocess.CompletedProcess(command, 0, output, "")
 
             health.run = fake_run
@@ -638,6 +781,7 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
                 "DEGEN_DOGS_REFRESH_LOCK_PATH": str(lock_dir / "refresh.lock"),
                 "MISSION3_PUBLICATION_MODE": "inline",
                 "DEGEN_DOGS_BRANCH": "main",
+                "INVOCATION_ID": "d" * 32,
             })
 
             stdout = io.StringIO()
@@ -661,6 +805,8 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
             health.remote_freshness.fetch_json = originals["fetch_json"]
             health.remote_freshness.assess_freshness = originals["assess_freshness"]
             health.refresh_telemetry.latest_refresh_row = originals["latest_refresh_row"]
+            health.read_health_attempt = originals["read_health_attempt"]
+            health.write_health_candidate = originals["write_health_candidate"]
             for name, value in original_environment.items():
                 if value is None:
                     os.environ.pop(name, None)
@@ -876,6 +1022,7 @@ def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
 
 
 if __name__ == "__main__":
+    test_health_candidate_failure_vocabulary_matches_immutable_recorder()
     test_pages_delay_keeps_newer_observation_and_drains_it_next()
     test_public_queue_health_uses_receipt_not_observation_and_exposes_no_private_values()
     test_systemd_health_inventory_checks_every_required_unit_exactly_once()
@@ -887,4 +1034,5 @@ if __name__ == "__main__":
     test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure()
     test_queue_health_state_machine_boundaries_and_durable_watermark()
     test_queue_health_timestamp_and_active_grace_boundaries()
+    test_health_candidate_is_canonical_public_and_invocation_bound()
     print("wsl_publication_integration=pass delay_seconds=120")

@@ -33,6 +33,7 @@ NEW_RUNTIME_ASSETS = (
     "scripts/drain_publication_queue.py",
     "scripts/verify_pages_deployment.py",
 )
+HEALTH_STATE_ASSET = "scripts/record_wsl_runner_health.py"
 ACTIVATION_UNITS = (
     "degen-dogs-runner.target",
     "degen-dogs-watcher.timer",
@@ -82,6 +83,7 @@ BOOTSTRAP_CORE_TESTS = (
     "scripts/test_refresh_and_publish.sh",
     "scripts/test_refresh_telemetry.py",
     "scripts/test_degen_dogs_runner_health.py",
+    "scripts/test_record_wsl_runner_health.py",
     "scripts/test_wsl_publication_integration.py",
 )
 
@@ -391,7 +393,8 @@ printf 'receipt\n'
         receipt = directory / "bootstrap-test-receipt.json"
         runtime_commit = "a" * 40
         trusted_commit = "b" * 40
-        schema_version = "2"
+        install_epoch = "c" * 32
+        schema_version = "3"
         expected_uid = str(os.getuid())
 
         def write_receipt() -> subprocess.CompletedProcess[bytes]:
@@ -404,6 +407,7 @@ printf 'receipt\n'
                     str(receipt),
                     runtime_commit,
                     trusted_commit,
+                    install_epoch,
                     schema_version,
                     expected_uid,
                 ],
@@ -424,6 +428,7 @@ printf 'receipt\n'
                     str(receipt),
                     runtime_commit,
                     trusted_commit,
+                    install_epoch,
                     schema_version,
                     expected_uid,
                 ],
@@ -438,8 +443,9 @@ printf 'receipt\n'
         assert first.returncode == 0, first.stderr.decode("utf-8", errors="replace")
         first_inode = receipt.stat().st_ino
         expected_record = {
+            "install_epoch": install_epoch,
             "runtime_commit": runtime_commit,
-            "schema_version": 2,
+            "schema_version": 3,
             "trusted_installer_commit": trusted_commit,
         }
         assert json.loads(receipt.read_text(encoding="utf-8")) == expected_record
@@ -461,6 +467,7 @@ printf 'receipt\n'
             json.dumps({**expected_record, "schema_version": True}).encode() + b"\n",
             json.dumps({**expected_record, "runtime_commit": "c" * 40}).encode() + b"\n",
             json.dumps({**expected_record, "trusted_installer_commit": "c" * 40}).encode() + b"\n",
+            json.dumps({**expected_record, "install_epoch": "d" * 32}).encode() + b"\n",
             json.dumps({**expected_record, "extra": "field"}).encode() + b"\n",
             b"{" + b"x" * 1024 + b"}\n",
         )
@@ -1064,6 +1071,9 @@ FAKE_VERIFIER
 cat >"$repo_dir/scripts/check_wsl_runner_health.py" <<'FAKE_HEALTH'
 import os
 
+assert os.environ["INVOCATION_ID"] == "d" * 32
+assert os.environ["DEGEN_DOGS_HEALTH_ATTEMPT_PATH"] == "/run/degen-dogs/health/attempt.json"
+assert os.environ["DEGEN_DOGS_HEALTH_REPORT_PATH"] == "/var/cache/degen-dogs/health-report.json"
 print("health|{}".format(os.environ["MISSION3_PUBLICATION_MODE"]))
 FAKE_HEALTH
 chmod 0755 "$repo_dir/scripts/run_wsl_runner_job.sh" "$repo_dir/scripts/runtime-bin/python3"
@@ -1112,6 +1122,7 @@ run_job() {
     GIT_GRAFT_FILE=/attacker/grafts GIT_EXTERNAL_DIFF=/attacker/diff \
     GIT_ASKPASS=/attacker/askpass SSH_ASKPASS=/attacker/askpass \
     SSH_ASKPASS_REQUIRE=force \
+    INVOCATION_ID=dddddddddddddddddddddddddddddddd \
     HOME="$runner_home" \
     DEGEN_DOGS_REPO_DIR="$repo_dir" \
     DEGEN_DOGS_LOG_DIR="$test_root/log" \
@@ -1326,6 +1337,7 @@ def test_queued_worker_lifecycle_inventories() -> None:
     expected_trusted_assets = (
         "scripts/install_wsl_runner.sh",
         "scripts/run_wsl_runner_anchor.sh",
+        HEALTH_STATE_ASSET,
         "config/wsl-runner.env.template",
         "config/logrotate/degen-dogs-wsl.in",
         "config/systemd/degen-dogs-watcher.service.in",
@@ -1339,6 +1351,9 @@ def test_queued_worker_lifecycle_inventories() -> None:
         *NEW_RUNTIME_ASSETS,
     )
     assert bash_array_items(installer, "trusted_root_assets") == expected_trusted_assets
+    assert "install -o root -g root -m 0755" in installer
+    assert "/usr/local/libexec/degen-dogs-wsl-health-state" in installer
+    assert '"$health_state_helper" install-identity' in installer
     assert bash_array_items(installer, "rendered_unit_names") == (
         "degen-dogs-watcher.service",
         "degen-dogs-hourly.service",
@@ -1367,10 +1382,18 @@ def test_queued_worker_lifecycle_inventories() -> None:
     assert bash_array_items(anchor, "triggered_services") == NEW_TRIGGERED_SERVICES
     assert 'systemctl show --property=LoadState --value "$unit"' in anchor
     assert 'systemctl is-failed --quiet "$unit"' in anchor
+    assert '"$health_state_helper" prepare-runtime >/dev/null' in anchor
+    assert "continuing runner startup while health service reports failure" in anchor
+    anchor_main_offset = anchor.index("anchor_main()")
+    assert anchor.index("trap cleanup EXIT", anchor_main_offset) < anchor.index(
+        "  prepare_health_runtime\n", anchor_main_offset
+    )
 
     powershell = text("scripts/install_wsl_startup_task.ps1")
     trusted_stage = powershell_literal_payload(powershell, "trustedBundleProvision")
     assert bash_array_items(trusted_stage, "required") == expected_trusted_assets
+    assert "$installEpoch = [Guid]::NewGuid().ToString('N').ToLowerInvariant()" in powershell
+    assert "$runtimeStage = $runtimeStage.Replace('__INSTALL_EPOCH__', $installEpoch)" in powershell
     runtime_stage = powershell_literal_payload(powershell, "runtimeStage")
     assert 'chmod 0711 "$runtime_stage"' in runtime_stage
     assert 'chmod 0700 "$runtime_stage/repo.git"' in runtime_stage
@@ -1384,6 +1407,14 @@ def test_queued_worker_lifecycle_inventories() -> None:
         payload = powershell_literal_payload(powershell, payload_name)
         assert bash_array_items(payload, "activation_units") == ACTIVATION_UNITS
         assert bash_array_items(payload, "service_units") == SERVICE_UNITS
+    uninstall_payload = powershell_literal_payload(powershell, "uninstallScript")
+    uninstall_targets = {
+        target
+        for line in uninstall_payload.splitlines()
+        if (tokens := shlex.split(line))[:3] == ["rm", "-f", "--"]
+        for target in tokens[3:]
+    }
+    assert "/usr/local/libexec/degen-dogs-wsl-health-state" in uninstall_targets
     activation = powershell_literal_payload(powershell, "commitActivation")
     assert bash_array_items(activation, "activation_units") == ACTIVATION_UNITS
     assert bash_array_items(activation, "triggered_services") == NEW_TRIGGERED_SERVICES
@@ -1391,6 +1422,209 @@ def test_queued_worker_lifecycle_inventories() -> None:
 
 def test_anchor_triggered_service_resilience() -> None:
     anchor = text("scripts/run_wsl_runner_anchor.sh")
+    health_prepare_failure_harness = anchor + r'''
+
+test_root=$(mktemp -d)
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper="$test_root/health-helper"
+health_calls="$test_root/health-calls"
+anchor_stderr="$test_root/anchor.stderr"
+anchor_pid=''
+
+cleanup_test() {
+  prior_status=$?
+  trap - EXIT
+  if [[ -n "$anchor_pid" ]] && kill -0 "$anchor_pid" 2>/dev/null; then
+    kill -TERM "$anchor_pid" 2>/dev/null || true
+    wait "$anchor_pid" 2>/dev/null || true
+  fi
+  rm -rf -- "$test_root"
+  exit "$prior_status"
+}
+trap cleanup_test EXIT
+
+id() {
+  if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
+  command id "$@"
+}
+install() {
+  if [[ "${1:-}" == "-d" ]]; then
+    mkdir -p -- "${@: -2}"
+    return 0
+  fi
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled|is-active) return 0 ;;
+    show) printf 'loaded\n' ;;
+    is-failed) return 1 ;;
+    start) return 95 ;;
+    *) return 97 ;;
+  esac
+}
+sleep() {
+  command sleep 0.05
+}
+
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+cat >"$health_state_helper" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >>"$health_calls"
+exit 89
+EOF
+chmod 0755 "$health_state_helper"
+( set -Eeuo pipefail; anchor_main ) 2>"$anchor_stderr" &
+anchor_pid=$!
+for _ in {1..100}; do
+  if [[ -f "$ready_marker" && -f "$active_marker" ]] && \
+    grep -Fq 'prepare-runtime' "$health_calls" && \
+    grep -Fq 'warning:' "$anchor_stderr"; then
+    break
+  fi
+  kill -0 "$anchor_pid" 2>/dev/null || break
+  command sleep 0.02
+done
+kill -0 "$anchor_pid"
+test -f "$ready_marker"
+test -f "$active_marker"
+test -f "$armed_marker"
+grep -Fxq 'prepare-runtime' "$health_calls"
+grep -Fq 'warning:' "$anchor_stderr"
+grep -Fq 'health state preparation failed' "$anchor_stderr"
+set +e
+kill -TERM "$anchor_pid"
+wait "$anchor_pid"
+anchor_status=$?
+set -e
+anchor_pid=''
+test "$anchor_status" = 1
+test ! -e "$ready_marker"
+test ! -e "$active_marker"
+test -f "$armed_marker"
+printf 'anchor-health-preparation-failure-survived\n'
+'''
+    health_prepare_failure = run_bash(health_prepare_failure_harness)
+    assert health_prepare_failure.stdout == b"anchor-health-preparation-failure-survived\n"
+
+    health_prepare_retry_harness = anchor + r'''
+
+test_root=$(mktemp -d)
+state_dir="$test_root/state"
+runtime_dir="$test_root/run"
+armed_marker="${state_dir}/activation-armed"
+active_marker="${runtime_dir}/activation-enabled"
+ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper="$test_root/health-helper"
+health_calls="$test_root/health-calls"
+health_recovered="$test_root/health-recovered"
+anchor_stderr="$test_root/anchor.stderr"
+anchor_pid=''
+
+cleanup_test() {
+  prior_status=$?
+  trap - EXIT
+  if [[ -n "$anchor_pid" ]] && kill -0 "$anchor_pid" 2>/dev/null; then
+    kill -TERM "$anchor_pid" 2>/dev/null || true
+    wait "$anchor_pid" 2>/dev/null || true
+  fi
+  rm -rf -- "$test_root"
+  exit "$prior_status"
+}
+trap cleanup_test EXIT
+
+id() {
+  if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
+  command id "$@"
+}
+install() {
+  if [[ "${1:-}" == "-d" ]]; then
+    mkdir -p -- "${@: -2}"
+    return 0
+  fi
+  local source="${@: -2:1}"
+  local target="${@: -1}"
+  cp -- "$source" "$target"
+  chmod 0644 "$target"
+}
+stat() {
+  case "${2:-}" in
+    %U) printf 'root\n' ;;
+    %h) printf '1\n' ;;
+    %a) printf '644\n' ;;
+    *) command stat "$@" ;;
+  esac
+}
+systemctl() {
+  case "${1:-}" in
+    is-enabled|is-active) return 0 ;;
+    show) printf 'loaded\n' ;;
+    is-failed) return 1 ;;
+    start) return 95 ;;
+    *) return 97 ;;
+  esac
+}
+sleep() {
+  command sleep 0.05
+}
+
+mkdir -p "$state_dir" "$runtime_dir"
+printf 'armed=1\n' >"$armed_marker"
+chmod 0644 "$armed_marker"
+cat >"$health_state_helper" <<EOF
+#!/usr/bin/env bash
+count=0
+if [[ -f "$health_calls" ]]; then count=\$(cat "$health_calls"); fi
+count=\$((count + 1))
+printf '%s\n' "\$count" >"$health_calls"
+if [[ "\$count" = 1 ]]; then exit 89; fi
+: >"$health_recovered"
+EOF
+chmod 0755 "$health_state_helper"
+( set -Eeuo pipefail; anchor_main ) 2>"$anchor_stderr" &
+anchor_pid=$!
+for _ in {1..100}; do
+  if [[ -f "$health_recovered" && -f "$ready_marker" && -f "$active_marker" ]]; then
+    break
+  fi
+  kill -0 "$anchor_pid" 2>/dev/null || break
+  command sleep 0.02
+done
+kill -0 "$anchor_pid"
+test -f "$health_recovered"
+test "$(cat "$health_calls")" -ge 2
+test -f "$ready_marker"
+test -f "$active_marker"
+grep -Fq 'health state preparation failed' "$anchor_stderr"
+set +e
+kill -TERM "$anchor_pid"
+wait "$anchor_pid"
+anchor_status=$?
+set -e
+anchor_pid=''
+test "$anchor_status" = 1
+printf 'anchor-health-preparation-retried\n'
+'''
+    health_prepare_retry = run_bash(health_prepare_retry_harness)
+    assert health_prepare_retry.stdout == b"anchor-health-preparation-retried\n"
+
     loaded_failure_harness = anchor + r'''
 
 test_root=$(mktemp -d)
@@ -1399,6 +1633,7 @@ runtime_dir="$test_root/run"
 armed_marker="${state_dir}/activation-armed"
 active_marker="${runtime_dir}/activation-enabled"
 ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper=/bin/true
 anchor_stderr="$test_root/anchor.stderr"
 anchor_pid=''
 
@@ -1498,6 +1733,7 @@ runtime_dir="$test_root/run"
 armed_marker="${state_dir}/activation-armed"
 active_marker="${runtime_dir}/activation-enabled"
 ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper=/bin/true
 load_checks="$test_root/load-checks"
 
 install() {
@@ -1558,6 +1794,7 @@ runtime_dir="$test_root/run"
 armed_marker="${state_dir}/activation-armed"
 active_marker="${runtime_dir}/activation-enabled"
 ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper=/bin/true
 
 id() {
   if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
@@ -1838,6 +2075,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
         "config/wsl-runner.env.template",
         "docs/windows-wsl-runner.md",
         "scripts/check_wsl_runner_health.py",
+        "scripts/record_wsl_runner_health.py",
         "scripts/install_wsl_runner.sh",
         "scripts/install_wsl_startup_task.ps1",
         "scripts/preflight_wsl_rpc.py",
@@ -1887,6 +2125,16 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "StartLimitBurst=" not in watcher_service
     assert "Restart=on-failure" in text("config/systemd/degen-dogs-hourly.service.in")
     assert "Restart=on-failure" in text("config/systemd/degen-dogs-health.service.in")
+    health_service = text("config/systemd/degen-dogs-health.service.in")
+    assert systemd_values(health_service, "ExecStartPre") == (
+        "+/usr/local/libexec/degen-dogs-wsl-health-state begin-health",
+    )
+    assert systemd_values(health_service, "ExecStopPost") == (
+        "+/usr/local/libexec/degen-dogs-wsl-health-state record-health",
+    )
+    assert systemd_values(health_service, "ReadWritePaths") == (
+        "@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@ /run/degen-dogs/health /var/lib/degen-dogs/health",
+    )
     test_queued_worker_units()
 
     launcher = text("scripts/run_wsl_runner_job.sh")
@@ -1896,6 +2144,10 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "MISSION3_WATCHER_LOG_PATH=-" in launcher
     assert "DEGEN_DOGS_REFRESH_LOCK_PATH" in launcher
     assert 'export DEGEN_DOGS_REFRESH_LOCK_PATH="${lock_dir}/refresh.lock"' in launcher
+    assert 'systemd_invocation_id="${INVOCATION_ID:-}"' in launcher
+    assert 'export INVOCATION_ID="$systemd_invocation_id"' in launcher
+    assert 'export DEGEN_DOGS_HEALTH_ATTEMPT_PATH=/run/degen-dogs/health/attempt.json' in launcher
+    assert 'export DEGEN_DOGS_HEALTH_REPORT_PATH=/var/cache/degen-dogs/health-report.json' in launcher
     assert "export DEGEN_DOGS_REMOTE=origin" in launcher
     assert "export DEGEN_DOGS_BRANCH=main" in launcher
     assert "export DEGEN_DOGS_SKIP_PUSH=0" in launcher
@@ -1921,6 +2173,9 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert 'filesystem_type="$(stat -f -c %T "$repo_dir")"' in installer
     assert "test_refresh_and_publish.sh" in installer
     assert "--expected-head" in installer and "--runtime-tree" in installer
+    assert "--install-epoch" in installer
+    assert 'install_epoch=""' in installer
+    assert '[[ "$install_epoch" =~ ^[0-9a-f]{32}$ ]]' in installer
     assert '"$asset_dir" != "$repo_dir"' in installer
     assert '"$(id -u "$runner_user")" != "0"' in installer
     assert "runner checkout parent must be a root-owned" in installer
@@ -2198,6 +2453,7 @@ runtime_dir="$test_root/run"
 armed_marker="${state_dir}/activation-armed"
 active_marker="${runtime_dir}/activation-enabled"
 ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper=/bin/true
 
 id() {
   if [[ "${1:-}" == "-u" ]]; then printf '0\n'; return 0; fi
@@ -2483,7 +2739,9 @@ exit "$status"
         "python3 scripts/test_wsl_runner_assets.py --require-rendered-systemd-isolation"
     )
     assert scripts["test:wsl-windows-policy"] == "python3 scripts/test_wsl_runner_windows_policy.py"
+    assert scripts["test:wsl-health-state"] == "python3 scripts/test_record_wsl_runner_health.py"
     assert "test:wsl-runner-isolation" not in scripts["test:ops"]
+    assert "test:wsl-health-state" in scripts["test:ops"]
     assert "test:wsl-windows-policy" in scripts["test:ops"]
 
     runner_env_loader = (ROOT / "scripts" / "load_runner_env.sh").read_text(encoding="utf-8")

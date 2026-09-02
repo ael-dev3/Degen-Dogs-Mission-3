@@ -18,7 +18,9 @@ Environment=DEGEN_DOGS_LOG_DIR=@LOG_DIR@
 Environment=DEGEN_DOGS_LOCK_DIR=@LOCK_DIR@
 Environment=DEGEN_DOGS_ENV_FILE=@ENV_FILE@
 Environment=DEGEN_DOGS_RUNNER_ID=@RUNNER_ID@
+ExecStartPre=+/usr/local/libexec/degen-dogs-wsl-health-state begin-health
 ExecStart=/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh health
+ExecStopPost=+/usr/local/libexec/degen-dogs-wsl-health-state record-health
 TimeoutStartSec=90s
 Restart=on-failure
 RestartSec=1min
@@ -26,7 +28,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@
+ReadWritePaths=@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@ /run/degen-dogs/health /var/lib/degen-dogs/health
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true

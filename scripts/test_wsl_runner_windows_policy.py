@@ -1382,6 +1382,14 @@ def test_embedded_linux_lifecycle_inventories_are_symmetric() -> None:
         payload = literal_payload(source, payload_name)
         assert bash_array(payload, "activation_units") == ACTIVATION_UNITS
         assert bash_array(payload, "service_units") == SERVICE_UNITS
+    uninstall_payload = literal_payload(source, "uninstallScript")
+    uninstall_targets = {
+        target
+        for line in uninstall_payload.splitlines()
+        if (tokens := shlex.split(line))[:3] == ["rm", "-f", "--"]
+        for target in tokens[3:]
+    }
+    assert "/usr/local/libexec/degen-dogs-wsl-health-state" in uninstall_targets
 
     activation = literal_payload(source, "commitActivation")
     assert bash_array(activation, "activation_units") == ACTIVATION_UNITS

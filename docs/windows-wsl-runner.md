@@ -333,7 +333,8 @@ that complete pass, followed by successful unit rendering, `systemd-analyze`,
 and logrotate verification, may atomically create
 `/var/lib/degen-dogs/bootstrap-test-receipt.json`. The private root-owned receipt
 is bound to the exact runtime commit, the exact frozen trusted-installer commit,
-and its strict schema. The separate `-Activate` pass uses `--skip-bootstrap` and
+the one 32-hex install epoch generated for that PowerShell lifecycle, and its
+strict schema. The separate `-Activate` pass uses `--skip-bootstrap` and
 refuses a missing, legacy, malformed, linked, non-private, wrong-schema, or
 commit-mismatched receipt; changing the trusted installer therefore invalidates
 the previous test policy even when the runtime commit is unchanged. Activation
@@ -398,6 +399,36 @@ refreshes keep archive work off for latency. On a seeded archive-capable runner,
 the staggered hourly job also maintains the archive; a latency-only peer may opt
 out as described above.
 
+The health service is wrapped by the immutable root-owned
+`/usr/local/libexec/degen-dogs-wsl-health-state`. Its start hook removes stale
+candidate evidence and creates an unpredictable attempt bound to the current
+systemd invocation, WSL boot, and install epoch. The unprivileged probe can
+write only the fixed mode-`0600` candidate in `/var/cache/degen-dogs`; the stop
+hook accepts it only when its invocation and token match and systemd also
+reports `SERVICE_RESULT=success`, `EXIT_CODE=exited`, and `EXIT_STATUS=0`.
+Only then is the `last_good` member of the single canonical root-owned
+`/var/lib/degen-dogs/health/state.json` advanced in the same atomic commit as
+the incident state. Failed or malformed attempts preserve the prior lease and
+update only that combined record's health incident. The separate install
+identity also pins the numeric runner UID/GID, so root snapshot and runtime
+preparation do not depend on the runner-owned cache directory. Lease age is
+derived from WSL `CLOCK_BOOTTIME`, not from the Windows wall clock. Backward WSL
+wall-clock steps are clamped only for durable incident/recovery display order;
+they cannot stall recording or make wall time authoritative for lease age.
+
+`state.json` is the sole lease/incident authority. The helper never reads the
+obsolete split `last-good.json` or `incident.json` names and removes those fixed
+names during a successful install-identity migration. Its normalized candidate
+failure-code vocabulary must exactly match the mutable health probe; changing
+that vocabulary or candidate schema requires deploying the corresponding
+reviewed trusted helper in the same install lifecycle.
+
+Health runtime preparation is an observer, not a publication prerequisite. If
+the helper is temporarily missing or preparation fails during boot, the root
+anchor warns, still starts the existing data units, and retries preparation on
+each anchor cycle until it succeeds; the health service remains failed/visible
+in the meantime.
+
 The WSL watcher alone pins `MISSION3_WATCHER_PUBLICATION_MODE=queue` after the
 protected environment file is loaded. Repository, environment-template, and
 Mac launchd defaults remain `inline`; archive behavior is unchanged. The
@@ -445,7 +476,8 @@ tail -n 80 /var/log/degen-dogs/watch-onchain.log
 tail -n 80 /var/log/degen-dogs/refresh.log
 tail -n 80 /var/log/degen-dogs/pages-verifier.jsonl
 sudo -u degendogs bash -p /srv/degen-dogs/repo/scripts/run_wsl_runner_job.sh preflight
-sudo -u degendogs bash -p /srv/degen-dogs/repo/scripts/run_wsl_runner_job.sh health
+sudo systemctl start degen-dogs-health.service
+sudo /usr/local/libexec/degen-dogs-wsl-health-state snapshot
 ```
 
 A one-shot watcher service is normally inactive between checks. Judge it by

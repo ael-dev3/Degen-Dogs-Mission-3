@@ -1050,6 +1050,7 @@ if (-not $TrustedInstallerCommit) {
 if ($TrustedInstallerCommit -notmatch '^[0-9a-f]{40}$') {
     throw 'TrustedInstallerCommit must be an exact lowercase 40-character reviewed Git SHA-1.'
 }
+$installEpoch = [Guid]::NewGuid().ToString('N').ToLowerInvariant()
 if ($UpgradeTrustedBundle -and -not $TrustedInstallerCommit) {
     throw '-UpgradeTrustedBundle requires -TrustedInstallerCommit with the exact reviewed commit.'
 }
@@ -1735,7 +1736,7 @@ done
 for unit in "${all_units[@]}"; do
   rm -f -- "/etc/systemd/system/$unit"
 done
-rm -f -- /etc/logrotate.d/degen-dogs-wsl /usr/local/libexec/degen-dogs-wsl-anchor /usr/local/libexec/degen-dogs-wsl-installer
+rm -f -- /etc/logrotate.d/degen-dogs-wsl /usr/local/libexec/degen-dogs-wsl-anchor /usr/local/libexec/degen-dogs-wsl-health-state /usr/local/libexec/degen-dogs-wsl-installer
 systemctl daemon-reload
 '@
         Invoke-WslRoot -Script $uninstallScript
@@ -1959,7 +1960,7 @@ if (-not $trustedBundleExists -or $UpgradeTrustedBundle) {
   git -c core.hooksPath=/dev/null --git-dir="$stage/repo.git" merge-base --is-ancestor \
     "$trusted_commit" refs/remotes/origin/main
   required=(
-    scripts/install_wsl_runner.sh scripts/run_wsl_runner_anchor.sh
+    scripts/install_wsl_runner.sh scripts/run_wsl_runner_anchor.sh scripts/record_wsl_runner_health.py
     config/wsl-runner.env.template config/logrotate/degen-dogs-wsl.in
     config/systemd/degen-dogs-watcher.service.in config/systemd/degen-dogs-watcher.timer
     config/systemd/degen-dogs-hourly.service.in config/systemd/degen-dogs-hourly.timer
@@ -2129,11 +2130,12 @@ stage_runtime_and_install() (
   test "$("${runner_git[@]}" -C '__REPO_DIR__' rev-parse HEAD)" = "$runtime_sha"
   /usr/local/libexec/degen-dogs-wsl-installer \
     --repo-dir '__REPO_DIR__' --expected-head "$runtime_sha" \
-    --runtime-tree "$runtime_stage/tree" "$@"
+    --install-epoch '__INSTALL_EPOCH__' --runtime-tree "$runtime_stage/tree" "$@"
 )
 '@
 $runtimeStage = $runtimeStage.Replace('__REPO_DIR__', $RepoDir)
 $runtimeStage = $runtimeStage.Replace('__RUNNER_USER__', $RunnerUser)
+$runtimeStage = $runtimeStage.Replace('__INSTALL_EPOCH__', $installEpoch)
 
 $bootstrap = @"
 set -Eeuo pipefail

@@ -14,6 +14,7 @@ Options:
   --runner-id ID        Public-safe telemetry label (default: windows-wsl)
   --env-file PATH       Protected runner config (default: REPO/.env.local)
   --expected-head SHA   Exact trusted origin/main commit staged by bootstrap
+  --install-epoch ID    Exact 32-hex Windows install lifecycle identity
   --runtime-tree PATH   Root-owned export of EXPECTED_HEAD used as manifest
   --skip-deploy-key     Keep existing credentials only if canonical and valid
   --skip-bootstrap      Reuse the exact valid core-suite/build receipt for activation
@@ -34,6 +35,7 @@ runner_user="degendogs"
 runner_id="windows-wsl"
 env_file=""
 expected_head=""
+install_epoch=""
 runtime_tree=""
 skip_bootstrap=0
 skip_deploy_key=0
@@ -65,6 +67,11 @@ while (( $# )); do
     --expected-head)
       [[ $# -ge 2 ]] || { usage >&2; exit 64; }
       expected_head="$2"
+      shift 2
+      ;;
+    --install-epoch)
+      [[ $# -ge 2 ]] || { usage >&2; exit 64; }
+      install_epoch="$2"
       shift 2
       ;;
     --runtime-tree)
@@ -120,6 +127,7 @@ all_bootstrap_gates=(
   suite:test_refresh_and_publish.sh
   suite:test_refresh_telemetry.py
   suite:test_degen_dogs_runner_health.py
+  suite:test_record_wsl_runner_health.py
   suite:test_wsl_publication_integration.py
   dashboard-build
   bootstrap-runtime-tests
@@ -283,7 +291,7 @@ npm_global_config="${state_dir}/npm-global.conf"
 tested_receipt_path="${state_dir}/bootstrap-test-receipt.json"
 claimed_receipt_path="${state_dir}/bootstrap-test-receipt.claimed.json"
 legacy_tested_sha_path="${state_dir}/tested-main.sha"
-bootstrap_receipt_schema_version=2
+bootstrap_receipt_schema_version=3
 
 if [[ "$uninstall" == "1" ]]; then
   rm -f -- /var/lib/degen-dogs/activation-armed /run/degen-dogs/activation-enabled /run/degen-dogs/anchor-ready \
@@ -299,6 +307,7 @@ if [[ "$uninstall" == "1" ]]; then
   rm -f -- \
     /etc/logrotate.d/degen-dogs-wsl \
     /usr/local/libexec/degen-dogs-wsl-anchor \
+    /usr/local/libexec/degen-dogs-wsl-health-state \
     /usr/local/libexec/degen-dogs-wsl-installer
   systemctl daemon-reload
   systemctl reset-failed >/dev/null 2>&1 || true
@@ -308,6 +317,8 @@ fi
 
 [[ "$expected_head" =~ ^[0-9a-f]{40}$ ]] || \
   fail "--expected-head with the exact trusted origin/main SHA-1 is required"
+[[ "$install_epoch" =~ ^[0-9a-f]{32}$ ]] || \
+  fail "--install-epoch with the exact Windows install lifecycle ID is required"
 [[ "$enable_now" != "1" || "$skip_bootstrap" == "1" ]] || \
   fail "--enable-now requires the separate one-shot --skip-bootstrap receipt claim"
 [[ -n "$repo_dir" ]] || \
@@ -338,6 +349,7 @@ asset_mode="$(stat -c %a "$asset_dir")"
 trusted_root_assets=(
   scripts/install_wsl_runner.sh
   scripts/run_wsl_runner_anchor.sh
+  scripts/record_wsl_runner_health.py
   config/wsl-runner.env.template
   config/logrotate/degen-dogs-wsl.in
   config/systemd/degen-dogs-watcher.service.in
@@ -444,6 +456,8 @@ fi
 [[ "$(id -G "$runner_user")" == "$(id -g "$runner_user")" ]] || \
   fail "runner user must not belong to supplementary groups"
 runner_group="$(id -gn "$runner_user")"
+runner_uid="$(id -u "$runner_user")"
+runner_gid="$(id -g "$runner_user")"
 runner_home="$(getent passwd "$runner_user" | cut -d: -f6)"
 [[ "$runner_home" =~ ^/[A-Za-z0-9._/-]+$ && "$runner_home" != *%* && -d "$runner_home" ]] || \
   fail "runner user has no systemd-safe home directory"
@@ -739,7 +753,7 @@ trusted_python_bin="${python_runtime_dir}/bin/python3"
 validate_bootstrap_receipt() {
   local receipt_path="$1"
   "$system_python_bin" -I -B - "$receipt_path" "$expected_head" \
-    "$trusted_installer_commit" "$bootstrap_receipt_schema_version" 0 <<'PY'
+    "$trusted_installer_commit" "$install_epoch" "$bootstrap_receipt_schema_version" 0 <<'PY'
 # WSL_BOOTSTRAP_RECEIPT_VALIDATOR
 from __future__ import annotations
 
@@ -753,8 +767,9 @@ from pathlib import Path
 path = Path(sys.argv[1])
 expected_runtime_commit = sys.argv[2]
 expected_trusted_installer_commit = sys.argv[3]
-expected_schema_version = int(sys.argv[4])
-expected_uid = int(sys.argv[5])
+expected_install_epoch = sys.argv[4]
+expected_schema_version = int(sys.argv[5])
+expected_uid = int(sys.argv[6])
 maximum_size = 512
 
 try:
@@ -785,6 +800,7 @@ try:
 except (UnicodeDecodeError, json.JSONDecodeError) as exc:
     raise SystemExit(f"bootstrap test receipt is malformed: {exc}") from exc
 required_keys = {
+    "install_epoch",
     "runtime_commit",
     "schema_version",
     "trusted_installer_commit",
@@ -794,6 +810,9 @@ if not isinstance(record, dict) or set(record) != required_keys:
 if type(record["schema_version"]) is not int or record["schema_version"] != expected_schema_version:
     raise SystemExit("bootstrap test receipt was minted under an old test schema")
 commit_pattern = re.compile(r"[0-9a-f]{40}")
+epoch_pattern = re.compile(r"[0-9a-f]{32}")
+if not isinstance(record["install_epoch"], str) or epoch_pattern.fullmatch(record["install_epoch"]) is None:
+    raise SystemExit("bootstrap test receipt has an invalid install_epoch")
 for field in ("runtime_commit", "trusted_installer_commit"):
     value = record[field]
     if not isinstance(value, str) or commit_pattern.fullmatch(value) is None:
@@ -802,6 +821,8 @@ if record["runtime_commit"] != expected_runtime_commit:
     raise SystemExit("bootstrap test receipt does not match the runtime commit")
 if record["trusted_installer_commit"] != expected_trusted_installer_commit:
     raise SystemExit("bootstrap test receipt was minted by a different trusted installer")
+if record["install_epoch"] != expected_install_epoch:
+    raise SystemExit("bootstrap test receipt was minted for a different install lifecycle")
 canonical = (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
 if raw != canonical:
     raise SystemExit("bootstrap test receipt is not canonical JSON")
@@ -811,7 +832,7 @@ PY
 write_bootstrap_receipt() {
   assert_bootstrap_gate_completion || return $?
   "$system_python_bin" -I -B - "$tested_receipt_path" "$expected_head" \
-    "$trusted_installer_commit" "$bootstrap_receipt_schema_version" 0 <<'PY'
+    "$trusted_installer_commit" "$install_epoch" "$bootstrap_receipt_schema_version" 0 <<'PY'
 # WSL_BOOTSTRAP_RECEIPT_WRITER
 from __future__ import annotations
 
@@ -824,11 +845,13 @@ from pathlib import Path
 target = Path(sys.argv[1])
 runtime_commit = sys.argv[2]
 trusted_installer_commit = sys.argv[3]
-schema_version = int(sys.argv[4])
-expected_uid = int(sys.argv[5])
+install_epoch = sys.argv[4]
+schema_version = int(sys.argv[5])
+expected_uid = int(sys.argv[6])
 if os.geteuid() != expected_uid:
     raise SystemExit("bootstrap test receipt writer is not running as the trusted owner")
 record = {
+    "install_epoch": install_epoch,
     "runtime_commit": runtime_commit,
     "schema_version": schema_version,
     "trusted_installer_commit": trusted_installer_commit,
@@ -1307,6 +1330,7 @@ PY
   run_required_gate suite:test_refresh_and_publish.sh run_bootstrap_test "$bash_bin" "${source_stage}/scripts/test_refresh_and_publish.sh"
   run_bootstrap_python "${source_stage}/scripts/test_refresh_telemetry.py"
   run_bootstrap_python "${source_stage}/scripts/test_degen_dogs_runner_health.py"
+  run_bootstrap_python "${source_stage}/scripts/test_record_wsl_runner_health.py"
   run_bootstrap_python "${source_stage}/scripts/test_wsl_publication_integration.py"
   run_required_gate dashboard-build run_bootstrap_test "$node_bin" "$npm_cli" --prefix "$source_stage" run build -- \
     --outDir "$build_output"
@@ -1420,6 +1444,21 @@ run_required_gate render:logrotate render_template \
 install -d -o root -g root -m 0755 /usr/local/libexec
 install -o root -g root -m 0755 "${asset_dir}/scripts/run_wsl_runner_anchor.sh" \
   /usr/local/libexec/degen-dogs-wsl-anchor
+health_state_helper=/usr/local/libexec/degen-dogs-wsl-health-state
+install -o root -g root -m 0755 "${asset_dir}/scripts/record_wsl_runner_health.py" \
+  "$health_state_helper"
+[[ -f "$health_state_helper" && ! -L "$health_state_helper" && \
+  "$(stat -c %U "$health_state_helper")" == root && \
+  "$(stat -c %G "$health_state_helper")" == root && \
+  "$(stat -c %a "$health_state_helper")" == 755 && \
+  "$(stat -c %h "$health_state_helper")" == 1 ]] || \
+  fail "installed health state helper identity is unsafe"
+cmp -s -- "${asset_dir}/scripts/record_wsl_runner_health.py" "$health_state_helper" || \
+  fail "installed health state helper differs from the trusted asset"
+install -d -o root -g root -m 0700 "${state_dir}/health"
+"$health_state_helper" install-identity \
+  "$install_epoch" "$expected_head" "$trusted_installer_commit" \
+  "$runner_uid" "$runner_gid" >/dev/null
 
 systemctl daemon-reload
 verify_units=()

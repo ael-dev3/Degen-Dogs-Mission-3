@@ -18,6 +18,7 @@ import stat
 import subprocess
 import sys
 import re
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -52,6 +53,35 @@ PUBLISHED_RESULTS = {
     "success_pushed_live_timeout",
 }
 QUEUE_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+HEX32 = re.compile(r"^[0-9a-f]{32}$")
+HEX40 = re.compile(r"^[0-9a-f]{40}$")
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+HEALTH_ATTEMPT_PATH = Path("/run/degen-dogs/health/attempt.json")
+HEALTH_REPORT_PATH = Path("/var/cache/degen-dogs/health-report.json")
+HEALTH_CANDIDATE_MAX_BYTES = 2048
+HEALTH_FAILURE_CODES = frozenset(
+    {
+        "disk_space_low",
+        "filesystem_unavailable",
+        "git_unhealthy",
+        "health_probe_failure",
+        "local_status_invalid",
+        "local_status_stale",
+        "publication_queue_stale",
+        "publication_state_invalid",
+        "refresh_lock_invalid",
+        "remote_dashboard_unhealthy",
+        "systemd_activation_unhealthy",
+        "systemd_worker_unhealthy",
+        "terminal_publication_unhealthy",
+        "watcher_pending_stale",
+        "watcher_refresh_failures",
+        "watcher_rpc_failures",
+        "watcher_state_invalid",
+        "watcher_state_missing",
+        "watcher_stale",
+    }
+)
 
 
 def terminal_publication_problem(row: dict[str, object]) -> str:
@@ -513,6 +543,234 @@ def publication_health_summary(
     return empty
 
 
+def normalized_failure_codes(problems: list[str]) -> list[str]:
+    """Map private diagnostic prose to a fixed public failure-code vocabulary."""
+    codes: set[str] = set()
+    for problem in problems:
+        value = str(problem)
+        if any(value.startswith(f"{unit}:") or value.startswith(f"{unit} ") for unit in ACTIVATION_UNITS):
+            codes.add("systemd_activation_unhealthy")
+        elif any(value.startswith(f"{unit}:") or value.startswith(f"{unit} ") for unit in WORKER_UNITS):
+            codes.add("systemd_worker_unhealthy")
+        elif value.startswith("shared refresh lock"):
+            codes.add("refresh_lock_invalid")
+        elif value == "watcher state file is missing":
+            codes.add("watcher_state_missing")
+        elif value.startswith("watcher state is unreadable") or value.startswith("watcher state has no valid"):
+            codes.add("watcher_state_invalid")
+        elif value.startswith("watcher state is stale"):
+            codes.add("watcher_stale")
+        elif "consecutive RPC failures" in value:
+            codes.add("watcher_rpc_failures")
+        elif "consecutive refresh failures" in value:
+            codes.add("watcher_refresh_failures")
+        elif "stale pending refresh" in value:
+            codes.add("watcher_pending_stale")
+        elif value.startswith("local refresh status is invalid") or value.startswith("local refresh status is unreadable"):
+            codes.add("local_status_invalid")
+        elif value.startswith("local refresh status is stale"):
+            codes.add("local_status_stale")
+        elif value.startswith("latest terminal publication") or value.startswith("terminal publication telemetry"):
+            codes.add("terminal_publication_unhealthy")
+        elif value.startswith("publication health failure:"):
+            if value.endswith("publication_queue_stale") or value.endswith("pages_verified_finalization_stale"):
+                codes.add("publication_queue_stale")
+            else:
+                codes.add("publication_state_invalid")
+        elif value.startswith("publication queue state") or value.startswith("publication provider telemetry"):
+            codes.add("publication_state_invalid")
+        elif value.startswith("remote dashboard freshness is unhealthy"):
+            codes.add("remote_dashboard_unhealthy")
+        elif value.startswith("publisher clone") or value.startswith("publisher Git"):
+            codes.add("git_unhealthy")
+        elif "filesystem is low on space" in value:
+            codes.add("disk_space_low")
+        elif "filesystem cannot be inspected" in value:
+            codes.add("filesystem_unavailable")
+        else:
+            codes.add("health_probe_failure")
+    result = sorted(codes)
+    if any(code not in HEALTH_FAILURE_CODES for code in result):
+        raise RuntimeError("internal health failure code escaped its allowlist")
+    return result
+
+
+def candidate_payload(report: dict[str, Any], attempt: dict[str, Any]) -> dict[str, Any]:
+    """Create the exact bounded candidate schema consumed by the root recorder."""
+    token = attempt.get("attempt_token")
+    invocation_id = attempt.get("invocation_id")
+    runner_head = report.get("runner_head")
+    checked_at = report.get("checked_at_utc")
+    status = report.get("status")
+    codes = report.get("failure_codes")
+    block = report.get("latest_generated_block")
+    generation = report.get("publication_generation")
+    if not isinstance(token, str) or HEX64.fullmatch(token) is None:
+        raise ValueError("health attempt token is invalid")
+    if not isinstance(invocation_id, str) or HEX32.fullmatch(invocation_id) is None:
+        raise ValueError("health attempt invocation is invalid")
+    if not isinstance(runner_head, str) or HEX40.fullmatch(runner_head) is None:
+        raise ValueError("runner HEAD is unavailable")
+    if not isinstance(checked_at, str) or STRICT_UTC.fullmatch(checked_at) is None:
+        raise ValueError("health check timestamp is invalid")
+    if status not in {"healthy", "unhealthy"}:
+        raise ValueError("health status is invalid")
+    if (
+        not isinstance(codes, list)
+        or any(not isinstance(code, str) or code not in HEALTH_FAILURE_CODES for code in codes)
+        or codes != sorted(set(codes))
+        or (status == "healthy" and codes)
+        or (status == "unhealthy" and not codes)
+    ):
+        raise ValueError("health failure codes are invalid")
+    if block is not None and (type(block) is not int or block < 0):
+        raise ValueError("generated block is invalid")
+    if generation is not None and (type(generation) is not int or generation < 1):
+        raise ValueError("publication generation is invalid")
+    return {
+        "attempt_token": token,
+        "checked_at_utc": checked_at,
+        "failure_codes": list(codes),
+        "invocation_id": invocation_id,
+        "latest_generated_block": block,
+        "publication_generation": generation,
+        "runner_head": runner_head,
+        "schema_version": 1,
+        "status": status,
+    }
+
+
+def canonical_candidate_bytes(candidate: dict[str, Any]) -> bytes:
+    payload = (json.dumps(candidate, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    if not payload or len(payload) > HEALTH_CANDIDATE_MAX_BYTES:
+        raise ValueError("health candidate is outside its size bound")
+    return payload
+
+
+def write_health_candidate(
+    path: Path,
+    candidate: dict[str, Any],
+    *,
+    expected_uid: int,
+    expected_gid: int,
+) -> None:
+    """Atomically fsync one runner-owned, single-link, mode-0600 candidate."""
+    path = Path(path)
+    if not path.is_absolute() or path.name in {"", ".", ".."}:
+        raise ValueError("health candidate path is invalid")
+    payload = canonical_candidate_bytes(candidate)
+    directory_fd = os.open(
+        path.parent,
+        os.O_RDONLY | os.O_CLOEXEC | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+    )
+    temporary = f".{path.name}.{secrets.token_hex(12)}"
+    descriptor = -1
+    try:
+        directory = os.fstat(directory_fd)
+        if (
+            not stat.S_ISDIR(directory.st_mode)
+            or directory.st_uid != expected_uid
+            or directory.st_gid != expected_gid
+            or stat.S_IMODE(directory.st_mode) != 0o700
+        ):
+            raise RuntimeError("health candidate directory identity is unsafe")
+        descriptor = os.open(
+            temporary,
+            os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0),
+            0o600,
+            dir_fd=directory_fd,
+        )
+        os.fchmod(descriptor, 0o600)
+        offset = 0
+        while offset < len(payload):
+            written = os.write(descriptor, payload[offset:])
+            if written <= 0:
+                raise OSError("short health candidate write")
+            offset += written
+        os.fsync(descriptor)
+        details = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(details.st_mode)
+            or details.st_uid != expected_uid
+            or details.st_gid != expected_gid
+            or stat.S_IMODE(details.st_mode) != 0o600
+            or details.st_nlink != 1
+        ):
+            raise RuntimeError("temporary health candidate identity is unsafe")
+        os.close(descriptor)
+        descriptor = -1
+        os.replace(temporary, path.name, src_dir_fd=directory_fd, dst_dir_fd=directory_fd)
+        installed = os.open(
+            path.name,
+            os.O_RDONLY | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=directory_fd,
+        )
+        try:
+            details = os.fstat(installed)
+            if (
+                not stat.S_ISREG(details.st_mode)
+                or details.st_uid != expected_uid
+                or details.st_gid != expected_gid
+                or stat.S_IMODE(details.st_mode) != 0o600
+                or details.st_nlink != 1
+                or details.st_size != len(payload)
+            ):
+                raise RuntimeError("installed health candidate identity is unsafe")
+        finally:
+            os.close(installed)
+        os.fsync(directory_fd)
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        try:
+            os.unlink(temporary, dir_fd=directory_fd)
+        except FileNotFoundError:
+            pass
+        os.close(directory_fd)
+
+
+def read_health_attempt(path: Path, *, expected_uid: int, expected_gid: int) -> dict[str, Any]:
+    """Read the fixed root-created attempt without following links."""
+    descriptor = os.open(path, os.O_RDONLY | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0))
+    try:
+        details = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(details.st_mode)
+            or details.st_uid != expected_uid
+            or details.st_gid != expected_gid
+            or stat.S_IMODE(details.st_mode) != 0o640
+            or details.st_nlink != 1
+            or details.st_size <= 0
+            or details.st_size > 1024
+        ):
+            raise ValueError("health attempt identity is unsafe")
+        raw = os.read(descriptor, 1025)
+    finally:
+        os.close(descriptor)
+    try:
+        value = json.loads(raw.decode("utf-8", errors="strict"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("health attempt JSON is invalid") from exc
+    keys = {"attempt_token", "boot_id", "install_epoch", "invocation_id", "schema_version", "started_at_utc"}
+    if (
+        not isinstance(value, dict)
+        or set(value) != keys
+        or type(value["schema_version"]) is not int
+        or value["schema_version"] != 1
+        or not isinstance(value["attempt_token"], str)
+        or HEX64.fullmatch(value["attempt_token"]) is None
+        or not isinstance(value["invocation_id"], str)
+        or HEX32.fullmatch(value["invocation_id"]) is None
+        or not isinstance(value["install_epoch"], str)
+        or HEX32.fullmatch(value["install_epoch"]) is None
+    ):
+        raise ValueError("health attempt schema is invalid")
+    canonical = (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    if raw != canonical:
+        raise ValueError("health attempt is not canonical")
+    return value
+
+
 def public_health_report(
     *,
     now: datetime,
@@ -566,11 +824,27 @@ def public_health_report(
         local_block = None
     remote = checks.get("remote") if isinstance(checks.get("remote"), dict) else {}
     git = checks.get("git") if isinstance(checks.get("git"), dict) else {}
-    filesystems = checks.get("filesystems") if isinstance(checks.get("filesystems"), list) else []
+    runner_head = git.get("head")
+    if not isinstance(runner_head, str) or HEX40.fullmatch(runner_head) is None:
+        runner_head = None
+    publication_generation = publication.get("latest_observed_generation")
+    if type(publication_generation) is not int or publication_generation < 1:
+        publication_generation = None
+    raw_filesystems = checks.get("filesystems")
+    if isinstance(raw_filesystems, dict):
+        filesystems = list(raw_filesystems.values())
+    elif isinstance(raw_filesystems, list):
+        filesystems = raw_filesystems
+    else:
+        filesystems = []
     return {
         "kind": "degen_dogs_wsl_runner_health",
         "checked_at_utc": utc_text(now),
         "status": "healthy" if not problems else "unhealthy",
+        "failure_codes": normalized_failure_codes(problems),
+        "runner_head": runner_head,
+        "latest_generated_block": local_block,
+        "publication_generation": publication_generation,
         "problem_count": len(problems),
         "warning_count": len(warnings),
         "checks": {
@@ -766,9 +1040,12 @@ def main() -> int:
         )
 
     git_branch = run(["git", "branch", "--show-current"])
+    git_head = run(["git", "rev-parse", "HEAD"])
     git_status = run(["git", "status", "--porcelain", "--untracked-files=no"])
+    head_value = git_head.stdout.strip() if git_head.returncode == 0 else ""
     checks["git"] = {
         "branch": git_branch.stdout.strip() if git_branch.returncode == 0 else "",
+        "head": head_value if HEX40.fullmatch(head_value) else None,
         "tracked_dirty": bool(git_status.stdout.strip()) if git_status.returncode == 0 else None,
     }
     if git_branch.returncode != 0 or git_branch.stdout.strip() != os.environ.get("DEGEN_DOGS_BRANCH", "main"):
@@ -785,6 +1062,8 @@ def main() -> int:
             problems.append(f"shared refresh lock recheck failed ({type(exc).__name__})")
         if not lock_active:
             problems.append("publisher clone has tracked changes while no refresh owns the lock")
+    if git_head.returncode != 0 or HEX40.fullmatch(head_value) is None:
+        problems.append("publisher Git HEAD is unavailable")
 
     filesystems: dict[str, Any] = {}
     seen_devices: set[int] = set()
@@ -817,7 +1096,40 @@ def main() -> int:
         except FileNotFoundError:
             continue
 
-    report = public_health_report(now=now, problems=problems, warnings=warnings, checks=checks)
+    attempt: dict[str, Any] | None = None
+    invocation_id = os.environ.get("INVOCATION_ID", "")
+    configured_attempt = Path(os.environ.get("DEGEN_DOGS_HEALTH_ATTEMPT_PATH", str(HEALTH_ATTEMPT_PATH)))
+    configured_report = Path(os.environ.get("DEGEN_DOGS_HEALTH_REPORT_PATH", str(HEALTH_REPORT_PATH)))
+    if configured_attempt != HEALTH_ATTEMPT_PATH or configured_report != HEALTH_REPORT_PATH:
+        problems.append("health state paths do not match fixed policy")
+    elif HEX32.fullmatch(invocation_id) is None:
+        problems.append("health invocation identity is invalid")
+    else:
+        try:
+            attempt = read_health_attempt(
+                HEALTH_ATTEMPT_PATH,
+                expected_uid=0,
+                expected_gid=os.getgid(),
+            )
+            if attempt.get("invocation_id") != invocation_id:
+                attempt = None
+                problems.append("health attempt invocation does not match this service")
+        except (OSError, ValueError):
+            problems.append("health attempt is missing or invalid")
+
+    report = public_health_report(now=utc_now(), problems=problems, warnings=warnings, checks=checks)
+    if attempt is not None:
+        try:
+            candidate = candidate_payload(report, attempt)
+            write_health_candidate(
+                HEALTH_REPORT_PATH,
+                candidate,
+                expected_uid=os.getuid(),
+                expected_gid=os.getgid(),
+            )
+        except (OSError, RuntimeError, ValueError):
+            problems.append("health candidate could not be written safely")
+            report = public_health_report(now=utc_now(), problems=problems, warnings=warnings, checks=checks)
     print(json.dumps(report, sort_keys=True, separators=(",", ":")))
     return 0 if not problems else 1
 

@@ -21,6 +21,8 @@ runtime_dir=/run/degen-dogs
 armed_marker="${state_dir}/activation-armed"
 active_marker="${runtime_dir}/activation-enabled"
 ready_marker="${runtime_dir}/anchor-ready"
+health_state_helper=/usr/local/libexec/degen-dogs-wsl-health-state
+health_runtime_ready=0
 
 cleanup() {
   rm -f -- "$ready_marker" "$active_marker"
@@ -66,6 +68,18 @@ start_units() {
   write_marker "$active_marker"
 }
 
+prepare_health_runtime() {
+  if [[ ! -x "$health_state_helper" || ! -f "$health_state_helper" || -L "$health_state_helper" ]]; then
+    printf 'warning: immutable health state helper is missing or unsafe; continuing runner startup while health service reports failure\n' >&2 || true
+    return 0
+  fi
+  if ! "$health_state_helper" prepare-runtime >/dev/null; then
+    printf 'warning: health state preparation failed; continuing runner startup while health service reports failure\n' >&2 || true
+    return 0
+  fi
+  health_runtime_ready=1
+}
+
 anchor_main() {
   # A Windows Task Scheduler job keeps this process attached to WSL. systemd
   # supervises the actual one-shot jobs; this root-only anchor starts missing
@@ -77,11 +91,15 @@ anchor_main() {
 
   install -d -o root -g root -m 0755 "$state_dir" "$runtime_dir"
   trap cleanup EXIT
+  prepare_health_runtime
   trap 'exit 1' HUP INT TERM
   write_marker "$ready_marker"
   start_units
 
   while sleep 60; do
+    if (( health_runtime_ready == 0 )); then
+      prepare_health_runtime
+    fi
     start_units
   done
 }

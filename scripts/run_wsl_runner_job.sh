@@ -26,6 +26,11 @@ case "$job" in
     ;;
 esac
 
+# systemd supplies one immutable invocation identity. Preserve it across the
+# runner-owned environment file so a stale or injected value cannot satisfy
+# the root recorder's attempt.
+systemd_invocation_id="${INVOCATION_ID:-}"
+
 repo_dir="${DEGEN_DOGS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
 [[ "$repo_dir" = /* && "$repo_dir" != /mnt/* ]] || {
   printf 'error: DEGEN_DOGS_REPO_DIR must be an absolute path on the WSL ext4 filesystem\n' >&2
@@ -100,6 +105,13 @@ source "${repo_dir}/scripts/load_runner_env.sh"
 degen_dogs_load_runner_env "$repo_dir"
 scrub_untrusted_process_environment
 export DEGEN_DOGS_PYTHON_BIN="$python_bin"
+export INVOCATION_ID="$systemd_invocation_id"
+export DEGEN_DOGS_HEALTH_ATTEMPT_PATH=/run/degen-dogs/health/attempt.json
+export DEGEN_DOGS_HEALTH_REPORT_PATH=/var/cache/degen-dogs/health-report.json
+if [[ "$job" == "health" && ! "$INVOCATION_ID" =~ ^[0-9a-f]{32}$ ]]; then
+  printf 'error: health job requires the fixed systemd invocation identity\n' >&2
+  exit 78
+fi
 
 exec_python_entrypoint() {
   local script_path="$1"
