@@ -667,6 +667,27 @@ def test_invalid_status_and_baselines_promote_archive_refresh() -> None:
                 owned.close()
 
 
+def test_oversized_baseline_integer_promotes_archive_refresh() -> None:
+    """Catches aborting when a bounded status exceeds Python's JSON integer conversion limit."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            status = temporary / "repo" / "generated" / "refresh_status.json"
+            status.parent.mkdir(parents=True)
+            status.write_text(
+                '{"current_dog_token_id":' + "9" * 5_000 + "}\n",
+                encoding="ascii",
+            )
+            queue = QueueHarness(owned)
+            queue.latest = target(1, DIGEST_1, token_id="818")
+            launcher = FakeLauncher([(0, None)])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0
+            assert launcher.calls[0][1]["env"]["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "1"
+        finally:
+            owned.close()
+
+
 def test_invalid_authenticated_target_fails_closed_before_launch() -> None:
     """Catches interpreting a malformed authenticated target as a bounded current publication."""
     with tempfile.TemporaryDirectory() as raw:

@@ -348,7 +348,7 @@ def incremental_archive_required(
         baseline = status.get("current_dog_token_id")
         if isinstance(baseline, bool) or not isinstance(baseline, int) or baseline < 1:
             return True
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, ValueError):
         return True
     return target_token != baseline
 
