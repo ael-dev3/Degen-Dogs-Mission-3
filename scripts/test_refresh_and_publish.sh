@@ -2119,6 +2119,12 @@ fi
 # A deferred queue publisher may require archive indexing for a new auction,
 # but it remains a bounded current refresh. Its journal must retain that exact
 # archive scope and queue identity for the drainer's later finalization.
+mkdir -p "$SUCCESS_REPO/archive/mission3/data/generated"
+printf '%s\n' '{"state":"before-deferred-archive"}' \
+  >"$SUCCESS_REPO/archive/mission3/data/generated/archive_scope_fixture.json"
+git -C "$SUCCESS_REPO" add archive/mission3/data/generated/archive_scope_fixture.json
+git -C "$SUCCESS_REPO" commit -qm "fixture: prepare deferred archive delta"
+git -C "$SUCCESS_REPO" push -q
 DEFER_ARCHIVE_LOCKS="$TEST_ROOT/deferred-archive-locks"
 DEFER_ARCHIVE_RESULT="$TEST_ROOT/deferred-archive-result"
 DEFER_ARCHIVE_RAW="$TEST_ROOT/deferred-archive-raw-proof"
