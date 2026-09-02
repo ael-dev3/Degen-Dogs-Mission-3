@@ -321,6 +321,8 @@ run_deferred_fixture() {
   local result_marker="$5"
   local raw_marker="${6:-}"
   local pages_marker="${7:-}"
+  local archive_refresh="${8:-0}"
+  local full_refresh="${9:-0}"
   local refresh_lock="$lock_dir/refresh.lock"
   local status=0
   mkdir -m 700 -p "$lock_dir"
@@ -344,6 +346,8 @@ run_deferred_fixture() {
     DEGEN_DOGS_DEFER_PAGES_VERIFICATION=1 \
     DEGEN_DOGS_PUBLICATION_GENERATION="$generation" \
     DEGEN_DOGS_PUBLICATION_DIGEST="$digest" \
+    DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$archive_refresh" \
+    DEGEN_DOGS_FULL_REFRESH="$full_refresh" \
     DEGEN_DOGS_SKIP_PULL=1 \
     DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
     DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
@@ -2111,6 +2115,62 @@ if [[ -e "$DEFER_PUSH_LOCKS/publication/latest.json" || -e "$DEFER_PUSH_LOCKS/pu
   echo "exact deferred pushed finalization did not CAS the queue before journal unlink" >&2
   exit 1
 fi
+
+# A deferred queue publisher may require archive indexing for a new auction,
+# but it remains a bounded current refresh. Its journal must retain that exact
+# archive scope and queue identity for the drainer's later finalization.
+DEFER_ARCHIVE_LOCKS="$TEST_ROOT/deferred-archive-locks"
+DEFER_ARCHIVE_RESULT="$TEST_ROOT/deferred-archive-result"
+DEFER_ARCHIVE_RAW="$TEST_ROOT/deferred-archive-raw-proof"
+DEFER_ARCHIVE_PAGES="$TEST_ROOT/deferred-archive-pages-proof"
+DEFER_ARCHIVE_DIGEST="$(write_fixture_publication_latest "$DEFER_ARCHIVE_LOCKS" 47)"
+run_deferred_fixture \
+  "$DEFER_ARCHIVE_LOCKS" 47 "$DEFER_ARCHIVE_DIGEST" \
+  "$TEST_ROOT/deferred-archive-logs" "$DEFER_ARCHIVE_RESULT" \
+  "$DEFER_ARCHIVE_RAW" "$DEFER_ARCHIVE_PAGES" 1 0
+python3 - "$DEFER_ARCHIVE_LOCKS" "$DEFER_ARCHIVE_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+pending = json.loads((root / "publication/pending.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["run_scope"] == "archive"
+assert journal["publication_generation"] == pending["generation"] == checkpoint["generation"] == 47
+assert journal["queue_digest"] == pending["queue_digest"] == checkpoint["queue_digest"] == sys.argv[2]
+assert journal["handoff_phase"] == "raw_proven"
+assert journal["publication_target"] == checkpoint["publication_target"]
+PY
+archive_line="$(grep -n 'running Mission 3 archive incremental index' "$TEST_ROOT/deferred-archive-logs/refresh.log" | head -n 1 | cut -d: -f1)"
+current_line="$(grep -n 'bounded current refresh' "$TEST_ROOT/deferred-archive-logs/refresh.log" | head -n 1 | cut -d: -f1)"
+if [[ -z "$archive_line" || -z "$current_line" || "$archive_line" -ge "$current_line" || \
+  ! -e "$DEFER_ARCHIVE_RAW" || -e "$DEFER_ARCHIVE_PAGES" || \
+  "$(sed -n '1p' "$DEFER_ARCHIVE_RESULT")" != "success_pushed" ]]; then
+  echo "deferred archive publication did not index before its bounded refresh" >&2
+  exit 1
+fi
+finalize_fixture_publication "$DEFER_ARCHIVE_LOCKS" 47 "$DEFER_ARCHIVE_DIGEST"
+
+# Deferred queue mode deliberately has no full-history permission, even when
+# archive indexing is also selected.
+for DEFERRED_INVALID_SCOPE in full archive_full; do
+  DEFERRED_INVALID_SCOPE_LOCKS="$TEST_ROOT/deferred-${DEFERRED_INVALID_SCOPE}-locks"
+  DEFERRED_INVALID_SCOPE_DIGEST="$(write_fixture_publication_latest "$DEFERRED_INVALID_SCOPE_LOCKS" "$(( 48 + ${#DEFERRED_INVALID_SCOPE} ))")"
+  if [[ "$DEFERRED_INVALID_SCOPE" == "full" ]]; then
+    invalid_archive=0
+  else
+    invalid_archive=1
+  fi
+  if run_deferred_fixture \
+    "$DEFERRED_INVALID_SCOPE_LOCKS" "$(( 48 + ${#DEFERRED_INVALID_SCOPE} ))" "$DEFERRED_INVALID_SCOPE_DIGEST" \
+    "$TEST_ROOT/deferred-${DEFERRED_INVALID_SCOPE}-logs" "$TEST_ROOT/deferred-${DEFERRED_INVALID_SCOPE}-result" \
+    "" "" "$invalid_archive" 1; then
+    echo "deferred ${DEFERRED_INVALID_SCOPE} scope was accepted" >&2
+    exit 1
+  fi
+done
 
 # No-diff is a terminal queued generation with no fabricated commit or push
 # timestamp. It checkpoints durably and leaves queue/journal acknowledgement

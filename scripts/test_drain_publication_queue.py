@@ -171,7 +171,13 @@ class QueueHarness:
         return True
 
 
-def target(generation: int, digest: str, *, command: str = "ignored") -> tuple[dict[str, Any], str]:
+def target(
+    generation: int,
+    digest: str,
+    *,
+    token_id: str = "818",
+    command: str = "ignored",
+) -> tuple[dict[str, Any], str]:
     return {
         "schema_version": 1,
         "generation": generation,
@@ -180,9 +186,29 @@ def target(generation: int, digest: str, *, command: str = "ignored") -> tuple[d
         "run_scope": "current",
         "observation": {
             "confirmed_block_number": 100 + generation,
+            "token_id": token_id,
             "queue_selected_command": command,
         },
     }, digest
+
+
+def write_committed_refresh_status(repo: Path, baseline: object) -> None:
+    """Create the literal queue-publisher baseline the drainer is allowed to read."""
+
+    status = repo / "generated" / "refresh_status.json"
+    status.parent.mkdir(parents=True, exist_ok=True)
+    status.write_text(
+        json.dumps({"current_dog_token_id": baseline}, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "config", "user.name", "Queue Fixture"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "config", "user.email", "queue-fixture@example.invalid"],
+        check=True,
+    )
+    subprocess.run(["git", "-C", str(repo), "add", "generated/refresh_status.json"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-qm", "fixture status"], check=True)
 
 
 def journal(generation: int, digest: str, *, phase: str = "generating", outcome: str | None = None) -> dict[str, Any]:
@@ -192,6 +218,7 @@ def journal(generation: int, digest: str, *, phase: str = "generating", outcome:
         "queue_digest": digest,
         "handoff_phase": phase,
         "terminal_outcome": outcome,
+        "publication_target": target(generation, digest)[0],
         "repo_realpath": "/attacker/ignored",
         "publish_paths": ["attacker/ignored"],
     }
@@ -493,6 +520,7 @@ def test_fixed_publisher_argv_exact_fd_and_sanitized_environment() -> None:
         owned = FakeOwnedLock()
         try:
             queue = QueueHarness(owned)
+            write_committed_refresh_status(temporary / "repo", 818)
             queue.latest = target(1, DIGEST_1, command="touch /tmp/owned")
             launcher = FakeLauncher([(0, None)])
             result = run_drainer(temporary, queue, launcher, FakeClock(), owned)
@@ -554,6 +582,132 @@ def test_fixed_publisher_argv_exact_fd_and_sanitized_environment() -> None:
             assert queue.finalize_calls == [(temporary / "state", 1, DIGEST_1)]
             assert owned.inheritable_at_exit is False
             assert launcher.processes[0].wait_timeouts == [95.0]
+        finally:
+            owned.close()
+
+
+def test_matching_current_target_keeps_bounded_refresh() -> None:
+    """Catches promoting archive work when the authenticated target matches the committed baseline."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            write_committed_refresh_status(temporary / "repo", 818)
+            queue = QueueHarness(owned)
+            queue.latest = target(1, DIGEST_1, token_id="818")
+            launcher = FakeLauncher([(0, None)])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0
+            env = launcher.calls[0][1]["env"]
+            assert env["DEGEN_DOGS_FULL_REFRESH"] == "0"
+            assert env["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "0"
+        finally:
+            owned.close()
+
+
+def test_newer_target_promotes_archive_refresh() -> None:
+    """Catches publishing a newly selected auction without incremental archive indexing."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            write_committed_refresh_status(temporary / "repo", 818)
+            queue = QueueHarness(owned)
+            queue.latest = target(1, DIGEST_1, token_id="819")
+            launcher = FakeLauncher([(0, None)])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0
+            env = launcher.calls[0][1]["env"]
+            assert env["DEGEN_DOGS_FULL_REFRESH"] == "0"
+            assert env["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "1"
+        finally:
+            owned.close()
+
+
+def test_missing_baseline_promotes_archive_refresh() -> None:
+    """Catches treating an absent committed status as safe for a bounded-only publication."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            queue = QueueHarness(owned)
+            queue.latest = target(1, DIGEST_1, token_id="818")
+            launcher = FakeLauncher([(0, None)])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0
+            assert launcher.calls[0][1]["env"]["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "1"
+        finally:
+            owned.close()
+
+
+def test_invalid_status_and_baselines_promote_archive_refresh() -> None:
+    """Catches accepting corrupt, Boolean, or negative baseline values as a safe current auction."""
+    cases: tuple[tuple[str, object], ...] = (
+        ("invalid-json", "{not json"),
+        ("boolean-baseline", True),
+        ("negative-baseline", -1),
+    )
+    for name, baseline in cases:
+        with tempfile.TemporaryDirectory() as raw:
+            temporary = Path(raw)
+            owned = FakeOwnedLock()
+            try:
+                status = temporary / "repo" / "generated" / "refresh_status.json"
+                status.parent.mkdir(parents=True)
+                if name == "invalid-json":
+                    status.write_text(str(baseline), encoding="utf-8")
+                else:
+                    status.write_text(
+                        json.dumps({"current_dog_token_id": baseline}) + "\n",
+                        encoding="utf-8",
+                    )
+                queue = QueueHarness(owned)
+                queue.latest = target(1, DIGEST_1, token_id="818")
+                launcher = FakeLauncher([(0, None)])
+                assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0, name
+                assert launcher.calls[0][1]["env"]["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "1", name
+            finally:
+                owned.close()
+
+
+def test_invalid_authenticated_target_fails_closed_before_launch() -> None:
+    """Catches interpreting a malformed authenticated target as a bounded current publication."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            write_committed_refresh_status(temporary / "repo", 818)
+            queue = QueueHarness(owned)
+            queue.latest = target(1, DIGEST_1, token_id="0819")
+            launcher = FakeLauncher([])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) != 0
+            assert not launcher.calls
+        finally:
+            owned.close()
+
+
+def test_generating_recovery_promotes_archive_and_stays_bound_to_its_journal_target() -> None:
+    """Catches a generating journal selecting newer latest data or dropping its conservative archive scope."""
+    with tempfile.TemporaryDirectory() as raw:
+        temporary = Path(raw)
+        owned = FakeOwnedLock()
+        try:
+            write_committed_refresh_status(temporary / "repo", 818)
+            queue = QueueHarness(owned)
+            recovery = journal(1, DIGEST_1, phase="generating")
+            recovery["publication_target"] = target(1, DIGEST_1, token_id="819")[0]
+            queue.journal = recovery
+            queue.latest = target(2, DIGEST_2, token_id="818")
+            queue.latest_read_forbidden_until_finalize = True
+            launcher = FakeLauncher([(0, None), (0, None)])
+            assert run_drainer(temporary, queue, launcher, FakeClock(), owned) == 0
+            first = launcher.calls[0][1]["env"]
+            assert first["DEGEN_DOGS_PUBLICATION_GENERATION"] == "1"
+            assert first["DEGEN_DOGS_PUBLICATION_DIGEST"] == DIGEST_1
+            assert first["DEGEN_DOGS_RUN_MISSION3_ARCHIVE"] == "1"
+            assert launcher.calls[0][0] == [
+                "/bin/bash",
+                "-p",
+                str(temporary / "repo" / "scripts" / "refresh_and_publish.sh"),
+            ]
+            assert queue.events[:3] == ["read_journal", "finalize", "read_latest"]
         finally:
             owned.close()
 

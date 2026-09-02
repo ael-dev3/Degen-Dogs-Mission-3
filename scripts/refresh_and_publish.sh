@@ -2163,7 +2163,8 @@ validate_name() {
 
 validate_deferred_publication_context() {
   [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || return 0
-  [[ "$RUN_SCOPE" == "current" ]] || fail "deferred Pages verification is valid only for current-surface publication"
+  [[ "$RUN_SCOPE" == "current" || "$RUN_SCOPE" == "archive" ]] || \
+    fail "deferred Pages verification is valid only for bounded current or archive publication"
   [[ "$SKIP_PUSH" == "0" ]] || fail "DEGEN_DOGS_SKIP_PUSH is not a deferred terminal outcome"
   [[ "$PUBLICATION_GENERATION" =~ ^[1-9][0-9]*$ ]] || fail "deferred publication generation must be canonical positive decimal"
   [[ "$PUBLICATION_DIGEST" =~ ^[0-9a-f]{64}$ ]] || fail "deferred publication digest must be canonical lowercase SHA-256"

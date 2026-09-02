@@ -12,6 +12,7 @@ import contextlib
 import dataclasses
 import datetime as dt
 import errno
+import json
 import os
 import re
 import signal
@@ -41,6 +42,8 @@ EXIT_FAILURE = 1
 EXIT_CONFIG = 78
 EXIT_TERMINATED = 128 + 15
 _DIGEST = re.compile(r"[0-9a-f]{64}\Z")
+_CANONICAL_POSITIVE_DECIMAL = re.compile(r"[1-9][0-9]*\Z")
+_MAX_REFRESH_STATUS_BYTES = 64 * 1024
 
 
 class ConfigurationError(RuntimeError):
@@ -315,6 +318,41 @@ def _is_dynamic_child_field(name: str) -> bool:
     return False
 
 
+def _canonical_target_token(publication_target: Mapping[str, Any]) -> int:
+    """Return the selected queue token, rejecting anything that is not canonical."""
+
+    observation = publication_target.get("observation")
+    if not isinstance(observation, Mapping):
+        raise RuntimeError("publication target observation is invalid")
+    token = observation.get("token_id")
+    if not isinstance(token, str) or not _CANONICAL_POSITIVE_DECIMAL.fullmatch(token):
+        raise RuntimeError("publication target token is invalid")
+    return int(token)
+
+
+def incremental_archive_required(
+    repo_dir: Path,
+    publication_target: Mapping[str, Any],
+) -> bool:
+    """Fail closed unless the fixed committed baseline matches the selected token."""
+
+    target_token = _canonical_target_token(publication_target)
+    try:
+        with (repo_dir / "generated" / "refresh_status.json").open("rb") as status_file:
+            payload = status_file.read(_MAX_REFRESH_STATUS_BYTES + 1)
+        if len(payload) > _MAX_REFRESH_STATUS_BYTES:
+            return True
+        status = json.loads(payload)
+        if not isinstance(status, Mapping):
+            return True
+        baseline = status.get("current_dog_token_id")
+        if isinstance(baseline, bool) or not isinstance(baseline, int) or baseline < 1:
+            return True
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return True
+    return target_token != baseline
+
+
 def sanitized_publisher_environment(
     base_env: Mapping[str, str],
     *,
@@ -324,7 +362,16 @@ def sanitized_publisher_environment(
     descriptor: int,
     generation: int,
     digest: str,
+    publication_target: Mapping[str, Any] | None = None,
+    force_archive: bool = False,
 ) -> dict[str, str]:
+    archive_required = force_archive
+    if publication_target is None:
+        # Isolated fixed-entrypoint tests do not select a queue target.  Their
+        # only safe environment is the conservative archive path.
+        archive_required = True
+    else:
+        archive_required = incremental_archive_required(repo_dir, publication_target) or archive_required
     environment = {
         str(key): str(value)
         for key, value in base_env.items()
@@ -341,7 +388,7 @@ def sanitized_publisher_environment(
             "DEGEN_DOGS_PUBLICATION_GENERATION": str(generation),
             "DEGEN_DOGS_PUBLICATION_DIGEST": digest,
             "DEGEN_DOGS_FULL_REFRESH": "0",
-            "DEGEN_DOGS_RUN_MISSION3_ARCHIVE": "0",
+            "DEGEN_DOGS_RUN_MISSION3_ARCHIVE": "1" if archive_required else "0",
             "DEGEN_DOGS_SKIP_PUSH": "0",
             "DEGEN_DOGS_SKIP_PULL": "0",
             "DEGEN_DOGS_SUPERSESSION_RETRY_COUNT": "0",
@@ -445,6 +492,8 @@ def run_publisher(
     descriptor: int,
     generation: int,
     digest: str,
+    publication_target: Mapping[str, Any] | None = None,
+    force_archive: bool = False,
     base_env: Mapping[str, str],
     timeout_seconds: float,
     termination_grace_seconds: float = DEFAULT_TERMINATION_GRACE_SECONDS,
@@ -473,6 +522,8 @@ def run_publisher(
         descriptor=descriptor,
         generation=generation,
         digest=digest,
+        publication_target=publication_target,
+        force_archive=force_archive,
     )
     child_deadline = monotonic() + timeout_seconds
     process: Any | None = None
@@ -653,11 +704,19 @@ def drain_publication_queue(
                 recovery = journal_reader(lock_root)
                 if recovery is not None:
                     generation, digest = _journal_identity(recovery)
+                    publication_target = recovery.get("publication_target")
+                    if not isinstance(publication_target, Mapping):
+                        raise RuntimeError("recovery publication target is invalid")
+                    force_archive = recovery.get("handoff_phase") == "generating" or recovery.get(
+                        "run_scope"
+                    ) in {"archive", "archive_full"}
                 else:
                     latest = latest_reader(lock_root)
                     if latest is None:
                         return 0
                     generation, digest = _latest_identity(latest)
+                    publication_target = latest[0]
+                    force_archive = False
 
                 child_budget = deadline - monotonic() - cleanup_grace_seconds
                 if child_budget <= 0:
@@ -669,6 +728,8 @@ def drain_publication_queue(
                     descriptor=descriptor,
                     generation=generation,
                     digest=digest,
+                    publication_target=publication_target,
+                    force_archive=force_archive,
                     base_env=environment,
                     timeout_seconds=child_budget,
                     termination_grace_seconds=termination_grace_seconds,
