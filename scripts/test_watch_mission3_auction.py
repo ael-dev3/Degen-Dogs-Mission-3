@@ -3014,6 +3014,7 @@ def test_archive_classifies_only_explicit_log_range_errors_without_leaking_provi
 
         for provider_message in (
             "block range too large",
+            "block range is too wide",
             "block range exceeds 500 blocks",
             "maximum block range is 1,000",
             "max block range: 50",
@@ -3092,6 +3093,59 @@ def test_archive_invalid_block_range_is_not_treated_as_size_limit():
 
 def test_archive_temporarily_unavailable_block_range_is_not_treated_as_size_limit():
     assert_archive_log_error_does_not_subdivide(-32000, "block range temporarily unavailable")
+
+
+def test_archive_block_range_too_wide_subdivides_into_finite_child_quorums():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example"]
+    calls: list[tuple[str, int, int]] = []
+    original = archive.post_json
+    previous = {
+        key: os.environ.get(key)
+        for key in ("BASE_RPC_ATTEMPTS", "BASE_RPC_QUORUM_SIZE")
+    }
+    os.environ["BASE_RPC_ATTEMPTS"] = "1"
+    os.environ["BASE_RPC_QUORUM_SIZE"] = "2"
+
+    def bounded_response(url, payload, **_kwargs):  # noqa: ANN001, ANN202
+        request_filter = payload["params"][0]
+        start = int(request_filter["fromBlock"], 16)
+        end = int(request_filter["toBlock"], 16)
+        calls.append((url, start, end))
+        if (start, end) == (1, 2):
+            return {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "error": {"code": -32005, "message": "block range is too wide"},
+            }
+        return {"jsonrpc": "2.0", "id": 1, "result": []}
+
+    archive.post_json = bounded_response
+    try:
+        bounds, logs, source = archive.fetch_log_range(
+            "0x" + "a" * 40,
+            ["0x" + "b" * 64],
+            1,
+            2,
+            urls,
+        )
+    finally:
+        archive.post_json = original
+        for key, value in previous.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+    assert bounds == (1, 2)
+    assert logs == []
+    assert sorted(calls) == sorted(
+        (url, start, end)
+        for start, end in ((1, 2), (1, 1), (2, 2))
+        for url in urls
+    )
+    assert all(archive.redact_url(url) in source for url in urls)
+    assert all(url not in source for url in urls)
 
 
 def test_config_uses_shared_log_dir_for_watcher_log():
