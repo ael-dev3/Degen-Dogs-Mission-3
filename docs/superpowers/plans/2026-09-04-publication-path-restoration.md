@@ -237,7 +237,61 @@ git add scripts/test_watch_mission3_auction.py scripts/archive_mission3_index.py
 git commit -m "fix: adapt archive RPC ranges to provider limits"
 ```
 
-### Task 3: Combined verification and deployment readiness
+### Task 3: Validate the current unified row according to onchain auction state
+
+**Files:**
+- Modify: `scripts/test_validate_dashboard_consistency.py`
+- Modify: `scripts/validate_dashboard_consistency.py`
+
+**Interfaces:**
+- Consumes: `current_state`, `expected_feed_status`, `archive_current_rank`, and each generated/public unified-index mirror.
+- Produces: state-aware uniqueness, status, and active-rank validation for the current Mission 3 Dog.
+
+- [ ] **Step 1: Add the ended-unsettled regression**
+
+Add `test_validator_accepts_unique_ended_unsettled_current_dog_without_active_rank()` using the real consistency fixture. Change the current auction state to `ended_unsettled`, the feed/current unified status to `ended pending settlement`, and every mirrored/rendered status field required by the fixture. Assert full `validate_current_surface()` succeeds, the current Dog row is unique, and no Mission 3 row has `archive_current_rank(row) == 1`.
+
+- [ ] **Step 2: Observe RED**
+
+Run the new test directly with `PYTHONDONTWRITEBYTECODE=1`. Expected: fail at the unconditional exactly-one-ongoing assertion.
+
+- [ ] **Step 3: Add negative uniqueness and stale-active regressions**
+
+Add two focused negative tests from the same ended-unsettled fixture:
+
+- duplicate the Mission 3 current-Dog row and require a fixed validation failure;
+- add or relabel another Mission 3 row as `ongoing` and require a fixed validation failure because no row may remain active-ranked when the actual current auction is ended.
+
+These tests must validate parsed output behavior, not grep source text.
+
+- [ ] **Step 4: Implement state-aware unified validation**
+
+For each unified mirror, collect Mission 3 rows matching `current_dog_id` and require exactly one. Require that row's normalized public status to equal `expected_feed_status`.
+
+Keep `archive_current_rank()` unchanged. If `current_state == "live"`, retain the existing exactly-one-active-row requirement and require that active row to be the current Dog. If `current_state == "ended_unsettled"`, require zero active-ranked Mission 3 rows. Fail closed on any unsupported current state.
+
+Reuse the already-validated unique current row for the downstream wallet, amount, rarity, and activity assertions instead of performing a second first-match lookup.
+
+- [ ] **Step 5: Run GREEN verification**
+
+Run:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dashboard_consistency.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_build_unified_dog_index.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_build_dashboard.py
+```
+
+Expected: all pass; existing live-current fixtures still require exactly one active Dog, and stale historical pending rows remain non-active.
+
+- [ ] **Step 6: Commit Task 3**
+
+```bash
+git add scripts/test_validate_dashboard_consistency.py scripts/validate_dashboard_consistency.py
+git commit -m "fix: validate ended current auction in unified index"
+```
+
+### Task 4: Combined verification and deployment readiness
 
 **Files:**
 - Verify only; do not change generated production data in the implementation worktree.
