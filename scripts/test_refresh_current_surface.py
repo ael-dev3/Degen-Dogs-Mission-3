@@ -852,6 +852,40 @@ def test_leaderboard_ties_use_sql_wallet_ascending_order() -> None:
     assert [row["bidder_wallet"] for row in output] == [wallet_a, wallet_b]
 
 
+def test_leaderboard_delta_retains_and_updates_wallet_below_former_top_100_boundary() -> None:
+    surface = load_module()
+    rows = [
+        {
+            "bidder_wallet": f"0x{index + 1:040x}",
+            "bids": 1,
+            "auctions_bid": 1,
+            "bid_eth": f"{(100 - index) / 100:.8f}",
+            "high_bid_eth": f"{(100 - index) / 100:.8f}",
+        }
+        for index in range(101)
+    ]
+    affected_wallet = rows[-1]["bidder_wallet"]
+    rows[-1]["bid_eth"] = "0.00000001"
+    rows[-1]["high_bid_eth"] = "0.00000001"
+    prior = bid(1, 100, "0xprior", wallet=affected_wallet, amount="0.00000001")
+    added = bid(2, 101, "0xcanonical", wallet=affected_wallet, amount="0.01")
+
+    output = surface.apply_bidder_leaderboard_delta(
+        rows,
+        [added],
+        [],
+        [prior, added],
+        {},
+    )
+
+    assert len(output) == 101
+    updated = next(row for row in output if row["bidder_wallet"] == affected_wallet)
+    assert updated["bids"] == 2
+    assert updated["auctions_bid"] == 2
+    assert updated["bid_eth"] == 0.01000001
+    assert {row["bidder_wallet"] for row in output} == {row["bidder_wallet"] for row in rows}
+
+
 def test_leaderboard_removal_fails_closed_at_unpersisted_rank_boundary() -> None:
     surface = load_module()
     wallet = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

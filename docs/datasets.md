@@ -21,7 +21,7 @@ after each refresh.
 | --- | --- | --- |
 | `auction_timeline` | `generated/auction_timeline.csv` | 138 |
 | `auction_daily_activity` | `generated/auction_daily_activity.csv` | 140 |
-| `auction_bidder_leaderboard` | `generated/auction_bidder_leaderboard.csv` | 100 |
+| `auction_bidder_leaderboard` | `generated/auction_bidder_leaderboard.csv` | all bidders |
 | `auction_winners` | `generated/auction_winners.csv` | 137 |
 | `recent_bids` | `generated/recent_bids.csv` | 100 |
 

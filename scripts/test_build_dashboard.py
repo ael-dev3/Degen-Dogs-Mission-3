@@ -979,7 +979,11 @@ def test_timer_urgency_stays_calm_until_less_than_one_hour_remains() -> None:
     assert dashboard.timer_urgency_state(0, "live") == "ended"
 
 
-def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, list[dict[str, Any]]]:
+def run_pricing_sql_fixture(
+    dashboard: Any,
+    current_eth_usd: str,
+    bid_rows: list[dict[str, Any]] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
     conn = sqlite3.connect(":memory:")
     dashboard.insert_rows(conn, "auction_created", [
         {"token_id": 8, "start_time_utc": "2026-06-07 00:00:00", "end_time_utc": "2026-06-08 12:00:00", "block_number": 80, "tx_hash": "0xcreated8"},
@@ -991,7 +995,7 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
         {"token_id": 8, "end_time_utc": "2026-06-08 12:05:00", "block_number": 81, "tx_hash": "0xextended8a", "log_index": 1},
         {"token_id": 8, "end_time_utc": "2026-06-08 12:10:00", "block_number": 82, "tx_hash": "0xextended8b", "log_index": 2},
     ], [("token_id", "INTEGER"), ("end_time_utc", "TEXT"), ("block_number", "INTEGER"), ("tx_hash", "TEXT"), ("log_index", "INTEGER")])
-    dashboard.insert_rows(conn, "auction_bids", [
+    dashboard.insert_rows(conn, "auction_bids", bid_rows or [
         {"token_id": 9, "bidder": "0x0000000000000000000000000000000000000099", "bid_eth": 0.25, "bid_eth_exact": "0.25", "bid_wei": "250000000000000000", "extended": 0, "block_number": 95, "tx_hash": "0xbid9", "log_index": 0, "block_time_utc": "2026-05-31 19:00:00"},
         {"token_id": 10, "bidder": "0x00000000000000000000000000000000000000a1", "bid_eth": 0.5, "bid_eth_exact": "0.5", "bid_wei": "500000000000000000", "extended": 0, "block_number": 110, "tx_hash": "0xbid10", "log_index": 0, "block_time_utc": "2026-06-01 19:00:00"},
         {"token_id": 11, "bidder": "0x00000000000000000000000000000000000000c3", "bid_eth": 0.75, "bid_eth_exact": "0.75", "bid_wei": "750000000000000000", "extended": 0, "block_number": 205, "tx_hash": "0xbid11early", "log_index": 0, "block_time_utc": "2026-06-02 00:30:00"},
@@ -1059,7 +1063,37 @@ def run_pricing_sql_fixture(dashboard: Any, current_eth_usd: str) -> dict[str, l
     conn.executescript(dashboard.SQL_PATH.read_text(encoding="utf-8"))
     return {
         name: dashboard.table_dicts(*dashboard.fetch_table(conn, name))
-        for name in ["recent_bids", "auction_winners", "auction_feed", "current_auction", "current_auction_bid_history", "auction_timeline", "mission3_metrics"]
+        for name in ["recent_bids", "auction_winners", "auction_feed", "current_auction", "current_auction_bid_history", "auction_timeline", "auction_bidder_leaderboard", "mission3_metrics"]
+    }
+
+
+def test_sql_bidder_leaderboard_contains_every_distinct_bidder() -> None:
+    dashboard = load_module()
+    fixture = run_pricing_sql_fixture(
+        dashboard,
+        "2000",
+        [
+            {
+                "token_id": index,
+                "bidder": f"0x{index:040x}",
+                "bid_eth": float(index),
+                "bid_eth_exact": str(index),
+                "bid_wei": str(index * 10**18),
+                "extended": 0,
+                "block_number": index,
+                "tx_hash": f"0xbid{index}",
+                "log_index": 0,
+                "block_time_utc": "2026-06-01 19:00:00",
+            }
+            for index in range(1, 102)
+        ],
+    )
+    rows = fixture["auction_bidder_leaderboard"]
+
+    assert len(rows) == 101
+    assert len({row["bidder_wallet"] for row in rows}) == 101
+    assert "0x0000000000000000000000000000000000000065" in {
+        row["bidder_wallet"] for row in rows
     }
 
 

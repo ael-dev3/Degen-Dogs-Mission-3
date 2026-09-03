@@ -411,7 +411,7 @@ LEFT JOIN latest_bid l USING (bidder)
 LEFT JOIN winner_stats w USING (bidder)
 LEFT JOIN address_labels lab ON lab.address_lc = LOWER(b.bidder)
 ORDER BY b.bid_eth DESC, b.bids DESC, b.bidder
-LIMIT 100;
+;
 
 DROP TABLE IF EXISTS season5_sup_rewards_by_auction;
 CREATE TABLE season5_sup_rewards_by_auction AS

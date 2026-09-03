@@ -705,7 +705,7 @@ def apply_bidder_leaderboard_delta(
             bid_wallet(row),
         )
     )
-    return output[:100]
+    return output
 
 
 def recompute_daily_activity(
