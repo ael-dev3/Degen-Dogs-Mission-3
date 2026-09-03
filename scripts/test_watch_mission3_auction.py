@@ -3012,6 +3012,24 @@ def test_archive_classifies_only_explicit_log_range_errors_without_leaking_provi
         else:
             raise AssertionError("archive did not classify an explicit eth_getLogs range limit")
 
+        for provider_message in (
+            "block range too large",
+            "block range exceeds 500 blocks",
+            "maximum block range is 1,000",
+            "max block range: 50",
+        ):
+            archive.post_json = lambda *_args, _message=provider_message, **_kwargs: {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "error": {"code": -32005, "message": _message},
+            }
+            try:
+                archive.rpc_call("eth_getLogs", [{}], urls=[secret_url])
+            except archive.RpcLogRangeLimit as exc:
+                assert str(exc) == "eth_getLogs provider range/response limit"
+            else:
+                raise AssertionError(f"archive did not classify explicit provider limit: {provider_message}")
+
         archive.post_json = lambda *_args, **_kwargs: {
             "jsonrpc": "2.0",
             "id": 1,
@@ -3029,6 +3047,51 @@ def test_archive_classifies_only_explicit_log_range_errors_without_leaking_provi
             raise AssertionError("archive accepted a generic invalid-parameters response")
     finally:
         archive.post_json = original
+
+
+def assert_archive_log_error_does_not_subdivide(code: int, message: str) -> None:
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example"]
+    calls: list[tuple[int, int]] = []
+    original = archive.post_json
+    previous_attempts = os.environ.get("BASE_RPC_ATTEMPTS")
+    os.environ["BASE_RPC_ATTEMPTS"] = "1"
+
+    def error_response(_url, payload, **_kwargs):  # noqa: ANN001, ANN202
+        request_filter = payload["params"][0]
+        calls.append((int(request_filter["fromBlock"], 16), int(request_filter["toBlock"], 16)))
+        return {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {"code": code, "message": message},
+        }
+
+    archive.post_json = error_response
+    try:
+        try:
+            archive.fetch_log_range("0x" + "a" * 40, ["0x" + "b" * 64], 1, 2, urls)
+        except archive.RpcLogRangeLimit as exc:
+            raise AssertionError(f"archive subdivided a generic provider error: {message}") from exc
+        except RuntimeError as exc:
+            assert type(exc) is RuntimeError
+            assert "failed independent quorum" in str(exc)
+        else:
+            raise AssertionError("archive accepted a generic provider error")
+    finally:
+        archive.post_json = original
+        if previous_attempts is None:
+            os.environ.pop("BASE_RPC_ATTEMPTS", None)
+        else:
+            os.environ["BASE_RPC_ATTEMPTS"] = previous_attempts
+    assert calls == [(1, 2), (1, 2)]
+
+
+def test_archive_invalid_block_range_is_not_treated_as_size_limit():
+    assert_archive_log_error_does_not_subdivide(-32602, "invalid block range")
+
+
+def test_archive_temporarily_unavailable_block_range_is_not_treated_as_size_limit():
+    assert_archive_log_error_does_not_subdivide(-32000, "block range temporarily unavailable")
 
 
 def test_config_uses_shared_log_dir_for_watcher_log():

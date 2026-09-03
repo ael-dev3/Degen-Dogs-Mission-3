@@ -122,8 +122,9 @@ def is_explicit_log_range_error(code: int, message: str) -> bool:
         return False
     normalized = message.casefold()
     return any(marker in normalized for marker in (
-        "block range", "range limit", "range is too", "maximum range",
-        "max range", "too many results", "response size",
+        "range limit", "range is too large", "range too large", "block range exceeds",
+        "maximum range", "maximum block range", "max range", "max block range",
+        "too many results", "response size",
         "query returned more than", "please limit the query",
     ))
 
