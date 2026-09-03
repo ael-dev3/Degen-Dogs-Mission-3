@@ -565,6 +565,110 @@ def write_fixture(
     rebuild_live_bundle(root)
 
 
+def write_current_state_fixture(
+    root: Path,
+    *,
+    current_state: str,
+    feed_status: str,
+    unified_status: str | None = None,
+    timeline_state: str | None = None,
+) -> None:
+    write_fixture(root)
+
+    for relative_path in (
+        Path("generated/current_auction.json"),
+        Path("public/generated/current_auction.json"),
+    ):
+        path = root / relative_path
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        rows[0]["auction_state"] = current_state
+        write_json(path, rows)
+
+    metric_rows = json.loads(
+        (root / "generated" / "mission3_metrics.json").read_text(encoding="utf-8")
+    )
+    current_status_metric = next(
+        row for row in metric_rows if row["metric"] == "current_auction_status"
+    )
+    current_status_metric["value"] = current_state
+    write_text(root / "generated" / "mission3_metrics.csv", metrics_csv(metric_rows))
+    write_json(root / "generated" / "mission3_metrics.json", metric_rows)
+    write_json(root / "public" / "generated" / "mission3_metrics.json", metric_rows)
+
+    for relative_path in (
+        Path("generated/refresh_status.json"),
+        Path("public/generated/refresh_status.json"),
+    ):
+        path = root / relative_path
+        status = json.loads(path.read_text(encoding="utf-8"))
+        status["current_auction_status"] = current_state
+        write_json(path, status)
+
+    for relative_path in (
+        Path("generated/auction_feed.json"),
+        Path("public/generated/auction_feed.json"),
+    ):
+        path = root / relative_path
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        rows[0]["status"] = feed_status
+        write_json(path, rows)
+
+    if timeline_state is not None:
+        for relative_path in (
+            Path("generated/auction_timeline.json"),
+            Path("public/generated/auction_timeline.json"),
+        ):
+            path = root / relative_path
+            rows = json.loads(path.read_text(encoding="utf-8"))
+            rows[0]["auction_state"] = timeline_state
+            write_json(path, rows)
+
+    if unified_status is not None:
+        for relative_path in (
+            Path("archive/data/generated/unified_dog_search_index.json"),
+            Path("public/generated/unified_dog_search_index.json"),
+        ):
+            path = root / relative_path
+            rows = json.loads(path.read_text(encoding="utf-8"))
+            rows[0]["status"] = unified_status
+            write_json(path, rows)
+
+    index_path = root / "index.html"
+    index = index_path.read_text(encoding="utf-8")
+    index = index.replace("<span>ongoing</span>", f"<span>{feed_status}</span>")
+    index = index.replace(
+        "<td>current_auction_status</td><td>live</td>",
+        f"<td>current_auction_status</td><td>{current_state}</td>",
+    )
+    write_text(index_path, index)
+
+    readme_path = root / "README.md"
+    readme = readme_path.read_text(encoding="utf-8").replace(
+        "| Current status | live |",
+        f"| Current status | {current_state} |",
+    )
+    write_text(readme_path, readme)
+    rebuild_live_bundle(root)
+
+
+def write_ended_unsettled_fixture(root: Path) -> None:
+    write_current_state_fixture(
+        root,
+        current_state="ended_unsettled",
+        feed_status="ended pending settlement",
+        unified_status="ended pending settlement",
+        timeline_state="ended_unsettled",
+    )
+
+
+def write_unsupported_current_state_fixture(root: Path) -> None:
+    write_current_state_fixture(
+        root,
+        current_state="paused",
+        feed_status="paused",
+    )
+
+
 def run_validation(root: Path) -> dict[str, Any]:
     validator = load_module()
     validator.ROOT = root
@@ -743,6 +847,95 @@ def test_validate_current_surface_accepts_consistent_apr_fixture() -> None:
             "settlements": 0,
             "bids": 1,
         }
+
+
+def test_validator_accepts_unique_ended_unsettled_current_dog_without_active_rank() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        result = run_validation(root)
+        assert result["auction_state"] == "ended_unsettled"
+
+        validator = load_module()
+        for relative_path in (
+            Path("archive/data/generated/unified_dog_search_index.json"),
+            Path("public/generated/unified_dog_search_index.json"),
+        ):
+            rows = json.loads((root / relative_path).read_text(encoding="utf-8"))
+            current_rows = [
+                row
+                for row in rows
+                if row.get("mission") == 3 and row.get("dog_id") == 729
+            ]
+            assert len(current_rows) == 1
+            assert current_rows[0]["status"] == "ended pending settlement"
+            assert not any(
+                row.get("mission") == 3 and validator.archive_current_rank(row) == 1
+                for row in rows
+            )
+
+
+def test_validator_rejects_duplicate_ended_unsettled_current_dog_row() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        path = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        rows.append(dict(rows[0]))
+        write_json(path, rows)
+
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "must contain exactly one Mission 3 row for current Dog #729; found 2",
+        )
+
+
+def test_validator_rejects_stale_active_row_for_ended_unsettled_current_dog() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        path = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        stale_active = dict(rows[0])
+        stale_active["dog_id"] = 728
+        stale_active["status"] = "ongoing"
+        rows.insert(0, stale_active)
+        write_json(path, rows)
+
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "must contain no active-ranked Mission 3 rows when current auction Dog #729 is ended_unsettled",
+        )
+
+
+def test_validator_rejects_ended_unsettled_current_dog_with_ongoing_status() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        for relative_path in (
+            Path("archive/data/generated/unified_dog_search_index.json"),
+            Path("public/generated/unified_dog_search_index.json"),
+        ):
+            path = root / relative_path
+            rows = json.loads(path.read_text(encoding="utf-8"))
+            rows[0]["status"] = "ongoing"
+            write_json(path, rows)
+        rebuild_live_bundle(root)
+
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "current Mission 3 Dog #729 status differs from auction_feed",
+        )
+
+
+def test_validator_rejects_unsupported_current_auction_state() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_unsupported_current_state_fixture(root)
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "unsupported current auction state: 'paused'",
+        )
 
 
 def test_validate_current_surface_rejects_public_extension_mirror_drift() -> None:

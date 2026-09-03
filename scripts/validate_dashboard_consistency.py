@@ -1904,7 +1904,13 @@ def validate_current_surface() -> dict[str, Any]:
     if int(metrics["snapshot_confirmations"]) < 1:
         raise AssertionError("mission3_metrics snapshot_confirmations must be at least one")
 
-    expected_feed_status = {"live": "ongoing", "ended_unsettled": "ended pending settlement"}.get(current_state, current_state)
+    feed_status_by_current_state = {
+        "live": "ongoing",
+        "ended_unsettled": "ended pending settlement",
+    }
+    if current_state not in feed_status_by_current_state:
+        raise AssertionError(f"unsupported current auction state: {current_state!r}")
+    expected_feed_status = feed_status_by_current_state[current_state]
     if text(feed.get("status")).lower() != expected_feed_status:
         raise AssertionError("auction_feed current row status differs from current_auction")
 
@@ -2169,6 +2175,38 @@ def validate_current_surface() -> dict[str, Any]:
         sorted_rows = sorted([row for row in unified_rows if isinstance(row, dict)], key=unified_sort_key, reverse=True)
         if unified_rows != sorted_rows:
             raise AssertionError(f"{path.relative_to(ROOT)} is not sorted with only the actual current auction prioritized")
+        current_rows = [
+            row
+            for row in sorted_rows
+            if row.get("mission") == 3 and dog_id(row) == current_dog_id
+        ]
+        if len(current_rows) != 1:
+            raise AssertionError(
+                f"{path.relative_to(ROOT)} must contain exactly one Mission 3 row "
+                f"for current Dog #{current_dog_id}; found {len(current_rows)}"
+            )
+        unified = current_rows[0]
+        if text(unified.get("status")).lower() != expected_feed_status:
+            raise AssertionError(
+                f"{path.relative_to(ROOT)} current Mission 3 Dog #{current_dog_id} "
+                "status differs from auction_feed"
+            )
+        active_rows = [
+            row
+            for row in sorted_rows
+            if row.get("mission") == 3 and archive_current_rank(row) == 1
+        ]
+        if current_state == "live":
+            if len(active_rows) != 1 or dog_id(active_rows[0]) != current_dog_id:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT)} must contain exactly one Mission 3 "
+                    f"ongoing/current row for Dog #{current_dog_id}"
+                )
+        elif active_rows:
+            raise AssertionError(
+                f"{path.relative_to(ROOT)} must contain no active-ranked Mission 3 rows "
+                f"when current auction Dog #{current_dog_id} is ended_unsettled"
+            )
         validate_unified_rarity_surface(
             str(path.relative_to(ROOT)),
             sorted_rows,
@@ -2186,9 +2224,6 @@ def validate_current_surface() -> dict[str, Any]:
                     raise AssertionError(
                         f"{path.relative_to(ROOT)} Dog #{dog_id(row)} rarity denominator contradicts metrics"
                     )
-        ongoing_rows = [row for row in sorted_rows if row.get("mission") == 3 and archive_current_rank(row) == 1]
-        if len(ongoing_rows) != 1 or dog_id(ongoing_rows[0]) != current_dog_id:
-            raise AssertionError(f"{path.relative_to(ROOT)} must contain exactly one Mission 3 ongoing/current row for Dog #{current_dog_id}")
         required_mission3 = historical_mission3_required_ids(historical_rows if isinstance(historical_rows, list) else [])
         unified_mission3 = {dog_id(row) for row in sorted_rows if row.get("mission") == 3}
         missing_mission3 = sorted(required_mission3 - unified_mission3)
@@ -2205,7 +2240,6 @@ def validate_current_surface() -> dict[str, Any]:
             if settlement_time and text(settled_row.get("activity_time_basis")) != "settlement_block_time":
                 raise AssertionError(f"{path.relative_to(ROOT)} settled Dog #{dog_id(settled_row)} activity basis is not settlement_block_time")
 
-        unified = find_unified_current(path, current_dog_id)
         raw_who = unified.get("winner_or_high_bidder")
         who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}
         raw_amount = unified.get("amount")
