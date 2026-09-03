@@ -1722,6 +1722,153 @@ def test_archive_log_reads_require_independent_canonical_agreement():
         archive.rpc_call = original
 
 
+def test_archive_log_range_bisects_only_explicit_range_limit_and_keeps_child_quorum():
+    archive = load_archive_module()
+    address = "0x" + "a" * 40
+    topic = "0x" + "b" * 64
+    urls = [
+        "https://first-secret.rpc.custom.example/v2/key-secret?api_key=query-secret",
+        "https://second-secret.rpc.custom.example/v3/key-secret?token=query-secret",
+    ]
+    first_log = {
+        "address": address,
+        "blockHash": "0x" + "c" * 64,
+        "blockNumber": "0x32",
+        "data": "0x",
+        "logIndex": "0x2",
+        "removed": False,
+        "topics": [topic],
+        "transactionHash": "0x" + "e" * 64,
+        "transactionIndex": "0x1",
+    }
+    second_log = {
+        "address": address,
+        "blockHash": "0x" + "d" * 64,
+        "blockNumber": "0x33",
+        "data": "0x",
+        "logIndex": "0x1",
+        "removed": False,
+        "topics": [topic],
+        "transactionHash": "0x" + "f" * 64,
+        "transactionIndex": "0x0",
+    }
+    calls: list[tuple[int, int]] = []
+    quorum_inputs: list[list[str]] = []
+    original = archive.rpc_consensus
+
+    def bounded_consensus(method, params, *, urls, timeout, normalizer):  # noqa: ANN001, ANN202
+        assert method == "eth_getLogs"
+        assert timeout == 120
+        assert normalizer is archive.canonical_logs
+        start = int(params[0]["fromBlock"], 16)
+        end = int(params[0]["toBlock"], 16)
+        calls.append((start, end))
+        quorum_inputs.append(list(urls))
+        if (start, end) == (1, 100):
+            raise archive.RpcLogRangeLimit("eth_getLogs provider range/response limit")
+        if (start, end) == (1, 50):
+            return [first_log], list(urls)
+        if (start, end) == (51, 100):
+            return [second_log], list(urls)
+        raise AssertionError(f"unexpected archive child range {(start, end)}")
+
+    archive.rpc_consensus = bounded_consensus
+    try:
+        bounds, logs, source = archive.fetch_log_range(address, [topic], 1, 100, urls)
+    finally:
+        archive.rpc_consensus = original
+
+    assert calls == [(1, 100), (1, 50), (51, 100)]
+    assert quorum_inputs == [urls, urls, urls]
+    assert bounds == (1, 100)
+    assert [(log["blockNumber"], log["logIndex"]) for log in logs] == [("0x32", "0x2"), ("0x33", "0x1")]
+    assert logs[0]["__source_rpc"] == "quorum:" + ",".join(archive.redact_url(url) for url in urls)
+    assert logs[1]["__source_rpc"] == "quorum:" + ",".join(archive.redact_url(url) for url in urls)
+    assert all(archive.redact_url(url) in source for url in urls)
+    for secret in ("first-secret", "second-secret", "key-secret", "query-secret"):
+        assert secret not in source
+
+
+def test_archive_log_range_does_not_bisect_generic_quorum_failure():
+    archive = load_archive_module()
+    calls = 0
+    original = archive.rpc_consensus
+
+    def failed_consensus(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        raise RuntimeError("transport/quorum unavailable")
+
+    archive.rpc_consensus = failed_consensus
+    try:
+        try:
+            archive.fetch_log_range("0x" + "a" * 40, ["0x" + "b" * 64], 1, 100, ["https://one.example", "https://two.example"])
+        except RuntimeError as exc:
+            assert type(exc) is RuntimeError
+            assert str(exc) == "transport/quorum unavailable"
+        else:
+            raise AssertionError("archive accepted a generic quorum failure")
+    finally:
+        archive.rpc_consensus = original
+    assert calls == 1
+
+
+def test_archive_one_block_range_limit_fails_closed():
+    archive = load_archive_module()
+    calls = 0
+    original = archive.rpc_consensus
+
+    def limited_consensus(*_args, **_kwargs):
+        nonlocal calls
+        calls += 1
+        raise archive.RpcLogRangeLimit("eth_getLogs provider range/response limit")
+
+    archive.rpc_consensus = limited_consensus
+    try:
+        try:
+            archive.fetch_log_range("0x" + "a" * 40, ["0x" + "b" * 64], 7, 7, ["https://one.example", "https://two.example"])
+        except archive.RpcLogRangeLimit:
+            pass
+        else:
+            raise AssertionError("archive did not fail closed for a limited one-block range")
+    finally:
+        archive.rpc_consensus = original
+    assert calls == 1
+
+
+def test_archive_log_quorum_preserves_typed_range_limits_without_worker_retries():
+    archive = load_archive_module()
+    urls = ["https://one.example", "https://two.example"]
+    calls = {url: 0 for url in urls}
+    original = archive.rpc_call
+    previous_attempts = os.environ.get("BASE_RPC_ATTEMPTS")
+    os.environ["BASE_RPC_ATTEMPTS"] = "3"
+
+    def partially_limited(method, _params, *, urls, timeout):  # noqa: ANN001, ANN202, ARG001
+        assert method == "eth_getLogs"
+        url = urls[0]
+        calls[url] += 1
+        if url == "https://one.example":
+            return [], url
+        raise archive.RpcLogRangeLimit("eth_getLogs provider range/response limit")
+
+    archive.rpc_call = partially_limited
+    try:
+        try:
+            archive.rpc_consensus("eth_getLogs", [{}], urls=urls, normalizer=archive.canonical_logs)
+        except archive.RpcLogRangeLimit as exc:
+            assert str(exc) == "eth_getLogs range was rejected by the independent RPC quorum"
+        else:
+            raise AssertionError("archive flattened an explicit range-limited log quorum")
+    finally:
+        archive.rpc_call = original
+        if previous_attempts is None:
+            os.environ.pop("BASE_RPC_ATTEMPTS", None)
+        else:
+            os.environ["BASE_RPC_ATTEMPTS"] = previous_attempts
+    assert calls == {url: 1 for url in urls}
+
+
 def test_archive_safe_head_ignores_a_stale_outlier_and_pins_hash_quorum():
     archive = load_archive_module()
     urls = ["https://one.example", "https://two.example", "https://stale.example"]
@@ -2498,9 +2645,12 @@ def test_archive_response_reader_rejects_oversized_body_before_reading():
     archive.open_rpc_request = lambda *_args, **_kwargs: OversizedResponse()
     try:
         try:
-            archive.post_json("https://one.example", {"jsonrpc": "2.0"})
-        except RuntimeError as exc:
-            assert "exceeds" in str(exc)
+            archive.post_json(
+                "https://one.example",
+                {"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{}]},
+            )
+        except archive.RpcLogRangeLimit as exc:
+            assert str(exc) == "eth_getLogs provider range/response limit"
         else:
             raise AssertionError("archive accepted an oversized RPC response")
     finally:
@@ -2590,6 +2740,19 @@ def test_archive_rpc_transport_rejects_unsafe_urls_and_sanitizes_http_errors():
             assert "secret" not in str(exc)
         else:
             raise AssertionError("archive accepted an RPC HTTP failure")
+
+        error = archive.urllib.error.HTTPError(secret_url, 413, "body-secret", {}, None)
+        archive.open_rpc_request = lambda *_args, **_kwargs: (_ for _ in ()).throw(error)
+        try:
+            archive.post_json(
+                secret_url,
+                {"jsonrpc": "2.0", "id": 1, "method": "eth_getLogs", "params": [{}]},
+            )
+        except archive.RpcLogRangeLimit as exc:
+            assert str(exc) == "eth_getLogs provider range/response limit"
+            assert "secret" not in str(exc)
+        else:
+            raise AssertionError("archive did not classify an HTTP 413 log range limit")
     finally:
         archive.open_rpc_request = original
 
@@ -2828,6 +2991,44 @@ def test_archive_rpc_single_and_batch_envelopes_are_exact_and_secret_safe():
             pass
         else:
             raise AssertionError(f"archive accepted malformed JSON-RPC batch envelope: {envelope!r}")
+
+
+def test_archive_classifies_only_explicit_log_range_errors_without_leaking_provider_text():
+    archive = load_archive_module()
+    original = archive.post_json
+    secret_url = "https://user-secret:password-secret@provider.example/v2/path-secret?api_key=query-secret"
+    try:
+        archive.post_json = lambda *_args, **_kwargs: {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {"code": -32005, "message": "block range is too large secret-token"},
+        }
+        try:
+            archive.rpc_call("eth_getLogs", [{}], urls=[secret_url])
+        except archive.RpcLogRangeLimit as exc:
+            assert str(exc) == "eth_getLogs provider range/response limit"
+            assert "secret-token" not in str(exc)
+            assert secret_url not in str(exc)
+        else:
+            raise AssertionError("archive did not classify an explicit eth_getLogs range limit")
+
+        archive.post_json = lambda *_args, **_kwargs: {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {"code": -32602, "message": "invalid parameters secret-token"},
+        }
+        try:
+            archive.rpc_call("eth_getLogs", [{}], urls=[secret_url])
+        except RuntimeError as exc:
+            assert type(exc) is RuntimeError
+            assert "code=-32602" in str(exc)
+            assert "invalid parameters" not in str(exc)
+            assert "secret-token" not in str(exc)
+            assert secret_url not in str(exc)
+        else:
+            raise AssertionError("archive accepted a generic invalid-parameters response")
+    finally:
+        archive.post_json = original
 
 
 def test_config_uses_shared_log_dir_for_watcher_log():

@@ -113,6 +113,21 @@ class RpcRateLimited(RuntimeError):
         self.retry_after_seconds = retry_after_seconds
 
 
+class RpcLogRangeLimit(RuntimeError):
+    """An explicit eth_getLogs range/response-size limit, safe to retry smaller."""
+
+
+def is_explicit_log_range_error(code: int, message: str) -> bool:
+    if code >= 0:
+        return False
+    normalized = message.casefold()
+    return any(marker in normalized for marker in (
+        "block range", "range limit", "range is too", "maximum range",
+        "max range", "too many results", "response size",
+        "query returned more than", "please limit the query",
+    ))
+
+
 def open_rpc_request(request: urllib.request.Request, timeout: int):
     return RPC_OPENER.open(request, timeout=timeout)
 
@@ -315,7 +330,9 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
         1024 * 1024,
         min(int(os.environ.get("BASE_RPC_MAX_RESPONSE_BYTES", str(DEFAULT_RPC_MAX_RESPONSE_BYTES))), 128 * 1024 * 1024),
     )
+    is_log_request = isinstance(payload, dict) and payload.get("method") == "eth_getLogs"
     rate_limit_error: RpcRateLimited | None = None
+    range_limit_error: RpcLogRangeLimit | None = None
     try:
         response = open_rpc_request(req, timeout)
     except urllib.error.HTTPError as exc:
@@ -325,12 +342,16 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
             except Exception:  # noqa: BLE001 - provider-controlled headers are never diagnostic output
                 retry_after = None
             rate_limit_error = RpcRateLimited(retry_after)
+        elif exc.code == 413 and is_log_request:
+            range_limit_error = RpcLogRangeLimit("eth_getLogs provider range/response limit")
         else:
             raise RuntimeError(f"HTTP {exc.code}") from None
     except Exception as exc:  # noqa: BLE001 - never expose credential-bearing URLs in transport errors
         raise RuntimeError(f"RPC transport failed ({type(exc).__name__})") from None
     if rate_limit_error is not None:
         raise rate_limit_error
+    if range_limit_error is not None:
+        raise range_limit_error
     try:
         with response:
             status = response.getcode() if hasattr(response, "getcode") else getattr(response, "status", None)
@@ -351,9 +372,13 @@ def post_json(url: str, payload: Any, *, timeout: int = 60) -> Any:
                 if parsed_length < 0:
                     raise RuntimeError("RPC response has an invalid Content-Length")
                 if parsed_length > max_bytes:
+                    if is_log_request:
+                        raise RpcLogRangeLimit("eth_getLogs provider range/response limit")
                     raise RuntimeError(f"RPC response exceeds {max_bytes} byte limit")
             raw = response.read(max_bytes + 1)
             if len(raw) > max_bytes:
+                if is_log_request:
+                    raise RpcLogRangeLimit("eth_getLogs provider range/response limit")
                 raise RuntimeError(f"RPC response exceeds {max_bytes} byte limit")
             text = raw.decode("utf-8", errors="strict")
     except RuntimeError:
@@ -394,8 +419,14 @@ def rpc_call(method: str, params: list[Any], *, urls: list[str] | None = None, t
                     or not isinstance(error.get("message"), str)
                 ):
                     raise RuntimeError("invalid JSON-RPC error envelope")
+                if method == "eth_getLogs" and is_explicit_log_range_error(error["code"], error["message"]):
+                    raise RpcLogRangeLimit("eth_getLogs provider range/response limit")
                 raise RuntimeError(f"JSON-RPC error code={error['code']}")
             return data["result"], url
+        except RpcLogRangeLimit as exc:
+            if len(active_urls) == 1:
+                raise
+            errors.append(f"{redact_url(url)}: {exc}")
         except RpcRateLimited as exc:
             if len(active_urls) == 1:
                 raise
@@ -563,6 +594,7 @@ def rpc_consensus(
     normalize = normalizer or (lambda value: value)
     votes: dict[str, list[tuple[str, Any]]] = defaultdict(list)
     errors: list[str] = []
+    range_limit_errors = 0
     deadline_seconds = max(
         1.0,
         min(float(os.environ.get("BASE_RPC_QUORUM_DEADLINE_SECONDS", "35")), float(timeout)),
@@ -579,6 +611,8 @@ def rpc_consensus(
                     break
                 result, _ = rpc_call(method, params, urls=[url], timeout=max(1.0, min(float(timeout), remaining)))
                 return url, result
+            except RpcLogRangeLimit:
+                raise
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
                 remaining = deadline - time.monotonic()
@@ -612,6 +646,9 @@ def rpc_consensus(
                     normalized = normalize(result)
                     vote_key = json.dumps(normalized, sort_keys=True, separators=(",", ":"), default=str)
                     votes[vote_key].append((used_url, result))
+                except RpcLogRangeLimit as exc:
+                    range_limit_errors += 1
+                    errors.append(f"{redact_url(url)}: {exc}")
                 except Exception as exc:  # noqa: BLE001
                     errors.append(f"{redact_url(url)}: {exc}")
 
@@ -634,6 +671,9 @@ def rpc_consensus(
     winner = ranked[0] if ranked else []
     runner_up_count = len(ranked[1]) if len(ranked) > 1 else 0
     if len(winner) < required or runner_up_count + unresolved_count >= len(winner):
+        top_votes = len(winner)
+        if method == "eth_getLogs" and range_limit_errors > 0 and top_votes + range_limit_errors >= required:
+            raise RpcLogRangeLimit("eth_getLogs range was rejected by the independent RPC quorum")
         counts = sorted((len(group) for group in votes.values()), reverse=True)
         tie = "; ambiguous_or_incomplete_top_vote=1"
         raise RuntimeError(
@@ -792,13 +832,23 @@ def log_filter(address: str, topics0: list[str], start: int, end: int) -> dict[s
 
 
 def fetch_log_range(address: str, topics0: list[str], start: int, end: int, urls: list[str]) -> tuple[tuple[int, int], list[dict[str, Any]], str]:
-    raw_logs, agreeing_urls = rpc_consensus(
-        "eth_getLogs",
-        [log_filter(address, topics0, start, end)],
-        urls=urls,
-        timeout=120,
-        normalizer=canonical_logs,
-    )
+    try:
+        raw_logs, agreeing_urls = rpc_consensus(
+            "eth_getLogs",
+            [log_filter(address, topics0, start, end)],
+            urls=urls,
+            timeout=120,
+            normalizer=canonical_logs,
+        )
+    except RpcLogRangeLimit:
+        if start >= end:
+            raise
+        midpoint = (start + end) // 2
+        _left_bounds, left_logs, left_source = fetch_log_range(address, topics0, start, midpoint, urls)
+        _right_bounds, right_logs, right_source = fetch_log_range(address, topics0, midpoint + 1, end, urls)
+        logs = left_logs + right_logs
+        logs.sort(key=lambda row: (hex_int(row["blockNumber"]), row["transactionHash"], hex_int(row["logIndex"])))
+        return (start, end), logs, ";".join((left_source, right_source))
     logs = canonical_logs(raw_logs)
     expected_address = canonical_address(address)
     expected_topics = {canonical_hash(topic, "configured event topic") for topic in topics0}
