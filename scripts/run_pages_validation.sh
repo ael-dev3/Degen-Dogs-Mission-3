@@ -138,6 +138,7 @@ run_group() {
         npm:test:live-snapshot
         npm:test:rpc-redaction
         npm:test:freshness
+        npm:test:ci-security
         npm:test:pages-validation-classifier
         npm:test:pages-deploy-controller
         npm:archive:prices:validate
