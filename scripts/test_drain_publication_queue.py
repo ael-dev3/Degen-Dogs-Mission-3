@@ -39,6 +39,91 @@ def load_module() -> Any:
 drainer = load_module()
 
 
+def test_runtime_budget_parser_accepts_default_and_boundaries() -> None:
+    """Catches changing the documented default or excluding either operator boundary."""
+
+    assert drainer.parse_runtime_budget_seconds(None) == 900.0
+    assert drainer.parse_runtime_budget_seconds("300") == 300.0
+    assert drainer.parse_runtime_budget_seconds("2700") == 2700.0
+
+
+def test_runtime_budget_parser_rejects_noncanonical_and_out_of_range_values() -> None:
+    """Catches permissive parsing, value disclosure, or huge-integer parser escapes."""
+
+    rejected = (
+        "",
+        "0",
+        "0299",
+        "299",
+        "2701",
+        "+300",
+        "300.0",
+        " 300",
+        "300 ",
+        "3e2",
+        "\u0663\u0660\u0660",
+        "9" * 5_000,
+    )
+    for value in rejected:
+        try:
+            drainer.parse_runtime_budget_seconds(value)
+        except drainer.ConfigurationError as exc:
+            assert str(exc) == drainer.RUNTIME_BUDGET_CONFIGURATION_ERROR
+        else:
+            raise AssertionError(f"invalid runtime budget was accepted at case index {rejected.index(value)}")
+
+
+def test_main_forwards_validated_runtime_budget_and_rejects_invalid_configuration() -> None:
+    """Catches bypassing entry-point validation or leaking invalid values to the child path."""
+
+    if os.name != "posix":
+        return
+    original_environment = os.environ.copy()
+    original_drain = drainer.drain_publication_queue
+    original_sigterm_handler = signal.getsignal(signal.SIGTERM)
+    calls: list[dict[str, Any]] = []
+
+    def fake_drain(**kwargs: Any) -> int:
+        calls.append(dict(kwargs))
+        return 0
+
+    try:
+        drainer.drain_publication_queue = fake_drain
+        os.environ.update(
+            {
+                "DEGEN_DOGS_REPO_DIR": "/srv/degen-dogs/repo",
+                "DEGEN_DOGS_LOCK_DIR": "/var/cache/degen-dogs",
+                "DEGEN_DOGS_REFRESH_LOCK_PATH": "/var/cache/degen-dogs/refresh.lock",
+            }
+        )
+        os.environ.pop("DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS", None)
+
+        assert drainer.main() == 0
+        assert calls[-1]["runtime_budget_seconds"] == 900.0
+        assert signal.getsignal(signal.SIGTERM) == original_sigterm_handler
+
+        os.environ["DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS"] = "2700"
+        assert drainer.main() == 0
+        assert calls[-1]["runtime_budget_seconds"] == 2700.0
+        assert signal.getsignal(signal.SIGTERM) == original_sigterm_handler
+
+        os.environ["DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS"] = "299"
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            assert drainer.main() == drainer.EXIT_CONFIG
+        assert len(calls) == 2
+        assert stderr.getvalue() == (
+            f"error: invalid queued publisher configuration: "
+            f"{drainer.RUNTIME_BUDGET_CONFIGURATION_ERROR}\n"
+        )
+        assert signal.getsignal(signal.SIGTERM) == original_sigterm_handler
+    finally:
+        drainer.drain_publication_queue = original_drain
+        os.environ.clear()
+        os.environ.update(original_environment)
+        signal.signal(signal.SIGTERM, original_sigterm_handler)
+
+
 def private_temporary_directory() -> tempfile.TemporaryDirectory[str]:
     """Place real secure-path fixtures below an owner-controlled POSIX ancestor."""
     parent = Path.home() if os.name == "posix" else None
@@ -481,6 +566,7 @@ def run_drainer(
         "DEGEN_DOGS_PUBLICATION_OUTCOME": "old-pushed",
         "DEGEN_DOGS_QUEUE_GENERATION": "88",
         "DEGEN_DOGS_QUEUE_OUTCOME": "old-peer",
+        "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS": "2700",
         "DEGEN_DOGS_PUSH_TO_LIVE_SECONDS": "12.5",
         "DEGEN_DOGS_REFRESH_REASONS": "old-reason",
         "DEGEN_DOGS_EVENT_NAME": "old-event",
@@ -573,6 +659,7 @@ def test_fixed_publisher_argv_exact_fd_and_sanitized_environment() -> None:
                 "DEGEN_DOGS_PUBLICATION_OUTCOME",
                 "DEGEN_DOGS_QUEUE_GENERATION",
                 "DEGEN_DOGS_QUEUE_OUTCOME",
+                "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS",
                 "DEGEN_DOGS_PUSH_TO_LIVE_SECONDS",
                 "DEGEN_DOGS_REFRESH_REASONS",
                 "DEGEN_DOGS_EVENT_NAME",

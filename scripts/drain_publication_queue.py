@@ -31,7 +31,13 @@ from runner_publication_state import (
 )
 
 
-DEFAULT_RUNTIME_BUDGET_SECONDS = 240.0
+DEFAULT_RUNTIME_BUDGET_SECONDS = 900.0
+MIN_QUEUE_RUNTIME_BUDGET_SECONDS = 300
+MAX_QUEUE_RUNTIME_BUDGET_SECONDS = 2700
+QUEUE_RUNTIME_BUDGET_ENV = "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS"
+RUNTIME_BUDGET_CONFIGURATION_ERROR = (
+    "queue runtime budget must be a canonical ASCII integer from 300 through 2700 seconds"
+)
 DEFAULT_LOCK_WAIT_SECONDS = 0.5
 DEFAULT_LOCK_POLL_SECONDS = 0.05
 DEFAULT_CLEANUP_GRACE_SECONDS = 10.0
@@ -48,6 +54,23 @@ _MAX_REFRESH_STATUS_BYTES = 64 * 1024
 
 class ConfigurationError(RuntimeError):
     """The fixed WSL runner paths or budget are invalid."""
+
+
+def parse_runtime_budget_seconds(value: str | None) -> float:
+    """Parse the bounded operator setting without accepting alternate number syntax."""
+
+    if value is None:
+        return DEFAULT_RUNTIME_BUDGET_SECONDS
+    if (
+        not isinstance(value, str)
+        or len(value) > len(str(MAX_QUEUE_RUNTIME_BUDGET_SECONDS))
+        or _CANONICAL_POSITIVE_DECIMAL.fullmatch(value) is None
+    ):
+        raise ConfigurationError(RUNTIME_BUDGET_CONFIGURATION_ERROR)
+    parsed = int(value)
+    if not MIN_QUEUE_RUNTIME_BUDGET_SECONDS <= parsed <= MAX_QUEUE_RUNTIME_BUDGET_SECONDS:
+        raise ConfigurationError(RUNTIME_BUDGET_CONFIGURATION_ERROR)
+    return float(parsed)
 
 
 class SecurePathError(RuntimeError):
@@ -796,12 +819,20 @@ def main() -> int:
     if os.name != "posix":
         print("error: queued publishing is supported only inside WSL", file=sys.stderr)
         return EXIT_CONFIG
+    try:
+        runtime_budget_seconds = parse_runtime_budget_seconds(
+            os.environ.get(QUEUE_RUNTIME_BUDGET_ENV)
+        )
+    except ConfigurationError as exc:
+        print(f"error: invalid queued publisher configuration: {exc}", file=sys.stderr)
+        return EXIT_CONFIG
     previous = signal.signal(signal.SIGTERM, _termination_handler)
     try:
         return drain_publication_queue(
             repo_dir=repo_dir,
             lock_dir=lock_dir,
             refresh_lock_path=refresh_lock_path,
+            runtime_budget_seconds=runtime_budget_seconds,
         )
     finally:
         signal.signal(signal.SIGTERM, previous)

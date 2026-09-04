@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import check_remote_freshness as remote_freshness  # noqa: E402
+import drain_publication_queue as publication_queue  # noqa: E402
 import refresh_telemetry  # noqa: E402
 import runner_publication_state  # noqa: E402
 
@@ -53,6 +54,11 @@ PUBLISHED_RESULTS = {
     "success_pushed_live_timeout",
 }
 QUEUE_DIGEST = re.compile(r"^[0-9a-f]{64}$")
+INACTIVE_QUEUE_STALE_LIMIT_SECONDS = 180
+ACTIVE_QUEUE_STALE_GRACE_SECONDS = 180
+DEFAULT_ACTIVE_QUEUE_STALE_LIMIT_SECONDS = (
+    publication_queue.DEFAULT_RUNTIME_BUDGET_SECONDS + ACTIVE_QUEUE_STALE_GRACE_SECONDS
+)
 HEX32 = re.compile(r"^[0-9a-f]{32}$")
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -295,6 +301,7 @@ def publication_health_summary(
     publisher_lock_active: bool,
     provider_failure_count: int = 0,
     configured_queue_mode: bool = False,
+    active_queue_stale_limit_seconds: float = DEFAULT_ACTIVE_QUEUE_STALE_LIMIT_SECONDS,
 ) -> dict[str, Any]:
     """Project one protected state-lock snapshot to a strict public allowlist.
 
@@ -535,7 +542,11 @@ def publication_health_summary(
         problems.append("pages_verified_finalization_stale")
     queue_age = empty["queue_age_seconds"]
     if empty["queue_lag"] > 0 and isinstance(queue_age, int):
-        queue_limit = 300 if active_publication else 180
+        queue_limit = (
+            active_queue_stale_limit_seconds
+            if active_publication
+            else INACTIVE_QUEUE_STALE_LIMIT_SECONDS
+        )
         if queue_age > queue_limit:
             problems.append("publication_queue_stale")
 
@@ -886,6 +897,17 @@ def main() -> int:
         publication_mode = "inline"
         # Do not probe/create queue state for an unrecognized legacy config.
 
+    try:
+        queue_runtime_budget_seconds = publication_queue.parse_runtime_budget_seconds(
+            os.environ.get(publication_queue.QUEUE_RUNTIME_BUDGET_ENV)
+        )
+    except publication_queue.ConfigurationError as exc:
+        print(f"error: invalid queued publisher configuration: {exc}", file=sys.stderr)
+        return 1
+    active_queue_stale_limit_seconds = (
+        queue_runtime_budget_seconds + ACTIVE_QUEUE_STALE_GRACE_SECONDS
+    )
+
     watcher_stale_seconds = env_int("DEGEN_DOGS_HEALTH_WATCHER_STALE_SECONDS", 180, minimum=30)
     pending_stale_seconds = env_int("DEGEN_DOGS_HEALTH_PENDING_STALE_SECONDS", 900, minimum=60)
     local_stale_seconds = env_int("DEGEN_DOGS_HEALTH_LIVE_STALE_SECONDS", 5400, minimum=300)
@@ -918,6 +940,7 @@ def main() -> int:
                 now=now,
                 publisher_lock_active=lock_active,
                 configured_queue_mode=True,
+                active_queue_stale_limit_seconds=active_queue_stale_limit_seconds,
             )
             checks["publication"] = publication
             problems.extend(f"publication health failure: {code}" for code in publication["problems"])
@@ -998,6 +1021,7 @@ def main() -> int:
             publisher_lock_active=lock_active,
             provider_failure_count=max(0, provider_failure_count),
             configured_queue_mode=True,
+            active_queue_stale_limit_seconds=active_queue_stale_limit_seconds,
         )
         checks["publication"] = publication
         problems.extend(f"publication health failure: {code}" for code in publication["problems"])

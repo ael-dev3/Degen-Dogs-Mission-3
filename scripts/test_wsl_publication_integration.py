@@ -9,7 +9,7 @@ import json
 import os
 import sys
 import tempfile
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -709,6 +709,7 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
         "MISSION3_PUBLICATION_MODE",
         "DEGEN_DOGS_BRANCH",
         "INVOCATION_ID",
+        "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS",
     )
     original_environment = {name: os.environ.get(name) for name in environment_names}
     with tempfile.TemporaryDirectory() as directory:
@@ -782,6 +783,7 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
                 "MISSION3_PUBLICATION_MODE": "inline",
                 "DEGEN_DOGS_BRANCH": "main",
                 "INVOCATION_ID": "d" * 32,
+                "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS": "900",
             })
 
             stdout = io.StringIO()
@@ -812,6 +814,32 @@ def test_main_returns_unhealthy_when_systemd_inventory_reports_failure() -> None
                     os.environ.pop(name, None)
                 else:
                     os.environ[name] = value
+
+
+def test_health_main_rejects_invalid_queue_budget_before_probing() -> None:
+    """Catches health running with a drainer budget that the drainer itself rejects."""
+
+    original_environment = os.environ.copy()
+    original_inventory = health.inspect_systemd_inventory
+    try:
+        os.environ["DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS"] = "private-invalid-budget"
+        health.inspect_systemd_inventory = lambda: (_ for _ in ()).throw(
+            AssertionError("health probes ran before queue-budget validation")
+        )
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            assert health.main() == 1
+        assert stdout.getvalue() == ""
+        assert stderr.getvalue() == (
+            f"error: invalid queued publisher configuration: "
+            f"{drainer.RUNTIME_BUDGET_CONFIGURATION_ERROR}\n"
+        )
+        assert "private-invalid-budget" not in stderr.getvalue()
+    finally:
+        health.inspect_systemd_inventory = original_inventory
+        os.environ.clear()
+        os.environ.update(original_environment)
 
 
 def test_queue_health_future_boundary_and_watcher_lock_rule() -> None:
@@ -1001,7 +1029,15 @@ def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
     )
     assert "publication_timestamp_reversal" in reversed_summary["problems"]
 
-    for age, stale in ((180, False), (181, True), (300, False), (301, True)):
+    boundaries = (
+        (180, False, None, False),
+        (181, False, None, True),
+        (1_080, True, None, False),
+        (1_081, True, None, True),
+        (2_880, True, 2_880.0, False),
+        (2_881, True, 2_880.0, True),
+    )
+    for age, lock_active, active_limit, stale in boundaries:
         at = (now - timedelta(seconds=age)).strftime("%Y-%m-%dT%H:%M:%SZ")
         snapshot = {
             "last_generation": 1,
@@ -1009,7 +1045,15 @@ def test_queue_health_timestamp_and_active_grace_boundaries() -> None:
             "journal": {"publication_generation": 1, "queue_digest": digest, "created_at_utc": at},
             "pending": None, "checkpoint": None, "pages_verified": None,
         }
-        summary = health.publication_health_summary(snapshot, now=now, publisher_lock_active=age >= 300)
+        kwargs = {}
+        if active_limit is not None:
+            kwargs["active_queue_stale_limit_seconds"] = active_limit
+        summary = health.publication_health_summary(
+            snapshot,
+            now=now,
+            publisher_lock_active=lock_active,
+            **kwargs,
+        )
         assert ("publication_queue_stale" in summary["problems"]) is stale, (age, summary)
 
     invalid = health.publication_health_summary(
@@ -1030,6 +1074,7 @@ if __name__ == "__main__":
     test_systemd_health_rejects_each_worker_load_or_result_failure()
     test_systemd_activation_failure_is_independent_of_healthy_queue_records()
     test_main_returns_unhealthy_when_systemd_inventory_reports_failure()
+    test_health_main_rejects_invalid_queue_budget_before_probing()
     test_queue_health_future_boundary_and_watcher_lock_rule()
     test_matching_pending_and_receipt_is_finalization_wait_not_verifier_failure()
     test_queue_health_state_machine_boundaries_and_durable_watermark()
