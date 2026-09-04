@@ -932,7 +932,9 @@ def main() -> int:
     publication_snapshot: dict[str, Any] | None = None
     if publication_mode == "queue":
         try:
-            publication_snapshot = runner_publication_state.read_publication_health_snapshot(lock_dir)
+            publication_snapshot = runner_publication_state.read_publication_health_snapshot(
+                lock_dir, active_inline_repo=ROOT if lock_active else None,
+            )
         except Exception as exc:  # noqa: BLE001 - detailed state failures remain private
             problems.append(f"publication queue state is unreadable ({type(exc).__name__})")
             publication = publication_health_summary(

@@ -1309,10 +1309,47 @@ def read_pages_verified_receipt(
             return None
 
 
+def _validate_active_inline_journal(value: Any, repo: Path) -> dict[str, Any]:
+    """Validate an inline refresh's journal for observation only, never queue proof."""
+    base = _JOURNAL_BASE_KEYS - {"publication_target"}
+    if not isinstance(value, dict) or frozenset(value) not in {
+        frozenset(base), frozenset(base | _JOURNAL_ALIGNMENT_KEYS),
+    }:
+        raise StateValidationError("inline recovery journal shape is invalid")
+    if type(value["schema_version"]) is not int or value["schema_version"] != SCHEMA_VERSION:
+        raise StateValidationError("inline recovery journal version is invalid")
+    if value["repo_realpath"] != str(repo.resolve()) or value["branch"] != "main":
+        raise StateValidationError("inline recovery journal repository identity differs")
+    for key, pattern in (
+        ("baseline_head", r"[0-9a-f]{40}"),
+        ("run_id", r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}"),
+        ("runner_id", r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}"),
+    ):
+        if not isinstance(value[key], str) or re.fullmatch(pattern, value[key]) is None:
+            raise StateValidationError("inline recovery journal provenance is invalid")
+    if value["run_scope"] not in {"current", "full", "archive", "archive_full"}:
+        raise StateValidationError("inline recovery journal scope is invalid")
+    _utc(value["created_at_utc"], "inline journal creation time")
+    paths = value["publish_paths"]
+    if not isinstance(paths, list) or not 1 <= len(paths) <= 32 or any(
+        not isinstance(path, str) or re.fullmatch(r"[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*", path) is None
+        for path in paths
+    ):
+        raise StateValidationError("inline recovery journal paths are invalid")
+    if "alignment_result" in value:
+        if value["alignment_result"] not in {"peer_supersedes", "regenerate"} or any(
+            not isinstance(value[key], str) or _SHA_40.fullmatch(value[key]) is None
+            for key in ("alignment_runner_commit", "alignment_remote_head")
+        ):
+            raise StateValidationError("inline recovery journal alignment is invalid")
+    return value
+
+
 def read_publication_health_snapshot(
     lock_dir: os.PathLike[str] | str,
     *,
     lock_context: Any | None = None,
+    active_inline_repo: Path | None = None,
 ) -> dict[str, Any]:
     """Read all fixed publication-health records under one state-lock view."""
     paths = state_paths(lock_dir)
@@ -1342,7 +1379,16 @@ def read_publication_health_snapshot(
             }
         checkpoint = optional(paths.checkpoint, _validate_checkpoint)
         verified = optional(paths.pages_verified, _validate_pages_verified)
-        journal = optional(paths.journal, _validate_journal)
+        def validate_health_journal(value: Any) -> dict[str, Any]:
+            if active_inline_repo is not None and isinstance(value, dict) and "publication_generation" not in value:
+                return _validate_active_inline_journal(value, active_inline_repo)
+            return _validate_journal(value)
+
+        journal = optional(paths.journal, validate_health_journal)
+        if journal is not None and "publication_generation" not in journal:
+            # Inline work cannot acknowledge a generation or satisfy queue proof.
+            # Keep all other state and its validation; leave the file untouched.
+            journal = None
         last_generation = _read_generation_watermark(paths.sequence)
 
         generations = [

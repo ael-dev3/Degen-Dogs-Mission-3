@@ -2357,6 +2357,42 @@ def test_publication_health_snapshot_reads_fixed_state_under_one_lock() -> None:
         assert completed["last_generation"] == queued.generation
 
 
+def test_health_reads_active_inline_journal_without_claiming_queue_progress() -> None:
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        queued = enqueue(root, observation())
+        paths = state.state_paths(root)
+        inline = {
+            "schema_version": 1, "repo_realpath": str(root), "branch": "main",
+            "baseline_head": "a" * 40, "run_id": "refresh-test", "runner_id": "windows-wsl",
+            "run_scope": "full", "created_at_utc": "2026-08-30T12:40:00Z",
+            "publish_paths": ["generated", "index.html"],
+        }
+        private_json(paths.journal, inline)
+        before = paths.journal.read_bytes()
+        expect_invalid(
+            lambda: state.read_publication_health_snapshot(root, lock_context=FakeLock()),
+            "inactive inline journal was silently ignored",
+        )
+        snapshot = state.read_publication_health_snapshot(
+            root, lock_context=FakeLock(), active_inline_repo=root,
+        )
+        assert snapshot["journal"] is None
+        assert snapshot["latest"]["record"] == queued.record
+        assert snapshot["last_generation"] == queued.generation
+        assert snapshot["checkpoint"] is None
+        assert paths.journal.read_bytes() == before
+        for key, value in (("publication_generation", 1), ("repo_realpath", "/wrong"),
+                           ("baseline_head", "bad"), ("schema_version", True)):
+            private_json(paths.journal, {**inline, key: value})
+            expect_invalid(
+                lambda: state.read_publication_health_snapshot(
+                    root, lock_context=FakeLock(), active_inline_repo=root,
+                ),
+                "malformed or misbound inline journal was ignored",
+            )
+
+
 def test_publication_health_snapshot_fails_closed_on_conflicting_fixed_state() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
