@@ -76,6 +76,14 @@ def text_value(value: Any) -> str:
     return "" if value is None else str(value).strip()
 
 
+def is_explicit_integer_zero(value: Any) -> bool:
+    if isinstance(value, bool):
+        return False
+    return (isinstance(value, int) and value == 0) or (
+        isinstance(value, str) and value.strip() == "0"
+    )
+
+
 def is_canonical_live_zero_bid(
     record: dict[str, Any],
     amount: dict[str, Any],
@@ -84,18 +92,17 @@ def is_canonical_live_zero_bid(
 ) -> bool:
     if text_value(record.get("status")).lower() not in {"ongoing", "live"}:
         return False
-    if decimal_or_none(amount.get("native")) != Decimal(0):
+    if (
+        decimal_or_none(amount.get("native")) != Decimal(0)
+        or not is_explicit_integer_zero(amount.get("raw"))
+    ):
         return False
-    raw_bid_count = bid_stats.get("bid_count")
-    if isinstance(raw_bid_count, bool):
-        return False
-    if isinstance(raw_bid_count, int):
-        bid_count = raw_bid_count
-    elif isinstance(raw_bid_count, str) and raw_bid_count.strip() == "0":
-        bid_count = 0
-    else:
-        return False
-    if bid_count != 0 or not isinstance(raw_bid_hashes, list) or raw_bid_hashes:
+    if (
+        not is_explicit_integer_zero(bid_stats.get("bid_count"))
+        or not is_explicit_integer_zero(bid_stats.get("unique_bidder_count"))
+        or not isinstance(raw_bid_hashes, list)
+        or raw_bid_hashes
+    ):
         return False
     raw_who = record.get("winner_or_high_bidder")
     who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}

@@ -174,11 +174,25 @@ def test_live_bid_or_contradictory_zero_bid_never_downgrades_to_creation_record(
     assert fractional_estimate is not None
     assert fractional_estimate["event_type"] == "current_bid"
 
+    contradictory_unique_count = zero_bid_live_record()
+    contradictory_unique_count["bid_stats"]["unique_bidder_count"] = 1
+    unique_count_estimate = archive_usd.update_record(contradictory_unique_count, {})
+    assert unique_count_estimate is not None
+    assert unique_count_estimate["event_type"] == "current_bid"
+
+    contradictory_raw_amount = zero_bid_live_record()
+    contradictory_raw_amount["amount"]["raw"] = "1"
+    raw_amount_estimate = archive_usd.update_record(contradictory_raw_amount, {})
+    assert raw_amount_estimate is not None
+    assert raw_amount_estimate["event_type"] == "current_bid"
+
     for record, estimate in [
         (positive, positive_estimate),
         (contradictory_wallet, wallet_estimate),
         (contradictory_count, count_estimate),
         (fractional_count, fractional_estimate),
+        (contradictory_unique_count, unique_count_estimate),
+        (contradictory_raw_amount, raw_amount_estimate),
     ]:
         try:
             validator.validate_current_bid_provenance(
