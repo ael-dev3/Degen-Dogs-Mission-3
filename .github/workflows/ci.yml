@@ -24,14 +24,13 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
-      - run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: |
           python -m pip install --require-hashes --only-binary=:all: -r requirements.txt
-      - name: Reject high-severity dependency vulnerabilities
-        run: npm audit --audit-level=high
-      - name: Verify npm registry signatures
-        run: npm audit signatures
-      - run: python3 -m py_compile scripts/build_dashboard.py scripts/refresh_current_surface.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py scripts/check_remote_freshness.py
+      - name: Enforce npm vulnerability and registry-signature gates
+        timeout-minutes: 3
+        run: python3 scripts/run_npm_security_checks.py --attempts 2 --timeout-seconds 30 --retry-delay-seconds 3
+      - run: python3 -m py_compile scripts/build_dashboard.py scripts/refresh_current_surface.py scripts/watch_mission3_auction.py scripts/validate_dashboard_consistency.py scripts/refresh_telemetry.py scripts/check_remote_freshness.py scripts/run_npm_security_checks.py
       - run: npm run test:dashboard
       - run: npm run validate:dashboard
       - run: npm run check:dashboard-ui
