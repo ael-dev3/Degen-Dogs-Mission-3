@@ -11,6 +11,7 @@ The immediate incident has two independent causes:
 1. `auction_bidder_leaderboard` is documented and emitted as a top-100 table, while the bounded updater consumes it as a complete all-time per-wallet baseline and the validator requires the current high bidder to be present. A valid bidder below rank 100 therefore forces a full rebuild and the rebuilt candidate is then rejected.
 2. The archive requests a fixed `eth_getLogs` span. The live three-provider pool has two or three matching witnesses at spans of 50 blocks or less, but one provider explicitly rejects a 57-block four-topic request. Mixed one-vote/range-limit/transient failures are flattened into a generic quorum failure, so the archive never discovers the smaller span that can satisfy quorum.
 3. The unified-index builder deliberately maps the actual current auction from `ended_unsettled` to `ended pending settlement` and reserves active sort rank for a truly live auction. The validator nevertheless requires exactly one live/ongoing-ranked row for every current auction state. Once Dog 822 passed its deadline without settlement, correct output therefore failed validation deterministically.
+4. The USD-enrichment stage labels every live auction as a `current_bid` event solely from auction status. A newly created live auction with zero bids has no bid transaction by definition, so the independent provenance validator correctly rejects that fabricated event type and publication can never advance until somebody bids.
 
 ## Safety invariants
 
@@ -23,6 +24,7 @@ The immediate incident has two independent causes:
 - Each subdivided range independently obtains the configured quorum and is validated against the requested contract, topics, block bounds, and canonical log schema.
 - A one-block range that is explicitly rejected fails closed; subdivision is finite.
 - An ended-but-unsettled current auction remains uniquely identifiable as current without promoting any historical pending row to active/live rank.
+- A live zero-bid auction may use auction-creation provenance, but only when amount, bid count, bid hashes, and bidder all independently show the canonical no-bid state. Positive or contradictory bid state must remain a `current_bid` and fail closed when its bid transaction or time is missing.
 
 ## Design decisions
 
@@ -50,15 +52,22 @@ Keep the builder's status mapping and sort semantics unchanged: only `live`/`ong
 
 For every unified index mirror, require exactly one Mission 3 row whose Dog ID equals the current onchain Dog and require its status to match the already-derived current feed status. When the current state is `live`, require exactly one active-ranked Mission 3 row and require it to be that Dog. When the current state is `ended_unsettled`, require zero active-ranked Mission 3 rows. This rejects duplicate current rows and stale ongoing rows while accepting the correct pending-settlement representation.
 
+### Explicit zero-bid event provenance
+
+Classify an ongoing/live unified row as an auction-creation record only when all no-bid signals agree: native amount is exactly zero, bid count is zero, the bid-transaction list is empty, and the bidder wallet is empty or the canonical zero address. Its USD estimate row uses the already-attested auction-creation transaction and block time. This is not a validator bypass: the validator independently checks the same no-bid evidence and the exact creation provenance.
+
+Every other ongoing/live row remains a `current_bid`, including positive amounts with a missing transaction hash and contradictory zero-amount rows. Existing exact bid-transaction, bid-time, quote, and current-surface checks therefore continue to fail closed.
+
 ## Deployment order
 
 1. Apply the proven local 50-block bound and allow the existing publisher to retry the preserved queue.
 2. Implement and test the complete bidder baseline.
 3. Implement and test adaptive archive range subdivision.
 4. Implement and test state-aware unified current-row validation.
-5. Review the combined branch, run focused and full verification, and push non-forcing to `main` only if its expected parent still matches.
-6. Verify the local queue reaches zero lag, the GitHub source commit contains the exact queued auction tuple, Pages deploys that commit, CI is green, and the public bundle matches source.
-7. Only after publication is healthy, continue the separately approved independent Windows audit/recovery plan in `docs/superpowers/plans/2026-09-02-independent-runner-watchdog.md`.
+5. Implement and test explicit zero-bid auction-creation provenance.
+6. Review the combined branch, run focused and full verification, and push non-forcing to `main` only if its expected parent still matches.
+7. Verify the local queue reaches zero lag, the GitHub source commit contains the exact queued auction tuple, Pages deploys that commit, CI is green, and the public bundle matches source.
+8. Only after publication is healthy, continue the separately approved independent Windows audit/recovery plan in `docs/superpowers/plans/2026-09-02-independent-runner-watchdog.md`.
 
 ## Acceptance criteria
 
@@ -71,4 +80,6 @@ For every unified index mirror, require exactly one Mission 3 row whose Dog ID e
 - A live current auction has exactly one active-ranked unified row for the current Dog.
 - An ended-unsettled current auction has exactly one status-matching unified row for the current Dog and no active-ranked Mission 3 rows.
 - Duplicate current-Dog rows and stale ongoing rows remain validation failures.
+- A canonical live zero-bid row is emitted as `auction_record` with its exact auction-creation transaction and time, and the validator accepts it.
+- A positive or contradictory live row never falls back to auction-creation provenance; missing bid provenance remains a hard failure.
 - The preserved Dog 822 generation is published normally; no manual artifact copy or validation bypass is used.

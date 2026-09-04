@@ -291,13 +291,51 @@ git add scripts/test_validate_dashboard_consistency.py scripts/validate_dashboar
 git commit -m "fix: validate ended current auction in unified index"
 ```
 
-### Task 4: Combined verification and deployment readiness
+### Task 4: Represent a live zero-bid auction with creation provenance
+
+**Files:**
+- Modify: `scripts/test_archive_apply_usd_estimates.py`
+- Modify: `scripts/archive_apply_usd_estimates.py`
+- Modify: `scripts/archive_validate_usd_estimates.py`
+
+**Interfaces:**
+- Consumes: unified `status`, `amount.native`, `bid_stats.bid_count`, `bid_tx_hashes`, `winner_or_high_bidder.wallet`, and `auction_created` provenance.
+- Produces: `auction_record` only for a canonical live no-bid state; every other live record remains `current_bid`.
+
+- [ ] **Step 1: Add a production-shaped zero-bid regression and observe RED**
+
+Create an ongoing Mission 3 record with zero native amount, zero bid count, no bid hashes, a zero-address bidder, and exact auction-creation transaction/time. Assert enrichment emits `event_type=auction_record`, the exact creation transaction/time, and an independently validating row. Before implementation this must fail because status alone produces `current_bid`.
+
+- [ ] **Step 2: Add contradictory/positive fail-closed regressions**
+
+Prove that a positive live amount with no bid hash and a zero-amount live row with a nonzero bidder or nonzero bid count remain `current_bid`, then prove the existing validator rejects their missing bid provenance.
+
+- [ ] **Step 3: Implement the narrow classifier and independent validation**
+
+Use all no-bid signals, require the canonical zero/empty bidder, and select the exact auction-created transaction and block time. Independently reject a zero-bid row whose estimate is not `auction_record`, whose creation provenance is missing/mismatched, or a bid-bearing active row that is not `current_bid`. Do not change ended-pending or settled event semantics.
+
+- [ ] **Step 4: Run focused and adjacent GREEN suites**
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_archive_apply_usd_estimates.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_build_unified_dog_index.py
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/test_validate_dashboard_consistency.py
+```
+
+- [ ] **Step 5: Commit Task 4**
+
+```bash
+git add scripts/test_archive_apply_usd_estimates.py scripts/archive_apply_usd_estimates.py scripts/archive_validate_usd_estimates.py
+git commit -m "fix: preserve zero-bid auction provenance"
+```
+
+### Task 5: Combined verification and deployment readiness
 
 **Files:**
 - Verify only; do not change generated production data in the implementation worktree.
 
 **Interfaces:**
-- Consumes: Tasks 1 and 2 as one publication pipeline.
+- Consumes: Tasks 1 through 4 as one publication pipeline.
 - Produces: reviewable test evidence and a branch ready for the controller's non-forcing deployment.
 
 - [ ] **Step 1: Run all focused suites**
