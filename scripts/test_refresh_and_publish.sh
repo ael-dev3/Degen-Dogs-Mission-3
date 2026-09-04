@@ -323,6 +323,7 @@ run_deferred_fixture() {
   local pages_marker="${7:-}"
   local archive_refresh="${8:-0}"
   local full_refresh="${9:-0}"
+  local skip_pull="${10:-1}"
   local refresh_lock="$lock_dir/refresh.lock"
   local status=0
   mkdir -m 700 -p "$lock_dir"
@@ -348,7 +349,7 @@ run_deferred_fixture() {
     DEGEN_DOGS_PUBLICATION_DIGEST="$digest" \
     DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$archive_refresh" \
     DEGEN_DOGS_FULL_REFRESH="$full_refresh" \
-    DEGEN_DOGS_SKIP_PULL=1 \
+    DEGEN_DOGS_SKIP_PULL="$skip_pull" \
     DEGEN_DOGS_GIT_RETRY_ATTEMPTS=1 \
     DEGEN_DOGS_GIT_RETRY_BASE_SECONDS=0 \
     DEGEN_DOGS_GIT_RETRY_MAX_SECONDS=0 \
@@ -361,6 +362,30 @@ run_deferred_fixture() {
   flock -u "$FIXTURE_DEFERRED_FD"
   exec {FIXTURE_DEFERRED_FD}>&-
   return "$status"
+}
+
+write_fixture_rebase_failure_env() {
+  local path="$1"
+  printf '%s\n' \
+    'git() {' \
+    '  if [[ "${FIXTURE_REBASE_FAILURE_MODE:-}" == "status" && "$1" == "status" &&' \
+    '    "$2" == "--porcelain" && "$3" == "--untracked-files=no" ]]; then' \
+    '    local fixture_head' \
+    '    fixture_head="$(command git rev-parse HEAD)" || return' \
+    '    if [[ "$fixture_head" != "${FIXTURE_REBASE_OLD_BASELINE:-}" ]]; then' \
+    '      return 86' \
+    '    fi' \
+    '  fi' \
+    '  command git "$@"' \
+    '}' \
+    'python3() {' \
+    '  if [[ "${FIXTURE_REBASE_FAILURE_MODE:-}" == "python" && "$#" -gt 11 &&' \
+    '    "$1" == "-" && "$5" =~ ^[0-9a-f]{40}$ && "$6" =~ ^[0-9a-f]{40}$ ]]; then' \
+    '    return 87' \
+    '  fi' \
+    '  command python3 "$@"' \
+    '}' >"$path"
+  chmod 600 "$path"
 }
 
 write_fixture_unlink_crash_env() {
@@ -3363,6 +3388,187 @@ for ALIGNMENT_UNLINK_FLOW in normal resumed resumed_already_ff landed; do
     run_alignment_unlink_crash_case "$ALIGNMENT_UNLINK_FLOW" "$ALIGNMENT_UNLINK_MODE"
   done
 done
+
+# A pristine deferred generation must survive a trusted code fast-forward. The
+# journal keeps the exact queued observation while its rollback baseline moves
+# atomically to the clean commit fetched from the configured remote. This is the
+# normal no-crash path that previously failed while reusing the old journal.
+git -C "$SUCCESS_REPO" fetch -q origin main
+git -C "$SUCCESS_REPO" merge -q --ff-only origin/main
+GENERATING_REBASE_PULL_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+GENERATING_REBASE_PULL_LOCKS="$TEST_ROOT/generating-rebase-pull-locks"
+GENERATING_REBASE_PULL_RESULT="$TEST_ROOT/generating-rebase-pull-result"
+GENERATING_REBASE_PULL_DIGEST="$(write_fixture_publication_latest "$GENERATING_REBASE_PULL_LOCKS" 81)"
+write_fixture_deferred_journal \
+  "$GENERATING_REBASE_PULL_LOCKS" "$SUCCESS_REPO" "$GENERATING_REBASE_PULL_BASELINE" \
+  81 "$GENERATING_REBASE_PULL_DIGEST" "generating-rebase-pull" generating
+GENERATING_REBASE_SOURCE="$TEST_ROOT/generating-rebase-source"
+git clone -q --branch main "$(git -C "$SUCCESS_REPO" remote get-url origin)" "$GENERATING_REBASE_SOURCE"
+git -C "$GENERATING_REBASE_SOURCE" config user.name "Degen Dogs Code Update Fixture"
+git -C "$GENERATING_REBASE_SOURCE" config user.email "degen-dogs-code-update@example.invalid"
+printf '%s\n' 'trusted code-only fast-forward' >"$GENERATING_REBASE_SOURCE/generating-rebase-fixture.txt"
+git -C "$GENERATING_REBASE_SOURCE" add generating-rebase-fixture.txt
+git -C "$GENERATING_REBASE_SOURCE" commit -qm "fixture: advance trusted publisher code"
+git -C "$GENERATING_REBASE_SOURCE" push -q origin main
+GENERATING_REBASE_PULL_HEAD="$(git -C "$GENERATING_REBASE_SOURCE" rev-parse HEAD)"
+run_deferred_fixture \
+  "$GENERATING_REBASE_PULL_LOCKS" 81 "$GENERATING_REBASE_PULL_DIGEST" \
+  "$TEST_ROOT/generating-rebase-pull-logs" "$GENERATING_REBASE_PULL_RESULT" \
+  "" "" 0 0 0
+python3 - "$GENERATING_REBASE_PULL_LOCKS" "$GENERATING_REBASE_PULL_HEAD" \
+  "$GENERATING_REBASE_PULL_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["baseline_head"] == sys.argv[2]
+assert journal["publication_generation"] == checkpoint["generation"] == 81
+assert journal["queue_digest"] == checkpoint["queue_digest"] == sys.argv[3]
+assert journal["handoff_phase"] == "terminal"
+assert checkpoint["outcome"] == "no_diff"
+PY
+if [[ "$(sed -n '1p' "$GENERATING_REBASE_PULL_RESULT")" != "success_no_diff" ]] || \
+  ! grep -q "rebased authenticated generating journal baseline" \
+    "$TEST_ROOT/generating-rebase-pull-logs/refresh.log"; then
+  echo "trusted code pull did not rebase and finish the selected deferred generation" >&2
+  exit 1
+fi
+finalize_fixture_publication \
+  "$GENERATING_REBASE_PULL_LOCKS" 81 "$GENERATING_REBASE_PULL_DIGEST"
+
+# A crash can occur after Git moves HEAD but before that journal rebase. Recovery
+# must authenticate the clean HEAD as a prefix of the freshly fetched remote,
+# advance only the pristine journal baseline, and continue without attribution
+# to a fabricated runner commit.
+GENERATING_REBASE_CRASH_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+GENERATING_REBASE_CRASH_LOCKS="$TEST_ROOT/generating-rebase-crash-locks"
+GENERATING_REBASE_CRASH_RESULT="$TEST_ROOT/generating-rebase-crash-result"
+GENERATING_REBASE_CRASH_DIGEST="$(write_fixture_publication_latest "$GENERATING_REBASE_CRASH_LOCKS" 82)"
+write_fixture_deferred_journal \
+  "$GENERATING_REBASE_CRASH_LOCKS" "$SUCCESS_REPO" "$GENERATING_REBASE_CRASH_BASELINE" \
+  82 "$GENERATING_REBASE_CRASH_DIGEST" "generating-rebase-crash" generating
+printf '%s\n' 'second trusted code-only fast-forward' >>"$SUCCESS_REPO/generating-rebase-fixture.txt"
+git -C "$SUCCESS_REPO" add generating-rebase-fixture.txt
+git -C "$SUCCESS_REPO" commit -qm "fixture: expose post-pull journal crash window"
+git -C "$SUCCESS_REPO" push -q origin main
+GENERATING_REBASE_CRASH_HEAD="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+run_deferred_fixture \
+  "$GENERATING_REBASE_CRASH_LOCKS" 82 "$GENERATING_REBASE_CRASH_DIGEST" \
+  "$TEST_ROOT/generating-rebase-crash-logs" "$GENERATING_REBASE_CRASH_RESULT"
+python3 - "$GENERATING_REBASE_CRASH_LOCKS" "$GENERATING_REBASE_CRASH_HEAD" \
+  "$GENERATING_REBASE_CRASH_DIGEST" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+journal = json.loads((root / "publisher-recovery.json").read_text(encoding="utf-8"))
+checkpoint = json.loads((root / "publication/pushed.json").read_text(encoding="utf-8"))
+assert journal["baseline_head"] == sys.argv[2]
+assert journal["publication_generation"] == checkpoint["generation"] == 82
+assert journal["queue_digest"] == checkpoint["queue_digest"] == sys.argv[3]
+assert journal["handoff_phase"] == "terminal"
+assert checkpoint["outcome"] == "no_diff"
+PY
+if [[ "$(sed -n '1p' "$GENERATING_REBASE_CRASH_RESULT")" != "success_no_diff" ]] || \
+  ! grep -q "recovered clean remote-line baseline" \
+    "$TEST_ROOT/generating-rebase-crash-logs/refresh.log"; then
+  echo "post-pull crash state did not recover its deferred journal baseline" >&2
+  exit 1
+fi
+finalize_fixture_publication \
+  "$GENERATING_REBASE_CRASH_LOCKS" 82 "$GENERATING_REBASE_CRASH_DIGEST"
+
+# Git cleanliness is an attestation, not best-effort output. A status command
+# failure after the pull must stop before the journal state transition.
+GENERATING_REBASE_FAILURE_ENV="$TEST_ROOT/generating-rebase-failure.bash"
+write_fixture_rebase_failure_env "$GENERATING_REBASE_FAILURE_ENV"
+git -C "$GENERATING_REBASE_SOURCE" fetch -q origin main
+git -C "$GENERATING_REBASE_SOURCE" merge -q --ff-only origin/main
+GENERATING_REBASE_STATUS_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+GENERATING_REBASE_STATUS_LOCKS="$TEST_ROOT/generating-rebase-status-failure-locks"
+GENERATING_REBASE_STATUS_DIGEST="$(write_fixture_publication_latest "$GENERATING_REBASE_STATUS_LOCKS" 83)"
+write_fixture_deferred_journal \
+  "$GENERATING_REBASE_STATUS_LOCKS" "$SUCCESS_REPO" "$GENERATING_REBASE_STATUS_BASELINE" \
+  83 "$GENERATING_REBASE_STATUS_DIGEST" "generating-rebase-status-failure" generating
+printf '%s\n' 'status attestation failure target' >>"$GENERATING_REBASE_SOURCE/generating-rebase-fixture.txt"
+git -C "$GENERATING_REBASE_SOURCE" add generating-rebase-fixture.txt
+git -C "$GENERATING_REBASE_SOURCE" commit -qm "fixture: advance before failed status attestation"
+git -C "$GENERATING_REBASE_SOURCE" push -q origin main
+export BASH_ENV="$GENERATING_REBASE_FAILURE_ENV"
+export FIXTURE_REBASE_FAILURE_MODE=status
+export FIXTURE_REBASE_OLD_BASELINE="$GENERATING_REBASE_STATUS_BASELINE"
+set +e
+run_deferred_fixture \
+  "$GENERATING_REBASE_STATUS_LOCKS" 83 "$GENERATING_REBASE_STATUS_DIGEST" \
+  "$TEST_ROOT/generating-rebase-status-failure-logs" \
+  "$TEST_ROOT/generating-rebase-status-failure-result" "" "" 0 0 0
+status=$?
+set -e
+unset BASH_ENV FIXTURE_REBASE_FAILURE_MODE FIXTURE_REBASE_OLD_BASELINE
+if [[ "$status" == "0" ]] || \
+  ! grep -q "tracked status could not be inspected" \
+    "$TEST_ROOT/generating-rebase-status-failure-logs/refresh.log" || \
+  grep -q "rebased authenticated generating journal baseline" \
+    "$TEST_ROOT/generating-rebase-status-failure-logs/refresh.log"; then
+  echo "failed Git status was accepted as a clean journal rebase attestation" >&2
+  exit 1
+fi
+python3 - "$GENERATING_REBASE_STATUS_LOCKS" "$GENERATING_REBASE_STATUS_BASELINE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+journal = json.loads((Path(sys.argv[1]) / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert journal["baseline_head"] == sys.argv[2]
+assert journal["handoff_phase"] == "generating"
+PY
+
+# The helper itself is called from an OR-list, so Bash errexit is not authority.
+# An injected state-machine failure must propagate explicitly and make the
+# success log unreachable.
+GENERATING_REBASE_PYTHON_BASELINE="$(git -C "$SUCCESS_REPO" rev-parse HEAD)"
+GENERATING_REBASE_PYTHON_LOCKS="$TEST_ROOT/generating-rebase-python-failure-locks"
+GENERATING_REBASE_PYTHON_DIGEST="$(write_fixture_publication_latest "$GENERATING_REBASE_PYTHON_LOCKS" 84)"
+write_fixture_deferred_journal \
+  "$GENERATING_REBASE_PYTHON_LOCKS" "$SUCCESS_REPO" "$GENERATING_REBASE_PYTHON_BASELINE" \
+  84 "$GENERATING_REBASE_PYTHON_DIGEST" "generating-rebase-python-failure" generating
+git -C "$GENERATING_REBASE_SOURCE" fetch -q origin main
+git -C "$GENERATING_REBASE_SOURCE" merge -q --ff-only origin/main
+printf '%s\n' 'state transition failure target' >>"$GENERATING_REBASE_SOURCE/generating-rebase-fixture.txt"
+git -C "$GENERATING_REBASE_SOURCE" add generating-rebase-fixture.txt
+git -C "$GENERATING_REBASE_SOURCE" commit -qm "fixture: advance before failed state transition"
+git -C "$GENERATING_REBASE_SOURCE" push -q origin main
+export BASH_ENV="$GENERATING_REBASE_FAILURE_ENV"
+export FIXTURE_REBASE_FAILURE_MODE=python
+set +e
+run_deferred_fixture \
+  "$GENERATING_REBASE_PYTHON_LOCKS" 84 "$GENERATING_REBASE_PYTHON_DIGEST" \
+  "$TEST_ROOT/generating-rebase-python-failure-logs" \
+  "$TEST_ROOT/generating-rebase-python-failure-result" "" "" 0 0 0
+status=$?
+set -e
+unset BASH_ENV FIXTURE_REBASE_FAILURE_MODE
+if [[ "$status" == "0" ]] || \
+  ! grep -q "could not advance the recovered deferred journal" \
+    "$TEST_ROOT/generating-rebase-python-failure-logs/refresh.log" || \
+  grep -q "rebased authenticated generating journal baseline" \
+    "$TEST_ROOT/generating-rebase-python-failure-logs/refresh.log"; then
+  echo "failed Python journal transition was suppressed by the caller OR-list" >&2
+  exit 1
+fi
+python3 - "$GENERATING_REBASE_PYTHON_LOCKS" "$GENERATING_REBASE_PYTHON_BASELINE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+journal = json.loads((Path(sys.argv[1]) / "publisher-recovery.json").read_text(encoding="utf-8"))
+assert journal["baseline_head"] == sys.argv[2]
+assert journal["handoff_phase"] == "generating"
+PY
 
 # Legacy inline journals must retain their original fail-closed shape. Fields
 # that are present but null/empty are malformed, not equivalent to absence.

@@ -353,6 +353,12 @@ def test_pages_recovery_is_latest_wins_bounded_and_deduplicated() -> None:
     assert watchdog_workflow.count("gh workflow run deploy-pages.yml") == 1
 
 
+def test_pages_hot_path_does_not_depend_on_registry_audit_availability() -> None:
+    pages_workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "npm ci --ignore-scripts --no-audit --no-fund" in pages_workflow
+    assert "npm audit" not in pages_workflow
+
+
 if __name__ == "__main__":
     tests = [value for name, value in sorted(globals().items()) if name.startswith("test_")]
     for test in tests:

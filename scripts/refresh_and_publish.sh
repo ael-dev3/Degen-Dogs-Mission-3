@@ -156,6 +156,10 @@ RECOVERY_SUPERSEDED=0
 RECOVERY_DEFERRED_HANDOFF=0
 RECOVERY_JOURNAL_DEFERRED=0
 RECOVERY_REUSE_DEFERRED_JOURNAL=0
+RECOVERY_REUSE_BASELINE=""
+RECOVERY_REUSE_RUN_ID=""
+RECOVERY_REUSE_RUNNER_ID=""
+RECOVERY_REUSE_RUN_SCOPE=""
 PUSH_REMOTE_HEAD=""
 DEFERRED_PUSH_REJECTED_ALIGNMENT=0
 
@@ -576,6 +580,112 @@ try:
 finally:
     temporary.unlink(missing_ok=True)
 PY
+}
+
+rebase_authenticated_deferred_generating_journal() {
+  local expected_baseline="$1"
+  local replacement_baseline="$2"
+  local expected_run_id="$3"
+  local expected_runner_id="$4"
+  local expected_run_scope="$5"
+  local context="$6"
+  local current_branch=""
+  local current_head=""
+  local index_lock=""
+  local publish_status=""
+  local remote_head=""
+  local tracked_status=""
+
+  [[ "$DEFER_PAGES_VERIFICATION" == "1" ]] || {
+    log "warning: refusing journal baseline rebase outside deferred queue mode"
+    return 1
+  }
+  current_branch="$(git branch --show-current)" || return 1
+  current_head="$(git rev-parse HEAD)" || return 1
+  [[ "$current_branch" == "$BRANCH" && "$current_head" == "$replacement_baseline" ]] || {
+    log "warning: refusing journal baseline rebase away from the checked-out ${BRANCH} commit"
+    return 1
+  }
+  git show-ref --verify --quiet "refs/remotes/${REMOTE}/${BRANCH}" || {
+    log "warning: refusing journal baseline rebase without a fetched remote branch"
+    return 1
+  }
+  remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || return 1
+  [[ "$remote_head" == "$replacement_baseline" ]] || {
+    log "warning: refusing journal baseline rebase to a commit other than freshly fetched ${REMOTE}/${BRANCH}"
+    return 1
+  }
+  git merge-base --is-ancestor "$expected_baseline" "$replacement_baseline" || {
+    log "warning: refusing non-fast-forward journal baseline rebase"
+    return 1
+  }
+  tracked_status="$(git status --porcelain --untracked-files=no)" || {
+    log "warning: refusing journal baseline rebase because tracked status could not be inspected"
+    return 1
+  }
+  [[ -z "$tracked_status" ]] || {
+    log "warning: refusing journal baseline rebase with tracked worktree changes"
+    return 1
+  }
+  publish_status="$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" || {
+    log "warning: refusing journal baseline rebase because publish status could not be inspected"
+    return 1
+  }
+  [[ -z "$publish_status" ]] || {
+    log "warning: refusing journal baseline rebase with dirty publish artifacts"
+    return 1
+  }
+  index_lock="$(git_index_lock_path)" || return 1
+  [[ ! -e "$index_lock" && ! -L "$index_lock" ]] || {
+    log "warning: refusing journal baseline rebase while a Git index lock exists"
+    return 1
+  }
+  if [[ "$replacement_baseline" != "$expected_baseline" ]] && \
+    validate_runner_commit \
+      "$replacement_baseline" "$expected_baseline" "$expected_run_id" \
+      "$expected_runner_id" "$expected_run_scope"; then
+    log "warning: refusing to adopt an attributable runner commit as a code baseline"
+    return 1
+  fi
+
+  python3 - "$LOCK_DIR" "$REPO_DIR" "$BRANCH" "$expected_baseline" \
+    "$replacement_baseline" "$expected_run_id" "$expected_runner_id" \
+    "$expected_run_scope" "$PUBLICATION_GENERATION" "$PUBLICATION_DIGEST" \
+    "${PUBLISH_PATHS[@]}" <<'PY' || return 1
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+(
+    lock_dir, repo, branch, expected_baseline, replacement_baseline,
+    run_id, runner_id, run_scope, generation, digest, *publish_paths,
+) = sys.argv[1:]
+sys.path.insert(0, str(Path(repo) / "scripts"))
+import runner_publication_state as state
+
+journal = state.read_deferred_recovery_journal(lock_dir)
+if journal is None:
+    raise SystemExit("deferred journal disappeared before baseline rebase")
+expected = {
+    "repo_realpath": str(Path(repo).resolve()),
+    "branch": branch,
+    "run_id": run_id,
+    "runner_id": runner_id,
+    "run_scope": run_scope,
+    "publish_paths": publish_paths,
+}
+if any(journal[key] != value for key, value in expected.items()):
+    raise SystemExit("deferred journal identity changed before baseline rebase")
+state.rebase_deferred_generating_journal(
+    lock_dir,
+    int(generation),
+    digest,
+    expected_baseline,
+    replacement_baseline,
+)
+PY
+  log "rebased authenticated generating journal baseline ${expected_baseline} -> ${replacement_baseline} (${context})"
 }
 
 write_recovery_alignment() {
@@ -1816,8 +1926,11 @@ recover_interrupted_generation() {
   local current_branch
   local current_head
   local current_run_scope
+  local publish_status
   local remote_head
+  local recovered_baseline
   local reconcile_status=0
+  local tracked_status
 
   [[ -e "$RECOVERY_JOURNAL" || -L "$RECOVERY_JOURNAL" ]] || return 0
   journal_record="$(read_recovery_journal_baseline)" || fail "publisher recovery journal could not be authenticated"
@@ -1853,6 +1966,40 @@ recover_interrupted_generation() {
   export DEGEN_DOGS_RUN_MISSION3_ARCHIVE="$RUN_MISSION3_ARCHIVE"
   export DEGEN_DOGS_FULL_REFRESH="$FULL_REFRESH"
   export DEGEN_DOGS_RUN_SCOPE="$RUN_SCOPE"
+
+  if [[ "$journal_deferred" == "1" && "$journal_handoff_phase" == "generating" && \
+    "$alignment_remote_head" == "-" && "$current_head" != "$journal_baseline" ]] && \
+    ! validate_runner_commit \
+      "$current_head" "$journal_baseline" "$journal_run_id" "$journal_runner_id" "$journal_run_scope"; then
+    tracked_status="$(git status --porcelain --untracked-files=no)" || \
+      fail "clean remote-line journal recovery could not inspect tracked worktree state"
+    [[ -z "$tracked_status" ]] || \
+      fail "clean remote-line journal recovery found tracked worktree changes"
+    publish_status="$(git status --porcelain --untracked-files=all -- "${PUBLISH_PATHS[@]}")" || \
+      fail "clean remote-line journal recovery could not inspect publish state"
+    [[ -z "$publish_status" ]] || \
+      fail "clean remote-line journal recovery found dirty publish artifacts"
+    run_with_retry "git fetch for deferred baseline recovery" git fetch "$REMOTE" "$BRANCH"
+    remote_head="$(git rev-parse "refs/remotes/${REMOTE}/${BRANCH}")" || \
+      fail "could not resolve remote during deferred baseline recovery"
+    git merge-base --is-ancestor "$journal_baseline" "$current_head" || \
+      fail "deferred journal HEAD is not a baseline descendant"
+    git merge-base --is-ancestor "$current_head" "$remote_head" || \
+      fail "deferred journal HEAD is not on the freshly fetched remote line"
+    if [[ "$current_head" != "$remote_head" ]]; then
+      git merge --ff-only "$remote_head" || \
+        fail "could not fast-forward clean deferred recovery to the fetched remote"
+      current_head="$(git rev-parse HEAD)" || \
+        fail "could not resolve fast-forwarded deferred recovery HEAD"
+    fi
+    recovered_baseline="$journal_baseline"
+    rebase_authenticated_deferred_generating_journal \
+      "$journal_baseline" "$current_head" "$journal_run_id" "$journal_runner_id" \
+      "$journal_run_scope" "startup recovery" || \
+      fail "could not authenticate the clean deferred journal code baseline"
+    journal_baseline="$current_head"
+    log "recovered clean remote-line baseline ${recovered_baseline} -> ${journal_baseline}"
+  fi
 
   if [[ "$journal_deferred" == "1" && "$journal_handoff_phase" == "terminal" && \
     "$journal_terminal_outcome" == "no_diff" ]]; then
@@ -2080,6 +2227,10 @@ PY
     fi
     cleanup_partial_generation 1 || fail "authenticated interrupted publisher rollback did not complete"
     RECOVERY_REUSE_DEFERRED_JOURNAL=1
+    RECOVERY_REUSE_BASELINE="$journal_baseline"
+    RECOVERY_REUSE_RUN_ID="$journal_run_id"
+    RECOVERY_REUSE_RUNNER_ID="$journal_runner_id"
+    RECOVERY_REUSE_RUN_SCOPE="$journal_run_scope"
     MUTATION_STARTED=0
   else
     cleanup_partial_generation || fail "authenticated interrupted publisher rollback did not complete"
@@ -2432,6 +2583,13 @@ if [[ "$SKIP_PULL" != "1" ]]; then
 fi
 
 BASELINE_HEAD="$(git rev-parse HEAD)"
+if [[ "$RECOVERY_REUSE_DEFERRED_JOURNAL" == "1" ]]; then
+  rebase_authenticated_deferred_generating_journal \
+    "$RECOVERY_REUSE_BASELINE" "$BASELINE_HEAD" "$RECOVERY_REUSE_RUN_ID" \
+    "$RECOVERY_REUSE_RUNNER_ID" "$RECOVERY_REUSE_RUN_SCOPE" "post-pull recovery" || \
+    fail "could not advance the recovered deferred journal to the fetched code baseline"
+  RECOVERY_REUSE_BASELINE="$BASELINE_HEAD"
+fi
 if git show-ref --verify --quiet "refs/remotes/${REMOTE}/${BRANCH}"; then
   LOCAL_AHEAD_COUNT="$(git rev-list --count "${REMOTE}/${BRANCH}..HEAD")"
 fi

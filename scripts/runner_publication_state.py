@@ -1467,6 +1467,60 @@ def read_deferred_recovery_journal(lock_dir: os.PathLike[str] | str) -> dict[str
         return None
 
 
+def rebase_deferred_generating_journal(
+    lock_dir: os.PathLike[str] | str,
+    generation: int,
+    digest: str,
+    expected_baseline: str,
+    replacement_baseline: str,
+    *,
+    lock_context: Any | None = None,
+) -> dict[str, Any]:
+    """Atomically advance only a pristine generating journal's rollback baseline.
+
+    The caller must authenticate the Git ancestry and clean worktree before this
+    state-only transition. Queue identity and its captured publication target
+    remain immutable, including when ``latest.json`` has advanced to N+1.
+    """
+    _integer(generation, "publication generation", minimum=1)
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise StateValidationError("publication digest is invalid")
+    if not isinstance(expected_baseline, str) or not _SHA_40.fullmatch(expected_baseline):
+        raise StateValidationError("expected journal baseline is invalid")
+    if not isinstance(replacement_baseline, str) or not _SHA_40.fullmatch(replacement_baseline):
+        raise StateValidationError("replacement journal baseline is invalid")
+
+    paths = state_paths(lock_dir)
+    with _lock(paths, lock_context):
+        journal = _validate_journal(_read_json(paths.journal))
+        if (
+            journal["handoff_phase"] != "generating"
+            or journal["terminal_outcome"] is not None
+            or journal["remote_commit"] is not None
+            or journal["alignment_runner_commit"] is not None
+            or journal["alignment_remote_head"] is not None
+            or journal["alignment_result"] is not None
+            or journal["coverage_proof"] is not None
+            or any(journal[key] is not None for key in _JOURNAL_PROOF_KEYS)
+        ):
+            raise StateValidationError("only a pristine generating journal may rebase")
+        if (
+            journal["publication_generation"] != generation
+            or journal["queue_digest"] != digest
+        ):
+            raise StateValidationError("journal rebase identity differs from the selected generation")
+        if journal["baseline_head"] == replacement_baseline:
+            return journal
+        if journal["baseline_head"] != expected_baseline:
+            raise StateValidationError("journal rebase expected baseline changed")
+
+        updated = dict(journal)
+        updated["baseline_head"] = replacement_baseline
+        updated = _validate_journal(updated)
+        atomic_write_record(paths.journal, updated)
+        return updated
+
+
 def create_deferred_recovery_journal(
     lock_dir: os.PathLike[str] | str,
     journal: dict[str, Any],

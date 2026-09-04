@@ -669,6 +669,80 @@ def test_deferred_journal_atomically_captures_the_exact_selected_publication_tar
             assert not state.state_paths(mismatch_root).journal.exists()
 
 
+def test_deferred_generating_journal_rebase_preserves_exact_queue_identity() -> None:
+    """A clean code fast-forward may advance the rollback baseline, never the queued target."""
+    with tempfile.TemporaryDirectory() as temporary:
+        root = Path(temporary)
+        selected = enqueue(root, observation())
+        original = generating_journal(
+            selected.generation,
+            selected.digest,
+            target=selected.record,
+        )
+        state.create_deferred_recovery_journal(root, original, lock_context=FakeLock())
+
+        # A newer observation may already be queued while the selected generation
+        # is recovering. Rebasing code history must not adopt or erase it.
+        newer = enqueue(root, observation(block=101, block_hash="0x" + "c" * 64))
+        rebased = state.rebase_deferred_generating_journal(
+            root,
+            selected.generation,
+            selected.digest,
+            "d" * 40,
+            "e" * 40,
+            lock_context=FakeLock(),
+        )
+        assert rebased["baseline_head"] == "e" * 40
+        assert rebased["publication_generation"] == selected.generation
+        assert rebased["queue_digest"] == selected.digest
+        assert rebased["publication_target"] == selected.record
+        latest, latest_digest = state.read_latest_with_digest(root)
+        assert latest["generation"] == newer.generation
+        assert latest_digest == newer.digest
+
+        assert state.rebase_deferred_generating_journal(
+            root,
+            selected.generation,
+            selected.digest,
+            "d" * 40,
+            "e" * 40,
+            lock_context=FakeLock(),
+        ) == rebased
+
+        expect_invalid(
+            lambda: state.rebase_deferred_generating_journal(
+                root,
+                selected.generation,
+                selected.digest,
+                "d" * 40,
+                "f" * 40,
+                lock_context=FakeLock(),
+            ),
+            "generating journal rebase accepted a stale expected baseline",
+        )
+
+        armed = state.arm_deferred_pushed_handoff(
+            root,
+            selected.generation,
+            selected.digest,
+            "a" * 40,
+            coverage_proof(selected.record),
+            lock_context=FakeLock(),
+        )
+        expect_invalid(
+            lambda: state.rebase_deferred_generating_journal(
+                root,
+                selected.generation,
+                selected.digest,
+                "e" * 40,
+                "f" * 40,
+                lock_context=FakeLock(),
+            ),
+            "push-ready journal allowed its authenticated baseline to change",
+        )
+        assert state.read_deferred_recovery_journal(root) == armed
+
+
 def test_publication_coverage_invariant_rejects_stale_or_ambiguous_snapshots() -> None:
     target = state.latest_record(
         1,
