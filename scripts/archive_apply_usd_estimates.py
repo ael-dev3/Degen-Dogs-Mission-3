@@ -353,7 +353,11 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         event_time_utc = bid_stats.get("last_bid_time_utc") or record.get("activity_time_utc")
     else:
         event_tx_hash = auction_created.get("tx_hash")
-        event_time_utc = auction_created.get("block_time_utc") or record.get("activity_time_utc")
+        event_time_utc = (
+            auction_created.get("block_time_utc")
+            if live_zero_bid
+            else record.get("activity_time_utc")
+        )
     return {
         "mission": record.get("mission"),
         "dog_id": record.get("dog_id"),

@@ -126,7 +126,7 @@ def validate_historical_event_provenance(
             )
 
 
-def validate_current_bid_provenance(
+def validate_live_event_provenance(
     *,
     mission: Any,
     dog_id: Any,
@@ -138,6 +138,8 @@ def validate_current_bid_provenance(
     event_type = text_value(row.get("event_type"))
     status = text_value(record.get("status")).lower()
     is_active = status in {"ongoing", "live"}
+    if not is_active:
+        return
     if is_active and is_canonical_live_zero_bid(record, amount):
         raw_created = record.get("auction_created")
         created: dict[str, Any] = raw_created if isinstance(raw_created, dict) else {}
@@ -151,7 +153,48 @@ def validate_current_bid_provenance(
             or text_value(row.get("event_time_utc")) != created_time
         ):
             fail(f"zero-bid auction creation provenance mismatch for mission {mission} dog {dog_id}")
+        current = current_by_dog.get(int(dog_id))
+        if current is not None:
+            current_native = decimal_or_none(current.get("current_bid_eth"))
+            current_wallet = text_value(current.get("bidder_wallet")).lower()
+            if current_native != Decimal(0) or current_wallet not in {"", ZERO_ADDRESS}:
+                fail(f"zero-bid current auction surface mismatch for Dog #{dog_id}")
+        return
 
+    if event_type != "current_bid":
+        fail(f"active bid event classification mismatch for mission {mission} dog {dog_id}")
+    bid_hashes = [text_value(value) for value in record.get("bid_tx_hashes", []) if text_value(value)]
+    if not bid_hashes or text_value(row.get("event_tx_hash")) != bid_hashes[-1]:
+        fail(f"current bid transaction provenance mismatch for mission {mission} dog {dog_id}")
+    bid_stats = record.get("bid_stats") if isinstance(record.get("bid_stats"), dict) else {}
+    last_bid_time = text_value(bid_stats.get("last_bid_time_utc"))
+    if not last_bid_time or text_value(row.get("event_time_utc")) != last_bid_time:
+        fail(f"current bid time provenance mismatch for mission {mission} dog {dog_id}")
+    if text_value(record.get("activity_time_utc")) != last_bid_time:
+        fail(f"current bid activity time mismatch for mission {mission} dog {dog_id}")
+
+
+def validate_current_bid_provenance(
+    *,
+    mission: Any,
+    dog_id: Any,
+    record: dict[str, Any],
+    amount: dict[str, Any],
+    row: dict[str, Any],
+    current_by_dog: dict[int, dict[str, Any]],
+) -> None:
+    validate_live_event_provenance(
+        mission=mission,
+        dog_id=dog_id,
+        record=record,
+        amount=amount,
+        row=row,
+        current_by_dog=current_by_dog,
+    )
+    event_type = text_value(row.get("event_type"))
+    status = text_value(record.get("status")).lower()
+    is_active = status in {"ongoing", "live"}
+    if is_active and is_canonical_live_zero_bid(record, amount):
         explicit_price = decimal_or_none(amount.get("usd_estimate_price_usd"))
         row_price = decimal_or_none(row.get("price_usd"))
         row_value = decimal_or_none(row.get("estimated_usd_value"))
@@ -169,19 +212,13 @@ def validate_current_bid_provenance(
 
         current = current_by_dog.get(int(dog_id))
         if current is not None:
-            current_native = decimal_or_none(current.get("current_bid_eth"))
-            current_wallet = text_value(current.get("bidder_wallet")).lower()
             current_price = decimal_or_none(current.get("eth_usd_price_live"))
-            if current_native != Decimal(0) or current_wallet not in {"", ZERO_ADDRESS}:
-                fail(f"zero-bid current auction surface mismatch for Dog #{dog_id}")
             if current_price is None or current_price != explicit_price:
                 fail(f"current auction ETH/USD quote differs from archive for Dog #{dog_id}")
             if text_value(current.get("eth_usd_price_date_utc")) != text_value(amount.get("usd_estimate_price_date_utc")):
                 fail(f"current auction ETH/USD quote date differs from archive for Dog #{dog_id}")
         return
 
-    if is_active and event_type != "current_bid":
-        fail(f"active bid event classification mismatch for mission {mission} dog {dog_id}")
     if event_type != "current_bid":
         return
     bid_hashes = [text_value(value) for value in record.get("bid_tx_hashes", []) if text_value(value)]
@@ -364,6 +401,14 @@ def main() -> None:
         row = estimate_by_key.get((mission, dog_id))
         if not isinstance(row, dict):
             fail(f"missing estimate row for mission {mission} dog {dog_id}")
+        validate_live_event_provenance(
+            mission=mission,
+            dog_id=dog_id,
+            record=record,
+            amount=amount,
+            row=row,
+            current_by_dog=current_by_dog,
+        )
         status = row.get("price_status")
         if status == "priced":
             priced += 1

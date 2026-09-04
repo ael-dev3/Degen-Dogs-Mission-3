@@ -37,6 +37,15 @@ def write_json(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def configure_validator_paths(validator: Any, root: Path) -> None:
+    validator.ROOT = root
+    validator.UNIFIED = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+    validator.PUBLIC_UNIFIED = root / "public" / "generated" / "unified_dog_search_index.json"
+    validator.PRICES = root / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json"
+    validator.ESTIMATES = root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json"
+    validator.MANIFEST = root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json"
+
+
 def live_feed_record() -> dict[str, Any]:
     exact_quote = Decimal("31.84") / Decimal("0.0169")
     return {
@@ -245,6 +254,125 @@ def test_zero_bid_validator_independently_rejects_classification_and_creation_dr
             raise AssertionError(f"validator accepted zero-bid {mutation} drift")
 
 
+def test_archive_validator_rejects_missing_price_live_event_provenance_drift() -> None:
+    priced_control = {
+        "mission": 3,
+        "dog_id": 822,
+        "status": "ended pending settlement",
+        "settlement": {"settled": False},
+        "activity_time_utc": "2026-09-03T23:53:00Z",
+        "amount": {
+            "native": "0.001",
+            "raw": "1000000000000000",
+            "native_symbol": "ETH",
+            "price_asset_key": "ETH",
+            "usd_estimate": "4.32109000",
+        },
+    }
+    priced_estimate = {
+        "mission": 3,
+        "dog_id": 822,
+        "event_type": "auction_record",
+        "event_time_utc": "2026-09-03T23:53:00Z",
+        "event_tx_hash": "0x" + "a" * 64,
+        "native_amount": "0.001",
+        "price_asset_key": "ETH",
+        "price_usd": "4321.09",
+        "estimated_usd_value": "4.32109000",
+        "estimated_usd_display": "$4.32",
+        "price_date_utc": "2026-09-04",
+        "price_source": "current_eth_usd_price",
+        "price_confidence": "live_current",
+        "price_status": "priced",
+    }
+
+    zero_bid = zero_bid_live_record()
+    zero_bid["amount"].update(
+        {
+            "usd_estimate": None,
+            "usd_estimate_display": None,
+            "usd_estimate_price_usd": None,
+            "usd_estimate_price_date_utc": None,
+        }
+    )
+    positive_bid = live_feed_record()
+    positive_bid["amount"].update(
+        {
+            "usd_estimate": None,
+            "usd_estimate_display": None,
+            "usd_estimate_price_usd": None,
+            "usd_estimate_price_date_utc": None,
+        }
+    )
+    cases = [
+        (
+            zero_bid,
+            {
+                "mission": 3,
+                "dog_id": 823,
+                "event_type": "current_bid",
+                "event_time_utc": None,
+                "event_tx_hash": None,
+                "native_amount": "0.0",
+                "price_asset_key": "ETH",
+                "price_usd": None,
+                "estimated_usd_value": None,
+                "price_status": "missing",
+            },
+            "zero-bid auction creation provenance mismatch",
+        ),
+        (
+            positive_bid,
+            {
+                "mission": 3,
+                "dog_id": 732,
+                "event_type": "auction_record",
+                "event_time_utc": positive_bid["activity_time_utc"],
+                "event_tx_hash": positive_bid["auction_created"]["tx_hash"],
+                "native_amount": positive_bid["amount"]["native"],
+                "price_asset_key": "ETH",
+                "price_usd": None,
+                "estimated_usd_value": None,
+                "price_status": "missing",
+            },
+            "active bid event classification mismatch",
+        ),
+    ]
+
+    for live_record, missing_estimate, expected_failure in cases:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            unified = [live_record, priced_control] + [
+                {"mission": 1, "dog_id": dog_id, "status": "created"}
+                for dog_id in range(1, 699)
+            ]
+            estimates = [missing_estimate, priced_estimate]
+            write_json(root / "archive" / "data" / "generated" / "unified_dog_search_index.json", unified)
+            write_json(root / "public" / "generated" / "unified_dog_search_index.json", unified)
+            write_json(
+                root / "archive" / "prices" / "data" / "generated" / "historical_prices_daily.json",
+                [
+                    {"asset_key": "ETH", "date_utc": "2026-09-04", "price_usd": "4321.09"},
+                    {"asset_key": "DEGEN", "date_utc": "2026-09-04", "price_usd": "0.01"},
+                ],
+            )
+            write_json(root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json", estimates)
+            write_json(
+                root / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json",
+                {"estimate_rows": len(estimates)},
+            )
+            configure_validator_paths(validator := load_validator_module(), root)
+
+            try:
+                validator.main()
+            except SystemExit as exc:
+                assert expected_failure in str(exc)
+            else:
+                raise AssertionError(
+                    f"validator accepted missing-price live provenance drift for Dog #{live_record['dog_id']}"
+                )
+
+
 def test_preserves_generated_feed_usd_when_historical_price_missing() -> None:
     archive_usd = load_module()
     record = live_feed_record()
@@ -311,6 +439,7 @@ def test_ended_pending_generated_feed_record_preserves_current_surface_usd() -> 
     record = live_feed_record()
     record["status"] = "ended pending settlement"
     record["activity_time_utc"] = "2026-06-03T19:41:49Z"
+    record["auction_created"]["block_time_utc"] = "2026-06-03T18:00:00Z"
     record["amount"]["native"] = "0.033"
     record["amount"]["usd_estimate"] = "54.74"
     record["amount"]["usd_estimate_display"] = "$54.74"
@@ -337,6 +466,7 @@ def test_ended_pending_generated_feed_record_preserves_current_surface_usd() -> 
     assert amount["eth_usd_price_at_event"] is None
     assert estimate is not None
     assert estimate["event_type"] == "auction_record"
+    assert estimate["event_time_utc"] == record["activity_time_utc"]
     assert estimate["estimated_usd_display"] == "$54.74"
     assert estimate["price_source"] == "generated_auction_feed"
 
