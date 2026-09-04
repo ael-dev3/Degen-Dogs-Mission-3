@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#651/697",
-      "rank": 651,
+      "display": "#653/699",
+      "rank": 653,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 137 dog #137 137 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xf22dc42da8007e7a40f112a0f91ba41b79bd4f5d3803e9060d1fcac6ca1c1295 0xb84bd7391d53634b217e70709060add80dbf1dd5344c6f5112e9853f8fdb7a4f background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #651/697 background: none (91.5%) body: blue (8.9%) neck: redcollar (29.1%) mouth: none (68.7%) ears: earbuds (32.6%) head: none (20.2%) eyes: bluelasereyes (11.5%)",
+    "search_text": "dog 137 dog #137 137 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xf22dc42da8007e7a40f112a0f91ba41b79bd4f5d3803e9060d1fcac6ca1c1295 0xb84bd7391d53634b217e70709060add80dbf1dd5344c6f5112e9853f8fdb7a4f #653/699 background: none; body: blue; neck: redcollar; mouth: none; ears: earbuds; head: none; eyes: bluelasereyes polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29821056,
       "block_time_utc": "2022-06-21T08:07:17Z",
@@ -78,7 +78,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -88,17 +88,17 @@
         "value": "Blue"
       },
       {
-        "display": "Neck: RedCollar (29.1%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.5%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

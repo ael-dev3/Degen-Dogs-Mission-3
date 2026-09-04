@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#448/697",
-      "rank": 448,
+      "display": "#447/699",
+      "rank": 447,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 290 dog #290 290 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 10000 degen 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 0xe864d597917b387bb6de050fcc85fbbe66b7aa53ebb3a5dd2fc8f001bb052929 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0x39ea45db1f58e01de9e74c54c48358752dd193812b852d53f383614f8a510b18 0x7897f30febab5329a898f11bff4475d36700b856bf14dd64c854ff8d228f0010 0xdf76f60840e30e54da6b7c0340883b8411e121f7d9e1dbf95b626f24ab832f6f chain_logs contract_getters #448/697 background: none (91.5%) body: sugarskull (6.5%) neck: redcollar (29.1%) mouth: none (68.7%) ears: loopearring (27.3%) head: stripedbeanie (8.0%) eyes: none (17.6%)",
+    "search_text": "dog 290 dog #290 290 mission 2 mission 2 degen chain settled 0xf8a025b42b07db05638fe596cce339707ec3cc71 0xf8a0…cc71 10000 degen 0x62a1b55ae3b13179ce0ffca7de91587ea37ad78bae104c28e7ac9a3f80035c65 0xe864d597917b387bb6de050fcc85fbbe66b7aa53ebb3a5dd2fc8f001bb052929 #447/699 background: none; body: sugarskull; neck: redcollar; mouth: none; ears: loopearring; head: stripedbeanie; eyes: none 0x39ea45db1f58e01de9e74c54c48358752dd193812b852d53f383614f8a510b18 0x7897f30febab5329a898f11bff4475d36700b856bf14dd64c854ff8d228f0010 0xdf76f60840e30e54da6b7c0340883b8411e121f7d9e1dbf95b626f24ab832f6f chain_logs contract_getters",
     "settlement": {
       "block_number": 25478587,
       "block_time_utc": "2025-02-19T19:54:00Z",
@@ -80,22 +80,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: SugarSkull (6.5%)",
+        "display": "Body: SugarSkull (6.4%)",
         "trait_type": "Body",
         "value": "SugarSkull"
       },
       {
-        "display": "Neck: RedCollar (29.1%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -110,7 +110,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (17.6%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

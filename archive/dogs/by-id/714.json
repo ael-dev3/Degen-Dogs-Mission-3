@@ -60,13 +60,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#351/697",
-      "rank": 351,
+      "display": "#348/699",
+      "rank": 348,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 714 dog #714 714 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.013 eth 13000000000000000 28.91 $28.91 2026-05-15t03:49:25z 0xe28e75e1994b7d1c090def0c0b74619b252c76b89dec36adfafd851e96f65e45 0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc generated auction feed 0x51bf699f30611d5eba35a52a1791039914a963add2bd261a4ee0160bf480c88e 0xf0f1d67777433cea0780f6162ae9f607c6c349981af74a60d8080973e26d364a 0x891e5149ba134862d389b1fc603a0d052793812e35bfb2bb4ecba4d8ddede734 0x012510f0bcadf4ea02cebbf453ecc770bbb591ff41396ae50407299ad9b5c3d6 0x48688277c134344fe9e9c29a40d46d829c896aaca10f7fa35b4075a82456e1dd 0xa1f33cf88b7613a4c999eddf07bdd444307b9220578eb5f82c7ca72ab99af84a 0xd403fe51277ca74f3c2bd7135448fdb4af808c2a589b3bfa178729a33c5255e0 0xb7f76362a3b4ebbc6378248dfce1f5b4e81ac0cffc0c30953c325e11db036589 0xba10bb50975c9a96e858fc19db118c8c7fc7b245df3dc957e9076e3cb4eaa3bc background none body white neck none mouth none ears loopearring head hoodie eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #351/697 background: none (91.5%) body: white (11.0%) neck: none (41.6%) mouth: none (68.7%) ears: loopearring (27.3%) head: hoodie (4.7%) eyes: glasses (12.3%)",
+    "search_text": "dog 714 dog #714 714 mission 3 mission 3 base settled 0x3516006709b775e01b48dfb5fad355a4e793e347 @staraptor.eth staraptor.eth 0.013 eth 13000000000000000 28.91 $28.91 2026-05-15t03:49:25z 0xe28e75e1994b7d1c090def0c0b74619b252c76b89dec36adfafd851e96f65e45 0xb0dc5a20f656b654b21e5edb81dd96fc88d450bf52ca297dfaac3c87d1e232bc #348/699 generated auction feed 0x51bf699f30611d5eba35a52a1791039914a963add2bd261a4ee0160bf480c88e 0xf0f1d67777433cea0780f6162ae9f607c6c349981af74a60d8080973e26d364a 0x891e5149ba134862d389b1fc603a0d052793812e35bfb2bb4ecba4d8ddede734 0x012510f0bcadf4ea02cebbf453ecc770bbb591ff41396ae50407299ad9b5c3d6 0x48688277c134344fe9e9c29a40d46d829c896aaca10f7fa35b4075a82456e1dd 0xa1f33cf88b7613a4c999eddf07bdd444307b9220578eb5f82c7ca72ab99af84a 0xd403fe51277ca74f3c2bd7135448fdb4af808c2a589b3bfa178729a33c5255e0 0xb7f76362a3b4ebbc6378248dfce1f5b4e81ac0cffc0c30953c325e11db036589 0xba10bb50975c9a96e858fc19db118c8c7fc7b245df3dc957e9076e3cb4eaa3bc background: none (91.6%) background none body: white (11.0%) body white neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: loopearring (27.3%) ears loopearring head: hoodie (4.7%) head hoodie eyes: glasses (12.3%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
     "settlement": {
       "block_number": 46013809,
       "block_time_utc": "2026-05-15T03:49:25Z",
@@ -88,7 +88,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -98,12 +98,12 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.6%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },

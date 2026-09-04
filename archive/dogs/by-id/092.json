@@ -53,13 +53,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#49/697",
+      "display": "#49/699",
       "rank": 49,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 92 dog #92 92 mission 1 mission 1 polygon settled 0xdf3f91843624a977e11324b5c030cf0435c974df 0xdf3f…74df 0.06 weth 0x0bcd0fcf85e974dbce8b4bbb8a2cf1c612d3604e1e02bda3c8e20598026225c6 0xcdb5a9cda7aca91db23d196d4f88d029d6ddff223f4de1fac9bed65bab4e9962 background: halo; body: grey; neck: goldnecklace; mouth: tongue; ears: goldearring; head: unicorn; eyes: bluelasereyes 0x6eed4e0c9c9bdb7cf67efd8328efeb45291184f0c16272ee04c19669a626ca1c 0x2502c5276662e07b4e201554238860deb72ba31b7add96af71ab7b09f13d6198 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #49/697 background: halo (8.5%) body: grey (12.9%) neck: goldnecklace (19.2%) mouth: tongue (9.9%) ears: goldearring (14.2%) head: unicorn (4.6%) eyes: bluelasereyes (11.5%)",
+    "search_text": "dog 92 dog #92 92 mission 1 mission 1 polygon settled 0xdf3f91843624a977e11324b5c030cf0435c974df 0xdf3f…74df 0.06 weth 0x0bcd0fcf85e974dbce8b4bbb8a2cf1c612d3604e1e02bda3c8e20598026225c6 0xcdb5a9cda7aca91db23d196d4f88d029d6ddff223f4de1fac9bed65bab4e9962 #49/699 background: halo; body: grey; neck: goldnecklace; mouth: tongue; ears: goldearring; head: unicorn; eyes: bluelasereyes 0x6eed4e0c9c9bdb7cf67efd8328efeb45291184f0c16272ee04c19669a626ca1c 0x2502c5276662e07b4e201554238860deb72ba31b7add96af71ab7b09f13d6198 polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 27917826,
       "block_time_utc": "2022-05-04T14:57:14Z",
@@ -81,7 +81,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.5%)",
+        "display": "Background: Halo (8.4%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -91,7 +91,7 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: GoldNecklace (19.2%)",
+        "display": "Neck: GoldNecklace (19.3%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "Tongue"
       },
       {
-        "display": "Ears: GoldEarring (14.2%)",
+        "display": "Ears: GoldEarring (14.3%)",
         "trait_type": "Ears",
         "value": "GoldEarring"
       },
@@ -111,7 +111,7 @@
         "value": "Unicorn"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.5%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

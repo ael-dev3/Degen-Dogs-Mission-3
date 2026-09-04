@@ -58,13 +58,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#430/697",
+      "display": "#430/699",
       "rank": 430,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 816 dog #816 816 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00647 eth 6470000000000000 16.25 $16.25 2026-08-28t21:50:13z 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 0x6095cdac770a695c5eeb28b7bb0578803f3da32af8896dbeaaaa1b99e75e1a9c generated auction feed 0xcc9e5e11c524ad49c31aa59ea70f1ee1f03ba9a48a5292e2b67df6af6afc8fdc 0x2bbc7e29706a8fb25fb6ec6ed95cf296ef24f5bf364008735e722d8f76e1e350 0xac7ce3062bfe3417bfed38dccac8988507d6bf0c94675ec923ac5062657ab811 0x1cff010341ac49c86e2643b38d44c476614d813aee5d3489fbf933eaf6a3d80e 0x12784da9de0522b388e00490fc50230524afa0abeb170e025640d88b82194b6a 0xbe574104798575e78852b0b1eb579cdfd2a3377074ca3269c664774e4cdcb757 0x14dac754c66daa5d8247355cb46e06cd9fa31ba27599b11b2c75dc773920d9d2 background halo body dalmation neck none mouth none ears none head none eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #430/697 background: halo (8.5%) body: dalmation (9.3%) neck: none (41.6%) mouth: none (68.7%) ears: none (26.0%) head: none (20.2%) eyes: bluelasereyes (11.5%)",
+    "search_text": "dog 816 dog #816 816 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.00647 eth 6470000000000000 16.25 $16.25 2026-08-28t21:50:13z 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 0x6095cdac770a695c5eeb28b7bb0578803f3da32af8896dbeaaaa1b99e75e1a9c #430/699 generated auction feed 0xcc9e5e11c524ad49c31aa59ea70f1ee1f03ba9a48a5292e2b67df6af6afc8fdc 0x2bbc7e29706a8fb25fb6ec6ed95cf296ef24f5bf364008735e722d8f76e1e350 0xac7ce3062bfe3417bfed38dccac8988507d6bf0c94675ec923ac5062657ab811 0x1cff010341ac49c86e2643b38d44c476614d813aee5d3489fbf933eaf6a3d80e 0x12784da9de0522b388e00490fc50230524afa0abeb170e025640d88b82194b6a 0xbe574104798575e78852b0b1eb579cdfd2a3377074ca3269c664774e4cdcb757 0x14dac754c66daa5d8247355cb46e06cd9fa31ba27599b11b2c75dc773920d9d2 background: halo (8.4%) background halo body: dalmation (9.3%) body dalmation neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: none (25.9%) ears none head: none (20.2%) head none eyes: bluelasereyes (11.4%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 50582233,
       "block_time_utc": "2026-08-28T21:50:13Z",
@@ -87,7 +87,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: Halo (8.5%)",
+        "display": "Background: Halo (8.4%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -97,17 +97,17 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.6%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -117,7 +117,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: BlueLaserEyes (11.5%)",
+        "display": "Eyes: BlueLaserEyes (11.4%)",
         "trait_type": "Eyes",
         "value": "BlueLaserEyes"
       }

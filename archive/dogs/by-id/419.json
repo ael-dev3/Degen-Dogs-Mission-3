@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#370/697",
-      "rank": 370,
+      "display": "#369/699",
+      "rank": 369,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters #370/697 background: none (91.5%) body: brown (10.8%) neck: redcollar (29.1%) mouth: pizza (10.9%) ears: earbuds (32.6%) head: whitemohawk (6.9%) eyes: none (17.6%)",
+    "search_text": "dog 419 dog #419 419 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0x9a639b86765dd74e50115814f35c4edd51e28f66855cb83bd76011539be0048a 0x17507091d5cec5dc6315be5d51c86530ac7111ff8074f96bd91f8214c2a42372 #369/699 background: none; body: brown; neck: redcollar; mouth: pizza; ears: earbuds; head: whitemohawk; eyes: none 0xc4cf7ab09b744a35a8cd711237aa8df6aca78158fc1f1af418347b98e7153ce6 chain_logs contract_getters",
     "settlement": {
       "block_number": 26006716,
       "block_time_utc": "2025-06-22T17:49:07Z",
@@ -78,17 +78,17 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.8%)",
+        "display": "Body: Brown (10.7%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.1%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -98,7 +98,7 @@
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.6%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

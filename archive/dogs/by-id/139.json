@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#458/697",
-      "rank": 458,
+      "display": "#471/699",
+      "rank": 471,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #458/697 background: none (91.5%) body: black (11.6%) neck: redcollar (29.1%) mouth: none (68.7%) ears: loopearring (27.3%) head: beanie (5.3%) eyes: none (17.6%)",
+    "search_text": "dog 139 dog #139 139 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xbbafd1c40052cf02056f9a6a9cc5d7ebb24e6c0a509a037c49c37efc1bfb4220 0x15de5585bf7a1dd83701f64c252dee6fe67c1ae8e8f7a8c71947cb9d47093bd8 #471/699 background: none; body: black; neck: redcollar; mouth: none; ears: loopearring; head: beanie; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": 29902006,
       "block_time_utc": "2022-06-23T09:49:25Z",
@@ -78,22 +78,22 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Black (11.6%)",
+        "display": "Body: Black (11.7%)",
         "trait_type": "Body",
         "value": "Black"
       },
       {
-        "display": "Neck: RedCollar (29.1%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: Beanie (5.3%)",
+        "display": "Head: Beanie (5.4%)",
         "trait_type": "Head",
         "value": "Beanie"
       },
       {
-        "display": "Eyes: None (17.6%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

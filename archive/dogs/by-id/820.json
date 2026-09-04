@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 1,
-      "last_bid_time_utc": "2026-08-31 23:25:29",
+      "last_bid_time_utc": "2026-08-31T23:25:29Z",
       "unique_bidder_count": 1
     },
     "bid_tx_hashes": [
@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#696/697",
-      "rank": 696,
+      "display": "#698/699",
+      "rank": 698,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 820 dog #820 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00500000 eth $12.33 2026-09-01t22:58:23z #696/697 background: none (91.5%) body: grey (12.9%) neck: none (41.6%) mouth: none (68.7%) ears: earbuds (32.6%) head: none (20.2%) eyes: none (17.6%) 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e",
+    "search_text": "dog 820 dog #820 820 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.005 eth 5000000000000000 12.33 $12.33 2026-09-01t22:58:23z 0x4f69c75fcb951ce40a6207638faa9729242eb6d875acde182d436cbdabf3c6c6 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e #698/699 generated auction feed 0x3c0573bb68d212ffe297fef420adb0387c5c14a5d5af82db3dc22fcb171d6239 background: none (91.6%) background none body: grey (12.9%) body grey neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: earbuds (32.5%) ears earbuds head: none (20.2%) head none eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 50757078,
       "block_time_utc": "2026-09-01T22:58:23Z",
@@ -68,21 +68,20 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -92,17 +91,17 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: None (41.6%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.6%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -112,7 +111,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: None (17.6%)",
+        "display": "Eyes: None (17.7%)",
         "trait_type": "Eyes",
         "value": "None"
       }

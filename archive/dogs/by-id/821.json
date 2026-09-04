@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-09-02T18:44:17Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-09-01T22:59:03Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-09-02T22:59:53Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "13.29721739",
+      "eth_usd_price_at_event": "2417.6758884733536",
       "eth_usd_price_date_utc": "2026-09-02",
-      "native": "0.005",
+      "native": "0.0055",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "5000000000000000",
-      "usd_estimate": "11.96722500",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$11.97",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "raw": "5500000000000000",
+      "usd_estimate": "13.29721739",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$13.30",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-09-02",
-      "usd_estimate_price_usd": "2393.445",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "2417.6758884733536",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 50757078,
@@ -29,12 +29,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-09-01T22:59:03Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-09-02T21:29:49Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
-      "0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd"
+      "0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd",
+      "0xf64c09a9299c89347ed791e1a7e8711e9a2bb654e0db284f955b373fa056ce50"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -45,26 +46,26 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e",
       "dog_page": "https://degendogs.club/#dog821",
-      "explorer": "https://basescan.org/address/0x437be13e57f822167a3206c6744d03bcd6b499ee",
+      "explorer": "https://basescan.org/address/0x1179da9bf5b4e5e8caf4bb378230c36fec572226",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/821",
       "repo_archive": "archive/dogs/by-id/821.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8"
     },
     "mission": 3,
     "rarity": {
-      "display": "#160/697",
-      "rank": 160,
+      "display": "#158/699",
+      "rank": 158,
       "scope": "base_existing",
-      "total": 697
+      "total": 699
     },
     "schema_version": 1,
-    "search_text": "dog 821 dog #821 821 mission 3 mission 3 base ongoing 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.005 eth 5000000000000000 11.97000000 $11.97 2026-09-01t22:59:03z 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e #160/697 generated auction feed 0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd background: none (91.5%) background none body: dalmation (9.3%) body dalmation neck: none (41.6%) neck none mouth: none (68.7%) mouth none ears: none (26.0%) ears none head: partyhat (4.3%) head partyhat eyes: monocle (7.3%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 821 dog #821 821 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 0x1179…2226 0.0055 eth 5500000000000000 13.3 $13.30 2026-09-02t22:59:53z 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e 0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8 #158/699 generated auction feed 0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd 0xf64c09a9299c89347ed791e1a7e8711e9a2bb654e0db284f955b373fa056ce50 background: none (91.6%) background none body: dalmation (9.3%) body dalmation neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: none (25.9%) ears none head: partyhat (4.3%) head partyhat eyes: monocle (7.3%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 50800323,
+      "block_time_utc": "2026-09-02T22:59:53Z",
+      "settled": true,
+      "tx_hash": "0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8",
+      "tx_url": "https://basescan.org/tx/0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8"
     },
     "source": {
       "confidence": "verified",
@@ -74,13 +75,14 @@
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
+        "generated_auction_winners",
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.6%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -90,17 +92,17 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.6%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.0%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -116,12 +118,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@kunon",
+      "display": "0x1179…2226",
       "farcaster_fid": null,
-      "farcaster_handle": "kunon",
-      "profile_url": "https://farcaster.xyz/kunon",
-      "wallet": "0x437be13e57f822167a3206c6744d03bcd6b499ee",
-      "wallet_explorer_url": "https://basescan.org/address/0x437be13e57f822167a3206c6744d03bcd6b499ee"
+      "farcaster_handle": null,
+      "profile_url": "https://basescan.org/address/0x1179da9bf5b4e5e8caf4bb378230c36fec572226",
+      "wallet": "0x1179da9bf5b4e5e8caf4bb378230c36fec572226",
+      "wallet_explorer_url": "https://basescan.org/address/0x1179da9bf5b4e5e8caf4bb378230c36fec572226"
     }
   },
   "schema_version": 1
