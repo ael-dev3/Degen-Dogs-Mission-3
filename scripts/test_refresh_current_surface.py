@@ -2160,6 +2160,55 @@ def test_current_creation_recovers_verified_block_from_preceding_settlement() ->
     }
 
 
+def test_update_readme_snapshot_accepts_unavailable_zero_bid_payback() -> None:
+    """A zero-bid auction must not crash the hourly refresh on an N/A payback."""
+
+    surface = load_module()
+    original_root = surface.ROOT
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        readme = root / "README.md"
+        readme.write_text(
+            "\n".join(
+                (
+                    "| Snapshot block | old |",
+                    "| Current bid | old |",
+                    "| Bid payback / APR | old |",
+                    "",
+                )
+            ),
+            encoding="utf-8",
+        )
+        builder = SimpleNamespace(
+            season6_readme_estimate_summary=lambda _metrics: "N/A",
+            woof_holder_summary=lambda _metrics: "unavailable",
+        )
+        try:
+            surface.ROOT = root
+            surface.update_readme_snapshot(
+                {
+                    "latest_block": 50848112,
+                    "token_id": 823,
+                    "auction_state": "live",
+                    "current_bid_eth": "0.0",
+                    "current_bid_usd": "0.0",
+                    "bidder": "no bids yet",
+                },
+                {
+                    "reward_current_bid_payback_days": "N/A",
+                    "reward_current_bid_apr_display": "N/A",
+                },
+                builder,
+            )
+        finally:
+            surface.ROOT = original_root
+
+        rendered = readme.read_text(encoding="utf-8")
+        assert "| Snapshot block | 50848112 |" in rendered
+        assert "| Current bid | 0.0 ETH ($0.00) |" in rendered
+        assert "| Bid payback / APR | N/A / N/A |" in rendered
+
+
 def test_current_creation_fails_closed_without_verified_block_mapping() -> None:
     surface = load_module()
     tx_hash = "0x" + "b" * 64

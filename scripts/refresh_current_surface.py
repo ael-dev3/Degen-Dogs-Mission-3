@@ -2657,13 +2657,10 @@ def update_readme_snapshot(current_row: dict[str, Any], metrics: dict[str, str],
     text = path.read_text(encoding="utf-8")
     payback = metrics.get("reward_current_bid_payback_days", "N/A")
     payback_display = "N/A"
-    try:
-        payback_value = Decimal(payback)
-        if payback_value > 0:
-            places = 1 if payback_value < 10 else 0
-            payback_display = f"≈{payback_value:,.{places}f} days"
-    except (TypeError, ValueError):
-        pass
+    payback_value = decimal_or_none(payback)
+    if payback_value is not None and payback_value > 0:
+        places = 1 if payback_value < 10 else 0
+        payback_display = f"≈{payback_value:,.{places}f} days"
     replacements = {
         "Snapshot block": str(current_row.get("latest_block", "")),
         "Snapshot time UTC": str(current_row.get("latest_block_time_utc", "")),
