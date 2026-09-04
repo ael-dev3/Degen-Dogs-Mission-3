@@ -89,7 +89,7 @@ def iso_utc(value: object) -> str:
 
 
 def expected_native(value: object) -> str:
-    text = str(value or "").strip()
+    text = "" if value is None else str(value).strip()
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 

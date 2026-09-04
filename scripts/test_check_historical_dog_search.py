@@ -27,6 +27,15 @@ def assert_raises_contains(callback: Any, expected: str) -> None:
         raise AssertionError(f"expected AssertionError containing {expected!r}")
 
 
+def test_expected_native_preserves_numeric_zero() -> None:
+    checker = load_module()
+
+    assert checker.expected_native(0) == "0"
+    assert checker.expected_native(0.0) == "0"
+    assert checker.expected_native("0.0") == "0"
+    assert checker.expected_native(None) == ""
+
+
 def test_exact_rarity_permutation_accepts_every_rank_once() -> None:
     checker = load_module()
     rows = [
