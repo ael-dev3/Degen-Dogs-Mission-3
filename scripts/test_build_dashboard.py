@@ -1467,6 +1467,7 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
     dashboard = load_module()
     urls = ["https://one.example", "https://two.example", "https://three.example"]
     snapshot_hash = "0x" + "cd" * 32
+    snapshot_timestamp = int(time.time())
     old_quorum_urls = dashboard._quorum_rpc_urls
     old_rpc_once = dashboard._rpc_once
     old_quorum_size = dashboard.RPC_QUORUM_SIZE
@@ -1488,9 +1489,9 @@ def test_verified_snapshot_requires_hash_agreement_from_independent_providers() 
                 return {
                     "number": params[0],
                     "hash": "0x" + "ab" * 32,
-                    "timestamp": hex(int(time.time()) - 1000),
+                    "timestamp": hex(snapshot_timestamp - 1000),
                 }
-            return {"number": params[0], "hash": snapshot_hash, "timestamp": hex(int(time.time()))}
+            return {"number": params[0], "hash": snapshot_hash, "timestamp": hex(snapshot_timestamp)}
         if method == "eth_getCode":
             return "0x60016000"
         if method == "eth_getLogs":
