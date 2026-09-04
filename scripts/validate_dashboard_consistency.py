@@ -2173,6 +2173,11 @@ def validate_current_surface() -> dict[str, Any]:
         if not isinstance(unified_rows, list):
             raise AssertionError(f"{path.relative_to(ROOT)} is not a list")
         sorted_rows = sorted([row for row in unified_rows if isinstance(row, dict)], key=unified_sort_key, reverse=True)
+        for row in sorted_rows:
+            if type(row.get("mission")) is not int:
+                raise AssertionError(
+                    f"{path.relative_to(ROOT)} mission must be a JSON integer"
+                )
         if unified_rows != sorted_rows:
             raise AssertionError(f"{path.relative_to(ROOT)} is not sorted with only the actual current auction prioritized")
         current_rows = [

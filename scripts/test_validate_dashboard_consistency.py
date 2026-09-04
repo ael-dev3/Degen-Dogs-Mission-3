@@ -890,6 +890,23 @@ def test_validator_rejects_duplicate_ended_unsettled_current_dog_row() -> None:
         )
 
 
+def test_validator_rejects_string_typed_duplicate_current_dog_row() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        path = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        duplicate = dict(rows[0])
+        duplicate["mission"] = "3"
+        rows.append(duplicate)
+        write_json(path, rows)
+
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "mission must be a JSON integer",
+        )
+
+
 def test_validator_rejects_stale_active_row_for_ended_unsettled_current_dog() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -905,6 +922,25 @@ def test_validator_rejects_stale_active_row_for_ended_unsettled_current_dog() ->
         assert_raises_contains(
             lambda: run_validation(root),
             "must contain no active-ranked Mission 3 rows when current auction Dog #729 is ended_unsettled",
+        )
+
+
+def test_validator_rejects_string_typed_stale_active_mission3_row() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_ended_unsettled_fixture(root)
+        path = root / "archive" / "data" / "generated" / "unified_dog_search_index.json"
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        stale_active = dict(rows[0])
+        stale_active["mission"] = "3"
+        stale_active["dog_id"] = 728
+        stale_active["status"] = "ongoing"
+        rows.insert(0, stale_active)
+        write_json(path, rows)
+
+        assert_raises_contains(
+            lambda: run_validation(root),
+            "mission must be a JSON integer",
         )
 
 
