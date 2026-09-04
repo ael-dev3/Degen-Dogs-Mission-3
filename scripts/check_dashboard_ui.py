@@ -281,7 +281,10 @@ def assert_no_farcaster_channel_panel() -> None:
 def assert_bid_history_card_layout() -> None:
     html = INDEX_PATH.read_text(encoding="utf-8")
     required_markers = [
-        '<details class="bid-history-menu">',
+        # A zero-bid auction intentionally omits the server-rendered menu, but
+        # the live hydrator must retain the exact menu template so the first
+        # bid appears without a full page deployment.
+        '<details class="bid-history-menu"',
         '.bid-history-menu{position:relative;align-self:stretch;flex:0 1 158px;min-width:150px;max-width:100%;margin-inline:0',
         '.bid-history-menu summary{list-style:none;cursor:pointer;position:relative;display:flex;min-height:48px;height:100%;flex-direction:column;align-items:center;justify-content:center;text-align:center',
         '.bid-history-list{position:absolute;left:50%;top:calc(100% + 3px);z-index:24;transform:translateX(-50%);width:min(340px,calc(100vw - 24px))',
