@@ -7,23 +7,19 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: pages
-  # Normal push deployments finish even if another snapshot arrives. A bounded
-  # watchdog recovery dispatch may replace a stale environment-waiting run.
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
+      actions: read
       contents: read
       pages: read
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
+          fetch-depth: 2
           persist-credentials: false
 
       - name: Setup Node
@@ -48,6 +44,13 @@ jobs:
 
       - name: Validate generated data and dashboard
         run: bash scripts/run_pages_validation.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DEGEN_DOGS_PAGES_EVENT_NAME: ${{ github.event_name }}
+          DEGEN_DOGS_PAGES_EVENT_REF: ${{ github.ref }}
+          DEGEN_DOGS_PAGES_EVENT_FORCED: ${{ github.event.forced }}
+          DEGEN_DOGS_PAGES_EVENT_BEFORE: ${{ github.event.before }}
+          DEGEN_DOGS_PAGES_EVENT_AFTER: ${{ github.event.after }}
 
       - name: Build
         run: npm run build
@@ -62,15 +65,38 @@ jobs:
 
   deploy:
     needs: build
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      actions: write
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout deployment controller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - name: Verify artifact is still current main
+        id: freshness
+        run: python3 scripts/pages_deploy_controller.py pre
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - name: Deploy to GitHub Pages
         id: deployment
+        if: steps.freshness.outputs.deploy == 'true'
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+      - name: Recheck main after deployment
+        if: steps.freshness.outputs.deploy == 'true' && steps.deployment.outcome == 'success'
+        run: python3 scripts/pages_deploy_controller.py post
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

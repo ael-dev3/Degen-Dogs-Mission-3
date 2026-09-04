@@ -1,13 +1,35 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Run every GitHub Pages validation gate, while overlapping only checks that
-# operate on independent fixtures or read the generated production artifacts.
-# Each group keeps a private log and every exit status is collected before the
-# workflow fails, so one early regression cannot hide failures in later gates.
+# Verified runner artifact commits take a four-gate production-data fast path.
+# Source changes and any uncertain classification retain the full regression
+# suite. Each independent group keeps a private log and all statuses are
+# collected before the workflow fails.
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)" || exit 70
 cd "$ROOT" || exit 70
+
+classification=""
+validation_mode="full"
+validation_reason="classifier execution failed"
+if classification="$(python3 "$ROOT/scripts/classify_pages_validation.py" "$ROOT")"; then
+  case "$classification" in
+    fast$'\t'*)
+      validation_mode="fast"
+      validation_reason="${classification#*$'\t'}"
+      ;;
+    full$'\t'*)
+      validation_reason="${classification#*$'\t'}"
+      ;;
+    *)
+      validation_reason="classifier output is invalid"
+      ;;
+  esac
+fi
+unset GITHUB_TOKEN
+validation_reason="${validation_reason//$'\n'/ }"
+validation_reason="${validation_reason//$'\r'/ }"
+printf 'pages_validation_mode=%s reason=%s\n' "$validation_mode" "$validation_reason"
 
 LOG_PARENT="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
 if [[ ! -d "$LOG_PARENT" ]]; then
@@ -40,7 +62,9 @@ run_check() {
         scripts/watch_mission3_auction.py \
         scripts/validate_dashboard_consistency.py \
         scripts/degen_dogs_runner_health.py \
-        scripts/check_remote_freshness.py
+        scripts/check_remote_freshness.py \
+        scripts/classify_pages_validation.py \
+        scripts/pages_deploy_controller.py
       ;;
     npm:*)
       npm run "${check#npm:}"
@@ -59,6 +83,26 @@ run_group() {
   local checks=()
 
   case "$group" in
+    fast-prices)
+      checks=(
+        npm:archive:prices:validate
+      )
+      ;;
+    fast-history)
+      checks=(
+        npm:check:historical-dogs
+      )
+      ;;
+    fast-consistency)
+      checks=(
+        npm:validate:dashboard
+      )
+      ;;
+    fast-ui)
+      checks=(
+        npm:check:dashboard-ui
+      )
+      ;;
     publisher)
       checks=(
         npm:test:runner-publish
@@ -94,6 +138,8 @@ run_group() {
         npm:test:live-snapshot
         npm:test:rpc-redaction
         npm:test:freshness
+        npm:test:pages-validation-classifier
+        npm:test:pages-deploy-controller
         npm:archive:prices:validate
         npm:check:historical-dogs
         npm:validate:dashboard
@@ -121,8 +167,18 @@ run_group() {
   return "$failed"
 }
 
-GROUP_IDS=(publisher data runner validation)
-GROUP_NAMES=("Publisher safety" "Data and watcher tests" "Runner tests" "Artifact validation")
+if [[ "$validation_mode" == "fast" ]]; then
+  GROUP_IDS=(fast-prices fast-history fast-consistency fast-ui)
+  GROUP_NAMES=(
+    "Historical USD integrity"
+    "Historical search integrity"
+    "Dashboard consistency"
+    "Generated UI integrity"
+  )
+else
+  GROUP_IDS=(publisher data runner validation)
+  GROUP_NAMES=("Publisher safety" "Data and watcher tests" "Runner tests" "Artifact validation")
+fi
 PIDS=()
 LOGS=()
 STATUSES=()

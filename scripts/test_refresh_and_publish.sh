@@ -422,8 +422,14 @@ grep -q 'npm ci --ignore-scripts' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'artifact_rel_pattern.fullmatch(rel)' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'literal-pathspecs add --pathspec-from-file' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q -- '--force-with-lease="$lease"' "$TEST_REPO/scripts/refresh_and_publish.sh"
-grep -q 'Refresh-Runner-ID: ${RUNNER_ID}' "$TEST_REPO/scripts/refresh_and_publish.sh"
-grep -q 'Refresh-Run-Scope: ${RUN_SCOPE}' "$TEST_REPO/scripts/refresh_and_publish.sh"
+grep -Fq "'Refresh-Runner-ID: %s\\nRefresh-Run-Scope: %s\\nRefresh-Run-ID: %s'" \
+  "$TEST_REPO/scripts/refresh_and_publish.sh"
+grep -q "printf -v commit_trailers" "$TEST_REPO/scripts/refresh_and_publish.sh"
+grep -Fq -- '-m "$commit_trailers"' "$TEST_REPO/scripts/refresh_and_publish.sh"
+if grep -Fq -- '-m "Refresh-Runner-ID: ${RUNNER_ID}"' "$TEST_REPO/scripts/refresh_and_publish.sh"; then
+  echo "publisher commit attribution is split across non-terminal message paragraphs" >&2
+  exit 1
+fi
 grep -q 'update_recovery_run_scope "full"' "$TEST_REPO/scripts/refresh_and_publish.sh"
 grep -q 'live_bundle_name.fullmatch(path.name)' "$TEST_REPO/scripts/refresh_and_publish.sh"
 if grep -q -- '-m py_compile' "$TEST_REPO/scripts/refresh_and_publish.sh"; then

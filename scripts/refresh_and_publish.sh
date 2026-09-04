@@ -2246,15 +2246,18 @@ PY
 commit_refresh_snapshot() {
   local commit_output
   local commit_status
+  local commit_trailers
+
+  printf -v commit_trailers \
+    'Refresh-Runner-ID: %s\nRefresh-Run-Scope: %s\nRefresh-Run-ID: %s' \
+    "$RUNNER_ID" "$RUN_SCOPE" "$DEGEN_DOGS_REFRESH_RUN_ID"
 
   if commit_output="$(git commit \
     -m "$commit_message" \
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
     -m "Automated refresh from runner ${RUNNER_ID}." \
-    -m "Refresh-Runner-ID: ${RUNNER_ID}" \
-    -m "Refresh-Run-Scope: ${RUN_SCOPE}" \
-    -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}" 2>&1)"; then
+    -m "$commit_trailers" 2>&1)"; then
     printf '%s\n' "$commit_output"
     return 0
   fi
@@ -2272,9 +2275,7 @@ commit_refresh_snapshot() {
     -m "Snapshot block: ${latest_block}" \
     -m "Current dog: ${current_dog}" \
     -m "Automated refresh from runner ${RUNNER_ID}." \
-    -m "Refresh-Runner-ID: ${RUNNER_ID}" \
-    -m "Refresh-Run-Scope: ${RUN_SCOPE}" \
-    -m "Refresh-Run-ID: ${DEGEN_DOGS_REFRESH_RUN_ID}"
+    -m "$commit_trailers"
 }
 
 verify_live_deployment() {
@@ -2929,7 +2930,7 @@ allowed_public_archive = re.compile(r"^public/generated/mission3/[A-Za-z0-9_]+\.
 allowed_unified_archive = re.compile(r"^archive/data/generated/unified_dog_search_[A-Za-z0-9_]+\.json$")
 allowed_dog_archive = re.compile(r"^archive/dogs/by-id/[0-9]+\.json$")
 allowed_price_archive = re.compile(r"^archive/prices/data/generated/[A-Za-z0-9_]+\.(csv|json)$")
-allowed_price_raw = re.compile(r"^archive/prices/data/raw/[A-Za-z0-9_\-]+\.json$")
+allowed_price_raw = re.compile(r"^archive/prices/data/raw/[A-Za-z0-9_-]+\.json$")
 unexpected = [
     path for path in staged
     if path not in allowed_exact

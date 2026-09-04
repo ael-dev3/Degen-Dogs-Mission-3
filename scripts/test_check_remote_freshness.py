@@ -339,8 +339,11 @@ def test_watchdog_issue_matching_requires_bot_and_marker_in_both_paths() -> None
 def test_pages_recovery_is_latest_wins_bounded_and_deduplicated() -> None:
     pages_workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
     watchdog_workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
-    assert "group: pages" in pages_workflow
-    assert "cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}" in pages_workflow
+    assert "\nconcurrency:\n" not in pages_workflow
+    assert "      group: pages-deploy" in pages_workflow
+    assert "      cancel-in-progress: false" in pages_workflow
+    assert "python3 scripts/pages_deploy_controller.py pre" in pages_workflow
+    assert "python3 scripts/pages_deploy_controller.py post" in pages_workflow
     assert "--json databaseId,status,headSha,createdAt" in watchdog_workflow
     assert "--limit 1000" in watchdog_workflow
     assert "^[0-9a-f]{40}$" in watchdog_workflow
@@ -357,6 +360,23 @@ def test_pages_hot_path_does_not_depend_on_registry_audit_availability() -> None
     pages_workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
     assert "npm ci --ignore-scripts --no-audit --no-fund" in pages_workflow
     assert "npm audit" not in pages_workflow
+
+
+def test_pages_fast_path_can_verify_its_exact_parent_deployment() -> None:
+    pages_workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
+    assert "      actions: read\n" in pages_workflow
+    assert "          fetch-depth: 2\n" in pages_workflow
+    assert (
+        "      - name: Validate generated data and dashboard\n"
+        "        run: bash scripts/run_pages_validation.sh\n"
+        "        env:\n"
+        "          GITHUB_TOKEN: ${{ github.token }}\n"
+        "          DEGEN_DOGS_PAGES_EVENT_NAME: ${{ github.event_name }}\n"
+        "          DEGEN_DOGS_PAGES_EVENT_REF: ${{ github.ref }}\n"
+        "          DEGEN_DOGS_PAGES_EVENT_FORCED: ${{ github.event.forced }}\n"
+        "          DEGEN_DOGS_PAGES_EVENT_BEFORE: ${{ github.event.before }}\n"
+        "          DEGEN_DOGS_PAGES_EVENT_AFTER: ${{ github.event.after }}\n"
+    ) in pages_workflow
 
 
 if __name__ == "__main__":
