@@ -18,7 +18,7 @@ Environment=DEGEN_DOGS_LOCK_DIR=@LOCK_DIR@
 Environment=DEGEN_DOGS_ENV_FILE=@ENV_FILE@
 Environment=DEGEN_DOGS_RUNNER_ID=@RUNNER_ID@
 ExecStart=/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh publisher
-TimeoutStartSec=5min
+TimeoutStartSec=50min
 TimeoutStopSec=30s
 KillMode=control-group
 NoNewPrivileges=true

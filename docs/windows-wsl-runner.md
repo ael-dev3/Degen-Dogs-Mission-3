@@ -443,6 +443,16 @@ Verifier exit `2` means the exact pending proof is unresolved or waiting for
 its authenticated journal, so systemd treats it as a successful bounded wait
 and the path/timer retries later.
 
+The protected environment defaults the whole-process queue catch-up budget to
+`DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS=900`.
+The accepted range is `300` to `2700` seconds, inclusive, and the publisher
+service keeps an independent 50-minute hard stop above that maximum. The
+environment loader normalizes unquoted assignment whitespace before validation;
+the value itself must remain a canonical ASCII whole number without signs,
+leading zeroes, decimal points, exponents, quoted whitespace, or embedded
+whitespace. Malformed or out-of-range values prevent the queue drainer from
+starting.
+
 ## Verify operation
 
 From the same Windows account (elevation is needed only for the pre-login

@@ -1262,7 +1262,7 @@ def test_queued_worker_units() -> None:
     assert systemd_values(publisher_service, "ExecStart") == (
         "/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh publisher",
     )
-    assert systemd_values(publisher_service, "TimeoutStartSec") == ("5min",)
+    assert systemd_values(publisher_service, "TimeoutStartSec") == ("50min",)
     assert systemd_values(publisher_service, "ReadWritePaths") == (
         "@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@",
     )
@@ -1324,6 +1324,26 @@ def test_queued_worker_units() -> None:
 
     target = text("config/systemd/degen-dogs-runner.target")
     assert systemd_values(target, "Wants") == (" ".join(NEW_TRIGGER_UNITS),)
+
+
+def test_queue_runtime_operator_contract_assets() -> None:
+    """Catches a service budget that is unavailable, ambiguous, or undocumented."""
+
+    variable = "DEGEN_DOGS_QUEUE_RUNTIME_BUDGET_SECONDS"
+    runner_env = text("config/wsl-runner.env.template")
+    assignments = re.findall(
+        rf"(?m)^[ \t]*{re.escape(variable)}[ \t]*=[ \t]*(.*?)[ \t]*$",
+        runner_env,
+    )
+    assert assignments == ["900"]
+    assert runner_env.count(f"{variable}=900") == 1
+    assert "accepted range is 300 to 2700 seconds" in runner_env
+
+    runner_docs = text("docs/windows-wsl-runner.md")
+    normalized_docs = " ".join(runner_docs.split())
+    assert f"`{variable}=900`" in normalized_docs
+    assert "accepted range is `300` to `2700` seconds" in normalized_docs
+    assert "Malformed or out-of-range values prevent the queue drainer from starting." in normalized_docs
 
 
 def test_queued_worker_lifecycle_inventories() -> None:
@@ -2136,6 +2156,7 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
         "@REPO_DIR@ @LOG_DIR@ @LOCK_DIR@ /run/degen-dogs/health /var/lib/degen-dogs/health",
     )
     test_queued_worker_units()
+    test_queue_runtime_operator_contract_assets()
 
     launcher = text("scripts/run_wsl_runner_job.sh")
     assert "MISSION3_WATCHER_AUTO_PUSH=1" in launcher
