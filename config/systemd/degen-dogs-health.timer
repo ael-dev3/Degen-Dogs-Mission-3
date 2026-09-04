@@ -1,11 +1,11 @@
 [Unit]
-Description=Run the Degen Dogs WSL health probe every five minutes
+Description=Retry the Degen Dogs WSL health probe one minute after completion
 
 [Timer]
 OnBootSec=2min
 # Always establish a future deadline when this timer is restarted after boot.
-OnActiveSec=5min
-OnUnitInactiveSec=5min
+OnActiveSec=1min
+OnUnitInactiveSec=1min
 AccuracySec=15s
 RandomizedDelaySec=15s
 Persistent=true

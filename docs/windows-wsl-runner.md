@@ -379,7 +379,8 @@ The systemd assets are:
 - `degen-dogs-watcher.service` / `.timer`: one-shot check every 15 seconds;
 - `degen-dogs-hourly.service` / `.timer`: minute-59 bounded reconcile, with
   optional incremental archive maintenance;
-- `degen-dogs-health.service` / `.timer`: five-minute health and freshness;
+- `degen-dogs-health.service` / `.timer`: health and freshness one minute after
+  each completed probe, with up to 30 seconds of timer tolerance/jitter;
 - `degen-dogs-publisher.service` / `.path` / `.timer`: drain only
   `/var/cache/degen-dogs/publication/latest.json` immediately, with a fast
   bounded fallback retry;
@@ -394,7 +395,14 @@ PATH, empty capability sets, read-only system/home mounts, and explicit write
 access only to the clone, log directory, and cache/lock directory. The watcher
 does not self-restart or use a service start limit: its 15-second timer is the
 single retry owner, so repeated successful checks cannot suppress later event
-checks. The hourly and health services retain bounded retry backoff. Event
+checks. Health uses the same single-owner approach: `Restart=no` and no start
+rate limit, with each probe bounded by a 90-second start timeout. Failed probes
+retain the prior lease and record an incident; the timer schedules the next
+probe after completion even after repeated failures. Under normal scheduling,
+the next attempt starts within 90 seconds of completion, and a successful
+90-second probe renews the 480-second lease with ample margin. A sustained
+dependency outage correctly expires the lease; it does not suppress checks or
+restart the auction collector. The hourly service retains bounded retry backoff. Event
 refreshes keep archive work off for latency. On a seeded archive-capable runner,
 the staggered hourly job also maintains the archive; a latency-only peer may opt
 out as described above.

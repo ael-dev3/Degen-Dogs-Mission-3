@@ -3,8 +3,9 @@ Description=Verify Degen Dogs WSL runner, Git state, disk, and live freshness
 Wants=network-online.target
 After=network-online.target
 ConditionPathExists=/run/degen-dogs/activation-enabled
-StartLimitIntervalSec=15min
-StartLimitBurst=4
+# The timer is the sole retry owner. Successful probes and temporary outages
+# must never consume a rate-limit bucket that suppresses later health checks.
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot
@@ -22,8 +23,7 @@ ExecStartPre=+/usr/local/libexec/degen-dogs-wsl-health-state begin-health
 ExecStart=/bin/bash -p @REPO_DIR@/scripts/run_wsl_runner_job.sh health
 ExecStopPost=+/usr/local/libexec/degen-dogs-wsl-health-state record-health
 TimeoutStartSec=90s
-Restart=on-failure
-RestartSec=1min
+Restart=no
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict

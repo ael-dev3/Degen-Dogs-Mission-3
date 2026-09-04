@@ -2122,8 +2122,8 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "OnCalendar=*-*-* *:59:00" in hourly_timer
     assert "Persistent=true" in hourly_timer
     health_timer = text("config/systemd/degen-dogs-health.timer")
-    assert re.search(r"(?m)^OnActiveSec=5min$", health_timer)
-    assert re.search(r"(?m)^OnUnitInactiveSec=5min$", health_timer)
+    assert re.search(r"(?m)^OnActiveSec=1min$", health_timer)
+    assert re.search(r"(?m)^OnUnitInactiveSec=1min$", health_timer)
 
     for relative in (
         "config/systemd/degen-dogs-watcher.service.in",
@@ -2144,8 +2144,12 @@ def test(*, require_rendered_systemd_isolation: bool = False) -> None:
     assert "StartLimitIntervalSec=0" in watcher_service
     assert "StartLimitBurst=" not in watcher_service
     assert "Restart=on-failure" in text("config/systemd/degen-dogs-hourly.service.in")
-    assert "Restart=on-failure" in text("config/systemd/degen-dogs-health.service.in")
     health_service = text("config/systemd/degen-dogs-health.service.in")
+    assert systemd_values(health_service, "Restart") == ("no",)
+    assert systemd_values(health_service, "StartLimitIntervalSec") == ("0",)
+    assert "StartLimitBurst=" not in health_service
+    assert "RestartSec=" not in health_service
+    assert systemd_values(health_service, "TimeoutStartSec") == ("90s",)
     assert systemd_values(health_service, "ExecStartPre") == (
         "+/usr/local/libexec/degen-dogs-wsl-health-state begin-health",
     )
