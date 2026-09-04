@@ -3015,6 +3015,8 @@ def test_archive_classifies_only_explicit_log_range_errors_without_leaking_provi
         for provider_message in (
             "block range too large",
             "block range is too wide",
+            "block range too wide",
+            "range too wide",
             "block range exceeds 500 blocks",
             "maximum block range is 1,000",
             "max block range: 50",
