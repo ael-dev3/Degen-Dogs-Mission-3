@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50881307"
+    "value": "50883118"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-04 19:59:21"
+    "value": "2026-09-04 20:59:43"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x6b6cbeb1c3bd9090b117f5152a998302c215993d109460fbed9b34498069ecd4"
+    "value": "0x240df7457889fba13f3560076d04b38f61f46189a741ac8577f71c544577f9e2"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50881307"
+    "value": "50883118"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x6b6cbeb1c3bd9090b117f5152a998302c215993d109460fbed9b34498069ecd4"
+    "value": "0x240df7457889fba13f3560076d04b38f61f46189a741ac8577f71c544577f9e2"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2455.615"
+    "value": "2451.805"
   },
   {
     "metric": "eth_usd_source",
@@ -353,15 +353,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "108.08"
+    "value": "107.97"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.9252"
+    "value": "0.9262"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "337.71"
+    "value": "338.05"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "9.82"
+    "value": "9.81"
   },
   {
     "metric": "current_bidder",
