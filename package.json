@@ -83,6 +83,6 @@
     "archive:mission1:check": "python3 scripts/archive_mission1_index.py --check-config"
   },
   "devDependencies": {
-    "vite": "^8.2.0"
+    "vite": "^8.2.2"
   }
 }
