@@ -14,6 +14,7 @@ PRICES = ROOT / "archive" / "prices" / "data" / "generated" / "historical_prices
 ESTIMATES = ROOT / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates.json"
 MANIFEST = ROOT / "archive" / "prices" / "data" / "generated" / "auction_usd_estimates_manifest.json"
 LIVE_USD_SOURCES = {"generated_auction_feed", "current_eth_usd_price", "token_stats.eth_usd_price"}
+ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
 def load_json(path: Path) -> Any:
@@ -21,7 +22,7 @@ def load_json(path: Path) -> Any:
 
 
 def decimal_or_none(value: Any) -> Decimal | None:
-    text = str(value or "").replace(",", "").strip()
+    text = "" if value is None else str(value).replace(",", "").strip()
     if not text:
         return None
     try:
@@ -36,6 +37,31 @@ def fail(message: str) -> None:
 
 def text_value(value: Any) -> str:
     return str(value or "").strip()
+
+
+def is_canonical_live_zero_bid(record: dict[str, Any], amount: dict[str, Any]) -> bool:
+    if text_value(record.get("status")).lower() not in {"ongoing", "live"}:
+        return False
+    if decimal_or_none(amount.get("native")) != Decimal(0):
+        return False
+    raw_bid_stats = record.get("bid_stats")
+    bid_stats: dict[str, Any] = raw_bid_stats if isinstance(raw_bid_stats, dict) else {}
+    raw_bid_count = bid_stats.get("bid_count")
+    if isinstance(raw_bid_count, bool):
+        return False
+    if isinstance(raw_bid_count, int):
+        bid_count = raw_bid_count
+    elif isinstance(raw_bid_count, str) and raw_bid_count.strip() == "0":
+        bid_count = 0
+    else:
+        return False
+    raw_bid_hashes = record.get("bid_tx_hashes")
+    if bid_count != 0 or not isinstance(raw_bid_hashes, list) or raw_bid_hashes:
+        return False
+    raw_who = record.get("winner_or_high_bidder")
+    who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}
+    wallet = text_value(who.get("wallet")).lower()
+    return wallet in {"", ZERO_ADDRESS}
 
 
 def is_live_or_current(record: dict[str, Any]) -> bool:
@@ -102,7 +128,54 @@ def validate_current_bid_provenance(
     row: dict[str, Any],
     current_by_dog: dict[int, dict[str, Any]],
 ) -> None:
-    if text_value(row.get("event_type")) != "current_bid":
+    event_type = text_value(row.get("event_type"))
+    status = text_value(record.get("status")).lower()
+    is_active = status in {"ongoing", "live"}
+    if is_active and is_canonical_live_zero_bid(record, amount):
+        raw_created = record.get("auction_created")
+        created: dict[str, Any] = raw_created if isinstance(raw_created, dict) else {}
+        created_hash = text_value(created.get("tx_hash"))
+        created_time = text_value(created.get("block_time_utc"))
+        if (
+            event_type != "auction_record"
+            or not created_hash
+            or not created_time
+            or text_value(row.get("event_tx_hash")) != created_hash
+            or text_value(row.get("event_time_utc")) != created_time
+        ):
+            fail(f"zero-bid auction creation provenance mismatch for mission {mission} dog {dog_id}")
+
+        explicit_price = decimal_or_none(amount.get("usd_estimate_price_usd"))
+        row_price = decimal_or_none(row.get("price_usd"))
+        row_value = decimal_or_none(row.get("estimated_usd_value"))
+        amount_value = decimal_or_none(amount.get("usd_estimate"))
+        if (
+            explicit_price is None
+            or row_price is None
+            or row_value is None
+            or amount_value is None
+            or row_price != explicit_price
+            or row_value != Decimal(0)
+            or amount_value != Decimal(0)
+        ):
+            fail(f"zero-bid exact live-price provenance mismatch for mission {mission} dog {dog_id}")
+
+        current = current_by_dog.get(int(dog_id))
+        if current is not None:
+            current_native = decimal_or_none(current.get("current_bid_eth"))
+            current_wallet = text_value(current.get("bidder_wallet")).lower()
+            current_price = decimal_or_none(current.get("eth_usd_price_live"))
+            if current_native != Decimal(0) or current_wallet not in {"", ZERO_ADDRESS}:
+                fail(f"zero-bid current auction surface mismatch for Dog #{dog_id}")
+            if current_price is None or current_price != explicit_price:
+                fail(f"current auction ETH/USD quote differs from archive for Dog #{dog_id}")
+            if text_value(current.get("eth_usd_price_date_utc")) != text_value(amount.get("usd_estimate_price_date_utc")):
+                fail(f"current auction ETH/USD quote date differs from archive for Dog #{dog_id}")
+        return
+
+    if is_active and event_type != "current_bid":
+        fail(f"active bid event classification mismatch for mission {mission} dog {dog_id}")
+    if event_type != "current_bid":
         return
     bid_hashes = [text_value(value) for value in record.get("bid_tx_hashes", []) if text_value(value)]
     if not bid_hashes or text_value(row.get("event_tx_hash")) != bid_hashes[-1]:

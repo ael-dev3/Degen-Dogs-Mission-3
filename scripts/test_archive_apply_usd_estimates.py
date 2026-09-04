@@ -66,6 +66,171 @@ def live_feed_record() -> dict[str, Any]:
     }
 
 
+def zero_bid_live_record() -> dict[str, Any]:
+    creation_hash = "0x" + "d" * 64
+    return {
+        "mission": 3,
+        "dog_id": 823,
+        "chain": "Base",
+        "chain_id": 8453,
+        "status": "ongoing",
+        # The generated feed currently advances this snapshot-oriented field
+        # even when the auction has no bids. Event provenance must instead use
+        # the independently attested auction creation below.
+        "activity_time_utc": "2026-09-04T00:01:07Z",
+        "amount": {
+            "native": "0.0",
+            "native_symbol": "ETH",
+            "price_asset_key": "ETH",
+            "raw": "0",
+            "usd_estimate": "0E-8",
+            "usd_estimate_display": "$0.00",
+            "usd_estimate_source": "current_eth_usd_price",
+            "usd_estimate_source_detail": "unit-test live quote",
+            "usd_estimate_confidence": "live_current",
+            "usd_estimate_price_usd": "4321.09",
+            "usd_estimate_price_date_utc": "2026-09-04",
+        },
+        "auction_created": {
+            "block_time_utc": "2026-09-03T23:54:05Z",
+            "tx_hash": creation_hash,
+        },
+        "settlement": {"settled": False},
+        "winner_or_high_bidder": {
+            "wallet": "0x0000000000000000000000000000000000000000",
+            "display": "no bids yet",
+        },
+        "bid_stats": {
+            "bid_count": 0,
+            "unique_bidder_count": 0,
+            "last_bid_time_utc": "2026-09-04T00:01:07Z",
+        },
+        "bid_tx_hashes": [],
+        "source": {"sources": ["generated_auction_feed"]},
+    }
+
+
+def test_live_zero_bid_uses_exact_auction_creation_provenance() -> None:
+    archive_usd = load_module()
+    validator = load_validator_module()
+    record = zero_bid_live_record()
+
+    estimate = archive_usd.update_record(record, {})
+
+    assert estimate is not None
+    assert estimate["event_type"] == "auction_record"
+    assert estimate["event_tx_hash"] == record["auction_created"]["tx_hash"]
+    assert estimate["event_time_utc"] == record["auction_created"]["block_time_utc"]
+    validator.validate_current_bid_provenance(
+        mission=3,
+        dog_id=823,
+        record=record,
+        amount=record["amount"],
+        row=estimate,
+        current_by_dog={
+            823: {
+                "token_id": 823,
+                # SQLite-backed generated JSON emits this as numeric zero.
+                "current_bid_eth": 0.0,
+                "bidder_wallet": "0x0000000000000000000000000000000000000000",
+                "eth_usd_price_live": "4321.09",
+                "eth_usd_price_date_utc": "2026-09-04",
+            }
+        },
+    )
+
+    numeric_zero = zero_bid_live_record()
+    numeric_zero["amount"]["native"] = 0.0
+    numeric_estimate = archive_usd.update_record(numeric_zero, {})
+    assert numeric_estimate is not None
+    assert numeric_estimate["event_type"] == "auction_record"
+
+
+def test_live_bid_or_contradictory_zero_bid_never_downgrades_to_creation_record() -> None:
+    archive_usd = load_module()
+    validator = load_validator_module()
+
+    positive = live_feed_record()
+    positive["bid_tx_hashes"] = []
+    positive_estimate = archive_usd.update_record(positive, {})
+    assert positive_estimate is not None
+    assert positive_estimate["event_type"] == "current_bid"
+
+    contradictory_wallet = zero_bid_live_record()
+    contradictory_wallet["winner_or_high_bidder"]["wallet"] = "0x" + "1" * 40
+    wallet_estimate = archive_usd.update_record(contradictory_wallet, {})
+    assert wallet_estimate is not None
+    assert wallet_estimate["event_type"] == "current_bid"
+
+    contradictory_count = zero_bid_live_record()
+    contradictory_count["bid_stats"]["bid_count"] = 1
+    count_estimate = archive_usd.update_record(contradictory_count, {})
+    assert count_estimate is not None
+    assert count_estimate["event_type"] == "current_bid"
+
+    fractional_count = zero_bid_live_record()
+    fractional_count["bid_stats"]["bid_count"] = 0.5
+    fractional_estimate = archive_usd.update_record(fractional_count, {})
+    assert fractional_estimate is not None
+    assert fractional_estimate["event_type"] == "current_bid"
+
+    for record, estimate in [
+        (positive, positive_estimate),
+        (contradictory_wallet, wallet_estimate),
+        (contradictory_count, count_estimate),
+        (fractional_count, fractional_estimate),
+    ]:
+        try:
+            validator.validate_current_bid_provenance(
+                mission=record["mission"],
+                dog_id=record["dog_id"],
+                record=record,
+                amount=record["amount"],
+                row=estimate,
+                current_by_dog={},
+            )
+        except SystemExit as exc:
+            assert "current bid transaction provenance mismatch" in str(exc)
+        else:
+            raise AssertionError("validator accepted a live bid-bearing state without bid provenance")
+
+
+def test_zero_bid_validator_independently_rejects_classification_and_creation_drift() -> None:
+    archive_usd = load_module()
+    validator = load_validator_module()
+    current = {
+        823: {
+            "current_bid_eth": 0.0,
+            "bidder_wallet": "0x0000000000000000000000000000000000000000",
+            "eth_usd_price_live": "4321.09",
+            "eth_usd_price_date_utc": "2026-09-04",
+        }
+    }
+
+    for mutation in ("event_type", "event_tx_hash", "event_time_utc"):
+        record = zero_bid_live_record()
+        estimate = archive_usd.update_record(record, {})
+        assert estimate is not None
+        estimate[mutation] = {
+            "event_type": "current_bid",
+            "event_tx_hash": "0x" + "e" * 64,
+            "event_time_utc": "2026-09-04T00:01:07Z",
+        }[mutation]
+        try:
+            validator.validate_current_bid_provenance(
+                mission=3,
+                dog_id=823,
+                record=record,
+                amount=record["amount"],
+                row=estimate,
+                current_by_dog=current,
+            )
+        except SystemExit as exc:
+            assert "zero-bid auction creation provenance mismatch" in str(exc)
+        else:
+            raise AssertionError(f"validator accepted zero-bid {mutation} drift")
+
+
 def test_preserves_generated_feed_usd_when_historical_price_missing() -> None:
     archive_usd = load_module()
     record = live_feed_record()

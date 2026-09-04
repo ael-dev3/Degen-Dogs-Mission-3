@@ -21,6 +21,7 @@ OUT_DIR = ROOT / "archive" / "prices" / "data" / "generated"
 ARCHIVE_UNIFIED = ROOT / "archive" / "data" / "generated" / "unified_dog_search_index.json"
 PUBLIC_UNIFIED = ROOT / "public" / "generated" / "unified_dog_search_index.json"
 DOG_ARCHIVE = ROOT / "archive" / "dogs" / "by-id"
+ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 
 def utc_now() -> str:
@@ -52,7 +53,7 @@ def write_json(path: Path, data: Any) -> None:
 
 
 def decimal_or_none(value: Any) -> Decimal | None:
-    text = str(value or "").replace(",", "").strip()
+    text = "" if value is None else str(value).replace(",", "").strip()
     if not text:
         return None
     try:
@@ -73,6 +74,33 @@ LIVE_USD_SOURCES = {
 
 def text_value(value: Any) -> str:
     return "" if value is None else str(value).strip()
+
+
+def is_canonical_live_zero_bid(
+    record: dict[str, Any],
+    amount: dict[str, Any],
+    bid_stats: dict[str, Any],
+    raw_bid_hashes: Any,
+) -> bool:
+    if text_value(record.get("status")).lower() not in {"ongoing", "live"}:
+        return False
+    if decimal_or_none(amount.get("native")) != Decimal(0):
+        return False
+    raw_bid_count = bid_stats.get("bid_count")
+    if isinstance(raw_bid_count, bool):
+        return False
+    if isinstance(raw_bid_count, int):
+        bid_count = raw_bid_count
+    elif isinstance(raw_bid_count, str) and raw_bid_count.strip() == "0":
+        bid_count = 0
+    else:
+        return False
+    if bid_count != 0 or not isinstance(raw_bid_hashes, list) or raw_bid_hashes:
+        return False
+    raw_who = record.get("winner_or_high_bidder")
+    who: dict[str, Any] = raw_who if isinstance(raw_who, dict) else {}
+    wallet = text_value(who.get("wallet")).lower()
+    return wallet in {"", ZERO_ADDRESS}
 
 
 def source_tokens(record: dict[str, Any], amount: dict[str, Any]) -> set[str]:
@@ -299,11 +327,17 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
     settlement: dict[str, Any] = raw_settlement if isinstance(raw_settlement, dict) else {}
     raw_created = record.get("auction_created")
     auction_created: dict[str, Any] = raw_created if isinstance(raw_created, dict) else {}
-    event_type = "settlement" if settlement.get("settled") else ("current_bid" if str(record.get("status", "")).lower() in {"ongoing", "live"} else "auction_record")
     raw_bid_hashes = record.get("bid_tx_hashes")
     bid_hashes = [text_value(value) for value in raw_bid_hashes if text_value(value)] if isinstance(raw_bid_hashes, list) else []
     raw_bid_stats = record.get("bid_stats")
     bid_stats: dict[str, Any] = raw_bid_stats if isinstance(raw_bid_stats, dict) else {}
+    status_is_live = text_value(record.get("status")).lower() in {"ongoing", "live"}
+    live_zero_bid = is_canonical_live_zero_bid(record, amount, bid_stats, raw_bid_hashes)
+    event_type = (
+        "settlement"
+        if settlement.get("settled")
+        else ("current_bid" if status_is_live and not live_zero_bid else "auction_record")
+    )
     if event_type == "settlement":
         event_tx_hash = settlement.get("tx_hash")
         event_time_utc = settlement.get("block_time_utc") or record.get("activity_time_utc")
@@ -312,7 +346,7 @@ def update_record(record: dict[str, Any], price_map: dict[tuple[str, str], dict[
         event_time_utc = bid_stats.get("last_bid_time_utc") or record.get("activity_time_utc")
     else:
         event_tx_hash = auction_created.get("tx_hash")
-        event_time_utc = record.get("activity_time_utc")
+        event_time_utc = auction_created.get("block_time_utc") or record.get("activity_time_utc")
     return {
         "mission": record.get("mission"),
         "dog_id": record.get("dog_id"),
