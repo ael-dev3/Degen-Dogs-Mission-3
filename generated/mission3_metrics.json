@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50924507"
+    "value": "50926305"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-05 19:59:21"
+    "value": "2026-09-05 20:59:17"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x1a78c1a690a6774056e56b5d9dbd6b686449bad81dec1efcbc6151beb1c95efa"
+    "value": "0xe19951ff1974c9ff099e879c0cadc105b005868a914e3889d76af689b5d6e9b1"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -45,11 +45,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "4/4"
+    "value": "5/5"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "alchemy,base.org,publicnode.com,rpc-host-e5083daccc13"
+    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50924507"
+    "value": "50926305"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x1a78c1a690a6774056e56b5d9dbd6b686449bad81dec1efcbc6151beb1c95efa"
+    "value": "0xe19951ff1974c9ff099e879c0cadc105b005868a914e3889d76af689b5d6e9b1"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2478.165"
+    "value": "2477.675"
   },
   {
     "metric": "eth_usd_source",
