@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50922713"
+    "value": "50924507"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-05 18:59:33"
+    "value": "2026-09-05 19:59:21"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xec00238802e0549c77ab698f1651410c66f44830ce73c5e9d174e080a04f16a1"
+    "value": "0x1a78c1a690a6774056e56b5d9dbd6b686449bad81dec1efcbc6151beb1c95efa"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -45,11 +45,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "5/5"
+    "value": "4/4"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
+    "value": "alchemy,base.org,publicnode.com,rpc-host-e5083daccc13"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50922713"
+    "value": "50924507"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xec00238802e0549c77ab698f1651410c66f44830ce73c5e9d174e080a04f16a1"
+    "value": "0x1a78c1a690a6774056e56b5d9dbd6b686449bad81dec1efcbc6151beb1c95efa"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2480.925"
+    "value": "2478.165"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "109.48"
+    "value": "109.37"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.9134"
+    "value": "0.9143"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "333.39"
+    "value": "333.72"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈333% APR"
+    "value": "≈334% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "9.92"
+    "value": "9.91"
   },
   {
     "metric": "current_bidder",
