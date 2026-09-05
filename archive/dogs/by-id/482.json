@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#290/699",
-      "rank": 290,
+      "display": "#293/700",
+      "rank": 293,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 482 dog #482 482 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 3700 degen 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 0x3a991db2c4fe400861ab8beb7aae0195619b39e9e442d3f965c2a1fa164e0a97 #290/699 background: none; body: brown; neck: goldnecklace; mouth: none; ears: goldearring; head: blackcap; eyes: eyepatch 0xe41db425e253108a971f8e602b0a9846a664d3fde880f5321ecb7a08dd1c825c 0x8baf30ae6f62ffe14490026f5768210d4c6821014506777bdceb3f58f856835b chain_logs contract_getters",
+    "search_text": "dog 482 dog #482 482 mission 2 mission 2 degen chain settled 0x26d85c9ed5c6cfe6bd13acd25b7aada9193e8caa 0x26d8…8caa 3700 degen 0x4ef988b72f9de6dfa32271e9560245aa3df8f9ffa13673778f85874447e18b60 0x3a991db2c4fe400861ab8beb7aae0195619b39e9e442d3f965c2a1fa164e0a97 background: none; body: brown; neck: goldnecklace; mouth: none; ears: goldearring; head: blackcap; eyes: eyepatch 0xe41db425e253108a971f8e602b0a9846a664d3fde880f5321ecb7a08dd1c825c 0x8baf30ae6f62ffe14490026f5768210d4c6821014506777bdceb3f58f856835b chain_logs contract_getters #293/700 background: none (91.6%) body: brown (10.9%) neck: goldnecklace (19.3%) mouth: none (68.7%) ears: goldearring (14.3%) head: blackcap (7.6%) eyes: eyepatch (7.9%)",
     "settlement": {
       "block_number": 26247223,
       "block_time_utc": "2025-09-09T14:15:55Z",
@@ -84,7 +84,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.7%)",
+        "display": "Body: Brown (10.9%)",
         "trait_type": "Body",
         "value": "Brown"
       },
@@ -94,7 +94,7 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },

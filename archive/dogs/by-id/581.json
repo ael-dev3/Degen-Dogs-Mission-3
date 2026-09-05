@@ -55,13 +55,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#313/699",
+      "display": "#313/700",
       "rank": 313,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 581 dog #581 581 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 15595 degen 0x141b8e5ad2c15b0c5c1a0e97a0dcfe1a1c6556d8831db3ee6706f9985823ca90 0xbd9e74c2f5cdb195bce02b3d82c3de9f6ed34a57bfd6e8e36eea04e73409ce7d #313/699 background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: unicorn; eyes: sunglasses 0x863abeddcdbb78faf812948503d4fc5241d4163b5f416addfe5575316cf6c8f6 0xf1992504cd5307c146e52ccc0a1e40c46f847b8b9ef6a063b4609d140ced7206 0x9d5038772a47ade3c6a3312ebd3eb3c2b0f19b37f9cc9d69b422da31ef5bd41d 0xa8c063b381d72b93942b6a0c4cc313fa94151e0489afdd81846ba03a5127b436 chain_logs contract_getters",
+    "search_text": "dog 581 dog #581 581 mission 2 mission 2 degen chain settled 0x8e5caf3f39b83dbc7663f7fc2b929e21d55482af @dl39 dl39 15595 degen 0x141b8e5ad2c15b0c5c1a0e97a0dcfe1a1c6556d8831db3ee6706f9985823ca90 0xbd9e74c2f5cdb195bce02b3d82c3de9f6ed34a57bfd6e8e36eea04e73409ce7d background: none; body: redbrown; neck: redcollar; mouth: none; ears: goldearring; head: unicorn; eyes: sunglasses 0x863abeddcdbb78faf812948503d4fc5241d4163b5f416addfe5575316cf6c8f6 0xf1992504cd5307c146e52ccc0a1e40c46f847b8b9ef6a063b4609d140ced7206 0x9d5038772a47ade3c6a3312ebd3eb3c2b0f19b37f9cc9d69b422da31ef5bd41d 0xa8c063b381d72b93942b6a0c4cc313fa94151e0489afdd81846ba03a5127b436 chain_logs contract_getters #313/700 background: none (91.6%) body: redbrown (15.4%) neck: redcollar (29.1%) mouth: none (68.7%) ears: goldearring (14.3%) head: unicorn (4.6%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": 26611206,
       "block_time_utc": "2025-12-29T07:41:53Z",
@@ -86,17 +86,17 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (29.2%)",
+        "display": "Neck: RedCollar (29.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },

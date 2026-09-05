@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#635/699",
-      "rank": 635,
+      "display": "#636/700",
+      "rank": 636,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 567 dog #567 567 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15000 degen 0x5aacd48c45be1df2861b3e0d07428e660def586ca6ae7f469e37346aa5b8b417 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b #635/699 background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: none; eyes: eyepatch 0x1b4b888a3d92be2a1f1656b7163b4d2b807a619e62f1cd012b2c6909afc250eb chain_logs contract_getters",
+    "search_text": "dog 567 dog #567 567 mission 2 mission 2 degen chain settled 0xbb672bbe37c259e7d22b250d6f1310161eefaece 0xbb67…aece 15000 degen 0x5aacd48c45be1df2861b3e0d07428e660def586ca6ae7f469e37346aa5b8b417 0xef29ba5252f00e723844a2cbfc227a760efeed850a753aadd39c80c8d6817e6b background: none; body: grey; neck: redcollar; mouth: none; ears: none; head: none; eyes: eyepatch 0x1b4b888a3d92be2a1f1656b7163b4d2b807a619e62f1cd012b2c6909afc250eb chain_logs contract_getters #636/700 background: none (91.6%) body: grey (12.9%) neck: redcollar (29.1%) mouth: none (68.7%) ears: none (26.0%) head: none (20.1%) eyes: eyepatch (7.9%)",
     "settlement": {
       "block_number": 26587659,
       "block_time_utc": "2025-12-15T06:14:34Z",
@@ -88,22 +88,22 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (29.2%)",
+        "display": "Neck: RedCollar (29.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: None (20.2%)",
+        "display": "Head: None (20.1%)",
         "trait_type": "Head",
         "value": "None"
       },

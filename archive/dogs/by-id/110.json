@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#26/699",
-      "rank": 26,
+      "display": "#29/700",
+      "rank": 29,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 110 dog #110 110 mission 1 mission 1 polygon no auction dogmaster reward weth #26/699 background: none; body: rainbow; neck: none; mouth: teeth; ears: loopearring; head: beanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 110 dog #110 110 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: rainbow; neck: none; mouth: teeth; ears: loopearring; head: beanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #29/700 background: none (91.6%) body: rainbow (4.3%) neck: none (41.4%) mouth: teeth (5.4%) ears: loopearring (27.3%) head: beanie (5.4%) eyes: eyepatch (7.9%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,12 +81,12 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: Teeth (5.3%)",
+        "display": "Mouth: Teeth (5.4%)",
         "trait_type": "Mouth",
         "value": "Teeth"
       },

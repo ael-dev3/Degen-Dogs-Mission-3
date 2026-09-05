@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#619/699",
-      "rank": 619,
+      "display": "#626/700",
+      "rank": 626,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 310 dog #310 310 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x2de4d8ade84461ad625ed74bf34337fe88c1cf1e5b4c59ec91085aaccdc421b4 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a #619/699 background: none; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: none 0xd395879c10877c34f871692c2a7ec49611c8b00fd966ded59615c17cd74ff34d chain_logs contract_getters",
+    "search_text": "dog 310 dog #310 310 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x2de4d8ade84461ad625ed74bf34337fe88c1cf1e5b4c59ec91085aaccdc421b4 0x2cc4e5dde94d8259c7dccf4df4d97be5f622fa50dcbfcf6d3e23a1302d0bda6a background: none; body: redbrown; neck: redcollar; mouth: none; ears: loopearring; head: whitemohawk; eyes: none 0xd395879c10877c34f871692c2a7ec49611c8b00fd966ded59615c17cd74ff34d chain_logs contract_getters #626/700 background: none (91.6%) body: redbrown (15.4%) neck: redcollar (29.1%) mouth: none (68.7%) ears: loopearring (27.3%) head: whitemohawk (7.0%) eyes: none (17.9%)",
     "settlement": {
       "block_number": 25579991,
       "block_time_utc": "2025-03-10T04:00:07Z",
@@ -83,17 +83,17 @@
         "value": "None"
       },
       {
-        "display": "Body: RedBrown (15.5%)",
+        "display": "Body: RedBrown (15.4%)",
         "trait_type": "Body",
         "value": "RedBrown"
       },
       {
-        "display": "Neck: RedCollar (29.2%)",
+        "display": "Neck: RedCollar (29.1%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -103,12 +103,12 @@
         "value": "LoopEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.9%)",
+        "display": "Head: WhiteMohawk (7.0%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }

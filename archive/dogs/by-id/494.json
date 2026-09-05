@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#571/699",
-      "rank": 571,
+      "display": "#576/700",
+      "rank": 576,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 494 dog #494 494 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xa08e4fdc9e17ea35ae285590991c932c86f6412b96c0f8262ade8034eb0bf9e9 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 #571/699 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: bluelasereyes 0xb7bdb5e9fae469c96bddc34793980a4d6d116adbd5944ce002f819490fad0fdd 0x1999c9da359bbec68a1585a12072baa43a2b2cba91ad5773e9b5ea58e70e6664 0x45dac7fd64048cb82e077c90d4f89bcf760566dc8775e388e715a85093be1bc7 chain_logs contract_getters",
+    "search_text": "dog 494 dog #494 494 mission 2 mission 2 degen chain settled 0xefe73c8d2f362ba8b20b9ea71b164ea5cdefd6a8 0xefe7…d6a8 2445 degen 0xa08e4fdc9e17ea35ae285590991c932c86f6412b96c0f8262ade8034eb0bf9e9 0x271b675e7cbb354b1ac5538cf73c075fb88ba747dc49507797bf7861ba616058 background: none; body: brown; neck: none; mouth: none; ears: earbuds; head: stripedbeanie; eyes: bluelasereyes 0xb7bdb5e9fae469c96bddc34793980a4d6d116adbd5944ce002f819490fad0fdd 0x1999c9da359bbec68a1585a12072baa43a2b2cba91ad5773e9b5ea58e70e6664 0x45dac7fd64048cb82e077c90d4f89bcf760566dc8775e388e715a85093be1bc7 chain_logs contract_getters #576/700 background: none (91.6%) body: brown (10.9%) neck: none (41.4%) mouth: none (68.7%) ears: earbuds (32.4%) head: stripedbeanie (8.0%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 26267958,
       "block_time_utc": "2025-09-21T23:42:53Z",
@@ -85,22 +85,22 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.7%)",
+        "display": "Body: Brown (10.9%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

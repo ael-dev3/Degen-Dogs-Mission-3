@@ -58,13 +58,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#130/699",
-      "rank": 130,
+      "display": "#131/700",
+      "rank": 131,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 745 dog #745 745 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.01774 eth 17740000000000000 31.85 $31.85 2026-06-16t23:27:35z 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 0xf27d50bf338277785b52bd065e9fc05ecaa19e12a83856ada4503222527d8c8a #130/699 generated auction feed 0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79 0xb062007cef59c2b552db4c52f5064c08a269dc7772f3f394dd56bb9e0961497b 0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b 0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b 0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf 0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6 0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5 background: halo (8.4%) background halo body: black (11.7%) body black neck: studdedcollar (10.0%) neck studdedcollar mouth: none (68.8%) mouth none ears: none (25.9%) ears none head: toque (7.0%) head toque eyes: bluelasereyes (11.4%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 745 dog #745 745 mission 3 mission 3 base settled 0x833c829b5123c7af0b810a03084d5d3f0529d323 @metasalary metasalary 0.01774 eth 17740000000000000 31.85 $31.85 2026-06-16t23:27:35z 0x3cf9a5947948a0cb253deba62f26eb76a17998c05106f6911bd31eff4e6beb05 0xf27d50bf338277785b52bd065e9fc05ecaa19e12a83856ada4503222527d8c8a generated auction feed 0x3454b8ba0828216704020953ad4fa236e0a61eb141eaaf1081ea2b66ea4b7f79 0xb062007cef59c2b552db4c52f5064c08a269dc7772f3f394dd56bb9e0961497b 0xf67927d0027a0caf081f3e762d524e06de6ed054fa0dc0f05dc37dde40c9427b 0x57f64c764f4e3f062f34371e50b3a2cc873ae4c692e06b67230a2a04c8d19b3b 0x979b0134777d43955bbc31cec9b0b894d63fcc9ab679c36c8f77603c37ac0ecf 0x11f099248f21253d8ed8b7c41bcdd840832dd522559f0353f38075aed15905d6 0xdd49810cc892fd62fe967e8b5862ae08aaa8935302f4b7e840de034022fb76c5 background halo body black neck studdedcollar mouth none ears none head toque eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners #131/700 background: halo (8.4%) body: black (11.7%) neck: studdedcollar (10.1%) mouth: none (68.7%) ears: none (26.0%) head: toque (7.0%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 47431554,
       "block_time_utc": "2026-06-16T23:27:35Z",
@@ -96,17 +96,17 @@
         "value": "Black"
       },
       {
-        "display": "Neck: StuddedCollar (10.0%)",
+        "display": "Neck: StuddedCollar (10.1%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },

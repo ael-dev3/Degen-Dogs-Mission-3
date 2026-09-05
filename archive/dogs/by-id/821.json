@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#158/699",
-      "rank": 158,
+      "display": "#157/700",
+      "rank": 157,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 821 dog #821 821 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 0x1179…2226 0.0055 eth 5500000000000000 13.3 $13.30 2026-09-02t22:59:53z 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e 0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8 #158/699 generated auction feed 0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd 0xf64c09a9299c89347ed791e1a7e8711e9a2bb654e0db284f955b373fa056ce50 background: none (91.6%) background none body: dalmation (9.3%) body dalmation neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: none (25.9%) ears none head: partyhat (4.3%) head partyhat eyes: monocle (7.3%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 821 dog #821 821 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 0x1179…2226 0.0055 eth 5500000000000000 13.3 $13.30 2026-09-02t22:59:53z 0xc1d17b7f9e16c4e3fb216b53f7831488a63d157dda8e6058350327d760a8105e 0x8b37204ced1b817300258bd31c2adae5f6d6f1fc14b8908b0439b7885ed719d8 generated auction feed 0xed49db2609679158083c59047fa2bfa5d5d34ce8780c619831f20da04e0846dd 0xf64c09a9299c89347ed791e1a7e8711e9a2bb654e0db284f955b373fa056ce50 background none body dalmation neck none mouth none ears none head partyhat eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #157/700 background: none (91.6%) body: dalmation (9.3%) neck: none (41.4%) mouth: none (68.7%) ears: none (26.0%) head: partyhat (4.3%) eyes: monocle (7.3%)",
     "settlement": {
       "block_number": 50800323,
       "block_time_utc": "2026-09-02T22:59:53Z",
@@ -92,17 +92,17 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },

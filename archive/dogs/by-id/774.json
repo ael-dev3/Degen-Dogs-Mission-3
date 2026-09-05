@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#513/699",
-      "rank": 513,
+      "display": "#514/700",
+      "rank": 514,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.17 $19.17 2026-07-16t08:33:29z 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7 #513/699 generated auction feed 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 background: none (91.6%) background none body: white (11.0%) body white neck: none (41.5%) neck none mouth: none (68.8%) mouth none ears: none (25.9%) ears none head: blackcap (7.6%) head blackcap eyes: masksnorkel (10.3%) eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 774 dog #774 774 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01 eth 10000000000000000 19.17 $19.17 2026-07-16t08:33:29z 0xf77b5f841a356999789f5251af2e4a73adbecf3ad8632ad9a6ef1ff84a936c88 0xac2ee26df84e83ff4205b1900b86790de8a16e554dd33c0da2bb3a6a6d615ef7 generated auction feed 0x2bd912738575fffec7d474273a3848bebee66470b2f91a9412d610959e949a29 0x3e323214e85ad8240d17b05b060637df5b4cd0f973a99a5c637a022c8b537b61 background none body white neck none mouth none ears none head blackcap eyes masksnorkel base_logs archive_indexer generated_auction_timeline generated_auction_winners #514/700 background: none (91.6%) body: white (11.0%) neck: none (41.4%) mouth: none (68.7%) ears: none (26.0%) head: blackcap (7.6%) eyes: masksnorkel (10.3%)",
     "settlement": {
       "block_number": 48700731,
       "block_time_utc": "2026-07-16T08:33:29Z",
@@ -91,17 +91,17 @@
         "value": "White"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },

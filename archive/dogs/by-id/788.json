@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#161/699",
-      "rank": 161,
+      "display": "#171/700",
+      "rank": 171,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.74 $16.74 2026-07-31t13:08:17z 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6 #161/699 generated auction feed 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144 background: none (91.6%) background none body: brown (10.7%) body brown neck: none (41.5%) neck none mouth: pizza (10.9%) mouth pizza ears: goldearring (14.3%) ears goldearring head: whitemohawk (6.9%) head whitemohawk eyes: eyepatch (7.9%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 788 dog #788 788 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.009 eth 9000000000000000 16.74 $16.74 2026-07-31t13:08:17z 0x5a1ce3be30da436c9ac0dee38fb944587bfee4080483209c650f6fc010336711 0x619a4aa06b2ecbedcf51421cbb2f8cd9d4f329c61010299204c820a687b127d6 generated auction feed 0x633b3f56aee990ef356612cdc0efaecb1ae6be266a83bea725a465f3d76d0db5 0x90bf52a14e2fa36db8cd21f4f52a632944e71481d8bec0e98855c9112e6bd935 0x200b867cf22b9b1dbe2a5740f7d07c80757d8ad5b631b90c4d8b7a43f25ff144 background none body brown neck none mouth pizza ears goldearring head whitemohawk eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners #171/700 background: none (91.6%) body: brown (10.9%) neck: none (41.4%) mouth: pizza (10.9%) ears: goldearring (14.3%) head: whitemohawk (7.0%) eyes: eyepatch (7.9%)",
     "settlement": {
       "block_number": 49356975,
       "block_time_utc": "2026-07-31T13:08:17Z",
@@ -87,12 +87,12 @@
         "value": "None"
       },
       {
-        "display": "Body: Brown (10.7%)",
+        "display": "Body: Brown (10.9%)",
         "trait_type": "Body",
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
@@ -107,7 +107,7 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: WhiteMohawk (6.9%)",
+        "display": "Head: WhiteMohawk (7.0%)",
         "trait_type": "Head",
         "value": "WhiteMohawk"
       },

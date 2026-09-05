@@ -55,13 +55,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#140/699",
-      "rank": 140,
+      "display": "#142/700",
+      "rank": 142,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 249 dog #249 249 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 10755 degen 0xa2aff1f4e1e8eed4cafa1facb3742d5d9c255ce7bdedf9f76889c316e6764dae 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 #140/699 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: hoodie; eyes: vrgoggles 0x58b3c714ceb611bf2e1e4fadb19909afce4c42c126a009b34b30be77c5a1993a 0x67149cf9dd3f5f0307abd8267645961b3c1bd541525347420ba3e75741ca206a 0xa346068b0bce728db1e7f37e390ebeb8ea034b8ba2fe43a5b1f2a55c43c786b2 0x38f7a9b6dbf17737555972445a440917f719530db0b692663158cc532c6386a9 chain_logs contract_getters",
+    "search_text": "dog 249 dog #249 249 mission 2 mission 2 degen chain settled 0x2e62ee3af78d005a0dffb116295b13ef45b6f2c0 0x2e62…f2c0 10755 degen 0xa2aff1f4e1e8eed4cafa1facb3742d5d9c255ce7bdedf9f76889c316e6764dae 0xd679b9bf300f40f46afc8d42976778b815164151026e256df1c1bd3275fdf784 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: none; head: hoodie; eyes: vrgoggles 0x58b3c714ceb611bf2e1e4fadb19909afce4c42c126a009b34b30be77c5a1993a 0x67149cf9dd3f5f0307abd8267645961b3c1bd541525347420ba3e75741ca206a 0xa346068b0bce728db1e7f37e390ebeb8ea034b8ba2fe43a5b1f2a55c43c786b2 0x38f7a9b6dbf17737555972445a440917f719530db0b692663158cc532c6386a9 chain_logs contract_getters #142/700 background: none (91.6%) body: dalmation (9.3%) neck: studdedcollar (10.1%) mouth: none (68.7%) ears: none (26.0%) head: hoodie (4.7%) eyes: vrgoggles (10.6%)",
     "settlement": {
       "block_number": 25215957,
       "block_time_utc": "2025-01-11T01:59:30Z",
@@ -91,17 +91,17 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: StuddedCollar (10.0%)",
+        "display": "Neck: StuddedCollar (10.1%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (25.9%)",
+        "display": "Ears: None (26.0%)",
         "trait_type": "Ears",
         "value": "None"
       },

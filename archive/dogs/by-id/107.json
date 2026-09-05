@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#274/699",
-      "rank": 274,
+      "display": "#278/700",
+      "rank": 278,
       "scope": "base_existing",
-      "total": 699
+      "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d #274/699 background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 107 dog #107 107 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0xe43d30f3f5a0b2e6fe2503ae5bca607c73f90f15d350efefba13787cde7d7c14 0xb1e2001ec6fd0d8804d2ad2c4b86fc836392ae4cbba1ad788c3ee7570b076f4d background: none; body: dalmation; neck: studdedcollar; mouth: none; ears: goldearring; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #278/700 background: none (91.6%) body: dalmation (9.3%) neck: studdedcollar (10.1%) mouth: none (68.7%) ears: goldearring (14.3%) head: headphones (6.7%) eyes: none (17.9%)",
     "settlement": {
       "block_number": 28503384,
       "block_time_utc": "2022-05-19T09:42:57Z",
@@ -88,12 +88,12 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: StuddedCollar (10.0%)",
+        "display": "Neck: StuddedCollar (10.1%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -108,7 +108,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.9%)",
         "trait_type": "Eyes",
         "value": "None"
       }
