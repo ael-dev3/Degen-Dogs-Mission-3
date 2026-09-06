@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#591/700",
+      "display": "#591/701",
       "rank": 591,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 187 dog #187 187 mission 1 mission 1 polygon no auction dogmaster reward weth #591/700 background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 187 dog #187 187 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #591/701 background: none (91.6%) body: black (11.7%) neck: none (41.4%) mouth: none (68.6%) ears: none (26.0%) head: headphones (6.7%) eyes: none (18.0%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -86,7 +86,7 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (18.0%)",
         "trait_type": "Eyes",
         "value": "None"
       }

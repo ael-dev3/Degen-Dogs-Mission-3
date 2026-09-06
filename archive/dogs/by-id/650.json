@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#599/700",
-      "rank": 599,
+      "display": "#600/701",
+      "rank": 600,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 650 dog #650 650 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 11000000000000000 22.4 $22.40 2026-03-11t08:27:57z 0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823 0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f #599/700 generated auction feed 0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e 0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e 0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e 0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74 background: none (91.6%) background none body: dalmation (9.3%) body dalmation neck: none (41.4%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.3%) ears loopearring head: stripedbeanie (8.0%) head stripedbeanie eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 650 dog #650 650 mission 3 mission 3 base settled 0xd29c790466675153a50df7860b9efdb689a21cde @thec1 thec1 0.011 eth 11000000000000000 22.4 $22.40 2026-03-11t08:27:57z 0xa4ea24adf6bd6a53510ea7445d9557db3c4cc8c16af45f71e1bab84ff6d6e823 0xb10e1c930e13020625583d420b85dc31fcb92a87666d5ab601e15af304ad1e6f generated auction feed 0xdb321fcf9a5fbebba2e41078fdcfcb8bf620e07da88182a4adf021dab7db215e 0xcd311c63d89f650cdd5f564267f680c23626bf3f94d4ab311fa79bffeadc5b3e 0x772088944de2125fed87578615f1aa25ecd5638c678a932f6495050a0bdbea2e 0x16fe04b29c6e52d4711994615ad96fe4de1d338d8097e0d665a6111c34399d74 background none body dalmation neck none mouth none ears loopearring head stripedbeanie eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #600/701 background: none (91.6%) body: dalmation (9.3%) neck: none (41.4%) mouth: none (68.6%) ears: loopearring (27.2%) head: stripedbeanie (8.0%) eyes: none (18.0%)",
     "settlement": {
       "block_number": 43214165,
       "block_time_utc": "2026-03-11T08:27:57Z",
@@ -98,12 +98,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -113,7 +113,7 @@
         "value": "StripedBeanie"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (18.0%)",
         "trait_type": "Eyes",
         "value": "None"
       }

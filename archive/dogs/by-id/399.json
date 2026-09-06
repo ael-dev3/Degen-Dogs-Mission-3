@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#419/700",
-      "rank": 419,
+      "display": "#420/701",
+      "rank": 420,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 399 dog #399 399 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d 0x3079eff2ea2b8e872736581314295b78dd44e8dde0cea31467c036d9f8d67005 #419/700 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: bluelasereyes 0x98cf9252b0b6382372836a6a2c9dd7d7bf558531c11b500e37bec6204011bcee chain_logs contract_getters",
+    "search_text": "dog 399 dog #399 399 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 2222 degen 0xd2fb0bc8bd12693e4d11487353d4738e4eeed52b84edde54f93b212777b1cb2d 0x3079eff2ea2b8e872736581314295b78dd44e8dde0cea31467c036d9f8d67005 background: none; body: redbrown; neck: studdedcollar; mouth: none; ears: goldearring; head: baseballcap; eyes: bluelasereyes 0x98cf9252b0b6382372836a6a2c9dd7d7bf558531c11b500e37bec6204011bcee chain_logs contract_getters #420/701 background: none (91.6%) body: redbrown (15.4%) neck: studdedcollar (10.1%) mouth: none (68.6%) ears: goldearring (14.3%) head: baseballcap (10.1%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 25935617,
       "block_time_utc": "2025-06-02T07:31:10Z",
@@ -93,7 +93,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },

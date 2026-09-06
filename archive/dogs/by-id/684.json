@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#102/700",
+      "display": "#102/701",
       "rank": 102,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 684 dog #684 684 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01684 eth 16840000000000000 39.12 $39.12 2026-04-14t20:29:23z 0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73 0x65c46a3ac644b4a5ea467233570313906375e07a466529d0b5c6246794191527 #102/700 generated auction feed 0x55f646426524802133f1b917e040dc99d63bc1a9cae2d5bb7b927fddd3aef834 background: none (91.6%) background none body: rainbow (4.3%) body rainbow neck: goldnecklace (19.3%) neck goldnecklace mouth: pizza (10.9%) mouth pizza ears: earbuds (32.4%) ears earbuds head: toque (7.0%) head toque eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 684 dog #684 684 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.01684 eth 16840000000000000 39.12 $39.12 2026-04-14t20:29:23z 0x23428a409c5403dc8ac558571d97a4edec71e44afdfdee8150090cc884778a73 0x65c46a3ac644b4a5ea467233570313906375e07a466529d0b5c6246794191527 generated auction feed 0x55f646426524802133f1b917e040dc99d63bc1a9cae2d5bb7b927fddd3aef834 background none body rainbow neck goldnecklace mouth pizza ears earbuds head toque eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners #102/701 background: none (91.6%) body: rainbow (4.3%) neck: goldnecklace (19.4%) mouth: pizza (10.8%) ears: earbuds (32.5%) head: toque (7.0%) eyes: none (18.0%)",
     "settlement": {
       "block_number": 44704608,
       "block_time_utc": "2026-04-14T20:29:23Z",
@@ -90,17 +90,17 @@
         "value": "Rainbow"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -110,7 +110,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (18.0%)",
         "trait_type": "Eyes",
         "value": "None"
       }

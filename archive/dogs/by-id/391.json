@@ -54,13 +54,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#575/700",
-      "rank": 575,
+      "display": "#572/701",
+      "rank": 572,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 391 dog #391 391 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x318fb938d160e96e354081d70a97a1225ff0d25fb7faf4dd6b70dbfec1b432ac 0x61e239e0c2746b5492cd50a1be93817225646a82b3421023fffffba14691ec6e #575/700 background: none; body: black; neck: goldnecklace; mouth: none; ears: loopearring; head: baseballcap; eyes: bluelasereyes 0x646fd8b8ad29bbb9d1a44185883d74b13cc6862a1ba0318ffa9db37efbefd32e 0x61c7d138ab1adac9d33e2d03d54f985001a5722f08804587b58c485ebfdda1a3 0x199f150bdce56991020a5ffa3312902ef920e869d86dbe8ca744c5a19f8f1572 chain_logs contract_getters",
+    "search_text": "dog 391 dog #391 391 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x318fb938d160e96e354081d70a97a1225ff0d25fb7faf4dd6b70dbfec1b432ac 0x61e239e0c2746b5492cd50a1be93817225646a82b3421023fffffba14691ec6e background: none; body: black; neck: goldnecklace; mouth: none; ears: loopearring; head: baseballcap; eyes: bluelasereyes 0x646fd8b8ad29bbb9d1a44185883d74b13cc6862a1ba0318ffa9db37efbefd32e 0x61c7d138ab1adac9d33e2d03d54f985001a5722f08804587b58c485ebfdda1a3 0x199f150bdce56991020a5ffa3312902ef920e869d86dbe8ca744c5a19f8f1572 chain_logs contract_getters #572/701 background: none (91.6%) body: black (11.7%) neck: goldnecklace (19.4%) mouth: none (68.6%) ears: loopearring (27.2%) head: baseballcap (10.1%) eyes: bluelasereyes (11.4%)",
     "settlement": {
       "block_number": 25908909,
       "block_time_utc": "2025-05-25T23:49:09Z",
@@ -90,17 +90,17 @@
         "value": "Black"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

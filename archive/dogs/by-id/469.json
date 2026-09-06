@@ -53,13 +53,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#3/700",
+      "display": "#3/701",
       "rank": 3,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 469 dog #469 469 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 12500 degen 0x37fe7ae4e01bab5f9e1f6cdd8e1eeb04456e37c644d60b84190c319c3f873f4b 0xc83087a20f2456a75ecf23a0f4d247c9ea54691ed207a09f636aa105216f6508 #3/700 background: none; body: alien; neck: goldnecklace; mouth: tongue; ears: loopearring; head: unicorn; eyes: glasses 0x5834e35594d2e334760d5bbeb4f73427fc28baa015bc73fedcba17a31ce8aa9a 0x169560d519ba4f277673df7fa47a5a18b1ed5d6e4606471211a2379223cd58f8 chain_logs contract_getters",
+    "search_text": "dog 469 dog #469 469 mission 2 mission 2 degen chain settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 12500 degen 0x37fe7ae4e01bab5f9e1f6cdd8e1eeb04456e37c644d60b84190c319c3f873f4b 0xc83087a20f2456a75ecf23a0f4d247c9ea54691ed207a09f636aa105216f6508 background: none; body: alien; neck: goldnecklace; mouth: tongue; ears: loopearring; head: unicorn; eyes: glasses 0x5834e35594d2e334760d5bbeb4f73427fc28baa015bc73fedcba17a31ce8aa9a 0x169560d519ba4f277673df7fa47a5a18b1ed5d6e4606471211a2379223cd58f8 chain_logs contract_getters #3/701 background: none (91.6%) body: alien (0.9%) neck: goldnecklace (19.4%) mouth: tongue (9.8%) ears: loopearring (27.2%) head: unicorn (4.6%) eyes: glasses (12.3%)",
     "settlement": {
       "block_number": 26210452,
       "block_time_utc": "2025-08-25T14:27:35Z",
@@ -89,17 +89,17 @@
         "value": "Alien"
       },
       {
-        "display": "Neck: GoldNecklace (19.3%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (9.8%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },

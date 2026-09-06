@@ -50,13 +50,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#237/700",
-      "rank": 237,
+      "display": "#248/701",
+      "rank": 248,
       "scope": "base_existing",
-      "total": 700
+      "total": 701
     },
     "schema_version": 1,
-    "search_text": "dog 152 dog #152 152 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c 0x060986cf137e0c2e44083b4459b30dc7c8df29caac98f9fa096ee9759dbb62a6 #237/700 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: toque; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 152 dog #152 152 mission 1 mission 1 polygon settled 0x0000000000000000000000000000000000000000 0x0000…0000 0 weth 0x885ad806397ae993f4c12bfc3076cdd89cb14b872de4fa304f1b9e4f70a81c3c 0x060986cf137e0c2e44083b4459b30dc7c8df29caac98f9fa096ee9759dbb62a6 background: none; body: grey; neck: none; mouth: teeth; ears: earbuds; head: toque; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #248/701 background: none (91.6%) body: grey (13.0%) neck: none (41.4%) mouth: teeth (5.6%) ears: earbuds (32.5%) head: toque (7.0%) eyes: none (18.0%)",
     "settlement": {
       "block_number": 31465276,
       "block_time_utc": "2022-08-03T08:06:32Z",
@@ -83,7 +83,7 @@
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (13.0%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -93,12 +93,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: Teeth (5.4%)",
+        "display": "Mouth: Teeth (5.6%)",
         "trait_type": "Mouth",
         "value": "Teeth"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.5%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -108,7 +108,7 @@
         "value": "Toque"
       },
       {
-        "display": "Eyes: None (17.9%)",
+        "display": "Eyes: None (18.0%)",
         "trait_type": "Eyes",
         "value": "None"
       }
