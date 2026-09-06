@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-09-06 06:59:19",
+    "token_id": 825,
+    "dog": "Dog #825",
+    "bidder": "@0xael.eth",
+    "bidder_url": "https://farcaster.xyz/0xael.eth",
+    "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "bid": "0.00300 ETH ($7)",
+    "bid_eth": 0.003,
+    "bid_usd": 7.52,
+    "eth_usd_price_live": "2506.345",
+    "eth_usd_price_date_utc": "2026-09-06",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 50944306,
+    "log_index": 472,
+    "tx_hash": "0xf4f2c982e847b7f12665ef1afd46ef79cae871578dab77f1a4d7b5e8e79c5741"
+  }
+]

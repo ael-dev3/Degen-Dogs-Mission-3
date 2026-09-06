@@ -23109,13 +23109,13 @@
     "dog_external_url": "https://degendogs.club/#dog825",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/825",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "0",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "@0xael.eth",
+    "winner_url": "https://farcaster.xyz/0xael.eth",
+    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "amount": "0.00300 ETH ($7)",
+    "amount_raw": "3000000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-06 05:53:25",
     "settled_time_utc": "",
     "rarity": "#212/701",
@@ -23125,6 +23125,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 825 Dog #825 https://api.degendogs.club/images/825.png https://degendogs.club/#dog825 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/825 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 0 2026-09-06 05:53:25 #212/701 53.543503 Background: None; Body: Grey; Neck: GoldNecklace; Mouth: Teeth; Ears: Earbuds; Head: BlackCap; Eyes: None Background: None (91.6%); Body: Grey (13.0%); Neck: GoldNecklace (19.4%); Mouth: Teeth (5.6%); Ears: Earbuds (32.5%); Head: BlackCap (7.7%); Eyes: None (18.0%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 825 Dog #825 https://api.degendogs.club/images/825.png https://degendogs.club/#dog825 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/825 live @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00300 ETH ($7) 3000000000000000 1 1 2026-09-06 05:53:25 #212/701 53.543503 Background: None; Body: Grey; Neck: GoldNecklace; Mouth: Teeth; Ears: Earbuds; Head: BlackCap; Eyes: None Background: None (91.6%); Body: Grey (13.0%); Neck: GoldNecklace (19.4%); Mouth: Teeth (5.6%); Ears: Earbuds (32.5%); Head: BlackCap (7.7%); Eyes: None (18.0%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
