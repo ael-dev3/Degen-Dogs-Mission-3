@@ -3,19 +3,19 @@
     "activity_time_basis": "last_bid_block_time",
     "activity_time_utc": "2026-09-05T07:17:23Z",
     "amount": {
-      "amount_usd_at_event": null,
+      "amount_usd_at_event": "10.02",
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-09-06",
       "native": "0.004",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "4000000000000000",
-      "usd_estimate": "9.96204000",
+      "usd_estimate": "10.02308000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$9.96",
+      "usd_estimate_display": "$10.02",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-06",
-      "usd_estimate_price_usd": "2490.51",
+      "usd_estimate_price_usd": "2505.77",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -58,7 +58,7 @@
       "total": 700
     },
     "schema_version": 1,
-    "search_text": "dog 824 dog #824 824 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.004 eth 4000000000000000 9.96000000 $9.96 2026-09-05t07:17:23z 0x040bfbb737c7c041c5359bf2148701ed4e8f82d7cec471437754a5074a02c7dd #100/700 generated auction feed 0x59b609c379292eb7dc9b17ba7ff7c658b694dd2dfb6a0451e840191d3ab8aa18 0x8d48915084337442d3826dcc3e0db3c7c19d951c43cf3f27975d969c4ed63480 background: none (91.6%) background none body: brown (10.9%) body brown neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: none (26.0%) ears none head: whitemohawk (7.0%) head whitemohawk eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 824 dog #824 824 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.004 eth 4000000000000000 10.02 $10.02 2026-09-05t07:17:23z 0x040bfbb737c7c041c5359bf2148701ed4e8f82d7cec471437754a5074a02c7dd #100/700 generated auction feed 0x59b609c379292eb7dc9b17ba7ff7c658b694dd2dfb6a0451e840191d3ab8aa18 0x8d48915084337442d3826dcc3e0db3c7c19d951c43cf3f27975d969c4ed63480 background: none (91.6%) background none body: brown (10.9%) body brown neck: studdedcollar (10.1%) neck studdedcollar mouth: teeth (5.4%) mouth teeth ears: none (26.0%) ears none head: whitemohawk (7.0%) head whitemohawk eyes: none (17.9%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
