@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50998420"
+    "value": "51000106"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-07 13:03:07"
+    "value": "2026-09-07 13:59:19"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x869a4420c216e314621da1b7502ce55616293097ef6b7c71c838d69895f3d1a2"
+    "value": "0x91dd71c1a05f976329b1da5b2c3ce6cd95dfd3e05738a73632cbc32818e797fd"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -45,11 +45,11 @@
   },
   {
     "metric": "rpc_quorum_agreement",
-    "value": "5/5"
+    "value": "4/4"
   },
   {
     "metric": "rpc_quorum_providers",
-    "value": "alchemy,base.org,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
+    "value": "alchemy,publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
   },
   {
     "metric": "log_rpc_quorum_providers",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50998420"
+    "value": "51000106"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x869a4420c216e314621da1b7502ce55616293097ef6b7c71c838d69895f3d1a2"
+    "value": "0x91dd71c1a05f976329b1da5b2c3ce6cd95dfd3e05738a73632cbc32818e797fd"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2503.315"
+    "value": "2498.415"
   },
   {
     "metric": "eth_usd_source",
@@ -353,15 +353,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "80.6"
+    "value": "80.49"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "1.2407"
+    "value": "1.2424"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "452.87"
+    "value": "453.47"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "7.51"
+    "value": "7.5"
   },
   {
     "metric": "current_bidder",
