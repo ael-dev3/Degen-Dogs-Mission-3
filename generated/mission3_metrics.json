@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "50996681"
+    "value": "50998310"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-07 12:05:09"
+    "value": "2026-09-07 12:59:27"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x6f0f900917812d499c3eee105ad6ecbba3f9bc02aa8101df389cbf1309b15b92"
+    "value": "0x7079a3f5ea55896d2822dde7d82b078cf8a6ebe388e23add76da76c829dd29ca"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "50996681"
+    "value": "50998310"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x6f0f900917812d499c3eee105ad6ecbba3f9bc02aa8101df389cbf1309b15b92"
+    "value": "0x7079a3f5ea55896d2822dde7d82b078cf8a6ebe388e23add76da76c829dd29ca"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2489.515"
+    "value": "2507.255"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "26.72"
+    "value": "80.7"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "3.7421"
+    "value": "1.2391"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "1365.88"
+    "value": "452.27"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈1,366% APR"
+    "value": "≈452% APR"
   },
   {
     "metric": "woof_holders",
@@ -393,19 +393,19 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.001"
+    "value": "0.003"
   },
   {
     "metric": "current_bid_usd",
-    "value": "2.49"
+    "value": "7.52"
   },
   {
     "metric": "current_bidder",
-    "value": "@thec1"
+    "value": "@0xael.eth"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0xd29c790466675153a50df7860b9efdb689a21cde"
+    "value": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "metric": "current_auction_end_utc",
@@ -421,7 +421,7 @@
   },
   {
     "metric": "total_bid_eth",
-    "value": "38.50958300"
+    "value": "38.51258300"
   },
   {
     "metric": "total_settled_eth",
@@ -441,27 +441,27 @@
   },
   {
     "metric": "season6_current_bidder_cap_remaining_sup",
-    "value": "1304.864046"
+    "value": "0"
   },
   {
     "metric": "season6_current_bidder_prior_wins",
-    "value": "4"
+    "value": "27"
   },
   {
     "metric": "season6_current_bidder_projected_capped_sup_if_wins",
-    "value": "11195.135954"
+    "value": "12500"
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "69.09"
+    "value": "77.14"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
-    "value": "11195.135954"
+    "value": "29720.409074"
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "69.09"
+    "value": "183.4"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -493,7 +493,7 @@
   },
   {
     "metric": "season6_sup_current_bid_cap_remaining_before_win_sup",
-    "value": "1304.864046"
+    "value": "0"
   },
   {
     "metric": "season6_sup_current_bid_estimate_status",
@@ -517,23 +517,23 @@
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
-    "value": "11195.135954"
+    "value": "29720.409074"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_without_win_sup",
-    "value": "11195.135954"
+    "value": "29720.409074"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_wins",
-    "value": "4"
+    "value": "27"
   },
   {
     "metric": "season6_sup_current_bidder_prior_s6_xp",
-    "value": "400"
+    "value": "2700"
   },
   {
     "metric": "season6_sup_current_bidder_wallet",
-    "value": "0xd29c790466675153a50df7860b9efdb689a21cde"
+    "value": "0x76d0e7a13248945ee9f808b4a472262b28778942"
   },
   {
     "metric": "season6_sup_days_remaining",
