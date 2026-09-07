@@ -1,5 +1,27 @@
 [
   {
+    "dog": "Dog #825",
+    "dog_image_url": "https://api.degendogs.club/images/825.png",
+    "dog_external_url": "https://degendogs.club/#dog825",
+    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/825",
+    "winner": "@i-am-rael.eth",
+    "winner_url": "https://farcaster.xyz/i-am-rael.eth",
+    "winning_bid": "0.00332 ETH ($8)",
+    "winning_bid_eth": 0.00332,
+    "winning_bid_usd": 8.23,
+    "winning_bid_usd_at_settlement": 8.23,
+    "eth_usd_price_at_event": "2480.0031686031184",
+    "eth_usd_price_date_utc": "2026-09-06",
+    "usd_estimate_source": "defillama_coin_prices",
+    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+    "usd_estimate_confidence": "medium",
+    "usd_estimate_basis": "nearest_settlement_date_eth_usd",
+    "metadata_verification_status": "onchain_token_uri_verified",
+    "rarity": "#208/702",
+    "last_bid_utc": "2026-09-07 01:54:09",
+    "settled_time_utc": "2026-09-07 05:55:41"
+  },
+  {
     "dog": "Dog #824",
     "dog_image_url": "https://api.degendogs.club/images/824.png",
     "dog_external_url": "https://degendogs.club/#dog824",
@@ -17,7 +39,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#101/701",
+    "rarity": "#102/702",
     "last_bid_utc": "2026-09-05 07:17:23",
     "settled_time_utc": "2026-09-06 05:53:25"
   },
@@ -39,7 +61,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#264/701",
+    "rarity": "#261/702",
     "last_bid_utc": "2026-09-04 08:33:49",
     "settled_time_utc": "2026-09-04 23:59:41"
   },
@@ -61,7 +83,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#620/701",
+    "rarity": "#620/702",
     "last_bid_utc": "2026-09-03 22:52:05",
     "settled_time_utc": "2026-09-03 23:54:05"
   },
@@ -83,7 +105,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#155/701",
+    "rarity": "#153/702",
     "last_bid_utc": "2026-09-02 21:29:49",
     "settled_time_utc": "2026-09-02 22:59:53"
   },
@@ -105,7 +127,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#700/701",
+    "rarity": "#701/702",
     "last_bid_utc": "2026-08-31 23:25:29",
     "settled_time_utc": "2026-09-01 22:58:23"
   },
@@ -127,7 +149,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#172/701",
+    "rarity": "#169/702",
     "last_bid_utc": "2026-08-30 21:57:39",
     "settled_time_utc": "2026-08-31 22:35:07"
   },
@@ -149,7 +171,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#602/701",
+    "rarity": "#603/702",
     "last_bid_utc": "2026-08-30 09:18:03",
     "settled_time_utc": "2026-08-30 21:57:23"
   },
@@ -171,7 +193,7 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#520/701",
+    "rarity": "#521/702",
     "last_bid_utc": "2026-08-29 20:37:59",
     "settled_time_utc": "2026-08-29 21:51:31"
   },
@@ -193,30 +215,8 @@
     "usd_estimate_confidence": "medium",
     "usd_estimate_basis": "settlement_date_eth_usd",
     "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#430/701",
+    "rarity": "#429/702",
     "last_bid_utc": "2026-08-28 21:42:35",
     "settled_time_utc": "2026-08-28 21:50:13"
-  },
-  {
-    "dog": "Dog #815",
-    "dog_image_url": "https://api.degendogs.club/images/815.png",
-    "dog_external_url": "https://degendogs.club/#dog815",
-    "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/815",
-    "winner": "@kunon",
-    "winner_url": "https://farcaster.xyz/kunon",
-    "winning_bid": "0.00550 ETH ($13)",
-    "winning_bid_eth": 0.0055,
-    "winning_bid_usd": 13.78,
-    "winning_bid_usd_at_settlement": 13.78,
-    "eth_usd_price_at_event": "2506.3431057180687",
-    "eth_usd_price_date_utc": "2026-08-27",
-    "usd_estimate_source": "defillama_coin_prices",
-    "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
-    "usd_estimate_confidence": "medium",
-    "usd_estimate_basis": "settlement_date_eth_usd",
-    "metadata_verification_status": "onchain_token_uri_verified",
-    "rarity": "#534/701",
-    "last_bid_utc": "2026-08-27 02:30:13",
-    "settled_time_utc": "2026-08-27 21:47:45"
   }
 ]
