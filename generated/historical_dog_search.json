@@ -23137,13 +23137,13 @@
     "dog_external_url": "https://degendogs.club/#dog826",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/826",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "0",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "@thec1",
+    "winner_url": "https://farcaster.xyz/thec1",
+    "winner_wallet": "0xd29c790466675153a50df7860b9efdb689a21cde",
+    "amount": "0.00100 ETH ($2)",
+    "amount_raw": "1000000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-07 05:55:41",
     "settled_time_utc": "",
     "rarity": "#251/702",
@@ -23153,6 +23153,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 826 Dog #826 https://api.degendogs.club/images/826.png https://degendogs.club/#dog826 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/826 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 0 2026-09-07 05:55:41 #251/702 51.928485 Background: None; Body: Brown; Neck: RedCollar; Mouth: None; Ears: LoopEarring; Head: Hoodie; Eyes: EyePatch Background: None (91.6%); Body: Brown (11.0%); Neck: RedCollar (29.2%); Mouth: None (68.7%); Ears: LoopEarring (27.4%); Head: Hoodie (4.8%); Eyes: EyePatch (8.0%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 826 Dog #826 https://api.degendogs.club/images/826.png https://degendogs.club/#dog826 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/826 live @thec1 https://farcaster.xyz/thec1 0xd29c790466675153a50df7860b9efdb689a21cde 0.00100 ETH ($2) 1000000000000000 1 1 2026-09-07 05:55:41 #251/702 51.928485 Background: None; Body: Brown; Neck: RedCollar; Mouth: None; Ears: LoopEarring; Head: Hoodie; Eyes: EyePatch Background: None (91.6%); Body: Brown (11.0%); Neck: RedCollar (29.2%); Mouth: None (68.7%); Ears: LoopEarring (27.4%); Head: Hoodie (4.8%); Eyes: EyePatch (8.0%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
