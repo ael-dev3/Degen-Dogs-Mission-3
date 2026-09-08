@@ -296,6 +296,17 @@ def assert_bid_history_card_layout() -> None:
             raise AssertionError(f"generated index.html missing bid history layout marker: {marker}")
 
 
+def assert_snapshot_reward_visibility() -> None:
+    builder = load_builder()
+    if builder.SHOW_SNAPSHOT_REWARD_ESTIMATES:
+        return
+    # Also enforce the display policy on runner-produced artifacts, including
+    # the data-only Pages fast path. Do not mistake retained JS/CSS for cards.
+    body = INDEX_PATH.read_text(encoding="utf-8").split("<body>", 1)[1].split("<script>", 1)[0]
+    if "data-current-rewards" in body or 'class="reward-strip"' in body:
+        raise AssertionError("generated dashboard still displays disabled snapshot reward cards")
+
+
 def main() -> int:
     assert_trait_links()
     assert_timer_urgency_colors()
@@ -304,6 +315,7 @@ def main() -> int:
     assert_creator_popover()
     assert_no_farcaster_channel_panel()
     assert_bid_history_card_layout()
+    assert_snapshot_reward_visibility()
     print("dashboard_ui_checks=pass")
     return 0
 

@@ -13,6 +13,8 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP, getcontext
 from pathlib import Path
 from typing import Any
 
+from build_dashboard import SHOW_SNAPSHOT_REWARD_ESTIMATES
+
 ROOT = Path(__file__).resolve().parents[1]
 ZERO = "0x0000000000000000000000000000000000000000"
 RECENT_BIDS = ROOT / "generated" / "recent_bids.json"
@@ -1263,7 +1265,9 @@ def find_unified_current(path: Path, current_dog_id: int) -> dict[str, Any]:
     return find_unified_mission3(path, current_dog_id)
 
 
-def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[str, str]) -> None:
+def validate_reward_metrics(
+    metrics: dict[str, str], index: str, readme: dict[str, str], *, show_snapshot_rewards: bool = True
+) -> None:
     basis_count = optional_decimal_value(metrics.get("reward_basis_dogs"))
     observed_count = optional_decimal_value(metrics.get("reward_observed_dogs_count"))
     if basis_count != Decimal("133") or observed_count not in (None, Decimal("133")):
@@ -1292,7 +1296,7 @@ def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[st
         assert_metric_cell(key, expected_value, index)
 
     reward_surface = reward_strip_surface(index)
-    if not reward_surface:
+    if show_snapshot_rewards and not reward_surface:
         raise AssertionError("index.html missing reward-strip APR/payback surface")
     for removed_copy in ("Observed 133-Dog stream", "WOOF Vault Bonus excluded."):
         if removed_copy in reward_surface:
@@ -1324,16 +1328,16 @@ def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[st
 
     expected_display = expected["reward_current_bid_apr_display"]
     reward_surface = reward_strip_surface(index)
-    if not reward_surface:
+    if show_snapshot_rewards and not reward_surface:
         raise AssertionError("index.html missing reward-strip APR/payback surface")
-    if expected_display and expected_display not in reward_surface:
+    if show_snapshot_rewards and expected_display and expected_display not in reward_surface:
         raise AssertionError(f"index.html missing reward APR display: {expected_display!r}")
     payback_display = "N/A"
     payback_days = optional_decimal_value(expected["reward_current_bid_payback_days"])
     if payback_days is not None and payback_days > 0:
         places = 1 if payback_days < 10 else 0
         payback_display = f"≈{payback_days:,.{places}f} days"
-    if payback_display and payback_display not in reward_surface:
+    if show_snapshot_rewards and payback_display and payback_display not in reward_surface:
         raise AssertionError(f"index.html missing reward payback display: {payback_display!r}")
     readme_summary = readme.get("Bid payback / APR")
     expected_summary = f"{payback_display} / {expected_display}"
@@ -1341,7 +1345,9 @@ def validate_reward_metrics(metrics: dict[str, str], index: str, readme: dict[st
         raise AssertionError("README Bid payback / APR differs from mission3_metrics reward estimate")
 
 
-def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
+def validate_season6_metrics(
+    metrics: dict[str, str], index: str, *, show_snapshot_rewards: bool = True
+) -> None:
     if not text(metrics.get("season6_sup_status")):
         return
     enabled = text(metrics.get("season6_sup_enabled")).lower()
@@ -1440,6 +1446,11 @@ def validate_season6_metrics(metrics: dict[str, str], index: str) -> None:
             raise AssertionError("Season 6 status cap-aware estimate differs from mission3_metrics")
         if text(status.get("estimated_cap_aware_incremental_usd")) != text(metrics.get("season6_sup_current_bid_estimated_cap_aware_usd")):
             raise AssertionError("Season 6 status USD estimate differs from mission3_metrics")
+
+    # Hiding cards is presentation-only: all numeric/export checks above still
+    # apply. check_dashboard_ui also rejects artifacts that reintroduce them.
+    if not show_snapshot_rewards:
+        return
 
     forbidden_fragments = [
         "Pool: 251,340 SUP",
@@ -1926,8 +1937,8 @@ def validate_current_surface() -> dict[str, Any]:
     assert_index_contains("current bid display", text(current.get("current_bid")), index)
     assert_index_contains("current high-bidder display", text(current.get("bidder")), index)
     assert_index_contains("current auction status", text(feed.get("status")), index)
-    validate_reward_metrics(metrics, index, readme)
-    validate_season6_metrics(metrics, index)
+    validate_reward_metrics(metrics, index, readme, show_snapshot_rewards=SHOW_SNAPSHOT_REWARD_ESTIMATES)
+    validate_season6_metrics(metrics, index, show_snapshot_rewards=SHOW_SNAPSHOT_REWARD_ESTIMATES)
     expected_season6_readme = season6_readme_estimate_summary(metrics)
     if expected_season6_readme and readme.get("Season 6 SUP estimate if current bid wins") != expected_season6_readme:
         raise AssertionError("README Season 6 SUP estimate differs from mission3_metrics")
