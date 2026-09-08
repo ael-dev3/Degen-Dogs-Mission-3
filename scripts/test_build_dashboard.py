@@ -2824,6 +2824,65 @@ def test_write_html_includes_browser_favicon_only() -> None:
         assert marker not in rendered
 
 
+def test_snapshot_reward_cards_stay_absent_after_live_refresh() -> None:
+    from classify_pages_validation import render_dashboard_once
+
+    dashboard = load_module()
+    metrics = {
+        "current_auction_token_id": "827",
+        "reward_woof_per_dog_per_day": "154091.739",
+        "reward_sup_per_dog_per_day": "1.5006",
+        "reward_total_per_dog_usd_per_day": "0.091172",
+        "reward_current_bid_payback_days": "81.17",
+        "reward_current_bid_apr_display": "450% APR",
+        "season6_sup_enabled": "true",
+        "season6_sup_current_bidder_wallet": "0x123",
+        "season6_sup_current_bid_estimated_cap_aware_sup": "100",
+        "season6_sup_current_bid_estimated_cap_aware_usd": "5",
+    }
+    tables = {
+        "mission3_metrics": (["metric", "value"], list(metrics.items())),
+        "auction_feed": (
+            ["status", "dog", "bid", "bidder_winner", "time_remaining", "auction_end_utc"],
+            [("ongoing", "Dog #827", "0.003 ETH", "@bidder", "01:00:00", "2026-09-09 05:56:25")],
+        ),
+    }
+    rendered = render_dashboard_once(tables, b"", dashboard).decode("utf-8")
+    body = rendered.split("<body>", 1)[1].split("<script>", 1)[0]
+    assert '<div data-current-rewards>' not in body, "snapshot rewards still have a visible mount point"
+    assert '<section class="reward-strip"' not in body
+    for label in ("WOOF / Dog", "SUP / Dog", "Total / Dog", "Bid payback", "Season 6 SUP estimate"):
+        assert f"<b>{label}</b>" not in body, label
+    for retained in ("Dog #827", "0.003 ETH", "@bidder", "data-countdown-end", "Search auctions"):
+        assert retained in body, retained
+    assert "reward_current_bid_payback_days" in body, "underlying metrics must remain available"
+
+    # Run the actual refresh renderer against the generated page's missing
+    # mount point. Repeated updates must be harmless even with reward data.
+    script = rendered.split("<script>", 1)[1].split("</script>", 1)[0]
+    definitions = "\n".join(
+        line for line in script.splitlines()
+        if line.startswith(("const currentRewards=", "const renderRewards="))
+    )
+    program = (
+        "const assert=require('node:assert/strict');\n"
+        "const document={querySelector(selector){assert.equal(selector,'[data-current-rewards]');return null;}};\n"
+        + definitions
+        + "\nconst metrics=" + json.dumps(metrics) + ";\n"
+        + "renderRewards(metrics);renderRewards({...metrics,reward_current_bid_apr_display:'900% APR'});\n"
+    )
+    result = subprocess.run(["node", "-e", program], capture_output=True, text=True, check=False)
+    assert result.returncode == 0, result.stderr
+
+    # Restoring the single display switch must not require data reconstruction.
+    dashboard.SHOW_SNAPSHOT_REWARD_ESTIMATES = True
+    restored = render_dashboard_once(tables, b"", dashboard).decode("utf-8")
+    restored_body = restored.split("<body>", 1)[1].split("<script>", 1)[0]
+    assert '<div data-current-rewards>' in restored_body
+    for label in ("WOOF / Dog", "SUP / Dog", "Total / Dog", "Bid payback", "Season 6 SUP estimate"):
+        assert f"<b>{label}</b>" in restored_body, label
+
+
 def test_unified_archive_bid_cell_formats_usd_from_shared_numeric_fallbacks() -> None:
     dashboard = load_module()
     tables = {

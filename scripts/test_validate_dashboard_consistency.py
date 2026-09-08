@@ -70,6 +70,7 @@ def write_fixture(
     feed_bidder: str = "@0xael.eth",
     season6_estimate_display: str = "≈1,000 SUP",
     season6_by_winner_capped: str = "1000",
+    include_live_bundle: bool = True,
 ) -> None:
     wallet = "0x76d0e7a13248945ee9f808b4a472262b28778942"
     existing_ids_sha256 = hashlib.sha256(
@@ -562,7 +563,8 @@ def write_fixture(
     )
     write_text(root / "index.html", index)
     write_text(root / "README.md", """# Fixture\n\n## Current snapshot\n\n| Field | Value |\n| --- | --- |\n| Snapshot block | 46732183 |\n| Snapshot time UTC | 2026-05-31 18:55:13 |\n| Current Dog | Dog #729 |\n| Current status | live |\n| Current bid | 0.01 ETH ($19.98) |\n| Current high bidder | @0xael.eth |\n| Bid payback / APR | ≈187 days / ≈196% APR |\n| Season 6 SUP estimate if current bid wins | ≈1,000 SUP / ≈$2,000 |\n\n## Next\n""")
-    rebuild_live_bundle(root)
+    if include_live_bundle:
+        rebuild_live_bundle(root)
 
 
 def write_current_state_fixture(
@@ -671,6 +673,8 @@ def write_unsupported_current_state_fixture(root: Path) -> None:
 
 def run_validation(root: Path) -> dict[str, Any]:
     validator = load_module()
+    # Existing fixtures intentionally exercise the optional reward cards too.
+    validator.SHOW_SNAPSHOT_REWARD_ESTIMATES = True
     validator.ROOT = root
     validator.RECENT_BIDS = root / "generated" / "recent_bids.json"
     return validator.validate_current_surface()
@@ -683,6 +687,30 @@ def assert_raises_contains(fn, text: str) -> None:
         assert text in str(exc)
     else:
         raise AssertionError(f"expected AssertionError containing {text!r}")
+
+
+def test_hidden_rewards_preserve_numeric_and_export_validation() -> None:
+    validator = load_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        write_fixture(root, include_live_bundle=False)
+        validator.ROOT = root
+        metrics = {row["metric"]: row["value"] for row in json.loads((root / "generated/mission3_metrics.json").read_text())}
+        index = hidden_metrics_table(metrics)
+        readme = {"Bid payback / APR": "≈187 days / ≈196% APR"}
+        validator.validate_reward_metrics(metrics, index, readme, show_snapshot_rewards=False)
+        validator.validate_season6_metrics(metrics, index, show_snapshot_rewards=False)
+        assert_raises_contains(
+            lambda: validator.validate_reward_metrics(
+                {**metrics, "reward_current_bid_apr_pct": "999"}, index, readme, show_snapshot_rewards=False
+            ),
+            "current bid reward math",
+        )
+        write_json(root / "public/generated/season6_sup_current_bidder_status.json", [])
+        assert_raises_contains(
+            lambda: validator.validate_season6_metrics(metrics, index, show_snapshot_rewards=False),
+            "differs from generated",
+        )
 
 
 def write_extension_schedule_fixture(root: Path) -> None:

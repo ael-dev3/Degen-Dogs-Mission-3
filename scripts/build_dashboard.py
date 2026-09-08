@@ -35,6 +35,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SQL_PATH = ROOT / "sql" / "mission3_dashboard.sql"
 GENERATED = ROOT / "generated"
 PUBLIC_GENERATED = ROOT / "public" / "generated"
+# Temporarily omit snapshot-based reward/ROI/Season 6 cards from the dashboard.
+# Keep calculations and exports intact; one source-controlled switch restores
+# both initial rendering and live hydration without per-runner configuration.
+SHOW_SNAPSHOT_REWARD_ESTIMATES = False
 LIVE_SNAPSHOT_BUNDLE_FILENAME_RE = re.compile(
     r"^live_snapshot_[1-9][0-9]*_[0-9a-f]{64}_[0-9a-f]{64}\.json$"
 )
@@ -5656,7 +5660,11 @@ def write_html(tables: dict[str, tuple[list[str], list[tuple[Any, ...]]]]) -> No
             bid_history_menu,
         ]
     )
-    reward_strip = render_reward_strip(metrics)
+    # No mount point means renderRewards() also remains a no-op on later polls.
+    reward_panel = (
+        f'      <div data-current-rewards>{render_reward_strip(metrics)}</div>'
+        if SHOW_SNAPSHOT_REWARD_ESTIMATES else ""
+    )
     chips = trait_chips(current)
     css = """
 :root{color-scheme:light;--paper:#e8ded5;--paper-calm:#f0fbea;--paper-warm:#fff7e6;--paper-urgent:#fff1f1;--ink:#0a0a0a;--panel:#fffaf3;--panel2:#f4ece3;--muted:#6d625b;--line:#cdbfb3;--calm:#61bf6b;--calm-dark:#1f6b3b;--warning:#d97706;--warning-dark:#92400e;--urgent:#e51b32;--urgent-dark:#9f1239;--critical-bg:#111111;--critical-red:#ef233c;--accent:#e51b2f;--accent2:#b91325;--shadow:0 10px 26px rgba(10,10,10,.1);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -5998,7 +6006,7 @@ window.addEventListener('online',refreshNow);
       <div class="topline"><div class="eyebrow">{live_dot_html}<span data-live-label>Mission 3 auction feed · verification pending</span></div>{top_actions_html}</div>
       <h1 data-current-dog>{current_dog_html}</h1>
       <div class="current-detail" data-current-detail>{current_detail}</div>
-      <div data-current-rewards>{reward_strip}</div>
+{reward_panel}
       <div class="traits" data-current-traits aria-label="Current dog traits and rarity">{chips}</div>
     </div>
     <a class="dog-stage" data-current-dog-stage href="{html.escape(current_dog_url, quote=True)}" target="_blank" rel="noopener noreferrer" aria-label="{html.escape(current_dog_label, quote=True)}">{image_html}</a>
