@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-09-07T05:58:28Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-09-07T12:06:55Z",
+    "activity_time_utc": "2026-09-08T00:57:11Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
-      "eth_usd_price_date_utc": "2026-09-07",
-      "native": "0.003",
+      "eth_usd_price_date_utc": "2026-09-08",
+      "native": "0.00331",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "3000000000000000",
-      "usd_estimate": "7.47190500",
+      "raw": "3310000000000000",
+      "usd_estimate": "8.22503555",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$7.47",
+      "usd_estimate_display": "$8.23",
       "usd_estimate_notes": "preserved_source_usd_estimate",
-      "usd_estimate_price_date_utc": "2026-09-07",
-      "usd_estimate_price_usd": "2490.635",
+      "usd_estimate_price_date_utc": "2026-09-08",
+      "usd_estimate_price_usd": "2484.905",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,13 +29,14 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 2,
-      "last_bid_time_utc": "2026-09-07T12:06:55Z",
-      "unique_bidder_count": 2
+      "bid_count": 3,
+      "last_bid_time_utc": "2026-09-08T00:57:11Z",
+      "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
       "0x24c2987ad7fe3e832a3cadc4c506951f85bcbc42f87aea77bb7db9a12589f085",
-      "0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd"
+      "0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd",
+      "0x106f8caf2c592fed5f96da42de003f20b5e23e8ee6e957b1c269bfaeac095d4c"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -46,7 +47,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0x16932c6c806fb62fdbd6c77a01ed9fe68b99d91b2250fece359c43ee8fc8a311",
       "dog_page": "https://degendogs.club/#dog826",
-      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "explorer": "https://basescan.org/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/826",
       "repo_archive": "archive/dogs/by-id/826.json",
       "settlement_tx": null
@@ -59,7 +60,7 @@
       "total": 702
     },
     "schema_version": 1,
-    "search_text": "dog 826 dog #826 826 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.47000000 $7.47 2026-09-07t12:06:55z 0x16932c6c806fb62fdbd6c77a01ed9fe68b99d91b2250fece359c43ee8fc8a311 #251/702 generated auction feed 0x24c2987ad7fe3e832a3cadc4c506951f85bcbc42f87aea77bb7db9a12589f085 0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd background: none (91.6%) background none body: brown (11.0%) body brown neck: redcollar (29.2%) neck redcollar mouth: none (68.7%) mouth none ears: loopearring (27.4%) ears loopearring head: hoodie (4.8%) head hoodie eyes: eyepatch (8.0%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 826 dog #826 826 mission 3 mission 3 base ongoing 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.00331 eth 3310000000000000 8.23000000 $8.23 2026-09-08t00:57:11z 0x16932c6c806fb62fdbd6c77a01ed9fe68b99d91b2250fece359c43ee8fc8a311 #251/702 generated auction feed 0x24c2987ad7fe3e832a3cadc4c506951f85bcbc42f87aea77bb7db9a12589f085 0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd 0x106f8caf2c592fed5f96da42de003f20b5e23e8ee6e957b1c269bfaeac095d4c background: none (91.6%) background none body: brown (11.0%) body brown neck: redcollar (29.2%) neck redcollar mouth: none (68.7%) mouth none ears: loopearring (27.4%) ears loopearring head: hoodie (4.8%) head hoodie eyes: eyepatch (8.0%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -117,12 +118,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@0xael.eth",
+      "display": "@cctv1",
       "farcaster_fid": null,
-      "farcaster_handle": "0xael.eth",
-      "profile_url": "https://farcaster.xyz/0xael.eth",
-      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
+      "farcaster_handle": "cctv1",
+      "profile_url": "https://farcaster.xyz/cctv1",
+      "wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
+      "wallet_explorer_url": "https://basescan.org/address/0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72"
     }
   },
   "schema_version": 1
