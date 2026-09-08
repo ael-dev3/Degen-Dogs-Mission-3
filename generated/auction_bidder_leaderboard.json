@@ -1482,6 +1482,19 @@
     "latest_bid_utc": "2026-01-24 13:01:51"
   },
   {
+    "bidder": "0x2d66…7e8a",
+    "bidder_url": "https://basescan.org/address/0x2d665e415f0c724452a8bddf4a6cfd2743717e8a",
+    "bidder_wallet": "0x2d665e415f0c724452a8bddf4a6cfd2743717e8a",
+    "bids": 1,
+    "auctions_bid": 1,
+    "bid_eth": 0.00365,
+    "high_bid_eth": 0.00365,
+    "auction_wins": 1,
+    "winning_eth": 0.00365,
+    "latest_bid_token_id": 826,
+    "latest_bid_utc": "2026-09-08 05:47:33"
+  },
+  {
     "bidder": "@floar.eth",
     "bidder_url": "https://farcaster.xyz/floar.eth",
     "bidder_wallet": "0x9d33588ae198c31946857208d93da9f1d1b59904",
