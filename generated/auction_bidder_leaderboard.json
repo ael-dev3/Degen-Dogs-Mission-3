@@ -3,14 +3,14 @@
     "bidder": "@0xael.eth",
     "bidder_url": "https://farcaster.xyz/0xael.eth",
     "bidder_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
-    "bids": 223,
-    "auctions_bid": 152,
-    "bid_eth": 4.69061,
+    "bids": 224,
+    "auctions_bid": 153,
+    "bid_eth": 4.69361,
     "high_bid_eth": 0.16455,
     "auction_wins": 43,
     "winning_eth": 0.82023,
-    "latest_bid_token_id": 827,
-    "latest_bid_utc": "2026-09-08 10:37:31"
+    "latest_bid_token_id": 828,
+    "latest_bid_utc": "2026-09-09 08:13:01"
   },
   {
     "bidder": "@stemo.eth",
@@ -393,14 +393,14 @@
     "bidder": "@cctv1",
     "bidder_url": "https://farcaster.xyz/cctv1",
     "bidder_wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
-    "bids": 57,
-    "auctions_bid": 41,
-    "bid_eth": 0.26064,
+    "bids": 58,
+    "auctions_bid": 42,
+    "bid_eth": 0.26395,
     "high_bid_eth": 0.01859,
     "auction_wins": 2,
     "winning_eth": 0.01621,
-    "latest_bid_token_id": 826,
-    "latest_bid_utc": "2026-09-08 00:57:11"
+    "latest_bid_token_id": 827,
+    "latest_bid_utc": "2026-09-09 01:08:29"
   },
   {
     "bidder": "@i-am-rael.eth",
@@ -445,14 +445,14 @@
     "bidder": "@farcy",
     "bidder_url": "https://farcaster.xyz/farcy",
     "bidder_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
-    "bids": 38,
-    "auctions_bid": 32,
-    "bid_eth": 0.19265,
+    "bids": 39,
+    "auctions_bid": 33,
+    "bid_eth": 0.19315,
     "high_bid_eth": 0.02965,
     "auction_wins": 3,
     "winning_eth": 0.04207,
-    "latest_bid_token_id": 827,
-    "latest_bid_utc": "2026-09-08 09:33:19"
+    "latest_bid_token_id": 828,
+    "latest_bid_utc": "2026-09-09 07:49:45"
   },
   {
     "bidder": "0x7c6f…2978",
@@ -1493,6 +1493,19 @@
     "winning_eth": 0.00365,
     "latest_bid_token_id": 826,
     "latest_bid_utc": "2026-09-08 05:47:33"
+  },
+  {
+    "bidder": "0x6e93…2973",
+    "bidder_url": "https://basescan.org/address/0x6e934baa19239d0bee3f36785efbb8fcee3b2973",
+    "bidder_wallet": "0x6e934baa19239d0bee3f36785efbb8fcee3b2973",
+    "bids": 1,
+    "auctions_bid": 1,
+    "bid_eth": 0.00365,
+    "high_bid_eth": 0.00365,
+    "auction_wins": 1,
+    "winning_eth": 0.00365,
+    "latest_bid_token_id": 827,
+    "latest_bid_utc": "2026-09-09 04:18:29"
   },
   {
     "bidder": "@floar.eth",

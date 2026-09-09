@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#364/703",
-      "rank": 364,
+      "display": "#366/704",
+      "rank": 366,
       "scope": "base_existing",
-      "total": 703
+      "total": 704
     },
     "schema_version": 1,
-    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth #364/703 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth #366/704 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -76,7 +76,7 @@
         "value": "None"
       },
       {
-        "display": "Body: White (11.0%)",
+        "display": "Body: White (10.9%)",
         "trait_type": "Body",
         "value": "White"
       },
@@ -86,7 +86,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.8%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (13.2%)",
+        "display": "Eyes: Sunglasses (13.4%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
