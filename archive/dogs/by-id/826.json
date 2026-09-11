@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#250/704",
-      "rank": 250,
+      "display": "#255/705",
+      "rank": 255,
       "scope": "base_existing",
-      "total": 704
+      "total": 705
     },
     "schema_version": 1,
-    "search_text": "dog 826 dog #826 826 mission 3 mission 3 base settled 0x2d665e415f0c724452a8bddf4a6cfd2743717e8a 0x2d66…7e8a 0.00365 eth 3650000000000000 9.09 $9.09 2026-09-08t05:56:25z 0x16932c6c806fb62fdbd6c77a01ed9fe68b99d91b2250fece359c43ee8fc8a311 0xf371217b112ff163b35fc65181916530f2bebbcfd858fff0380e9170153f2100 #250/704 generated auction feed 0x24c2987ad7fe3e832a3cadc4c506951f85bcbc42f87aea77bb7db9a12589f085 0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd 0x106f8caf2c592fed5f96da42de003f20b5e23e8ee6e957b1c269bfaeac095d4c 0xbb660312164eb64a7d76d8ea9a45c53b073a24d2e931528206fd88340cc720cc background: none (91.5%) background none body: brown (10.9%) body brown neck: redcollar (29.3%) neck redcollar mouth: none (68.8%) mouth none ears: loopearring (27.4%) ears loopearring head: hoodie (4.8%) head hoodie eyes: eyepatch (8.0%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 826 dog #826 826 mission 3 mission 3 base settled 0x2d665e415f0c724452a8bddf4a6cfd2743717e8a 0x2d66…7e8a 0.00365 eth 3650000000000000 9.09 $9.09 2026-09-08t05:56:25z 0x16932c6c806fb62fdbd6c77a01ed9fe68b99d91b2250fece359c43ee8fc8a311 0xf371217b112ff163b35fc65181916530f2bebbcfd858fff0380e9170153f2100 #255/705 generated auction feed 0x24c2987ad7fe3e832a3cadc4c506951f85bcbc42f87aea77bb7db9a12589f085 0x11ee3b7c18c7e95456439fdcd97d1429469cfe8a80f259da7e03ee7c9edfa2cd 0x106f8caf2c592fed5f96da42de003f20b5e23e8ee6e957b1c269bfaeac095d4c 0xbb660312164eb64a7d76d8ea9a45c53b073a24d2e931528206fd88340cc720cc background: none (91.3%) background none body: brown (10.9%) body brown neck: redcollar (29.2%) neck redcollar mouth: none (68.8%) mouth none ears: loopearring (27.5%) ears loopearring head: hoodie (4.8%) head hoodie eyes: eyepatch (8.1%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 51028819,
       "block_time_utc": "2026-09-08T05:56:25Z",
@@ -84,7 +84,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -94,7 +94,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: RedCollar (29.3%)",
+        "display": "Neck: RedCollar (29.2%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
@@ -104,7 +104,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.4%)",
+        "display": "Ears: LoopEarring (27.5%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -114,7 +114,7 @@
         "value": "Hoodie"
       },
       {
-        "display": "Eyes: EyePatch (8.0%)",
+        "display": "Eyes: EyePatch (8.1%)",
         "trait_type": "Eyes",
         "value": "EyePatch"
       }
