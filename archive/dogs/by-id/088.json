@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#492/705",
-      "rank": 492,
+      "display": "#499/706",
+      "rank": 499,
       "scope": "base_existing",
-      "total": 705
+      "total": 706
     },
     "schema_version": 1,
-    "search_text": "dog 88 dog #88 88 mission 1 mission 1 polygon no auction dogmaster reward weth #492/705 background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 88 dog #88 88 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #499/706 background: none (91.4%) body: grey (13.0%) neck: redcollar (29.2%) mouth: none (68.7%) ears: earbuds (32.4%) head: stripedbeanie (8.1%) eyes: eyepatch (8.1%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,12 +71,12 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.3%)",
+        "display": "Background: None (91.4%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: Grey (12.9%)",
+        "display": "Body: Grey (13.0%)",
         "trait_type": "Body",
         "value": "Grey"
       },
@@ -86,17 +86,17 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (7.9%)",
+        "display": "Head: StripedBeanie (8.1%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

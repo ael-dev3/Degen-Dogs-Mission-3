@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#82/705",
+      "display": "#82/706",
       "rank": 82,
       "scope": "base_existing",
-      "total": 705
+      "total": 706
     },
     "schema_version": 1,
-    "search_text": "dog 0 dog #0 0 mission 1 mission 1 polygon no auction dogmaster reward weth #82/705 background: none; body: redbrown; neck: none; mouth: none; ears: goldearring; head: partyhat; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 0 dog #0 0 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: redbrown; neck: none; mouth: none; ears: goldearring; head: partyhat; eyes: 3dglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #82/706 background: none (91.4%) body: redbrown (15.3%) neck: none (41.4%) mouth: none (68.7%) ears: goldearring (14.2%) head: partyhat (4.2%) eyes: 3dglasses (4.2%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,7 +71,7 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.3%)",
+        "display": "Background: None (91.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -81,12 +81,12 @@
         "value": "RedBrown"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -96,12 +96,12 @@
         "value": "GoldEarring"
       },
       {
-        "display": "Head: PartyHat (4.3%)",
+        "display": "Head: PartyHat (4.2%)",
         "trait_type": "Head",
         "value": "PartyHat"
       },
       {
-        "display": "Eyes: 3DGlasses (4.3%)",
+        "display": "Eyes: 3DGlasses (4.2%)",
         "trait_type": "Eyes",
         "value": "3DGlasses"
       }

@@ -55,13 +55,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#536/705",
-      "rank": 536,
+      "display": "#540/706",
+      "rank": 540,
       "scope": "base_existing",
-      "total": 705
+      "total": 706
     },
     "schema_version": 1,
-    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base settled 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.0055 eth 5500000000000000 13.78 $13.78 2026-08-27t21:47:45z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 #536/705 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d 0x2e090ecef7b5dbef16f135d864206dc7e209f1052e86728858890adfc1dc77a4 background: none (91.3%) background none body: orange (8.2%) body orange neck: none (41.3%) neck none mouth: none (68.8%) mouth none ears: earbuds (32.5%) ears earbuds head: stripedbeanie (7.9%) head stripedbeanie eyes: sunglasses (13.3%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners",
+    "search_text": "dog 815 dog #815 815 mission 3 mission 3 base settled 0x437be13e57f822167a3206c6744d03bcd6b499ee @kunon kunon 0.0055 eth 5500000000000000 13.78 $13.78 2026-08-27t21:47:45z 0x4166f6176f693894c73351303b9407544770a6df18246b21a12915f21b0062a9 0xcc8d0cdc1dc79d8381303c1d62b2008cc0c0a439398844245a581a95e9b74bb1 generated auction feed 0x091762bbc5c067d90c4cff023778624a66a8610675c53b33d1254c5943f3bcee 0x8c9443f79bb098579ac85b926cf0fc055df3cb7942a07450970842d834bc5cad 0x7c8c25f7946aa82699568d1e64e3e2955ba2d292a89e82571d63261460a65f9d 0x2e090ecef7b5dbef16f135d864206dc7e209f1052e86728858890adfc1dc77a4 background none body orange neck none mouth none ears earbuds head stripedbeanie eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners #540/706 background: none (91.4%) body: orange (8.2%) neck: none (41.4%) mouth: none (68.7%) ears: earbuds (32.4%) head: stripedbeanie (8.1%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": 50538959,
       "block_time_utc": "2026-08-27T21:47:45Z",
@@ -83,7 +83,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.3%)",
+        "display": "Background: None (91.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -93,22 +93,22 @@
         "value": "Orange"
       },
       {
-        "display": "Neck: None (41.3%)",
+        "display": "Neck: None (41.4%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (7.9%)",
+        "display": "Head: StripedBeanie (8.1%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },

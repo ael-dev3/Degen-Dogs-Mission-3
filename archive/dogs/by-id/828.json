@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#197/705",
+      "display": "#197/706",
       "rank": 197,
       "scope": "base_existing",
-      "total": 705
+      "total": 706
     },
     "schema_version": 1,
-    "search_text": "dog 828 dog #828 828 mission 3 mission 3 base settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.00331 eth 3310000000000000 8.17 $8.17 2026-09-10t14:01:33z 0x392e01bc1bfda1525112e59c85450f535d98437cd34c32edf1c6d245c5756cad 0x5fe510845b12dd42bdaa96a1e2f40ac3ddf481d3a0e11ca73e3446d14f49e834 #197/705 generated auction feed 0xff3da2f8d575cddf217828288553f25bebb6ae2ac65c47de6a75421e66c67263 0x4a977e440c1ddd40672ad41efb969b6701d5a8f079e7f19ce381da4c3e13722d 0xa6a48034f947ffc43dfdcc52ee5668e98daf91a6a3bd74d7593cf978df710450 background: none (91.3%) background none body: rainbow (4.5%) body rainbow neck: goldnecklace (19.4%) neck goldnecklace mouth: none (68.8%) mouth none ears: earbuds (32.5%) ears earbuds head: crazyhair (7.1%) head crazyhair eyes: sunglasses (13.3%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 828 dog #828 828 mission 3 mission 3 base settled 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 @cctv1 cctv1 0.00331 eth 3310000000000000 8.17 $8.17 2026-09-10t14:01:33z 0x392e01bc1bfda1525112e59c85450f535d98437cd34c32edf1c6d245c5756cad 0x5fe510845b12dd42bdaa96a1e2f40ac3ddf481d3a0e11ca73e3446d14f49e834 generated auction feed 0xff3da2f8d575cddf217828288553f25bebb6ae2ac65c47de6a75421e66c67263 0x4a977e440c1ddd40672ad41efb969b6701d5a8f079e7f19ce381da4c3e13722d 0xa6a48034f947ffc43dfdcc52ee5668e98daf91a6a3bd74d7593cf978df710450 background none body rainbow neck goldnecklace mouth none ears earbuds head crazyhair eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #197/706 background: none (91.4%) body: rainbow (4.5%) neck: goldnecklace (19.4%) mouth: none (68.7%) ears: earbuds (32.4%) head: crazyhair (7.1%) eyes: sunglasses (13.3%)",
     "settlement": {
       "block_number": 51129773,
       "block_time_utc": "2026-09-10T14:01:33Z",
@@ -83,7 +83,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.3%)",
+        "display": "Background: None (91.4%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -98,12 +98,12 @@
         "value": "GoldNecklace"
       },
       {
-        "display": "Mouth: None (68.8%)",
+        "display": "Mouth: None (68.7%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.5%)",
+        "display": "Ears: Earbuds (32.4%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },

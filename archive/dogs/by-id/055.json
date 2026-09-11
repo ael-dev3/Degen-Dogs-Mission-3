@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#18/705",
+      "display": "#18/706",
       "rank": 18,
       "scope": "base_existing",
-      "total": 705
+      "total": 706
     },
     "schema_version": 1,
-    "search_text": "dog 55 dog #55 55 mission 1 mission 1 polygon no auction dogmaster reward weth #18/705 background: halo; body: blue; neck: redcollar; mouth: coin; ears: none; head: baseballcap; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 55 dog #55 55 mission 1 mission 1 polygon no auction dogmaster reward weth background: halo; body: blue; neck: redcollar; mouth: coin; ears: none; head: baseballcap; eyes: masksnorkel polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #18/706 background: halo (8.6%) body: blue (8.8%) neck: redcollar (29.2%) mouth: coin (2.5%) ears: none (25.9%) head: baseballcap (10.1%) eyes: masksnorkel (10.2%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,7 +71,7 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: Halo (8.7%)",
+        "display": "Background: Halo (8.6%)",
         "trait_type": "Background",
         "value": "Halo"
       },
@@ -86,12 +86,12 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Coin (2.6%)",
+        "display": "Mouth: Coin (2.5%)",
         "trait_type": "Mouth",
         "value": "Coin"
       },
       {
-        "display": "Ears: None (25.8%)",
+        "display": "Ears: None (25.9%)",
         "trait_type": "Ears",
         "value": "None"
       },
