@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#159/706",
-      "rank": 159,
+      "display": "#158/707",
+      "rank": 158,
       "scope": "base_existing",
-      "total": 706
+      "total": 707
     },
     "schema_version": 1,
-    "search_text": "dog 829 dog #829 829 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.31 $7.31 2026-09-11t14:10:07z 0x5fe510845b12dd42bdaa96a1e2f40ac3ddf481d3a0e11ca73e3446d14f49e834 0xcae454faec406481ba253b6c0115147c8130593e76d3f81f94ef959423579cdb #159/706 generated auction feed 0x60bafa082049832dfa8784bfb013a70efea419be0bcbfb1046146eb7c33e881e 0x827c63102a0bee1fd1476074b2854bb53a98ade8e8cb305b1896c97c0c7cc107 background: halo (8.6%) background halo body: dalmation (9.3%) body dalmation neck: none (41.4%) neck none mouth: none (68.7%) mouth none ears: loopearring (27.5%) ears loopearring head: crazyhair (7.1%) head crazyhair eyes: eyepatch (8.1%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 829 dog #829 829 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.31 $7.31 2026-09-11t14:10:07z 0x5fe510845b12dd42bdaa96a1e2f40ac3ddf481d3a0e11ca73e3446d14f49e834 0xcae454faec406481ba253b6c0115147c8130593e76d3f81f94ef959423579cdb generated auction feed 0x60bafa082049832dfa8784bfb013a70efea419be0bcbfb1046146eb7c33e881e 0x827c63102a0bee1fd1476074b2854bb53a98ade8e8cb305b1896c97c0c7cc107 background halo body dalmation neck none mouth none ears loopearring head crazyhair eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #158/707 background: halo (8.6%) body: dalmation (9.3%) neck: none (41.4%) mouth: none (68.6%) ears: loopearring (27.4%) head: crazyhair (7.1%) eyes: eyepatch (8.1%)",
     "settlement": {
       "block_number": 51173230,
       "block_time_utc": "2026-09-11T14:10:07Z",
@@ -97,12 +97,12 @@
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.7%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.5%)",
+        "display": "Ears: LoopEarring (27.4%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
