@@ -15,7 +15,7 @@
     "amount_wei": "3000000000000000",
     "current_bid_usd": 7.54,
     "current_bid_usd_live": 7.54,
-    "eth_usd_price_live": "2513.295",
+    "eth_usd_price_live": "2512.745",
     "eth_usd_price_date_utc": "2026-09-12",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
@@ -29,10 +29,10 @@
     "start_time_unix": 1789135807,
     "end_time_unix": 1789222207,
     "auction_state": "live",
-    "seconds_remaining": 36646,
-    "time_remaining": "10:10:46",
+    "seconds_remaining": 33048,
+    "time_remaining": "09:10:48",
     "settled": 0,
-    "latest_block": 51198107,
-    "latest_block_time_utc": "2026-09-12 03:59:21"
+    "latest_block": 51199906,
+    "latest_block_time_utc": "2026-09-12 04:59:19"
   }
 ]
