@@ -23277,13 +23277,13 @@
     "dog_external_url": "https://degendogs.club/#dog831",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/831",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "0",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "@farcy",
+    "winner_url": "https://farcaster.xyz/farcy",
+    "winner_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
+    "amount": "0.00050 ETH ($1)",
+    "amount_raw": "500000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-12 21:43:19",
     "settled_time_utc": "",
     "rarity": "#85/707",
@@ -23293,6 +23293,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 831 Dog #831 https://api.degendogs.club/images/831.png https://degendogs.club/#dog831 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/831 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 0 2026-09-12 21:43:19 #85/707 64.917262 Background: None; Body: Orange; Neck: None; Mouth: Pizza; Ears: None; Head: PartyHat; Eyes: Monocle Background: None (91.4%); Body: Orange (8.3%); Neck: None (41.4%); Mouth: Pizza (10.9%); Ears: None (26.0%); Head: PartyHat (4.4%); Eyes: Monocle (7.4%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 831 Dog #831 https://api.degendogs.club/images/831.png https://degendogs.club/#dog831 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/831 live @farcy https://farcaster.xyz/farcy 0x84cb3b93f9a918632f05528770b5cf926396b0f4 0.00050 ETH ($1) 500000000000000 1 1 2026-09-12 21:43:19 #85/707 64.917262 Background: None; Body: Orange; Neck: None; Mouth: Pizza; Ears: None; Head: PartyHat; Eyes: Monocle Background: None (91.4%); Body: Orange (8.3%); Neck: None (41.4%); Mouth: Pizza (10.9%); Ears: None (26.0%); Head: PartyHat (4.4%); Eyes: Monocle (7.4%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]

@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-09-12 21:43:53",
+    "token_id": 831,
+    "dog": "Dog #831",
+    "bidder": "@farcy",
+    "bidder_url": "https://farcaster.xyz/farcy",
+    "bidder_wallet": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
+    "bid": "0.00050 ETH ($1)",
+    "bid_eth": 0.0005,
+    "bid_usd": 1.26,
+    "eth_usd_price_live": "2523.445",
+    "eth_usd_price_date_utc": "2026-09-12",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 51230043,
+    "log_index": 198,
+    "tx_hash": "0x7b82ba30c63193c17a6e14de6c4765e3ca965b2c5d5347a31f67b0cd4739e313"
+  }
+]
