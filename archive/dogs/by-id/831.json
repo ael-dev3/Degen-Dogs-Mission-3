@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "3000000000000000",
-      "usd_estimate": "7.41118500",
+      "usd_estimate": "7.44024000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$7.41",
+      "usd_estimate_display": "$7.44",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-13",
-      "usd_estimate_price_usd": "2470.395",
+      "usd_estimate_price_usd": "2480.08",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 707
     },
     "schema_version": 1,
-    "search_text": "dog 831 dog #831 831 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.41000000 $7.41 2026-09-12t22:37:29z 0xddd5eb0c05cd3e2f0af28408eb5d6b83d2f1fd41c8f4feba4694be1fd2ceabce #85/707 generated auction feed 0x7b82ba30c63193c17a6e14de6c4765e3ca965b2c5d5347a31f67b0cd4739e313 0x1a1fe626065888cec2e3fa0b3772b236a7b1b5e4a869861e8126539ad84c8b04 background: none (91.4%) background none body: orange (8.3%) body orange neck: none (41.4%) neck none mouth: pizza (10.9%) mouth pizza ears: none (26.0%) ears none head: partyhat (4.4%) head partyhat eyes: monocle (7.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 831 dog #831 831 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.44000000 $7.44 2026-09-12t22:37:29z 0xddd5eb0c05cd3e2f0af28408eb5d6b83d2f1fd41c8f4feba4694be1fd2ceabce #85/707 generated auction feed 0x7b82ba30c63193c17a6e14de6c4765e3ca965b2c5d5347a31f67b0cd4739e313 0x1a1fe626065888cec2e3fa0b3772b236a7b1b5e4a869861e8126539ad84c8b04 background: none (91.4%) background none body: orange (8.3%) body orange neck: none (41.4%) neck none mouth: pizza (10.9%) mouth pizza ears: none (26.0%) ears none head: partyhat (4.4%) head partyhat eyes: monocle (7.4%) eyes monocle base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
