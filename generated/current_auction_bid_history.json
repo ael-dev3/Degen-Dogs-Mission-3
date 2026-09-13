@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "bid_time_utc": "2026-09-13 21:48:25",
+    "token_id": 832,
+    "dog": "Dog #832",
+    "bidder": "@cryptomill",
+    "bidder_url": "https://farcaster.xyz/cryptomill",
+    "bidder_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "bid": "0.00050 ETH ($1)",
+    "bid_eth": 0.0005,
+    "bid_usd": 1.25,
+    "eth_usd_price_live": "2508.515",
+    "eth_usd_price_date_utc": "2026-09-13",
+    "usd_estimate_source": "current_eth_usd_price",
+    "usd_estimate_source_detail": "coinbase",
+    "usd_estimate_confidence": "live_current",
+    "usd_estimate_basis": "current_auction_bid_history_live_eth_usd",
+    "extended": 0,
+    "block_number": 51273379,
+    "log_index": 394,
+    "tx_hash": "0xad52dcb196870e9d5adebf4c95b8e0bda9f948ff49aa90188c4cb8b53fe1d083"
+  }
+]
