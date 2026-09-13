@@ -1,5 +1,16 @@
 [
   {
+    "amount_eth": "0.003",
+    "amount_raw": "3000000000000000",
+    "bidder": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "block_number": 51231651,
+    "block_time_utc": "2026-09-12T22:37:29Z",
+    "extended": 0,
+    "log_index": 112,
+    "token_id": 831,
+    "transaction_hash": "0x1a1fe626065888cec2e3fa0b3772b236a7b1b5e4a869861e8126539ad84c8b04"
+  },
+  {
     "amount_eth": "0.0005",
     "amount_raw": "500000000000000",
     "bidder": "0x84cb3b93f9a918632f05528770b5cf926396b0f4",
