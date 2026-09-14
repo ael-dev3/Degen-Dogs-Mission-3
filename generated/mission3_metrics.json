@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51313309"
+    "value": "51315104"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-14 19:59:25"
+    "value": "2026-09-14 20:59:15"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x1f8b3f29d1a4acb89c6cdee3ee8122233502307c0111d250351ef00df98820b8"
+    "value": "0xc435816a904cd89fe6136d3f5b0e8d7848f482ca7bc1f3b2ad6e8c04471e6a00"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -53,7 +53,7 @@
   },
   {
     "metric": "log_rpc_quorum_providers",
-    "value": "base.org,publicnode.com,rpc-host-a0d298ecc6bb"
+    "value": "base.org,publicnode.com,rpc-host-e5083daccc13"
   },
   {
     "metric": "auction_house_code_sha256",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51313309"
+    "value": "51315104"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x1f8b3f29d1a4acb89c6cdee3ee8122233502307c0111d250351ef00df98820b8"
+    "value": "0xc435816a904cd89fe6136d3f5b0e8d7848f482ca7bc1f3b2ad6e8c04471e6a00"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2540.985"
+    "value": "2568.755"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "84.04"
+    "value": "85.04"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "1.1899"
+    "value": "1.176"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "434.3"
+    "value": "429.23"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈434% APR"
+    "value": "≈429% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "7.62"
+    "value": "7.71"
   },
   {
     "metric": "current_bidder",
