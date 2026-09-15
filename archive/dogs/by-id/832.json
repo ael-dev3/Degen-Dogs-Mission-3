@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 3,
-      "last_bid_time_utc": "2026-09-14 21:46:39",
+      "last_bid_time_utc": "2026-09-14T21:46:39Z",
       "unique_bidder_count": 3
     },
     "bid_tx_hashes": [
@@ -47,7 +47,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0x7319178f2fb84a38a7870b3876d6e55ac4a0faca90d6dbdfe711e7d61e9b4a3b",
       "dog_page": "https://degendogs.club/#dog832",
-      "explorer": "https://basescan.org/address/0xabb57831ea27b2610eab0da51d8b351c5b3af5c4",
+      "explorer": "https://basescan.org/address/0xa2648350f3566e4f18a9519734928d08d3ea08c4",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/832",
       "repo_archive": "archive/dogs/by-id/832.json",
       "settlement_tx": "https://basescan.org/tx/0x058e0af27543fc3640086ce7b924128ce549c4b336a7a920e55afa9dbb972011"
@@ -60,7 +60,7 @@
       "total": 709
     },
     "schema_version": 1,
-    "search_text": "dog 832 dog #832 mission 3 base settled @badadan 0xa2648350f3566e4f18a9519734928d08d3ea08c4 0.00331000 eth $8.20 2026-09-14t21:54:25z #218/709 background: none (91.4%) body: redbrown (15.4%) neck: studdedcollar (10.2%) mouth: none (68.5%) ears: none (26.1%) head: partyhat (4.5%) eyes: bluelasereyes (11.6%) 0x058e0af27543fc3640086ce7b924128ce549c4b336a7a920e55afa9dbb972011",
+    "search_text": "dog 832 dog #832 832 mission 3 mission 3 base settled 0xa2648350f3566e4f18a9519734928d08d3ea08c4 @badadan badadan 0.00331 eth 3310000000000000 8.2 $8.20 2026-09-14t21:54:25z 0x7319178f2fb84a38a7870b3876d6e55ac4a0faca90d6dbdfe711e7d61e9b4a3b 0x058e0af27543fc3640086ce7b924128ce549c4b336a7a920e55afa9dbb972011 #218/709 generated auction feed 0xad52dcb196870e9d5adebf4c95b8e0bda9f948ff49aa90188c4cb8b53fe1d083 0xff1b8e1f77d15a253c03a2e2dea18b37daa43894c53b08370f5f0ae1a4e4bedb 0xad77f238f1360a1bfc54ebc2e50387c7de1f8ee2d36b2c0a652f2e560d7ee476 background: none (91.4%) background none body: redbrown (15.4%) body redbrown neck: studdedcollar (10.2%) neck studdedcollar mouth: none (68.5%) mouth none ears: none (26.1%) ears none head: partyhat (4.5%) head partyhat eyes: bluelasereyes (11.6%) eyes bluelasereyes base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 51316759,
       "block_time_utc": "2026-09-14T21:54:25Z",
@@ -70,15 +70,14 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
