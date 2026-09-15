@@ -52,13 +52,13 @@
     },
     "mission": 2,
     "rarity": {
-      "display": "#497/709",
-      "rank": 497,
+      "display": "#501/710",
+      "rank": 501,
       "scope": "base_existing",
-      "total": 709
+      "total": 710
     },
     "schema_version": 1,
-    "search_text": "dog 305 dog #305 305 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 #497/709 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: eyepatch 0xd109bff6701f39aa03dec70a7329e75065e4dd5f9b6661ba7b38ca83b42801e1 chain_logs contract_getters",
+    "search_text": "dog 305 dog #305 305 mission 2 mission 2 degen chain settled 0x5d13b662a387a0e40b9320b8759e38c1204ec5ea 0x5d13…c5ea 3332.999999999999737856 degen 0x62011d08ad4829dbabeb0c6745b5c55fc30a1120aed673734c837c042a85b6dc 0xc89cf20294073ee60d349101731d9872d3b68727cf3baf70c7b308aab379c533 background: none; body: redbrown; neck: redcollar; mouth: tongue; ears: earbuds; head: none; eyes: eyepatch 0xd109bff6701f39aa03dec70a7329e75065e4dd5f9b6661ba7b38ca83b42801e1 chain_logs contract_getters #501/710 background: none (91.4%) body: redbrown (15.4%) neck: redcollar (29.2%) mouth: tongue (10.0%) ears: earbuds (32.3%) head: none (20.0%) eyes: eyepatch (8.0%)",
     "settlement": {
       "block_number": 25555554,
       "block_time_utc": "2025-03-05T23:39:23Z",
@@ -93,7 +93,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: Tongue (9.9%)",
+        "display": "Mouth: Tongue (10.0%)",
         "trait_type": "Mouth",
         "value": "Tongue"
       },
@@ -103,7 +103,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: None (19.9%)",
+        "display": "Head: None (20.0%)",
         "trait_type": "Head",
         "value": "None"
       },
