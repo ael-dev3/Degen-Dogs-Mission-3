@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "3000000000000000",
-      "usd_estimate": "7.32009000",
+      "usd_estimate": "7.20303000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$7.32",
+      "usd_estimate_display": "$7.20",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-15",
-      "usd_estimate_price_usd": "2440.03",
+      "usd_estimate_price_usd": "2401.01",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 709
     },
     "schema_version": 1,
-    "search_text": "dog 833 dog #833 833 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.32000000 $7.32 2026-09-14t22:01:35z 0x058e0af27543fc3640086ce7b924128ce549c4b336a7a920e55afa9dbb972011 #157/709 generated auction feed 0x882217a5c553a81dcdd12b5e7b17bbe36f2f55662d06e373027283d8f48fafd5 0xfd4cf6461c2efbf2db793bbc756b32b82e8e02df0de7419f4f48fdc926cde1d4 background: none (91.4%) background none body: sugarskull (6.5%) body sugarskull neck: redcollar (29.2%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: loopearring (27.5%) ears loopearring head: headphones (6.8%) head headphones eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 833 dog #833 833 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.20000000 $7.20 2026-09-14t22:01:35z 0x058e0af27543fc3640086ce7b924128ce549c4b336a7a920e55afa9dbb972011 #157/709 generated auction feed 0x882217a5c553a81dcdd12b5e7b17bbe36f2f55662d06e373027283d8f48fafd5 0xfd4cf6461c2efbf2db793bbc756b32b82e8e02df0de7419f4f48fdc926cde1d4 background: none (91.4%) background none body: sugarskull (6.5%) body sugarskull neck: redcollar (29.2%) neck redcollar mouth: tongue (9.9%) mouth tongue ears: loopearring (27.5%) ears loopearring head: headphones (6.8%) head headphones eyes: glasses (12.4%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
