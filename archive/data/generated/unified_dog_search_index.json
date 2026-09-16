@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "3100000000000000",
-      "usd_estimate": "7.45199700",
+      "usd_estimate": "7.40989900",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$7.45",
+      "usd_estimate_display": "$7.41",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-16",
-      "usd_estimate_price_usd": "2403.87",
+      "usd_estimate_price_usd": "2390.29",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 710
     },
     "schema_version": 1,
-    "search_text": "dog 834 dog #834 834 mission 3 mission 3 base ongoing 0xabb57831ea27b2610eab0da51d8b351c5b3af5c4 @zksen.eth zksen.eth 0.0031 eth 3100000000000000 7.45 $7.45 2026-09-15t22:31:49z 0x358cca2370f19406555633291612a75a51fdb6bb04a9a16b6db5ceaef5d36ae0 #565/710 generated auction feed 0xcb98e6abc08fc2a41052d150b56a400d8687a77249931f8e1a106c706dbd89fd background: none (91.4%) background none body: brown (11.0%) body brown neck: none (41.4%) neck none mouth: tongue (10.0%) mouth tongue ears: none (26.2%) ears none head: none (20.0%) head none eyes: glasses (12.5%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 834 dog #834 834 mission 3 mission 3 base ended pending settlement 0xabb57831ea27b2610eab0da51d8b351c5b3af5c4 @zksen.eth zksen.eth 0.0031 eth 3100000000000000 7.41000000 $7.41 2026-09-15t22:31:49z 0x358cca2370f19406555633291612a75a51fdb6bb04a9a16b6db5ceaef5d36ae0 #565/710 generated auction feed 0xcb98e6abc08fc2a41052d150b56a400d8687a77249931f8e1a106c706dbd89fd background: none (91.4%) background none body: brown (11.0%) body brown neck: none (41.4%) neck none mouth: tongue (10.0%) mouth tongue ears: none (26.2%) ears none head: none (20.0%) head none eyes: glasses (12.5%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -76,7 +76,7 @@
         "generated_auction_feed"
       ]
     },
-    "status": "ongoing",
+    "status": "ended pending settlement",
     "traits": [
       {
         "display": "Background: None (91.4%)",

@@ -23360,12 +23360,12 @@
     "dog_image_url": "https://api.degendogs.club/images/834.png",
     "dog_external_url": "https://degendogs.club/#dog834",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/834",
-    "status": "live",
+    "status": "ended pending settlement",
     "winner": "@zksen.eth",
     "winner_url": "https://farcaster.xyz/zksen.eth",
     "winner_wallet": "0xabb57831ea27b2610eab0da51d8b351c5b3af5c4",
     "amount": "0.00310 ETH ($7)",
-    "amount_raw": "",
+    "amount_raw": "3100000000000000",
     "bid_count": 1,
     "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-15 22:31:17",
@@ -23377,6 +23377,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 834 Dog #834 https://api.degendogs.club/images/834.png https://degendogs.club/#dog834 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/834 live @zksen.eth https://farcaster.xyz/zksen.eth 0xabb57831ea27b2610eab0da51d8b351c5b3af5c4 0.00310 ETH ($7) 1 1 2026-09-15 22:31:17 #565/710 39.406253 Background: None; Body: Brown; Neck: None; Mouth: Tongue; Ears: None; Head: None; Eyes: Glasses Background: None (91.4%); Body: Brown (11.0%); Neck: None (41.4%); Mouth: Tongue (10.0%); Ears: None (26.2%); Head: None (20.0%); Eyes: Glasses (12.5%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 834 Dog #834 https://api.degendogs.club/images/834.png https://degendogs.club/#dog834 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/834 ended pending settlement @zksen.eth https://farcaster.xyz/zksen.eth 0xabb57831ea27b2610eab0da51d8b351c5b3af5c4 0.00310 ETH ($7) 3100000000000000 1 1 2026-09-15 22:31:17 #565/710 39.406253 Background: None; Body: Brown; Neck: None; Mouth: Tongue; Ears: None; Head: None; Eyes: Glasses Background: None (91.4%); Body: Brown (11.0%); Neck: None (41.4%); Mouth: Tongue (10.0%); Ears: None (26.2%); Head: None (20.0%); Eyes: Glasses (12.5%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
