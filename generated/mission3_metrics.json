@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51423202"
+    "value": "51424904"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-17 09:02:31"
+    "value": "2026-09-17 09:59:15"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x5ed9b95a957a32d74ac8ec6afbeea8f98581b183a758be85756f936fa9bcf770"
+    "value": "0xe68c7c746744b395939da3c8fe8238b501de727ac4a5bd86cb4223af95e005f6"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -53,7 +53,7 @@
   },
   {
     "metric": "log_rpc_quorum_providers",
-    "value": "base.org,publicnode.com,rpc-host-a0d298ecc6bb"
+    "value": "publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
   },
   {
     "metric": "auction_house_code_sha256",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51423202"
+    "value": "51424904"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x5ed9b95a957a32d74ac8ec6afbeea8f98581b183a758be85756f936fa9bcf770"
+    "value": "0xe68c7c746744b395939da3c8fe8238b501de727ac4a5bd86cb4223af95e005f6"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2444.825"
+    "value": "2436.845"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "85.04"
+    "value": "84.81"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "1.1759"
+    "value": "1.1791"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "429.19"
+    "value": "430.37"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈429% APR"
+    "value": "≈430% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "7.33"
+    "value": "7.31"
   },
   {
     "metric": "current_bidder",
