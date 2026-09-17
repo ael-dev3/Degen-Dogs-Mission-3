@@ -23389,13 +23389,13 @@
     "dog_external_url": "https://degendogs.club/#dog835",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/835",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "0",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "@cryptomill",
+    "winner_url": "https://farcaster.xyz/cryptomill",
+    "winner_wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+    "amount": "0.00070 ETH ($1)",
+    "amount_raw": "700000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-17 05:18:13",
     "settled_time_utc": "",
     "rarity": "#568/711",
@@ -23405,6 +23405,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 835 Dog #835 https://api.degendogs.club/images/835.png https://degendogs.club/#dog835 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/835 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 0 2026-09-17 05:18:13 #568/711 39.34175 Background: None; Body: Grey; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: RedMohawk; Eyes: Sunglasses Background: None (91.4%); Body: Grey (13.1%); Neck: GoldNecklace (19.4%); Mouth: None (68.5%); Ears: Earbuds (32.3%); Head: RedMohawk (7.5%); Eyes: Sunglasses (13.4%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 835 Dog #835 https://api.degendogs.club/images/835.png https://degendogs.club/#dog835 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/835 live @cryptomill https://farcaster.xyz/cryptomill 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 0.00070 ETH ($1) 700000000000000 1 1 2026-09-17 05:18:13 #568/711 39.34175 Background: None; Body: Grey; Neck: GoldNecklace; Mouth: None; Ears: Earbuds; Head: RedMohawk; Eyes: Sunglasses Background: None (91.4%); Body: Grey (13.1%); Neck: GoldNecklace (19.4%); Mouth: None (68.5%); Ears: Earbuds (32.3%); Head: RedMohawk (7.5%); Eyes: Sunglasses (13.4%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
