@@ -2,21 +2,21 @@
   "generated_at_utc": "2026-09-18T05:42:21Z",
   "record": {
     "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-09-18T05:44:23Z",
+    "activity_time_utc": "2026-09-18T13:24:37Z",
     "amount": {
       "amount_usd_at_event": null,
       "eth_usd_price_at_event": null,
       "eth_usd_price_date_utc": "2026-09-18",
-      "native": "0.0005",
+      "native": "0.003",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
-      "raw": "500000000000000",
-      "usd_estimate": "1.24985000",
+      "raw": "3000000000000000",
+      "usd_estimate": "7.73734500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$1.25",
+      "usd_estimate_display": "$7.74",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-18",
-      "usd_estimate_price_usd": "2499.7",
+      "usd_estimate_price_usd": "2579.115",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -29,12 +29,13 @@
     },
     "auction_house": null,
     "bid_stats": {
-      "bid_count": 1,
-      "last_bid_time_utc": "2026-09-18T05:44:23Z",
-      "unique_bidder_count": 1
+      "bid_count": 2,
+      "last_bid_time_utc": "2026-09-18T13:24:37Z",
+      "unique_bidder_count": 2
     },
     "bid_tx_hashes": [
-      "0xd17023642138f270267b66711632592db8f0a38a6d5e486b42842555d3aa0616"
+      "0xd17023642138f270267b66711632592db8f0a38a6d5e486b42842555d3aa0616",
+      "0x5a305ad5f5b5d008d88a20c6e7f8718026b57a6c26409aef60b15a28e2696e5a"
     ],
     "chain": "Base",
     "chain_id": 8453,
@@ -45,7 +46,7 @@
     "links": {
       "auction_tx": "https://basescan.org/tx/0xed3b501bee1745b712733fe080cdcfca9b0d0e667176860bba36a9c8f94c6235",
       "dog_page": "https://degendogs.club/#dog836",
-      "explorer": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
+      "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/836",
       "repo_archive": "archive/dogs/by-id/836.json",
       "settlement_tx": null
@@ -58,7 +59,7 @@
       "total": 712
     },
     "schema_version": 1,
-    "search_text": "dog 836 dog #836 836 mission 3 mission 3 base ongoing 0x71ce5605ab649d97446ef179bc2983b18ddc9a48 @cryptomill cryptomill 0.0005 eth 500000000000000 1.25000000 $1.25 2026-09-18t05:44:23z 0xed3b501bee1745b712733fe080cdcfca9b0d0e667176860bba36a9c8f94c6235 #652/712 generated auction feed 0xd17023642138f270267b66711632592db8f0a38a6d5e486b42842555d3aa0616 background: none (91.4%) background none body: grey (13.2%) body grey neck: none (41.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.4%) ears earbuds head: baseballcap (10.1%) head baseballcap eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 836 dog #836 836 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.74000000 $7.74 2026-09-18t13:24:37z 0xed3b501bee1745b712733fe080cdcfca9b0d0e667176860bba36a9c8f94c6235 #652/712 generated auction feed 0xd17023642138f270267b66711632592db8f0a38a6d5e486b42842555d3aa0616 0x5a305ad5f5b5d008d88a20c6e7f8718026b57a6c26409aef60b15a28e2696e5a background: none (91.4%) background none body: grey (13.2%) body grey neck: none (41.4%) neck none mouth: none (68.5%) mouth none ears: earbuds (32.4%) ears earbuds head: baseballcap (10.1%) head baseballcap eyes: vrgoggles (10.5%) eyes vrgoggles base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -116,12 +117,12 @@
       }
     ],
     "winner_or_high_bidder": {
-      "display": "@cryptomill",
+      "display": "@0xael.eth",
       "farcaster_fid": null,
-      "farcaster_handle": "cryptomill",
-      "profile_url": "https://farcaster.xyz/cryptomill",
-      "wallet": "0x71ce5605ab649d97446ef179bc2983b18ddc9a48",
-      "wallet_explorer_url": "https://basescan.org/address/0x71ce5605ab649d97446ef179bc2983b18ddc9a48"
+      "farcaster_handle": "0xael.eth",
+      "profile_url": "https://farcaster.xyz/0xael.eth",
+      "wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+      "wallet_explorer_url": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942"
     }
   },
   "schema_version": 1
