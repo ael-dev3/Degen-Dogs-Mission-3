@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#468/711",
+      "display": "#468/712",
       "rank": 468,
       "scope": "base_existing",
-      "total": 711
+      "total": 712
     },
     "schema_version": 1,
-    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth #468/711 background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #468/712 background: none (91.4%) body: brown (11.0%) neck: goldnecklace (19.4%) mouth: none (68.5%) ears: none (26.1%) head: crazyhair (7.0%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -91,7 +91,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (26.2%)",
+        "display": "Ears: None (26.1%)",
         "trait_type": "Ears",
         "value": "None"
       },
