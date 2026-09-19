@@ -23445,13 +23445,13 @@
     "dog_external_url": "https://degendogs.club/#dog837",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/837",
     "status": "live",
-    "winner": "@cctv1",
-    "winner_url": "https://farcaster.xyz/cctv1",
-    "winner_wallet": "0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72",
-    "amount": "0.00055 ETH ($1)",
-    "amount_raw": "550000000000000",
-    "bid_count": 2,
-    "unique_bidder_count": 2,
+    "winner": "@0xael.eth",
+    "winner_url": "https://farcaster.xyz/0xael.eth",
+    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "amount": "0.00300 ETH ($7)",
+    "amount_raw": "3000000000000000",
+    "bid_count": 3,
+    "unique_bidder_count": 3,
     "auction_created_time_utc": "2026-09-19 06:04:13",
     "settled_time_utc": "",
     "rarity": "#652/713",
@@ -23461,6 +23461,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 837 Dog #837 https://api.degendogs.club/images/837.png https://degendogs.club/#dog837 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/837 live @cctv1 https://farcaster.xyz/cctv1 0xbdd8f7ceae7fbfb25bd5615ad3c2608404f6bb72 0.00055 ETH ($1) 550000000000000 2 2 2026-09-19 06:04:13 #652/713 34.986963 Background: None; Body: Grey; Neck: RedCollar; Mouth: None; Ears: None; Head: BaseballCap; Eyes: Glasses Background: None (91.4%); Body: Grey (13.3%); Neck: RedCollar (29.2%); Mouth: None (68.6%); Ears: None (26.2%); Head: BaseballCap (10.2%); Eyes: Glasses (12.6%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 837 Dog #837 https://api.degendogs.club/images/837.png https://degendogs.club/#dog837 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/837 live @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00300 ETH ($7) 3000000000000000 3 3 2026-09-19 06:04:13 #652/713 34.986963 Background: None; Body: Grey; Neck: RedCollar; Mouth: None; Ears: None; Head: BaseballCap; Eyes: Glasses Background: None (91.4%); Body: Grey (13.3%); Neck: RedCollar (29.2%); Mouth: None (68.6%); Ears: None (26.2%); Head: BaseballCap (10.2%); Eyes: Glasses (12.6%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
