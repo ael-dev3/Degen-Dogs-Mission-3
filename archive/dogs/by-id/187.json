@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#599/713",
-      "rank": 599,
+      "display": "#600/714",
+      "rank": 600,
       "scope": "base_existing",
-      "total": 713
+      "total": 714
     },
     "schema_version": 1,
-    "search_text": "dog 187 dog #187 187 mission 1 mission 1 polygon no auction dogmaster reward weth #599/713 background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 187 dog #187 187 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: black; neck: none; mouth: none; ears: none; head: headphones; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #600/714 background: none (91.5%) body: black (11.5%) neck: none (41.5%) mouth: none (68.5%) ears: none (26.3%) head: headphones (6.7%) eyes: none (17.6%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,7 +71,7 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.4%)",
+        "display": "Background: None (91.5%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -81,17 +81,17 @@
         "value": "Black"
       },
       {
-        "display": "Neck: None (41.4%)",
+        "display": "Neck: None (41.5%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.6%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.2%)",
+        "display": "Ears: None (26.3%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "Headphones"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.6%)",
         "trait_type": "Eyes",
         "value": "None"
       }
