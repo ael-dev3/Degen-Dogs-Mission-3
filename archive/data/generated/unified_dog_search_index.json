@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "3000000000000000",
-      "usd_estimate": "7.87881000",
+      "usd_estimate": "7.85337000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$7.88",
+      "usd_estimate_display": "$7.85",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-09-20",
-      "usd_estimate_price_usd": "2626.27",
+      "usd_estimate_price_usd": "2617.79",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 713
     },
     "schema_version": 1,
-    "search_text": "dog 837 dog #837 837 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.88 $7.88 2026-09-19t17:09:43z 0xac98d3419f3aafddc4ce64463944a8e8469e5e656728059a46e56b88cea2bc54 #652/713 generated auction feed 0x1024164e1ccfb3376990cba61dffada6b4bee2ee1883cfc581be02beff698618 0xac7e1a0876d68864955206cdb7c049d5947278e4020180e3fbdb090a2e69fc73 0x35eacc1ed2846582df99ac9a652546204eaaf59b1c74e5b83ddd71a31270b015 background: none (91.4%) background none body: grey (13.3%) body grey neck: redcollar (29.2%) neck redcollar mouth: none (68.6%) mouth none ears: none (26.2%) ears none head: baseballcap (10.2%) head baseballcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 837 dog #837 837 mission 3 mission 3 base ongoing 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.85000000 $7.85 2026-09-19t17:09:43z 0xac98d3419f3aafddc4ce64463944a8e8469e5e656728059a46e56b88cea2bc54 #652/713 generated auction feed 0x1024164e1ccfb3376990cba61dffada6b4bee2ee1883cfc581be02beff698618 0xac7e1a0876d68864955206cdb7c049d5947278e4020180e3fbdb090a2e69fc73 0x35eacc1ed2846582df99ac9a652546204eaaf59b1c74e5b83ddd71a31270b015 background: none (91.4%) background none body: grey (13.3%) body grey neck: redcollar (29.2%) neck redcollar mouth: none (68.6%) mouth none ears: none (26.2%) ears none head: baseballcap (10.2%) head baseballcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
