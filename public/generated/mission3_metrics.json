@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51718309"
+    "value": "51720106"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-24 04:59:25"
+    "value": "2026-09-24 05:59:19"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xe153098700db0020e416854d227f7bcc450d104c9341ab0fe47b5d605ab6ecb8"
+    "value": "0x37d766eabe752f5c2247fc6a4c856a90fbfdd271a4dd302ecd37b108629491b4"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -37,7 +37,7 @@
   },
   {
     "metric": "snapshot_confirmations",
-    "value": "1"
+    "value": "2"
   },
   {
     "metric": "rpc_quorum_size",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51718309"
+    "value": "51720106"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xe153098700db0020e416854d227f7bcc450d104c9341ab0fe47b5d605ab6ecb8"
+    "value": "0x37d766eabe752f5c2247fc6a4c856a90fbfdd271a4dd302ecd37b108629491b4"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2681.055"
+    "value": "2684.32"
   },
   {
     "metric": "eth_usd_source",
@@ -353,15 +353,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "81.6"
+    "value": "81.7"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "1.2255"
+    "value": "1.224"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "447.32"
+    "value": "446.76"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "8.04"
+    "value": "8.05"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-09-24T04:59:25Z"
+    "value": "2026-09-24T05:59:19Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
