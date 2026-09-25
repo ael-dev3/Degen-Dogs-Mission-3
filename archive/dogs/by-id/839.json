@@ -1,0 +1,127 @@
+{
+  "generated_at_utc": "2026-09-25T18:09:20Z",
+  "record": {
+    "activity_time_basis": "last_bid_block_time",
+    "activity_time_utc": "2026-09-25T18:09:15Z",
+    "amount": {
+      "amount_usd_at_event": null,
+      "eth_usd_price_at_event": null,
+      "eth_usd_price_date_utc": "2026-09-25",
+      "native": "0.0",
+      "native_symbol": "ETH",
+      "price_asset_key": "ETH",
+      "raw": "0",
+      "usd_estimate": "0E-8",
+      "usd_estimate_confidence": "live_current",
+      "usd_estimate_display": "$0.00",
+      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate_price_date_utc": "2026-09-25",
+      "usd_estimate_price_usd": "2688.825",
+      "usd_estimate_source": "current_eth_usd_price",
+      "usd_estimate_source_detail": "coinbase",
+      "usd_estimate_time_basis": "last_bid_block_time"
+    },
+    "auction_created": {
+      "block_number": 51785195,
+      "block_time_utc": "2026-09-25T18:08:57Z",
+      "tx_hash": "0x7ab09edc777311ee07c9f4e919e1432c337dcda4265e9dd9bed59586a3b1face",
+      "tx_url": "https://basescan.org/tx/0x7ab09edc777311ee07c9f4e919e1432c337dcda4265e9dd9bed59586a3b1face"
+    },
+    "auction_house": null,
+    "bid_stats": {
+      "bid_count": 0,
+      "last_bid_time_utc": "2026-09-25T18:09:15Z",
+      "unique_bidder_count": 0
+    },
+    "bid_tx_hashes": [],
+    "chain": "Base",
+    "chain_id": 8453,
+    "dog_id": 839,
+    "dog_image_url": "https://api.degendogs.club/images/839.png",
+    "dog_item_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/839",
+    "era_label": "Mission 3",
+    "links": {
+      "auction_tx": "https://basescan.org/tx/0x7ab09edc777311ee07c9f4e919e1432c337dcda4265e9dd9bed59586a3b1face",
+      "dog_page": "https://degendogs.club/#dog839",
+      "explorer": null,
+      "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/839",
+      "repo_archive": "archive/dogs/by-id/839.json",
+      "settlement_tx": null
+    },
+    "mission": 3,
+    "rarity": {
+      "display": "#94/715",
+      "rank": 94,
+      "scope": "base_existing",
+      "total": 715
+    },
+    "schema_version": 1,
+    "search_text": "dog 839 dog #839 839 mission 3 mission 3 base ongoing 0x0000000000000000000000000000000000000000 no bids yet 0.0 eth 0 0.00000000 $0.00 2026-09-25t18:09:15z 0x7ab09edc777311ee07c9f4e919e1432c337dcda4265e9dd9bed59586a3b1face #94/715 generated auction feed background: halo (8.7%) background halo body: white (11.0%) body white neck: none (41.5%) neck none mouth: pizza (10.9%) mouth pizza ears: earbuds (32.4%) ears earbuds head: beanie (5.5%) head beanie eyes: masksnorkel (10.2%) eyes masksnorkel base_logs archive_indexer dashboard_builder generated_auction_timeline generated_auction_feed",
+    "settlement": {
+      "block_number": null,
+      "block_time_utc": null,
+      "settled": false,
+      "tx_hash": null,
+      "tx_url": null
+    },
+    "source": {
+      "confidence": "verified",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "raw_confidence": "verified_onchain_generated_tables",
+      "sources": [
+        "base_logs",
+        "archive_indexer",
+        "dashboard_builder",
+        "generated_auction_timeline",
+        "generated_auction_feed"
+      ]
+    },
+    "status": "ongoing",
+    "traits": [
+      {
+        "display": "Background: Halo (8.7%)",
+        "trait_type": "Background",
+        "value": "Halo"
+      },
+      {
+        "display": "Body: White (11.0%)",
+        "trait_type": "Body",
+        "value": "White"
+      },
+      {
+        "display": "Neck: None (41.5%)",
+        "trait_type": "Neck",
+        "value": "None"
+      },
+      {
+        "display": "Mouth: Pizza (10.9%)",
+        "trait_type": "Mouth",
+        "value": "Pizza"
+      },
+      {
+        "display": "Ears: Earbuds (32.4%)",
+        "trait_type": "Ears",
+        "value": "Earbuds"
+      },
+      {
+        "display": "Head: Beanie (5.5%)",
+        "trait_type": "Head",
+        "value": "Beanie"
+      },
+      {
+        "display": "Eyes: MaskSnorkel (10.2%)",
+        "trait_type": "Eyes",
+        "value": "MaskSnorkel"
+      }
+    ],
+    "winner_or_high_bidder": {
+      "display": "no bids yet",
+      "farcaster_fid": null,
+      "farcaster_handle": null,
+      "profile_url": null,
+      "wallet": "0x0000000000000000000000000000000000000000",
+      "wallet_explorer_url": null
+    }
+  },
+  "schema_version": 1
+}

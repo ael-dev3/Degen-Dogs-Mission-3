@@ -54,13 +54,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#653/714",
-      "rank": 653,
+      "display": "#654/715",
+      "rank": 654,
       "scope": "base_existing",
-      "total": 714
+      "total": 715
     },
     "schema_version": 1,
-    "search_text": "dog 837 dog #837 837 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.9 $7.90 2026-09-20t06:15:55z 0xac98d3419f3aafddc4ce64463944a8e8469e5e656728059a46e56b88cea2bc54 0x67440f24c60bde17f310ea42e9619d28a47fb40d91be04ddb0bd9d6308e8676f #653/714 generated auction feed 0x1024164e1ccfb3376990cba61dffada6b4bee2ee1883cfc581be02beff698618 0xac7e1a0876d68864955206cdb7c049d5947278e4020180e3fbdb090a2e69fc73 0x35eacc1ed2846582df99ac9a652546204eaaf59b1c74e5b83ddd71a31270b015 background: none (91.5%) background none body: grey (13.3%) body grey neck: redcollar (29.1%) neck redcollar mouth: none (68.5%) mouth none ears: none (26.3%) ears none head: baseballcap (10.2%) head baseballcap eyes: glasses (12.6%) eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 837 dog #837 837 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.9 $7.90 2026-09-20t06:15:55z 0xac98d3419f3aafddc4ce64463944a8e8469e5e656728059a46e56b88cea2bc54 0x67440f24c60bde17f310ea42e9619d28a47fb40d91be04ddb0bd9d6308e8676f generated auction feed 0x1024164e1ccfb3376990cba61dffada6b4bee2ee1883cfc581be02beff698618 0xac7e1a0876d68864955206cdb7c049d5947278e4020180e3fbdb090a2e69fc73 0x35eacc1ed2846582df99ac9a652546204eaaf59b1c74e5b83ddd71a31270b015 background none body grey neck redcollar mouth none ears none head baseballcap eyes glasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #654/715 background: none (91.3%) body: grey (13.3%) neck: redcollar (29.1%) mouth: none (68.4%) ears: none (26.3%) head: baseballcap (10.2%) eyes: glasses (12.6%)",
     "settlement": {
       "block_number": 51547804,
       "block_time_utc": "2026-09-20T06:15:55Z",
@@ -83,7 +83,7 @@
     "status": "settled",
     "traits": [
       {
-        "display": "Background: None (91.5%)",
+        "display": "Background: None (91.3%)",
         "trait_type": "Background",
         "value": "None"
       },
@@ -98,7 +98,7 @@
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.4%)",
         "trait_type": "Mouth",
         "value": "None"
       },
