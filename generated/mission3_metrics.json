@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51836534"
+    "value": "51838904"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-26 22:40:15"
+    "value": "2026-09-26 23:59:15"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x69b87fa226b42e497b550ea17a7a3c51fad3c7e9a158d8d6d0acc6ba590b999a"
+    "value": "0x5defb33d72c73d166346ab456c0b1006468632ec925c28d47e2dca8847270cc5"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51836534"
+    "value": "51838904"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x69b87fa226b42e497b550ea17a7a3c51fad3c7e9a158d8d6d0acc6ba590b999a"
+    "value": "0x5defb33d72c73d166346ab456c0b1006468632ec925c28d47e2dca8847270cc5"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2687.125"
+    "value": "2695.705"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "N/A"
+    "value": "68.34"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "N/A"
+    "value": "1.4632"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "N/A"
+    "value": "534.08"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "N/A"
+    "value": "≈534% APR"
   },
   {
     "metric": "woof_holders",
@@ -393,19 +393,19 @@
   },
   {
     "metric": "current_bid_eth",
-    "value": "0.0"
+    "value": "0.0024"
   },
   {
     "metric": "current_bid_usd",
-    "value": "0.0"
+    "value": "6.47"
   },
   {
     "metric": "current_bidder",
-    "value": "no bids yet"
+    "value": "@bluewindking"
   },
   {
     "metric": "current_bidder_wallet",
-    "value": "0x0000000000000000000000000000000000000000"
+    "value": "0x1179da9bf5b4e5e8caf4bb378230c36fec572226"
   },
   {
     "metric": "current_auction_end_utc",
@@ -421,7 +421,7 @@
   },
   {
     "metric": "total_bid_eth",
-    "value": "38.58017300"
+    "value": "38.58257300"
   },
   {
     "metric": "total_settled_eth",
@@ -441,7 +441,7 @@
   },
   {
     "metric": "season6_current_bidder_cap_remaining_sup",
-    "value": "N/A"
+    "value": "12500"
   },
   {
     "metric": "season6_current_bidder_prior_wins",
@@ -449,19 +449,19 @@
   },
   {
     "metric": "season6_current_bidder_projected_capped_sup_if_wins",
-    "value": "N/A"
+    "value": "0"
   },
   {
     "metric": "season6_current_bidder_projected_capped_usd_if_wins",
-    "value": "N/A"
+    "value": "0"
   },
   {
     "metric": "season6_current_bidder_projected_raw_sup_if_wins",
-    "value": "N/A"
+    "value": "0"
   },
   {
     "metric": "season6_current_bidder_projected_raw_usd_if_wins",
-    "value": "N/A"
+    "value": "0"
   },
   {
     "metric": "season6_sup_campaign_end_utc",
@@ -497,7 +497,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimate_status",
-    "value": "no_current_bid"
+    "value": "outside_season_window"
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_sup",
@@ -505,7 +505,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_cap_aware_usd",
-    "value": "N/A"
+    "value": "0"
   },
   {
     "metric": "season6_sup_current_bid_estimated_raw_incremental_sup",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "N/A"
+    "value": "2026-09-27T22:40:05Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
@@ -533,7 +533,7 @@
   },
   {
     "metric": "season6_sup_current_bidder_wallet",
-    "value": ""
+    "value": "0x1179da9bf5b4e5e8caf4bb378230c36fec572226"
   },
   {
     "metric": "season6_sup_days_remaining",
@@ -549,7 +549,7 @@
   },
   {
     "metric": "season6_sup_estimate_status",
-    "value": "no_current_bid"
+    "value": "outside_season_window"
   },
   {
     "metric": "season6_sup_expected_future_settlement_interval_seconds",

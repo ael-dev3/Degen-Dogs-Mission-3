@@ -23529,13 +23529,13 @@
     "dog_external_url": "https://degendogs.club/#dog840",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/840",
     "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "0",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "winner": "@bluewindking",
+    "winner_url": "https://farcaster.xyz/bluewindking",
+    "winner_wallet": "0x1179da9bf5b4e5e8caf4bb378230c36fec572226",
+    "amount": "0.00240 ETH ($6)",
+    "amount_raw": "2400000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-09-26 22:40:05",
     "settled_time_utc": "",
     "rarity": "#681/716",
@@ -23545,6 +23545,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 840 Dog #840 https://api.degendogs.club/images/840.png https://degendogs.club/#dog840 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/840 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 0 2026-09-26 22:40:05 #681/716 32.691522 Background: None; Body: Dalmation; Neck: GoldNecklace; Mouth: None; Ears: LoopEarring; Head: None; Eyes: None Background: None (91.3%); Body: Dalmation (9.4%); Neck: GoldNecklace (19.4%); Mouth: None (68.4%); Ears: LoopEarring (27.4%); Head: None (20.0%); Eyes: None (17.7%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 840 Dog #840 https://api.degendogs.club/images/840.png https://degendogs.club/#dog840 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/840 live @bluewindking https://farcaster.xyz/bluewindking 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 0.00240 ETH ($6) 2400000000000000 1 1 2026-09-26 22:40:05 #681/716 32.691522 Background: None; Body: Dalmation; Neck: GoldNecklace; Mouth: None; Ears: LoopEarring; Head: None; Eyes: None Background: None (91.3%); Body: Dalmation (9.4%); Neck: GoldNecklace (19.4%); Mouth: None (68.4%); Ears: LoopEarring (27.4%); Head: None (20.0%); Eyes: None (17.7%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
