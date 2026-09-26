@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51810100"
+    "value": "51811902"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-26 07:59:07"
+    "value": "2026-09-26 08:59:11"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xda5b164b9c3b6b58524095e7d9bea081c1f176ec7fbc4c4d70c8e783f7349994"
+    "value": "0x0ec431e9253541c32259125a49f5a4efb59131db34ede0e6a887b53a3279fb9b"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51810100"
+    "value": "51811902"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xda5b164b9c3b6b58524095e7d9bea081c1f176ec7fbc4c4d70c8e783f7349994"
+    "value": "0x0ec431e9253541c32259125a49f5a4efb59131db34ede0e6a887b53a3279fb9b"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2691.145"
+    "value": "2690.905"
   },
   {
     "metric": "eth_usd_source",
