@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#377/716",
-      "rank": 377,
+      "display": "#376/717",
+      "rank": 376,
       "scope": "base_existing",
-      "total": 716
+      "total": 717
     },
     "schema_version": 1,
-    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth #377/716 background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 154 dog #154 154 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: white; neck: studdedcollar; mouth: none; ears: none; head: redmohawk; eyes: sunglasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #376/717 background: none (91.4%) body: white (11.2%) neck: studdedcollar (10.0%) mouth: none (68.5%) ears: none (26.2%) head: redmohawk (7.4%) eyes: sunglasses (13.2%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -71,27 +71,27 @@
     "status": "no auction dogmaster reward",
     "traits": [
       {
-        "display": "Background: None (91.3%)",
+        "display": "Background: None (91.4%)",
         "trait_type": "Background",
         "value": "None"
       },
       {
-        "display": "Body: White (11.0%)",
+        "display": "Body: White (11.2%)",
         "trait_type": "Body",
         "value": "White"
       },
       {
-        "display": "Neck: StuddedCollar (10.1%)",
+        "display": "Neck: StuddedCollar (10.0%)",
         "trait_type": "Neck",
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: None (68.4%)",
+        "display": "Mouth: None (68.5%)",
         "trait_type": "Mouth",
         "value": "None"
       },
       {
-        "display": "Ears: None (26.3%)",
+        "display": "Ears: None (26.2%)",
         "trait_type": "Ears",
         "value": "None"
       },
@@ -101,7 +101,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (13.3%)",
+        "display": "Eyes: Sunglasses (13.2%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
