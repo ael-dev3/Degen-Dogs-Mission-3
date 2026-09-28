@@ -13,9 +13,9 @@
     "current_bid": "0.00200 ETH ($5)",
     "current_bid_eth": 0.002,
     "amount_wei": "2000000000000000",
-    "current_bid_usd": 5.35,
-    "current_bid_usd_live": 5.35,
-    "eth_usd_price_live": "2672.79",
+    "current_bid_usd": 5.36,
+    "current_bid_usd_live": 5.36,
+    "eth_usd_price_live": "2682.015",
     "eth_usd_price_date_utc": "2026-09-28",
     "usd_estimate_source": "current_eth_usd_price",
     "usd_estimate_source_detail": "coinbase",
@@ -29,10 +29,10 @@
     "start_time_unix": 1790549159,
     "end_time_unix": 1790635559,
     "auction_state": "live",
-    "seconds_remaining": 9988,
-    "time_remaining": "02:46:28",
+    "seconds_remaining": 6402,
+    "time_remaining": "01:46:42",
     "settled": 0,
-    "latest_block": 51918112,
-    "latest_block_time_utc": "2026-09-28 19:59:31"
+    "latest_block": 51919905,
+    "latest_block_time_utc": "2026-09-28 20:59:17"
   }
 ]
