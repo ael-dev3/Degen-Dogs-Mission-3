@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 1,
-      "last_bid_time_utc": "2026-09-26 22:40:35",
+      "last_bid_time_utc": "2026-09-26T22:40:35Z",
       "unique_bidder_count": 1
     },
     "bid_tx_hashes": [
@@ -58,7 +58,7 @@
       "total": 717
     },
     "schema_version": 1,
-    "search_text": "dog 840 dog #840 mission 3 base settled @bluewindking 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 0.00240000 eth $6.47 2026-09-27t22:45:59z #682/717 background: none (91.4%) body: dalmation (9.3%) neck: goldnecklace (19.5%) mouth: none (68.5%) ears: loopearring (27.3%) head: none (19.9%) eyes: none (17.7%) 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e",
+    "search_text": "dog 840 dog #840 840 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 @bluewindking bluewindking 0.0024 eth 2400000000000000 6.47 $6.47 2026-09-27t22:45:59z 0xcb6cc95f201c111c989adf3909e3dd8d34cab6fa97a382c45b7ffba44a6fdaba 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e #682/717 generated auction feed 0xb64f1e532b29d0ed8bdc2d3a7f89c41ef68d0be32d7877df4d5a420883143f8c background: none (91.4%) background none body: dalmation (9.3%) body dalmation neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.5%) mouth none ears: loopearring (27.3%) ears loopearring head: none (19.9%) head none eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 51879906,
       "block_time_utc": "2026-09-27T22:45:59Z",
@@ -68,15 +68,14 @@
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
+      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed",
-        "dashboard_builder",
-        "generated_auction_winners"
+        "generated_auction_winners",
+        "generated_auction_feed"
       ]
     },
     "status": "settled",
