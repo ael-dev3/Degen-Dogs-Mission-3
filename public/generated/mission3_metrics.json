@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "52004500"
+    "value": "52006305"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-30 19:59:07"
+    "value": "2026-09-30 20:59:17"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x235a3d81408c1d3a410391d970edbbaac19ff06b5ecf0b5ad8a6bfa3aadfca40"
+    "value": "0x43d42574f041f1e81b1eeb46d30d5c5523c07b949c9865ded94f36dac2be907c"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "52004500"
+    "value": "52006305"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x235a3d81408c1d3a410391d970edbbaac19ff06b5ecf0b5ad8a6bfa3aadfca40"
+    "value": "0x43d42574f041f1e81b1eeb46d30d5c5523c07b949c9865ded94f36dac2be907c"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2668.775"
+    "value": "2679.695"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "996.6"
+    "value": "1001.7"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.1003"
+    "value": "0.0998"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "36.62"
+    "value": "36.44"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈37% APR"
+    "value": "≈36% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "5.87"
+    "value": "5.9"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-09-30T19:59:07Z"
+    "value": "2026-09-30T20:59:17Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
