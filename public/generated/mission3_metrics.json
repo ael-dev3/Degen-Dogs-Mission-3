@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "51979309"
+    "value": "51981103"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-09-30 05:59:25"
+    "value": "2026-09-30 06:59:13"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x401eb4ef98898e9ad1d4a472fa5166b7a71867809e0c95df7bf0a70c8eaf18c8"
+    "value": "0x63cb809cfe441a1f6a5dc9a529793bb945d078cf8771fc7a0d97d876c50eb5f6"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "51979309"
+    "value": "51981103"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x401eb4ef98898e9ad1d4a472fa5166b7a71867809e0c95df7bf0a70c8eaf18c8"
+    "value": "0x63cb809cfe441a1f6a5dc9a529793bb945d078cf8771fc7a0d97d876c50eb5f6"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2674.435"
+    "value": "2663.385"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "61.88"
+    "value": "61.67"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "1.6161"
+    "value": "1.6216"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "589.86"
+    "value": "591.87"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈590% APR"
+    "value": "≈592% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "5.88"
+    "value": "5.86"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-09-30T05:59:25Z"
+    "value": "2026-09-30T06:59:13Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
