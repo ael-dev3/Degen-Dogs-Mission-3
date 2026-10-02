@@ -11,12 +11,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2200000000000000",
-      "usd_estimate": "5.90610900",
+      "usd_estimate": "5.86448500",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$5.91",
+      "usd_estimate_display": "$5.86",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-10-02",
-      "usd_estimate_price_usd": "2684.595",
+      "usd_estimate_price_usd": "2665.675",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -59,7 +59,7 @@
       "total": 717
     },
     "schema_version": 1,
-    "search_text": "dog 841 dog #841 841 mission 3 mission 3 base ended pending settlement 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.0022 eth 2200000000000000 5.91000000 $5.91 2026-09-28t21:53:59z 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e #213/717 generated auction feed 0xc0ec7a7213e0f13fce2cf29783748a9ebbae7e906c9e67ac6a538b9eab6a0714 0xb458c4ca794320052a26ad300dacb58d7a0a9366fb60480b10d579c58ca47ff8 background: none (91.4%) background none body: white (11.2%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.5%) mouth none ears: goldearring (14.1%) ears goldearring head: beanie (5.6%) head beanie eyes: eyepatch (8.1%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 841 dog #841 841 mission 3 mission 3 base ended pending settlement 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.0022 eth 2200000000000000 5.86000000 $5.86 2026-09-28t21:53:59z 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e #213/717 generated auction feed 0xc0ec7a7213e0f13fce2cf29783748a9ebbae7e906c9e67ac6a538b9eab6a0714 0xb458c4ca794320052a26ad300dacb58d7a0a9366fb60480b10d579c58ca47ff8 background: none (91.4%) background none body: white (11.2%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.5%) mouth none ears: goldearring (14.1%) ears goldearring head: beanie (5.6%) head beanie eyes: eyepatch (8.1%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
