@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "52202510"
+    "value": "52204303"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-10-05 09:59:27"
+    "value": "2026-10-05 10:59:13"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xfa6818d3cb451c2c7df89300bc28fa7a2a6be193132a881b5856a53d11d3f9e0"
+    "value": "0x49e4933f112f29370ca42defed4ee15c1902288dde3135187855d96cf4715282"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "52202510"
+    "value": "52204303"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xfa6818d3cb451c2c7df89300bc28fa7a2a6be193132a881b5856a53d11d3f9e0"
+    "value": "0x49e4933f112f29370ca42defed4ee15c1902288dde3135187855d96cf4715282"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2716.355"
+    "value": "2716.21"
   },
   {
     "metric": "eth_usd_source",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-10-05T09:59:27Z"
+    "value": "2026-10-05T10:59:13Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
