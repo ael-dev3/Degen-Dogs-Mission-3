@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#569/717",
-      "rank": 569,
+      "display": "#573/718",
+      "rank": 573,
       "scope": "base_existing",
-      "total": 717
+      "total": 718
     },
     "schema_version": 1,
-    "search_text": "dog 835 dog #835 835 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.34 $7.34 2026-09-18t05:41:51z 0x6e0c94c6ea3dac53d788a271d66296796212b44cf031551274cd40675a98cff0 0xed3b501bee1745b712733fe080cdcfca9b0d0e667176860bba36a9c8f94c6235 #569/717 generated auction feed 0xf4633265e47a6e4436ee79d09c698788d662ae9a9c61f6f2b4ffec08bc986a3b 0xfbd308ac356df3f95499a4f228b787d8dc8816e635bda843f9aefe9fbbd4012f background: none (91.4%) background none body: grey (13.2%) body grey neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.5%) mouth none ears: earbuds (32.4%) ears earbuds head: redmohawk (7.4%) head redmohawk eyes: sunglasses (13.2%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 835 dog #835 835 mission 3 mission 3 base settled 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.003 eth 3000000000000000 7.34 $7.34 2026-09-18t05:41:51z 0x6e0c94c6ea3dac53d788a271d66296796212b44cf031551274cd40675a98cff0 0xed3b501bee1745b712733fe080cdcfca9b0d0e667176860bba36a9c8f94c6235 #573/718 generated auction feed 0xf4633265e47a6e4436ee79d09c698788d662ae9a9c61f6f2b4ffec08bc986a3b 0xfbd308ac356df3f95499a4f228b787d8dc8816e635bda843f9aefe9fbbd4012f background: none (91.4%) background none body: grey (13.2%) body grey neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.5%) mouth none ears: earbuds (32.3%) ears earbuds head: redmohawk (7.4%) head redmohawk eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
     "settlement": {
       "block_number": 51460382,
       "block_time_utc": "2026-09-18T05:41:51Z",
@@ -102,7 +102,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: Earbuds (32.4%)",
+        "display": "Ears: Earbuds (32.3%)",
         "trait_type": "Ears",
         "value": "Earbuds"
       },
@@ -112,7 +112,7 @@
         "value": "RedMohawk"
       },
       {
-        "display": "Eyes: Sunglasses (13.2%)",
+        "display": "Eyes: Sunglasses (13.4%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }
