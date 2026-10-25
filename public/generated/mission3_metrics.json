@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "53088103"
+    "value": "53089904"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-10-25 21:59:13"
+    "value": "2026-10-25 22:59:15"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0xbf0b6dd571aa3c338369c8b571fab84924c68db7f9f5a0ab77eb7a1066574218"
+    "value": "0xbdf56d8afa20e654ca746a38c305c7c1e42c6d8c6c01300d1e1634ad79a5dadf"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -37,7 +37,7 @@
   },
   {
     "metric": "snapshot_confirmations",
-    "value": "1"
+    "value": "2"
   },
   {
     "metric": "rpc_quorum_size",
@@ -53,7 +53,7 @@
   },
   {
     "metric": "log_rpc_quorum_providers",
-    "value": "publicnode.com,rpc-host-a0d298ecc6bb"
+    "value": "publicnode.com,rpc-host-a0d298ecc6bb,rpc-host-e5083daccc13"
   },
   {
     "metric": "auction_house_code_sha256",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "53088103"
+    "value": "53089904"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0xbf0b6dd571aa3c338369c8b571fab84924c68db7f9f5a0ab77eb7a1066574218"
+    "value": "0xbdf56d8afa20e654ca746a38c305c7c1e42c6d8c6c01300d1e1634ad79a5dadf"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2329.825"
+    "value": "2340.68"
   },
   {
     "metric": "eth_usd_source",
@@ -353,15 +353,15 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "840.7"
+    "value": "844.31"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.1189"
+    "value": "0.1184"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "43.42"
+    "value": "43.23"
   },
   {
     "metric": "reward_current_bid_apr_display",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "4.66"
+    "value": "4.68"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-10-25T21:59:13Z"
+    "value": "2026-10-25T22:59:15Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
