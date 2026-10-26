@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "53111500"
+    "value": "53113306"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-10-26 10:59:07"
+    "value": "2026-10-26 11:59:19"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x7787b53676a308715b0dd3fa78fbbe2bcf07fdc61f62a47a48a2d000dec70c7c"
+    "value": "0x2a2e0fdf4f5d5fed1c0fc61f2474de1ad225948a0767a098002f284defc48e03"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "53111500"
+    "value": "53113306"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x7787b53676a308715b0dd3fa78fbbe2bcf07fdc61f62a47a48a2d000dec70c7c"
+    "value": "0x2a2e0fdf4f5d5fed1c0fc61f2474de1ad225948a0767a098002f284defc48e03"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2325.1"
+    "value": "2330.105"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "838.9"
+    "value": "840.7"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.1192"
+    "value": "0.1189"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "43.51"
+    "value": "43.42"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈44% APR"
+    "value": "≈43% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "4.65"
+    "value": "4.66"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-10-26T10:59:07Z"
+    "value": "2026-10-26T11:59:19Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
