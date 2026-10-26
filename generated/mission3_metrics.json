@@ -9,11 +9,11 @@
   },
   {
     "metric": "latest_block",
-    "value": "53109703"
+    "value": "53111500"
   },
   {
     "metric": "latest_block_time_utc",
-    "value": "2026-10-26 09:59:13"
+    "value": "2026-10-26 10:59:07"
   },
   {
     "metric": "onchain_verification_status",
@@ -29,7 +29,7 @@
   },
   {
     "metric": "snapshot_block_hash",
-    "value": "0x12824158ba067dfa266a51492dd42a840f49d204c3514ad3b8a6dba21b6a316d"
+    "value": "0x7787b53676a308715b0dd3fa78fbbe2bcf07fdc61f62a47a48a2d000dec70c7c"
   },
   {
     "metric": "canonical_reorg_from_hash",
@@ -173,11 +173,11 @@
   },
   {
     "metric": "dog_rarity_continuity_through_block",
-    "value": "53109703"
+    "value": "53111500"
   },
   {
     "metric": "dog_rarity_continuity_through_block_hash",
-    "value": "0x12824158ba067dfa266a51492dd42a840f49d204c3514ad3b8a6dba21b6a316d"
+    "value": "0x7787b53676a308715b0dd3fa78fbbe2bcf07fdc61f62a47a48a2d000dec70c7c"
   },
   {
     "metric": "dog_rarity_continuity_verification_status",
@@ -241,7 +241,7 @@
   },
   {
     "metric": "eth_usd_price",
-    "value": "2334.9"
+    "value": "2325.1"
   },
   {
     "metric": "eth_usd_source",
@@ -353,19 +353,19 @@
   },
   {
     "metric": "reward_current_bid_payback_days",
-    "value": "842.5"
+    "value": "838.9"
   },
   {
     "metric": "reward_current_bid_daily_roi_pct",
-    "value": "0.1187"
+    "value": "0.1192"
   },
   {
     "metric": "reward_current_bid_apr_pct",
-    "value": "43.32"
+    "value": "43.51"
   },
   {
     "metric": "reward_current_bid_apr_display",
-    "value": "≈43% APR"
+    "value": "≈44% APR"
   },
   {
     "metric": "woof_holders",
@@ -397,7 +397,7 @@
   },
   {
     "metric": "current_bid_usd",
-    "value": "4.67"
+    "value": "4.65"
   },
   {
     "metric": "current_bidder",
@@ -513,7 +513,7 @@
   },
   {
     "metric": "season6_sup_current_bid_estimated_win_time_utc",
-    "value": "2026-10-26T09:59:13Z"
+    "value": "2026-10-26T10:59:07Z"
   },
   {
     "metric": "season6_sup_current_bid_projected_total_with_win_sup",
