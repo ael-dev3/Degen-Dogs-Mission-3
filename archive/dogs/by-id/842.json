@@ -1,25 +1,25 @@
 {
   "generated_at_utc": "2026-10-23T17:31:45Z",
   "record": {
-    "activity_time_basis": "last_bid_block_time",
-    "activity_time_utc": "2026-10-09T20:27:25Z",
+    "activity_time_basis": "settlement_block_time",
+    "activity_time_utc": "2026-10-26T21:18:13Z",
     "amount": {
-      "amount_usd_at_event": null,
-      "eth_usd_price_at_event": null,
+      "amount_usd_at_event": "4.65366143",
+      "eth_usd_price_at_event": "2326.830715323991",
       "eth_usd_price_date_utc": "2026-10-26",
       "native": "0.002",
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2000000000000000",
-      "usd_estimate": "4.60889000",
-      "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$4.61",
-      "usd_estimate_notes": "preserved_source_usd_estimate",
+      "usd_estimate": "4.65366143",
+      "usd_estimate_confidence": "medium",
+      "usd_estimate_display": "$4.65",
+      "usd_estimate_notes": "Use for ETH and WETH-denominated auction values. WETH is priced via ETH/USD.",
       "usd_estimate_price_date_utc": "2026-10-26",
-      "usd_estimate_price_usd": "2304.445",
-      "usd_estimate_source": "current_eth_usd_price",
-      "usd_estimate_source_detail": "coinbase",
-      "usd_estimate_time_basis": "last_bid_block_time"
+      "usd_estimate_price_usd": "2326.830715323991",
+      "usd_estimate_source": "defillama_coin_prices",
+      "usd_estimate_source_detail": "coins.llama.fi/chart/coingecko:ethereum",
+      "usd_estimate_time_basis": "settlement_block_time"
     },
     "auction_created": {
       "block_number": 52393747,
@@ -30,7 +30,7 @@
     "auction_house": null,
     "bid_stats": {
       "bid_count": 1,
-      "last_bid_time_utc": "2026-10-09T20:27:25Z",
+      "last_bid_time_utc": "2026-10-09 20:27:25",
       "unique_bidder_count": 1
     },
     "bid_tx_hashes": [
@@ -48,36 +48,38 @@
       "explorer": "https://basescan.org/address/0x76d0e7a13248945ee9f808b4a472262b28778942",
       "item": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/842",
       "repo_archive": "archive/dogs/by-id/842.json",
-      "settlement_tx": null
+      "settlement_tx": "https://basescan.org/tx/0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3"
     },
     "mission": 3,
     "rarity": {
-      "display": "#387/718",
+      "display": "#387/719",
       "rank": 387,
       "scope": "base_existing",
-      "total": 718
+      "total": 719
     },
     "schema_version": 1,
-    "search_text": "dog 842 dog #842 842 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.002 eth 2000000000000000 4.61000000 $4.61 2026-10-09t20:27:25z 0xf845c440bfa6c403f3043c0acfdfbbba5ad2464678bf02207ebe779128763343 #387/718 generated auction feed 0x35bc32ce82d1ef57378b47a4ade7b889b2f4400e8a6aec466f711c4adca3771a background: none (91.4%) background none body: brown (11.0%) body brown neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: goldearring (14.2%) ears goldearring head: beanie (5.7%) head beanie eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 842 dog #842 mission 3 base settled @0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00200000 eth $4.65 2026-10-26t21:18:13z #387/719 background: none (91.4%) body: brown (11.0%) neck: none (41.6%) mouth: none (68.6%) ears: goldearring (14.2%) head: beanie (5.7%) eyes: sunglasses (13.5%) 0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3",
     "settlement": {
-      "block_number": null,
-      "block_time_utc": null,
-      "settled": false,
-      "tx_hash": null,
-      "tx_url": null
+      "block_number": 53130073,
+      "block_time_utc": "2026-10-26T21:18:13Z",
+      "settled": true,
+      "tx_hash": "0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3",
+      "tx_url": "https://basescan.org/tx/0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3"
     },
     "source": {
       "confidence": "verified",
-      "notes": "Mission 3 live/current source of truth is Base auction logs and current auction contract state.",
+      "notes": "Mission 3 source of truth is Base auction logs reconciled with generated canonical tables.",
       "raw_confidence": "verified_onchain_generated_tables",
       "sources": [
         "base_logs",
         "archive_indexer",
         "generated_auction_timeline",
-        "generated_auction_feed"
+        "generated_auction_feed",
+        "dashboard_builder",
+        "generated_auction_winners"
       ]
     },
-    "status": "ended pending settlement",
+    "status": "settled",
     "traits": [
       {
         "display": "Background: None (91.4%)",
@@ -90,12 +92,12 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: None (41.5%)",
+        "display": "Neck: None (41.6%)",
         "trait_type": "Neck",
         "value": "None"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -110,7 +112,7 @@
         "value": "Beanie"
       },
       {
-        "display": "Eyes: Sunglasses (13.4%)",
+        "display": "Eyes: Sunglasses (13.5%)",
         "trait_type": "Eyes",
         "value": "Sunglasses"
       }

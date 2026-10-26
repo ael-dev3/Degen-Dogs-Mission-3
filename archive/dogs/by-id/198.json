@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#260/718",
-      "rank": 260,
+      "display": "#258/719",
+      "rank": 258,
       "scope": "base_existing",
-      "total": 718
+      "total": 719
     },
     "schema_version": 1,
-    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth #260/718 background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 198 dog #198 198 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: black; neck: studdedcollar; mouth: pizza; ears: loopearring; head: redmohawk; eyes: none polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #258/719 background: none (91.4%) body: black (11.4%) neck: studdedcollar (10.0%) mouth: pizza (10.8%) ears: loopearring (27.3%) head: redmohawk (7.4%) eyes: none (17.7%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -86,7 +86,7 @@
         "value": "StuddedCollar"
       },
       {
-        "display": "Mouth: Pizza (10.9%)",
+        "display": "Mouth: Pizza (10.8%)",
         "trait_type": "Mouth",
         "value": "Pizza"
       },

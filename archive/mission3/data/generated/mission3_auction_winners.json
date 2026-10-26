@@ -1,5 +1,19 @@
 [
   {
+    "amount_eth": "0.002",
+    "amount_raw": "2000000000000000",
+    "bid_count": 1,
+    "first_bid_time_utc": "2026-10-09T20:27:25Z",
+    "last_bid_time_utc": "2026-10-09T20:27:25Z",
+    "settled_block": 53130073,
+    "settled_log_index": 868,
+    "settled_time_utc": "2026-10-26T21:18:13Z",
+    "settled_tx": "0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3",
+    "token_id": 842,
+    "unique_bidder_count": 1,
+    "winner": "0x76d0e7a13248945ee9f808b4a472262b28778942"
+  },
+  {
     "amount_eth": "0.0022",
     "amount_raw": "2200000000000000",
     "bid_count": 2,

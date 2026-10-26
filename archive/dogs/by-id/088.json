@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#506/718",
-      "rank": 506,
+      "display": "#510/719",
+      "rank": 510,
       "scope": "base_existing",
-      "total": 718
+      "total": 719
     },
     "schema_version": 1,
-    "search_text": "dog 88 dog #88 88 mission 1 mission 1 polygon no auction dogmaster reward weth #506/718 background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 88 dog #88 88 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: grey; neck: redcollar; mouth: none; ears: earbuds; head: stripedbeanie; eyes: eyepatch polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #510/719 background: none (91.4%) body: grey (13.2%) neck: redcollar (28.9%) mouth: none (68.6%) ears: earbuds (32.3%) head: stripedbeanie (8.1%) eyes: eyepatch (8.1%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,12 +81,12 @@
         "value": "Grey"
       },
       {
-        "display": "Neck: RedCollar (29.0%)",
+        "display": "Neck: RedCollar (28.9%)",
         "trait_type": "Neck",
         "value": "RedCollar"
       },
       {
-        "display": "Mouth: None (68.5%)",
+        "display": "Mouth: None (68.6%)",
         "trait_type": "Mouth",
         "value": "None"
       },
@@ -96,7 +96,7 @@
         "value": "Earbuds"
       },
       {
-        "display": "Head: StripedBeanie (7.9%)",
+        "display": "Head: StripedBeanie (8.1%)",
         "trait_type": "Head",
         "value": "StripedBeanie"
       },
