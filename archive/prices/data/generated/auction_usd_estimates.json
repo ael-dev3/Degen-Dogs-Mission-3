@@ -1,11 +1,11 @@
 [
   {
-    "amount_usd_at_event": "4.62",
+    "amount_usd_at_event": null,
     "chain": "Base",
     "chain_id": 8453,
     "dog_id": 842,
-    "estimated_usd_display": "$4.62",
-    "estimated_usd_value": "4.62008000",
+    "estimated_usd_display": "$4.61",
+    "estimated_usd_value": "4.60889000",
     "eth_usd_price_at_event": null,
     "eth_usd_price_date_utc": "2026-10-26",
     "event_time_utc": "2026-10-09T20:27:25Z",
@@ -22,7 +22,7 @@
     "price_source": "current_eth_usd_price",
     "price_source_detail": "coinbase",
     "price_status": "priced",
-    "price_usd": "2310.04"
+    "price_usd": "2304.445"
   },
   {
     "amount_usd_at_event": "5.43999865",
