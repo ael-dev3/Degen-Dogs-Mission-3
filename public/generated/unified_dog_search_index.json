@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2000000000000000",
-      "usd_estimate": "4.61987000",
+      "usd_estimate": "4.59798000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$4.62",
+      "usd_estimate_display": "$4.60",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-10-26",
-      "usd_estimate_price_usd": "2309.935",
+      "usd_estimate_price_usd": "2298.99",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 718
     },
     "schema_version": 1,
-    "search_text": "dog 842 dog #842 842 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.002 eth 2000000000000000 4.62000000 $4.62 2026-10-09t20:27:25z 0xf845c440bfa6c403f3043c0acfdfbbba5ad2464678bf02207ebe779128763343 #387/718 generated auction feed 0x35bc32ce82d1ef57378b47a4ade7b889b2f4400e8a6aec466f711c4adca3771a background: none (91.4%) background none body: brown (11.0%) body brown neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: goldearring (14.2%) ears goldearring head: beanie (5.7%) head beanie eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 842 dog #842 842 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.002 eth 2000000000000000 4.60000000 $4.60 2026-10-09t20:27:25z 0xf845c440bfa6c403f3043c0acfdfbbba5ad2464678bf02207ebe779128763343 #387/718 generated auction feed 0x35bc32ce82d1ef57378b47a4ade7b889b2f4400e8a6aec466f711c4adca3771a background: none (91.4%) background none body: brown (11.0%) body brown neck: none (41.5%) neck none mouth: none (68.5%) mouth none ears: goldearring (14.2%) ears goldearring head: beanie (5.7%) head beanie eyes: sunglasses (13.4%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
