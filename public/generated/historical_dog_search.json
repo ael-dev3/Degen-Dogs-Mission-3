@@ -23612,14 +23612,14 @@
     "dog_image_url": "https://api.degendogs.club/images/843.png",
     "dog_external_url": "https://degendogs.club/#dog843",
     "dog_opensea_url": "https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/843",
-    "status": "live",
-    "winner": "no bids yet",
-    "winner_url": "",
-    "winner_wallet": "0x0000000000000000000000000000000000000000",
-    "amount": "0.00000 ETH ($0)",
-    "amount_raw": "",
-    "bid_count": 0,
-    "unique_bidder_count": 0,
+    "status": "ended pending settlement",
+    "winner": "@0xael.eth",
+    "winner_url": "https://farcaster.xyz/0xael.eth",
+    "winner_wallet": "0x76d0e7a13248945ee9f808b4a472262b28778942",
+    "amount": "0.00200 ETH ($4)",
+    "amount_raw": "2000000000000000",
+    "bid_count": 1,
+    "unique_bidder_count": 1,
     "auction_created_time_utc": "2026-10-26 21:18:13",
     "settled_time_utc": "",
     "rarity": "#534/719",
@@ -23629,6 +23629,6 @@
     "metadata_verification_status": "onchain_token_uri_verified",
     "confidence": "verified",
     "sources": "base_logs,archive_indexer",
-    "search_text": "3 Base 8453 843 Dog #843 https://api.degendogs.club/images/843.png https://degendogs.club/#dog843 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/843 live no bids yet 0x0000000000000000000000000000000000000000 0.00000 ETH ($0) 0 0 2026-10-26 21:18:13 #534/719 40.553957 Background: None; Body: Orange; Neck: None; Mouth: None; Ears: None; Head: StripedBeanie; Eyes: Sunglasses Background: None (91.4%); Body: Orange (8.3%); Neck: None (41.6%); Mouth: None (68.6%); Ears: None (26.3%); Head: StripedBeanie (8.1%); Eyes: Sunglasses (13.5%) onchain_token_uri_verified verified base_logs,archive_indexer"
+    "search_text": "3 Base 8453 843 Dog #843 https://api.degendogs.club/images/843.png https://degendogs.club/#dog843 https://opensea.io/item/base/0x09154248ffdbaf8aa877ae8a4bf8ce1503596428/843 ended pending settlement @0xael.eth https://farcaster.xyz/0xael.eth 0x76d0e7a13248945ee9f808b4a472262b28778942 0.00200 ETH ($4) 2000000000000000 1 1 2026-10-26 21:18:13 #534/719 40.553957 Background: None; Body: Orange; Neck: None; Mouth: None; Ears: None; Head: StripedBeanie; Eyes: Sunglasses Background: None (91.4%); Body: Orange (8.3%); Neck: None (41.6%); Mouth: None (68.6%); Ears: None (26.3%); Head: StripedBeanie (8.1%); Eyes: Sunglasses (13.5%) onchain_token_uri_verified verified base_logs,archive_indexer"
   }
 ]
