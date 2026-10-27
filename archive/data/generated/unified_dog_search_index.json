@@ -10,12 +10,12 @@
       "native_symbol": "ETH",
       "price_asset_key": "ETH",
       "raw": "2000000000000000",
-      "usd_estimate": "4.69485000",
+      "usd_estimate": "4.69514000",
       "usd_estimate_confidence": "live_current",
-      "usd_estimate_display": "$4.69",
+      "usd_estimate_display": "$4.70",
       "usd_estimate_notes": "preserved_source_usd_estimate",
       "usd_estimate_price_date_utc": "2026-10-27",
-      "usd_estimate_price_usd": "2347.425",
+      "usd_estimate_price_usd": "2347.57",
       "usd_estimate_source": "current_eth_usd_price",
       "usd_estimate_source_detail": "coinbase",
       "usd_estimate_time_basis": "last_bid_block_time"
@@ -57,7 +57,7 @@
       "total": 719
     },
     "schema_version": 1,
-    "search_text": "dog 843 dog #843 843 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.002 eth 2000000000000000 4.69000000 $4.69 2026-10-27t21:15:19z 0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3 #534/719 generated auction feed 0x19bb01d11a34bd7e9287f52f3143ddb30ca101d40102319c2994370918f0a0dc background: none (91.4%) background none body: orange (8.3%) body orange neck: none (41.6%) neck none mouth: none (68.6%) mouth none ears: none (26.3%) ears none head: stripedbeanie (8.1%) head stripedbeanie eyes: sunglasses (13.5%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
+    "search_text": "dog 843 dog #843 843 mission 3 mission 3 base ended pending settlement 0x76d0e7a13248945ee9f808b4a472262b28778942 @0xael.eth 0xael.eth 0.002 eth 2000000000000000 4.70000000 $4.70 2026-10-27t21:15:19z 0x3053fa7f602603a7449a3052b84791a9b6b389665770487e88f839b6e8a48cb3 #534/719 generated auction feed 0x19bb01d11a34bd7e9287f52f3143ddb30ca101d40102319c2994370918f0a0dc background: none (91.4%) background none body: orange (8.3%) body orange neck: none (41.6%) neck none mouth: none (68.6%) mouth none ears: none (26.3%) ears none head: stripedbeanie (8.1%) head stripedbeanie eyes: sunglasses (13.5%) eyes sunglasses base_logs archive_indexer generated_auction_timeline generated_auction_feed",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
