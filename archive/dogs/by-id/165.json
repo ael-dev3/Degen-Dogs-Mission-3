@@ -43,13 +43,13 @@
     },
     "mission": 1,
     "rarity": {
-      "display": "#467/719",
+      "display": "#467/720",
       "rank": 467,
       "scope": "base_existing",
-      "total": 719
+      "total": 720
     },
     "schema_version": 1,
-    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth #467/719 background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github",
+    "search_text": "dog 165 dog #165 165 mission 1 mission 1 polygon no auction dogmaster reward weth background: none; body: brown; neck: goldnecklace; mouth: none; ears: none; head: crazyhair; eyes: glasses polygon_receipts polygonscan_tx_pages degen_dogs_docs markcarey_github #467/720 background: none (91.4%) body: brown (11.0%) neck: goldnecklace (19.4%) mouth: none (68.6%) ears: none (26.2%) head: crazyhair (6.9%) eyes: glasses (12.5%)",
     "settlement": {
       "block_number": null,
       "block_time_utc": null,
@@ -81,7 +81,7 @@
         "value": "Brown"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -91,12 +91,12 @@
         "value": "None"
       },
       {
-        "display": "Ears: None (26.3%)",
+        "display": "Ears: None (26.2%)",
         "trait_type": "Ears",
         "value": "None"
       },
       {
-        "display": "Head: CrazyHair (7.0%)",
+        "display": "Head: CrazyHair (6.9%)",
         "trait_type": "Head",
         "value": "CrazyHair"
       },

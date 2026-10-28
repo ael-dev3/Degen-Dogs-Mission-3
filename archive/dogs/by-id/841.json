@@ -53,13 +53,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#227/719",
-      "rank": 227,
+      "display": "#218/720",
+      "rank": 218,
       "scope": "base_existing",
-      "total": 719
+      "total": 720
     },
     "schema_version": 1,
-    "search_text": "dog 841 dog #841 841 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.0022 eth 2200000000000000 5.44 $5.44 2026-10-09t20:14:01z 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e 0xf845c440bfa6c403f3043c0acfdfbbba5ad2464678bf02207ebe779128763343 #227/719 generated auction feed 0xc0ec7a7213e0f13fce2cf29783748a9ebbae7e906c9e67ac6a538b9eab6a0714 0xb458c4ca794320052a26ad300dacb58d7a0a9366fb60480b10d579c58ca47ff8 background: none (91.4%) background none body: white (11.1%) body white neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: goldearring (14.2%) ears goldearring head: beanie (5.7%) head beanie eyes: eyepatch (8.1%) eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 841 dog #841 841 mission 3 mission 3 base settled 0x84cb3b93f9a918632f05528770b5cf926396b0f4 @farcy farcy 0.0022 eth 2200000000000000 5.44 $5.44 2026-10-09t20:14:01z 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e 0xf845c440bfa6c403f3043c0acfdfbbba5ad2464678bf02207ebe779128763343 generated auction feed 0xc0ec7a7213e0f13fce2cf29783748a9ebbae7e906c9e67ac6a538b9eab6a0714 0xb458c4ca794320052a26ad300dacb58d7a0a9366fb60480b10d579c58ca47ff8 background none body white neck goldnecklace mouth none ears goldearring head beanie eyes eyepatch base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #218/720 background: none (91.4%) body: white (11.1%) neck: goldnecklace (19.4%) mouth: none (68.6%) ears: goldearring (14.2%) head: beanie (5.7%) eyes: eyepatch (8.1%)",
     "settlement": {
       "block_number": 52393747,
       "block_time_utc": "2026-10-09T20:14:01Z",
@@ -92,7 +92,7 @@
         "value": "White"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },

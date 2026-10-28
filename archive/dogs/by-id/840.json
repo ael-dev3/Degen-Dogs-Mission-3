@@ -52,13 +52,13 @@
     },
     "mission": 3,
     "rarity": {
-      "display": "#684/719",
-      "rank": 684,
+      "display": "#685/720",
+      "rank": 685,
       "scope": "base_existing",
-      "total": 719
+      "total": 720
     },
     "schema_version": 1,
-    "search_text": "dog 840 dog #840 840 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 @bluewindking bluewindking 0.0024 eth 2400000000000000 6.47 $6.47 2026-09-27t22:45:59z 0xcb6cc95f201c111c989adf3909e3dd8d34cab6fa97a382c45b7ffba44a6fdaba 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e #684/719 generated auction feed 0xb64f1e532b29d0ed8bdc2d3a7f89c41ef68d0be32d7877df4d5a420883143f8c background: none (91.4%) background none body: dalmation (9.3%) body dalmation neck: goldnecklace (19.5%) neck goldnecklace mouth: none (68.6%) mouth none ears: loopearring (27.3%) ears loopearring head: none (19.9%) head none eyes: none (17.7%) eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed",
+    "search_text": "dog 840 dog #840 840 mission 3 mission 3 base settled 0x1179da9bf5b4e5e8caf4bb378230c36fec572226 @bluewindking bluewindking 0.0024 eth 2400000000000000 6.47 $6.47 2026-09-27t22:45:59z 0xcb6cc95f201c111c989adf3909e3dd8d34cab6fa97a382c45b7ffba44a6fdaba 0x9b41e60a88d6374d3df0469055de695ea77011a7b1e9380e341c64355c5e436e generated auction feed 0xb64f1e532b29d0ed8bdc2d3a7f89c41ef68d0be32d7877df4d5a420883143f8c background none body dalmation neck goldnecklace mouth none ears loopearring head none eyes none base_logs archive_indexer generated_auction_timeline generated_auction_winners generated_auction_feed #685/720 background: none (91.4%) body: dalmation (9.3%) neck: goldnecklace (19.4%) mouth: none (68.6%) ears: loopearring (27.2%) head: none (19.9%) eyes: none (17.6%)",
     "settlement": {
       "block_number": 51879906,
       "block_time_utc": "2026-09-27T22:45:59Z",
@@ -91,7 +91,7 @@
         "value": "Dalmation"
       },
       {
-        "display": "Neck: GoldNecklace (19.5%)",
+        "display": "Neck: GoldNecklace (19.4%)",
         "trait_type": "Neck",
         "value": "GoldNecklace"
       },
@@ -101,7 +101,7 @@
         "value": "None"
       },
       {
-        "display": "Ears: LoopEarring (27.3%)",
+        "display": "Ears: LoopEarring (27.2%)",
         "trait_type": "Ears",
         "value": "LoopEarring"
       },
@@ -111,7 +111,7 @@
         "value": "None"
       },
       {
-        "display": "Eyes: None (17.7%)",
+        "display": "Eyes: None (17.6%)",
         "trait_type": "Eyes",
         "value": "None"
       }
